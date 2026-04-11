@@ -1,0 +1,105 @@
+name: bamclauncher
+packages:
+  - path: .
+release_options:
+  - name: stable
+    flutter_options:
+      target: lib/main.dart
+    windows:
+      build_options:
+        target-platform: windows-x64
+    macos:
+      build_options:
+        target-platform: macos
+    linux:
+      build_options:
+        target-platform: linux-x64
+
+plugins:
+  app_package:
+    windows:
+      enabled: true
+      msi:
+        enabled: true
+        args:
+          app_name: BAMCLauncher
+          app_version: 1.0.0
+          app_description: BAMCLauncher - A cross-platform Minecraft launcher
+          publisher_name: BAMC Team
+          publisher_email: contact@bamclauncher.com
+          publisher_url: https://bamclauncher.com
+          product_code: BAMCLauncher
+          upgrade_code: 4A8D5F7E-1B3C-4D9E-8A2F-B7C6D9E0F2A1
+          icon_path: windows/runner/resources/app_icon.ico
+          install_dir: "C:\\Program Files\\BAMCLauncher"
+          desktop_shortcut: true
+          start_menu_shortcut: true
+          file_associations:
+            - extension: .bamc
+              description: BAMCLauncher Modpack
+              icon_path: windows/runner/resources/app_icon.ico
+          signing_certificate_file: $WINDOWS_CERTIFICATE_FILE
+          signing_certificate_password: $WINDOWS_CERTIFICATE_PASSWORD
+          timestamp_url: http://timestamp.digicert.com
+          
+      zip:
+        enabled: true
+        args:
+          app_name: BAMCLauncher
+          output_name: BAMCLauncher-Windows-Portable
+          icon_path: windows/runner/resources/app_icon.ico
+
+    macos:
+      enabled: true
+      dmg:
+        enabled: true
+        args:
+          app_name: BAMCLauncher
+          app_version: 1.0.0
+          app_identifier: com.bamclauncher.app
+          app_category: public.app-category.games
+          icon_path: macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png
+          background_image: scripts/macos/dmg_background.png
+          signing_identity: $MACOS_SIGNING_IDENTITY
+          entitlements_file: macos/Runner/Release.entitlements
+          notarization_apple_id: $APPLE_ID
+          notarization_password: $APPLE_ID_PASSWORD
+          notarization_team_id: $APPLE_TEAM_ID
+
+    linux:
+      enabled: true
+      deb:
+        enabled: true
+        args:
+          app_name: bamclauncher
+          app_version: 1.0.0
+          maintainer: BAMC Team <contact@bamclauncher.com>
+          description: BAMCLauncher - A cross-platform Minecraft launcher
+          homepage: https://bamclauncher.com
+          license: GPL-3.0
+          icon_path: linux/runner/resources/app_icon.png
+          desktop_file: scripts/linux/bamclauncher.desktop
+          categories: Game;
+          
+      rpm:
+        enabled: true
+        args:
+          app_name: bamclauncher
+          app_version: 1.0.0
+          release: 1
+          summary: BAMCLauncher - A cross-platform Minecraft launcher
+          description: BAMCLauncher - A cross-platform Minecraft launcher built with Flutter
+          license: GPL-3.0
+          url: https://bamclauncher.com
+          vendor: BAMC Team
+          icon_path: linux/runner/resources/app_icon.png
+          desktop_file: scripts/linux/bamclauncher.desktop
+          
+      appimage:
+        enabled: true
+        args:
+          app_name: BAMCLauncher
+          app_version: 1.0.0
+          icon_path: linux/runner/resources/app_icon.png
+          desktop_file: scripts/linux/bamclauncher.desktop
+          categories: Game;

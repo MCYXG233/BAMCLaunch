@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=BAMCLauncher
+Comment=BAMCLauncher - A cross-platform Minecraft launcher
+Exec=bamclauncher
+Icon=bamclauncher
+Type=Application
+Categories=Game;
+Terminal=false
+StartupNotify=true
+Keywords=Minecraft;Launcher;Game;
