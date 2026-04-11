@@ -156,7 +156,7 @@ flutter build linux
 ## 联系方式
 
 - **GitHub**: [MCYXG233/BAMC_Launcher](https://github.com/MCYXG233/BAMC_Launcher)
-- **邮箱**: mcxyg233@example.com
+- **邮箱**: MCYXG2008@outlook.com
 
 ---
 
