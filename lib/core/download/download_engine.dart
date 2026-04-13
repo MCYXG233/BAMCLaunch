@@ -53,15 +53,15 @@ class DownloadEngine implements IDownloadEngine {
     _lastProgressUpdate[url] = DateTime.now();
 
     try {
-      Logger.info('开始下载: $url -> $savePath');
+      logger.info('开始下载: $url -> $savePath');
       await _executeDownload(task, sources, onProgress, onError);
-      Logger.info('下载完成: $url');
+      logger.info('下载完成: $url');
       _downloadCompleters[url]?.complete();
     } catch (e) {
       task.status = DownloadStatus.failed;
       task.errorMessage = e.toString();
       onError?.call(e.toString());
-      Logger.error('下载失败: $url - $e');
+      logger.error('下载失败: $url - $e');
       _downloadCompleters[url]?.completeError(e);
     } finally {
       _cleanupDownload(url);
@@ -137,7 +137,7 @@ class DownloadEngine implements IDownloadEngine {
 
     if (await tempFile.exists()) {
       task.downloadedBytes = await tempFile.length();
-      Logger.info('恢复下载: ${task.downloadedBytes} 字节已下载');
+      logger.info('恢复下载: ${task.downloadedBytes} 字节已下载');
     }
 
     int contentLength = 0;
@@ -151,7 +151,7 @@ class DownloadEngine implements IDownloadEngine {
         success = true;
       } catch (e) {
         retryCount++;
-        Logger.warn('获取内容长度失败 (${retryCount}/${task.maxRetries}): $e');
+        logger.warn('获取内容长度失败 (${retryCount}/${task.maxRetries}): $e');
         if (retryCount < task.maxRetries) {
           await Future.delayed(Duration(seconds: pow(2, retryCount).toInt()));
         } else {
@@ -161,14 +161,14 @@ class DownloadEngine implements IDownloadEngine {
     }
 
     task.totalBytes = contentLength;
-    Logger.info('文件大小: ${_formatFileSize(contentLength)}');
+    logger.info('文件大小: ${_formatFileSize(contentLength)}');
 
     if (task.downloadedBytes >= contentLength) {
       await tempFile.rename(task.savePath);
       task.status = DownloadStatus.completed;
       task.progress = 1.0;
       onProgress?.call(1.0);
-      Logger.info('文件已完整下载，无需重复下载');
+      logger.info('文件已完整下载，无需重复下载');
       return;
     }
 
@@ -223,13 +223,13 @@ class DownloadEngine implements IDownloadEngine {
               completer.complete();
             } catch (e) {
               chunkRetryCount++;
-              Logger.warn('分块下载失败 (${chunkRetryCount}/${task.maxRetries}): $e');
+              logger.warn('分块下载失败 (${chunkRetryCount}/${task.maxRetries}): $e');
               if (chunkRetryCount < task.maxRetries) {
                 // 尝试切换到其他源
                 if (availableSources.isNotEmpty) {
                   try {
                     resolvedUrl = await _resolveUrlWithSources(task.url, availableSources);
-                    Logger.info('切换到备用源: $resolvedUrl');
+                    logger.info('切换到备用源: $resolvedUrl');
                   } catch (_) {
                     // 忽略源切换失败
                   }
@@ -252,12 +252,12 @@ class DownloadEngine implements IDownloadEngine {
       onProgress?.call(1.0);
 
       if (task.checksum != null && task.checksumType != null) {
-        Logger.info('开始校验文件哈希值');
+        logger.info('开始校验文件哈希值');
         final isValid = await verifyFile(task.savePath, task.checksum!, task.checksumType!);
         if (!isValid) {
           throw Exception('文件校验失败');
         }
-        Logger.info('文件校验成功');
+        logger.info('文件校验成功');
       }
     } finally {
       speedTimer.cancel();
@@ -271,16 +271,16 @@ class DownloadEngine implements IDownloadEngine {
       try {
         final responseTime = await source.getResponseTime();
         sourceResponseTimes[source] = responseTime;
-        Logger.debug('源 ${source.getName()} 响应时间: ${responseTime}ms');
+        logger.debug('源 ${source.getName()} 响应时间: ${responseTime}ms');
       } catch (e) {
-        Logger.warn('源 ${source.getName()} 测试失败: $e');
+        logger.warn('源 ${source.getName()} 测试失败: $e');
       }
     });
 
     await Future.wait(futures);
 
     if (sourceResponseTimes.isEmpty) {
-      Logger.warn('所有源测试失败，使用原始URL');
+      logger.warn('所有源测试失败，使用原始URL');
       return originalUrl;
     }
 
@@ -290,7 +290,7 @@ class DownloadEngine implements IDownloadEngine {
         .key;
 
     final resolvedUrl = await bestSource.resolveUrl(originalUrl);
-    Logger.info('选择最佳源: ${bestSource.getName()} -> $resolvedUrl');
+    logger.info('选择最佳源: ${bestSource.getName()} -> $resolvedUrl');
     return resolvedUrl;
   }
 
@@ -341,7 +341,7 @@ class DownloadEngine implements IDownloadEngine {
       current += chunkSize;
     }
     
-    Logger.debug('文件分块: ${chunks.length} 块');
+    logger.debug('文件分块: ${chunks.length} 块');
     return chunks;
   }
 
@@ -447,7 +447,7 @@ class DownloadEngine implements IDownloadEngine {
       final endTime = DateTime.now();
       final chunkTime = endTime.difference(startTime).inMilliseconds / 1000;
       final chunkSpeed = chunkTime > 0 ? (totalChunkBytes / chunkTime).round() : 0;
-      Logger.debug('分块下载完成: ${_formatFileSize(totalChunkBytes)} in ${chunkTime.toStringAsFixed(2)}s (${_formatFileSize(chunkSpeed)}/s)');
+      logger.debug('分块下载完成: ${_formatFileSize(totalChunkBytes)} in ${chunkTime.toStringAsFixed(2)}s (${_formatFileSize(chunkSpeed)}/s)');
     } finally {
       client.close(force: true);
     }
@@ -484,12 +484,12 @@ class DownloadEngine implements IDownloadEngine {
       final isMatch = calculatedChecksum.toLowerCase() == checksum.toLowerCase();
       
       if (!isMatch) {
-        Logger.error('校验失败: 计算值=$calculatedChecksum, 期望值=$checksum');
+        logger.error('校验失败: 计算值=$calculatedChecksum, 期望值=$checksum');
       }
       
       return isMatch;
     } catch (e) {
-      Logger.error('校验过程出错: $e');
+      logger.error('校验过程出错: $e');
       return false;
     }
   }
@@ -499,7 +499,7 @@ class DownloadEngine implements IDownloadEngine {
     _cancelFlags[url] = true;
     _subscriptions[url]?.forEach((sub) => sub.cancel());
     _downloadCompleters[url]?.completeError(Exception('下载已取消'));
-    Logger.info('取消下载: $url');
+    logger.info('取消下载: $url');
     _cleanupDownload(url);
   }
   
@@ -509,7 +509,7 @@ class DownloadEngine implements IDownloadEngine {
     if (task != null) {
       task.pause();
       task.status = DownloadStatus.paused;
-      Logger.info('暂停下载: $url');
+      logger.info('暂停下载: $url');
     }
   }
   
@@ -520,7 +520,7 @@ class DownloadEngine implements IDownloadEngine {
       task.resume();
       task.status = DownloadStatus.downloading;
       _lastProgressUpdate[url] = DateTime.now();
-      Logger.info('恢复下载: $url');
+      logger.info('恢复下载: $url');
     }
   }
 

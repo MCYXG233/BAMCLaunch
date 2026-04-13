@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import '../../../core/core.dart';
-import '../../../core/logger/logger_impl.dart';
 import '../../../core/performance/performance_monitor.dart'
     as performance_monitor;
 import '../../../core/ipc/implementations/ipc_manager.dart';
@@ -17,26 +16,6 @@ import '../../pages/content/content_page.dart';
 import '../../pages/modpack/modpack_page.dart';
 import '../../pages/server/server_page.dart';
 import '../../pages/settings/settings_page.dart';
-
-final IPlatformAdapter platformAdapter = PlatformAdapterFactory.getInstance();
-final IDownloadEngine downloadEngine = DownloadEngine();
-final ILogger logger = LoggerImpl();
-final IConfigManager configManager = ConfigManager(platformAdapter);
-final VersionManager versionManager = VersionManager(
-  platformAdapter: platformAdapter,
-  logger: logger,
-  downloadEngine: downloadEngine,
-);
-
-final AccountManager accountManager = AccountManager(
-  configManager,
-  logger,
-);
-
-final ContentManager contentManager = ContentManager(
-  platformAdapter: platformAdapter,
-  downloadEngine: downloadEngine,
-);
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -75,25 +54,11 @@ class _MainLayoutState extends State<MainLayout> {
   }
 
   Future<void> _initializeManagers() async {
-    _configManager = ConfigManager(platformAdapter);
-    _gameLauncher = GameLauncher(
-      platformAdapter: platformAdapter,
-      logger: logger,
-      versionManager: versionManager,
-    );
-    final ipcManager = IpcManager(logger, _configManager);
-    final terracottaIntegration = TerracottaIntegration(
-        ipcManager, logger, _configManager, platformAdapter);
-    _serverManager = ServerManager(_configManager, logger, _gameLauncher,
-        accountManager, platformAdapter, ipcManager, terracottaIntegration);
-    _updateManager = UpdateManager(
-      platformAdapter: platformAdapter,
-      configManager: _configManager,
-      downloadEngine: downloadEngine,
-      logger: logger,
-    );
+    _configManager = configManager;
+    _gameLauncher = gameLauncher;
+    _serverManager = serverManager;
+    _updateManager = updateManager;
 
-    await _serverManager.initialize();
     await _checkForUpdates();
   }
 

@@ -171,10 +171,9 @@ class ContentManager implements IContentManager {
         downloadUrl = await _getModFileDownloadUrlOnModrinth(modId, fileId);
       }
       
-      await _downloadEngine.download(
-        url: downloadUrl,
-        destination: destination,
-        headers: {'User-Agent': 'BAMCLauncher'},
+      await _downloadEngine.downloadFile(
+        downloadUrl,
+        destination,
       );
       
       return destination;
@@ -196,10 +195,9 @@ class ContentManager implements IContentManager {
         downloadUrl = await _getModpackFileDownloadUrlOnModrinth(modpackId, fileId);
       }
       
-      await _downloadEngine.download(
-        url: downloadUrl,
-        destination: destination,
-        headers: {'User-Agent': 'BAMCLauncher'},
+      await _downloadEngine.downloadFile(
+        downloadUrl,
+        destination,
       );
       
       return destination;

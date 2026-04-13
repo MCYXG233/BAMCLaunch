@@ -7,6 +7,8 @@ enum LogLevel {
 }
 
 abstract class ILogger {
+  Future<void> initialize(String logFilePath);
+  
   void debug(String message, [Map<String, dynamic>? context]);
   void info(String message, [Map<String, dynamic>? context]);
   void warn(String message, [Map<String, dynamic>? context]);

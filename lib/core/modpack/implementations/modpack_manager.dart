@@ -235,9 +235,9 @@ class ModpackManager implements IModpackManager {
         try {
           final modPath = '$instanceDir/mods/${mod.name}-${mod.version}.jar';
           if (mod.downloadUrl.isNotEmpty) {
-            await _downloadEngine.download(
-              url: mod.downloadUrl,
-              destination: modPath,
+            await _downloadEngine.downloadFile(
+              mod.downloadUrl,
+              modPath,
             );
           } else if (File(mod.filePath).existsSync()) {
             await File(mod.filePath).copy(modPath);

@@ -21,7 +21,7 @@ void main() async {
       '${logDirectory.path}${Platform.pathSeparator}${DateTime.now().toIso8601String().replaceAll(':', '-')}.log';
 
   // 初始化日志系统
-  await (logger as dynamic).initialize(logFilePath);
+  await logger.initialize(logFilePath);
 
   // 初始化异常处理器
   ExceptionHandler().initialize();
@@ -41,6 +41,9 @@ void main() async {
 
     // 启动内存优化器
     MemoryOptimizer().startOptimization();
+
+    // 初始化账户管理器
+    await accountManager.initialize();
 
     runApp(const MyApp());
   }, (error, stackTrace) {
