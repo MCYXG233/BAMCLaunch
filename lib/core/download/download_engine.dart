@@ -10,15 +10,35 @@ import 'download_task.dart';
 import 'download_status.dart';
 import '../logger/logger.dart';
 
+/// 下载引擎实现类
+/// 提供文件下载、多线程分块下载、断点续传等功能
 class DownloadEngine implements IDownloadEngine {
+  /// 下载任务映射
   final Map<String, DownloadTask> _downloadTasks = {};
+  /// 下载完成器映射
   final Map<String, Completer<void>> _downloadCompleters = {};
+  /// 订阅映射
   final Map<String, List<StreamSubscription>> _subscriptions = {};
+  /// 取消标志映射
   final Map<String, bool> _cancelFlags = {};
+  /// 活跃下载集合
   final Set<String> _activeDownloads = {};
+  /// 下载速度映射
   final Map<String, int> _downloadSpeeds = {};
+  /// 上次进度更新时间映射
   final Map<String, DateTime> _lastProgressUpdate = {};
 
+  /// 下载单个文件
+  /// [url]: 下载URL
+  /// [savePath]: 保存路径
+  /// [sources]: 下载源列表
+  /// [checksum]: 文件校验和
+  /// [checksumType]: 校验和类型
+  /// [maxRetries]: 最大重试次数
+  /// [chunkSize]: 分块大小
+  /// [maxThreads]: 最大线程数
+  /// [onProgress]: 进度回调
+  /// [onError]: 错误回调
   @override
   Future<void> downloadFile(
     String url,
@@ -68,6 +88,17 @@ class DownloadEngine implements IDownloadEngine {
     }
   }
 
+  /// 下载多个文件
+  /// [urls]: 下载URL列表
+  /// [savePaths]: 保存路径列表
+  /// [sources]: 下载源列表
+  /// [checksums]: 文件校验和列表
+  /// [checksumTypes]: 校验和类型列表
+  /// [maxRetries]: 最大重试次数
+  /// [chunkSize]: 分块大小
+  /// [maxThreads]: 最大线程数
+  /// [onProgress]: 进度回调
+  /// [onError]: 错误回调
   @override
   Future<List<bool>> downloadFiles(
     List<String> urls,
@@ -114,6 +145,11 @@ class DownloadEngine implements IDownloadEngine {
     return results;
   }
 
+  /// 执行下载
+  /// [task]: 下载任务
+  /// [sources]: 下载源列表
+  /// [onProgress]: 进度回调
+  /// [onError]: 错误回调
   Future<void> _executeDownload(
     DownloadTask task,
     List<IDownloadSource>? sources,
@@ -264,6 +300,10 @@ class DownloadEngine implements IDownloadEngine {
     }
   }
 
+  /// 使用下载源解析URL
+  /// [originalUrl]: 原始URL
+  /// [sources]: 下载源列表
+  /// 返回解析后的URL
   Future<String> _resolveUrlWithSources(String originalUrl, List<IDownloadSource> sources) async {
     // 并行测试所有源的响应时间
     final sourceResponseTimes = <IDownloadSource, int>{};
@@ -294,6 +334,9 @@ class DownloadEngine implements IDownloadEngine {
     return resolvedUrl;
   }
 
+  /// 获取内容长度
+  /// [url]: 文件URL
+  /// 返回文件大小
   Future<int> _getContentLength(String url) async {
     final client = HttpClient();
     
@@ -328,6 +371,11 @@ class DownloadEngine implements IDownloadEngine {
     }
   }
 
+  /// 将文件分割成分块
+  /// [start]: 起始位置
+  /// [end]: 结束位置
+  /// [chunkSize]: 分块大小
+  /// 返回分块列表
   List<_Chunk> _splitIntoChunks(int start, int end, int chunkSize) {
     final chunks = <_Chunk>[];
     int current = start;
@@ -345,6 +393,13 @@ class DownloadEngine implements IDownloadEngine {
     return chunks;
   }
 
+  /// 下载分块
+  /// [url]: 文件URL
+  /// [file]: 临时文件
+  /// [start]: 分块起始位置
+  /// [end]: 分块结束位置
+  /// [task]: 下载任务
+  /// [onProgress]: 进度回调
   Future<void> _downloadChunk(
     String url,
     File file,
@@ -453,6 +508,11 @@ class DownloadEngine implements IDownloadEngine {
     }
   }
 
+  /// 验证文件
+  /// [filePath]: 文件路径
+  /// [checksum]: 校验和
+  /// [checksumType]: 校验和类型
+  /// 返回是否验证成功
   @override
   Future<bool> verifyFile(String filePath, String checksum, String checksumType) async {
     final file = File(filePath);
@@ -494,6 +554,8 @@ class DownloadEngine implements IDownloadEngine {
     }
   }
 
+  /// 取消下载
+  /// [url]: 下载URL
   @override
   void cancelDownload(String url) {
     _cancelFlags[url] = true;
@@ -503,6 +565,8 @@ class DownloadEngine implements IDownloadEngine {
     _cleanupDownload(url);
   }
   
+  /// 暂停下载
+  /// [url]: 下载URL
   @override
   void pauseDownload(String url) {
     final task = _downloadTasks[url];
@@ -513,6 +577,8 @@ class DownloadEngine implements IDownloadEngine {
     }
   }
   
+  /// 恢复下载
+  /// [url]: 下载URL
   @override
   void resumeDownload(String url) {
     final task = _downloadTasks[url];
@@ -524,23 +590,34 @@ class DownloadEngine implements IDownloadEngine {
     }
   }
 
+  /// 检查是否正在下载
+  /// [url]: 下载URL
+  /// 返回是否正在下载
   @override
   bool isDownloading(String url) {
     return _downloadTasks.containsKey(url) && 
            _downloadTasks[url]?.status == DownloadStatus.downloading;
   }
   
+  /// 检查是否暂停
+  /// [url]: 下载URL
+  /// 返回是否暂停
   @override
   bool isPaused(String url) {
     return _downloadTasks.containsKey(url) && 
            _downloadTasks[url]?.status == DownloadStatus.paused;
   }
 
+  /// 获取下载进度
+  /// [url]: 下载URL
+  /// 返回进度（0-1）
   @override
   double getProgress(String url) {
     return _downloadTasks[url]?.progress ?? 0.0;
   }
   
+  /// 获取暂停的下载列表
+  /// 返回暂停的下载URL列表
   @override
   List<String> getPausedDownloads() {
     return _downloadTasks.entries
@@ -549,11 +626,15 @@ class DownloadEngine implements IDownloadEngine {
         .toList();
   }
   
+  /// 获取下载状态
+  /// [url]: 下载URL
+  /// 返回下载状态
   @override
   DownloadStatus getStatus(String url) {
     return _downloadTasks[url]?.status ?? DownloadStatus.pending;
   }
 
+  /// 取消所有下载
   @override
   void cancelAllDownloads() {
     final urls = List.from(_downloadTasks.keys);
@@ -562,11 +643,15 @@ class DownloadEngine implements IDownloadEngine {
     }
   }
 
+  /// 获取活跃下载列表
+  /// 返回活跃下载URL列表
   @override
   List<String> getActiveDownloads() {
     return List.from(_activeDownloads);
   }
 
+  /// 获取所有下载进度
+  /// 返回下载进度映射
   @override
   Map<String, double> getAllProgress() {
     final progressMap = <String, double>{};
@@ -576,14 +661,21 @@ class DownloadEngine implements IDownloadEngine {
     return progressMap;
   }
 
+  /// 获取下载速度
+  /// [url]: 下载URL
+  /// 返回下载速度（字节/秒）
   int getSpeed(String url) {
     return _downloadSpeeds[url] ?? 0;
   }
 
+  /// 获取所有下载速度
+  /// 返回下载速度映射
   Map<String, int> getAllSpeeds() {
     return Map.from(_downloadSpeeds);
   }
 
+  /// 清理下载资源
+  /// [url]: 下载URL
   void _cleanupDownload(String url) {
     _downloadTasks.remove(url);
     _downloadCompleters.remove(url);
@@ -594,6 +686,9 @@ class DownloadEngine implements IDownloadEngine {
     _lastProgressUpdate.remove(url);
   }
 
+  /// 格式化文件大小
+  /// [bytes]: 字节数
+  /// 返回格式化后的文件大小字符串
   String _formatFileSize(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(2)} KB';
@@ -602,20 +697,30 @@ class DownloadEngine implements IDownloadEngine {
   }
 }
 
+/// 下载分块类
 class _Chunk {
+  /// 分块起始位置
   final int start;
+  /// 分块结束位置
   final int end;
 
+  /// 构造函数
   _Chunk({required this.start, required this.end});
 }
 
+/// 信号量类
 class _Semaphore {
+  /// 最大许可数
   final int _maxPermits;
+  /// 可用许可数
   int _availablePermits;
+  /// 等待队列
   final Queue<Completer<void>> _waiting = Queue();
 
+  /// 构造函数
   _Semaphore(this._maxPermits) : _availablePermits = _maxPermits;
 
+  /// 获取许可
   Future<void> acquire() {
     if (_availablePermits > 0) {
       _availablePermits--;
@@ -627,6 +732,7 @@ class _Semaphore {
     }
   }
 
+  /// 释放许可
   void release() {
     if (_waiting.isNotEmpty) {
       final completer = _waiting.removeFirst();

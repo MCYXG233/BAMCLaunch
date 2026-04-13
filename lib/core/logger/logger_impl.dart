@@ -3,24 +3,40 @@ import 'dart:collection';
 import 'dart:io';
 import 'i_logger.dart';
 
+/// 日志实现类
+/// 提供日志记录、文件管理、日志轮转等功能
 class LoggerImpl implements ILogger {
+  /// 单例实例
   static final LoggerImpl _instance = LoggerImpl._internal();
 
+  /// 日志文件
   late File _logFile;
+  /// 日志文件写入流
   late IOSink _logSink;
+  /// 初始化状态
   bool _isInitialized = false;
+  /// 当前日志级别
   LogLevel _logLevel = LogLevel.debug;
+  /// 日志队列
   final Queue<String> _logQueue = Queue();
+  /// 日志流控制器，用于异步处理日志
   final StreamController<String> _logStreamController =
       StreamController.broadcast();
+  /// 日志流订阅
   late StreamSubscription<String> _logSubscription;
+  /// 最大日志文件数量
   static const int _maxLogFiles = 10;
+  /// 最大日志文件大小（10MB）
   static const int _maxLogFileSize = 10 * 1024 * 1024; // 10MB
 
+  /// 工厂构造函数，返回单例实例
   factory LoggerImpl() => _instance;
 
+  /// 私有构造函数
   LoggerImpl._internal();
 
+  /// 初始化日志系统
+  /// [logFilePath]: 日志文件路径
   Future<void> initialize(String logFilePath) async {
     if (_isInitialized) return;
 
@@ -46,6 +62,9 @@ class LoggerImpl implements ILogger {
     }
   }
 
+  /// 记录调试级别日志
+  /// [message]: 日志消息
+  /// [context]: 日志上下文信息
   @override
   void debug(String message, [Map<String, dynamic>? context]) {
     if (_shouldLog(LogLevel.debug)) {
@@ -53,6 +72,9 @@ class LoggerImpl implements ILogger {
     }
   }
 
+  /// 记录信息级别日志
+  /// [message]: 日志消息
+  /// [context]: 日志上下文信息
   @override
   void info(String message, [Map<String, dynamic>? context]) {
     if (_shouldLog(LogLevel.info)) {
@@ -60,6 +82,9 @@ class LoggerImpl implements ILogger {
     }
   }
 
+  /// 记录警告级别日志
+  /// [message]: 日志消息
+  /// [context]: 日志上下文信息
   @override
   void warn(String message, [Map<String, dynamic>? context]) {
     if (_shouldLog(LogLevel.warn)) {
@@ -67,6 +92,10 @@ class LoggerImpl implements ILogger {
     }
   }
 
+  /// 记录错误级别日志
+  /// [message]: 日志消息
+  /// [context]: 日志上下文信息
+  /// [error]: 错误对象
   @override
   void error(String message, [Map<String, dynamic>? context, dynamic error]) {
     if (_shouldLog(LogLevel.error)) {
@@ -74,17 +103,21 @@ class LoggerImpl implements ILogger {
     }
   }
 
+  /// 设置日志级别
+  /// [level]: 日志级别
   @override
   void setLogLevel(LogLevel level) {
     _logLevel = level;
     info('Log level changed', {'level': level.name});
   }
 
+  /// 获取当前日志级别
   @override
   LogLevel getLogLevel() {
     return _logLevel;
   }
 
+  /// 刷新日志缓冲区
   @override
   Future<void> flush() async {
     if (_isInitialized) {
@@ -92,6 +125,7 @@ class LoggerImpl implements ILogger {
     }
   }
 
+  /// 关闭日志系统
   @override
   void close() {
     if (_isInitialized) {
@@ -102,10 +136,18 @@ class LoggerImpl implements ILogger {
     }
   }
 
+  /// 检查是否应该记录指定级别的日志
+  /// [level]: 日志级别
+  /// 返回是否应该记录
   bool _shouldLog(LogLevel level) {
     return level.index >= _logLevel.index;
   }
 
+  /// 内部日志记录方法
+  /// [level]: 日志级别
+  /// [message]: 日志消息
+  /// [context]: 日志上下文信息
+  /// [error]: 错误对象
   void _log(String level, String message, Map<String, dynamic>? context,
       [dynamic error]) {
     final timestamp = DateTime.now().toIso8601String();
@@ -134,6 +176,7 @@ class LoggerImpl implements ILogger {
     }
   }
 
+  /// 启动异步日志处理
   void _startAsyncLogProcessing() {
     _logSubscription = _logStreamController.stream.listen((logLine) async {
       try {
@@ -149,6 +192,8 @@ class LoggerImpl implements ILogger {
     });
   }
 
+  /// 执行日志文件轮转
+  /// [logDirectory]: 日志目录路径
   Future<void> _rotateLogs(String logDirectory) async {
     final logFiles = Directory(logDirectory)
         .listSync()
@@ -171,6 +216,9 @@ class LoggerImpl implements ILogger {
     }
   }
 
+  /// 格式化上下文信息
+  /// [context]: 上下文信息
+  /// 返回格式化后的上下文字符串
   String _formatContext(Map<String, dynamic> context) {
     return context.entries
         .map((entry) => '${entry.key}: ${entry.value}')

@@ -5,30 +5,44 @@ import 'i_config_manager.dart';
 import 'aes_encryption.dart';
 import 'models/global_config.dart';
 
+/// 配置管理器实现类
+/// 负责配置的读写、加密、备份与恢复等操作
 class ConfigManager implements IConfigManager {
+  /// 平台适配器
   final IPlatformAdapter _platformAdapter;
+  /// 配置文件名
   final String _configFileName = 'config.json';
+  /// 备份文件名
   final String _backupFileName = 'config_backup.json';
+  /// 备份目录名
   final String _backupDirectoryName = 'backups';
+  /// 加密密钥
   String? _encryptionKey;
 
+  /// 构造函数
+  /// [_platformAdapter]: 平台适配器实例
   ConfigManager(this._platformAdapter);
 
+  /// 获取配置文件路径
   Future<String> get _configFilePath async {
     final configDir = _platformAdapter.configDirectory;
     return '$configDir${Platform.pathSeparator}$_configFileName';
   }
 
+  /// 获取备份文件路径
   Future<String> get _backupFilePath async {
     final configDir = _platformAdapter.configDirectory;
     return '$configDir${Platform.pathSeparator}$_backupFileName';
   }
 
+  /// 获取备份目录路径
   Future<String> get _backupDirectoryPath async {
     final configDir = _platformAdapter.configDirectory;
     return '$configDir${Platform.pathSeparator}$_backupDirectoryName';
   }
 
+  /// 获取加密密钥
+  /// 基于用户名和主机名生成唯一密钥
   Future<String> _getEncryptionKey() async {
     if (_encryptionKey == null) {
       final username = await _platformAdapter.getUsername();
@@ -38,6 +52,8 @@ class ConfigManager implements IConfigManager {
     return _encryptionKey!;
   }
 
+  /// 加载所有配置
+  /// 返回配置映射
   Future<Map<String, dynamic>> _loadAllConfigs() async {
     final configPath = await _configFilePath;
     final configDir = Directory(_platformAdapter.configDirectory);
@@ -59,6 +75,8 @@ class ConfigManager implements IConfigManager {
     }
   }
 
+  /// 保存所有配置
+  /// [configs]: 配置映射
   Future<void> _saveAllConfigs(Map<String, dynamic> configs) async {
     final configPath = await _configFilePath;
     final configDir = Directory(_platformAdapter.configDirectory);
@@ -73,6 +91,10 @@ class ConfigManager implements IConfigManager {
   }
 
   // 基础配置操作
+  /// 保存配置
+  /// [key]: 配置键
+  /// [value]: 配置值
+  /// [encrypt]: 是否加密
   @override
   Future<void> saveConfig(String key, dynamic value,
       {bool encrypt = false}) async {
@@ -90,6 +112,10 @@ class ConfigManager implements IConfigManager {
     await _saveAllConfigs(configs);
   }
 
+  /// 加载配置
+  /// [key]: 配置键
+  /// [decrypt]: 是否解密
+  /// 返回配置值
   @override
   Future<dynamic> loadConfig(String key, {bool decrypt = false}) async {
     final configs = await _loadAllConfigs();
@@ -110,6 +136,8 @@ class ConfigManager implements IConfigManager {
     return config['value'];
   }
 
+  /// 删除配置
+  /// [key]: 配置键
   @override
   Future<void> removeConfig(String key) async {
     final configs = await _loadAllConfigs();
@@ -117,12 +145,17 @@ class ConfigManager implements IConfigManager {
     await _saveAllConfigs(configs);
   }
 
+  /// 检查配置是否存在
+  /// [key]: 配置键
+  /// 返回是否存在
   @override
   Future<bool> containsKey(String key) async {
     final configs = await _loadAllConfigs();
     return configs.containsKey(key);
   }
 
+  /// 获取所有配置
+  /// 返回配置映射，加密配置显示为<encrypted>
   @override
   Future<Map<String, dynamic>> getAllConfigs() async {
     final configs = await _loadAllConfigs();
@@ -139,12 +172,15 @@ class ConfigManager implements IConfigManager {
     return result;
   }
 
+  /// 清除所有配置
   @override
   Future<void> clearAllConfigs() async {
     await _saveAllConfigs({});
   }
 
   // 全局配置操作
+  /// 保存全局配置
+  /// [config]: 全局配置对象或映射
   @override
   Future<void> saveGlobalConfig(dynamic config) async {
     if (config is GlobalConfig) {
@@ -154,6 +190,8 @@ class ConfigManager implements IConfigManager {
     }
   }
 
+  /// 加载全局配置
+  /// 返回全局配置对象
   @override
   Future<dynamic> loadGlobalConfig() async {
     final config = await loadConfig('global_config');
@@ -163,6 +201,9 @@ class ConfigManager implements IConfigManager {
     return null;
   }
 
+  /// 验证配置
+  /// [config]: 配置对象或映射
+  /// 返回是否有效
   @override
   Future<bool> validateConfig(dynamic config) async {
     try {
@@ -185,6 +226,7 @@ class ConfigManager implements IConfigManager {
     }
   }
 
+  /// 重置为默认配置
   @override
   Future<void> resetToDefaults() async {
     final defaultConfig = GlobalConfig.defaultConfig();
@@ -193,6 +235,8 @@ class ConfigManager implements IConfigManager {
   }
 
   // 配置迁移与升级
+  /// 迁移配置
+  /// 根据当前版本进行配置迁移
   @override
   Future<void> migrateConfig() async {
     final currentVersion = await getCurrentConfigVersion();
@@ -208,6 +252,8 @@ class ConfigManager implements IConfigManager {
     // 可以添加更多版本迁移逻辑
   }
 
+  /// 获取当前配置版本
+  /// 返回配置版本字符串
   @override
   Future<String> getCurrentConfigVersion() async {
     final config = await loadGlobalConfig();
@@ -217,6 +263,8 @@ class ConfigManager implements IConfigManager {
     return '';
   }
 
+  /// 更新配置版本
+  /// [version]: 新的版本号
   @override
   Future<void> updateConfigVersion(String version) async {
     final config = await loadGlobalConfig();
@@ -235,6 +283,7 @@ class ConfigManager implements IConfigManager {
   }
 
   // 备份与恢复
+  /// 备份配置
   @override
   Future<void> backupConfig() async {
     final configPath = await _configFilePath;
@@ -246,6 +295,9 @@ class ConfigManager implements IConfigManager {
     }
   }
 
+  /// 恢复配置
+  /// [backupPath]: 备份文件路径
+  /// 返回是否恢复成功
   @override
   Future<bool> restoreConfig(String backupPath) async {
     if (!(await _platformAdapter.isFile(backupPath))) {
@@ -262,6 +314,8 @@ class ConfigManager implements IConfigManager {
     }
   }
 
+  /// 获取备份文件列表
+  /// 返回备份文件路径列表
   @override
   Future<List<String>> getBackupFiles() async {
     final backupDir = await _backupDirectoryPath;
@@ -279,6 +333,7 @@ class ConfigManager implements IConfigManager {
     }
   }
 
+  /// 创建自动备份
   @override
   Future<void> createAutoBackup() async {
     final backupDir = await _backupDirectoryPath;
@@ -302,6 +357,8 @@ class ConfigManager implements IConfigManager {
     await cleanOldBackups(5);
   }
 
+  /// 清理旧备份
+  /// [keepCount]: 保留的备份数量
   @override
   Future<void> cleanOldBackups(int keepCount) async {
     final backupDir = await _backupDirectoryPath;
@@ -339,6 +396,8 @@ class ConfigManager implements IConfigManager {
   }
 
   // 配置验证
+  /// 检查配置是否有效
+  /// 返回是否有效
   @override
   Future<bool> isConfigValid() async {
     try {
@@ -349,6 +408,8 @@ class ConfigManager implements IConfigManager {
     }
   }
 
+  /// 修复配置
+  /// 如果配置无效，创建备份并重置为默认配置
   @override
   Future<void> repairConfig() async {
     try {

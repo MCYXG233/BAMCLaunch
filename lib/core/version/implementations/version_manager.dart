@@ -10,14 +10,25 @@ import '../../download/download_engine.dart';
 import '../../platform/i_platform_adapter.dart';
 import '../../logger/i_logger.dart';
 
+/// 版本管理器实现类
+/// 负责游戏版本的下载、安装、卸载和管理
 class VersionManager implements IVersionManager {
+  /// 下载引擎
   final IDownloadEngine _downloadEngine;
+  /// 平台适配器
   final IPlatformAdapter _platformAdapter;
+  /// 日志记录器
   final ILogger _logger;
 
+  /// 缓存的版本清单
   VersionManifest? _cachedManifest;
+  /// 清单最后更新时间
   DateTime? _manifestLastUpdated;
 
+  /// 构造函数
+  /// [platformAdapter]: 平台适配器实例
+  /// [logger]: 日志记录器实例
+  /// [downloadEngine]: 下载引擎实例（可选）
   VersionManager({
     required IPlatformAdapter platformAdapter,
     required ILogger logger,
@@ -26,6 +37,9 @@ class VersionManager implements IVersionManager {
         _logger = logger,
         _downloadEngine = downloadEngine ?? DownloadEngine();
 
+  /// 获取版本清单
+  /// [forceRefresh]: 是否强制刷新缓存
+  /// 返回版本清单
   @override
   Future<VersionManifest> getVersionManifest(
       {bool forceRefresh = false}) async {
@@ -66,6 +80,8 @@ class VersionManager implements IVersionManager {
     return manifest;
   }
 
+  /// 获取已安装的版本列表
+  /// 返回已安装的版本列表
   @override
   Future<List<Version>> getInstalledVersions() async {
     final versionsDir = Directory('${_platformAdapter.gameDirectory}/versions');
@@ -99,6 +115,9 @@ class VersionManager implements IVersionManager {
     return installedVersions;
   }
 
+  /// 获取版本信息
+  /// [versionId]: 版本ID
+  /// 返回版本信息
   @override
   Future<Version> getVersionInfo(String versionId) async {
     final manifest = await getVersionManifest();
@@ -118,6 +137,9 @@ class VersionManager implements IVersionManager {
     return Version.fromJson(versionData);
   }
 
+  /// 安装版本
+  /// [versionId]: 版本ID
+  /// [onProgress]: 进度回调
   @override
   Future<void> installVersion(
       String versionId, Function(double) onProgress) async {
@@ -152,6 +174,8 @@ class VersionManager implements IVersionManager {
     await _installLibraries(version, onProgress);
   }
 
+  /// 卸载版本
+  /// [versionId]: 版本ID
   @override
   Future<void> uninstallVersion(String versionId) async {
     _logger.info('Uninstalling version: $versionId');
@@ -164,6 +188,9 @@ class VersionManager implements IVersionManager {
     }
   }
 
+  /// 检查版本完整性
+  /// [versionId]: 版本ID
+  /// 返回版本是否完整
   @override
   Future<bool> checkVersionIntegrity(String versionId) async {
     try {
@@ -202,6 +229,8 @@ class VersionManager implements IVersionManager {
     }
   }
 
+  /// 修复版本
+  /// [versionId]: 版本ID
   @override
   Future<void> repairVersion(String versionId) async {
     _logger.info('Repairing version: $versionId');
@@ -210,6 +239,12 @@ class VersionManager implements IVersionManager {
     await installVersion(versionId, (progress) {});
   }
 
+  /// 创建自定义版本
+  /// [id]: 版本ID
+  /// [name]: 版本名称
+  /// [inheritsFrom]: 继承的基础版本
+  /// [customData]: 自定义数据
+  /// 返回创建的自定义版本
   @override
   Future<Version> createCustomVersion({
     required String id,
@@ -246,6 +281,9 @@ class VersionManager implements IVersionManager {
     return customVersion;
   }
 
+  /// 解析版本继承关系
+  /// [versionId]: 版本ID
+  /// 返回解析后的版本信息
   Future<Version> resolveVersionInheritance(String versionId) async {
     _logger.info('Resolving version inheritance for: $versionId');
 
@@ -281,6 +319,9 @@ class VersionManager implements IVersionManager {
     return version;
   }
 
+  /// 更新版本状态
+  /// [versionId]: 版本ID
+  /// [status]: 版本状态
   @override
   Future<void> updateVersionStatus(
       String versionId, VersionStatus status) async {
@@ -296,6 +337,9 @@ class VersionManager implements IVersionManager {
     }
   }
 
+  /// 搜索版本
+  /// [query]: 搜索关键词
+  /// 返回匹配的版本列表
   @override
   Future<List<VersionEntry>> searchVersions(String query) async {
     final manifest = await getVersionManifest();
@@ -305,6 +349,9 @@ class VersionManager implements IVersionManager {
     }).toList();
   }
 
+  /// 下载版本资产
+  /// [versionId]: 版本ID
+  /// [onProgress]: 进度回调
   @override
   Future<void> downloadVersionAssets(
       String versionId, Function(double) onProgress) async {
@@ -359,6 +406,9 @@ class VersionManager implements IVersionManager {
     }
   }
 
+  /// 安装库文件
+  /// [version]: 版本信息
+  /// [onProgress]: 进度回调
   Future<void> _installLibraries(
       Version version, Function(double) onProgress) async {
     final librariesDir =
@@ -390,6 +440,10 @@ class VersionManager implements IVersionManager {
     }
   }
 
+  /// 获取加载器版本列表
+  /// [loaderType]: 加载器类型
+  /// [mcVersion]: Minecraft版本
+  /// 返回加载器版本列表
   @override
   Future<List<LoaderVersion>> getLoaderVersions(
     LoaderType loaderType,
@@ -418,6 +472,13 @@ class VersionManager implements IVersionManager {
     return versions;
   }
 
+  /// 安装加载器
+  /// [loaderType]: 加载器类型
+  /// [mcVersion]: Minecraft版本
+  /// [loaderVersion]: 加载器版本
+  /// [onProgress]: 进度回调
+  /// [onStatusChanged]: 状态变化回调
+  /// 返回安装结果
   @override
   Future<LoaderInstallResult> installLoader({
     required LoaderType loaderType,
@@ -501,6 +562,11 @@ class VersionManager implements IVersionManager {
     }
   }
 
+  /// 检查加载器兼容性
+  /// [loaderType]: 加载器类型
+  /// [mcVersion]: Minecraft版本
+  /// [loaderVersion]: 加载器版本
+  /// 返回兼容性信息
   @override
   Future<LoaderCompatibilityInfo> checkLoaderCompatibility(
     LoaderType loaderType,
@@ -534,12 +600,16 @@ class VersionManager implements IVersionManager {
     }
   }
 
+  /// 卸载加载器
+  /// [versionId]: 版本ID
   @override
   Future<void> uninstallLoader(String versionId) async {
     _logger.info('Uninstalling loader version: $versionId');
     await uninstallVersion(versionId);
   }
 
+  /// 获取已安装的加载器列表
+  /// 返回已安装的加载器列表
   @override
   Future<List<Version>> getInstalledLoaders() async {
     final allVersions = await getInstalledVersions();
@@ -551,6 +621,9 @@ class VersionManager implements IVersionManager {
     }).toList();
   }
 
+  /// 获取Forge版本列表
+  /// [mcVersion]: Minecraft版本
+  /// 返回Forge版本列表
   Future<List<LoaderVersion>> _fetchForgeVersions(String mcVersion) async {
     final url =
         'https://files.minecraftforge.net/net/minecraftforge/forge/index_$mcVersion.json';
@@ -582,6 +655,9 @@ class VersionManager implements IVersionManager {
     }
   }
 
+  /// 获取Fabric版本列表
+  /// [mcVersion]: Minecraft版本
+  /// 返回Fabric版本列表
   Future<List<LoaderVersion>> _fetchFabricVersions(String mcVersion) async {
     final url = 'https://meta.fabricmc.net/v2/versions/loader/$mcVersion';
     final tempFile =
@@ -609,6 +685,9 @@ class VersionManager implements IVersionManager {
     }
   }
 
+  /// 获取Quilt版本列表
+  /// [mcVersion]: Minecraft版本
+  /// 返回Quilt版本列表
   Future<List<LoaderVersion>> _fetchQuiltVersions(String mcVersion) async {
     final url = 'https://meta.quiltmc.org/v3/versions/loader/$mcVersion';
     final tempFile =
@@ -635,6 +714,9 @@ class VersionManager implements IVersionManager {
     }
   }
 
+  /// 获取NeoForge版本列表
+  /// [mcVersion]: Minecraft版本
+  /// 返回NeoForge版本列表
   Future<List<LoaderVersion>> _fetchNeoForgeVersions(String mcVersion) async {
     final url =
         'https://maven.neoforged.net/releases/net/neoforged/forge/index_$mcVersion.json';
@@ -666,6 +748,11 @@ class VersionManager implements IVersionManager {
     }
   }
 
+  /// 安装Forge
+  /// [mcVersion]: Minecraft版本
+  /// [loaderVersion]: 加载器版本
+  /// [versionId]: 版本ID
+  /// [onProgress]: 进度回调
   Future<void> _installForge(String mcVersion, String loaderVersion,
       String versionId, Function(double)? onProgress) async {
     final installerUrl =
@@ -702,6 +789,11 @@ class VersionManager implements IVersionManager {
     }
   }
 
+  /// 安装Fabric
+  /// [mcVersion]: Minecraft版本
+  /// [loaderVersion]: 加载器版本
+  /// [versionId]: 版本ID
+  /// [onProgress]: 进度回调
   Future<void> _installFabric(String mcVersion, String loaderVersion,
       String versionId, Function(double)? onProgress) async {
     final baseVersion = await getVersionInfo(mcVersion);
@@ -739,6 +831,11 @@ class VersionManager implements IVersionManager {
     });
   }
 
+  /// 安装Quilt
+  /// [mcVersion]: Minecraft版本
+  /// [loaderVersion]: 加载器版本
+  /// [versionId]: 版本ID
+  /// [onProgress]: 进度回调
   Future<void> _installQuilt(String mcVersion, String loaderVersion,
       String versionId, Function(double)? onProgress) async {
     final quiltVersionUrl =
@@ -774,6 +871,11 @@ class VersionManager implements IVersionManager {
     });
   }
 
+  /// 安装NeoForge
+  /// [mcVersion]: Minecraft版本
+  /// [loaderVersion]: 加载器版本
+  /// [versionId]: 版本ID
+  /// [onProgress]: 进度回调
   Future<void> _installNeoForge(String mcVersion, String loaderVersion,
       String versionId, Function(double)? onProgress) async {
     final installerUrl =
@@ -810,6 +912,8 @@ class VersionManager implements IVersionManager {
     }
   }
 
+  /// 验证加载器安装
+  /// [versionId]: 版本ID
   Future<void> _verifyLoaderInstallation(String versionId) async {
     final versionDir =
         Directory('${_platformAdapter.gameDirectory}/versions/$versionId');
@@ -829,6 +933,9 @@ class VersionManager implements IVersionManager {
     }
   }
 
+  /// 回滚加载器安装
+  /// [versionId]: 版本ID
+  /// [backupFiles]: 备份文件列表
   Future<void> _rollbackLoaderInstallation(
       String versionId, List<String> backupFiles) async {
     final versionDir =

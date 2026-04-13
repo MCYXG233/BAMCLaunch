@@ -9,21 +9,37 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 
+/// 游戏启动器实现类
+/// 负责游戏的启动、Java检测、崩溃分析等功能
 class GameLauncher implements IGameLauncher {
+  /// 平台适配器
   final IPlatformAdapter _platformAdapter;
+  /// 日志记录器
   final ILogger _logger;
+  /// 版本管理器
   final IVersionManager _versionManager;
+  /// Java管理器
   final JavaManager _javaManager;
+  /// 启动参数构建器
   final LaunchArgumentsBuilder _argumentsBuilder;
+  /// 游戏进程
   Process? _gameProcess;
+  /// 输出流控制器
   final StreamController<String> _outputController =
       StreamController.broadcast();
+  /// 信号流控制器
   final StreamController<ProcessSignal> _signalController =
       StreamController.broadcast();
+  /// 启动状态流控制器
   final StreamController<GameLaunchStatus> _statusController =
       StreamController.broadcast();
+  /// 最后一次崩溃日志
   String? _lastCrashLog;
 
+  /// 构造函数
+  /// [platformAdapter]: 平台适配器实例
+  /// [logger]: 日志记录器实例
+  /// [versionManager]: 版本管理器实例
   GameLauncher({
     required IPlatformAdapter platformAdapter,
     required ILogger logger,
@@ -40,6 +56,8 @@ class GameLauncher implements IGameLauncher {
           logger: logger,
         );
 
+  /// 检测Java环境
+  /// 返回Java检测结果
   @override
   Future<JavaDetectionResult> detectJava() async {
     try {
@@ -136,12 +154,19 @@ class GameLauncher implements IGameLauncher {
     }
   }
 
+  /// 解析Java版本
+  /// [output]: Java版本输出
+  /// 返回解析后的版本字符串
   String _parseJavaVersion(String output) {
     RegExp versionRegex = RegExp(r'version "(\d+(?:\.\d+)*)"');
     Match? match = versionRegex.firstMatch(output);
     return match?.group(1) ?? 'Unknown';
   }
 
+  /// 优化JVM参数
+  /// [gameVersion]: 游戏版本
+  /// [memoryMb]: 内存大小（MB）
+  /// 返回优化后的JVM参数字符串
   @override
   Future<String> optimizeJvmParameters(String gameVersion, int memoryMb) async {
     try {
@@ -181,6 +206,14 @@ class GameLauncher implements IGameLauncher {
     }
   }
 
+  /// 构建游戏启动配置
+  /// [gameVersion]: 游戏版本
+  /// [username]: 用户名
+  /// [uuid]: 用户UUID
+  /// [accessToken]: 访问令牌
+  /// [memoryMb]: 内存大小（MB）
+  /// [customEnvironment]: 自定义环境变量
+  /// 返回游戏启动配置
   Future<GameLaunchConfig> buildLaunchConfig({
     required String gameVersion,
     required String username,
@@ -253,6 +286,9 @@ class GameLauncher implements IGameLauncher {
     }
   }
 
+  /// 启动游戏
+  /// [config]: 游戏启动配置
+  /// 返回游戏进程
   @override
   Future<Process> launchGame(GameLaunchConfig config) async {
     try {
@@ -334,6 +370,10 @@ class GameLauncher implements IGameLauncher {
     }
   }
 
+  /// 确保必要的目录存在
+  /// [gameDir]: 游戏目录
+  /// [assetsDir]: 资源目录
+  /// [librariesDir]: 库目录
   Future<void> _ensureDirectories(String gameDir, String assetsDir, String librariesDir) async {
     final dirs = [gameDir, assetsDir, librariesDir, '$gameDir/natives', '$gameDir/logs'];
     for (final dir in dirs) {
@@ -345,6 +385,8 @@ class GameLauncher implements IGameLauncher {
     }
   }
 
+  /// 检测崩溃信息
+  /// [output]: 游戏输出
   void _detectCrash(String output) {
     // 检测常见的崩溃关键词
     final crashKeywords = [
@@ -366,6 +408,8 @@ class GameLauncher implements IGameLauncher {
     }
   }
 
+  /// 分析崩溃日志
+  /// [crashLog]: 崩溃日志
   void _analyzeCrashLog(String crashLog) {
     _logger.info('分析崩溃日志...');
     
@@ -389,21 +433,25 @@ class GameLauncher implements IGameLauncher {
     });
   }
 
+  /// 获取游戏输出流
   @override
   Stream<String> getGameOutput() {
     return _outputController.stream;
   }
 
+  /// 获取进程信号流
   @override
   Stream<ProcessSignal> getProcessSignals() {
     return _signalController.stream;
   }
 
+  /// 获取启动状态流
   @override
   Stream<GameLaunchStatus> getLaunchStatus() {
     return _statusController.stream;
   }
 
+  /// 终止游戏进程
   @override
   Future<void> killProcess() async {
     if (_gameProcess != null) {
@@ -415,11 +463,14 @@ class GameLauncher implements IGameLauncher {
     }
   }
 
+  /// 检查游戏进程是否运行
   @override
   bool get isProcessRunning {
     return _gameProcess != null;
   }
 
+  /// 分析最后一次崩溃
+  /// 返回崩溃分析结果
   @override
   Future<CrashAnalysis> analyzeLastCrash() async {
     if (_lastCrashLog != null) {
@@ -460,6 +511,9 @@ class GameLauncher implements IGameLauncher {
     );
   }
 
+  /// 分析崩溃日志文本
+  /// [crashLog]: 崩溃日志文本
+  /// 返回分析结果
   String _analyzeCrashLogText(String crashLog) {
     if (crashLog.contains('OutOfMemoryError')) {
       return '内存不足，请增加分配的内存';
@@ -474,6 +528,7 @@ class GameLauncher implements IGameLauncher {
     }
   }
 
+  /// 释放资源
   @override
   void dispose() {
     _outputController.close();
