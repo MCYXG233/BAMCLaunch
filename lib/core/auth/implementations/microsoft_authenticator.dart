@@ -32,21 +32,21 @@ class MicrosoftAuthenticator implements IAuthenticator {
     }
 
     try {
-      Logger.info('开始Microsoft认证流程');
+      logger.info('开始Microsoft认证流程');
       
-      Logger.info('1. 获取Azure令牌');
+      logger.info('1. 获取Azure令牌');
       Map<String, dynamic> azureTokens = await _getAzureTokens(authorizationCode);
       
-      Logger.info('2. 获取Xbox Live令牌');
+      logger.info('2. 获取Xbox Live令牌');
       Map<String, dynamic> xboxLiveToken = await _getXboxLiveToken(azureTokens['access_token']);
       
-      Logger.info('3. 获取XSTS令牌');
+      logger.info('3. 获取XSTS令牌');
       Map<String, dynamic> xstsToken = await _getXstsToken(xboxLiveToken['Token']);
       
-      Logger.info('4. 获取Minecraft令牌');
+      logger.info('4. 获取Minecraft令牌');
       Map<String, dynamic> minecraftToken = await _getMinecraftToken(xstsToken);
       
-      Logger.info('5. 获取Minecraft个人资料');
+      logger.info('5. 获取Minecraft个人资料');
       MinecraftProfile profile = await _getMinecraftProfile(minecraftToken['access_token']);
 
       TokenData tokenData = TokenData(
@@ -55,7 +55,7 @@ class MicrosoftAuthenticator implements IAuthenticator {
         expiresAt: DateTime.now().add(Duration(seconds: azureTokens['expires_in'])),
       );
 
-      Logger.info('认证成功，用户: ${profile.name}');
+      logger.info('认证成功，用户: ${profile.name}');
       
       return Account(
         id: profile.id,
@@ -66,7 +66,7 @@ class MicrosoftAuthenticator implements IAuthenticator {
         lastLogin: DateTime.now(),
       );
     } catch (e) {
-      Logger.error('认证失败: $e');
+      logger.error('认证失败: $e');
       rethrow;
     } finally {
       // 清理状态
@@ -82,7 +82,7 @@ class MicrosoftAuthenticator implements IAuthenticator {
     }
 
     try {
-      Logger.info('开始刷新令牌: ${account.username}');
+      logger.info('开始刷新令牌: ${account.username}');
       
       Map<String, dynamic> azureTokens = await _refreshAzureTokens(account.tokenData!.refreshToken!);
       Map<String, dynamic> xboxLiveToken = await _getXboxLiveToken(azureTokens['access_token']);
@@ -96,7 +96,7 @@ class MicrosoftAuthenticator implements IAuthenticator {
         expiresAt: DateTime.now().add(Duration(seconds: azureTokens['expires_in'])),
       );
 
-      Logger.info('令牌刷新成功: ${account.username}');
+      logger.info('令牌刷新成功: ${account.username}');
       
       return account.copyWith(
         tokenData: newTokenData,
@@ -104,7 +104,7 @@ class MicrosoftAuthenticator implements IAuthenticator {
         lastLogin: DateTime.now(),
       );
     } catch (e) {
-      Logger.error('令牌刷新失败: $e');
+      logger.error('令牌刷新失败: $e');
       rethrow;
     }
   }
@@ -112,10 +112,10 @@ class MicrosoftAuthenticator implements IAuthenticator {
   @override
   Future<MinecraftProfile> getProfile(Account account) async {
     try {
-      Logger.info('获取个人资料: ${account.username}');
+      logger.info('获取个人资料: ${account.username}');
       return await _getMinecraftProfile(account.tokenData!.accessToken);
     } catch (e) {
-      Logger.error('获取个人资料失败: $e');
+      logger.error('获取个人资料失败: $e');
       rethrow;
     }
   }
@@ -124,9 +124,9 @@ class MicrosoftAuthenticator implements IAuthenticator {
   Future<void> logout(Account account) async {
     try {
       // 这里可以添加Microsoft logout API调用
-      Logger.info('注销账户: ${account.username}');
+      logger.info('注销账户: ${account.username}');
     } catch (e) {
-      Logger.error('注销失败: $e');
+      logger.error('注销失败: $e');
       // 即使失败也继续执行，因为本地注销是主要目标
     }
   }
@@ -255,7 +255,7 @@ class MicrosoftAuthenticator implements IAuthenticator {
         if (response.statusCode >= 200 && response.statusCode < 300) {
           return jsonDecode(response.body) as Map<String, dynamic>;
         } else {
-          Logger.error('$operation失败: ${response.statusCode} - ${response.body}');
+          logger.error('$operation失败: ${response.statusCode} - ${response.body}');
           if (i == retries - 1) {
             throw Exception('$operation失败: ${response.statusCode} - ${response.body}');
           }
@@ -263,7 +263,7 @@ class MicrosoftAuthenticator implements IAuthenticator {
           delay *= 2;
         }
       } catch (e) {
-        Logger.error('$operation网络请求失败: $e');
+        logger.error('$operation网络请求失败: $e');
         if (i == retries - 1) {
           throw Exception('$operation网络请求失败: $e');
         }
@@ -288,7 +288,7 @@ class MicrosoftAuthenticator implements IAuthenticator {
         if (response.statusCode >= 200 && response.statusCode < 300) {
           return jsonDecode(response.body) as Map<String, dynamic>;
         } else {
-          Logger.error('$operation失败: ${response.statusCode} - ${response.body}');
+          logger.error('$operation失败: ${response.statusCode} - ${response.body}');
           if (i == retries - 1) {
             throw Exception('$operation失败: ${response.statusCode} - ${response.body}');
           }
@@ -296,7 +296,7 @@ class MicrosoftAuthenticator implements IAuthenticator {
           delay *= 2;
         }
       } catch (e) {
-        Logger.error('$operation网络请求失败: $e');
+        logger.error('$operation网络请求失败: $e');
         if (i == retries - 1) {
           throw Exception('$operation网络请求失败: $e');
         }
