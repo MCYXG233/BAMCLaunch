@@ -5,11 +5,15 @@ import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import '../models/account.dart';
 import '../interfaces/i_authenticator.dart';
+import '../../logger/logger.dart';
 
 class MicrosoftAuthenticator implements IAuthenticator {
   static const String clientId = '0000000048093EE3';
   static const String redirectUri = 'https://login.live.com/oauth20_desktop.srf';
   static const String scope = 'XboxLive.signin offline_access';
+  
+  String? _codeVerifier;
+  String? _state;
 
   @override
   AccountType get accountType => AccountType.microsoft;
@@ -17,31 +21,58 @@ class MicrosoftAuthenticator implements IAuthenticator {
   @override
   Future<Account> login(Map<String, dynamic> credentials) async {
     String authorizationCode = credentials['authorizationCode'] as String;
+    String returnedState = credentials['state'] as String? ?? '';
     
     if (authorizationCode.isEmpty) {
       throw Exception('授权码不能为空');
     }
+    
+    if (_state != null && _state != returnedState) {
+      throw Exception('状态验证失败，可能是CSRF攻击');
+    }
 
-    Map<String, dynamic> azureTokens = await _getAzureTokens(authorizationCode);
-    Map<String, dynamic> xboxLiveToken = await _getXboxLiveToken(azureTokens['access_token']);
-    Map<String, dynamic> xstsToken = await _getXstsToken(xboxLiveToken['Token']);
-    Map<String, dynamic> minecraftToken = await _getMinecraftToken(xstsToken);
-    MinecraftProfile profile = await _getMinecraftProfile(minecraftToken['access_token']);
+    try {
+      Logger.info('开始Microsoft认证流程');
+      
+      Logger.info('1. 获取Azure令牌');
+      Map<String, dynamic> azureTokens = await _getAzureTokens(authorizationCode);
+      
+      Logger.info('2. 获取Xbox Live令牌');
+      Map<String, dynamic> xboxLiveToken = await _getXboxLiveToken(azureTokens['access_token']);
+      
+      Logger.info('3. 获取XSTS令牌');
+      Map<String, dynamic> xstsToken = await _getXstsToken(xboxLiveToken['Token']);
+      
+      Logger.info('4. 获取Minecraft令牌');
+      Map<String, dynamic> minecraftToken = await _getMinecraftToken(xstsToken);
+      
+      Logger.info('5. 获取Minecraft个人资料');
+      MinecraftProfile profile = await _getMinecraftProfile(minecraftToken['access_token']);
 
-    TokenData tokenData = TokenData(
-      accessToken: minecraftToken['access_token'],
-      refreshToken: azureTokens['refresh_token'],
-      expiresAt: DateTime.now().add(Duration(seconds: azureTokens['expires_in'])),
-    );
+      TokenData tokenData = TokenData(
+        accessToken: minecraftToken['access_token'],
+        refreshToken: azureTokens['refresh_token'],
+        expiresAt: DateTime.now().add(Duration(seconds: azureTokens['expires_in'])),
+      );
 
-    return Account(
-      id: profile.id,
-      username: profile.name,
-      type: AccountType.microsoft,
-      tokenData: tokenData,
-      profile: profile,
-      lastLogin: DateTime.now(),
-    );
+      Logger.info('认证成功，用户: ${profile.name}');
+      
+      return Account(
+        id: profile.id,
+        username: profile.name,
+        type: AccountType.microsoft,
+        tokenData: tokenData,
+        profile: profile,
+        lastLogin: DateTime.now(),
+      );
+    } catch (e) {
+      Logger.error('认证失败: $e');
+      rethrow;
+    } finally {
+      // 清理状态
+      _codeVerifier = null;
+      _state = null;
+    }
   }
 
   @override
@@ -50,33 +81,54 @@ class MicrosoftAuthenticator implements IAuthenticator {
       throw Exception('没有刷新令牌');
     }
 
-    Map<String, dynamic> azureTokens = await _refreshAzureTokens(account.tokenData!.refreshToken!);
-    Map<String, dynamic> xboxLiveToken = await _getXboxLiveToken(azureTokens['access_token']);
-    Map<String, dynamic> xstsToken = await _getXstsToken(xboxLiveToken['Token']);
-    Map<String, dynamic> minecraftToken = await _getMinecraftToken(xstsToken);
-    MinecraftProfile profile = await _getMinecraftProfile(minecraftToken['access_token']);
+    try {
+      Logger.info('开始刷新令牌: ${account.username}');
+      
+      Map<String, dynamic> azureTokens = await _refreshAzureTokens(account.tokenData!.refreshToken!);
+      Map<String, dynamic> xboxLiveToken = await _getXboxLiveToken(azureTokens['access_token']);
+      Map<String, dynamic> xstsToken = await _getXstsToken(xboxLiveToken['Token']);
+      Map<String, dynamic> minecraftToken = await _getMinecraftToken(xstsToken);
+      MinecraftProfile profile = await _getMinecraftProfile(minecraftToken['access_token']);
 
-    TokenData newTokenData = TokenData(
-      accessToken: minecraftToken['access_token'],
-      refreshToken: azureTokens['refresh_token'],
-      expiresAt: DateTime.now().add(Duration(seconds: azureTokens['expires_in'])),
-    );
+      TokenData newTokenData = TokenData(
+        accessToken: minecraftToken['access_token'],
+        refreshToken: azureTokens['refresh_token'],
+        expiresAt: DateTime.now().add(Duration(seconds: azureTokens['expires_in'])),
+      );
 
-    return account.copyWith(
-      tokenData: newTokenData,
-      profile: profile,
-      lastLogin: DateTime.now(),
-    );
+      Logger.info('令牌刷新成功: ${account.username}');
+      
+      return account.copyWith(
+        tokenData: newTokenData,
+        profile: profile,
+        lastLogin: DateTime.now(),
+      );
+    } catch (e) {
+      Logger.error('令牌刷新失败: $e');
+      rethrow;
+    }
   }
 
   @override
   Future<MinecraftProfile> getProfile(Account account) async {
-    return _getMinecraftProfile(account.tokenData!.accessToken);
+    try {
+      Logger.info('获取个人资料: ${account.username}');
+      return await _getMinecraftProfile(account.tokenData!.accessToken);
+    } catch (e) {
+      Logger.error('获取个人资料失败: $e');
+      rethrow;
+    }
   }
 
   @override
   Future<void> logout(Account account) async {
-    
+    try {
+      // 这里可以添加Microsoft logout API调用
+      Logger.info('注销账户: ${account.username}');
+    } catch (e) {
+      Logger.error('注销失败: $e');
+      // 即使失败也继续执行，因为本地注销是主要目标
+    }
   }
 
   @override
@@ -84,19 +136,25 @@ class MicrosoftAuthenticator implements IAuthenticator {
     return account.tokenData?.refreshToken != null;
   }
 
-  String generateAuthorizationUrl() {
-    String state = _generateRandomString(32);
-    String codeVerifier = _generateRandomString(128);
-    String codeChallenge = _generateCodeChallenge(codeVerifier);
+  Map<String, String> generateAuthorizationUrl() {
+    _state = _generateRandomString(32);
+    _codeVerifier = _generateRandomString(128);
+    String codeChallenge = _generateCodeChallenge(_codeVerifier!);
 
-    return 'https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?'
+    String url = 'https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?'
         'client_id=$clientId'
         '&response_type=code'
         '&redirect_uri=${Uri.encodeComponent(redirectUri)}'
         '&scope=${Uri.encodeComponent(scope)}'
-        '&state=$state'
+        '&state=$_state'
         '&code_challenge=$codeChallenge'
         '&code_challenge_method=S256';
+
+    return {
+      'url': url,
+      'state': _state!,
+      'codeVerifier': _codeVerifier!,
+    };
   }
 
   Future<Map<String, dynamic>> _getAzureTokens(String authorizationCode) async {
@@ -105,9 +163,10 @@ class MicrosoftAuthenticator implements IAuthenticator {
     String body = 'client_id=$clientId'
         '&grant_type=authorization_code'
         '&code=$authorizationCode'
-        '&redirect_uri=${Uri.encodeComponent(redirectUri)}';
+        '&redirect_uri=${Uri.encodeComponent(redirectUri)}'
+        '&code_verifier=$_codeVerifier';
 
-    return await _httpPost(uri, headers, body);
+    return await _httpPost(uri, headers, body, 'Azure令牌');
   }
 
   Future<Map<String, dynamic>> _refreshAzureTokens(String refreshToken) async {
@@ -118,7 +177,7 @@ class MicrosoftAuthenticator implements IAuthenticator {
         '&refresh_token=$refreshToken'
         '&scope=${Uri.encodeComponent(scope)}';
 
-    return await _httpPost(uri, headers, body);
+    return await _httpPost(uri, headers, body, '刷新Azure令牌');
   }
 
   Future<Map<String, dynamic>> _getXboxLiveToken(String azureToken) async {
@@ -134,7 +193,7 @@ class MicrosoftAuthenticator implements IAuthenticator {
       'TokenType': 'JWT',
     };
 
-    return await _httpPost(uri, headers, jsonEncode(body));
+    return await _httpPost(uri, headers, jsonEncode(body), 'Xbox Live令牌');
   }
 
   Future<Map<String, dynamic>> _getXstsToken(String xboxLiveToken) async {
@@ -149,7 +208,7 @@ class MicrosoftAuthenticator implements IAuthenticator {
       'TokenType': 'JWT',
     };
 
-    return await _httpPost(uri, headers, jsonEncode(body));
+    return await _httpPost(uri, headers, jsonEncode(body), 'XSTS令牌');
   }
 
   Future<Map<String, dynamic>> _getMinecraftToken(Map<String, dynamic> xstsToken) async {
@@ -159,7 +218,7 @@ class MicrosoftAuthenticator implements IAuthenticator {
       'identityToken': 'XBL3.0 x=${xstsToken['DisplayClaims']['xui'][0]['uhs']};${xstsToken['Token']}',
     };
 
-    return await _httpPost(uri, headers, jsonEncode(body));
+    return await _httpPost(uri, headers, jsonEncode(body), 'Minecraft令牌');
   }
 
   Future<MinecraftProfile> _getMinecraftProfile(String minecraftToken) async {
@@ -168,10 +227,10 @@ class MicrosoftAuthenticator implements IAuthenticator {
       'Authorization': 'Bearer $minecraftToken',
     };
 
-    Map<String, dynamic> response = await _httpGet(uri, headers);
+    Map<String, dynamic> response = await _httpGet(uri, headers, 'Minecraft个人资料');
     
-    String skinUrl = response['skins']?.firstWhere((skin) => skin['state'] == 'ACTIVE', orElse: () => {})['url'];
-    String capeUrl = response['capes']?.firstWhere((cape) => cape['state'] == 'ACTIVE', orElse: () => {})['url'];
+    String skinUrl = response['skins']?.firstWhere((skin) => skin['state'] == 'ACTIVE', orElse: () => {})?['url'] ?? '';
+    String capeUrl = response['capes']?.firstWhere((cape) => cape['state'] == 'ACTIVE', orElse: () => {})?['url'] ?? '';
 
     return MinecraftProfile(
       id: response['id'],
@@ -181,39 +240,71 @@ class MicrosoftAuthenticator implements IAuthenticator {
     );
   }
 
-  Future<Map<String, dynamic>> _httpPost(Uri uri, Map<String, String> headers, String body) async {
-    try {
-      final response = await http.post(
-        uri,
-        headers: headers,
-        body: body,
-      ).timeout(const Duration(seconds: 30));
+  Future<Map<String, dynamic>> _httpPost(Uri uri, Map<String, String> headers, String body, String operation) async {
+    int retries = 3;
+    int delay = 1000;
+    
+    for (int i = 0; i < retries; i++) {
+      try {
+        final response = await http.post(
+          uri,
+          headers: headers,
+          body: body,
+        ).timeout(const Duration(seconds: 30));
 
-      if (response.statusCode >= 200 && response.statusCode< 300) {
-        return jsonDecode(response.body) as Map<String, dynamic>;
-      } else {
-        throw Exception('HTTP错误: ${response.statusCode} - ${response.body}');
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          return jsonDecode(response.body) as Map<String, dynamic>;
+        } else {
+          Logger.error('$operation失败: ${response.statusCode} - ${response.body}');
+          if (i == retries - 1) {
+            throw Exception('$operation失败: ${response.statusCode} - ${response.body}');
+          }
+          await Future.delayed(Duration(milliseconds: delay));
+          delay *= 2;
+        }
+      } catch (e) {
+        Logger.error('$operation网络请求失败: $e');
+        if (i == retries - 1) {
+          throw Exception('$operation网络请求失败: $e');
+        }
+        await Future.delayed(Duration(milliseconds: delay));
+        delay *= 2;
       }
-    } catch (e) {
-      throw Exception('网络请求失败: $e');
     }
+    throw Exception('$operation失败：达到最大重试次数');
   }
 
-  Future<Map<String, dynamic>> _httpGet(Uri uri, Map<String, String> headers) async {
-    try {
-      final response = await http.get(
-        uri,
-        headers: headers,
-      ).timeout(const Duration(seconds: 30));
+  Future<Map<String, dynamic>> _httpGet(Uri uri, Map<String, String> headers, String operation) async {
+    int retries = 3;
+    int delay = 1000;
+    
+    for (int i = 0; i < retries; i++) {
+      try {
+        final response = await http.get(
+          uri,
+          headers: headers,
+        ).timeout(const Duration(seconds: 30));
 
-      if (response.statusCode >= 200 && response.statusCode< 300) {
-        return jsonDecode(response.body) as Map<String, dynamic>;
-      } else {
-        throw Exception('HTTP错误: ${response.statusCode} - ${response.body}');
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          return jsonDecode(response.body) as Map<String, dynamic>;
+        } else {
+          Logger.error('$operation失败: ${response.statusCode} - ${response.body}');
+          if (i == retries - 1) {
+            throw Exception('$operation失败: ${response.statusCode} - ${response.body}');
+          }
+          await Future.delayed(Duration(milliseconds: delay));
+          delay *= 2;
+        }
+      } catch (e) {
+        Logger.error('$operation网络请求失败: $e');
+        if (i == retries - 1) {
+          throw Exception('$operation网络请求失败: $e');
+        }
+        await Future.delayed(Duration(milliseconds: delay));
+        delay *= 2;
       }
-    } catch (e) {
-      throw Exception('网络请求失败: $e');
     }
+    throw Exception('$operation失败：达到最大重试次数');
   }
 
   String _generateRandomString(int length) {

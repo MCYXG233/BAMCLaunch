@@ -1,44 +1,42 @@
 import '../models/modpack_models.dart';
 
 abstract class IModpackManager {
-  Future<List<Modpack>> getInstalledModpacks();
+  // 导入整合包
+  Future<Modpack> importModpack(String filePath);
 
-  Future<ModpackManifest> parseModpack(String filePath);
+  // 导出整合包
+  Future<String> exportModpack(String modpackId, String destination);
 
-  Future<ModpackImportResult> importModpack({
-    required String filePath,
-    Function(ModpackImportProgress)? onProgress,
-  });
+  // 安装整合包
+  Future<ModpackInstallationResult> installModpack(String modpackId, String gameVersion);
 
-  Future<ModpackInstallResult> installModpack({
-    required Modpack modpack,
-    Function(double)? onProgress,
-  });
+  // 卸载整合包
+  Future<bool> uninstallModpack(String modpackId);
 
-  Future<void> uninstallModpack(String modpackId);
+  // 获取整合包列表
+  Future<List<Modpack>> getModpacks();
 
-  Future<ModpackExportResult> exportModpack({
-    required String modpackId,
-    required String exportPath,
-    required ModpackFormat format,
-    Function(double)? onProgress,
-  });
+  // 获取整合包详情
+  Future<Modpack?> getModpack(String modpackId);
 
-  Future<Modpack> createModpack(ModpackCreateOptions options);
+  // 更新整合包
+  Future<Modpack> updateModpack(String modpackId);
 
-  Future<Modpack> getModpackInfo(String modpackId);
+  // 备份整合包
+  Future<String> backupModpack(String modpackId, String destination);
 
-  Future<bool> checkModpackIntegrity(String modpackId);
+  // 恢复整合包
+  Future<Modpack> restoreModpack(String backupPath);
 
-  Future<void> repairModpack(String modpackId);
+  // 获取整合包的模组列表
+  Future<List<Mod>> getModpackMods(String modpackId);
 
-  Future<List<Modpack>> searchModpacks(String query);
+  // 向整合包添加模组
+  Future<bool> addModToModpack(String modpackId, String modId, String version);
 
-  Future<void> refreshModpackCache();
+  // 从整合包移除模组
+  Future<bool> removeModFromModpack(String modpackId, String modId);
 
-  Future<bool> isModpackInstalled(String modpackId);
-
-  Future<void> updateModpackStatus(String modpackId, ModpackStatus status);
-
-  Future<ModpackFormat> detectModpackFormat(String filePath);
+  // 更新整合包中的模组
+  Future<bool> updateModInModpack(String modpackId, String modId, String version);
 }

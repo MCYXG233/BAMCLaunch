@@ -1,145 +1,145 @@
-# BAMCLauncher - Product Requirement Document
+# BAMCLauncher - 产品需求文档
 
-## Overview
-- **Summary**: BAMCLauncher is a fully self-developed, cross-platform Minecraft launcher designed for Windows, macOS, and Linux desktop environments, featuring a layered architecture, unified abstract interfaces, and plugin-based modularization for robustness and extensibility.
-- **Purpose**: To provide a high-quality, feature-rich Minecraft launcher that matches or exceeds industry-leading launchers while maintaining complete code control through self-developed core capabilities.
-- **Target Users**: Minecraft players across Windows, macOS, and Linux platforms who need a reliable, feature-rich launcher with cross-platform consistency.
+## 概述
+- **摘要**：BAMCLauncher是一个完全自主开发的跨平台Minecraft启动器，专为Windows、macOS和Linux桌面环境设计，采用分层架构、统一抽象接口和基于插件的模块化设计，确保健壮性和可扩展性。
+- **目的**：提供一个高质量、功能丰富的Minecraft启动器，在保持完全代码控制的同时，达到或超越行业领先启动器的功能水平。
+- **目标用户**：Windows、macOS和Linux平台上需要可靠、功能丰富且跨平台一致的Minecraft启动器的玩家。
 
-## Goals
-- Create a cross-platform Minecraft launcher with native desktop experience on Windows, macOS, and Linux
-- Implement a layered architecture with unified abstract interfaces for maximum extensibility
-- Develop core capabilities in-house for complete code control and robustness
-- Achieve full functionality parity with industry-leading launchers
-- Ensure high performance, security, and user-friendly UI/UX
+## 目标
+- 创建一个在Windows、macOS和Linux上具有原生桌面体验的跨平台Minecraft启动器
+- 实现分层架构和统一抽象接口，以实现最大的可扩展性
+- 自主开发核心功能，确保完全的代码控制和健壮性
+- 达到与行业领先启动器的完全功能对等
+- 确保高性能、安全性和用户友好的UI/UX
 
-## Non-Goals (Out of Scope)
-- Mobile platform support (iOS/Android)
-- Third-party Minecraft launcher SDK integration
-- Mobile-first UI patterns or touch-optimized interfaces
-- Support for non-desktop platforms
+## 非目标（超出范围）
+- 移动平台支持（iOS/Android）
+- 第三方Minecraft启动器SDK集成
+- 移动优先的UI模式或触摸优化界面
+- 非桌面平台支持
 
-## Background & Context
-- BAMCLauncher is built on Flutter 3.22+ with Dart SDK 3.0+ for cross-platform development
-- The project follows a strict self-development principle for core capabilities, only using mature low-level dependencies
-- The launcher aims to compete with established launchers like PCL2, HMCL, BakaXL, and LaunchX
-- The design incorporates Minecraft pixel style with Blue Archive fresh glassmorphism aesthetic
+## 背景与上下文
+- BAMCLauncher基于Flutter 3.22+和Dart SDK 3.0+构建，用于跨平台开发
+- 项目遵循严格的自主开发原则，仅使用成熟的底层依赖
+- 启动器旨在与PCL2、HMCL、BakaXL和LaunchX等已建立的启动器竞争
+- 设计融合了Minecraft像素风格和Blue Archive清新玻璃态美学
 
-## Functional Requirements
-- **FR-1**: Cross-platform compatibility across Windows, macOS, and Linux
-- **FR-2**: Microsoft OAuth2 authentication flow (Xbox → XSTS → Minecraft full chain)
-- **FR-3**: Multi-account management with offline accounts and Authlib-Injector support
-- **FR-4**: Full MC version retrieval and vanilla installation
-- **FR-5**: Mod loader auto-install (Forge/Fabric/Quilt/NeoForge)
-- **FR-6**: Multi-threaded chunked download with resume and mirror source failover
-- **FR-7**: Java auto-detection and installation
-- **FR-8**: Game launch with JVM optimization and process monitoring
-- **FR-9**: Mod/resource pack/shader/datapack management
-- **FR-10**: All-format modpack import/export and auto-install
-- **FR-11**: Server list management and one-click join
-- **FR-12**: Global config management with encrypted storage
-- **FR-13**: Hierarchical logging and global exception capture
-- **FR-14**: Auto-update and rollback system
-- **FR-15**: Desktop-native UI with Minecraft × Blue Archive design language
+## 功能需求
+- **FR-1**：跨平台兼容性（Windows、macOS和Linux）
+- **FR-2**：Microsoft OAuth2认证流程（Xbox → XSTS → Minecraft完整链）
+- **FR-3**：多账户管理，支持离线账户和Authlib-Injector
+- **FR-4**：完整的MC版本检索和原版安装
+- **FR-5**：模组加载器自动安装（Forge/Fabric/Quilt/NeoForge）
+- **FR-6**：多线程分块下载，支持断点续传和镜像源故障转移
+- **FR-7**：Java自动检测和安装
+- **FR-8**：游戏启动，包括JVM优化和进程监控
+- **FR-9**：模组/资源包/ shader/数据包管理
+- **FR-10**：全格式整合包导入/导出和自动安装
+- **FR-11**：服务器列表管理和一键加入
+- **FR-12**：全局配置管理，带加密存储
+- **FR-13**：分层日志记录和全局异常捕获
+- **FR-14**：自动更新和回滚系统
+- **FR-15**：桌面原生UI，采用Minecraft × Blue Archive设计语言
 
-## Non-Functional Requirements
-- **NFR-1**: Performance - 60fps UI, lazy loading for large lists, strict resource lifecycle management
-- **NFR-2**: Security - AES-256 encryption for sensitive data, full HTTPS certificate verification, PKCE for OAuth2
-- **NFR-3**: Robustness - Global exception capture, automatic fault tolerance, corruption detection and repair
-- **NFR-4**: Cross-platform consistency - Identical behavior across Windows, macOS, and Linux
-- **NFR-5**: Maintainability - Layered architecture, unified interfaces, comprehensive documentation
+## 非功能需求
+- **NFR-1**：性能 - 60fps UI，大型列表懒加载，严格的资源生命周期管理
+- **NFR-2**：安全性 - 敏感数据AES-256加密，完整的HTTPS证书验证，OAuth2的PKCE
+- **NFR-3**：健壮性 - 全局异常捕获，自动容错，损坏检测和修复
+- **NFR-4**：跨平台一致性 - Windows、macOS和Linux上的相同行为
+- **NFR-5**：可维护性 - 分层架构，统一接口，全面的文档
 
-## Constraints
-- **Technical**: Flutter 3.22+ (stable channel), Dart SDK 3.0+, only allowed UI dependency: `window_manager`
-- **Business**: Full self-development for core capabilities, no third-party Minecraft launcher SDKs
-- **Dependencies**: Only allowed low-level dependencies: `crypto`, `archive`, `sqflite_common_ffi`, `xml`
+## 约束
+- **技术**：Flutter 3.22+（稳定频道），Dart SDK 3.0+，仅允许的UI依赖：`window_manager`
+- **业务**：核心功能完全自主开发，无第三方Minecraft启动器SDK
+- **依赖**：仅允许的底层依赖：`crypto`、`archive`、`sqflite_common_ffi`、`xml`
 
-## Assumptions
-- Minecraft EULA compliance is maintained
-- Microsoft API terms are followed
-- GPLv3 open-source license is applied
-- Users have internet access for downloads and authentication
-- Users have sufficient system resources to run Minecraft
+## 假设
+- 遵守Minecraft EULA
+- 遵循Microsoft API条款
+- 应用GPLv3开源许可证
+- 用户有互联网访问权限用于下载和认证
+- 用户有足够的系统资源运行Minecraft
 
-## Acceptance Criteria
+## 验收标准
 
-### AC-1: Cross-Platform Compatibility
-- **Given**: BAMCLauncher is installed on Windows, macOS, and Linux
-- **When**: User launches the application
-- **Then**: The launcher starts successfully and provides identical functionality across all platforms
-- **Verification**: `programmatic`
+### AC-1：跨平台兼容性
+- **给定**：BAMCLauncher安装在Windows、macOS和Linux上
+- **当**：用户启动应用程序
+- **则**：启动器成功启动并在所有平台上提供相同的功能
+- **验证**：`programmatic`
 
-### AC-2: Microsoft Authentication
-- **Given**: User initiates Microsoft login
-- **When**: User completes OAuth2 flow
-- **Then**: User is successfully authenticated and can access Minecraft accounts
-- **Verification**: `programmatic`
+### AC-2：Microsoft认证
+- **给定**：用户启动Microsoft登录
+- **当**：用户完成OAuth2流程
+- **则**：用户成功认证并可以访问Minecraft账户
+- **验证**：`programmatic`
 
-### AC-3: Version Management
-- **Given**: User requests installation of a specific Minecraft version
-- **When**: Launcher downloads and installs the version
-- **Then**: Version is installed correctly and can be launched
-- **Verification**: `programmatic`
+### AC-3：版本管理
+- **给定**：用户请求安装特定的Minecraft版本
+- **当**：启动器下载并安装该版本
+- **则**：版本安装正确且可以启动
+- **验证**：`programmatic`
 
-### AC-4: Mod Loader Installation
-- **Given**: User requests installation of Forge/Fabric/Quilt/NeoForge
-- **When**: Launcher downloads and installs the mod loader
-- **Then**: Mod loader is installed correctly and integrated with the selected Minecraft version
-- **Verification**: `programmatic`
+### AC-4：模组加载器安装
+- **给定**：用户请求安装Forge/Fabric/Quilt/NeoForge
+- **当**：启动器下载并安装模组加载器
+- **则**：模组加载器安装正确并与选定的Minecraft版本集成
+- **验证**：`programmatic`
 
-### AC-5: Download Engine Performance
-- **Given**: User initiates a large download (e.g., Minecraft version)
-- **When**: Download progresses
-- **Then**: Download uses multiple threads, resumes on interruption, and fails over to alternative mirrors if needed
-- **Verification**: `programmatic`
+### AC-5：下载引擎性能
+- **给定**：用户启动大型下载（例如Minecraft版本）
+- **当**：下载进行中
+- **则**：下载使用多线程，中断后可续传，必要时故障转移到备用镜像
+- **验证**：`programmatic`
 
-### AC-6: Game Launch
-- **Given**: User launches Minecraft
-- **When**: Launcher detects Java, optimizes JVM, and starts the game
-- **Then**: Minecraft starts successfully with optimal performance
-- **Verification**: `programmatic`
+### AC-6：游戏启动
+- **给定**：用户启动Minecraft
+- **当**：启动器检测Java，优化JVM并启动游戏
+- **则**：Minecraft成功启动并具有最佳性能
+- **验证**：`programmatic`
 
-### AC-7: Content Management
-- **Given**: User manages mods/resource packs/shaders/datapacks
-- **When**: User installs, updates, or removes content
-- **Then**: Content is managed correctly with conflict detection and dependency resolution
-- **Verification**: `programmatic`
+### AC-7：内容管理
+- **给定**：用户管理模组/资源包/shader/数据包
+- **当**：用户安装、更新或删除内容
+- **则**：内容管理正确，具有冲突检测和依赖解析
+- **验证**：`programmatic`
 
-### AC-8: Modpack Management
-- **Given**: User imports or creates a modpack
-- **When**: Launcher processes the modpack
-- **Then**: Modpack is installed correctly with all dependencies
-- **Verification**: `programmatic`
+### AC-8：整合包管理
+- **给定**：用户导入或创建整合包
+- **当**：启动器处理整合包
+- **则**：整合包安装正确，包含所有依赖项
+- **验证**：`programmatic`
 
-### AC-9: Server Management
-- **Given**: User adds or joins a server
-- **When**: User connects to the server
-- **Then**: Connection is established successfully with mod auto-sync if needed
-- **Verification**: `programmatic`
+### AC-9：服务器管理
+- **给定**：用户添加或加入服务器
+- **当**：用户连接到服务器
+- **则**：连接成功建立，必要时自动同步模组
+- **验证**：`programmatic`
 
-### AC-10: UI/UX Experience
-- **Given**: User interacts with the launcher UI
-- **When**: User navigates, clicks, or uses keyboard shortcuts
-- **Then**: UI responds smoothly at 60fps with desktop-native interactions
-- **Verification**: `human-judgment`
+### AC-10：UI/UX体验
+- **给定**：用户与启动器UI交互
+- **当**：用户导航、点击或使用键盘快捷键
+- **则**：UI以60fps流畅响应，具有桌面原生交互
+- **验证**：`human-judgment`
 
-### AC-11: Robustness
-- **Given**: Launcher encounters an error or exception
-- **When**: Error occurs
-- **Then**: Launcher captures the error, provides meaningful feedback, and continues operating
-- **Verification**: `programmatic`
+### AC-11：健壮性
+- **给定**：启动器遇到错误或异常
+- **当**：错误发生
+- **则**：启动器捕获错误，提供有意义的反馈，并继续运行
+- **验证**：`programmatic`
 
-### AC-12: Auto-Update
-- **Given**: A new version of BAMCLauncher is available
-- **When**: Launcher checks for updates
-- **Then**: Launcher downloads and installs the update, with rollback capability if needed
-- **Verification**: `programmatic`
+### AC-12：自动更新
+- **给定**：BAMCLauncher有新版本可用
+- **当**：启动器检查更新
+- **则**：启动器下载并安装更新，必要时具有回滚能力
+- **验证**：`programmatic`
 
-## Open Questions
-- [ ] What specific Java versions should be supported for different Minecraft versions?
-- [ ] How to handle platform-specific edge cases in Wayland (Linux) and sandbox (macOS)?
-- [ ] What mirror sources should be included for download failover?
-- [ ] How to optimize JVM arguments for different system configurations?
-- [ ] What specific modpack formats should be supported?
-- [ ] How to handle Minecraft EULA compliance for launcher distribution?
-- [ ] What crash reporting mechanism should be implemented?
-- [ ] How to optimize performance for low-end systems?
+## 未解决的问题
+- [ ] 不同Minecraft版本应支持哪些特定的Java版本？
+- [ ] 如何处理Wayland（Linux）和沙盒（macOS）中的平台特定边缘情况？
+- [ ] 应包含哪些镜像源用于下载故障转移？
+- [ ] 如何针对不同系统配置优化JVM参数？
+- [ ] 应支持哪些特定的整合包格式？
+- [ ] 如何处理启动器分发的Minecraft EULA合规性？
+- [ ] 应实现什么崩溃报告机制？
+- [ ] 如何为低端系统优化性能？

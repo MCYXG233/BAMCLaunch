@@ -1,54 +1,48 @@
 import '../models/server_models.dart';
-import '../../ipc/models/ipc_models.dart';
 
 abstract class IServerManager {
-  Future<List<ServerInfo>> getServerList();
+  // 添加服务器
+  Future<Server> addServer(Server server);
 
-  Future<void> addServer(ServerInfo server);
+  // 删除服务器
+  Future<bool> removeServer(String serverId);
 
-  Future<void> updateServer(ServerInfo server);
+  // 更新服务器
+  Future<Server> updateServer(Server server);
 
-  Future<void> deleteServer(String name);
+  // 获取服务器列表
+  Future<List<Server>> getServers();
 
-  Future<void> toggleFavorite(String name);
+  // 获取服务器详情
+  Future<Server?> getServer(String serverId);
 
-  Future<void> toggleAutoConnect(String name);
+  // 连接服务器
+  Future<ServerConnectionResult> connectToServer(String serverId);
 
-  Future<void> connectToServer(String name);
+  // 断开服务器连接
+  Future<bool> disconnectFromServer(String serverId);
 
-  Future<ServerResponse?> pingServer(String address, int port);
+  // 测试服务器连接
+  Future<ServerPingResult> pingServer(String serverId);
 
-  Future<List<LanServerInfo>> discoverLanServers();
+  // 自动同步服务器模组
+  Future<ServerSyncResult> syncServerMods(String serverId);
 
-  Future<bool> startLanServer(String worldName, int port);
+  // 获取服务器状态
+  Future<ServerStatus> getServerStatus(String serverId);
 
-  Future<void> stopLanServer();
+  // 导出服务器配置
+  Future<String> exportServerConfig(String serverId, String destination);
 
-  Future<bool> isLanServerRunning();
+  // 导入服务器配置
+  Future<Server> importServerConfig(String filePath);
 
-  Future<PortMappingResult> createPortMapping(int internalPort, int externalPort);
+  // 启动服务器（本地服务器）
+  Future<bool> startServer(String serverId);
 
-  Future<void> deletePortMapping(int externalPort);
+  // 停止服务器（本地服务器）
+  Future<bool> stopServer(String serverId);
 
-  Future<List<ServerInfo>> searchServers(String query);
-
-  Future<void> importServers(List<ServerInfo> servers);
-
-  Future<List<ServerInfo>> exportServers();
-
-  Stream<ServerInfo> get onServerStatusChanged;
-
-  Stream<List<LanServerInfo>> get onLanServersDiscovered;
-
-  Future<bool> isTerracottaIntegrationEnabled();
-
-  Future<void> enableTerracottaIntegration(bool enabled);
-
-  Future<IpcResponse> sendIpcRequest(IpcRequest request);
-
-  Future<bool> isIpcConnected();
-
-  Future<void> connectIpc(String endpoint);
-
-  Future<void> disconnectIpc();
+  // 重启服务器（本地服务器）
+  Future<bool> restartServer(String serverId);
 }

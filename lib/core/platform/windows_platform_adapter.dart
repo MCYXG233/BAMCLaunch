@@ -1,13 +1,20 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:system_tray/system_tray.dart';
 import 'i_platform_adapter.dart';
 
 class WindowsPlatformAdapter implements IPlatformAdapter {
+  SystemTray? _systemTray;
   @override
   String get appDataDirectory {
-    final appData = Platform.environment['APPDATA'];
-    return '${appData!}/.bamclauncher';
+    final appData = Platform.environment['APPDATA'] ?? '';
+    if (appData.isEmpty) {
+      final userProfile = Platform.environment['USERPROFILE'] ?? '';
+      return '$userProfile/.bamclauncher';
+    }
+    return '${appData}/.bamclauncher';
   }
 
   @override
@@ -34,24 +41,53 @@ class WindowsPlatformAdapter implements IPlatformAdapter {
   List<String> get javaPaths {
     final paths = <String>[];
 
-    paths.add('C:\\Program Files\\Java\\jdk1.8.0_301\\bin\\java.exe');
-    paths.add('C:\\Program Files\\Java\\jdk-17\\bin\\java.exe');
-    paths.add('C:\\Program Files (x86)\\Java\\jre1.8.0_301\\bin\\java.exe');
+    // 检查常见的Java安装路径
+    final javaDirs = [
+      'C:\\Program Files\\Java',
+      'C:\\Program Files (x86)\\Java',
+    ];
 
-    final programFiles = Platform.environment['PROGRAMFILES'];
-    if (programFiles != null) {
-      paths.add('$programFiles\\Java\\jdk1.8.0_301\\bin\\java.exe');
-      paths.add('$programFiles\\Java\\jdk-17\\bin\\java.exe');
+    for (final javaDir in javaDirs) {
+      final dir = Directory(javaDir);
+      if (dir.existsSync()) {
+        final subDirs = dir.listSync();
+        for (final subDir in subDirs) {
+          if (subDir is Directory) {
+            final javaExe = '${subDir.path}\\bin\\java.exe';
+            if (File(javaExe).existsSync()) {
+              paths.add(javaExe);
+            }
+          }
+        }
+      }
     }
 
-    final programFilesX86 = Platform.environment['PROGRAMFILES(X86)'];
-    if (programFilesX86 != null) {
-      paths.add('$programFilesX86\\Java\\jre1.8.0_301\\bin\\java.exe');
+    // 检查环境变量中的JAVA_HOME
+    final javaHome = Platform.environment['JAVA_HOME'];
+    if (javaHome != null) {
+      final javaExe = '$javaHome\\bin\\java.exe';
+      if (File(javaExe).existsSync()) {
+        paths.add(javaExe);
+      }
     }
 
+    // 检查PATH环境变量
+    final pathEnv = Platform.environment['PATH'];
+    if (pathEnv != null) {
+      final pathSegments = pathEnv.split(';');
+      for (final segment in pathSegments) {
+        final javaExe = '$segment\\java.exe';
+        if (File(javaExe).existsSync()) {
+          paths.add(javaExe);
+        }
+      }
+    }
+
+    // 添加通用的java命令
     paths.add('java');
 
-    return paths.where((path) => File(path).existsSync()).toList();
+    // 去重并返回
+    return paths.toSet().toList();
   }
 
   @override
@@ -59,11 +95,21 @@ class WindowsPlatformAdapter implements IPlatformAdapter {
     for (final path in javaPaths) {
       if (await File(path).exists()) {
         try {
-          final result = await Process.run(path, ['-version']);
+          // 使用超时处理，避免命令执行时间过长
+          final result = await Process.run(
+            path, 
+            ['-version'],
+            timeout: const Duration(seconds: 5),
+          );
           if (result.exitCode == 0) {
-            return path;
+            // 验证输出是否包含Java版本信息
+            final errorOutput = result.stderr.toString();
+            if (errorOutput.contains('java version') || errorOutput.contains('openjdk version')) {
+              return path;
+            }
           }
-        } catch (_) {
+        } catch (e) {
+          // 忽略错误，继续尝试下一个路径
           continue;
         }
       }
@@ -196,23 +242,49 @@ class WindowsPlatformAdapter implements IPlatformAdapter {
       const appName = 'BAMCLauncher';
       final executablePath = Platform.resolvedExecutable;
 
+      ProcessResult result;
       if (enabled) {
-        await Process.run('reg', [
-          'add',
-          registryPath,
-          '/v',
-          appName,
-          '/t',
-          'REG_SZ',
-          '/d',
-          executablePath,
-          '/f'
-        ]);
+        result = await Process.run(
+          'reg',
+          [
+            'add',
+            registryPath,
+            '/v',
+            appName,
+            '/t',
+            'REG_SZ',
+            '/d',
+            executablePath,
+            '/f'
+          ],
+          timeout: const Duration(seconds: 10),
+        );
       } else {
-        await Process.run('reg', ['delete', registryPath, '/v', appName, '/f']);
+        result = await Process.run(
+          'reg',
+          ['delete', registryPath, '/v', appName, '/f'],
+          timeout: const Duration(seconds: 10),
+        );
       }
-      return true;
-    } catch (_) {
+
+      // 检查退出码
+      if (result.exitCode == 0) {
+        return true;
+      } else {
+        // 检查是否是权限问题
+        if (result.stderr.toString().toLowerCase().contains('access denied')) {
+          print('注册表操作失败: 访问被拒绝，请以管理员身份运行');
+        } else {
+          print('注册表操作失败: ${result.stderr}');
+        }
+        return false;
+      }
+    } catch (e) {
+      if (e is TimeoutException) {
+        print('注册表操作超时');
+      } else {
+        print('注册表操作异常: $e');
+      }
       return false;
     }
   }
@@ -223,10 +295,33 @@ class WindowsPlatformAdapter implements IPlatformAdapter {
       const registryPath = 'SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run';
       const appName = 'BAMCLauncher';
 
-      final result =
-          await Process.run('reg', ['query', registryPath, '/v', appName]);
-      return result.exitCode == 0;
-    } catch (_) {
+      final result = await Process.run(
+        'reg',
+        ['query', registryPath, '/v', appName],
+        timeout: const Duration(seconds: 10),
+      );
+
+      // 检查退出码
+      if (result.exitCode == 0) {
+        return true;
+      } else if (result.exitCode == 1) {
+        // 退出码1表示键不存在，这是正常的
+        return false;
+      } else {
+        // 其他错误
+        if (result.stderr.toString().toLowerCase().contains('access denied')) {
+          print('注册表查询失败: 访问被拒绝，请以管理员身份运行');
+        } else {
+          print('注册表查询失败: ${result.stderr}');
+        }
+        return false;
+      }
+    } catch (e) {
+      if (e is TimeoutException) {
+        print('注册表查询超时');
+      } else {
+        print('注册表查询异常: $e');
+      }
       return false;
     }
   }
@@ -333,31 +428,104 @@ class WindowsPlatformAdapter implements IPlatformAdapter {
 
   @override
   Future<void> initializeTray(String iconPath, String tooltip) async {
-    
+    try {
+      _systemTray = SystemTray();
+      
+      // 初始化系统托盘
+      await _systemTray!.initSystemTray(
+        title: tooltip,
+        iconPath: iconPath,
+      );
+      
+      // 监听托盘点击事件
+      _systemTray!.registerSystemTrayEventHandler((eventName) async {
+        if (eventName == kSystemTrayEventClick) {
+          // 点击托盘图标显示/隐藏窗口
+          if (await windowManager.isVisible()) {
+            await windowManager.hide();
+          } else {
+            await windowManager.show();
+            await windowManager.focus();
+          }
+        }
+      });
+    } catch (e) {
+      print('初始化托盘失败: $e');
+    }
   }
 
   @override
   Future<void> showTray() async {
-    
+    try {
+      if (_systemTray != null) {
+        // 系统托盘在初始化时就会显示
+      }
+    } catch (e) {
+      print('显示托盘失败: $e');
+    }
   }
 
   @override
   Future<void> hideTray() async {
-    
+    try {
+      if (_systemTray != null) {
+        await _systemTray!.closeSystemTray();
+      }
+    } catch (e) {
+      print('隐藏托盘失败: $e');
+    }
   }
 
   @override
   Future<void> setTrayTooltip(String tooltip) async {
-    
+    try {
+      if (_systemTray != null) {
+        await _systemTray!.setSystemTrayInfo(
+          title: tooltip,
+        );
+      }
+    } catch (e) {
+      print('设置托盘提示失败: $e');
+    }
   }
 
   @override
   Future<void> setTrayMenu(List<Map<String, dynamic>> menuItems) async {
-    
+    try {
+      if (_systemTray != null) {
+        final menu = Menu();
+        
+        for (final item in menuItems) {
+          final label = item['label'] as String;
+          final action = item['action'] as Function?;
+          final enabled = item['enabled'] as bool? ?? true;
+          
+          if (action != null) {
+            await menu.addMenuItem(
+              MenuItem(label: label, onClicked: () => action()),
+            );
+          } else {
+            // 分隔线
+            await menu.addSeparator();
+          }
+        }
+        
+        await _systemTray!.setContextMenu(menu);
+      }
+    } catch (e) {
+      print('设置托盘菜单失败: $e');
+    }
   }
 
   @override
   Future<void> disposeTray() async {
-    
+    try {
+      if (_systemTray != null) {
+        await _systemTray!.closeSystemTray();
+        _systemTray = null;
+      }
+    } catch (e) {
+      print('释放托盘资源失败: $e');
+    }
   }
 }

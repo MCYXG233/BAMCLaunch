@@ -7,6 +7,7 @@ import 'java_manager.dart';
 import 'launch_arguments_builder.dart';
 import 'dart:io';
 import 'dart:async';
+import 'dart:convert';
 
 class GameLauncher implements IGameLauncher {
   final IPlatformAdapter _platformAdapter;
@@ -19,6 +20,9 @@ class GameLauncher implements IGameLauncher {
       StreamController.broadcast();
   final StreamController<ProcessSignal> _signalController =
       StreamController.broadcast();
+  final StreamController<GameLaunchStatus> _statusController =
+      StreamController.broadcast();
+  String? _lastCrashLog;
 
   GameLauncher({
     required IPlatformAdapter platformAdapter,
@@ -141,6 +145,7 @@ class GameLauncher implements IGameLauncher {
   @override
   Future<String> optimizeJvmParameters(String gameVersion, int memoryMb) async {
     try {
+      _logger.info('优化JVM参数: $gameVersion, 内存: ${memoryMb}MB');
       final version = await _versionManager.getVersionInfo(gameVersion);
       final jvmArgs = await _argumentsBuilder.buildJvmArguments(
         version,
@@ -148,9 +153,10 @@ class GameLauncher implements IGameLauncher {
         memoryMb,
         '${_platformAdapter.gameDirectory}/.minecraft',
       );
+      _logger.debug('生成的JVM参数: ${jvmArgs.join(' ')}');
       return jvmArgs.join(' ');
     } catch (e) {
-      _logger.warn('Failed to optimize JVM parameters: $e, using default');
+      _logger.warn('优化JVM参数失败: $e, 使用默认参数');
       List<String> args = [];
 
       args.add('-Xms${memoryMb}M');
@@ -170,6 +176,7 @@ class GameLauncher implements IGameLauncher {
       args.add('-Dfml.ignoreInvalidMinecraftCertificates=true');
       args.add('-Dfml.ignorePatchDiscrepancies=true');
 
+      _logger.debug('使用默认JVM参数: ${args.join(' ')}');
       return args.join(' ');
     }
   }
@@ -180,58 +187,78 @@ class GameLauncher implements IGameLauncher {
     required String uuid,
     required String accessToken,
     required int memoryMb,
+    Map<String, String>? customEnvironment,
   }) async {
     _logger.info('构建游戏启动配置: $gameVersion');
+    _statusController.add(GameLaunchStatus.preparing);
 
-    final version = await _versionManager.getVersionInfo(gameVersion);
-    final javaResult = await _javaManager.findRecommendedJava(gameVersion);
+    try {
+      final version = await _versionManager.getVersionInfo(gameVersion);
+      _statusController.add(GameLaunchStatus.checkingJava);
+      
+      final javaResult = await _javaManager.findRecommendedJava(gameVersion);
 
-    if (javaResult == null || !javaResult.found) {
-      throw Exception('未找到合适的Java环境，检测结果: ${javaResult?.error ?? "未知错误"}');
+      if (javaResult == null || !javaResult.found) {
+        throw Exception('未找到合适的Java环境，检测结果: ${javaResult?.error ?? "未知错误"}');
+      }
+
+      _statusController.add(GameLaunchStatus.resolvingDependencies);
+      final gameDir = '${_platformAdapter.gameDirectory}/.minecraft';
+      final assetsDir = '$gameDir/assets';
+      final librariesDir = '$gameDir/libraries';
+
+      // 确保必要的目录存在
+      await _ensureDirectories(gameDir, assetsDir, librariesDir);
+
+      _statusController.add(GameLaunchStatus.buildingArguments);
+      final jvmArgs = await _argumentsBuilder.buildJvmArguments(
+        version,
+        javaResult.javaPath!,
+        memoryMb,
+        gameDir,
+      );
+
+      final gameArgs = await _argumentsBuilder.buildGameArguments(
+        version,
+        username,
+        uuid,
+        accessToken,
+        gameDir,
+        assetsDir,
+        version.assetIndex?.id ?? gameVersion,
+        gameVersion,
+      );
+
+      _statusController.add(GameLaunchStatus.ready);
+      return GameLaunchConfig(
+        gameDir: gameDir,
+        gameVersion: gameVersion,
+        javaPath: javaResult.javaPath!,
+        memoryMb: memoryMb,
+        username: username,
+        uuid: uuid,
+        accessToken: accessToken,
+        assetIndex: version.assetIndex?.id ?? gameVersion,
+        assetsDir: assetsDir,
+        librariesDir: librariesDir,
+        mainClass: version.mainClass,
+        jvmArgs: jvmArgs,
+        gameArgs: gameArgs,
+        customEnvironment: customEnvironment,
+      );
+    } catch (e) {
+      _logger.error('构建启动配置失败: $e');
+      _statusController.add(GameLaunchStatus.error);
+      rethrow;
     }
-
-    final gameDir = '${_platformAdapter.gameDirectory}/.minecraft';
-    final assetsDir = '$gameDir/assets';
-    final librariesDir = '$gameDir/libraries';
-
-    final jvmArgs = await _argumentsBuilder.buildJvmArguments(
-      version,
-      javaResult.javaPath!,
-      memoryMb,
-      gameDir,
-    );
-
-    final gameArgs = await _argumentsBuilder.buildGameArguments(
-      version,
-      username,
-      uuid,
-      accessToken,
-      gameDir,
-      assetsDir,
-      version.assetIndex?.id ?? gameVersion,
-      gameVersion,
-    );
-
-    return GameLaunchConfig(
-      gameDir: gameDir,
-      gameVersion: gameVersion,
-      javaPath: javaResult.javaPath!,
-      memoryMb: memoryMb,
-      username: username,
-      uuid: uuid,
-      accessToken: accessToken,
-      assetIndex: version.assetIndex?.id ?? gameVersion,
-      assetsDir: assetsDir,
-      librariesDir: librariesDir,
-      mainClass: version.mainClass,
-      jvmArgs: jvmArgs,
-      gameArgs: gameArgs,
-    );
   }
 
   @override
   Future<Process> launchGame(GameLaunchConfig config) async {
     try {
+      _statusController.add(GameLaunchStatus.launching);
+      _logger.info('启动游戏: ${config.gameVersion}');
+
       final classpath = _argumentsBuilder.buildClasspath(
         config.librariesDir,
         config.gameVersion,
@@ -246,53 +273,120 @@ class GameLauncher implements IGameLauncher {
         ...config.gameArgs,
       ];
 
-      _logger.info('启动游戏进程: ${command.join(' ')}');
+      _logger.info('启动命令: ${command.join(' ')}');
       _logger.debug('完整启动命令: ${command.join(' ')}');
+
+      // 准备环境变量
+      Map<String, String> environment = Map.from(Platform.environment);
+      if (config.customEnvironment != null) {
+        environment.addAll(config.customEnvironment!);
+      }
 
       _gameProcess = await Process.start(
         command.first,
         command.sublist(1),
         workingDirectory: config.gameDir,
+        environment: environment,
       );
 
       _signalController.add(ProcessSignal.started);
+      _statusController.add(GameLaunchStatus.running);
 
+      // 捕获标准输出
       _gameProcess!.stdout
-          .transform(const SystemEncoding().decoder)
+          .transform(utf8.decoder)
           .listen((data) {
         _outputController.add(data);
         _logger.info('[Game] $data');
+        // 检测崩溃信息
+        _detectCrash(data);
       });
 
+      // 捕获错误输出
       _gameProcess!.stderr
-          .transform(const SystemEncoding().decoder)
+          .transform(utf8.decoder)
           .listen((data) {
         _outputController.add(data);
         _logger.error('[Game] $data');
+        // 检测崩溃信息
+        _detectCrash(data);
       });
 
+      // 处理进程退出
       _gameProcess!.exitCode.then((code) {
         _logger.info('游戏进程退出, 退出码: $code');
         _signalController.add(ProcessSignal.exited);
+        _statusController.add(GameLaunchStatus.exited);
         _gameProcess = null;
+        
+        // 分析崩溃日志
+        if (_lastCrashLog != null) {
+          _analyzeCrashLog(_lastCrashLog!);
+        }
       });
 
       return _gameProcess!;
     } catch (e) {
       _logger.error('启动游戏失败: $e');
       _signalController.add(ProcessSignal.error);
+      _statusController.add(GameLaunchStatus.error);
       rethrow;
     }
   }
 
-  Future<void> ensureNativesExtracted(String gameVersion) async {
-    final gameDir = '${_platformAdapter.gameDirectory}/.minecraft';
-    final nativesDir = '$gameDir/natives';
-
-    if (!await Directory(nativesDir).exists()) {
-      await Directory(nativesDir).create(recursive: true);
-      _logger.info('创建natives目录: $nativesDir');
+  Future<void> _ensureDirectories(String gameDir, String assetsDir, String librariesDir) async {
+    final dirs = [gameDir, assetsDir, librariesDir, '$gameDir/natives', '$gameDir/logs'];
+    for (final dir in dirs) {
+      final directory = Directory(dir);
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+        _logger.info('创建目录: $dir');
+      }
     }
+  }
+
+  void _detectCrash(String output) {
+    // 检测常见的崩溃关键词
+    final crashKeywords = [
+      'Exception in thread',
+      'Error:',
+      'Crash',
+      'Java.lang',
+      'OutOfMemoryError',
+      'StackOverflowError',
+    ];
+
+    for (final keyword in crashKeywords) {
+      if (output.contains(keyword)) {
+        _lastCrashLog ??= '';
+        _lastCrashLog! += output;
+        _logger.warn('检测到可能的崩溃: $keyword');
+        break;
+      }
+    }
+  }
+
+  void _analyzeCrashLog(String crashLog) {
+    _logger.info('分析崩溃日志...');
+    
+    if (crashLog.contains('OutOfMemoryError')) {
+      _logger.error('崩溃原因: 内存不足，请增加分配的内存');
+    } else if (crashLog.contains('NoClassDefFoundError') || crashLog.contains('ClassNotFoundException')) {
+      _logger.error('崩溃原因: 缺少依赖库，请重新安装游戏版本');
+    } else if (crashLog.contains('UnsatisfiedLinkError')) {
+      _logger.error('崩溃原因: 本地库加载失败，请检查natives目录');
+    } else if (crashLog.contains('IllegalArgumentException') || crashLog.contains('NullPointerException')) {
+      _logger.error('崩溃原因: 游戏代码错误，可能是模组冲突');
+    } else {
+      _logger.error('崩溃原因: 未知错误，请检查完整日志');
+    }
+
+    // 保存崩溃日志
+    final logDir = '${_platformAdapter.gameDirectory}/.minecraft/logs';
+    final logFile = File('$logDir/crash_${DateTime.now().millisecondsSinceEpoch}.txt');
+    logFile.writeAsString(crashLog).catchError((e) {
+      _logger.error('保存崩溃日志失败: $e');
+    });
   }
 
   @override
@@ -306,17 +400,87 @@ class GameLauncher implements IGameLauncher {
   }
 
   @override
+  Stream<GameLaunchStatus> getLaunchStatus() {
+    return _statusController.stream;
+  }
+
+  @override
   Future<void> killProcess() async {
     if (_gameProcess != null) {
       _logger.info('终止游戏进程');
       _gameProcess!.kill();
       await _gameProcess!.exitCode;
       _gameProcess = null;
+      _statusController.add(GameLaunchStatus.exited);
     }
   }
 
   @override
   bool get isProcessRunning {
     return _gameProcess != null;
+  }
+
+  @override
+  Future<CrashAnalysis> analyzeLastCrash() async {
+    if (_lastCrashLog != null) {
+      return CrashAnalysis(
+        hasCrash: true,
+        crashLog: _lastCrashLog!,
+        analysis: _analyzeCrashLogText(_lastCrashLog!),
+      );
+    }
+    
+    // 检查最新的崩溃日志文件
+    final logDir = '${_platformAdapter.gameDirectory}/.minecraft/logs';
+    final logDirExists = await Directory(logDir).exists();
+    
+    if (logDirExists) {
+      final crashFiles = await Directory(logDir)
+          .list()
+          .where((entity) => entity is File && entity.path.endsWith('.txt') && entity.path.contains('crash_'))
+          .toList();
+      
+      if (crashFiles.isNotEmpty) {
+        // 按修改时间排序，获取最新的崩溃日志
+        crashFiles.sort((a, b) => b.statSync().modified.compareTo(a.statSync().modified));
+        final latestCrashFile = crashFiles.first as File;
+        final crashLog = await latestCrashFile.readAsString();
+        
+        return CrashAnalysis(
+          hasCrash: true,
+          crashLog: crashLog,
+          analysis: _analyzeCrashLogText(crashLog),
+        );
+      }
+    }
+    
+    return CrashAnalysis(
+      hasCrash: false,
+      analysis: '没有检测到崩溃日志',
+    );
+  }
+
+  String _analyzeCrashLogText(String crashLog) {
+    if (crashLog.contains('OutOfMemoryError')) {
+      return '内存不足，请增加分配的内存';
+    } else if (crashLog.contains('NoClassDefFoundError') || crashLog.contains('ClassNotFoundException')) {
+      return '缺少依赖库，请重新安装游戏版本';
+    } else if (crashLog.contains('UnsatisfiedLinkError')) {
+      return '本地库加载失败，请检查natives目录';
+    } else if (crashLog.contains('IllegalArgumentException') || crashLog.contains('NullPointerException')) {
+      return '游戏代码错误，可能是模组冲突';
+    } else {
+      return '未知错误，请检查完整日志';
+    }
+  }
+
+  @override
+  void dispose() {
+    _outputController.close();
+    _signalController.close();
+    _statusController.close();
+    if (_gameProcess != null) {
+      _gameProcess!.kill();
+    }
   }
 }

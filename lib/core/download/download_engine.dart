@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
+import 'dart:math';
 import 'package:crypto/crypto.dart';
 
 import 'i_download_engine.dart';
 import 'i_download_source.dart';
 import 'download_task.dart';
 import 'download_status.dart';
+import '../logger/logger.dart';
 
 class DownloadEngine implements IDownloadEngine {
   final Map<String, DownloadTask> _downloadTasks = {};
@@ -14,6 +16,8 @@ class DownloadEngine implements IDownloadEngine {
   final Map<String, List<StreamSubscription>> _subscriptions = {};
   final Map<String, bool> _cancelFlags = {};
   final Set<String> _activeDownloads = {};
+  final Map<String, int> _downloadSpeeds = {};
+  final Map<String, DateTime> _lastProgressUpdate = {};
 
   @override
   Future<void> downloadFile(
@@ -29,7 +33,7 @@ class DownloadEngine implements IDownloadEngine {
     Function(String)? onError,
   }) async {
     if (_downloadTasks.containsKey(url)) {
-      throw Exception('Download already in progress');
+      throw Exception('下载已经在进行中');
     }
 
     final task = DownloadTask(
@@ -45,14 +49,19 @@ class DownloadEngine implements IDownloadEngine {
     _cancelFlags[url] = false;
     _downloadCompleters[url] = Completer<void>();
     _activeDownloads.add(url);
+    _downloadSpeeds[url] = 0;
+    _lastProgressUpdate[url] = DateTime.now();
 
     try {
+      Logger.info('开始下载: $url -> $savePath');
       await _executeDownload(task, sources, onProgress, onError);
+      Logger.info('下载完成: $url');
       _downloadCompleters[url]?.complete();
     } catch (e) {
       task.status = DownloadStatus.failed;
       task.errorMessage = e.toString();
       onError?.call(e.toString());
+      Logger.error('下载失败: $url - $e');
       _downloadCompleters[url]?.completeError(e);
     } finally {
       _cleanupDownload(url);
@@ -73,7 +82,7 @@ class DownloadEngine implements IDownloadEngine {
     Function(int, String)? onError,
   }) async {
     if (urls.length != savePaths.length) {
-      throw Exception('URLs and save paths must have the same length');
+      throw Exception('URLs 和保存路径长度必须相同');
     }
 
     final results = <bool>[];
@@ -112,9 +121,10 @@ class DownloadEngine implements IDownloadEngine {
     Function(String)? onError,
   ) async {
     String resolvedUrl = task.url;
+    List<IDownloadSource> availableSources = sources?.where((source) => source.isValid()).toList() ?? [];
     
-    if (sources != null && sources.isNotEmpty) {
-      resolvedUrl = await _resolveUrlWithSources(task.url, sources);
+    if (availableSources.isNotEmpty) {
+      resolvedUrl = await _resolveUrlWithSources(task.url, availableSources);
     }
 
     task.status = DownloadStatus.downloading;
@@ -127,89 +137,150 @@ class DownloadEngine implements IDownloadEngine {
 
     if (await tempFile.exists()) {
       task.downloadedBytes = await tempFile.length();
+      Logger.info('恢复下载: ${task.downloadedBytes} 字节已下载');
     }
 
-    final contentLength = await _getContentLength(resolvedUrl);
+    int contentLength = 0;
+    int retryCount = 0;
+    bool success = false;
+
+    // 尝试获取内容长度，支持重试
+    while (retryCount < task.maxRetries && !success) {
+      try {
+        contentLength = await _getContentLength(resolvedUrl);
+        success = true;
+      } catch (e) {
+        retryCount++;
+        Logger.warn('获取内容长度失败 (${retryCount}/${task.maxRetries}): $e');
+        if (retryCount < task.maxRetries) {
+          await Future.delayed(Duration(seconds: pow(2, retryCount).toInt()));
+        } else {
+          throw Exception('无法获取文件大小: $e');
+        }
+      }
+    }
+
     task.totalBytes = contentLength;
+    Logger.info('文件大小: ${_formatFileSize(contentLength)}');
 
     if (task.downloadedBytes >= contentLength) {
       await tempFile.rename(task.savePath);
       task.status = DownloadStatus.completed;
       task.progress = 1.0;
       onProgress?.call(1.0);
+      Logger.info('文件已完整下载，无需重复下载');
       return;
     }
 
-    final chunks = _splitIntoChunks(task.downloadedBytes, contentLength, task.chunkSize);
+    // 动态调整分块大小，根据文件大小
+    int adjustedChunkSize = task.chunkSize;
+    if (contentLength > 100 * 1024 * 1024) { // 大于100MB
+      adjustedChunkSize = 4 * 1024 * 1024; // 4MB chunks
+    } else if (contentLength > 10 * 1024 * 1024) { // 大于10MB
+      adjustedChunkSize = 2 * 1024 * 1024; // 2MB chunks
+    }
+
+    final chunks = _splitIntoChunks(task.downloadedBytes, contentLength, adjustedChunkSize);
     final semaphore = _Semaphore(task.maxThreads);
     final chunkCompleters = <Completer<void>>[];
 
-    for (final chunk in chunks) {
-      if (_cancelFlags[task.url] == true) {
-        throw Exception('Download canceled');
+    // 启动速度监控
+    final speedTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!_activeDownloads.contains(task.url)) {
+        timer.cancel();
+        return;
       }
+      // 这里可以添加速度回调
+    });
 
-      // 检查是否暂停
-      await task.waitIfPaused();
-
-      final completer = Completer<void>();
-      chunkCompleters.add(completer);
-
-      semaphore.acquire().then((_) async {
-        try {
-          await _downloadChunk(
-            resolvedUrl,
-            tempFile,
-            chunk.start,
-            chunk.end,
-            task,
-            onProgress,
-          );
-          completer.complete();
-        } catch (e) {
-          completer.completeError(e);
-        } finally {
-          semaphore.release();
+    try {
+      for (final chunk in chunks) {
+        if (_cancelFlags[task.url] == true) {
+          throw Exception('下载已取消');
         }
-      });
-    }
 
-    await Future.wait(chunkCompleters.map((completer) => completer.future));
+        // 检查是否暂停
+        await task.waitIfPaused();
 
-    await tempFile.rename(task.savePath);
-    task.status = DownloadStatus.completed;
-    task.progress = 1.0;
-    onProgress?.call(1.0);
+        final completer = Completer<void>();
+        chunkCompleters.add(completer);
 
-    if (task.checksum != null && task.checksumType != null) {
-      final isValid = await verifyFile(task.savePath, task.checksum!, task.checksumType!);
-      if (!isValid) {
-        throw Exception('Checksum verification failed');
+        semaphore.acquire().then((_) async {
+          int chunkRetryCount = 0;
+          bool chunkSuccess = false;
+
+          while (chunkRetryCount < task.maxRetries && !chunkSuccess) {
+            try {
+              await _downloadChunk(
+                resolvedUrl,
+                tempFile,
+                chunk.start,
+                chunk.end,
+                task,
+                onProgress,
+              );
+              chunkSuccess = true;
+              completer.complete();
+            } catch (e) {
+              chunkRetryCount++;
+              Logger.warn('分块下载失败 (${chunkRetryCount}/${task.maxRetries}): $e');
+              if (chunkRetryCount < task.maxRetries) {
+                // 尝试切换到其他源
+                if (availableSources.isNotEmpty) {
+                  try {
+                    resolvedUrl = await _resolveUrlWithSources(task.url, availableSources);
+                    Logger.info('切换到备用源: $resolvedUrl');
+                  } catch (_) {
+                    // 忽略源切换失败
+                  }
+                }
+                await Future.delayed(Duration(seconds: pow(2, chunkRetryCount).toInt()));
+              } else {
+                completer.completeError(e);
+              }
+            }
+          }
+          semaphore.release();
+        });
       }
+
+      await Future.wait(chunkCompleters.map((completer) => completer.future));
+
+      await tempFile.rename(task.savePath);
+      task.status = DownloadStatus.completed;
+      task.progress = 1.0;
+      onProgress?.call(1.0);
+
+      if (task.checksum != null && task.checksumType != null) {
+        Logger.info('开始校验文件哈希值');
+        final isValid = await verifyFile(task.savePath, task.checksum!, task.checksumType!);
+        if (!isValid) {
+          throw Exception('文件校验失败');
+        }
+        Logger.info('文件校验成功');
+      }
+    } finally {
+      speedTimer.cancel();
     }
   }
 
   Future<String> _resolveUrlWithSources(String originalUrl, List<IDownloadSource> sources) async {
-    final validSources = sources.where((source) => source.isValid()).toList();
-    
-    if (validSources.isEmpty) {
-      return originalUrl;
-    }
-
     // 并行测试所有源的响应时间
     final sourceResponseTimes = <IDownloadSource, int>{};
-    final futures = validSources.map((source) async {
+    final futures = sources.map((source) async {
       try {
         final responseTime = await source.getResponseTime();
         sourceResponseTimes[source] = responseTime;
-      } catch (_) {
-        // 忽略失败的源
+        Logger.debug('源 ${source.getName()} 响应时间: ${responseTime}ms');
+      } catch (e) {
+        Logger.warn('源 ${source.getName()} 测试失败: $e');
       }
     });
 
     await Future.wait(futures);
 
     if (sourceResponseTimes.isEmpty) {
+      Logger.warn('所有源测试失败，使用原始URL');
       return originalUrl;
     }
 
@@ -218,7 +289,9 @@ class DownloadEngine implements IDownloadEngine {
         .reduce((a, b) => a.value < b.value ? a : b)
         .key;
 
-    return await bestSource.resolveUrl(originalUrl);
+    final resolvedUrl = await bestSource.resolveUrl(originalUrl);
+    Logger.info('选择最佳源: ${bestSource.getName()} -> $resolvedUrl');
+    return resolvedUrl;
   }
 
   Future<int> _getContentLength(String url) async {
@@ -226,17 +299,18 @@ class DownloadEngine implements IDownloadEngine {
     
     try {
       final request = await client.getUrl(Uri.parse(url))
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 15));
       request.headers.add('Range', 'bytes=0-');
       request.headers.add('User-Agent', 'BAMCLauncher/1.0');
+      request.headers.add('Accept', '*/*');
       
       final response = await request.close()
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 15));
       
       if (response.statusCode == 206) {
         final contentRange = response.headers.value('content-range');
         if (contentRange != null) {
-          final match = RegExp(r'/(\d+)').firstMatch(contentRange);
+          final match = RegExp(r'/([0-9]+)$').firstMatch(contentRange);
           if (match != null) {
             return int.parse(match.group(1)!);
           }
@@ -248,9 +322,9 @@ class DownloadEngine implements IDownloadEngine {
         }
       }
       
-      throw Exception('Failed to get content length, status: ${response.statusCode}');
+      throw Exception('获取内容长度失败，状态码: ${response.statusCode}');
     } finally {
-      client.close();
+      client.close(force: true);
     }
   }
 
@@ -258,15 +332,16 @@ class DownloadEngine implements IDownloadEngine {
     final chunks = <_Chunk>[];
     int current = start;
     
-    while (current< end) {
+    while (current < end) {
       final chunkEnd = current + chunkSize - 1;
       chunks.add(_Chunk(
         start: current,
-        end: chunkEnd >end ? end - 1 : chunkEnd,
+        end: chunkEnd > end ? end - 1 : chunkEnd,
       ));
       current += chunkSize;
     }
     
+    Logger.debug('文件分块: ${chunks.length} 块');
     return chunks;
   }
 
@@ -279,12 +354,12 @@ class DownloadEngine implements IDownloadEngine {
     Function(double)? onProgress,
   ) async {
     if (_cancelFlags[task.url] == true) {
-      throw Exception('Download canceled');
+      throw Exception('下载已取消');
     }
 
     final client = HttpClient()
-      ..connectionTimeout = const Duration(seconds: 10)
-      ..idleTimeout = const Duration(seconds: 30);
+      ..connectionTimeout = const Duration(seconds: 15)
+      ..idleTimeout = const Duration(seconds: 60);
       
     try {
       final request = await client.getUrl(Uri.parse(url))
@@ -292,12 +367,13 @@ class DownloadEngine implements IDownloadEngine {
       request.headers.add('Range', 'bytes=$start-$end');
       request.headers.add('User-Agent', 'BAMCLauncher/1.0');
       request.headers.add('Accept-Encoding', 'identity'); // 禁用压缩以避免额外内存使用
+      request.headers.add('Accept', '*/*');
       
       final response = await request.close()
-          .timeout(const Duration(seconds: 60));
+          .timeout(const Duration(seconds: 120));
 
       if (response.statusCode != 206) {
-        throw Exception('Failed to download chunk: ${response.statusCode}');
+        throw Exception('分块下载失败: ${response.statusCode}');
       }
 
       // 优化流处理：使用固定大小的缓冲区，避免内存峰值
@@ -307,12 +383,16 @@ class DownloadEngine implements IDownloadEngine {
       int bytesWritten = 0;
       int progressUpdateCounter = 0;
       const progressUpdateInterval = 4; // 减少进度更新频率，避免频繁回调
+      int totalChunkBytes = end - start + 1;
+      int chunkBytesWritten = 0;
+      
+      final startTime = DateTime.now();
       
       await for (final chunk in response) {
         // 检查是否取消
         if (_cancelFlags[task.url] == true) {
           await sink.close();
-          throw Exception('Download canceled');
+          throw Exception('下载已取消');
         }
         
         // 检查是否暂停
@@ -320,15 +400,25 @@ class DownloadEngine implements IDownloadEngine {
         
         sink.add(chunk);
         bytesWritten += chunk.length;
+        chunkBytesWritten += chunk.length;
         progressUpdateCounter++;
         
         // 定期更新进度，避免频繁回调
-        if ((bytesWritten >= bufferSize || bytesWritten >= (end - start + 1)) && 
+        if ((bytesWritten >= bufferSize || chunkBytesWritten >= totalChunkBytes) && 
             progressUpdateCounter >= progressUpdateInterval) {
           task.downloadedBytes += bytesWritten;
           task.progress = task.totalBytes > 0 
               ? task.downloadedBytes / task.totalBytes 
               : 0.0;
+          
+          // 计算下载速度
+          final now = DateTime.now();
+          final elapsed = now.difference(_lastProgressUpdate[task.url]!).inMilliseconds / 1000;
+          if (elapsed > 0) {
+            _downloadSpeeds[task.url] = (bytesWritten / elapsed).round();
+          }
+          _lastProgressUpdate[task.url] = now;
+          
           onProgress?.call(task.progress);
           bytesWritten = 0;
           progressUpdateCounter = 0;
@@ -341,10 +431,23 @@ class DownloadEngine implements IDownloadEngine {
         task.progress = task.totalBytes > 0 
             ? task.downloadedBytes / task.totalBytes 
             : 0.0;
+        
+        final now = DateTime.now();
+        final elapsed = now.difference(_lastProgressUpdate[task.url]!).inMilliseconds / 1000;
+        if (elapsed > 0) {
+          _downloadSpeeds[task.url] = (bytesWritten / elapsed).round();
+        }
+        _lastProgressUpdate[task.url] = now;
+        
         onProgress?.call(task.progress);
       }
       
       await sink.close();
+      
+      final endTime = DateTime.now();
+      final chunkTime = endTime.difference(startTime).inMilliseconds / 1000;
+      final chunkSpeed = chunkTime > 0 ? (totalChunkBytes / chunkTime).round() : 0;
+      Logger.debug('分块下载完成: ${_formatFileSize(totalChunkBytes)} in ${chunkTime.toStringAsFixed(2)}s (${_formatFileSize(chunkSpeed)}/s)');
     } finally {
       client.close(force: true);
     }
@@ -370,22 +473,33 @@ class DownloadEngine implements IDownloadEngine {
         hash = sha256;
         break;
       default:
-        throw Exception('Unsupported checksum type: $checksumType');
+        throw Exception('不支持的校验类型: $checksumType');
     }
 
-    final input = file.openRead();
-    final digest = await input.transform(hash).first;
-    
-    final calculatedChecksum = digest.toString();
-
-    return calculatedChecksum.toLowerCase() == checksum.toLowerCase();
+    try {
+      final input = file.openRead();
+      final digest = await input.transform(hash).first;
+      
+      final calculatedChecksum = digest.toString();
+      final isMatch = calculatedChecksum.toLowerCase() == checksum.toLowerCase();
+      
+      if (!isMatch) {
+        Logger.error('校验失败: 计算值=$calculatedChecksum, 期望值=$checksum');
+      }
+      
+      return isMatch;
+    } catch (e) {
+      Logger.error('校验过程出错: $e');
+      return false;
+    }
   }
 
   @override
   void cancelDownload(String url) {
     _cancelFlags[url] = true;
     _subscriptions[url]?.forEach((sub) => sub.cancel());
-    _downloadCompleters[url]?.completeError(Exception('Download canceled'));
+    _downloadCompleters[url]?.completeError(Exception('下载已取消'));
+    Logger.info('取消下载: $url');
     _cleanupDownload(url);
   }
   
@@ -394,6 +508,8 @@ class DownloadEngine implements IDownloadEngine {
     final task = _downloadTasks[url];
     if (task != null) {
       task.pause();
+      task.status = DownloadStatus.paused;
+      Logger.info('暂停下载: $url');
     }
   }
   
@@ -402,6 +518,9 @@ class DownloadEngine implements IDownloadEngine {
     final task = _downloadTasks[url];
     if (task != null) {
       task.resume();
+      task.status = DownloadStatus.downloading;
+      _lastProgressUpdate[url] = DateTime.now();
+      Logger.info('恢复下载: $url');
     }
   }
 
@@ -450,11 +569,19 @@ class DownloadEngine implements IDownloadEngine {
 
   @override
   Map<String, double> getAllProgress() {
-    final progressMap =<String, double>{};
+    final progressMap = <String, double>{};
     for (final entry in _downloadTasks.entries) {
       progressMap[entry.key] = entry.value.progress;
     }
     return progressMap;
+  }
+
+  int getSpeed(String url) {
+    return _downloadSpeeds[url] ?? 0;
+  }
+
+  Map<String, int> getAllSpeeds() {
+    return Map.from(_downloadSpeeds);
   }
 
   void _cleanupDownload(String url) {
@@ -463,6 +590,15 @@ class DownloadEngine implements IDownloadEngine {
     _subscriptions.remove(url);
     _cancelFlags.remove(url);
     _activeDownloads.remove(url);
+    _downloadSpeeds.remove(url);
+    _lastProgressUpdate.remove(url);
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(2)} KB';
+    if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
+    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
   }
 }
 

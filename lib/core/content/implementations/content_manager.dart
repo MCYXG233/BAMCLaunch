@@ -1,628 +1,546 @@
 import '../interfaces/i_content_manager.dart';
 import '../models/content_models.dart';
-import '../api/curseforge_api.dart';
-import '../api/modrinth_api.dart';
-import '../../platform/i_platform_adapter.dart';
+import '../../http/i_http_client.dart';
+import '../../logger/i_logger.dart';
 import '../../download/i_download_engine.dart';
-import '../../logger/logger.dart';
-import 'dart:io';
+import 'dart:convert';
 
 class ContentManager implements IContentManager {
-  final IPlatformAdapter _platformAdapter;
+  final IHttpClient _httpClient;
+  final ILogger _logger;
   final IDownloadEngine _downloadEngine;
-  final CurseForgeApi _curseforgeApi;
-  final ModrinthApi _modrinthApi;
-
-  // 缓存机制
-  final Map<String, SearchResult> _searchCache = {};
-  final Map<String, ContentItem> _contentDetailsCache = {};
-  final Map<String, List<ContentItem>> _popularCache = {};
-  final Duration _cacheDuration = const Duration(minutes: 30);
 
   ContentManager({
-    required IPlatformAdapter platformAdapter,
+    required IHttpClient httpClient,
+    required ILogger logger,
     required IDownloadEngine downloadEngine,
-  })  : _platformAdapter = platformAdapter,
-        _downloadEngine = downloadEngine,
-        _curseforgeApi = CurseForgeApi(),
-        _modrinthApi = ModrinthApi();
+  })  : _httpClient = httpClient,
+        _logger = logger,
+        _downloadEngine = downloadEngine;
 
   @override
-  Future<SearchResult> searchContent(SearchQuery query) async {
-    try {
-      // 生成缓存键
-      final cacheKey = _generateSearchCacheKey(query);
-
-      // 检查缓存
-      if (_searchCache.containsKey(cacheKey)) {
-        final cachedResult = _searchCache[cacheKey]!;
-        // 缓存有效期检查
-        if (DateTime.now().difference(cachedResult.timestamp) <
-            _cacheDuration) {
-          return cachedResult;
-        }
-      }
-
-      final results = <SearchResult>[];
-
-      // 尝试从CurseForge搜索
-      try {
-        if (_curseforgeApi.isConfigured) {
-          final curseforgeResult = await _curseforgeApi.search(query);
-          results.add(curseforgeResult);
-        }
-      } catch (e) {
-        logger.warn('CurseForge搜索失败: $e');
-      }
-
-      // 尝试从Modrinth搜索
-      try {
-        final modrinthResult = await _modrinthApi.search(query);
-        results.add(modrinthResult);
-      } catch (e) {
-        logger.warn('Modrinth搜索失败: $e');
-      }
-
-      // 合并结果
-      final combinedItems = results.expand((result) => result.items).toList();
-      final totalCount =
-          results.fold(0, (sum, result) => sum + result.totalCount);
-
-      final result = SearchResult(
-        items: combinedItems,
-        totalCount: totalCount,
-        currentPage: query.page,
-        totalPages: totalCount > 0 ? (totalCount / query.pageSize).ceil() : 0,
-        timestamp: DateTime.now(),
-      );
-
-      // 更新缓存
-      _searchCache[cacheKey] = result;
-      return result;
-    } catch (e) {
-      throw Exception('搜索失败: $e');
-    }
-  }
-
-  @override
-  Future<ContentInstallResult> installContent({
-    required ContentItem item,
-    required String versionId,
-    Function(double)? onProgress,
+  Future<List<Mod>> searchMods({
+    required String query,
+    String? gameVersion,
+    String? modLoader,
+    int page = 1,
+    int pageSize = 20,
   }) async {
     try {
-      final contentDir = _getContentDirectory(item.type, versionId);
-      await Directory(contentDir).create(recursive: true);
-
-      final filePath = '$contentDir/${item.name}_${item.version}.jar';
-
-      try {
-        await _downloadEngine.downloadFile(
-          item.downloadUrl,
-          filePath,
-          onProgress: onProgress,
-        );
-      } catch (e) {
-        return ContentInstallResult(
-          success: false,
-          errorMessage: '下载失败: $e',
-          missingDependencies: [],
-          conflicts: [],
-        );
-      }
-
-      final conflicts = await checkConflicts(item);
-      final dependencies = await checkDependencies(item);
-
-      return ContentInstallResult(
-        success: true,
-        installedItem: item.copyWith(status: ContentStatus.installed),
-        missingDependencies: dependencies.missingDependencies,
-        conflicts: conflicts.map((c) => c.conflictReason).toList(),
+      _logger.info('搜索模组: $query');
+      
+      // 先尝试Modrinth API
+      final modrinthMods = await _searchModsOnModrinth(
+        query: query,
+        gameVersion: gameVersion,
+        modLoader: modLoader,
+        page: page,
+        pageSize: pageSize,
       );
-    } catch (e) {
-      return ContentInstallResult(
-        success: false,
-        errorMessage: 'Installation failed: $e',
-        missingDependencies: [],
-        conflicts: [],
+      
+      if (modrinthMods.isNotEmpty) {
+        return modrinthMods;
+      }
+      
+      // 再尝试CurseForge API
+      final curseforgeMods = await _searchModsOnCurseForge(
+        query: query,
+        gameVersion: gameVersion,
+        modLoader: modLoader,
+        page: page,
+        pageSize: pageSize,
       );
-    }
-  }
-
-  @override
-  Future<ContentInstallResult> updateContent({
-    required ContentItem item,
-    required String versionId,
-    Function(double)? onProgress,
-  }) async {
-    return installContent(
-      item: item,
-      versionId: versionId,
-      onProgress: onProgress,
-    );
-  }
-
-  @override
-  Future<void> uninstallContent(String contentId, ContentType type) async {
-    final versions = await getInstalledVersions();
-    for (final versionId in versions) {
-      final contentDir = _getContentDirectory(type, versionId);
-      final files = Directory(contentDir).listSync();
-      for (final file in files) {
-        if (file is File && file.path.contains(contentId)) {
-          await file.delete();
-        }
-      }
-    }
-  }
-
-  @override
-  Future<List<ContentItem>> getInstalledContent(ContentType type) async {
-    final installedItems = <ContentItem>[];
-    final versions = await getInstalledVersions();
-
-    for (final versionId in versions) {
-      final contentDir = _getContentDirectory(type, versionId);
-      if (await Directory(contentDir).exists()) {
-        final files = Directory(contentDir).listSync();
-        for (final file in files) {
-          if (file is File && file.path.endsWith('.jar')) {
-            final item = _parseLocalContent(file, type, versionId);
-            if (item != null) {
-              installedItems.add(item);
-            }
-          }
-        }
-      }
-    }
-
-    return installedItems;
-  }
-
-  @override
-  Future<List<ContentItem>> checkForUpdates(ContentType type) async {
-    final installedItems = await getInstalledContent(type);
-    final itemsWithUpdates = <ContentItem>[];
-
-    for (final item in installedItems) {
-      try {
-        ContentItem? latestVersion;
-        if (item.source == ContentSource.curseforge) {
-          latestVersion = await _curseforgeApi.getModDetails(item.id);
-        } else if (item.source == ContentSource.modrinth) {
-          latestVersion = await _modrinthApi.getProjectDetails(item.id);
-        }
-
-        if (latestVersion != null && latestVersion.version != item.version) {
-          itemsWithUpdates
-              .add(item.copyWith(status: ContentStatus.updateAvailable));
-        }
-      } catch (e) {
-        continue;
-      }
-    }
-
-    return itemsWithUpdates;
-  }
-
-  @override
-  Future<List<ConflictInfo>> checkConflicts(ContentItem item) async {
-    final conflicts = <ConflictInfo>[];
-    final installedItems = await getInstalledContent(item.type);
-
-    for (final installedItem in installedItems) {
-      // 检查ID冲突（重复安装）
-      if (installedItem.id == item.id) {
-        conflicts.add(ConflictInfo(
-          existingItem: installedItem,
-          newItem: item,
-          conflictReason: '该内容已安装',
-        ));
-        continue;
-      }
-
-      // 检查已知冲突
-      for (final conflictId in installedItem.conflicts) {
-        if (conflictId == item.id) {
-          conflicts.add(ConflictInfo(
-            existingItem: installedItem,
-            newItem: item,
-            conflictReason: '与已安装的 ${installedItem.name} 存在冲突',
-          ));
-        }
-      }
-
-      // 检查新内容的冲突列表
-      for (final conflictId in item.conflicts) {
-        if (conflictId == installedItem.id) {
-          conflicts.add(ConflictInfo(
-            existingItem: installedItem,
-            newItem: item,
-            conflictReason: '${item.name} 与已安装的 ${installedItem.name} 存在冲突',
-          ));
-        }
-      }
-
-      // 检查游戏版本兼容性冲突
-      if (_checkGameVersionConflict(installedItem, item)) {
-        conflicts.add(ConflictInfo(
-          existingItem: installedItem,
-          newItem: item,
-          conflictReason: '游戏版本不兼容',
-        ));
-      }
-
-      // 检查加载器冲突
-      if (_checkLoaderConflict(installedItem, item)) {
-        conflicts.add(ConflictInfo(
-          existingItem: installedItem,
-          newItem: item,
-          conflictReason: '模组加载器不兼容',
-        ));
-      }
-
-      // 检查文件冲突（对于模组）
-      if (item.type == ContentType.mod) {
-        final fileConflicts = await _checkFileConflicts(installedItem, item);
-        conflicts.addAll(fileConflicts);
-      }
-    }
-
-    return conflicts;
-  }
-
-  bool _checkGameVersionConflict(ContentItem existing, ContentItem newItem) {
-    // 检查是否有共同的游戏版本
-    final commonVersions = existing.gameVersions
-        .toSet()
-        .intersection(newItem.gameVersions.toSet());
-    return commonVersions.isEmpty;
-  }
-
-  bool _checkLoaderConflict(ContentItem existing, ContentItem newItem) {
-    // 检查是否有共同的加载器
-    final commonLoaders =
-        existing.loaders.toSet().intersection(newItem.loaders.toSet());
-    return commonLoaders.isEmpty;
-  }
-
-  Future<List<ConflictInfo>> _checkFileConflicts(
-      ContentItem existing, ContentItem newItem) async {
-    final conflicts = <ConflictInfo>[];
-
-    try {
-      // 这里可以实现更复杂的文件冲突检测逻辑
-      // 例如检查模组JAR文件中的类名冲突、资源文件冲突等
-      // 目前返回空列表，后续可以扩展
+      
+      return curseforgeMods;
     } catch (e) {
-      logger.warn('文件冲突检测失败: $e');
-    }
-
-    return conflicts;
-  }
-
-  @override
-  Future<DependencyInfo> checkDependencies(ContentItem item) async {
-    final missingDependencies = <ContentDependency>[];
-
-    for (final dep in item.dependencies) {
-      try {
-        // 检查依赖是否已安装
-        final isInstalled = await isContentInstalled(dep.id, ContentType.mod);
-
-        if (!isInstalled && dep.isRequired) {
-          // 解析依赖详细信息
-          final resolvedDep = await _resolveDependencyDetails(dep);
-          if (resolvedDep != null) {
-            missingDependencies.add(resolvedDep);
-          }
-        } else if (isInstalled) {
-          // 检查版本兼容性
-          final installedVersion =
-              await getInstalledVersion(dep.id, ContentType.mod);
-          if (installedVersion != null && dep.version != null) {
-            if (!_isVersionCompatible(installedVersion, dep.version!)) {
-              // 版本不兼容，添加到缺失依赖中（需要更新）
-              final resolvedDep = await _resolveDependencyDetails(dep);
-              if (resolvedDep != null) {
-                missingDependencies.add(resolvedDep.copyWith(
-                  version: dep.version,
-                ));
-              }
-            }
-          }
-        }
-      } catch (e) {
-        logger.warn('检查依赖失败: ${dep.id}, 错误: $e');
-        if (dep.isRequired) {
-          missingDependencies.add(dep);
-        }
-      }
-    }
-
-    return DependencyInfo(
-      item: item,
-      missingDependencies: missingDependencies,
-    );
-  }
-
-  @override
-  Future<List<ContentDependency>> resolveDependencies(
-      List<ContentDependency> dependencies) async {
-    final resolvedDependencies = <ContentDependency>[];
-
-    for (final dep in dependencies) {
-      try {
-        final resolvedDep = await _resolveDependencyDetails(dep);
-        if (resolvedDep != null) {
-          resolvedDependencies.add(resolvedDep);
-        }
-      } catch (e) {
-        logger.warn('解析依赖失败: ${dep.id}, 错误: $e');
-        // 如果是必需依赖，添加原始依赖信息
-        if (dep.isRequired) {
-          resolvedDependencies.add(dep);
-        }
-      }
-    }
-
-    return resolvedDependencies;
-  }
-
-  Future<ContentDependency?> _resolveDependencyDetails(
-      ContentDependency dep) async {
-    try {
-      ContentItem? depDetails;
-      if (dep.id.contains('-')) {
-        // Modrinth项目ID格式
-        depDetails = await _modrinthApi.getProjectDetails(dep.id);
-      } else {
-        // CurseForge项目ID格式
-        depDetails = await _curseforgeApi.getModDetails(dep.id);
-      }
-
-      return dep.copyWith(
-        name: depDetails.name,
-        version: dep.version ?? depDetails.version,
-      );
-    } catch (e) {
-      logger.warn('获取依赖详情失败: ${dep.id}, 错误: $e');
-    }
-    return null;
-  }
-
-  bool _isVersionCompatible(String installedVersion, String requiredVersion) {
-    try {
-      // 简单的版本比较逻辑
-      final installedParts = installedVersion
-          .split('.')
-          .map(int.tryParse)
-          .whereType<int>()
-          .toList();
-      final requiredParts = requiredVersion
-          .split('.')
-          .map(int.tryParse)
-          .whereType<int>()
-          .toList();
-
-      // 比较主版本号
-      if (installedParts.isNotEmpty && requiredParts.isNotEmpty) {
-        if (installedParts[0] > requiredParts[0]) {
-          return true;
-        } else if (installedParts[0] == requiredParts[0]) {
-          // 比较次版本号
-          if (installedParts.length > 1 && requiredParts.length > 1) {
-            return installedParts[1] >= requiredParts[1];
-          }
-          return true;
-        }
-      }
-      return false;
-    } catch (e) {
-      // 如果版本格式无法解析，假设兼容
-      return true;
-    }
-  }
-
-  @override
-  Future<void> installDependencies(List<ContentDependency> dependencies) async {
-    for (final dep in dependencies) {
-      try {
-        ContentItem? depItem;
-        if (dep.id.contains('-')) {
-          depItem = await _modrinthApi.getProjectDetails(dep.id);
-        } else {
-          depItem = await _curseforgeApi.getModDetails(dep.id);
-        }
-
-        await installContent(
-          item: depItem,
-          versionId: 'latest',
-        );
-      } catch (e) {
-        continue;
-      }
-    }
-  }
-
-  @override
-  Future<ContentItem> getContentDetails(
-      String contentId, ContentSource source) async {
-    final cacheKey = '$contentId-${source.toString()}';
-
-    // 检查缓存
-    if (_contentDetailsCache.containsKey(cacheKey)) {
-      return _contentDetailsCache[cacheKey]!;
-    }
-
-    ContentItem item;
-    if (source == ContentSource.curseforge) {
-      item = await _curseforgeApi.getModDetails(contentId);
-    } else if (source == ContentSource.modrinth) {
-      item = await _modrinthApi.getProjectDetails(contentId);
-    } else {
-      throw Exception('Unsupported source');
-    }
-
-    // 更新缓存
-    _contentDetailsCache[cacheKey] = item;
-    return item;
-  }
-
-  @override
-  Future<List<ContentItem>> getPopularContent(ContentType type,
-      {int limit = 10}) async {
-    final cacheKey = 'popular_${type.toString()}_$limit';
-
-    // 检查缓存
-    if (_popularCache.containsKey(cacheKey)) {
-      return _popularCache[cacheKey]!;
-    }
-
-    final curseforgePopular =
-        await _curseforgeApi.getPopularMods(type, limit: limit ~/ 2);
-    final modrinthPopular =
-        await _modrinthApi.getPopularProjects(type, limit: limit ~/ 2);
-
-    final result =
-        [...curseforgePopular, ...modrinthPopular].take(limit).toList();
-
-    // 更新缓存
-    _popularCache[cacheKey] = result;
-    return result;
-  }
-
-  @override
-  Future<List<ContentItem>> getFeaturedContent(ContentType type,
-      {int limit = 10}) async {
-    return getPopularContent(type, limit: limit);
-  }
-
-  @override
-  Future<void> refreshContentCache() async {
-    _searchCache.clear();
-    _contentDetailsCache.clear();
-    _popularCache.clear();
-  }
-
-  @override
-  Future<bool> isContentInstalled(String contentId, ContentType type) async {
-    final installedItems = await getInstalledContent(type);
-    return installedItems.any((item) => item.id == contentId);
-  }
-
-  @override
-  Future<String?> getInstalledVersion(
-      String contentId, ContentType type) async {
-    final installedItems = await getInstalledContent(type);
-    final item =
-        installedItems.where((item) => item.id == contentId).firstOrNull;
-    return item?.version;
-  }
-
-  @override
-  Future<void> validateContentIntegrity(
-      String contentId, ContentType type) async {}
-
-  String _getContentDirectory(ContentType type, String versionId) {
-    final gameDir = _platformAdapter.gameDirectory;
-    switch (type) {
-      case ContentType.mod:
-        return '$gameDir/$versionId/mods';
-      case ContentType.modpack:
-        return '$gameDir/modpacks';
-      case ContentType.resourcePack:
-        return '$gameDir/resourcepacks';
-      case ContentType.shaderPack:
-        return '$gameDir/shaderpacks';
-      case ContentType.dataPack:
-        return '$gameDir/$versionId/datapacks';
-      case ContentType.map:
-        return '$gameDir/saves';
-    }
-  }
-
-  Future<List<String>> getInstalledVersions() async {
-    final gameDir = _platformAdapter.gameDirectory;
-    final versionsDir = Directory('$gameDir/versions');
-    if (!await versionsDir.exists()) {
+      _logger.error('搜索模组失败: $e');
       return [];
     }
-
-    return versionsDir
-        .listSync()
-        .whereType<Directory>()
-        .map((dir) => dir.path.split(Platform.pathSeparator).last)
-        .toList();
   }
 
-  ContentItem? _parseLocalContent(
-      File file, ContentType type, String versionId) {
-    final fileName = file.path.split(Platform.pathSeparator).last;
-    final name = fileName.replaceAll(RegExp(r'_[0-9].*\.jar$'), '');
+  @override
+  Future<Mod> getModDetails(String modId, {String? source}) async {
+    try {
+      _logger.info('获取模组详情: $modId');
+      
+      if (source == 'curseforge' || modId.startsWith('curseforge-')) {
+        return await _getModDetailsOnCurseForge(modId.replaceAll('curseforge-', ''));
+      } else {
+        return await _getModDetailsOnModrinth(modId);
+      }
+    } catch (e) {
+      _logger.error('获取模组详情失败: $e');
+      rethrow;
+    }
+  }
 
-    return ContentItem(
-      id: fileName,
-      name: name,
-      author: 'Unknown',
-      description: 'Local content',
-      version: 'local',
-      downloadUrl: '',
-      downloadCount: 0,
-      type: type,
-      source: ContentSource.local,
-      status: ContentStatus.installed,
-      gameVersions: [versionId],
-      loaders: [],
-      dependencies: [],
-      conflicts: [],
+  @override
+  Future<List<ModFile>> getModFiles(String modId, {String? source}) async {
+    try {
+      _logger.info('获取模组文件: $modId');
+      
+      if (source == 'curseforge' || modId.startsWith('curseforge-')) {
+        return await _getModFilesOnCurseForge(modId.replaceAll('curseforge-', ''));
+      } else {
+        return await _getModFilesOnModrinth(modId);
+      }
+    } catch (e) {
+      _logger.error('获取模组文件失败: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<Modpack>> searchModpacks({
+    required String query,
+    String? gameVersion,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    try {
+      _logger.info('搜索整合包: $query');
+      
+      // 先尝试Modrinth API
+      final modrinthModpacks = await _searchModpacksOnModrinth(
+        query: query,
+        gameVersion: gameVersion,
+        page: page,
+        pageSize: pageSize,
+      );
+      
+      if (modrinthModpacks.isNotEmpty) {
+        return modrinthModpacks;
+      }
+      
+      // 再尝试CurseForge API
+      final curseforgeModpacks = await _searchModpacksOnCurseForge(
+        query: query,
+        gameVersion: gameVersion,
+        page: page,
+        pageSize: pageSize,
+      );
+      
+      return curseforgeModpacks;
+    } catch (e) {
+      _logger.error('搜索整合包失败: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<Modpack> getModpackDetails(String modpackId, {String? source}) async {
+    try {
+      _logger.info('获取整合包详情: $modpackId');
+      
+      if (source == 'curseforge' || modpackId.startsWith('curseforge-')) {
+        return await _getModpackDetailsOnCurseForge(modpackId.replaceAll('curseforge-', ''));
+      } else {
+        return await _getModpackDetailsOnModrinth(modpackId);
+      }
+    } catch (e) {
+      _logger.error('获取整合包详情失败: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<ModpackFile>> getModpackFiles(String modpackId, {String? source}) async {
+    try {
+      _logger.info('获取整合包文件: $modpackId');
+      
+      if (source == 'curseforge' || modpackId.startsWith('curseforge-')) {
+        return await _getModpackFilesOnCurseForge(modpackId.replaceAll('curseforge-', ''));
+      } else {
+        return await _getModpackFilesOnModrinth(modpackId);
+      }
+    } catch (e) {
+      _logger.error('获取整合包文件失败: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<String> downloadMod(String modId, String fileId, String destination, {String? source}) async {
+    try {
+      _logger.info('下载模组: $modId, 文件: $fileId');
+      
+      String downloadUrl;
+      if (source == 'curseforge' || modId.startsWith('curseforge-')) {
+        downloadUrl = await _getModFileDownloadUrlOnCurseForge(modId.replaceAll('curseforge-', ''), fileId);
+      } else {
+        downloadUrl = await _getModFileDownloadUrlOnModrinth(modId, fileId);
+      }
+      
+      await _downloadEngine.download(
+        url: downloadUrl,
+        destination: destination,
+        headers: {'User-Agent': 'BAMCLauncher'},
+      );
+      
+      return destination;
+    } catch (e) {
+      _logger.error('下载模组失败: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<String> downloadModpack(String modpackId, String fileId, String destination, {String? source}) async {
+    try {
+      _logger.info('下载整合包: $modpackId, 文件: $fileId');
+      
+      String downloadUrl;
+      if (source == 'curseforge' || modpackId.startsWith('curseforge-')) {
+        downloadUrl = await _getModpackFileDownloadUrlOnCurseForge(modpackId.replaceAll('curseforge-', ''), fileId);
+      } else {
+        downloadUrl = await _getModpackFileDownloadUrlOnModrinth(modpackId, fileId);
+      }
+      
+      await _downloadEngine.download(
+        url: downloadUrl,
+        destination: destination,
+        headers: {'User-Agent': 'BAMCLauncher'},
+      );
+      
+      return destination;
+    } catch (e) {
+      _logger.error('下载整合包失败: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<GameVersion>> getGameVersions() async {
+    try {
+      _logger.info('获取游戏版本列表');
+      
+      // 从Modrinth API获取游戏版本
+      final response = await _httpClient.get('https://api.modrinth.com/v2/tag/game-version');
+      final data = jsonDecode(response.body) as List;
+      
+      final versions = <GameVersion>[];
+      for (final item in data) {
+        versions.add(GameVersion(
+          id: item['id'] as String,
+          name: item['name'] as String,
+          version: item['version'] as String,
+          isStable: item['stable'] as bool,
+          releaseDate: DateTime.parse(item['date'] as String),
+        ));
+      }
+      
+      return versions;
+    } catch (e) {
+      _logger.error('获取游戏版本列表失败: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<ModLoader>> getModLoaders(String gameVersion) async {
+    try {
+      _logger.info('获取模组加载器列表: $gameVersion');
+      
+      // 从Modrinth API获取模组加载器
+      final response = await _httpClient.get('https://api.modrinth.com/v2/tag/loader');
+      final data = jsonDecode(response.body) as List;
+      
+      final loaders = <ModLoader>[];
+      for (final item in data) {
+        loaders.add(ModLoader(
+          id: item['id'] as String,
+          name: item['name'] as String,
+          version: '',
+          gameVersion: gameVersion,
+          isRecommended: item['recommended'] as bool,
+          isLatest: item['latest'] as bool,
+        ));
+      }
+      
+      return loaders;
+    } catch (e) {
+      _logger.error('获取模组加载器列表失败: $e');
+      return [];
+    }
+  }
+
+  // Modrinth API 实现
+  Future<List<Mod>> _searchModsOnModrinth({
+    required String query,
+    String? gameVersion,
+    String? modLoader,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final url = Uri.parse('https://api.modrinth.com/v2/search').replace(
+      queryParameters: {
+        'query': query,
+        'limit': pageSize.toString(),
+        'offset': ((page - 1) * pageSize).toString(),
+        'facets': jsonEncode([
+          if (gameVersion != null) ['versions:$gameVersion'],
+          if (modLoader != null) ['loaders:$modLoader'],
+          ['project_type:mod'],
+        ]),
+      },
+    );
+    
+    final response = await _httpClient.get(url.toString());
+    final data = jsonDecode(response.body);
+    
+    final mods = <Mod>[];
+    for (final item in data['hits'] as List) {
+      mods.add(Mod(
+        id: item['project_id'] as String,
+        name: item['title'] as String,
+        summary: item['description'] as String,
+        description: item['body'] as String,
+        author: item['author'] as String,
+        source: 'modrinth',
+        slug: item['slug'] as String,
+        iconUrl: item['icon_url'] as String?,
+        logoUrl: null,
+        categories: List<String>.from(item['categories'] as List),
+        gameVersions: List<String>.from(item['versions'] as List),
+        modLoaders: List<String>.from(item['loaders'] as List),
+        downloadCount: item['downloads'] as int,
+        followersCount: item['follows'] as int,
+        score: (item['score'] as num).toDouble(),
+        createdAt: DateTime.parse(item['published'] as String),
+        updatedAt: DateTime.parse(item['updated'] as String),
+        publishedAt: DateTime.parse(item['published'] as String),
+      ));
+    }
+    
+    return mods;
+  }
+
+  Future<Mod> _getModDetailsOnModrinth(String modId) async {
+    final response = await _httpClient.get('https://api.modrinth.com/v2/project/$modId');
+    final data = jsonDecode(response.body);
+    
+    return Mod(
+      id: data['id'] as String,
+      name: data['title'] as String,
+      summary: data['description'] as String,
+      description: data['body'] as String,
+      author: data['author'] as String,
+      source: 'modrinth',
+      slug: data['slug'] as String,
+      iconUrl: data['icon_url'] as String?,
+      logoUrl: null,
+      categories: List<String>.from(data['categories'] as List),
+      gameVersions: List<String>.from(data['versions'] as List),
+      modLoaders: List<String>.from(data['loaders'] as List),
+      downloadCount: data['downloads'] as int,
+      followersCount: data['follows'] as int,
+      score: 0.0,
+      createdAt: DateTime.parse(data['published'] as String),
+      updatedAt: DateTime.parse(data['updated'] as String),
+      publishedAt: DateTime.parse(data['published'] as String),
     );
   }
 
-  String _generateSearchCacheKey(SearchQuery query) {
-    return 'search_${query.query}_${query.type}_${query.gameVersion}_${query.loader}_${query.category}_${query.author}_${query.sortType}_${query.ascending}_${query.page}_${query.pageSize}';
+  Future<List<ModFile>> _getModFilesOnModrinth(String modId) async {
+    final response = await _httpClient.get('https://api.modrinth.com/v2/project/$modId/version');
+    final data = jsonDecode(response.body) as List;
+    
+    final files = <ModFile>[];
+    for (final item in data) {
+      for (final file in item['files'] as List) {
+        files.add(ModFile(
+          id: file['hashes']['sha1'] as String,
+          name: item['name'] as String,
+          fileName: file['filename'] as String,
+          downloadUrl: file['url'] as String,
+          size: file['size'] as int,
+          fileType: file['file_type'] as String,
+          gameVersions: List<String>.from(item['game_versions'] as List),
+          modLoaders: List<String>.from(item['loaders'] as List),
+          createdAt: DateTime.parse(item['date_published'] as String),
+          updatedAt: DateTime.parse(item['date_published'] as String),
+          isPrimary: file['primary'] as bool,
+        ));
+      }
+    }
+    
+    return files;
   }
-}
 
-extension ContentItemCopyWith on ContentItem {
-  ContentItem copyWith({
-    String? id,
-    String? name,
-    String? author,
-    String? description,
-    String? version,
-    String? downloadUrl,
-    int? downloadCount,
-    String? iconUrl,
-    DateTime? releaseDate,
-    ContentType? type,
-    ContentSource? source,
-    ContentStatus? status,
-    String? installedVersion,
-    List<String>? gameVersions,
-    List<String>? loaders,
-    List<ContentDependency>? dependencies,
-    List<String>? conflicts,
-  }) {
-    return ContentItem(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      author: author ?? this.author,
-      description: description ?? this.description,
-      version: version ?? this.version,
-      downloadUrl: downloadUrl ?? this.downloadUrl,
-      downloadCount: downloadCount ?? this.downloadCount,
-      iconUrl: iconUrl ?? this.iconUrl,
-      releaseDate: releaseDate ?? this.releaseDate,
-      type: type ?? this.type,
-      source: source ?? this.source,
-      status: status ?? this.status,
-      installedVersion: installedVersion ?? this.installedVersion,
-      gameVersions: gameVersions ?? this.gameVersions,
-      loaders: loaders ?? this.loaders,
-      dependencies: dependencies ?? this.dependencies,
-      conflicts: conflicts ?? this.conflicts,
+  Future<String> _getModFileDownloadUrlOnModrinth(String modId, String fileId) async {
+    final response = await _httpClient.get('https://api.modrinth.com/v2/version/$fileId');
+    final data = jsonDecode(response.body);
+    
+    for (final file in data['files'] as List) {
+      if (file['hashes']['sha1'] == fileId) {
+        return file['url'] as String;
+      }
+    }
+    
+    throw Exception('File not found');
+  }
+
+  // CurseForge API 实现
+  Future<List<Mod>> _searchModsOnCurseForge({
+    required String query,
+    String? gameVersion,
+    String? modLoader,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    // 注意：CurseForge API 需要 API Key
+    // 这里使用模拟数据，实际实现需要添加 API Key
+    return [];
+  }
+
+  Future<Mod> _getModDetailsOnCurseForge(String modId) async {
+    // 注意：CurseForge API 需要 API Key
+    throw Exception('CurseForge API not implemented');
+  }
+
+  Future<List<ModFile>> _getModFilesOnCurseForge(String modId) async {
+    // 注意：CurseForge API 需要 API Key
+    return [];
+  }
+
+  Future<String> _getModFileDownloadUrlOnCurseForge(String modId, String fileId) async {
+    // 注意：CurseForge API 需要 API Key
+    throw Exception('CurseForge API not implemented');
+  }
+
+  // 整合包相关方法
+  Future<List<Modpack>> _searchModpacksOnModrinth({
+    required String query,
+    String? gameVersion,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final url = Uri.parse('https://api.modrinth.com/v2/search').replace(
+      queryParameters: {
+        'query': query,
+        'limit': pageSize.toString(),
+        'offset': ((page - 1) * pageSize).toString(),
+        'facets': jsonEncode([
+          if (gameVersion != null) ['versions:$gameVersion'],
+          ['project_type:modpack'],
+        ]),
+      },
     );
+    
+    final response = await _httpClient.get(url.toString());
+    final data = jsonDecode(response.body);
+    
+    final modpacks = <Modpack>[];
+    for (final item in data['hits'] as List) {
+      modpacks.add(Modpack(
+        id: item['project_id'] as String,
+        name: item['title'] as String,
+        summary: item['description'] as String,
+        description: item['body'] as String,
+        author: item['author'] as String,
+        source: 'modrinth',
+        slug: item['slug'] as String,
+        iconUrl: item['icon_url'] as String?,
+        logoUrl: null,
+        categories: List<String>.from(item['categories'] as List),
+        gameVersions: List<String>.from(item['versions'] as List),
+        downloadCount: item['downloads'] as int,
+        followersCount: item['follows'] as int,
+        score: (item['score'] as num).toDouble(),
+        createdAt: DateTime.parse(item['published'] as String),
+        updatedAt: DateTime.parse(item['updated'] as String),
+        publishedAt: DateTime.parse(item['published'] as String),
+      ));
+    }
+    
+    return modpacks;
+  }
+
+  Future<Modpack> _getModpackDetailsOnModrinth(String modpackId) async {
+    final response = await _httpClient.get('https://api.modrinth.com/v2/project/$modpackId');
+    final data = jsonDecode(response.body);
+    
+    return Modpack(
+      id: data['id'] as String,
+      name: data['title'] as String,
+      summary: data['description'] as String,
+      description: data['body'] as String,
+      author: data['author'] as String,
+      source: 'modrinth',
+      slug: data['slug'] as String,
+      iconUrl: data['icon_url'] as String?,
+      logoUrl: null,
+      categories: List<String>.from(data['categories'] as List),
+      gameVersions: List<String>.from(data['versions'] as List),
+      downloadCount: data['downloads'] as int,
+      followersCount: data['follows'] as int,
+      score: 0.0,
+      createdAt: DateTime.parse(data['published'] as String),
+      updatedAt: DateTime.parse(data['updated'] as String),
+      publishedAt: DateTime.parse(data['published'] as String),
+    );
+  }
+
+  Future<List<ModpackFile>> _getModpackFilesOnModrinth(String modpackId) async {
+    final response = await _httpClient.get('https://api.modrinth.com/v2/project/$modpackId/version');
+    final data = jsonDecode(response.body) as List;
+    
+    final files = <ModpackFile>[];
+    for (final item in data) {
+      for (final file in item['files'] as List) {
+        files.add(ModpackFile(
+          id: file['hashes']['sha1'] as String,
+          name: item['name'] as String,
+          fileName: file['filename'] as String,
+          downloadUrl: file['url'] as String,
+          size: file['size'] as int,
+          gameVersion: item['game_versions'][0] as String,
+          modLoader: item['loaders'][0] as String,
+          createdAt: DateTime.parse(item['date_published'] as String),
+          updatedAt: DateTime.parse(item['date_published'] as String),
+        ));
+      }
+    }
+    
+    return files;
+  }
+
+  Future<String> _getModpackFileDownloadUrlOnModrinth(String modpackId, String fileId) async {
+    final response = await _httpClient.get('https://api.modrinth.com/v2/version/$fileId');
+    final data = jsonDecode(response.body);
+    
+    for (final file in data['files'] as List) {
+      if (file['hashes']['sha1'] == fileId) {
+        return file['url'] as String;
+      }
+    }
+    
+    throw Exception('File not found');
+  }
+
+  // CurseForge 整合包相关方法
+  Future<List<Modpack>> _searchModpacksOnCurseForge({
+    required String query,
+    String? gameVersion,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    // 注意：CurseForge API 需要 API Key
+    return [];
+  }
+
+  Future<Modpack> _getModpackDetailsOnCurseForge(String modpackId) async {
+    // 注意：CurseForge API 需要 API Key
+    throw Exception('CurseForge API not implemented');
+  }
+
+  Future<List<ModpackFile>> _getModpackFilesOnCurseForge(String modpackId) async {
+    // 注意：CurseForge API 需要 API Key
+    return [];
+  }
+
+  Future<String> _getModpackFileDownloadUrlOnCurseForge(String modpackId, String fileId) async {
+    // 注意：CurseForge API 需要 API Key
+    throw Exception('CurseForge API not implemented');
   }
 }

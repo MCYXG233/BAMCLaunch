@@ -1,205 +1,167 @@
-enum ContentType {
-  mod,
-  modpack,
-  resourcePack,
-  shaderPack,
-  dataPack,
-  map,
-}
-
-enum ContentSource {
-  curseforge,
-  modrinth,
-  local,
-}
-
-enum ContentStatus {
-  installed,
-  updateAvailable,
-  notInstalled,
-  installing,
-  updating,
-  failed,
-}
-
-class ContentItem {
+class Mod {
   final String id;
   final String name;
-  final String author;
+  final String summary;
   final String description;
-  final String version;
-  final String downloadUrl;
-  final int downloadCount;
+  final String author;
+  final String source;
+  final String slug;
   final String? iconUrl;
-  final DateTime? releaseDate;
-  final ContentType type;
-  final ContentSource source;
-  final ContentStatus status;
-  final String? installedVersion;
+  final String? logoUrl;
+  final List<String> categories;
   final List<String> gameVersions;
-  final List<String> loaders;
-  final List<ContentDependency> dependencies;
-  final List<String> conflicts;
+  final List<String> modLoaders;
+  final int downloadCount;
+  final int followersCount;
+  final double score;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? publishedAt;
 
-  ContentItem({
+  Mod({
     required this.id,
     required this.name,
-    required this.author,
+    required this.summary,
     required this.description,
-    required this.version,
-    required this.downloadUrl,
-    required this.downloadCount,
-    this.iconUrl,
-    this.releaseDate,
-    required this.type,
+    required this.author,
     required this.source,
-    required this.status,
-    this.installedVersion,
+    required this.slug,
+    this.iconUrl,
+    this.logoUrl,
+    required this.categories,
     required this.gameVersions,
-    required this.loaders,
-    required this.dependencies,
-    required this.conflicts,
+    required this.modLoaders,
+    required this.downloadCount,
+    required this.followersCount,
+    required this.score,
+    required this.createdAt,
+    required this.updatedAt,
+    this.publishedAt,
   });
 }
 
-class ContentDependency {
+class ModFile {
   final String id;
   final String name;
-  final String? version;
-  final bool isRequired;
+  final String fileName;
+  final String downloadUrl;
+  final int size;
+  final String fileType;
+  final List<String> gameVersions;
+  final List<String> modLoaders;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool isPrimary;
 
-  ContentDependency({
+  ModFile({
     required this.id,
     required this.name,
-    this.version,
-    required this.isRequired,
-  });
-
-  ContentDependency copyWith({
-    String? id,
-    String? name,
-    String? version,
-    bool? isRequired,
-  }) {
-    return ContentDependency(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      version: version ?? this.version,
-      isRequired: isRequired ?? this.isRequired,
-    );
-  }
-}
-
-enum SortType {
-  relevance,
-  downloads,
-  recentlyUpdated,
-  recentlyAdded,
-  featured,
-}
-
-class SearchQuery {
-  final String query;
-  final ContentType type;
-  final String? gameVersion;
-  final String? loader;
-  final String? category;
-  final String? author;
-  final SortType sortType;
-  final bool ascending;
-  final int page;
-  final int pageSize;
-
-  SearchQuery({
-    required this.query,
-    required this.type,
-    this.gameVersion,
-    this.loader,
-    this.category,
-    this.author,
-    this.sortType = SortType.relevance,
-    this.ascending = false,
-    this.page = 1,
-    this.pageSize = 20,
-  });
-
-  SearchQuery copyWith({
-    String? query,
-    ContentType? type,
-    String? gameVersion,
-    String? loader,
-    String? category,
-    String? author,
-    SortType? sortType,
-    bool? ascending,
-    int? page,
-    int? pageSize,
-  }) {
-    return SearchQuery(
-      query: query ?? this.query,
-      type: type ?? this.type,
-      gameVersion: gameVersion ?? this.gameVersion,
-      loader: loader ?? this.loader,
-      category: category ?? this.category,
-      author: author ?? this.author,
-      sortType: sortType ?? this.sortType,
-      ascending: ascending ?? this.ascending,
-      page: page ?? this.page,
-      pageSize: pageSize ?? this.pageSize,
-    );
-  }
-}
-
-class SearchResult {
-  final List<ContentItem> items;
-  final int totalCount;
-  final int currentPage;
-  final int totalPages;
-  final DateTime timestamp;
-
-  SearchResult({
-    required this.items,
-    required this.totalCount,
-    required this.currentPage,
-    required this.totalPages,
-    DateTime? timestamp,
-  }) : timestamp = timestamp ?? DateTime.now();
-}
-
-class ContentInstallResult {
-  final bool success;
-  final String? errorMessage;
-  final ContentItem? installedItem;
-  final List<ContentDependency> missingDependencies;
-  final List<String> conflicts;
-
-  ContentInstallResult({
-    required this.success,
-    this.errorMessage,
-    this.installedItem,
-    required this.missingDependencies,
-    required this.conflicts,
+    required this.fileName,
+    required this.downloadUrl,
+    required this.size,
+    required this.fileType,
+    required this.gameVersions,
+    required this.modLoaders,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.isPrimary,
   });
 }
 
-class ConflictInfo {
-  final ContentItem existingItem;
-  final ContentItem newItem;
-  final String conflictReason;
+class Modpack {
+  final String id;
+  final String name;
+  final String summary;
+  final String description;
+  final String author;
+  final String source;
+  final String slug;
+  final String? iconUrl;
+  final String? logoUrl;
+  final List<String> categories;
+  final List<String> gameVersions;
+  final int downloadCount;
+  final int followersCount;
+  final double score;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? publishedAt;
 
-  ConflictInfo({
-    required this.existingItem,
-    required this.newItem,
-    required this.conflictReason,
+  Modpack({
+    required this.id,
+    required this.name,
+    required this.summary,
+    required this.description,
+    required this.author,
+    required this.source,
+    required this.slug,
+    this.iconUrl,
+    this.logoUrl,
+    required this.categories,
+    required this.gameVersions,
+    required this.downloadCount,
+    required this.followersCount,
+    required this.score,
+    required this.createdAt,
+    required this.updatedAt,
+    this.publishedAt,
   });
 }
 
-class DependencyInfo {
-  final ContentItem item;
-  final List<ContentDependency> missingDependencies;
+class ModpackFile {
+  final String id;
+  final String name;
+  final String fileName;
+  final String downloadUrl;
+  final int size;
+  final String gameVersion;
+  final String modLoader;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
-  DependencyInfo({
-    required this.item,
-    required this.missingDependencies,
+  ModpackFile({
+    required this.id,
+    required this.name,
+    required this.fileName,
+    required this.downloadUrl,
+    required this.size,
+    required this.gameVersion,
+    required this.modLoader,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+}
+
+class GameVersion {
+  final String id;
+  final String name;
+  final String version;
+  final bool isStable;
+  final DateTime releaseDate;
+
+  GameVersion({
+    required this.id,
+    required this.name,
+    required this.version,
+    required this.isStable,
+    required this.releaseDate,
+  });
+}
+
+class ModLoader {
+  final String id;
+  final String name;
+  final String version;
+  final String gameVersion;
+  final bool isRecommended;
+  final bool isLatest;
+
+  ModLoader({
+    required this.id,
+    required this.name,
+    required this.version,
+    required this.gameVersion,
+    required this.isRecommended,
+    required this.isLatest,
   });
 }

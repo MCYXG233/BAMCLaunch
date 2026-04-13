@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:system_tray/system_tray.dart';
 import 'i_platform_adapter.dart';
 
 class LinuxPlatformAdapter implements IPlatformAdapter {
+  SystemTray? _systemTray;
   @override
   String get appDataDirectory {
     final home = Platform.environment['HOME'];
@@ -34,21 +36,63 @@ class LinuxPlatformAdapter implements IPlatformAdapter {
   List<String> get javaPaths {
     final paths = <String>[];
 
-    paths.add('/usr/lib/jvm/java-8-openjdk-amd64/bin/java');
-    paths.add('/usr/lib/jvm/java-17-openjdk-amd64/bin/java');
-
-    final home = Platform.environment['HOME'];
-    if (home != null) {
-      paths.add('$home/.jdks/jdk1.8.0_301/bin/java');
-      paths.add('$home/.jdks/jdk-17/bin/java');
+    // 检查系统级Java目录
+    final jvmDir = Directory('/usr/lib/jvm');
+    if (jvmDir.existsSync()) {
+      final subDirs = jvmDir.listSync();
+      for (final subDir in subDirs) {
+        if (subDir is Directory) {
+          final javaExe = '${subDir.path}/bin/java';
+          if (File(javaExe).existsSync()) {
+            paths.add(javaExe);
+          }
+        }
+      }
     }
 
-    paths.add('/usr/bin/java');
-    paths.add('/usr/local/bin/java');
-    paths.add('/opt/java/bin/java');
+    // 检查用户级Java目录
+    final home = Platform.environment['HOME'];
+    if (home != null) {
+      final userJdkDir = Directory('$home/.jdks');
+      if (userJdkDir.existsSync()) {
+        final subDirs = userJdkDir.listSync();
+        for (final subDir in subDirs) {
+          if (subDir is Directory) {
+            final javaExe = '${subDir.path}/bin/java';
+            if (File(javaExe).existsSync()) {
+              paths.add(javaExe);
+            }
+          }
+        }
+      }
+    }
+
+    // 检查环境变量中的JAVA_HOME
+    final javaHome = Platform.environment['JAVA_HOME'];
+    if (javaHome != null) {
+      final javaExe = '$javaHome/bin/java';
+      if (File(javaExe).existsSync()) {
+        paths.add(javaExe);
+      }
+    }
+
+    // 检查常见的Java执行路径
+    final commonPaths = [
+      '/usr/bin/java',
+      '/usr/local/bin/java',
+      '/opt/java/bin/java',
+    ];
+    for (final path in commonPaths) {
+      if (File(path).existsSync()) {
+        paths.add(path);
+      }
+    }
+
+    // 添加通用的java命令
     paths.add('java');
 
-    return paths.where((path) => File(path).existsSync()).toList();
+    // 去重并返回
+    return paths.toSet().toList();
   }
 
   @override
@@ -56,11 +100,21 @@ class LinuxPlatformAdapter implements IPlatformAdapter {
     for (final path in javaPaths) {
       if (await File(path).exists()) {
         try {
-          final result = await Process.run(path, ['-version']);
+          // 使用超时处理，避免命令执行时间过长
+          final result = await Process.run(
+            path, 
+            ['-version'],
+            timeout: const Duration(seconds: 5),
+          );
           if (result.exitCode == 0) {
-            return path;
+            // 验证输出是否包含Java版本信息
+            final errorOutput = result.stderr.toString();
+            if (errorOutput.contains('java version') || errorOutput.contains('openjdk version')) {
+              return path;
+            }
           }
-        } catch (_) {
+        } catch (e) {
+          // 忽略错误，继续尝试下一个路径
           continue;
         }
       }
@@ -335,31 +389,103 @@ X-GNOME-Autostart-enabled=true''';
 
   @override
   Future<void> initializeTray(String iconPath, String tooltip) async {
-    
+    try {
+      _systemTray = SystemTray();
+      
+      // 初始化系统托盘
+      await _systemTray!.initSystemTray(
+        title: tooltip,
+        iconPath: iconPath,
+      );
+      
+      // 监听托盘点击事件
+      _systemTray!.registerSystemTrayEventHandler((eventName) async {
+        if (eventName == kSystemTrayEventClick) {
+          // 点击托盘图标显示/隐藏窗口
+          if (await windowManager.isVisible()) {
+            await windowManager.hide();
+          } else {
+            await windowManager.show();
+            await windowManager.focus();
+          }
+        }
+      });
+    } catch (e) {
+      print('初始化托盘失败: $e');
+    }
   }
 
   @override
   Future<void> showTray() async {
-    
+    try {
+      if (_systemTray != null) {
+        // 系统托盘在初始化时就会显示
+      }
+    } catch (e) {
+      print('显示托盘失败: $e');
+    }
   }
 
   @override
   Future<void> hideTray() async {
-    
+    try {
+      if (_systemTray != null) {
+        await _systemTray!.closeSystemTray();
+      }
+    } catch (e) {
+      print('隐藏托盘失败: $e');
+    }
   }
 
   @override
   Future<void> setTrayTooltip(String tooltip) async {
-    
+    try {
+      if (_systemTray != null) {
+        await _systemTray!.setSystemTrayInfo(
+          title: tooltip,
+        );
+      }
+    } catch (e) {
+      print('设置托盘提示失败: $e');
+    }
   }
 
   @override
   Future<void> setTrayMenu(List<Map<String, dynamic>> menuItems) async {
-    
+    try {
+      if (_systemTray != null) {
+        final menu = Menu();
+        
+        for (final item in menuItems) {
+          final label = item['label'] as String;
+          final action = item['action'] as Function?;
+          
+          if (action != null) {
+            await menu.addMenuItem(
+              MenuItem(label: label, onClicked: () => action()),
+            );
+          } else {
+            // 分隔线
+            await menu.addSeparator();
+          }
+        }
+        
+        await _systemTray!.setContextMenu(menu);
+      }
+    } catch (e) {
+      print('设置托盘菜单失败: $e');
+    }
   }
 
   @override
   Future<void> disposeTray() async {
-    
+    try {
+      if (_systemTray != null) {
+        await _systemTray!.closeSystemTray();
+        _systemTray = null;
+      }
+    } catch (e) {
+      print('释放托盘资源失败: $e');
+    }
   }
 }

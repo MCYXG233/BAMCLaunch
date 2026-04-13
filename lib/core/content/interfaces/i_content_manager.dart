@@ -1,45 +1,44 @@
 import '../models/content_models.dart';
 
 abstract class IContentManager {
-  Future<SearchResult> searchContent(SearchQuery query);
-
-  Future<ContentInstallResult> installContent({
-    required ContentItem item,
-    required String versionId,
-    Function(double)? onProgress,
+  // 搜索模组
+  Future<List<Mod>> searchMods({
+    required String query,
+    String? gameVersion,
+    String? modLoader,
+    int page = 1,
+    int pageSize = 20,
   });
 
-  Future<ContentInstallResult> updateContent({
-    required ContentItem item,
-    required String versionId,
-    Function(double)? onProgress,
+  // 获取模组详情
+  Future<Mod> getModDetails(String modId, {String? source});
+
+  // 获取模组文件
+  Future<List<ModFile>> getModFiles(String modId, {String? source});
+
+  // 搜索整合包
+  Future<List<Modpack>> searchModpacks({
+    required String query,
+    String? gameVersion,
+    int page = 1,
+    int pageSize = 20,
   });
 
-  Future<void> uninstallContent(String contentId, ContentType type);
+  // 获取整合包详情
+  Future<Modpack> getModpackDetails(String modpackId, {String? source});
 
-  Future<List<ContentItem>> getInstalledContent(ContentType type);
+  // 获取整合包文件
+  Future<List<ModpackFile>> getModpackFiles(String modpackId, {String? source});
 
-  Future<List<ContentItem>> checkForUpdates(ContentType type);
+  // 下载模组
+  Future<String> downloadMod(String modId, String fileId, String destination, {String? source});
 
-  Future<List<ConflictInfo>> checkConflicts(ContentItem item);
+  // 下载整合包
+  Future<String> downloadModpack(String modpackId, String fileId, String destination, {String? source});
 
-  Future<DependencyInfo> checkDependencies(ContentItem item);
+  // 获取游戏版本列表
+  Future<List<GameVersion>> getGameVersions();
 
-  Future<List<ContentDependency>> resolveDependencies(List<ContentDependency> dependencies);
-
-  Future<void> installDependencies(List<ContentDependency> dependencies);
-
-  Future<ContentItem> getContentDetails(String contentId, ContentSource source);
-
-  Future<List<ContentItem>> getPopularContent(ContentType type, {int limit = 10});
-
-  Future<List<ContentItem>> getFeaturedContent(ContentType type, {int limit = 10});
-
-  Future<void> refreshContentCache();
-
-  Future<bool> isContentInstalled(String contentId, ContentType type);
-
-  Future<String?> getInstalledVersion(String contentId, ContentType type);
-
-  Future<void> validateContentIntegrity(String contentId, ContentType type);
+  // 获取模组加载器列表
+  Future<List<ModLoader>> getModLoaders(String gameVersion);
 }
