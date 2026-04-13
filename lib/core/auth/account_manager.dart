@@ -1,5 +1,6 @@
 import '../config/i_config_manager.dart';
 import '../logger/i_logger.dart';
+import 'package:collection/collection.dart';
 import 'models/account.dart';
 import 'interfaces/i_authenticator.dart';
 import 'implementations/offline_authenticator.dart';
@@ -58,7 +59,7 @@ class AccountManager {
 
   Future<void> removeAccount(String accountId) async {
     Account? removedAccount =
-        _accounts.firstWhere((a) => a.id == accountId, orElse: () => null);
+        _accounts.firstWhereOrNull((a) => a.id == accountId);
 
     _accounts.removeWhere((a) => a.id == accountId);
 
@@ -70,12 +71,19 @@ class AccountManager {
     }
 
     await _saveAccounts();
-    _logger.info('删除账户: ${removedAccount.username} (${removedAccount.type})');
+    if (removedAccount != null) {
+      _logger.info('删除账户: ${removedAccount.username} (${removedAccount.type})');
+    }
   }
 
   Future<void> selectAccount(String accountId) async {
     Account? account =
-        _accounts.firstWhere((a) => a.id == accountId, orElse: () => null);
+        _accounts.firstWhereOrNull((a) => a.id == accountId);
+
+    if (account == null) {
+      _logger.error('账户不存在: $accountId');
+      return;
+    }
 
     for (var a in _accounts) {
       a.isSelected = a.id == accountId;
@@ -108,7 +116,11 @@ class AccountManager {
 
   Future<void> logout(String accountId) async {
     Account? account =
-        _accounts.firstWhere((a) => a.id == accountId, orElse: () => null);
+        _accounts.firstWhereOrNull((a) => a.id == accountId);
+    if (account == null) {
+      _logger.error('账户不存在: $accountId');
+      return;
+    }
     IAuthenticator authenticator = getAuthenticator(account.type);
     await authenticator.logout(account);
     _logger.info('登出账户: ${account.username} (${account.type})');
@@ -116,7 +128,11 @@ class AccountManager {
 
   Future<Account?> refreshAccount(String accountId) async {
     Account? account =
-        _accounts.firstWhere((a) => a.id == accountId, orElse: () => null);
+        _accounts.firstWhereOrNull((a) => a.id == accountId);
+    if (account == null) {
+      _logger.error('账户不存在: $accountId');
+      return null;
+    }
     IAuthenticator authenticator = getAuthenticator(account.type);
 
     if (!authenticator.canRefresh(account)) {
@@ -140,7 +156,7 @@ class AccountManager {
   }
 
   Account? getAccountById(String accountId) {
-    return _accounts.firstWhere((a) => a.id == accountId, orElse: () => null);
+    return _accounts.firstWhereOrNull((a) => a.id == accountId);
   }
 
   bool hasAccounts() {

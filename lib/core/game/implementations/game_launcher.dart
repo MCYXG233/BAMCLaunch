@@ -41,30 +41,88 @@ class GameLauncher implements IGameLauncher {
     try {
       _logger.info('开始检测Java环境');
 
+      // 首先尝试通过平台适配器查找Java
       String? javaPath = await _platformAdapter.findJava();
-      if (javaPath == null) {
-        return JavaDetectionResult(
-          found: false,
-          error: '未找到Java环境',
-        );
+      if (javaPath != null) {
+        ProcessResult result = await Process.run(javaPath, ['-version']);
+        if (result.exitCode == 0) {
+          String errorOutput = result.stderr.toString();
+          String version = _parseJavaVersion(errorOutput);
+          _logger.info('检测到Java: $version, 路径: $javaPath');
+          return JavaDetectionResult(
+            found: true,
+            javaPath: javaPath,
+            version: version,
+          );
+        }
       }
 
-      ProcessResult result = await Process.run(javaPath, ['-version']);
-      if (result.exitCode == 0) {
-        String errorOutput = result.stderr.toString();
-        String version = _parseJavaVersion(errorOutput);
-        _logger.info('检测到Java: $version, 路径: $javaPath');
-        return JavaDetectionResult(
-          found: true,
-          javaPath: javaPath,
-          version: version,
-        );
-      } else {
-        return JavaDetectionResult(
-          found: false,
-          error: 'Java执行失败: ${result.stderr}',
-        );
+      // 尝试通过环境变量查找Java
+      String? envJavaPath = Platform.environment['JAVA_HOME'];
+      if (envJavaPath != null) {
+        String javaExecPath = Platform.isWindows 
+            ? '$envJavaPath\\bin\\java.exe' 
+            : '$envJavaPath/bin/java';
+        if (await File(javaExecPath).exists()) {
+          ProcessResult result = await Process.run(javaExecPath, ['-version']);
+          if (result.exitCode == 0) {
+            String errorOutput = result.stderr.toString();
+            String version = _parseJavaVersion(errorOutput);
+            _logger.info('通过JAVA_HOME检测到Java: $version, 路径: $javaExecPath');
+            return JavaDetectionResult(
+              found: true,
+              javaPath: javaExecPath,
+              version: version,
+            );
+          }
+        }
       }
+
+      // 尝试常见的Java安装路径
+      List<String> commonJavaPaths = Platform.isWindows
+          ? [
+              'C:\\Program Files\\Java\\jdk-17\\bin\\java.exe',
+              'C:\\Program Files\\Java\\jdk-16\\bin\\java.exe',
+              'C:\\Program Files\\Java\\jdk-15\\bin\\java.exe',
+              'C:\\Program Files (x86)\\Java\\jdk-17\\bin\\java.exe',
+              'C:\\Program Files (x86)\\Java\\jdk-16\\bin\\java.exe',
+            ]
+          : Platform.isMacOS
+              ? [
+                  '/usr/bin/java',
+                  '/usr/local/bin/java',
+                  '/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home/bin/java',
+                ]
+              : [
+                  '/usr/bin/java',
+                  '/usr/local/bin/java',
+                  '/opt/java/bin/java',
+                ];
+
+      for (String path in commonJavaPaths) {
+        if (await File(path).exists()) {
+          try {
+            ProcessResult result = await Process.run(path, ['-version']);
+            if (result.exitCode == 0) {
+              String errorOutput = result.stderr.toString();
+              String version = _parseJavaVersion(errorOutput);
+              _logger.info('通过常见路径检测到Java: $version, 路径: $path');
+              return JavaDetectionResult(
+                found: true,
+                javaPath: path,
+                version: version,
+              );
+            }
+          } catch (e) {
+            _logger.warn('尝试路径 $path 失败: $e');
+          }
+        }
+      }
+
+      return JavaDetectionResult(
+        found: false,
+        error: '未找到Java环境，请手动安装Java 17或更高版本',
+      );
     } catch (e) {
       _logger.error('Java检测异常: $e');
       return JavaDetectionResult(

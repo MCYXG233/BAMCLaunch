@@ -46,12 +46,12 @@ class VersionManager implements IVersionManager {
     const manifestUrl =
         'https://launchermeta.mojang.com/mc/game/version_manifest.json';
     final cacheDir = Directory(_platformAdapter.cacheDirectory);
-    
+
     // 确保缓存目录存在
     if (!await cacheDir.exists()) {
       await cacheDir.create(recursive: true);
     }
-    
+
     final tempFile =
         File('${_platformAdapter.cacheDirectory}/version_manifest.json');
 
@@ -134,12 +134,14 @@ class VersionManager implements IVersionManager {
 
     if (version.download != null) {
       final jarFile = File('${versionDir.path}/$versionId.jar');
+      // 使用多线程分块下载
       await _downloadEngine.downloadFile(
         version.download!.url,
         jarFile.path,
         checksum: version.download!.sha1,
         checksumType: 'sha1',
         onProgress: onProgress,
+        maxThreads: 4, // 启用多线程下载
       );
     }
 
@@ -242,6 +244,41 @@ class VersionManager implements IVersionManager {
     await jsonFile.writeAsString(jsonEncode(customVersion.toJson()));
 
     return customVersion;
+  }
+
+  Future<Version> resolveVersionInheritance(String versionId) async {
+    _logger.info('Resolving version inheritance for: $versionId');
+
+    final versionDir =
+        Directory('${_platformAdapter.gameDirectory}/versions/$versionId');
+    final jsonFile = File('${versionDir.path}/$versionId.json');
+
+    if (!await jsonFile.exists()) {
+      throw Exception('Version $versionId not found');
+    }
+
+    final content = await jsonFile.readAsString();
+    final versionData = jsonDecode(content);
+    var version = Version.fromJson(versionData);
+
+    // 递归解析继承关系，直到找到基础版本
+    while (version.inheritsFrom != null) {
+      final parentVersion = await getVersionInfo(version.inheritsFrom);
+      // 合并版本信息，子版本覆盖父版本的相同字段
+      version = version.copyWith(
+        download: version.download ?? parentVersion.download,
+        assetIndex: version.assetIndex ?? parentVersion.assetIndex,
+        libraries: version.libraries ?? parentVersion.libraries,
+        arguments: version.arguments ?? parentVersion.arguments,
+        jvmArguments: version.jvmArguments ?? parentVersion.jvmArguments,
+        mainClass: version.mainClass ?? parentVersion.mainClass,
+        complianceLevel:
+            version.complianceLevel ?? parentVersion.complianceLevel,
+        inheritsFrom: parentVersion.inheritsFrom,
+      );
+    }
+
+    return version;
   }
 
   @override

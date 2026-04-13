@@ -34,8 +34,8 @@ class ImageCacheManager {
        _cacheExpiration = cacheExpiration;
 
   Future<void> initialize() async {
-    if (_cacheDirectory != null && !await _cacheDirectory.exists()) {
-      await _cacheDirectory.create(recursive: true);
+    if (_cacheDirectory != null && !await _cacheDirectory!.exists()) {
+      await _cacheDirectory!.create(recursive: true);
     }
     await _cleanExpiredCache();
   }
@@ -110,14 +110,25 @@ class ImageCacheManager {
 
   Future<void> _cacheToDisk(String key, String url) async {
     try {
-      final httpClient = HttpClient();
-      final request = await httpClient.getUrl(Uri.parse(url));
-      final response = await request.close();
+      final httpClient = HttpClient()
+        ..connectionTimeout = const Duration(seconds: 10)
+        ..idleTimeout = const Duration(seconds: 30);
+      
+      final request = await httpClient.getUrl(Uri.parse(url))
+          .timeout(const Duration(seconds: 10));
+      request.headers.add('User-Agent', 'BAMCLauncher/1.0');
+      
+      final response = await request.close()
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
-        final bytes = await response.first;
         final file = _getCacheFile(key);
-        await file.writeAsBytes(bytes);
+        await file.parent.create(recursive: true);
+        
+        // 使用流式写入，避免一次性加载到内存
+        final sink = file.openWrite();
+        await response.pipe(sink);
+        await sink.close();
       }
     } catch (_) {
       // 忽略缓存失败
@@ -152,7 +163,7 @@ class ImageCacheManager {
     if (_cacheDirectory == null) return;
 
     try {
-      final files = await _cacheDirectory.list().toList();
+      final files = await _cacheDirectory!.list().toList();
       for (final file in files) {
         if (file is File) {
           final stat = await file.stat();
@@ -178,7 +189,7 @@ class ImageCacheManager {
     if (_cacheDirectory == null) return;
 
     try {
-      final files = await _cacheDirectory.list().toList();
+      final files = await _cacheDirectory!.list().toList();
       for (final file in files) {
         if (file is File) {
           await file.delete();
