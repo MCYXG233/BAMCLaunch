@@ -29,13 +29,13 @@ class ImageCacheManager {
     Directory? cacheDirectory,
     required int maxMemoryCacheSize,
     required Duration cacheExpiration,
-  })  : _cacheDirectory = cacheDirectory,
-        _maxMemoryCacheSize = maxMemoryCacheSize,
-        _cacheExpiration = cacheExpiration;
+  }) : _cacheDirectory = cacheDirectory,
+       _maxMemoryCacheSize = maxMemoryCacheSize,
+       _cacheExpiration = cacheExpiration;
 
   Future<void> initialize() async {
-    if (_cacheDirectory != null && !await _cacheDirectory!.exists()) {
-      await _cacheDirectory!.create(recursive: true);
+    if (_cacheDirectory != null && !await _cacheDirectory.exists()) {
+      await _cacheDirectory.create(recursive: true);
     }
     await _cleanExpiredCache();
   }
@@ -75,7 +75,9 @@ class ImageCacheManager {
         if (await file.exists()) {
           final fileStat = await file.stat();
           if (!_isExpired(
-              fileStat.modified.millisecondsSinceEpoch, expiration)) {
+            fileStat.modified.millisecondsSinceEpoch,
+            expiration,
+          )) {
             provider = FileImage(file);
             _addToMemoryCache(key, provider);
             completer.complete(provider);
@@ -150,7 +152,7 @@ class ImageCacheManager {
     if (_cacheDirectory == null) return;
 
     try {
-      final files = await _cacheDirectory!.list().toList();
+      final files = await _cacheDirectory.list().toList();
       for (final file in files) {
         if (file is File) {
           final stat = await file.stat();
@@ -176,7 +178,7 @@ class ImageCacheManager {
     if (_cacheDirectory == null) return;
 
     try {
-      final files = await _cacheDirectory!.list().toList();
+      final files = await _cacheDirectory.list().toList();
       for (final file in files) {
         if (file is File) {
           await file.delete();
@@ -200,10 +202,7 @@ class _CachedImage {
   final ImageProvider provider;
   final int timestamp;
 
-  _CachedImage({
-    required this.provider,
-    required this.timestamp,
-  });
+  _CachedImage({required this.provider, required this.timestamp});
 }
 
 class CachedImage extends StatelessWidget {
