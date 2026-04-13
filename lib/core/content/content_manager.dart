@@ -1,5 +1,6 @@
 import '../platform/platform.dart';
 import '../download/download.dart';
+import '../http/i_http_client.dart';
 import '../http/implementations/http_client.dart';
 import '../logger/logger.dart';
 import 'interfaces/i_content_manager.dart';

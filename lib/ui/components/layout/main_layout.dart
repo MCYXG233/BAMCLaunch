@@ -26,10 +26,10 @@ class MainLayout extends StatefulWidget {
 
 class _MainLayoutState extends State<MainLayout> {
   NavigationItem _selectedItem = NavigationItem.home;
-  late ServerManager _serverManager;
-  late ConfigManager _configManager;
-  late GameLauncher _gameLauncher;
-  late UpdateManager _updateManager;
+  late IServerManager _serverManager;
+  late IConfigManager _configManager;
+  late IGameLauncher _gameLauncher;
+  late IUpdateManager _updateManager;
   late performance_monitor.PerformanceMonitor _performanceMonitor;
   bool _showPerformanceOverlay = false;
 

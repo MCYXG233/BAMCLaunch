@@ -1,7 +1,7 @@
 import '../platform/platform.dart';
 import '../logger/logger.dart';
 import '../download/download.dart';
-import '../version/implementations/version_manager.dart';
+import '../version/version.dart';
 import 'interfaces/i_game_launcher.dart';
 import 'implementations/game_launcher.dart';
 
@@ -19,14 +19,6 @@ final IPlatformAdapter platformAdapter = PlatformAdapterFactory.getInstance();
 
 /// 全局下载引擎单例
 final IDownloadEngine downloadEngine = DownloadEngine();
-
-/// 全局版本管理器单例
-/// 用于管理游戏版本的下载和安装
-final IVersionManager versionManager = VersionManager(
-  platformAdapter: platformAdapter,
-  logger: logger,
-  downloadEngine: downloadEngine,
-);
 
 /// 全局游戏启动器单例
 /// 用于启动和管理游戏进程
