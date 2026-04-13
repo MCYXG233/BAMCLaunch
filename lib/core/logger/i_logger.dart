@@ -7,6 +7,8 @@ enum LogLevel {
 }
 
 abstract class ILogger {
+  /// 初始化日志系统
+  /// [logFilePath]: 日志文件保存路径
   Future<void> initialize(String logFilePath);
   
   void debug(String message, [Map<String, dynamic>? context]);

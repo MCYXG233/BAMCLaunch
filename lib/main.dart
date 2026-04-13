@@ -43,6 +43,7 @@ void main() async {
     MemoryOptimizer().startOptimization();
 
     // 初始化账户管理器
+    // 加载已保存的账户信息，准备用户认证
     await accountManager.initialize();
 
     runApp(const MyApp());

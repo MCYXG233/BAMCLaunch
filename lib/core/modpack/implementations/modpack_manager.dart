@@ -235,6 +235,9 @@ class ModpackManager implements IModpackManager {
         try {
           final modPath = '$instanceDir/mods/${mod.name}-${mod.version}.jar';
           if (mod.downloadUrl.isNotEmpty) {
+            // 使用简化的下载方法下载模组文件
+            // mod.downloadUrl: 模组下载链接
+            // modPath: 模组保存路径
             await _downloadEngine.downloadFile(
               mod.downloadUrl,
               modPath,

@@ -171,6 +171,9 @@ class ContentManager implements IContentManager {
         downloadUrl = await _getModFileDownloadUrlOnModrinth(modId, fileId);
       }
       
+      // 使用简化的下载方法下载文件
+      // downloadUrl: 下载链接
+      // destination: 保存路径
       await _downloadEngine.downloadFile(
         downloadUrl,
         destination,
@@ -195,6 +198,9 @@ class ContentManager implements IContentManager {
         downloadUrl = await _getModpackFileDownloadUrlOnModrinth(modpackId, fileId);
       }
       
+      // 使用简化的下载方法下载文件
+      // downloadUrl: 下载链接
+      // destination: 保存路径
       await _downloadEngine.downloadFile(
         downloadUrl,
         destination,
