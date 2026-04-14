@@ -25,6 +25,7 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
   late WebViewController _controller;
   bool _isLoading = false;
   bool _isLoginComplete = false;
+  Map<String, String>? _authData;
 
   @override
   void initState() {
@@ -34,8 +35,8 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
 
   void _initializeWebView() {
     final MicrosoftAuthenticator authenticator = MicrosoftAuthenticator();
-    final Map<String, String> authData = authenticator.generateAuthorizationUrl();
-    final String authUrl = authData['url']!;
+    _authData = authenticator.generateAuthorizationUrl();
+    final String authUrl = _authData!['url']!;
 
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -75,6 +76,7 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
       // 从URL中提取授权码
       final Uri uri = Uri.parse(url);
       final String? code = uri.queryParameters['code'];
+      final String? state = uri.queryParameters['state'];
 
       if (code == null) {
         throw Exception('未能获取授权码');
@@ -82,7 +84,10 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
 
       // 使用授权码登录
       Account account = await widget.accountManager.login(
-        {'authorizationCode': code},
+        {
+          'authorizationCode': code,
+          'state': state,
+        },
         AccountType.microsoft,
       );
 

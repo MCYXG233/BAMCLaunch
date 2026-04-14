@@ -174,13 +174,25 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Future<void> _handleDeviceCodeLogin() async {
-    // 暂时禁用设备代码登录，因为 MicrosoftDeviceLoginPage 存在问题
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('设备代码登录功能暂时不可用'),
-        backgroundColor: BamcColors.warning,
+    Account? account = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MicrosoftDeviceLoginPage(
+          accountManager: widget.accountManager,
+          logger: logger,
+        ),
       ),
     );
+
+    if (account != null) {
+      await _loadAccounts();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('微软账户登录成功: ${account.username}'),
+          backgroundColor: BamcColors.success,
+        ),
+      );
+    }
   }
 
   Future<void> _handleAddOfflineAccount() async {

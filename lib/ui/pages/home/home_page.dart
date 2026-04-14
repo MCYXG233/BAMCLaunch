@@ -6,8 +6,10 @@ import '../../components/layout/bamc_card.dart';
 
 class HomePage extends StatefulWidget {
   final IVersionManager versionManager;
+  final VoidCallback? onNavigateToVersions;
+  final VoidCallback? onNavigateToModpacks;
   
-  const HomePage({super.key, required this.versionManager});
+  const HomePage({super.key, required this.versionManager, this.onNavigateToVersions, this.onNavigateToModpacks});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -149,7 +151,9 @@ class _HomePageState extends State<HomePage> {
               color: BamcColors.primary,
               onTap: () {
                 // 导航到版本管理页面
-                Navigator.pushNamed(context, '/versions');
+                if (widget.onNavigateToVersions != null) {
+                  widget.onNavigateToVersions!();
+                }
               },
             ),
             _buildQuickLaunchCard(
@@ -158,7 +162,9 @@ class _HomePageState extends State<HomePage> {
               color: BamcColors.secondary,
               onTap: () {
                 // 导航到版本管理页面的安装版本功能
-                Navigator.pushNamed(context, '/versions');
+                if (widget.onNavigateToVersions != null) {
+                  widget.onNavigateToVersions!();
+                }
               },
             ),
             _buildQuickLaunchCard(
@@ -167,7 +173,9 @@ class _HomePageState extends State<HomePage> {
               color: BamcColors.success,
               onTap: () {
                 // 导航到整合包页面
-                Navigator.pushNamed(context, '/modpacks');
+                if (widget.onNavigateToModpacks != null) {
+                  widget.onNavigateToModpacks!();
+                }
               },
             ),
           ],
@@ -314,7 +322,9 @@ class _HomePageState extends State<HomePage> {
               text: '查看全部',
               onPressed: () {
                 // 导航到版本管理页面
-                Navigator.pushNamed(context, '/versions');
+                if (widget.onNavigateToVersions != null) {
+                  widget.onNavigateToVersions!();
+                }
               },
               type: BamcButtonType.outline,
               size: BamcButtonSize.small,

@@ -86,8 +86,17 @@ class _MicrosoftDeviceLoginPageState extends State<MicrosoftDeviceLoginPage> {
     _startCountdown();
 
     try {
-      // 轮询令牌
-      final account = await _authenticator.loginWithDeviceCode();
+      // 轮询令牌获取 Azure 令牌
+      final azureTokens = await _authenticator.pollForToken();
+
+      // 使用账户管理器登录
+      Account account = await widget.accountManager.login(
+        {
+          'azureTokens': azureTokens,
+          'deviceCodeFlow': true,
+        },
+        AccountType.microsoft,
+      );
 
       if (mounted) {
         setState(() {

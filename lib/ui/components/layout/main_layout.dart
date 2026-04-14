@@ -95,7 +95,11 @@ class _MainLayoutState extends State<MainLayout> {
   Widget _buildContent() {
     // 使用懒加载优化页面性能
     final pages = [
-      HomePage(versionManager: versionManager),
+      HomePage(
+        versionManager: versionManager,
+        onNavigateToVersions: () => _handleNavigationItemSelected(NavigationItem.versions),
+        onNavigateToModpacks: () => _handleNavigationItemSelected(NavigationItem.modpacks),
+      ),
       VersionPage(
           versionManager: versionManager, contentManager: contentManager),
       ContentPage(versionManager: versionManager),

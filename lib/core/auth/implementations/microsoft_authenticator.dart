@@ -23,22 +23,30 @@ class MicrosoftAuthenticator implements IAuthenticator {
 
   @override
   Future<Account> login(Map<String, dynamic> credentials) async {
-    String authorizationCode = credentials['authorizationCode'] as String;
-    String returnedState = credentials['state'] as String? ?? '';
-    
-    if (authorizationCode.isEmpty) {
-      throw Exception('授权码不能为空');
-    }
-    
-    if (_state != null && _state != returnedState) {
-      throw Exception('状态验证失败，可能是CSRF攻击');
-    }
-
     try {
       logger.info('开始Microsoft认证流程');
       
-      logger.info('1. 获取Azure令牌');
-      Map<String, dynamic> azureTokens = await _getAzureTokens(authorizationCode);
+      Map<String, dynamic> azureTokens;
+      
+      // 检查是否是设备代码登录
+      if (credentials.containsKey('deviceCodeFlow') && credentials['deviceCodeFlow'] == true) {
+        azureTokens = credentials['azureTokens'] as Map<String, dynamic>;
+      } else {
+        // 普通授权码登录
+        String authorizationCode = credentials['authorizationCode'] as String;
+        String returnedState = credentials['state'] as String? ?? '';
+        
+        if (authorizationCode.isEmpty) {
+          throw Exception('授权码不能为空');
+        }
+        
+        if (_state != null && _state != returnedState) {
+          throw Exception('状态验证失败，可能是CSRF攻击');
+        }
+        
+        logger.info('1. 获取Azure令牌');
+        azureTokens = await _getAzureTokens(authorizationCode);
+      }
       
       logger.info('2. 获取Xbox Live令牌');
       Map<String, dynamic> xboxLiveToken = await _getXboxLiveToken(azureTokens['access_token']);
@@ -75,6 +83,9 @@ class MicrosoftAuthenticator implements IAuthenticator {
       // 清理状态
       _codeVerifier = null;
       _state = null;
+      _deviceCode = null;
+      _expiresIn = null;
+      _interval = null;
     }
   }
 
