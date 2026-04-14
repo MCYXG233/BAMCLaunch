@@ -41,4 +41,29 @@ abstract class IContentManager {
 
   // 获取模组加载器列表
   Future<List<ModLoader>> getModLoaders(String gameVersion);
+
+  // 安装内容
+  Future<bool> installContent(String contentId, String version, String destination, {String? source});
+
+  // 获取已安装内容
+  Future<List<ContentItem>> getInstalledContent(ContentType type);
+
+  // 卸载内容
+  Future<bool> uninstallContent(String contentId);
+
+  // 搜索内容
+  Future<List<ContentItem>> searchContent({
+    required String query,
+    ContentType? type,
+    String? gameVersion,
+    int page = 1,
+    int pageSize = 20,
+  });
+
+  // 获取热门内容
+  Future<List<ContentItem>> getPopularContent({
+    ContentType? type,
+    String? gameVersion,
+    int limit = 20,
+  });
 }

@@ -5,7 +5,7 @@ import '../../components/buttons/bamc_button.dart';
 import '../../components/layout/bamc_card.dart';
 
 class HomePage extends StatefulWidget {
-  final VersionManager versionManager;
+  final IVersionManager versionManager;
   
   const HomePage({super.key, required this.versionManager});
 

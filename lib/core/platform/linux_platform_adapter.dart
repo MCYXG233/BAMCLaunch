@@ -103,9 +103,9 @@ class LinuxPlatformAdapter implements IPlatformAdapter {
           // 使用超时处理，避免命令执行时间过长
           final result = await Process.run(
             path, 
-            ['-version'],
-            timeout: const Duration(seconds: 5),
+            ['-version']
           );
+          // 超时处理在外部的 try-catch 中处理
           if (result.exitCode == 0) {
             // 验证输出是否包含Java版本信息
             final errorOutput = result.stderr.toString();
@@ -430,7 +430,7 @@ X-GNOME-Autostart-enabled=true''';
   Future<void> hideTray() async {
     try {
       if (_systemTray != null) {
-        await _systemTray!.closeSystemTray();
+        await _systemTray!.destroy();
       }
     } catch (e) {
       print('隐藏托盘失败: $e');
@@ -455,21 +455,26 @@ X-GNOME-Autostart-enabled=true''';
     try {
       if (_systemTray != null) {
         final menu = Menu();
-        
+        final List<MenuItemBase> items = [];
+
         for (final item in menuItems) {
           final label = item['label'] as String;
           final action = item['action'] as Function?;
-          
+
           if (action != null) {
-            await menu.addMenuItem(
-              MenuItem(label: label, onClicked: () => action()),
+            items.add(
+              MenuItemLabel(
+                label: label,
+                onClicked: (menuItem) => action(),
+              ),
             );
           } else {
             // 分隔线
-            await menu.addSeparator();
+            items.add(MenuSeparator());
           }
         }
-        
+
+        await menu.buildFrom(items);
         await _systemTray!.setContextMenu(menu);
       }
     } catch (e) {
@@ -481,7 +486,7 @@ X-GNOME-Autostart-enabled=true''';
   Future<void> disposeTray() async {
     try {
       if (_systemTray != null) {
-        await _systemTray!.closeSystemTray();
+        await _systemTray!.destroy();
         _systemTray = null;
       }
     } catch (e) {

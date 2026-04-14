@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../core/core.dart';
-import '../../../core/modpack/models/modpack_models.dart';
 import '../../../ui/theme/colors.dart';
 import '../../components/buttons/bamc_button.dart';
 
@@ -129,25 +128,10 @@ class _ModpackDetailPageState extends State<ModpackDetailPage> {
   Future<void> _performInstall() async {
     setState(() => _isLoading = true);
     try {
-      // 创建Modpack对象
-      final modpackObj = Modpack(
-        id: widget.modpack.id,
-        name: widget.modpack.name,
-        author: widget.modpack.author,
-        version: _selectedVersion!.id,
-        description: widget.modpack.description,
-        minecraftVersion: widget.modpack.gameVersions.first,
-        loaderType: widget.modpack.loaders.first,
-        fileCount: 0,
-        size: 0,
-        format: ModpackFormat.curseforge,
-        status: ModpackStatus.installed,
-        createdAt: DateTime.now(),
-      );
-
+      // 直接使用现有的安装方法
       await modpackManager.installModpack(
-        modpack: modpackObj,
-        onProgress: (progress) {},
+        widget.modpack.id,
+        widget.modpack.version,
       );
 
       ScaffoldMessenger.of(context).showSnackBar(

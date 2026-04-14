@@ -5,7 +5,7 @@ import '../../components/buttons/bamc_button.dart';
 import '../../components/dialogs/update_dialog.dart';
 
 class SettingsPage extends StatefulWidget {
-  final ConfigManager configManager;
+  final IConfigManager configManager;
 
   const SettingsPage({super.key, required this.configManager});
 

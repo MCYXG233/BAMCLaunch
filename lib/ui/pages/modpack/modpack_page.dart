@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/core.dart';
+import '../../../core/core.dart' hide Modpack;
 import '../../../core/modpack/models/modpack_models.dart';
 import '../../../ui/theme/colors.dart';
 import '../../components/buttons/bamc_button.dart';
@@ -89,8 +89,8 @@ class _ModpackPageState extends State<ModpackPage> {
       ),
     );
 
-    modpackManager.importModpack(
-      filePath: filePath,
+    modpackManager.importModpackWithProgress(
+      filePath,
       onProgress: (progress) {
         if (mounted) {
           setState(() {
@@ -275,26 +275,15 @@ class _ModpackPageState extends State<ModpackPage> {
             String installMessage = '准备安装...';
 
             modpackManager.installModpack(
-              modpack: modpack,
-              onProgress: (progress) {
-                setState(() {
-                  installProgress = progress;
-                  if (progress < 0.3) {
-                    installMessage = '安装Minecraft版本...';
-                  } else if (progress < 0.7) {
-                    installMessage = '安装模组加载器...';
-                  } else {
-                    installMessage = '安装整合包文件...';
-                  }
-                });
-              },
+              modpack.id,
+              modpack.version,
             ).then((result) {
               if (mounted) {
                 Navigator.pop(context);
                 if (result.success) {
                   _showSuccess('整合包安装成功');
                 } else {
-                  _showError('整合包安装失败: ${result.errorMessage}');
+                  _showError('整合包安装失败: ${result.error}');
                 }
               }
             }).catchError((e) {
@@ -659,12 +648,8 @@ class _ModpackPageState extends State<ModpackPage> {
                 if (directory != null) {
                   final exportPath = '$directory/${modpack.name}_v${modpack.version}.zip';
                   await modpackManager.exportModpack(
-                    modpackId: modpack.id,
-                    exportPath: exportPath,
-                    format: selectedFormat,
-                    onProgress: (progress) {
-                      // 可以显示导出进度
-                    },
+                    modpack.id,
+                    exportPath,
                   );
                   _showSuccess('整合包导出成功');
                 }

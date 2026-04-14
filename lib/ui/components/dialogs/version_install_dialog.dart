@@ -4,7 +4,7 @@ import '../../theme/colors.dart';
 import '../buttons/bamc_button.dart';
 
 class VersionInstallDialog extends StatefulWidget {
-  final VersionManager versionManager;
+  final IVersionManager versionManager;
 
   const VersionInstallDialog({
     super.key,

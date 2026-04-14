@@ -6,8 +6,8 @@ import '../../components/inputs/bamc_input.dart';
 
 class VersionSettingsPage extends StatefulWidget {
   final Version version;
-  final VersionManager versionManager;
-  final ContentManager contentManager;
+  final IVersionManager versionManager;
+  final IContentManager contentManager;
 
   const VersionSettingsPage({
     super.key,
@@ -75,7 +75,7 @@ class _VersionSettingsPageState extends State<VersionSettingsPage> {
   Future<void> _handleUninstallMod(ContentItem mod) async {
     setState(() => _isLoading = true);
     try {
-      await widget.contentManager.uninstallContent(mod.id, mod.type);
+      await widget.contentManager.uninstallContent(mod.id);
       await _loadMods();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('模组卸载成功')),

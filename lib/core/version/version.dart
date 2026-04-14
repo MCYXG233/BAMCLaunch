@@ -1,6 +1,7 @@
 import '../platform/platform.dart';
 import '../logger/logger.dart';
 import '../download/download.dart';
+import 'interfaces/i_version_manager.dart';
 import 'implementations/version_manager.dart';
 
 export 'interfaces/i_version_manager.dart';

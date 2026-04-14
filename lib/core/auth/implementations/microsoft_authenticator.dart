@@ -8,12 +8,15 @@ import '../interfaces/i_authenticator.dart';
 import '../../logger/logger.dart';
 
 class MicrosoftAuthenticator implements IAuthenticator {
-  static const String clientId = '0000000048093EE3';
+  static const String clientId = '0b1a81c9-6e23-41fd-8690-98a17d81bf4a';
   static const String redirectUri = 'https://login.live.com/oauth20_desktop.srf';
   static const String scope = 'XboxLive.signin offline_access';
   
   String? _codeVerifier;
   String? _state;
+  String? _deviceCode;
+  int? _expiresIn;
+  int? _interval;
 
   @override
   AccountType get accountType => AccountType.microsoft;
@@ -155,6 +158,118 @@ class MicrosoftAuthenticator implements IAuthenticator {
       'state': _state!,
       'codeVerifier': _codeVerifier!,
     };
+  }
+
+  Future<Map<String, dynamic>> getDeviceCode() async {
+    try {
+      logger.info('获取设备代码');
+      
+      Uri uri = Uri.parse('https://login.microsoftonline.com/common/oauth2/v2.0/devicecode');
+      Map<String, String> headers = {'Content-Type': 'application/x-www-form-urlencoded'};
+      String body = 'client_id=$clientId'
+          '&scope=${Uri.encodeComponent(scope)}';
+
+      Map<String, dynamic> response = await _httpPost(uri, headers, body, '设备代码');
+      
+      _deviceCode = response['device_code'];
+      _expiresIn = response['expires_in'];
+      _interval = response['interval'];
+      
+      return response;
+    } catch (e) {
+      logger.error('获取设备代码失败: $e');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> pollForToken() async {
+    if (_deviceCode == null) {
+      throw Exception('未获取设备代码');
+    }
+
+    int maxAttempts = (_expiresIn ?? 300) ~/ (_interval ?? 5);
+    int attempts = 0;
+
+    while (attempts < maxAttempts) {
+      try {
+        logger.info('轮询令牌，尝试 $attempts/$maxAttempts');
+        
+        Uri uri = Uri.parse('https://login.microsoftonline.com/common/oauth2/v2.0/token');
+        Map<String, String> headers = {'Content-Type': 'application/x-www-form-urlencoded'};
+        String body = 'client_id=$clientId'
+            '&grant_type=urn:ietf:params:oauth:grant-type:device_code'
+            '&device_code=$_deviceCode';
+
+        Map<String, dynamic> response = await _httpPost(uri, headers, body, '轮询令牌');
+        return response;
+      } catch (e) {
+        String errorMessage = e.toString();
+        if (errorMessage.contains('authorization_pending')) {
+          // 等待用户完成登录
+          await Future.delayed(Duration(seconds: _interval ?? 5));
+          attempts++;
+        } else if (errorMessage.contains('slow_down')) {
+          // 需要减慢轮询速度
+          await Future.delayed(Duration(seconds: (_interval ?? 5) + 5));
+          attempts++;
+        } else {
+          // 其他错误
+          logger.error('轮询令牌失败: $e');
+          rethrow;
+        }
+      }
+    }
+
+    throw Exception('设备代码登录超时');
+  }
+
+  Future<Account> loginWithDeviceCode() async {
+    try {
+      logger.info('开始设备代码流登录');
+      
+      logger.info('1. 获取设备代码');
+      Map<String, dynamic> deviceCodeData = await getDeviceCode();
+      
+      logger.info('2. 等待用户登录');
+      Map<String, dynamic> azureTokens = await pollForToken();
+      
+      logger.info('3. 获取Xbox Live令牌');
+      Map<String, dynamic> xboxLiveToken = await _getXboxLiveToken(azureTokens['access_token']);
+      
+      logger.info('4. 获取XSTS令牌');
+      Map<String, dynamic> xstsToken = await _getXstsToken(xboxLiveToken['Token']);
+      
+      logger.info('5. 获取Minecraft令牌');
+      Map<String, dynamic> minecraftToken = await _getMinecraftToken(xstsToken);
+      
+      logger.info('6. 获取Minecraft个人资料');
+      MinecraftProfile profile = await _getMinecraftProfile(minecraftToken['access_token']);
+
+      TokenData tokenData = TokenData(
+        accessToken: minecraftToken['access_token'],
+        refreshToken: azureTokens['refresh_token'],
+        expiresAt: DateTime.now().add(Duration(seconds: azureTokens['expires_in'])),
+      );
+
+      logger.info('认证成功，用户: ${profile.name}');
+      
+      return Account(
+        id: profile.id,
+        username: profile.name,
+        type: AccountType.microsoft,
+        tokenData: tokenData,
+        profile: profile,
+        lastLogin: DateTime.now(),
+      );
+    } catch (e) {
+      logger.error('设备代码登录失败: $e');
+      rethrow;
+    } finally {
+      // 清理状态
+      _deviceCode = null;
+      _expiresIn = null;
+      _interval = null;
+    }
   }
 
   Future<Map<String, dynamic>> _getAzureTokens(String authorizationCode) async {

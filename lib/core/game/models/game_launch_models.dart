@@ -12,6 +12,32 @@ class JavaDetectionResult {
   });
 }
 
+/// 游戏启动状态枚举
+enum GameLaunchStatus {
+  preparing,
+  checkingJava,
+  resolvingDependencies,
+  buildingArguments,
+  ready,
+  launching,
+  running,
+  exited,
+  error,
+}
+
+/// 崩溃分析结果类
+class CrashAnalysis {
+  final bool hasCrash;
+  final String? crashLog;
+  final String analysis;
+
+  CrashAnalysis({
+    required this.hasCrash,
+    this.crashLog,
+    required this.analysis,
+  });
+}
+
 class GameLaunchConfig {
   final String gameDir;
   final String gameVersion;
@@ -26,6 +52,7 @@ class GameLaunchConfig {
   final String mainClass;
   final List<String> jvmArgs;
   final List<String> gameArgs;
+  final Map<String, String>? customEnvironment;
 
   GameLaunchConfig({
     required this.gameDir,
@@ -41,6 +68,7 @@ class GameLaunchConfig {
     required this.mainClass,
     required this.jvmArgs,
     required this.gameArgs,
+    this.customEnvironment,
   });
 
   GameLaunchConfig copyWith({
@@ -57,6 +85,7 @@ class GameLaunchConfig {
     String? mainClass,
     List<String>? jvmArgs,
     List<String>? gameArgs,
+    Map<String, String>? customEnvironment,
   }) {
     return GameLaunchConfig(
       gameDir: gameDir ?? this.gameDir,
@@ -72,6 +101,7 @@ class GameLaunchConfig {
       mainClass: mainClass ?? this.mainClass,
       jvmArgs: jvmArgs ?? this.jvmArgs,
       gameArgs: gameArgs ?? this.gameArgs,
+      customEnvironment: customEnvironment ?? this.customEnvironment,
     );
   }
 }

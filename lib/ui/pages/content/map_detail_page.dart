@@ -17,6 +17,7 @@ class _MapDetailPageState extends State<MapDetailPage> {
   ContentItem? _selectedVersion;
   String? _selectedGameInstance;
   List<String> _gameInstances = [];
+  final _platformAdapter = PlatformAdapterFactory.getInstance();
 
   @override
   void initState() {
@@ -408,19 +409,21 @@ class _MapDetailPageState extends State<MapDetailPage> {
   Future<void> _installMap() async {
     setState(() => _isLoading = true);
     try {
+      final destination =
+          '${_platformAdapter.gameDirectory}/instances/$_selectedGameInstance/saves/${widget.map.name}';
       final result = await contentManager.installContent(
-        item: widget.map,
-        versionId: widget.map.version,
-        onProgress: (progress) {},
+        widget.map.id,
+        widget.map.version,
+        destination,
       );
 
-      if (result.success) {
+      if (result) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('地图 ${widget.map.name} 安装成功')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('安装失败: ${result.errorMessage}')),
+          const SnackBar(content: Text('安装失败')),
         );
       }
     } catch (e) {
@@ -458,19 +461,21 @@ class _MapDetailPageState extends State<MapDetailPage> {
   Future<void> _downloadMap() async {
     setState(() => _isLoading = true);
     try {
+      final destination =
+          '${_platformAdapter.gameDirectory}/downloads/${widget.map.name}';
       final result = await contentManager.installContent(
-        item: widget.map,
-        versionId: widget.map.version,
-        onProgress: (progress) {},
+        widget.map.id,
+        widget.map.version,
+        destination,
       );
 
-      if (result.success) {
+      if (result) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('地图 ${widget.map.name} 下载成功')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('下载失败: ${result.errorMessage}')),
+          const SnackBar(content: Text('下载失败')),
         );
       }
     } catch (e) {

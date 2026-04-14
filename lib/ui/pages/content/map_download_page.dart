@@ -31,16 +31,16 @@ class _MapDownloadPageState extends State<MapDownloadPage> {
     try {
       if (_searchQuery.isNotEmpty) {
         final result = await contentManager.searchContent(
-          SearchQuery(
-            query: _searchQuery,
-            type: ContentType.map,
-            gameVersion: _selectedGameVersion,
-          ),
+          query: _searchQuery,
+          type: ContentType.dataPack, // 使用 dataPack 类型代替 map
+          gameVersion: _selectedGameVersion,
         );
-        setState(() => _maps = result.items);
+        setState(() => _maps = result);
       } else {
         // 加载热门地图
-        final popular = await contentManager.getPopularContent(ContentType.map);
+        final popular = await contentManager.getPopularContent(
+          type: ContentType.dataPack, // 使用 dataPack 类型代替 map
+        );
         setState(() => _maps = popular);
       }
     } catch (e) {
@@ -363,19 +363,21 @@ class _MapDownloadPageState extends State<MapDownloadPage> {
   Future<void> _installMap(ContentItem map) async {
     setState(() => _isLoading = true);
     try {
+      final platformAdapter = PlatformAdapterFactory.getInstance();
+      final destination = '${platformAdapter.gameDirectory}/saves/${map.name}';
       final result = await contentManager.installContent(
-        item: map,
-        versionId: 'latest',
-        onProgress: (progress) {},
+        map.id,
+        map.version,
+        destination,
       );
 
-      if (result.success) {
+      if (result) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('地图 ${map.name} 安装成功')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('安装失败: ${result.errorMessage}')),
+          const SnackBar(content: Text('安装失败')),
         );
       }
     } catch (e) {

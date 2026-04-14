@@ -32,17 +32,16 @@ class _ShaderPackDownloadPageState extends State<ShaderPackDownloadPage> {
     try {
       if (_searchQuery.isNotEmpty) {
         final result = await contentManager.searchContent(
-          SearchQuery(
-            query: _searchQuery,
-            type: ContentType.shaderPack,
-            gameVersion: _selectedGameVersion,
-          ),
+          query: _searchQuery,
+          type: ContentType.shaderPack,
+          gameVersion: _selectedGameVersion,
         );
-        setState(() => _shaderPacks = result.items);
+        setState(() => _shaderPacks = result);
       } else {
         // 加载热门光影包
-        final popular =
-            await contentManager.getPopularContent(ContentType.shaderPack);
+        final popular = await contentManager.getPopularContent(
+          type: ContentType.shaderPack,
+        );
         setState(() => _shaderPacks = popular);
       }
     } catch (e) {
@@ -365,19 +364,21 @@ class _ShaderPackDownloadPageState extends State<ShaderPackDownloadPage> {
   Future<void> _installShaderPack(ContentItem shaderPack) async {
     setState(() => _isLoading = true);
     try {
+      final platformAdapter = PlatformAdapterFactory.getInstance();
+      final destination = '${platformAdapter.gameDirectory}/shaderpacks';
       final result = await contentManager.installContent(
-        item: shaderPack,
-        versionId: 'latest',
-        onProgress: (progress) {},
+        shaderPack.id,
+        shaderPack.version,
+        destination,
       );
 
-      if (result.success) {
+      if (result) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('光影包 ${shaderPack.name} 安装成功')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('安装失败: ${result.errorMessage}')),
+          const SnackBar(content: Text('安装失败')),
         );
       }
     } catch (e) {

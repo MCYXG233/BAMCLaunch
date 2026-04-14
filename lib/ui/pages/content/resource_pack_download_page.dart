@@ -33,17 +33,16 @@ class _ResourcePackDownloadPageState extends State<ResourcePackDownloadPage> {
     try {
       if (_searchQuery.isNotEmpty) {
         final result = await contentManager.searchContent(
-          SearchQuery(
-            query: _searchQuery,
-            type: ContentType.resourcePack,
-            gameVersion: _selectedGameVersion,
-          ),
+          query: _searchQuery,
+          type: ContentType.resourcePack,
+          gameVersion: _selectedGameVersion,
         );
-        setState(() => _resourcePacks = result.items);
+        setState(() => _resourcePacks = result);
       } else {
         // 加载热门资源包
-        final popular =
-            await contentManager.getPopularContent(ContentType.resourcePack);
+        final popular = await contentManager.getPopularContent(
+          type: ContentType.resourcePack,
+        );
         setState(() => _resourcePacks = popular);
       }
     } catch (e) {
@@ -370,19 +369,21 @@ class _ResourcePackDownloadPageState extends State<ResourcePackDownloadPage> {
   Future<void> _installResourcePack(ContentItem resourcePack) async {
     setState(() => _isLoading = true);
     try {
+      final platformAdapter = PlatformAdapterFactory.getInstance();
+      final destination = '${platformAdapter.gameDirectory}/resourcepacks';
       final result = await contentManager.installContent(
-        item: resourcePack,
-        versionId: 'latest',
-        onProgress: (progress) {},
+        resourcePack.id,
+        resourcePack.version,
+        destination,
       );
 
-      if (result.success) {
+      if (result) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('资源包 ${resourcePack.name} 安装成功')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('安装失败: ${result.errorMessage}')),
+          const SnackBar(content: Text('安装失败')),
         );
       }
     } catch (e) {

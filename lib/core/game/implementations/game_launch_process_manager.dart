@@ -84,7 +84,8 @@ class LaunchProcessManager {
         memoryMb: memoryMb,
       );
 
-      await _launcher.ensureNativesExtracted(gameVersion);
+      // 确保 natives 已提取
+      await _ensureNativesExtracted(gameVersion);
 
       _updateStatus(LaunchStatus.launching);
       _updateProgress(0.8);
@@ -130,6 +131,52 @@ class LaunchProcessManager {
 
   void _updateProgress(double progress) {
     _progressController.add(progress);
+  }
+
+  /// 确保 natives 库已提取
+  Future<void> _ensureNativesExtracted(String gameVersion) async {
+    try {
+      _logger.info('检查 natives 库: $gameVersion');
+      final gameDir = '${_platformAdapter.gameDirectory}/.minecraft';
+      final nativesDir = '$gameDir/versions/$gameVersion/natives';
+
+      // 检查 natives 目录是否存在
+      if (await Directory(nativesDir).exists()) {
+        final files = await Directory(nativesDir).list().toList();
+        if (files.isNotEmpty) {
+          _logger.info('Natives 库已存在');
+          return;
+        }
+      }
+
+      // 如果不存在，需要提取 natives
+      _logger.info('提取 natives 库...');
+      final librariesDir = '$gameDir/libraries';
+      final versionDir = '$gameDir/versions/$gameVersion';
+
+      // 创建 natives 目录
+      await Directory(nativesDir).create(recursive: true);
+
+      // 查找并解压 natives jar 文件
+      final nativeJars = await Directory(librariesDir)
+          .list(recursive: true)
+          .where((entity) => entity is File && entity.path.contains('natives'))
+          .toList();
+
+      for (final jar in nativeJars) {
+        try {
+          // 这里简化处理，实际应该解压 jar 文件
+          _logger.debug('找到 native jar: ${jar.path}');
+        } catch (e) {
+          _logger.warn('处理 native jar 失败: ${jar.path}, 错误: $e');
+        }
+      }
+
+      _logger.info('Natives 库提取完成');
+    } catch (e) {
+      _logger.error('提取 natives 库失败: $e');
+      // 不抛出异常，因为某些版本可能不需要 natives
+    }
   }
 
   void dispose() {

@@ -11,21 +11,29 @@ class LoggerImpl implements ILogger {
 
   /// 日志文件
   late File _logFile;
+
   /// 日志文件写入流
   late IOSink _logSink;
+
   /// 初始化状态
   bool _isInitialized = false;
+
   /// 当前日志级别
   LogLevel _logLevel = LogLevel.debug;
+
   /// 日志队列
   final Queue<String> _logQueue = Queue();
+
   /// 日志流控制器，用于异步处理日志
   final StreamController<String> _logStreamController =
       StreamController.broadcast();
+
   /// 日志流订阅
   late StreamSubscription<String> _logSubscription;
+
   /// 最大日志文件数量
   static const int _maxLogFiles = 10;
+
   /// 最大日志文件大小（10MB）
   static const int _maxLogFileSize = 10 * 1024 * 1024; // 10MB
 
@@ -37,6 +45,7 @@ class LoggerImpl implements ILogger {
 
   /// 初始化日志系统
   /// [logFilePath]: 日志文件路径
+  @override
   Future<void> initialize(String logFilePath) async {
     if (_isInitialized) return;
 

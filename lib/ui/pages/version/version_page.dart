@@ -9,8 +9,8 @@ import 'loader_install_test_page.dart';
 import 'version_settings_page.dart';
 
 class VersionPage extends StatefulWidget {
-  final VersionManager versionManager;
-  final ContentManager contentManager;
+  final IVersionManager versionManager;
+  final IContentManager contentManager;
 
   const VersionPage({
     super.key,

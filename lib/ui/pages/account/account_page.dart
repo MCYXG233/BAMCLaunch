@@ -3,7 +3,8 @@ import '../../../core/core.dart';
 import '../../../ui/theme/colors.dart';
 import '../../components/buttons/bamc_button.dart';
 import '../../components/dialogs/add_offline_account_dialog.dart';
-import '../account/microsoft_login_page.dart';
+import 'microsoft_login_page.dart';
+import 'microsoft_device_login_page.dart';
 
 class AccountPage extends StatefulWidget {
   final AccountManager accountManager;
@@ -106,6 +107,51 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Future<void> _handleMicrosoftLogin() async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: BamcColors.background,
+        title: const Text(
+          '选择登录方式',
+          style: TextStyle(
+            color: BamcColors.textPrimary,
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 16),
+            BamcButton(
+              text: '网页登录',
+              onPressed: () async {
+                Navigator.pop(context);
+                await _handleWebLogin();
+              },
+              type: BamcButtonType.primary,
+              size: BamcButtonSize.large,
+              icon: Icons.open_in_browser,
+            ),
+            const SizedBox(height: 12),
+            BamcButton(
+              text: '设备代码登录',
+              onPressed: () async {
+                Navigator.pop(context);
+                await _handleDeviceCodeLogin();
+              },
+              type: BamcButtonType.outline,
+              size: BamcButtonSize.large,
+              icon: Icons.qr_code_scanner,
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleWebLogin() async {
     Account? account = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -125,6 +171,16 @@ class _AccountPageState extends State<AccountPage> {
         ),
       );
     }
+  }
+
+  Future<void> _handleDeviceCodeLogin() async {
+    // 暂时禁用设备代码登录，因为 MicrosoftDeviceLoginPage 存在问题
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('设备代码登录功能暂时不可用'),
+        backgroundColor: BamcColors.warning,
+      ),
+    );
   }
 
   Future<void> _handleAddOfflineAccount() async {

@@ -6,7 +6,7 @@ import '../../components/lists/bamc_list.dart';
 import './version_detail_page.dart';
 
 class AutoInstallPage extends StatefulWidget {
-  final VersionManager versionManager;
+  final IVersionManager versionManager;
 
   const AutoInstallPage({super.key, required this.versionManager});
 

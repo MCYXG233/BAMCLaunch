@@ -3,6 +3,8 @@ import '../models/game_launch_models.dart';
 import '../../platform/i_platform_adapter.dart';
 import '../../logger/i_logger.dart';
 import '../../version/interfaces/i_version_manager.dart';
+import '../../download/i_download_engine.dart';
+import '../../download/download_engine.dart';
 import 'java_manager.dart';
 import 'launch_arguments_builder.dart';
 import 'dart:io';
@@ -18,6 +20,8 @@ class GameLauncher implements IGameLauncher {
   final ILogger _logger;
   /// 版本管理器
   final IVersionManager _versionManager;
+  /// 下载引擎
+  final IDownloadEngine _downloadEngine;
   /// Java管理器
   final JavaManager _javaManager;
   /// 启动参数构建器
@@ -40,13 +44,16 @@ class GameLauncher implements IGameLauncher {
   /// [platformAdapter]: 平台适配器实例
   /// [logger]: 日志记录器实例
   /// [versionManager]: 版本管理器实例
+  /// [downloadEngine]: 下载引擎实例
   GameLauncher({
     required IPlatformAdapter platformAdapter,
     required ILogger logger,
     required IVersionManager versionManager,
+    IDownloadEngine? downloadEngine,
   })  : _platformAdapter = platformAdapter,
         _logger = logger,
         _versionManager = versionManager,
+        _downloadEngine = downloadEngine ?? DownloadEngine(),
         _javaManager = JavaManager(
           platformAdapter: platformAdapter,
           logger: logger,
@@ -401,7 +408,7 @@ class GameLauncher implements IGameLauncher {
     for (final keyword in crashKeywords) {
       if (output.contains(keyword)) {
         _lastCrashLog ??= '';
-        _lastCrashLog! += output;
+        _lastCrashLog = (_lastCrashLog ?? '') + output;
         _logger.warn('检测到可能的崩溃: $keyword');
         break;
       }

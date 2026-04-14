@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../core/core.dart';
-import '../../../core/modpack/models/modpack_models.dart';
 import '../../../ui/theme/colors.dart';
 import '../../components/buttons/bamc_button.dart';
 import '../../components/inputs/bamc_input.dart';
@@ -35,18 +34,16 @@ class _ModpackDownloadPageState extends State<ModpackDownloadPage> {
     try {
       if (_searchQuery.isNotEmpty) {
         final result = await contentManager.searchContent(
-          SearchQuery(
-            query: _searchQuery,
-            type: ContentType.modpack,
-            gameVersion: _selectedGameVersion,
-            loader: _selectedLoader,
-          ),
+          query: _searchQuery,
+          type: ContentType.modpack,
+          gameVersion: _selectedGameVersion,
         );
-        setState(() => _modpacks = result.items);
+        setState(() => _modpacks = result);
       } else {
         // 加载热门整合包
-        final popular =
-            await contentManager.getPopularContent(ContentType.modpack);
+        final popular = await contentManager.getPopularContent(
+          type: ContentType.modpack,
+        );
         setState(() => _modpacks = popular);
       }
     } catch (e) {
@@ -418,26 +415,10 @@ class _ModpackDownloadPageState extends State<ModpackDownloadPage> {
   Future<void> _installModpack(ContentItem modpack) async {
     setState(() => _isLoading = true);
     try {
-      // 使用整合包管理器安装
-      // 创建Modpack对象
-      final modpackObj = Modpack(
-        id: modpack.id,
-        name: modpack.name,
-        author: modpack.author,
-        version: modpack.version,
-        description: modpack.description,
-        minecraftVersion: modpack.gameVersions.first,
-        loaderType: modpack.loaders.first,
-        fileCount: 0,
-        size: 0,
-        format: ModpackFormat.curseforge,
-        status: ModpackStatus.installed,
-        createdAt: DateTime.now(),
-      );
-
+      // 直接使用现有的安装方法
       final result = await modpackManager.installModpack(
-        modpack: modpackObj,
-        onProgress: (progress) {},
+        modpack.id,
+        modpack.version,
       );
 
       if (result.success) {
@@ -446,7 +427,7 @@ class _ModpackDownloadPageState extends State<ModpackDownloadPage> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('安装失败: ${result.errorMessage}')),
+          SnackBar(content: Text('安装失败: ${result.error}')),
         );
       }
     } catch (e) {

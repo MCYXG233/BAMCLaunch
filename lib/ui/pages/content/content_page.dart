@@ -20,7 +20,7 @@ enum ResourceCenterTab {
 }
 
 class ContentPage extends StatefulWidget {
-  final VersionManager versionManager;
+  final IVersionManager versionManager;
 
   const ContentPage({super.key, required this.versionManager});
 

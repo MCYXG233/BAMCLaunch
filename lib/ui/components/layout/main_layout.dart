@@ -3,8 +3,6 @@ import 'package:flutter/foundation.dart';
 import '../../../core/core.dart';
 import '../../../core/performance/performance_monitor.dart'
     as performance_monitor;
-import '../../../core/ipc/implementations/ipc_manager.dart';
-import '../../../core/ipc/implementations/terracotta_integration.dart';
 import 'custom_title_bar.dart';
 import 'sidebar.dart';
 import 'breadcrumb_navigation.dart';
@@ -71,7 +69,7 @@ class _MainLayoutState extends State<MainLayout> {
           barrierDismissible: false,
           builder: (context) => UpdateDialog(
             updateInfo: updateInfo,
-            updateManager: _updateManager,
+            updateManager: _updateManager as UpdateManager,
           ),
         );
       }

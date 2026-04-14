@@ -14,7 +14,7 @@ class WindowsPlatformAdapter implements IPlatformAdapter {
       final userProfile = Platform.environment['USERPROFILE'] ?? '';
       return '$userProfile/.bamclauncher';
     }
-    return '${appData}/.bamclauncher';
+    return '$appData/.bamclauncher';
   }
 
   @override
@@ -96,15 +96,13 @@ class WindowsPlatformAdapter implements IPlatformAdapter {
       if (await File(path).exists()) {
         try {
           // 使用超时处理，避免命令执行时间过长
-          final result = await Process.run(
-            path, 
-            ['-version'],
-            timeout: const Duration(seconds: 5),
-          );
+          final result = await Process.run(path, ['-version']);
+          // 超时处理在外部的 try-catch 中处理
           if (result.exitCode == 0) {
             // 验证输出是否包含Java版本信息
             final errorOutput = result.stderr.toString();
-            if (errorOutput.contains('java version') || errorOutput.contains('openjdk version')) {
+            if (errorOutput.contains('java version') ||
+                errorOutput.contains('openjdk version')) {
               return path;
             }
           }
@@ -215,7 +213,7 @@ class WindowsPlatformAdapter implements IPlatformAdapter {
       return false;
     }
   }
-  
+
   @override
   Future<void> killProcesses(String processName) async {
     try {
@@ -244,27 +242,20 @@ class WindowsPlatformAdapter implements IPlatformAdapter {
 
       ProcessResult result;
       if (enabled) {
-        result = await Process.run(
-          'reg',
-          [
-            'add',
-            registryPath,
-            '/v',
-            appName,
-            '/t',
-            'REG_SZ',
-            '/d',
-            executablePath,
-            '/f'
-          ],
-          timeout: const Duration(seconds: 10),
-        );
+        result = await Process.run('reg', [
+          'add',
+          registryPath,
+          '/v',
+          appName,
+          '/t',
+          'REG_SZ',
+          '/d',
+          executablePath,
+          '/f'
+        ]);
       } else {
         result = await Process.run(
-          'reg',
-          ['delete', registryPath, '/v', appName, '/f'],
-          timeout: const Duration(seconds: 10),
-        );
+            'reg', ['delete', registryPath, '/v', appName, '/f']);
       }
 
       // 检查退出码
@@ -295,11 +286,8 @@ class WindowsPlatformAdapter implements IPlatformAdapter {
       const registryPath = 'SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run';
       const appName = 'BAMCLauncher';
 
-      final result = await Process.run(
-        'reg',
-        ['query', registryPath, '/v', appName],
-        timeout: const Duration(seconds: 10),
-      );
+      final result =
+          await Process.run('reg', ['query', registryPath, '/v', appName]);
 
       // 检查退出码
       if (result.exitCode == 0) {
@@ -430,13 +418,13 @@ class WindowsPlatformAdapter implements IPlatformAdapter {
   Future<void> initializeTray(String iconPath, String tooltip) async {
     try {
       _systemTray = SystemTray();
-      
+
       // 初始化系统托盘
       await _systemTray!.initSystemTray(
         title: tooltip,
         iconPath: iconPath,
       );
-      
+
       // 监听托盘点击事件
       _systemTray!.registerSystemTrayEventHandler((eventName) async {
         if (eventName == kSystemTrayEventClick) {
@@ -469,7 +457,7 @@ class WindowsPlatformAdapter implements IPlatformAdapter {
   Future<void> hideTray() async {
     try {
       if (_systemTray != null) {
-        await _systemTray!.closeSystemTray();
+        await _systemTray!.destroy();
       }
     } catch (e) {
       print('隐藏托盘失败: $e');
@@ -494,22 +482,26 @@ class WindowsPlatformAdapter implements IPlatformAdapter {
     try {
       if (_systemTray != null) {
         final menu = Menu();
-        
+        final List<MenuItemBase> items = [];
+
         for (final item in menuItems) {
           final label = item['label'] as String;
           final action = item['action'] as Function?;
-          final enabled = item['enabled'] as bool? ?? true;
-          
+
           if (action != null) {
-            await menu.addMenuItem(
-              MenuItem(label: label, onClicked: () => action()),
+            items.add(
+              MenuItemLabel(
+                label: label,
+                onClicked: (menuItem) => action(),
+              ),
             );
           } else {
             // 分隔线
-            await menu.addSeparator();
+            items.add(MenuSeparator());
           }
         }
-        
+
+        await menu.buildFrom(items);
         await _systemTray!.setContextMenu(menu);
       }
     } catch (e) {
@@ -521,7 +513,7 @@ class WindowsPlatformAdapter implements IPlatformAdapter {
   Future<void> disposeTray() async {
     try {
       if (_systemTray != null) {
-        await _systemTray!.closeSystemTray();
+        await _systemTray!.destroy();
         _systemTray = null;
       }
     } catch (e) {

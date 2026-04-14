@@ -34,20 +34,16 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
     try {
       if (_searchQuery.isNotEmpty) {
         final result = await contentManager.searchContent(
-          SearchQuery(
-            query: _searchQuery,
-            type: ContentType.mod,
-            gameVersion: _selectedGameVersion,
-            loader: _selectedLoader,
-            category: _selectedCategory,
-            author: _selectedAuthor,
-            sortType: _selectedSortType,
-          ),
+          query: _searchQuery,
+          type: ContentType.mod,
+          gameVersion: _selectedGameVersion,
         );
-        setState(() => _mods = result.items);
+        setState(() => _mods = result);
       } else {
         // 加载热门模组
-        final popular = await contentManager.getPopularContent(ContentType.mod);
+        final popular = await contentManager.getPopularContent(
+          type: ContentType.mod,
+        );
         setState(() => _mods = popular);
       }
     } catch (e) {
@@ -364,19 +360,21 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
   Future<void> _installMod(ContentItem mod) async {
     setState(() => _isLoading = true);
     try {
+      final platformAdapter = PlatformAdapterFactory.getInstance();
+      final destination = '${platformAdapter.gameDirectory}/mods';
       final result = await contentManager.installContent(
-        item: mod,
-        versionId: 'latest',
-        onProgress: (progress) {},
+        mod.id,
+        mod.version,
+        destination,
       );
 
-      if (result.success) {
+      if (result) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('模组 ${mod.name} 安装成功')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('安装失败: ${result.errorMessage}')),
+          const SnackBar(content: Text('安装失败')),
         );
       }
     } catch (e) {

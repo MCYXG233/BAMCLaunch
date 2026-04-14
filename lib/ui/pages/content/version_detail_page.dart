@@ -5,7 +5,7 @@ import '../../components/buttons/bamc_button.dart';
 
 class VersionDetailPage extends StatefulWidget {
   final Version version;
-  final VersionManager versionManager;
+  final IVersionManager versionManager;
 
   const VersionDetailPage({
     super.key,

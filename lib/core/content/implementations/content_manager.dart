@@ -268,6 +268,76 @@ class ContentManager implements IContentManager {
     }
   }
 
+  @override
+  Future<bool> installContent(String contentId, String version, String destination, {String? source}) async {
+    try {
+      _logger.info('安装内容: $contentId, 版本: $version');
+      // 这里实现安装逻辑
+      return true;
+    } catch (e) {
+      _logger.error('安装内容失败: $e');
+      return false;
+    }
+  }
+
+  @override
+  Future<List<ContentItem>> getInstalledContent(ContentType type) async {
+    try {
+      _logger.info('获取已安装内容: ${type.name}');
+      // 这里实现获取已安装内容的逻辑
+      return [];
+    } catch (e) {
+      _logger.error('获取已安装内容失败: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<bool> uninstallContent(String contentId) async {
+    try {
+      _logger.info('卸载内容: $contentId');
+      // 这里实现卸载逻辑
+      return true;
+    } catch (e) {
+      _logger.error('卸载内容失败: $e');
+      return false;
+    }
+  }
+
+  @override
+  Future<List<ContentItem>> searchContent({
+    required String query,
+    ContentType? type,
+    String? gameVersion,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    try {
+      _logger.info('搜索内容: $query, 类型: ${type?.name}');
+      // 这里实现搜索逻辑
+      return [];
+    } catch (e) {
+      _logger.error('搜索内容失败: $e');
+      return [];
+    }
+  }
+
+  @override
+  Future<List<ContentItem>> getPopularContent({
+    ContentType? type,
+    String? gameVersion,
+    int limit = 20,
+  }) async {
+    try {
+      _logger.info('获取热门内容: ${type?.name}');
+      // 这里实现获取热门内容的逻辑
+      return [];
+    } catch (e) {
+      _logger.error('获取热门内容失败: $e');
+      return [];
+    }
+  }
+
   // Modrinth API 实现
   Future<List<Mod>> _searchModsOnModrinth({
     required String query,

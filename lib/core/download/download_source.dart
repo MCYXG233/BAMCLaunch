@@ -69,6 +69,11 @@ class DownloadSource implements IDownloadSource {
     }
   }
 
+  @override
+  String getName() {
+    return name;
+  }
+
   Future<bool> _isUrlAccessible(String url) async {
     final client = HttpClient();
     

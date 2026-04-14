@@ -34,7 +34,8 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
 
   void _initializeWebView() {
     final MicrosoftAuthenticator authenticator = MicrosoftAuthenticator();
-    final String authUrl = authenticator.generateAuthorizationUrl();
+    final Map<String, String> authData = authenticator.generateAuthorizationUrl();
+    final String authUrl = authData['url']!;
 
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)

@@ -16,12 +16,8 @@ class ServerPage extends StatefulWidget {
 }
 
 class _ServerPageState extends State<ServerPage> {
-  List<ServerInfo> _servers = [];
-  List<LanServerInfo> _lanServers = [];
+  List<Server> _servers = [];
   bool _isLoading = false;
-  bool _isDiscovering = false;
-  bool _isTerracottaEnabled = false;
-  bool _isIpcConnected = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -29,49 +25,6 @@ class _ServerPageState extends State<ServerPage> {
   void initState() {
     super.initState();
     _loadServers();
-    _loadTerracottaStatus();
-    _setupListeners();
-  }
-
-  void _setupListeners() {
-    widget.serverManager.onServerStatusChanged.listen((server) {
-      _loadServers();
-    });
-
-    widget.serverManager.onLanServersDiscovered.listen((servers) {
-      setState(() {
-        _lanServers = servers;
-        _isDiscovering = false;
-      });
-    });
-  }
-
-  Future<void> _loadTerracottaStatus() async {
-    try {
-      bool enabled =
-          await widget.serverManager.isTerracottaIntegrationEnabled();
-      bool connected = await widget.serverManager.isIpcConnected();
-      setState(() {
-        _isTerracottaEnabled = enabled;
-        _isIpcConnected = connected;
-      });
-    } catch (e) {
-      _showErrorDialog('加载Terracotta状态失败: $e');
-    }
-  }
-
-  Future<void> _toggleTerracottaIntegration() async {
-    try {
-      await widget.serverManager
-          .enableTerracottaIntegration(!_isTerracottaEnabled);
-      await _loadTerracottaStatus();
-      _showInfoDialog(
-        'Terracotta集成',
-        _isTerracottaEnabled ? 'Terracotta集成已启用' : 'Terracotta集成已禁用',
-      );
-    } catch (e) {
-      _showErrorDialog('切换Terracotta集成状态失败: $e');
-    }
   }
 
   Future<void> _showCopyrightInfo() async {
@@ -84,28 +37,12 @@ class _ServerPageState extends State<ServerPage> {
   Future<void> _loadServers() async {
     setState(() => _isLoading = true);
     try {
-      List<ServerInfo> servers = await widget.serverManager.getServerList();
-      if (_searchQuery.isNotEmpty) {
-        servers = await widget.serverManager.searchServers(_searchQuery);
-      }
+      List<Server> servers = await widget.serverManager.getServers();
       setState(() => _servers = servers);
     } catch (e) {
       _showErrorDialog('加载服务器列表失败: $e');
     } finally {
       setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _discoverLanServers() async {
-    setState(() => _isDiscovering = true);
-    try {
-      List<LanServerInfo> servers =
-          await widget.serverManager.discoverLanServers();
-      setState(() => _lanServers = servers);
-    } catch (e) {
-      _showErrorDialog('发现局域网服务器失败: $e');
-    } finally {
-      setState(() => _isDiscovering = false);
     }
   }
 
@@ -157,11 +94,15 @@ class _ServerPageState extends State<ServerPage> {
                 return;
               }
 
-              ServerInfo server = ServerInfo(
+              Server server = Server(
+                id: DateTime.now().toString(),
                 name: name,
                 address: address,
                 port: port,
-                type: ServerType.vanilla,
+                isLocal: false,
+                tags: [],
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
               );
 
               try {
@@ -179,46 +120,36 @@ class _ServerPageState extends State<ServerPage> {
     );
   }
 
-  Future<void> _connectToServer(ServerInfo server) async {
+  Future<void> _connectToServer(Server server) async {
     try {
-      await widget.serverManager.connectToServer(server.name);
+      await widget.serverManager.connectToServer(server.id);
     } catch (e) {
       _showErrorDialog('连接服务器失败: $e');
     }
   }
 
-  Future<void> _pingServer(ServerInfo server) async {
+  Future<void> _pingServer(Server server) async {
     try {
-      ServerResponse? response =
-          await widget.serverManager.pingServer(server.address, server.port);
-      if (response != null) {
+      ServerPingResult response = await widget.serverManager.pingServer(server.id);
+      if (response.success) {
         _showInfoDialog(
           '服务器信息',
           '''
-版本: ${response.versionName}
-在线人数: ${response.onlinePlayers}/${response.maxPlayers}
-描述: ${response.description}
-安全聊天: ${response.secureChat ? '开启' : '关闭'}
+版本: ${response.version ?? '未知'}
+在线人数: ${response.onlinePlayers ?? 0}/${response.maxPlayers ?? 0}
+描述: ${response.motd ?? '无'}
+延迟: ${response.ping ?? 0}ms
           ''',
         );
       } else {
-        _showErrorDialog('服务器离线或无法连接');
+        _showErrorDialog('服务器离线或无法连接: ${response.error ?? '未知错误'}');
       }
     } catch (e) {
       _showErrorDialog('Ping服务器失败: $e');
     }
   }
 
-  Future<void> _toggleFavorite(ServerInfo server) async {
-    try {
-      await widget.serverManager.toggleFavorite(server.name);
-      _loadServers();
-    } catch (e) {
-      _showErrorDialog('操作失败: $e');
-    }
-  }
-
-  Future<void> _editServer(ServerInfo server) async {
+  Future<void> _editServer(Server server) async {
     TextEditingController nameController =
         TextEditingController(text: server.name);
     TextEditingController addressController =
@@ -280,11 +211,12 @@ class _ServerPageState extends State<ServerPage> {
                 return;
               }
 
-              ServerInfo updatedServer = server.copyWith(
+              Server updatedServer = server.copyWith(
                 name: name,
                 address: address,
                 port: port,
                 description: description,
+                updatedAt: DateTime.now(),
               );
 
               try {
@@ -302,7 +234,7 @@ class _ServerPageState extends State<ServerPage> {
     );
   }
 
-  Future<void> _deleteServer(ServerInfo server) async {
+  Future<void> _deleteServer(Server server) async {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -316,7 +248,7 @@ class _ServerPageState extends State<ServerPage> {
           BamcButton(
             onPressed: () async {
               try {
-                await widget.serverManager.deleteServer(server.name);
+                await widget.serverManager.removeServer(server.id);
                 _loadServers();
                 Navigator.pop(context);
               } catch (e) {
@@ -364,7 +296,7 @@ class _ServerPageState extends State<ServerPage> {
     );
   }
 
-  Widget _buildServerItem(ServerInfo server) {
+  Widget _buildServerItem(Server server) {
     return BamcListItem(
       title: Text(server.name),
       subtitle: Column(
@@ -380,10 +312,7 @@ class _ServerPageState extends State<ServerPage> {
             ),
         ],
       ),
-      leading: Icon(
-        server.favorite ? Icons.star : Icons.star_border,
-        color: server.favorite ? Colors.yellow : null,
-      ),
+      leading: const Icon(Icons.computer),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -408,33 +337,7 @@ class _ServerPageState extends State<ServerPage> {
             tooltip: '删除服务器',
             color: Colors.red,
           ),
-          IconButton(
-            icon: Icon(server.favorite ? Icons.star : Icons.star_border),
-            onPressed: () => _toggleFavorite(server),
-            color: server.favorite ? Colors.yellow : null,
-            tooltip: server.favorite ? '取消收藏' : '收藏',
-          ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildLanServerItem(LanServerInfo server) {
-    return BamcListItem(
-      title: Text(server.name),
-      subtitle: Text('${server.address}:${server.port}'),
-      leading: const Icon(Icons.lan),
-      trailing: IconButton(
-        icon: const Icon(Icons.play_arrow),
-        onPressed: () {
-          ServerInfo lanServer = ServerInfo(
-            name: server.name,
-            address: server.address,
-            port: server.port,
-            type: ServerType.vanilla,
-          );
-          _connectToServer(lanServer);
-        },
       ),
     );
   }
@@ -450,42 +353,6 @@ class _ServerPageState extends State<ServerPage> {
           ],
         ),
         const SizedBox(height: 24),
-        if (_isTerracottaEnabled)
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: _isIpcConnected ? Colors.green[50] : Colors.orange[50],
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: _isIpcConnected ? Colors.green : Colors.orange,
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  _isIpcConnected ? Icons.check_circle : Icons.warning,
-                  color: _isIpcConnected ? Colors.green : Colors.orange,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    _isIpcConnected
-                        ? 'Terracotta集成已启用并连接'
-                        : 'Terracotta集成已启用但未连接',
-                    style: TextStyle(
-                      color: _isIpcConnected ? Colors.green : Colors.orange,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: _showCopyrightInfo,
-                  child: const Text('查看版权信息'),
-                ),
-              ],
-            ),
-          ),
-        const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
@@ -495,7 +362,6 @@ class _ServerPageState extends State<ServerPage> {
                 hintText: '输入服务器名称或地址',
                 onChanged: (value) {
                   setState(() => _searchQuery = value);
-                  _loadServers();
                 },
               ),
             ),
@@ -517,19 +383,6 @@ class _ServerPageState extends State<ServerPage> {
             Row(
               children: [
                 BamcButton(
-                  onPressed: _discoverLanServers,
-                  text: _isDiscovering ? '搜索中...' : '搜索局域网',
-                  disabled: _isDiscovering,
-                ),
-                const SizedBox(width: 16),
-                BamcButton(
-                  onPressed: _toggleTerracottaIntegration,
-                  text: _isTerracottaEnabled ? '禁用Terracotta' : '启用Terracotta',
-                  type: _isTerracottaEnabled ? BamcButtonType.warning : BamcButtonType.success,
-                  size: BamcButtonSize.medium,
-                ),
-                const SizedBox(width: 16),
-                BamcButton(
                   onPressed: _showCopyrightInfo,
                   text: '版权信息',
                   type: BamcButtonType.outline,
@@ -546,29 +399,11 @@ class _ServerPageState extends State<ServerPage> {
           Expanded(
             child: ListView(
               children: [
-                if (_servers.isEmpty && _searchQuery.isEmpty)
+                if (_servers.isEmpty)
                   const Center(
                     child: Text('暂无服务器，点击"添加服务器"添加'),
                   ),
-                if (_servers.isEmpty && _searchQuery.isNotEmpty)
-                  const Center(
-                    child: Text('没有找到匹配的服务器'),
-                  ),
                 ..._servers.map(_buildServerItem),
-                if (_lanServers.isNotEmpty)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 24),
-                      const Text(
-                        '局域网服务器',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 16),
-                      ..._lanServers.map(_buildLanServerItem),
-                    ],
-                  ),
               ],
             ),
           ),

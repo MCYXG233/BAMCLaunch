@@ -29,6 +29,10 @@ class Modpack {
     required this.path,
   });
 
+  // 兼容页面中的字段名称
+  String get minecraftVersion => gameVersion;
+  String? get loaderType => modLoader.isNotEmpty ? modLoader : null;
+
   Modpack copyWith({
     String? id,
     String? name,
@@ -130,4 +134,51 @@ class Mod {
       installedAt: installedAt ?? this.installedAt,
     );
   }
+}
+
+enum ModpackFormat {
+  curseforge,
+  modrinth,
+}
+
+class ModpackCreateOptions {
+  final String name;
+  final String author;
+  final String version;
+  final String description;
+  final String minecraftVersion;
+  final ModpackFormat format;
+  final List<String> includeFiles;
+  final List<String> excludeFiles;
+
+  ModpackCreateOptions({
+    required this.name,
+    required this.author,
+    required this.version,
+    required this.description,
+    required this.minecraftVersion,
+    required this.format,
+    required this.includeFiles,
+    required this.excludeFiles,
+  });
+}
+
+class ModpackImportResult {
+  final bool success;
+  final String? errorMessage;
+
+  ModpackImportResult({
+    required this.success,
+    this.errorMessage,
+  });
+}
+
+class ModpackProgress {
+  final double progress;
+  final String? message;
+
+  ModpackProgress({
+    required this.progress,
+    this.message,
+  });
 }

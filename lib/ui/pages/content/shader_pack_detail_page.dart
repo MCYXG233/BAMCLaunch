@@ -120,15 +120,23 @@ class _ShaderPackDetailPageState extends State<ShaderPackDetailPage> {
   Future<void> _performInstall() async {
     setState(() => _isLoading = true);
     try {
-      await contentManager.installContent(
-        item: widget.shaderPack,
-        versionId: _selectedVersion!.id,
-        onProgress: (progress) {},
+      final platformAdapter = PlatformAdapterFactory.getInstance();
+      final destination = '${platformAdapter.gameDirectory}/shaderpacks';
+      final result = await contentManager.installContent(
+        widget.shaderPack.id,
+        _selectedVersion!.id,
+        destination,
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('光影包 ${widget.shaderPack.name} 安装成功')),
-      );
+      if (result) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('光影包 ${widget.shaderPack.name} 安装成功')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('安装失败')),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('安装失败: $e')),

@@ -29,11 +29,13 @@ class ServerManager implements IServerManager {
   Future<Server> addServer(Server server) async {
     try {
       _logger.info('添加服务器: ${server.name}');
-      
+
       final serversDir = '${_platformAdapter.gameDirectory}/servers';
       await _platformAdapter.createDirectory(serversDir);
 
-      final serverId = server.id.isNotEmpty ? server.id : 'server_${DateTime.now().millisecondsSinceEpoch}';
+      final serverId = server.id.isNotEmpty
+          ? server.id
+          : 'server_${DateTime.now().millisecondsSinceEpoch}';
       final newServer = server.copyWith(
         id: serverId,
         createdAt: DateTime.now(),
@@ -53,12 +55,13 @@ class ServerManager implements IServerManager {
   Future<bool> removeServer(String serverId) async {
     try {
       _logger.info('删除服务器: $serverId');
-      
+
       final servers = await getServers();
-      final server = servers.firstWhere((s) => s.id == serverId, orElse: () => throw Exception('服务器不存在'));
+      final server = servers.firstWhere((s) => s.id == serverId,
+          orElse: () => throw Exception('服务器不存在'));
 
       final serversDir = '${_platformAdapter.gameDirectory}/servers';
-      final serverFile = File('$serversDir/${serverId}.json');
+      final serverFile = File('$serversDir/$serverId.json');
       if (await serverFile.exists()) {
         await serverFile.delete();
       }
@@ -83,7 +86,7 @@ class ServerManager implements IServerManager {
   Future<Server> updateServer(Server server) async {
     try {
       _logger.info('更新服务器: ${server.name}');
-      
+
       final existingServer = await getServer(server.id);
       if (existingServer == null) {
         throw Exception('服务器不存在');
@@ -106,7 +109,7 @@ class ServerManager implements IServerManager {
   Future<List<Server>> getServers() async {
     try {
       _logger.info('获取服务器列表');
-      
+
       final serversDir = '${_platformAdapter.gameDirectory}/servers';
       if (!await Directory(serversDir).exists()) {
         return [];
@@ -138,10 +141,10 @@ class ServerManager implements IServerManager {
   Future<Server?> getServer(String serverId) async {
     try {
       _logger.info('获取服务器详情: $serverId');
-      
+
       final serversDir = '${_platformAdapter.gameDirectory}/servers';
-      final serverFile = File('$serversDir/${serverId}.json');
-      
+      final serverFile = File('$serversDir/$serverId.json');
+
       if (!await serverFile.exists()) {
         return null;
       }
@@ -159,7 +162,7 @@ class ServerManager implements IServerManager {
   Future<ServerConnectionResult> connectToServer(String serverId) async {
     try {
       _logger.info('连接服务器: $serverId');
-      
+
       final server = await getServer(serverId);
       if (server == null) {
         return ServerConnectionResult(
@@ -204,7 +207,7 @@ class ServerManager implements IServerManager {
       _logger.info('断开服务器连接: $serverId');
       // 对于远程服务器，这里只是一个占位符
       // 对于本地服务器，可能需要停止进程
-      
+
       _logger.info('断开服务器连接成功: $serverId');
       return true;
     } catch (e) {
@@ -217,7 +220,7 @@ class ServerManager implements IServerManager {
   Future<ServerPingResult> pingServer(String serverId) async {
     try {
       _logger.info('测试服务器连接: $serverId');
-      
+
       final server = await getServer(serverId);
       if (server == null) {
         return ServerPingResult(
@@ -255,7 +258,7 @@ class ServerManager implements IServerManager {
   Future<ServerSyncResult> syncServerMods(String serverId) async {
     try {
       _logger.info('同步服务器模组: $serverId');
-      
+
       final server = await getServer(serverId);
       if (server == null) {
         return ServerSyncResult(
@@ -295,7 +298,7 @@ class ServerManager implements IServerManager {
   Future<ServerStatus> getServerStatus(String serverId) async {
     try {
       _logger.info('获取服务器状态: $serverId');
-      
+
       final server = await getServer(serverId);
       if (server == null) {
         return ServerStatus(
@@ -306,7 +309,8 @@ class ServerManager implements IServerManager {
       }
 
       final pingResult = await pingServer(serverId);
-      final state = pingResult.success ? ServerState.online : ServerState.offline;
+      final state =
+          pingResult.success ? ServerState.online : ServerState.offline;
 
       return ServerStatus(
         serverId: serverId,
@@ -332,7 +336,7 @@ class ServerManager implements IServerManager {
   Future<String> exportServerConfig(String serverId, String destination) async {
     try {
       _logger.info('导出服务器配置: $serverId');
-      
+
       final server = await getServer(serverId);
       if (server == null) {
         throw Exception('服务器不存在');
@@ -357,7 +361,8 @@ class ServerManager implements IServerManager {
       };
 
       final outputFile = File(destination);
-      await outputFile.writeAsString(jsonEncode(config, indent: 2));
+      await outputFile
+          .writeAsString(const JsonEncoder.withIndent('  ').convert(config));
 
       _logger.info('服务器配置导出成功: $destination');
       return destination;
@@ -371,7 +376,7 @@ class ServerManager implements IServerManager {
   Future<Server> importServerConfig(String filePath) async {
     try {
       _logger.info('导入服务器配置: $filePath');
-      
+
       final file = File(filePath);
       if (!await file.exists()) {
         throw Exception('配置文件不存在');
@@ -382,7 +387,8 @@ class ServerManager implements IServerManager {
       final serverData = config['server'] as Map<String, dynamic>;
 
       final server = Server(
-        id: serverData['id'] as String? ?? 'server_${DateTime.now().millisecondsSinceEpoch}',
+        id: serverData['id'] as String? ??
+            'server_${DateTime.now().millisecondsSinceEpoch}',
         name: serverData['name'] as String,
         address: serverData['address'] as String,
         port: serverData['port'] as int,
@@ -411,7 +417,7 @@ class ServerManager implements IServerManager {
   Future<bool> startServer(String serverId) async {
     try {
       _logger.info('启动服务器: $serverId');
-      
+
       final server = await getServer(serverId);
       if (server == null) {
         return false;
@@ -442,7 +448,7 @@ class ServerManager implements IServerManager {
   Future<bool> stopServer(String serverId) async {
     try {
       _logger.info('停止服务器: $serverId');
-      
+
       final server = await getServer(serverId);
       if (server == null) {
         return false;
@@ -467,9 +473,9 @@ class ServerManager implements IServerManager {
   Future<bool> restartServer(String serverId) async {
     try {
       _logger.info('重启服务器: $serverId');
-      
+
       await stopServer(serverId);
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 2));
       return await startServer(serverId);
     } catch (e) {
       _logger.error('重启服务器失败: $e');
@@ -500,7 +506,8 @@ class ServerManager implements IServerManager {
       'updatedAt': server.updatedAt.toIso8601String(),
     };
 
-    await serverFile.writeAsString(jsonEncode(serverData, indent: 2));
+    await serverFile
+        .writeAsString(const JsonEncoder.withIndent('  ').convert(serverData));
   }
 
   Server _parseServer(dynamic data) {
