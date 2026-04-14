@@ -24,6 +24,9 @@ class _HomePageState extends State<HomePage> {
     _loadData();
   }
 
+  int _installedModsCount = 0;
+  String _playTime = '0h';
+
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
@@ -40,6 +43,14 @@ class _HomePageState extends State<HomePage> {
       
       final latestVersion = await widget.versionManager.getVersionInfo(latestRelease.id);
       setState(() => _recommendedVersions = [latestVersion]);
+
+      // 加载模组数量（这里应该从模组管理器获取，暂时使用0）
+      // 实际项目中应该注入IModManager并调用相应方法
+      setState(() => _installedModsCount = 0);
+
+      // 加载游戏时长（这里应该从统计数据获取，暂时使用0h）
+      // 实际项目中应该从存储或统计服务获取
+      setState(() => _playTime = '0h');
     } catch (e) {
       logger.error('Failed to load home page data: $e');
     } finally {
@@ -227,7 +238,7 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               child: _buildStatisticCard(
                 title: '已安装模组',
-                value: '0', // 暂时显示0，后续集成模组管理
+                value: _installedModsCount.toString(),
                 icon: Icons.extension,
                 color: BamcColors.secondary,
               ),
@@ -236,7 +247,7 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               child: _buildStatisticCard(
                 title: '游戏时长',
-                value: '0h', // 暂时显示0，后续集成游戏时长统计
+                value: _playTime,
                 icon: Icons.timer,
                 color: BamcColors.success,
               ),
