@@ -67,13 +67,53 @@ class _SidebarState extends State<Sidebar> {
                     ],
                   )
                 : null,
+            border: isSelected
+                ? Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 2,
+                  )
+                : isHovering
+                    ? Border.all(
+                        color: BamcColors.primary.withOpacity(0.3),
+                        width: 1,
+                      )
+                    : null,
+            boxShadow: isSelected || isHovering
+                ? [
+                    BoxShadow(
+                      color: BamcColors.primary.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
           child: Row(
             children: [
-              Icon(
-                icon,
-                size: 20,
-                color: isSelected ? Colors.white : BamcColors.textPrimary,
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Colors.white.withOpacity(0.2)
+                      : isHovering
+                          ? BamcColors.primary.withOpacity(0.2)
+                          : Colors.transparent,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(
+                    color: isSelected
+                        ? Colors.white
+                        : isHovering
+                            ? BamcColors.primary
+                            : BamcColors.border,
+                    width: 1,
+                  ),
+                ),
+                child: Icon(
+                  icon,
+                  size: 16,
+                  color: isSelected ? Colors.white : BamcColors.textPrimary,
+                ),
               ),
               const SizedBox(width: 12),
               Text(
@@ -82,6 +122,7 @@ class _SidebarState extends State<Sidebar> {
                   fontSize: 14,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                   color: isSelected ? Colors.white : BamcColors.textPrimary,
+                  fontFamily: isSelected ? 'Minecraft' : null,
                 ),
               ),
             ],
@@ -108,25 +149,83 @@ class _SidebarState extends State<Sidebar> {
         children: [
           // Logo区域
           Container(
-            height: 60,
+            height: 80,
             padding: const EdgeInsets.all(16),
-            child: const Column(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  BamcColors.primary.withOpacity(0.1),
+                  BamcColors.secondary.withOpacity(0.1),
+                ],
+              ),
+              border: Border(
+                bottom: BorderSide(
+                  color: BamcColors.border,
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'BAMCLauncher',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: BamcColors.primary,
-                  ),
-                ),
-                Text(
-                  'Minecraft Launcher',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: BamcColors.textSecondary,
-                  ),
+                Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            BamcColors.primary,
+                            BamcColors.secondary,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: BamcColors.primary.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.gamepad_rounded,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'BAMCLauncher',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: BamcColors.primary,
+                            fontFamily: 'Minecraft',
+                          ),
+                        ),
+                        Text(
+                          'Minecraft Launcher',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: BamcColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),

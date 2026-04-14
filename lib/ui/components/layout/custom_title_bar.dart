@@ -182,15 +182,29 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
           _handleMouseUp(event);
         },
         child: Container(
-          height: 40,
-          decoration: const BoxDecoration(
-            color: BamcColors.surface,
+          height: 48,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                BamcColors.primary.withOpacity(0.05),
+                BamcColors.secondary.withOpacity(0.05),
+              ],
+            ),
             border: Border(
               bottom: BorderSide(
                 color: BamcColors.border,
                 width: 1,
               ),
             ),
+            boxShadow: [
+              BoxShadow(
+                color: BamcColors.shadow,
+                blurRadius: 4,
+                offset: const Offset(0, 1),
+              ),
+            ],
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -202,13 +216,44 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
                   _buildLeftActions(),
                 Expanded(
                   child: Center(
-                    child: Text(
-                      widget.title,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: BamcColors.textPrimary,
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 20,
+                          height: 20,
+                          margin: const EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                BamcColors.primary,
+                                BamcColors.secondary,
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: Colors.white,
+                              width: 1,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.gamepad_rounded,
+                            size: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          widget.title,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: BamcColors.primary,
+                            fontFamily: 'Minecraft',
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -217,7 +262,7 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
                     children: [
                       if (widget.onPerformanceToggle != null)
                         _buildPerformanceButton(),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 12),
                       _buildWindowControls(),
                     ],
                   )

@@ -154,12 +154,12 @@ class _BamcInputState extends State<BamcInput> {
   }
 
   InputBorder _getBorder() {
-    final borderRadius = widget.borderRadius ?? BorderRadius.circular(8);
+    final borderRadius = widget.borderRadius ?? BorderRadius.circular(6);
 
     if (widget.errorText != null && widget.errorText!.isNotEmpty) {
       return OutlineInputBorder(
         borderRadius: borderRadius,
-        borderSide: const BorderSide(
+        borderSide: BorderSide(
           color: BamcColors.warning,
           width: 2,
         ),
@@ -169,7 +169,7 @@ class _BamcInputState extends State<BamcInput> {
     if (_isFocused) {
       return OutlineInputBorder(
         borderRadius: borderRadius,
-        borderSide: const BorderSide(
+        borderSide: BorderSide(
           color: BamcColors.primary,
           width: 2,
         ),
@@ -188,9 +188,10 @@ class _BamcInputState extends State<BamcInput> {
 
     return OutlineInputBorder(
       borderRadius: borderRadius,
-      borderSide: const BorderSide(
+      borderSide: BorderSide(
         color: BamcColors.border,
         width: 1,
+        style: BorderStyle.solid,
       ),
     );
   }
@@ -267,14 +268,34 @@ class _BamcInputState extends State<BamcInput> {
                     color: BamcColors.textSecondary,
                   ),
                   prefixIcon: widget.prefixIcon != null
-                      ? Icon(
-                          widget.prefixIcon,
-                          size: _getIconSize(),
-                          color: isDisabled
-                              ? BamcColors.textDisabled
-                              : (_isFocused
-                                  ? BamcColors.primary
-                                  : BamcColors.textSecondary),
+                      ? Container(
+                          margin: const EdgeInsets.only(left: 4),
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: isDisabled
+                                ? BamcColors.background
+                                : (_isFocused
+                                    ? BamcColors.primary.withOpacity(0.1)
+                                    : BamcColors.background),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: isDisabled
+                                  ? BamcColors.border
+                                  : (_isFocused
+                                      ? BamcColors.primary
+                                      : BamcColors.border),
+                              width: 1,
+                            ),
+                          ),
+                          child: Icon(
+                            widget.prefixIcon,
+                            size: _getIconSize() - 4,
+                            color: isDisabled
+                                ? BamcColors.textDisabled
+                                : (_isFocused
+                                    ? BamcColors.primary
+                                    : BamcColors.textSecondary),
+                          ),
                         )
                       : null,
                   suffixIcon: widget.suffixIcon != null
