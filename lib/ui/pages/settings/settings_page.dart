@@ -1,10 +1,15 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../../core/core.dart';
 import '../../../ui/theme/colors.dart';
 import '../../components/buttons/bamc_button.dart';
 import '../../components/dialogs/update_dialog.dart';
 
+/// 设置页面组件
+/// 提供游戏设置、启动设置、高级设置等功能
 class SettingsPage extends StatefulWidget {
+  /// 配置管理器实例
   final IConfigManager configManager;
 
   const SettingsPage({super.key, required this.configManager});
@@ -14,14 +19,23 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  /// 游戏路径输入控制器
   late TextEditingController _gamePathController;
+  /// Java路径输入控制器
   late TextEditingController _javaPathController;
+  /// 自动更新开关状态
   bool _autoUpdate = false;
+  /// 自动登录开关状态
   bool _autoLogin = false;
+  /// 启用日志开关状态
   bool _enableLogs = true;
+  /// 是否正在加载
   bool _isLoading = false;
+  /// 是否正在检查更新
   bool _isCheckingUpdate = false;
+  /// 当前版本号
   String _currentVersion = '1.0.0';
+  /// 更新管理器实例
   late UpdateManager _updateManager;
 
   @override
@@ -30,7 +44,6 @@ class _SettingsPageState extends State<SettingsPage> {
     _gamePathController = TextEditingController();
     _javaPathController = TextEditingController();
     
-    // 初始化更新管理器
     _updateManager = UpdateManager(
       platformAdapter: PlatformAdapterFactory.getInstance(),
       configManager: widget.configManager,
@@ -108,6 +121,54 @@ class _SettingsPageState extends State<SettingsPage> {
       });
     } catch (e) {
       logger.error('Failed to load version info: $e');
+    }
+  }
+
+  Future<void> _pickGamePath() async {
+    try {
+      String? selectedDirectory = await FilePicker.platform.getDirectoryPath(
+        dialogTitle: '选择游戏目录',
+      );
+      if (selectedDirectory != null) {
+        setState(() {
+          _gamePathController.text = selectedDirectory;
+        });
+      }
+    } catch (e) {
+      logger.error('Failed to pick game path: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('选择目录失败: $e'),
+            backgroundColor: BamcColors.warning,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _pickJavaPath() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        dialogTitle: '选择Java可执行文件',
+        type: Platform.isWindows ? FileType.custom : FileType.any,
+        allowedExtensions: Platform.isWindows ? ['exe'] : null,
+      );
+      if (result != null && result.files.single.path != null) {
+        setState(() {
+          _javaPathController.text = result.files.single.path!;
+        });
+      }
+    } catch (e) {
+      logger.error('Failed to pick Java path: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('选择Java文件失败: $e'),
+            backgroundColor: BamcColors.warning,
+          ),
+        );
+      }
     }
   }
 
@@ -205,10 +266,22 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       child: Column(
         children: [
-          _buildTextField(
-            label: '游戏路径',
-            controller: _gamePathController,
-            hintText: '选择游戏安装路径',
+          Row(
+            children: [
+              Expanded(
+                  child: _buildTextField(
+                label: '游戏路径',
+                controller: _gamePathController,
+                hintText: '选择游戏安装路径',
+              )),
+              const SizedBox(width: 16),
+              BamcButton(
+                text: '浏览',
+                onPressed: _pickGamePath,
+                type: BamcButtonType.outline,
+                size: BamcButtonSize.small,
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           Row(
@@ -222,7 +295,7 @@ class _SettingsPageState extends State<SettingsPage> {
               const SizedBox(width: 16),
               BamcButton(
                 text: '浏览',
-                onPressed: () {},
+                onPressed: _pickJavaPath,
                 type: BamcButtonType.outline,
                 size: BamcButtonSize.small,
               ),

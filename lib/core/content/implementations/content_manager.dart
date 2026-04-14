@@ -1,22 +1,39 @@
 import '../interfaces/i_content_manager.dart';
 import '../models/content_models.dart';
+import '../api/curseforge_api.dart';
+import '../api/modrinth_api.dart';
 import '../../http/i_http_client.dart';
 import '../../logger/i_logger.dart';
 import '../../download/i_download_engine.dart';
 import 'dart:convert';
 
+/// 内容管理器实现类
+/// 负责管理游戏内容的搜索、下载、安装等功能，对接CurseForge和Modrinth平台
 class ContentManager implements IContentManager {
+  /// HTTP客户端
   final IHttpClient _httpClient;
+  /// 日志记录器
   final ILogger _logger;
+  /// 下载引擎
   final IDownloadEngine _downloadEngine;
+  /// CurseForge API客户端
+  final CurseForgeApi _curseForgeApi;
+  /// Modrinth API客户端
+  final ModrinthApi _modrinthApi;
 
+  /// 构造函数
+  /// [httpClient]: HTTP客户端实例
+  /// [logger]: 日志记录器实例
+  /// [downloadEngine]: 下载引擎实例
   ContentManager({
     required IHttpClient httpClient,
     required ILogger logger,
     required IDownloadEngine downloadEngine,
   })  : _httpClient = httpClient,
         _logger = logger,
-        _downloadEngine = downloadEngine;
+        _downloadEngine = downloadEngine,
+        _curseForgeApi = CurseForgeApi(),
+        _modrinthApi = ModrinthApi();
 
   @override
   Future<List<Mod>> searchMods({
@@ -271,8 +288,55 @@ class ContentManager implements IContentManager {
   @override
   Future<bool> installContent(String contentId, String version, String destination, {String? source}) async {
     try {
-      _logger.info('安装内容: $contentId, 版本: $version');
-      // 这里实现安装逻辑
+      _logger.info('安装内容: $contentId, 版本: $version, 目标: $destination');
+      
+      String? downloadUrl;
+      
+      if (source == 'modrinth' || (source == null && !contentId.startsWith('curseforge-'))) {
+        try {
+          final versions = await _modrinthApi.getProjectVersions(contentId);
+          if (versions.isNotEmpty) {
+            for (final v in versions) {
+              if (v['version_number'] == version || version.isEmpty) {
+                final files = v['files'] as List;
+                if (files.isNotEmpty) {
+                  final primaryFile = files.firstWhere(
+                    (f) => f['primary'] == true,
+                    orElse: () => files.first,
+                  );
+                  downloadUrl = primaryFile['url'] as String;
+                  break;
+                }
+              }
+            }
+          }
+        } catch (e) {
+          _logger.warn('从Modrinth获取下载链接失败: $e');
+        }
+      }
+      
+      if (downloadUrl == null && (source == 'curseforge' || contentId.startsWith('curseforge-'))) {
+        if (_curseForgeApi.isConfigured) {
+          try {
+            final cfId = contentId.replaceAll('curseforge-', '');
+            final files = await _curseForgeApi.getModFiles(cfId);
+            if (files.isNotEmpty) {
+              final fileId = files.first['id'].toString();
+              downloadUrl = await _curseForgeApi.getFileDownloadUrl(fileId);
+            }
+          } catch (e) {
+            _logger.warn('从CurseForge获取下载链接失败: $e');
+          }
+        }
+      }
+      
+      if (downloadUrl == null) {
+        throw Exception('无法获取下载链接');
+      }
+      
+      await _downloadEngine.downloadFile(downloadUrl, destination);
+      
+      _logger.info('内容安装成功: $contentId');
       return true;
     } catch (e) {
       _logger.error('安装内容失败: $e');
@@ -314,14 +378,52 @@ class ContentManager implements IContentManager {
   }) async {
     try {
       _logger.info('搜索内容: $query, 类型: ${type?.name}');
-      // 这里实现搜索逻辑
-      return [];
+      final contentType = type ?? ContentType.mod;
+      
+      List<ContentItem> results = [];
+      
+      try {
+        final searchQuery = SearchQuery(
+          query: query,
+          type: contentType,
+          gameVersion: gameVersion,
+          page: page,
+          pageSize: pageSize,
+        );
+        final modrinthResult = await _modrinthApi.search(searchQuery);
+        results.addAll(modrinthResult.items);
+      } catch (e) {
+        _logger.warn('Modrinth搜索失败: $e');
+      }
+      
+      if (results.isEmpty && _curseForgeApi.isConfigured) {
+        try {
+          final searchQuery = SearchQuery(
+            query: query,
+            type: contentType,
+            gameVersion: gameVersion,
+            page: page,
+            pageSize: pageSize,
+          );
+          final curseforgeResult = await _curseForgeApi.search(searchQuery);
+          results.addAll(curseforgeResult.items);
+        } catch (e) {
+          _logger.warn('CurseForge搜索失败: $e');
+        }
+      }
+      
+      return results;
     } catch (e) {
       _logger.error('搜索内容失败: $e');
       return [];
     }
   }
 
+  /// 获取热门内容
+  /// [type]: 内容类型
+  /// [gameVersion]: 游戏版本
+  /// [limit]: 返回数量限制
+  /// 返回热门内容列表
   @override
   Future<List<ContentItem>> getPopularContent({
     ContentType? type,
@@ -330,8 +432,25 @@ class ContentManager implements IContentManager {
   }) async {
     try {
       _logger.info('获取热门内容: ${type?.name}');
-      // 这里实现获取热门内容的逻辑
-      return [];
+      final contentType = type ?? ContentType.mod;
+      
+      List<ContentItem> results = [];
+      
+      try {
+        results = await _modrinthApi.getPopularProjects(contentType, limit: limit);
+      } catch (e) {
+        _logger.warn('Modrinth获取热门项目失败: $e');
+      }
+      
+      if (results.isEmpty && _curseForgeApi.isConfigured) {
+        try {
+          results = await _curseForgeApi.getPopularMods(contentType, limit: limit);
+        } catch (e) {
+          _logger.warn('CurseForge获取热门项目失败: $e');
+        }
+      }
+      
+      return results;
     } catch (e) {
       _logger.error('获取热门内容失败: $e');
       return [];
