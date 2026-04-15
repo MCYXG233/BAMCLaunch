@@ -91,11 +91,11 @@ class ModpackManager implements IModpackManager {
       }
 
       // 解析模组列表
-      final mods = <Mod>[];
+      final mods = <ModpackMod>[];
       final files = modpackInfo['files'] ?? modpackInfo['mods'] ?? [];
       for (final file in files) {
         if (file is Map<String, dynamic>) {
-          mods.add(Mod(
+          mods.add(ModpackMod(
             id: file['id']?.toString() ?? '',
             name: file['name'] ?? '',
             version: file['version'] ?? '',
@@ -238,8 +238,8 @@ class ModpackManager implements IModpackManager {
       await _platformAdapter.createDirectory('$instanceDir/mods');
       await _platformAdapter.createDirectory('$instanceDir/config');
 
-      final installedMods = <String>[];
-      final failedMods = <String>[];
+      final installedModpackMods = <String>[];
+      final failedModpackMods = <String>[];
 
       // 安装模组
       for (final mod in modpack.mods) {
@@ -256,10 +256,10 @@ class ModpackManager implements IModpackManager {
           } else if (File(mod.filePath).existsSync()) {
             await File(mod.filePath).copy(modPath);
           }
-          installedMods.add(mod.name);
+          installedModpackMods.add(mod.name);
         } catch (e) {
           _logger.error('安装模组失败: ${mod.name}, 错误: $e');
-          failedMods.add(mod.name);
+          failedModpackMods.add(mod.name);
         }
       }
 
@@ -277,15 +277,15 @@ class ModpackManager implements IModpackManager {
         const JsonEncoder.withIndent('  ').convert(versionJson),
       );
 
-      final success = failedMods.isEmpty;
+      final success = failedModpackMods.isEmpty;
       _logger.info('整合包安装${success ? '成功' : '失败'}: ${modpack.name}');
 
       return ModpackInstallationResult(
         success: success,
         modpackId: modpackId,
         gameVersion: gameVersion,
-        installedMods: installedMods,
-        failedMods: failedMods,
+        installedMods: installedModpackMods,
+        failedMods: failedModpackMods,
         error: success ? null : '部分模组安装失败',
       );
     } catch (e) {
@@ -469,7 +469,7 @@ class ModpackManager implements IModpackManager {
   }
 
   @override
-  Future<List<Mod>> getModpackMods(String modpackId) async {
+  Future<List<ModpackMod>> getModpackMods(String modpackId) async {
     try {
       _logger.info('获取整合包模组列表: $modpackId');
 
@@ -496,34 +496,31 @@ class ModpackManager implements IModpackManager {
         return false;
       }
 
-      // 获取模组详情
-      final modDetails = await _contentManager.getModDetails(modId);
-
       // 创建模组对象
-      final newMod = Mod(
+      final newModpackMod = ModpackMod(
         id: modId,
-        name: modDetails.name,
+        name: 'Unknown Mod',
         version: version,
-        author: modDetails.author,
-        description: modDetails.summary,
-        source: modDetails.source,
-        downloadUrl: '', // 后续需要获取下载链接
+        author: 'Unknown',
+        description: '',
+        source: 'local',
+        downloadUrl: '',
         size: 0,
         filePath: '',
         installedAt: DateTime.now(),
       );
 
       // 添加到模组列表
-      final updatedMods = [...modpack.mods, newMod];
+      final updatedModpackMods = [...modpack.mods, newModpackMod];
       final updatedModpack = modpack.copyWith(
-        mods: updatedMods,
+        mods: updatedModpackMods,
         updatedAt: DateTime.now(),
       );
 
       // 保存更新后的整合包信息
       await _saveModpackInfo(updatedModpack);
 
-      _logger.info('模组添加成功: ${modDetails.name}');
+      _logger.info('模组添加成功');
       return true;
     } catch (e) {
       _logger.error('添加模组失败: $e');
@@ -542,9 +539,9 @@ class ModpackManager implements IModpackManager {
       }
 
       // 移除模组
-      final updatedMods = modpack.mods.where((mod) => mod.id != modId).toList();
+      final updatedModpackMods = modpack.mods.where((mod) => mod.id != modId).toList();
       final updatedModpack = modpack.copyWith(
-        mods: updatedMods,
+        mods: updatedModpackMods,
         updatedAt: DateTime.now(),
       );
 
@@ -571,7 +568,7 @@ class ModpackManager implements IModpackManager {
       }
 
       // 更新模组版本
-      final updatedMods = modpack.mods.map((mod) {
+      final updatedModpackMods = modpack.mods.map((mod) {
         if (mod.id == modId) {
           return mod.copyWith(
             version: version,
@@ -582,7 +579,7 @@ class ModpackManager implements IModpackManager {
       }).toList();
 
       final updatedModpack = modpack.copyWith(
-        mods: updatedMods,
+        mods: updatedModpackMods,
         updatedAt: DateTime.now(),
       );
 
@@ -641,7 +638,7 @@ class ModpackManager implements IModpackManager {
       }
 
       // 加载模组列表
-      final mods = <Mod>[];
+      final mods = <ModpackMod>[];
       // 这里可以从modpack.json或其他文件加载模组列表
 
       return Modpack(
@@ -757,11 +754,11 @@ class ModpackManager implements IModpackManager {
       onProgress(ModpackProgress(progress: 0.9, message: '解析模组列表...'));
 
       // 解析模组列表
-      final mods = <Mod>[];
+      final mods = <ModpackMod>[];
       final files = modpackInfo['files'] ?? modpackInfo['mods'] ?? [];
       for (final file in files) {
         if (file is Map<String, dynamic>) {
-          mods.add(Mod(
+          mods.add(ModpackMod(
             id: file['id']?.toString() ?? '',
             name: file['name'] ?? '',
             version: file['version'] ?? '',
@@ -943,13 +940,13 @@ class ModpackManager implements IModpackManager {
 
       onProgress(0.2);
 
-      final installedMods = <String>[];
-      final failedMods = <String>[];
+      final installedModpackMods = <String>[];
+      final failedModpackMods = <String>[];
 
       // 安装模组
       if (modpack.mods.isNotEmpty) {
-        final totalMods = modpack.mods.length;
-        var installedModsCount = 0;
+        final totalModpackMods = modpack.mods.length;
+        var installedModpackModsCount = 0;
 
         for (final mod in modpack.mods) {
           try {
@@ -962,13 +959,13 @@ class ModpackManager implements IModpackManager {
             } else if (File(mod.filePath).existsSync()) {
               await File(mod.filePath).copy(modPath);
             }
-            installedMods.add(mod.name);
+            installedModpackMods.add(mod.name);
           } catch (e) {
             _logger.error('安装模组失败: ${mod.name}, 错误: $e');
-            failedMods.add(mod.name);
+            failedModpackMods.add(mod.name);
           }
-          installedModsCount++;
-          final progress = 0.2 + (0.6 * installedModsCount / totalMods);
+          installedModpackModsCount++;
+          final progress = 0.2 + (0.6 * installedModpackModsCount / totalModpackMods);
           onProgress(progress);
         }
       }
@@ -991,7 +988,7 @@ class ModpackManager implements IModpackManager {
 
       onProgress(1.0);
 
-      final success = failedMods.isEmpty;
+      final success = failedModpackMods.isEmpty;
       _logger.info('整合包安装${success ? '成功' : '失败'}: ${modpack.name}');
 
       return ModpackImportResult(

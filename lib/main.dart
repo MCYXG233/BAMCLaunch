@@ -57,8 +57,8 @@ void main() async {
       isAnonymous: true,
     );
 
-    print('Global error caught: $error');
-    print('Stack trace: $stackTrace');
+    logger.error('Global error caught: $error');
+    logger.error('Stack trace: $stackTrace');
   });
 }
 

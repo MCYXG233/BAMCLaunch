@@ -160,8 +160,7 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
   Widget _buildRightActions() {
     return Row(
       children: [
-        if (widget.onPerformanceToggle != null)
-          _buildPerformanceButton(),
+        if (widget.onPerformanceToggle != null) _buildPerformanceButton(),
       ],
     );
   }
@@ -192,17 +191,17 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
                 BamcColors.secondary.withOpacity(0.05),
               ],
             ),
-            border: Border(
+            border: const Border(
               bottom: BorderSide(
                 color: BamcColors.border,
                 width: 1,
               ),
             ),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: BamcColors.shadow,
                 blurRadius: 4,
-                offset: const Offset(0, 1),
+                offset: Offset(0, 1),
               ),
             ],
           ),
@@ -224,7 +223,7 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
                           height: 20,
                           margin: const EdgeInsets.only(right: 8),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
+                            gradient: const LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               colors: [
@@ -246,7 +245,7 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
                         ),
                         Text(
                           widget.title,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: BamcColors.primary,

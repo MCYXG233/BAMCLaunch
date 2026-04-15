@@ -17,7 +17,7 @@ abstract class IContentManager {
   Future<List<ModFile>> getModFiles(String modId, {String? source});
 
   // 搜索整合包
-  Future<List<Modpack>> searchModpacks({
+  Future<List<ContentModpack>> searchModpacks({
     required String query,
     String? gameVersion,
     int page = 1,
@@ -25,10 +25,10 @@ abstract class IContentManager {
   });
 
   // 获取整合包详情
-  Future<Modpack> getModpackDetails(String modpackId, {String? source});
+  Future<ContentModpack> getModpackDetails(String modpackId, {String? source});
 
   // 获取整合包文件
-  Future<List<ModpackFile>> getModpackFiles(String modpackId, {String? source});
+  Future<List<ContentModpackFile>> getModpackFiles(String modpackId, {String? source});
 
   // 下载模组
   Future<String> downloadMod(String modId, String fileId, String destination, {String? source});

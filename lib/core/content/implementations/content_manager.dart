@@ -5,7 +5,9 @@ import '../api/modrinth_api.dart';
 import '../../http/i_http_client.dart';
 import '../../logger/i_logger.dart';
 import '../../download/i_download_engine.dart';
+import '../../platform/platform.dart';
 import 'dart:convert';
+import 'dart:io';
 
 /// 内容管理器实现类
 /// 负责管理游戏内容的搜索、下载、安装等功能，对接CurseForge和Modrinth平台
@@ -20,6 +22,8 @@ class ContentManager implements IContentManager {
   final CurseForgeApi _curseForgeApi;
   /// Modrinth API客户端
   final ModrinthApi _modrinthApi;
+  /// 平台适配器
+  final IPlatformAdapter _platformAdapter;
 
   /// 构造函数
   /// [httpClient]: HTTP客户端实例
@@ -33,7 +37,8 @@ class ContentManager implements IContentManager {
         _logger = logger,
         _downloadEngine = downloadEngine,
         _curseForgeApi = CurseForgeApi(),
-        _modrinthApi = ModrinthApi();
+        _modrinthApi = ModrinthApi(),
+        _platformAdapter = PlatformAdapterFactory.getInstance();
 
   @override
   Future<List<Mod>> searchMods({
@@ -108,7 +113,7 @@ class ContentManager implements IContentManager {
   }
 
   @override
-  Future<List<Modpack>> searchModpacks({
+  Future<List<ContentModpack>> searchModpacks({
     required String query,
     String? gameVersion,
     int page = 1,
@@ -145,7 +150,7 @@ class ContentManager implements IContentManager {
   }
 
   @override
-  Future<Modpack> getModpackDetails(String modpackId, {String? source}) async {
+  Future<ContentModpack> getModpackDetails(String modpackId, {String? source}) async {
     try {
       _logger.info('获取整合包详情: $modpackId');
       
@@ -161,7 +166,7 @@ class ContentManager implements IContentManager {
   }
 
   @override
-  Future<List<ModpackFile>> getModpackFiles(String modpackId, {String? source}) async {
+  Future<List<ContentModpackFile>> getModpackFiles(String modpackId, {String? source}) async {
     try {
       _logger.info('获取整合包文件: $modpackId');
       
@@ -370,20 +375,20 @@ class ContentManager implements IContentManager {
                   installedContent.add(ContentItem(
                     id: modName,
                     name: modName,
-                    version: '',
-                    summary: '',
-                    description: '',
                     author: '',
-                    source: 'local',
+                    description: '',
+                    version: '',
+                    downloadUrl: '',
+                    downloadCount: 0,
                     iconUrl: null,
-                    projectUrl: null,
-                    downloadUrl: null,
-                    size: await (modFile as File).length(),
+                    releaseDate: null,
                     type: ContentType.mod,
+                    source: ContentSource.local,
+                    status: ContentStatus.notInstalled,
                     gameVersions: [],
-                    modLoaders: [],
-                    createdAt: DateTime.now(),
-                    updatedAt: DateTime.now(),
+                    loaders: [],
+                    dependencies: [],
+                    conflicts: [],
                   ));
                 }
               }
@@ -645,7 +650,7 @@ class ContentManager implements IContentManager {
   }
 
   // 整合包相关方法
-  Future<List<Modpack>> _searchModpacksOnModrinth({
+  Future<List<ContentModpack>> _searchModpacksOnModrinth({
     required String query,
     String? gameVersion,
     int page = 1,
@@ -666,9 +671,9 @@ class ContentManager implements IContentManager {
     final response = await _httpClient.get(url.toString());
     final data = jsonDecode(response.body);
     
-    final modpacks = <Modpack>[];
+    final modpacks = <ContentModpack>[];
     for (final item in data['hits'] as List) {
-      modpacks.add(Modpack(
+      modpacks.add(ContentModpack(
         id: item['project_id'] as String,
         name: item['title'] as String,
         summary: item['description'] as String,
@@ -692,11 +697,11 @@ class ContentManager implements IContentManager {
     return modpacks;
   }
 
-  Future<Modpack> _getModpackDetailsOnModrinth(String modpackId) async {
+  Future<ContentModpack> _getModpackDetailsOnModrinth(String modpackId) async {
     final response = await _httpClient.get('https://api.modrinth.com/v2/project/$modpackId');
     final data = jsonDecode(response.body);
     
-    return Modpack(
+    return ContentModpack(
       id: data['id'] as String,
       name: data['title'] as String,
       summary: data['description'] as String,
@@ -717,23 +722,23 @@ class ContentManager implements IContentManager {
     );
   }
 
-  Future<List<ModpackFile>> _getModpackFilesOnModrinth(String modpackId) async {
+  Future<List<ContentModpackFile>> _getModpackFilesOnModrinth(String modpackId) async {
     final response = await _httpClient.get('https://api.modrinth.com/v2/project/$modpackId/version');
     final data = jsonDecode(response.body) as List;
     
-    final files = <ModpackFile>[];
+    final files = <ContentModpackFile>[];
     for (final item in data) {
       for (final file in item['files'] as List) {
-        files.add(ModpackFile(
+        files.add(ContentModpackFile(
           id: file['hashes']['sha1'] as String,
-          name: item['name'] as String,
+          name: file['filename'] as String,
           fileName: file['filename'] as String,
           downloadUrl: file['url'] as String,
           size: file['size'] as int,
-          gameVersion: item['game_versions'][0] as String,
-          modLoader: item['loaders'][0] as String,
-          createdAt: DateTime.parse(item['date_published'] as String),
-          updatedAt: DateTime.parse(item['date_published'] as String),
+          gameVersion: item['game_versions'] as String,
+          modLoader: item['loaders'] as String,
+          createdAt: DateTime.parse(item['created'] as String),
+          updatedAt: DateTime.parse(item['updated'] as String),
         ));
       }
     }
@@ -755,7 +760,7 @@ class ContentManager implements IContentManager {
   }
 
   // CurseForge 整合包相关方法
-  Future<List<Modpack>> _searchModpacksOnCurseForge({
+  Future<List<ContentModpack>> _searchModpacksOnCurseForge({
     required String query,
     String? gameVersion,
     int page = 1,
@@ -765,12 +770,12 @@ class ContentManager implements IContentManager {
     return [];
   }
 
-  Future<Modpack> _getModpackDetailsOnCurseForge(String modpackId) async {
+  Future<ContentModpack> _getModpackDetailsOnCurseForge(String modpackId) async {
     // 注意：CurseForge API 需要 API Key
     throw Exception('CurseForge API not implemented');
   }
 
-  Future<List<ModpackFile>> _getModpackFilesOnCurseForge(String modpackId) async {
+  Future<List<ContentModpackFile>> _getModpackFilesOnCurseForge(String modpackId) async {
     // 注意：CurseForge API 需要 API Key
     return [];
   }

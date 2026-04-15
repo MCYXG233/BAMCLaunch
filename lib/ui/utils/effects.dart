@@ -18,7 +18,7 @@ class BamcEffects {
         borderRadius: borderRadius ?? BorderRadius.circular(8),
         border: border ??
             Border.all(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               width: 1,
             ),
         boxShadow: shadow != null
@@ -186,7 +186,7 @@ class BamcEffects {
     double spreadRadius = 0,
   }) {
     return BoxShadow(
-      color: color.withOpacity(0.2),
+      color: color.withValues(alpha: 0.2),
       blurRadius: blurRadius,
       offset: offset,
       spreadRadius: spreadRadius,
@@ -200,7 +200,7 @@ class BamcEffects {
     double spreadRadius = 0,
   }) {
     return BoxShadow(
-      color: color.withOpacity(0.3),
+      color: color.withValues(alpha: 0.3),
       blurRadius: blurRadius,
       offset: Offset.zero,
       spreadRadius: spreadRadius,
@@ -249,12 +249,12 @@ class BamcEffects {
     return BoxDecoration(
       color: color,
       border: Border.all(
-        color: Colors.white.withOpacity(0.3),
+        color: Colors.white.withValues(alpha: 0.3),
         width: borderWidth,
       ),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.3),
+          color: Colors.black.withValues(alpha: 0.3),
           blurRadius: 8,
           offset: const Offset(2, 2),
         ),

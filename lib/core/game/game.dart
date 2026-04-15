@@ -1,8 +1,6 @@
-import '../globals.dart';
-import 'interfaces/i_game_launcher.dart';
-import 'implementations/game_launcher.dart';
-
 /// 导出游戏相关的接口和实现
+library;
+
 export 'interfaces/i_game_launcher.dart';
 export 'implementations/game_launcher.dart';
 export 'implementations/java_manager.dart';

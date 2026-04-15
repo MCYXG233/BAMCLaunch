@@ -49,7 +49,7 @@ abstract class IModpackManager {
   Future<Modpack> restoreModpack(String backupPath);
 
   // 获取整合包的模组列表
-  Future<List<Mod>> getModpackMods(String modpackId);
+  Future<List<ModpackMod>> getModpackMods(String modpackId);
 
   // 向整合包添加模组
   Future<bool> addModToModpack(String modpackId, String modId, String version);

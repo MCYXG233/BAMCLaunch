@@ -152,8 +152,9 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Future<void> _handleWebLogin() async {
+    final currentContext = context;
     Account? account = await Navigator.push(
-      context,
+      currentContext,
       MaterialPageRoute(
         builder: (context) => MicrosoftLoginPage(
           accountManager: widget.accountManager,
@@ -162,9 +163,9 @@ class _AccountPageState extends State<AccountPage> {
       ),
     );
 
-    if (account != null) {
+    if (account != null && mounted) {
       await _loadAccounts();
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(currentContext).showSnackBar(
         SnackBar(
           content: Text('微软账户登录成功: ${account.username}'),
           backgroundColor: BamcColors.success,
@@ -174,8 +175,9 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Future<void> _handleDeviceCodeLogin() async {
+    final currentContext = context;
     Account? account = await Navigator.push(
-      context,
+      currentContext,
       MaterialPageRoute(
         builder: (context) => MicrosoftDeviceLoginPage(
           accountManager: widget.accountManager,
@@ -184,9 +186,9 @@ class _AccountPageState extends State<AccountPage> {
       ),
     );
 
-    if (account != null) {
+    if (account != null && mounted) {
       await _loadAccounts();
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(currentContext).showSnackBar(
         SnackBar(
           content: Text('微软账户登录成功: ${account.username}'),
           backgroundColor: BamcColors.success,
@@ -196,12 +198,13 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Future<void> _handleAddOfflineAccount() async {
+    final currentContext = context;
     Account? account =
-        await AddOfflineAccountDialog.show(context, widget.accountManager);
+        await AddOfflineAccountDialog.show(currentContext, widget.accountManager);
 
-    if (account != null) {
+    if (account != null && mounted) {
       await _loadAccounts();
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(currentContext).showSnackBar(
         SnackBar(
           content: Text('离线账户添加成功: ${account.username}'),
           backgroundColor: BamcColors.success,
@@ -223,45 +226,57 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Future<void> _handleRefreshAccount(String accountId) async {
+    final currentContext = context;
     setState(() => _isLoading = true);
     try {
       final refreshedAccount =
           await widget.accountManager.refreshAccount(accountId);
-      if (refreshedAccount != null) {
+      if (refreshedAccount != null && mounted) {
         await _loadAccounts();
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(currentContext).showSnackBar(
           const SnackBar(content: Text('账户刷新成功')),
         );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
+      } else if (mounted) {
+        ScaffoldMessenger.of(currentContext).showSnackBar(
           const SnackBar(content: Text('账户无法刷新')),
         );
       }
     } catch (e) {
       logger.error('刷新账户失败: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('刷新失败: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(currentContext).showSnackBar(
+          SnackBar(content: Text('刷新失败: $e')),
+        );
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
   Future<void> _handleDeleteAccount(String accountId) async {
+    final currentContext = context;
     setState(() => _isLoading = true);
     try {
       await widget.accountManager.removeAccount(accountId);
       await _loadAccounts();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('账户删除成功')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(currentContext).showSnackBar(
+          const SnackBar(content: Text('账户删除成功')),
+        );
+      }
     } catch (e) {
       logger.error('删除账户失败: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('删除失败: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(currentContext).showSnackBar(
+          SnackBar(content: Text('删除失败: $e')),
+        );
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -497,7 +512,7 @@ class _AccountPageState extends State<AccountPage> {
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(28),
                     child: Image.network(
-                      account.profile!.skinUrl!,
+                      account.profile!.skinUrl ?? '',
                       width: 56,
                       height: 56,
                       fit: BoxFit.cover,

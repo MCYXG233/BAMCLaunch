@@ -160,7 +160,7 @@ class _SidebarState extends State<Sidebar> {
                   BamcColors.secondary.withOpacity(0.1),
                 ],
               ),
-              border: Border(
+              border: const Border(
                 bottom: BorderSide(
                   color: BamcColors.border,
                   width: 1,
@@ -176,7 +176,7 @@ class _SidebarState extends State<Sidebar> {
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
@@ -193,7 +193,7 @@ class _SidebarState extends State<Sidebar> {
                           BoxShadow(
                             color: BamcColors.primary.withOpacity(0.3),
                             blurRadius: 8,
-                            offset: Offset(0, 2),
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
@@ -204,7 +204,7 @@ class _SidebarState extends State<Sidebar> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Column(
+                    const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(

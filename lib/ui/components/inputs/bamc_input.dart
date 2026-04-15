@@ -159,7 +159,7 @@ class _BamcInputState extends State<BamcInput> {
     if (widget.errorText != null && widget.errorText!.isNotEmpty) {
       return OutlineInputBorder(
         borderRadius: borderRadius,
-        borderSide: BorderSide(
+        borderSide: const BorderSide(
           color: BamcColors.warning,
           width: 2,
         ),
@@ -169,7 +169,7 @@ class _BamcInputState extends State<BamcInput> {
     if (_isFocused) {
       return OutlineInputBorder(
         borderRadius: borderRadius,
-        borderSide: BorderSide(
+        borderSide: const BorderSide(
           color: BamcColors.primary,
           width: 2,
         ),
@@ -188,7 +188,7 @@ class _BamcInputState extends State<BamcInput> {
 
     return OutlineInputBorder(
       borderRadius: borderRadius,
-      borderSide: BorderSide(
+      borderSide: const BorderSide(
         color: BamcColors.border,
         width: 1,
         style: BorderStyle.solid,

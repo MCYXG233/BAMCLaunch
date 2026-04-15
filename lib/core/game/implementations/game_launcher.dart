@@ -221,6 +221,7 @@ class GameLauncher implements IGameLauncher {
   /// [memoryMb]: 内存大小（MB）
   /// [customEnvironment]: 自定义环境变量
   /// 返回游戏启动配置
+  @override
   Future<GameLaunchConfig> buildLaunchConfig({
     required String gameVersion,
     required String username,

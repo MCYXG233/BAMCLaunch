@@ -8,7 +8,7 @@ class Modpack {
   final String modLoader;
   final String modLoaderVersion;
   final String iconPath;
-  final List<Mod> mods;
+  final List<ModpackMod> mods;
   final DateTime createdAt;
   final DateTime updatedAt;
   final String path;
@@ -43,7 +43,7 @@ class Modpack {
     String? modLoader,
     String? modLoaderVersion,
     String? iconPath,
-    List<Mod>? mods,
+    List<ModpackMod>? mods,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? path,
@@ -84,7 +84,7 @@ class ModpackInstallationResult {
   });
 }
 
-class Mod {
+class ModpackMod {
   final String id;
   final String name;
   final String version;
@@ -96,7 +96,7 @@ class Mod {
   final String filePath;
   final DateTime installedAt;
 
-  Mod({
+  ModpackMod({
     required this.id,
     required this.name,
     required this.version,
@@ -109,7 +109,7 @@ class Mod {
     required this.installedAt,
   });
 
-  Mod copyWith({
+  ModpackMod copyWith({
     String? id,
     String? name,
     String? version,
@@ -121,7 +121,7 @@ class Mod {
     String? filePath,
     DateTime? installedAt,
   }) {
-    return Mod(
+    return ModpackMod(
       id: id ?? this.id,
       name: name ?? this.name,
       version: version ?? this.version,

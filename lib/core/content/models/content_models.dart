@@ -68,7 +68,7 @@ class ModFile {
   });
 }
 
-class Modpack {
+class ContentModpack {
   final String id;
   final String name;
   final String summary;
@@ -87,7 +87,7 @@ class Modpack {
   final DateTime updatedAt;
   final DateTime? publishedAt;
 
-  Modpack({
+  ContentModpack({
     required this.id,
     required this.name,
     required this.summary,
@@ -108,7 +108,7 @@ class Modpack {
   });
 }
 
-class ModpackFile {
+class ContentModpackFile {
   final String id;
   final String name;
   final String fileName;
@@ -119,7 +119,7 @@ class ModpackFile {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  ModpackFile({
+  ContentModpackFile({
     required this.id,
     required this.name,
     required this.fileName,

@@ -20,5 +20,13 @@ abstract class IGameLauncher {
 
   Future<CrashAnalysis> analyzeLastCrash();
 
+  Future<GameLaunchConfig> buildLaunchConfig({
+    required String gameVersion,
+    required String username,
+    required String uuid,
+    required String accessToken,
+    required int memoryMb,
+  });
+
   void dispose();
 }

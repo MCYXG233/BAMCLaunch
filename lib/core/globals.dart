@@ -6,7 +6,7 @@ import 'logger/logger.dart';
 import 'config/config.dart';
 import 'version/version.dart';
 import 'game/game.dart';
-import 'content/content_manager.dart';
+import 'content/content.dart';
 import 'modpack/modpack.dart';
 import 'server/server.dart';
 import 'update/update.dart';
@@ -32,6 +32,7 @@ final IVersionManager versionManager = VersionManager(
 final IGameLauncher gameLauncher = GameLauncher(
   platformAdapter: platformAdapter,
   logger: logger,
+  versionManager: versionManager,
 );
 
 /// 全局内容管理器单例
@@ -51,13 +52,17 @@ final IModpackManager modpackManager = ModpackManager(
 
 /// 全局服务器管理器单例
 final IServerManager serverManager = ServerManager(
-  configManager: configManager,
+  platformAdapter: platformAdapter,
   logger: logger,
+  downloadEngine: downloadEngine,
+  contentManager: contentManager,
 );
 
 /// 全局更新管理器单例
 final IUpdateManager updateManager = UpdateManager(
   platformAdapter: platformAdapter,
+  configManager: configManager,
+  downloadEngine: downloadEngine,
   logger: logger,
 );
 
