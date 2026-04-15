@@ -3,13 +3,17 @@ import '../../../core/core.dart';
 import '../../../ui/theme/colors.dart';
 import '../../components/buttons/bamc_button.dart';
 import '../../components/layout/bamc_card.dart';
+import '../../components/dialogs/error_dialog.dart';
 
 class HomePage extends StatefulWidget {
   final IVersionManager versionManager;
+  final IContentManager contentManager;
+  final IGameLauncher gameLauncher;
+  final AccountManager accountManager;
   final VoidCallback? onNavigateToVersions;
   final VoidCallback? onNavigateToModpacks;
   
-  const HomePage({super.key, required this.versionManager, this.onNavigateToVersions, this.onNavigateToModpacks});
+  const HomePage({super.key, required this.versionManager, required this.contentManager, required this.gameLauncher, required this.accountManager, this.onNavigateToVersions, this.onNavigateToModpacks});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -46,9 +50,9 @@ class _HomePageState extends State<HomePage> {
       final latestVersion = await widget.versionManager.getVersionInfo(latestRelease.id);
       setState(() => _recommendedVersions = [latestVersion]);
 
-      // 加载模组数量（这里应该从模组管理器获取，暂时使用0）
-      // 实际项目中应该注入IModManager并调用相应方法
-      setState(() => _installedModsCount = 0);
+      // 加载模组数量
+      final installedMods = await widget.contentManager.getInstalledContent(ContentType.mod);
+      setState(() => _installedModsCount = installedMods.length);
 
       // 加载游戏时长（这里应该从统计数据获取，暂时使用0h）
       // 实际项目中应该从存储或统计服务获取
@@ -396,8 +400,7 @@ class _HomePageState extends State<HomePage> {
             child: BamcButton(
               text: '启动游戏',
               onPressed: () async {
-                // 这里应该调用游戏启动逻辑
-                logger.info('Starting game version: ${version.id}');
+                await _launchGame(version);
               },
               type: BamcButtonType.primary,
               size: BamcButtonSize.small,
@@ -406,5 +409,46 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  Future<void> _launchGame(Version version) async {
+    try {
+      // 检查是否有选中的账户
+      final selectedAccount = widget.accountManager.selectedAccount;
+      if (selectedAccount == null) {
+        if (mounted) {
+          ErrorDialog.show(context, '错误', '请先选择一个账户');
+        }
+        return;
+      }
+
+      // 检查Java环境
+      final javaResult = await widget.gameLauncher.detectJava();
+      if (!javaResult.found) {
+        if (mounted) {
+          ErrorDialog.show(context, '错误', '未找到Java环境: ${javaResult.error}');
+        }
+        return;
+      }
+
+      // 构建启动配置
+      final config = await widget.gameLauncher.buildLaunchConfig(
+        gameVersion: version.id,
+        username: selectedAccount.username,
+        uuid: selectedAccount.id,
+        accessToken: selectedAccount.tokenData?.accessToken ?? '',
+        memoryMb: 4096, // 默认4GB内存
+      );
+
+      // 启动游戏
+      await widget.gameLauncher.launchGame(config);
+      
+      logger.info('Game launched successfully: ${version.id}');
+    } catch (e) {
+      logger.error('Failed to launch game: $e');
+      if (mounted) {
+        ErrorDialog.show(context, '启动失败', '无法启动游戏: $e');
+      }
+    }
   }
 }

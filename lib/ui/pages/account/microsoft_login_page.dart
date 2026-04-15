@@ -33,9 +33,11 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
     _initializeWebView();
   }
 
+  late MicrosoftAuthenticator _authenticator;
+
   void _initializeWebView() {
-    final MicrosoftAuthenticator authenticator = MicrosoftAuthenticator();
-    _authData = authenticator.generateAuthorizationUrl();
+    _authenticator = MicrosoftAuthenticator();
+    _authData = _authenticator.generateAuthorizationUrl();
     final String authUrl = _authData!['url']!;
 
     _controller = WebViewController()
@@ -83,17 +85,22 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
       }
 
       // 使用授权码登录
-      Account account = await widget.accountManager.login(
+      Account account = await _authenticator.login(
         {
           'authorizationCode': code,
           'state': state,
         },
-        AccountType.microsoft,
       );
+
+      // 将账户添加到账户管理器
+      Account savedAccount = await widget.accountManager.addAccount(account);
+      
+      // 选择新添加的账户
+      await widget.accountManager.selectAccount(savedAccount.id);
 
       // 登录成功，返回账户信息
       if (mounted) {
-        Navigator.pop(context, account);
+        Navigator.pop(context, savedAccount);
       }
     } catch (e) {
       widget.logger.error('微软登录失败: $e');

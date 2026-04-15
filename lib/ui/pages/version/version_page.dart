@@ -5,17 +5,22 @@ import '../../components/buttons/bamc_button.dart';
 import '../../components/inputs/bamc_input.dart';
 import '../../components/layout/bamc_card.dart';
 import '../../components/dialogs/version_install_dialog.dart';
+import '../../components/dialogs/error_dialog.dart';
 import 'loader_install_test_page.dart';
 import 'version_settings_page.dart';
 
 class VersionPage extends StatefulWidget {
   final IVersionManager versionManager;
   final IContentManager contentManager;
+  final IGameLauncher gameLauncher;
+  final AccountManager accountManager;
 
   const VersionPage({
     super.key,
     required this.versionManager,
     required this.contentManager,
+    required this.gameLauncher,
+    required this.accountManager,
   });
 
   @override
@@ -302,11 +307,13 @@ class _VersionPageState extends State<VersionPage> {
                   text: '启动',
                   onPressed: () async {
                     if (version.status == VersionStatus.installed) {
-                      logger.info('Starting game version: ${version.id}');
-                      // 这里应该调用游戏启动逻辑
+                      await _launchGame(version);
                     } else {
                       logger.warn(
                           'Cannot start uninstalled version: ${version.id}');
+                      if (mounted) {
+                        ErrorDialog.show(context, '错误', '版本未安装，无法启动');
+                      }
                     }
                   },
                   type: BamcButtonType.primary,
@@ -368,5 +375,46 @@ class _VersionPageState extends State<VersionPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _launchGame(Version version) async {
+    try {
+      // 检查是否有选中的账户
+      final selectedAccount = widget.accountManager.selectedAccount;
+      if (selectedAccount == null) {
+        if (mounted) {
+          ErrorDialog.show(context, '错误', '请先选择一个账户');
+        }
+        return;
+      }
+
+      // 检查Java环境
+      final javaResult = await widget.gameLauncher.detectJava();
+      if (!javaResult.found) {
+        if (mounted) {
+          ErrorDialog.show(context, '错误', '未找到Java环境: ${javaResult.error}');
+        }
+        return;
+      }
+
+      // 构建启动配置
+      final config = await widget.gameLauncher.buildLaunchConfig(
+        gameVersion: version.id,
+        username: selectedAccount.username,
+        uuid: selectedAccount.id,
+        accessToken: selectedAccount.tokenData?.accessToken ?? '',
+        memoryMb: 4096, // 默认4GB内存
+      );
+
+      // 启动游戏
+      await widget.gameLauncher.launchGame(config);
+      
+      logger.info('Game launched successfully: ${version.id}');
+    } catch (e) {
+      logger.error('Failed to launch game: $e');
+      if (mounted) {
+        ErrorDialog.show(context, '启动失败', '无法启动游戏: $e');
+      }
+    }
   }
 }

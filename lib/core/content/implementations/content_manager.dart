@@ -348,8 +348,51 @@ class ContentManager implements IContentManager {
   Future<List<ContentItem>> getInstalledContent(ContentType type) async {
     try {
       _logger.info('获取已安装内容: ${type.name}');
-      // 这里实现获取已安装内容的逻辑
-      return [];
+      
+      final installedContent = <ContentItem>[];
+      final gameDir = _platformAdapter.gameDirectory;
+      
+      if (type == ContentType.mod) {
+        // 检查所有版本目录中的mods文件夹
+        final versionsDir = Directory('$gameDir/versions');
+        if (await versionsDir.exists()) {
+          final versionDirs = await versionsDir.list().toList();
+          
+          for (final dir in versionDirs) {
+            if (dir is Directory) {
+              final modsDir = Directory('${dir.path}/mods');
+              if (await modsDir.exists()) {
+                final modFiles = await modsDir.list().where((file) => file.path.endsWith('.jar')).toList();
+                
+                for (final modFile in modFiles) {
+                  // 这里可以解析模组信息，暂时只添加文件名
+                  final modName = modFile.path.split('/').last.replaceAll('.jar', '');
+                  installedContent.add(ContentItem(
+                    id: modName,
+                    name: modName,
+                    version: '',
+                    summary: '',
+                    description: '',
+                    author: '',
+                    source: 'local',
+                    iconUrl: null,
+                    projectUrl: null,
+                    downloadUrl: null,
+                    size: await (modFile as File).length(),
+                    type: ContentType.mod,
+                    gameVersions: [],
+                    modLoaders: [],
+                    createdAt: DateTime.now(),
+                    updatedAt: DateTime.now(),
+                  ));
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      return installedContent;
     } catch (e) {
       _logger.error('获取已安装内容失败: $e');
       return [];

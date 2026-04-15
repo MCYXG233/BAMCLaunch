@@ -94,14 +94,21 @@ class _MainLayoutState extends State<MainLayout> {
 
   Widget _buildContent() {
     // 使用懒加载优化页面性能
-    final pages = [
-      HomePage(
-        versionManager: versionManager,
-        onNavigateToVersions: () => _handleNavigationItemSelected(NavigationItem.versions),
-        onNavigateToModpacks: () => _handleNavigationItemSelected(NavigationItem.modpacks),
-      ),
+      final pages = [
+        HomePage(
+          versionManager: versionManager,
+          contentManager: contentManager,
+          gameLauncher: gameLauncher,
+          accountManager: accountManager,
+          onNavigateToVersions: () => _handleNavigationItemSelected(NavigationItem.versions),
+          onNavigateToModpacks: () => _handleNavigationItemSelected(NavigationItem.modpacks),
+        ),
       VersionPage(
-          versionManager: versionManager, contentManager: contentManager),
+          versionManager: versionManager, 
+          contentManager: contentManager,
+          gameLauncher: gameLauncher,
+          accountManager: accountManager,
+        ),
       ContentPage(versionManager: versionManager),
       const ModpackPage(),
       ServerPage(serverManager: _serverManager),
