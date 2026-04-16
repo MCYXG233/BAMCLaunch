@@ -60,7 +60,7 @@ class _CardListDemoPageState extends State<CardListDemoPage> {
           );
         },
       ),
-      const ContextMenuDivider(),
+      ContextMenuDivider(),
       ContextMenuItem(
         text: '复制',
         icon: Icons.copy,

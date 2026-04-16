@@ -211,7 +211,8 @@ class _BamcCardListState<T> extends State<BamcCardList<T>> {
     if (entries.isEmpty) return;
 
     final overlay = Overlay.of(context);
-    final overlayEntry = OverlayEntry(
+    late OverlayEntry overlayEntry;
+    overlayEntry = OverlayEntry(
       builder: (context) => _ContextMenuOverlay(
         position: position,
         items: entries,

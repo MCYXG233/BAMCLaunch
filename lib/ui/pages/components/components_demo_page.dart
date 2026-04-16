@@ -54,7 +54,7 @@ class ComponentsDemoPage extends StatelessWidget {
                       tabs: [
                         BamcTab(
                           title: '卡片布局',
-                          content: _buildCardLayout(),
+                          content: _buildCardLayout(context),
                         ),
                         BamcTab(
                           title: '网格布局',
@@ -76,7 +76,7 @@ class ComponentsDemoPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCardLayout() {
+  Widget _buildCardLayout(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: SingleChildScrollView(
@@ -114,7 +114,6 @@ class ComponentsDemoPage extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: BamcColors.primary,
                           foregroundColor: Colors.white,
-                          borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Text('操作按钮'),
                       ),
@@ -132,7 +131,6 @@ class ComponentsDemoPage extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: BamcColors.secondary,
                           foregroundColor: Colors.white,
-                          borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Text('打开毛玻璃弹窗'),
                       ),
@@ -472,7 +470,6 @@ class ComponentsDemoPage extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: BamcColors.primary,
             foregroundColor: Colors.white,
-            borderRadius: BorderRadius.circular(6),
           ),
           child: const Text('确定'),
         ),

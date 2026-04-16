@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'core/core.dart';
 import 'core/performance/memory_optimizer.dart';
 import 'ui/theme/theme.dart';
-import 'ui/components/layout/main_layout.dart' hide logger;
 import 'ui/components/progress/pixel_loading_animation.dart';
 import 'ui/pages/components/minecraft_xp_bar_demo_page.dart';
 

@@ -110,6 +110,7 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
   @override
   void dispose() {
     _pageAnimationController.dispose();
+    _performanceMonitor.stopMonitoring();
     super.dispose();
   }
 
@@ -330,9 +331,5 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
     );
   }
 
-  @override
-  void dispose() {
-    _performanceMonitor.stopMonitoring();
-    super.dispose();
-  }
+
 }
