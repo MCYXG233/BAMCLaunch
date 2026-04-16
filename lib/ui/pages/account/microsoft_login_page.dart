@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -7,7 +8,6 @@ import '../../../core/auth/implementations/microsoft_authenticator.dart';
 import '../../../core/auth/models/account.dart';
 import '../../../core/auth/account_manager.dart';
 import '../../../core/logger/i_logger.dart';
-import '../../../core/platform/platform.dart';
 import '../../components/buttons/bamc_button.dart';
 import '../../components/progress/pixel_loading_animation.dart';
 import '../../theme/colors.dart';
@@ -188,8 +188,8 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = Platform.isMobile;
-    final isWeb = Platform.isWeb;
+    final isMobile = Platform.isAndroid || Platform.isIOS;
+    final isWeb = kIsWeb;
 
     // 根据平台调整布局参数
     final headerHeight = isMobile ? 56.0 : 64.0;
@@ -271,8 +271,8 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
               child: WebViewWidget(
                   controller: _controller,
                   // 为不同平台提供适当的配置
-                  gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                    Factory(() => EagerGestureRecognizer()),
+                  gestureRecognizers: <OneSequenceGestureRecognizerFactoryWithHandlers<OneSequenceGestureRecognizer>>{
+                    EagerGestureRecognizer: () => EagerGestureRecognizer(),
                   }),
             ),
           ),

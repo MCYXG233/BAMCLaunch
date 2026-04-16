@@ -67,60 +67,60 @@ class HttpClient implements IHttpClient {
   @override
   Future<HttpResponse> post(String url,
       {Map<String, String>? headers, dynamic body}) async {
-    return _executeWithRetry(() async {
-      final response = await _client
+    final response = await _executeWithRetry(() async {
+      return await _client
           .post(
             Uri.parse(url),
             headers: headers,
             body: body,
           )
           .timeout(_timeout);
-
-      return HttpResponse(
-        statusCode: response.statusCode,
-        body: response.body,
-        headers: Map.from(response.headers),
-      );
     });
+
+    return HttpResponse(
+      statusCode: response.statusCode,
+      body: response.body,
+      headers: Map.from(response.headers),
+    );
   }
 
   @override
   Future<HttpResponse> put(String url,
       {Map<String, String>? headers, dynamic body}) async {
-    return _executeWithRetry(() async {
-      final response = await _client
+    final response = await _executeWithRetry(() async {
+      return await _client
           .put(
             Uri.parse(url),
             headers: headers,
             body: body,
           )
           .timeout(_timeout);
-
-      return HttpResponse(
-        statusCode: response.statusCode,
-        body: response.body,
-        headers: Map.from(response.headers),
-      );
     });
+
+    return HttpResponse(
+      statusCode: response.statusCode,
+      body: response.body,
+      headers: Map.from(response.headers),
+    );
   }
 
   @override
   Future<HttpResponse> delete(String url,
       {Map<String, String>? headers}) async {
-    return _executeWithRetry(() async {
-      final response = await _client
+    final response = await _executeWithRetry(() async {
+      return await _client
           .delete(
             Uri.parse(url),
             headers: headers,
           )
           .timeout(_timeout);
-
-      return HttpResponse(
-        statusCode: response.statusCode,
-        body: response.body,
-        headers: Map.from(response.headers),
-      );
     });
+
+    return HttpResponse(
+      statusCode: response.statusCode,
+      body: response.body,
+      headers: Map.from(response.headers),
+    );
   }
 
   Future<http.Response> _executeWithRetry(

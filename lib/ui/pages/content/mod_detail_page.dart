@@ -293,7 +293,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
               style: const TextStyle(
                 fontSize: 14,
                 color: BamcColors.textPrimary,
-                lineHeight: 1.5,
+                height: 1.5,
               ),
             ),
           ),
