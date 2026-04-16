@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'core/core.dart';
 import 'core/performance/memory_optimizer.dart';
 import 'ui/theme/theme.dart';
-import 'ui/components/progress/pixel_loading_animation.dart';
-import 'ui/pages/components/minecraft_xp_bar_demo_page.dart';
+import 'ui/components/layout/main_layout.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -74,8 +73,13 @@ class _MyAppState extends State<MyApp> {
       title: 'BAMCLauncher',
       theme: BamcTheme.lightTheme,
       home: _isLoading
-          ? const LoadingScreen(message: '正在启动BAMCLauncher...')
-          : const MinecraftXpBarDemoPage(),
+          ? Container(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            )
+          : const MainLayout(),
       debugShowCheckedModeBanner: false,
     );
   }
