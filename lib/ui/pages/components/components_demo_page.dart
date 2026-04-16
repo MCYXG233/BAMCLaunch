@@ -1,249 +1,261 @@
 import 'package:flutter/material.dart';
-import '../../../ui/components/buttons/bamc_button.dart';
-import '../../../ui/components/inputs/bamc_input.dart';
-import '../../../ui/components/lists/bamc_list.dart';
-import '../../../ui/components/progress/bamc_progress_bar.dart';
-import '../../../ui/components/menus/bamc_context_menu.dart';
-import '../../../ui/theme/colors.dart';
+import '../../components/layout/breadcrumb_navigation.dart';
+import '../../components/tabs/bamc_tab_bar.dart';
+import '../../components/layout/bamc_card.dart';
+import '../../theme/colors.dart';
 
-class ComponentsDemoPage extends StatefulWidget {
+class ComponentsDemoPage extends StatelessWidget {
   const ComponentsDemoPage({super.key});
-
-  @override
-  State<ComponentsDemoPage> createState() => _ComponentsDemoPageState();
-}
-
-class _ComponentsDemoPageState extends State<ComponentsDemoPage> {
-  String? _selectedItem;
-  final double _progressValue = 65.0;
-
-  final List<String> _listItems = [
-    'Minecraft 1.20.1',
-    'Minecraft 1.19.4',
-    'Minecraft 1.18.2',
-    'Forge 1.20.1-47.0.1',
-    'Fabric 1.20.1-0.14.22',
-    'Quilt 1.20.1-0.18.1',
-  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('组件库演示'),
+      backgroundColor: BamcColors.background,
+      body: Column(
+        children: [
+          // 面包屑导航
+          BreadcrumbNavigation(
+            items: [
+              BreadcrumbItem(
+                title: '首页',
+                onTap: () {},
+              ),
+              BreadcrumbItem(
+                title: '组件库',
+                onTap: () {},
+              ),
+              BreadcrumbItem(
+                title: '布局组件',
+                isActive: true,
+              ),
+            ],
+          ),
+          // 主内容区
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+                  const Text(
+                    '布局组件示例',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: BamcColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // 标签页切换
+                  Expanded(
+                    child: BamcTabBar(
+                      tabs: [
+                        BamcTab(
+                          title: '卡片布局',
+                          content: _buildCardLayout(),
+                        ),
+                        BamcTab(
+                          title: '网格布局',
+                          content: _buildGridLayout(),
+                        ),
+                        BamcTab(
+                          title: '列表布局',
+                          content: _buildListLayout(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+    );
+  }
+
+  Widget _buildCardLayout() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 按钮组件演示
-            _buildSection('按钮组件'),
-            Row(
-              children: [
-                BamcButton(
-                  text: '主要按钮',
-                  type: BamcButtonType.primary,
-                  onPressed: () => _showMessage('主要按钮被点击'),
-                ),
-                const SizedBox(width: 8),
-                BamcButton(
-                  text: '次要按钮',
-                  type: BamcButtonType.secondary,
-                  onPressed: () => _showMessage('次要按钮被点击'),
-                ),
-                const SizedBox(width: 8),
-                BamcButton(
-                  text: '警告按钮',
-                  type: BamcButtonType.warning,
-                  onPressed: () => _showMessage('警告按钮被点击'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                BamcButton(
-                  text: '成功按钮',
-                  type: BamcButtonType.success,
-                  onPressed: () => _showMessage('成功按钮被点击'),
-                ),
-                const SizedBox(width: 8),
-                BamcButton(
-                  text: '轮廓按钮',
-                  type: BamcButtonType.outline,
-                  onPressed: () => _showMessage('轮廓按钮被点击'),
-                ),
-                const SizedBox(width: 8),
-                BamcButton(
-                  text: '文字按钮',
-                  type: BamcButtonType.text,
-                  onPressed: () => _showMessage('文字按钮被点击'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                BamcButton(
-                  text: '带图标',
-                  icon: Icons.play_arrow,
-                  onPressed: () => _showMessage('带图标按钮被点击'),
-                ),
-                const SizedBox(width: 8),
-                BamcButton(
-                  text: '加载中',
-                  isLoading: true,
-                  onPressed: () {},
-                ),
-                const SizedBox(width: 8),
-                BamcButton(
-                  text: '禁用',
-                  disabled: true,
-                  onPressed: () {},
-                ),
-              ],
-            ),
-
-            // 输入框组件演示
-            const SizedBox(height: 32),
-            _buildSection('输入框组件'),
-            BamcInput(
-              labelText: '用户名',
-              hintText: '请输入用户名',
-              prefixIcon: Icons.person,
-              onChanged: (value) => print('用户名: $value'),
-            ),
-            const SizedBox(height: 16),
-            BamcInput(
-              labelText: '密码',
-              hintText: '请输入密码',
-              prefixIcon: Icons.lock,
-              suffixIcon: Icons.visibility,
-              obscureText: true,
-              onSuffixIconPressed: () => _showMessage('密码可见性切换'),
-            ),
-            const SizedBox(height: 16),
-            const BamcInput(
-              labelText: '邮箱',
-              hintText: '请输入邮箱地址',
-              prefixIcon: Icons.email,
-              keyboardType: TextInputType.emailAddress,
-              errorText: '请输入有效的邮箱地址',
-            ),
-
-            // 进度条组件演示
-            const SizedBox(height: 32),
-            _buildSection('进度条组件'),
-            BamcProgressBar(
-              value: _progressValue,
-              label: '下载进度',
-              showPercentage: true,
-            ),
-            const SizedBox(height: 16),
-            const BamcProgressBar(
-              value: 45,
-              type: BamcProgressBarType.secondary,
-              label: '安装进度',
-              showPercentage: true,
-            ),
-            const SizedBox(height: 16),
-            const BamcProgressBar(
-              value: 80,
-              type: BamcProgressBarType.warning,
-              label: '警告进度',
-              showPercentage: true,
-            ),
-            const SizedBox(height: 16),
-            const BamcProgressBar(
-              value: 95,
-              type: BamcProgressBarType.success,
-              label: '成功进度',
-              showPercentage: true,
-            ),
-            const SizedBox(height: 16),
-            const BamcProgressBar(
-              value: 70,
-              type: BamcProgressBarType.pixel,
-              label: '像素风格进度条',
-              showPercentage: true,
-            ),
-
-            // 列表组件演示
-            const SizedBox(height: 32),
-            _buildSection('列表组件'),
-            SizedBox(
-              height: 300,
-              child: BamcList<String>(
-                items: _listItems,
-                selectedItem: _selectedItem,
-                onSelectionChanged: (item) {
-                  setState(() {
-                    _selectedItem = item;
-                  });
-                  _showMessage('选中: $item');
-                },
-                contextMenuItems: (item, index) => [
-                  ContextMenuItem(
-                    text: '启动',
-                    icon: Icons.play_arrow,
-                    onTap: () => _showMessage('启动: $item'),
-                  ),
-                  ContextMenuItem(
-                    text: '编辑',
-                    icon: Icons.edit,
-                    onTap: () => _showMessage('编辑: $item'),
-                  ),
-                  ContextMenuDivider(),
-                  ContextMenuItem(
-                    text: '删除',
-                    icon: Icons.delete,
-                    onTap: () => _showMessage('删除: $item'),
-                  ),
-                ],
-                itemBuilder: (context, item, index, isSelected) {
-                  return BamcListItem(
-                    leading: const Icon(Icons.gamepad),
-                    title: Text(item),
-                    subtitle: Text('版本 $index'),
-                    trailing: const Icon(Icons.chevron_right),
-                    selected: isSelected,
-                  );
-                },
+            const Text(
+              '卡片布局示例',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: BamcColors.textPrimary,
               ),
             ),
-
-            // 右键菜单演示
-            const SizedBox(height: 32),
-            _buildSection('右键菜单演示'),
-            BamcContextMenu(
-              items: [
-                ContextMenuItem(
-                  text: '复制',
-                  icon: Icons.copy,
-                  shortcut: 'Ctrl+C',
-                  onTap: () => _showMessage('复制'),
-                ),
-                ContextMenuItem(
-                  text: '粘贴',
-                  icon: Icons.paste,
-                  shortcut: 'Ctrl+V',
-                  onTap: () => _showMessage('粘贴'),
-                ),
-                ContextMenuDivider(),
-                ContextMenuItem(
-                  text: '设置',
-                  icon: Icons.settings,
-                  onTap: () => _showMessage('设置'),
-                ),
-              ],
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  border: Border.all(color: BamcColors.border),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text('右键点击此处查看菜单'),
+            const SizedBox(height: 20),
+            // 卡片1
+            BamcCard(
+              title: '功能卡片',
+              margin: const EdgeInsets.only(bottom: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '这是一个功能卡片示例，展示了如何使用BamcCard组件创建带有标题和内容的卡片。',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: BamcColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: BamcColors.primary,
+                          foregroundColor: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text('操作按钮'),
+                      ),
+                      const SizedBox(width: 12),
+                      TextButton(
+                        onPressed: () {},
+                        style: TextButton.styleFrom(
+                          foregroundColor: BamcColors.primary,
+                        ),
+                        child: const Text('次要操作'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // 卡片2
+            BamcCard(
+              title: '信息卡片',
+              margin: const EdgeInsets.only(bottom: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '这是一个信息卡片示例，用于展示详细信息。卡片支持自定义边距、填充和边框样式。',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: BamcColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Divider(
+                    color: BamcColors.border,
+                    thickness: 1,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        '状态: 已完成',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: BamcColors.success,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const Text(
+                        '更新时间: 2026-04-16',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: BamcColors.textTertiary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // 卡片3
+            BamcCard(
+              title: '统计卡片',
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text(
+                          '1,234',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: BamcColors.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          '总用户数',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: BamcColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const VerticalDivider(
+                    color: BamcColors.border,
+                    thickness: 1,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text(
+                          '567',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: BamcColors.success,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          '活跃用户',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: BamcColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const VerticalDivider(
+                    color: BamcColors.border,
+                    thickness: 1,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text(
+                          '89%',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: BamcColors.warning,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          '转化率',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: BamcColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -252,28 +264,152 @@ class _ComponentsDemoPageState extends State<ComponentsDemoPage> {
     );
   }
 
-  Widget _buildSection(String title) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: BamcColors.textPrimary,
+  Widget _buildGridLayout() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '网格布局示例',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: BamcColors.textPrimary,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-      ],
+          const SizedBox(height: 20),
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 1.2,
+              ),
+              itemCount: 6,
+              itemBuilder: (context, index) {
+                return BamcCard(
+                  hoverable: true,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: BamcColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.category,
+                          size: 32,
+                          color: BamcColors.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        '卡片 ${index + 1}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: BamcColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        '这是一个网格卡片',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: BamcColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 2),
+  Widget _buildListLayout() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '列表布局示例',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: BamcColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: ListView.builder(
+              itemCount: 5,
+              itemBuilder: (context, index) {
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: BamcCard(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: BamcColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.list_alt,
+                            size: 24,
+                            color: BamcColors.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '列表项 ${index + 1}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: BamcColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                '这是一个列表项的描述文本，展示了如何在列表中使用卡片组件。',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: BamcColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Icon(
+                          Icons.chevron_right,
+                          color: BamcColors.textTertiary,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 
 class BamcColors {
-  // 主色调
-  static const Color primary = Color(0xFF64B5F6); // 蔚蓝档案经典清新蓝
-  static const Color primaryLight = Color(0xFF90CAF9);
-  static const Color primaryDark = Color(0xFF42A5F5);
+  // 主色调 - 蔚蓝档案风格
+  static const Color primary = Color(0xFF4A86E8); // 蔚蓝档案主蓝
+  static const Color primaryLight = Color(0xFF7AA9F5);
+  static const Color primaryDark = Color(0xFF2E6CD4);
 
-  // 辅助色
+  // 辅助色 - Minecraft风格
   static const Color secondary = Color(0xFF7CB342); // MC草方块绿
   static const Color secondaryLight = Color(0xFFAED581);
   static const Color secondaryDark = Color(0xFF689F38);
+
+  // 强调色 - 融合风格
+  static const Color accent = Color(0xFFF8BBD0); // 蔚蓝档案粉
+  static const Color accentLight = Color(0xFFFCE4EC);
+  static const Color accentDark = Color(0xFFF48FB1);
 
   // 警告色
   static const Color warning = Color(0xFFE53935); // MC红石红
@@ -36,13 +41,13 @@ class BamcColors {
   static const Color successLight = Color(0xFFFFEB3B);
   static const Color successDark = Color(0xFFFBC02D);
 
-  // 中性色
-  static const Color background = Color(0xFFFAFAFA);
+  // 中性色 - 优化视觉效果
+  static const Color background = Color(0xFFF5F7FA); // 更柔和的背景色
   static const Color surface = Color(0xFFFFFFFF);
   static const Color card = Color(0xFFFFFFFF);
   
   static const Color textPrimary = Color(0xFF212121);
-  static const Color textSecondary = Color(0xFF757575);
+  static const Color textSecondary = Color(0xFF6D6D6D); // 更清晰的次要文字
   static const Color textDisabled = Color(0xFFBDBDBD);
 
   static const Color divider = Color(0xFFE0E0E0);

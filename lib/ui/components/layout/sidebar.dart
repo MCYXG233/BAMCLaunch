@@ -47,7 +47,10 @@ class _SidebarState extends State<Sidebar> {
       onExit: (_) => _updateHoverState(item, false),
       child: GestureDetector(
         onTap: () => widget.onItemSelected(item),
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          transform: Matrix4.identity()
+            ..translate(isHovering ? 4.0 : 0.0, isHovering ? -2.0 : 0.0),
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
@@ -56,34 +59,40 @@ class _SidebarState extends State<Sidebar> {
                 : isHovering
                     ? BamcColors.primary.withOpacity(0.1)
                     : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(4),
             gradient: isSelected
-                ? const LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
+                ? LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                     colors: [
                       BamcColors.primary,
                       BamcColors.primaryDark,
+                      BamcColors.secondaryDark,
                     ],
                   )
                 : null,
             border: isSelected
                 ? Border.all(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withOpacity(0.5),
                     width: 2,
                   )
                 : isHovering
                     ? Border.all(
-                        color: BamcColors.primary.withOpacity(0.3),
+                        color: BamcColors.primary.withOpacity(0.5),
                         width: 1,
                       )
                     : null,
             boxShadow: isSelected || isHovering
                 ? [
                     BoxShadow(
-                      color: BamcColors.primary.withOpacity(0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: BamcColors.primary.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                    BoxShadow(
+                      color: BamcColors.primary.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
                     ),
                   ]
                 : null,
@@ -91,15 +100,15 @@ class _SidebarState extends State<Sidebar> {
           child: Row(
             children: [
               Container(
-                width: 24,
-                height: 24,
+                width: 28,
+                height: 28,
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? Colors.white.withOpacity(0.2)
+                      ? Colors.white.withOpacity(0.3)
                       : isHovering
-                          ? BamcColors.primary.withOpacity(0.2)
+                          ? BamcColors.primary.withOpacity(0.3)
                           : Colors.transparent,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(2),
                   border: Border.all(
                     color: isSelected
                         ? Colors.white
@@ -111,7 +120,7 @@ class _SidebarState extends State<Sidebar> {
                 ),
                 child: Icon(
                   icon,
-                  size: 16,
+                  size: 18,
                   color: isSelected ? Colors.white : BamcColors.textPrimary,
                 ),
               ),
@@ -120,9 +129,18 @@ class _SidebarState extends State<Sidebar> {
                 title,
                 style: TextStyle(
                   fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
                   color: isSelected ? Colors.white : BamcColors.textPrimary,
                   fontFamily: isSelected ? 'Minecraft' : null,
+                  shadows: isSelected
+                      ? [
+                          Shadow(
+                            color: Colors.black.withOpacity(0.3),
+                            offset: const Offset(0, 1),
+                            blurRadius: 2,
+                          ),
+                        ]
+                      : null,
                 ),
               ),
             ],

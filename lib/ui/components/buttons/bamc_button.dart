@@ -179,42 +179,81 @@ class _BamcButtonState extends State<BamcButton> with SingleTickerProviderStateM
   }
 
   BoxDecoration _getDecoration() {
-    final borderRadius = widget.borderRadius ?? BorderRadius.circular(8);
+    final borderRadius = widget.borderRadius ?? BorderRadius.circular(4);
     
     switch (widget.type) {
       case BamcButtonType.primary:
         return BoxDecoration(
           gradient: BamcEffects.primaryGradient(),
           borderRadius: borderRadius,
-          boxShadow: widget.shadows ?? (_isHovered ? [BamcEffects.hoverShadow()] : [BamcEffects.standardShadow()]),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.3),
+            width: 1,
+          ),
+          boxShadow: widget.shadows ?? (_isHovered ? [
+            BamcEffects.hoverShadow(),
+            BamcEffects.glowEffect(color: BamcColors.primary)
+          ] : [
+            BamcEffects.standardShadow()
+          ]),
         );
       case BamcButtonType.secondary:
         return BoxDecoration(
           gradient: BamcEffects.secondaryGradient(),
           borderRadius: borderRadius,
-          boxShadow: widget.shadows ?? (_isHovered ? [BamcEffects.hoverShadow()] : [BamcEffects.standardShadow()]),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.3),
+            width: 1,
+          ),
+          boxShadow: widget.shadows ?? (_isHovered ? [
+            BamcEffects.hoverShadow(),
+            BamcEffects.glowEffect(color: BamcColors.secondary)
+          ] : [
+            BamcEffects.standardShadow()
+          ]),
         );
       case BamcButtonType.warning:
         return BoxDecoration(
           gradient: BamcEffects.warningGradient(),
           borderRadius: borderRadius,
-          boxShadow: widget.shadows ?? (_isHovered ? [BamcEffects.hoverShadow()] : [BamcEffects.standardShadow()]),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.3),
+            width: 1,
+          ),
+          boxShadow: widget.shadows ?? (_isHovered ? [
+            BamcEffects.hoverShadow(),
+            BamcEffects.glowEffect(color: BamcColors.warning)
+          ] : [
+            BamcEffects.standardShadow()
+          ]),
         );
       case BamcButtonType.success:
         return BoxDecoration(
           gradient: BamcEffects.successGradient(),
           borderRadius: borderRadius,
-          boxShadow: widget.shadows ?? (_isHovered ? [BamcEffects.hoverShadow()] : [BamcEffects.standardShadow()]),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.3),
+            width: 1,
+          ),
+          boxShadow: widget.shadows ?? (_isHovered ? [
+            BamcEffects.hoverShadow(),
+            BamcEffects.glowEffect(color: BamcColors.success)
+          ] : [
+            BamcEffects.standardShadow()
+          ]),
         );
       case BamcButtonType.outline:
         return BoxDecoration(
           color: Colors.transparent,
           borderRadius: borderRadius,
           border: Border.all(
-            color: BamcColors.primary,
+            color: _isHovered ? BamcColors.primaryLight : BamcColors.primary,
             width: 2,
           ),
-          boxShadow: widget.shadows ?? (_isHovered ? [BamcEffects.hoverShadow()] : null),
+          boxShadow: widget.shadows ?? (_isHovered ? [
+            BamcEffects.hoverShadow(),
+            BamcEffects.glowEffect(color: BamcColors.primary)
+          ] : null),
         );
       case BamcButtonType.text:
         return BoxDecoration(
@@ -227,6 +266,7 @@ class _BamcButtonState extends State<BamcButton> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     final isDisabled = widget.disabled || widget.isLoading;
+    final scale = _animationController.isAnimating && _animationController.value > 0.5 ? 0.95 : (_isHovered ? 1.05 : 1.0);
     
     return MouseRegion(
       onEnter: (_) => _handleHover(true),
@@ -236,8 +276,8 @@ class _BamcButtonState extends State<BamcButton> with SingleTickerProviderStateM
         onTapDown: isDisabled ? null : _handleTapDown,
         onTapUp: isDisabled ? null : _handleTapUp,
         onTapCancel: isDisabled ? null : _handleTapCancel,
-        child: ScaleTransition(
-          scale: _scaleAnimation,
+        child: Transform.scale(
+          scale: scale,
           child: Container(
             width: widget.fullWidth ? double.infinity : null,
             padding: EdgeInsets.symmetric(
@@ -247,11 +287,15 @@ class _BamcButtonState extends State<BamcButton> with SingleTickerProviderStateM
             decoration: isDisabled
                 ? BoxDecoration(
                     color: BamcColors.textDisabled.withOpacity(0.3),
-                    borderRadius: widget.borderRadius ?? BorderRadius.circular(8),
+                    borderRadius: widget.borderRadius ?? BorderRadius.circular(4),
+                    border: Border.all(
+                      color: BamcColors.border,
+                      width: 1,
+                    ),
                   )
                 : _getDecoration(),
             child: Opacity(
-              opacity: isDisabled ? 0.6 : 1.0,
+              opacity: isDisabled ? 0.6 : (_isHovered ? 1.1 : 1.0),
               child: _buildButtonContent(),
             ),
           ),

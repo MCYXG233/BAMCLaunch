@@ -22,6 +22,7 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
   double _dragStartX = 0;
   double _dragStartY = 0;
   bool _isHovering = false;
+  Map<String, bool> _hoverStates = {};
 
   Future<void> _handleMinimize() async {
     await windowManager.minimize();
@@ -53,26 +54,39 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
     // windowManager.stopDragging();
   }
 
+  Widget _buildPixelIcon(String type) {
+    return Container(
+      width: 12,
+      height: 12,
+      child: CustomPaint(
+        painter: _PixelIconPainter(type),
+      ),
+    );
+  }
+
   Widget _buildWindowControls() {
     if (widget.isMacOS) {
       return Row(
         children: [
           _buildControlButton(
+            id: 'close',
             color: BamcColors.warning,
             onPressed: _handleClose,
-            icon: Icons.close,
+            iconType: 'close',
           ),
           const SizedBox(width: 8),
           _buildControlButton(
+            id: 'minimize',
             color: BamcColors.success,
             onPressed: _handleMinimize,
-            icon: Icons.minimize,
+            iconType: 'minimize',
           ),
           const SizedBox(width: 8),
           _buildControlButton(
+            id: 'maximize',
             color: BamcColors.secondary,
             onPressed: _handleMaximize,
-            icon: Icons.maximize,
+            iconType: 'maximize',
           ),
         ],
       );
@@ -80,21 +94,24 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
       return Row(
         children: [
           _buildControlButton(
+            id: 'minimize',
             color: BamcColors.border,
             onPressed: _handleMinimize,
-            icon: Icons.minimize,
+            iconType: 'minimize',
           ),
           const SizedBox(width: 8),
           _buildControlButton(
+            id: 'maximize',
             color: BamcColors.border,
             onPressed: _handleMaximize,
-            icon: Icons.maximize,
+            iconType: 'maximize',
           ),
           const SizedBox(width: 8),
           _buildControlButton(
+            id: 'close',
             color: BamcColors.warning,
             onPressed: _handleClose,
-            icon: Icons.close,
+            iconType: 'close',
           ),
         ],
       );
@@ -102,25 +119,57 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
   }
 
   Widget _buildControlButton({
+    required String id,
     required Color color,
     required VoidCallback onPressed,
-    required IconData icon,
+    required String iconType,
   }) {
+    bool isHovering = _hoverStates[id] ?? false;
+    
     return MouseRegion(
       cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hoverStates[id] = true),
+      onExit: (_) => setState(() => _hoverStates[id] = false),
       child: GestureDetector(
         onTap: onPressed,
         child: Container(
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(16),
+            gradient: isHovering
+                ? LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      color.withOpacity(1.0),
+                      color.withOpacity(0.7),
+                    ],
+                  )
+                : LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      color.withOpacity(0.8),
+                      color.withOpacity(0.9),
+                    ],
+                  ),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              width: 1,
+            ),
+            boxShadow: isHovering
+                ? [
+                    BoxShadow(
+                      color: color.withOpacity(0.3),
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
+                    ),
+                  ]
+                : [],
           ),
-          child: Icon(
-            icon,
-            size: 16,
-            color: Colors.white,
+          child: Center(
+            child: _buildPixelIcon(iconType),
           ),
         ),
       ),
@@ -128,25 +177,54 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
   }
 
   Widget _buildPerformanceButton() {
+    bool isHovering = _hoverStates['performance'] ?? false;
+    
     return MouseRegion(
       cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hoverStates['performance'] = true),
+      onExit: (_) => setState(() => _hoverStates['performance'] = false),
       child: GestureDetector(
         onTap: widget.onPerformanceToggle,
         child: Container(
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: BamcColors.primary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(16),
+            gradient: isHovering
+                ? LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      BamcColors.primary.withOpacity(0.2),
+                      BamcColors.secondary.withOpacity(0.2),
+                    ],
+                  )
+                : LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      BamcColors.primary.withOpacity(0.1),
+                      BamcColors.secondary.withOpacity(0.1),
+                    ],
+                  ),
+            borderRadius: BorderRadius.circular(4),
             border: Border.all(
-              color: BamcColors.primary.withOpacity(0.3),
+              color: isHovering
+                  ? BamcColors.primary.withOpacity(0.5)
+                  : BamcColors.primary.withOpacity(0.3),
               width: 1,
             ),
+            boxShadow: isHovering
+                ? [
+                    BoxShadow(
+                      color: BamcColors.primary.withOpacity(0.2),
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
+                    ),
+                  ]
+                : [],
           ),
-          child: const Icon(
-            Icons.speed,
-            size: 16,
-            color: BamcColors.primary,
+          child: Center(
+            child: _buildPixelIcon('performance'),
           ),
         ),
       ),
@@ -273,5 +351,52 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
         ),
       ),
     );
+  }
+}
+
+class _PixelIconPainter extends CustomPainter {
+  final String type;
+
+  _PixelIconPainter(this.type);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.white;
+    final pixelSize = size.width / 12;
+
+    switch (type) {
+      case 'close':
+        // Pixel close icon (X)
+        canvas.drawRect(Rect.fromLTWH(3 * pixelSize, 3 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(5 * pixelSize, 3 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(7 * pixelSize, 3 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(3 * pixelSize, 5 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(7 * pixelSize, 5 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(3 * pixelSize, 7 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(5 * pixelSize, 7 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(7 * pixelSize, 7 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
+        break;
+      case 'minimize':
+        // Pixel minimize icon (horizontal line)
+        canvas.drawRect(Rect.fromLTWH(3 * pixelSize, 5 * pixelSize, 6 * pixelSize, 2 * pixelSize), paint);
+        break;
+      case 'maximize':
+        // Pixel maximize icon (square)
+        canvas.drawRect(Rect.fromLTWH(3 * pixelSize, 3 * pixelSize, 6 * pixelSize, 6 * pixelSize), paint);
+        break;
+      case 'performance':
+        // Pixel performance icon (speed lines)
+        canvas.drawRect(Rect.fromLTWH(4 * pixelSize, 3 * pixelSize, 4 * pixelSize, 6 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(3 * pixelSize, 4 * pixelSize, 1 * pixelSize, 4 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(8 * pixelSize, 4 * pixelSize, 1 * pixelSize, 4 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(2 * pixelSize, 5 * pixelSize, 1 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(9 * pixelSize, 5 * pixelSize, 1 * pixelSize, 2 * pixelSize), paint);
+        break;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
   }
 }
