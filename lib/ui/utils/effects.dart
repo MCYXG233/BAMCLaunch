@@ -16,8 +16,7 @@ class BamcEffects {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: borderRadius ?? BorderRadius.circular(8),
-        border:
-            border ??
+        border: border ??
             Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
         boxShadow: shadow != null
             ? [shadow]
@@ -254,13 +253,13 @@ class BamcEffects {
   // 按钮按下效果
   static Matrix4 buttonPressTransform() {
     return Matrix4.identity()
-      ..scaleByDouble(0.95)
-      ..translateByDouble(0, 2, 0);
+      ..scale(0.95)
+      ..translate(0, 2, 0);
   }
 
   // 悬浮缩放效果
   static Matrix4 hoverScaleTransform() {
-    return Matrix4.identity()..scaleByDouble(1.05);
+    return Matrix4.identity()..scale(1.05);
   }
 
   // 渐入动画
@@ -301,8 +300,8 @@ class BamcEffects {
       child: SlideTransition(
         position: Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero)
             .animate(
-              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-            ),
+          CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+        ),
         child: child,
       ),
     );
@@ -311,8 +310,8 @@ class BamcEffects {
   // 悬浮卡片转换 - 轻微上浮与阴影加深
   static Matrix4 hoverCardTransform(bool isHovered) {
     return Matrix4.identity()
-      ..translateByDouble(0, isHovered ? -8 : 0, 0)
-      ..scaleByDouble(isHovered ? 1.02 : 1.0);
+      ..translate(0, isHovered ? -8 : 0, 0)
+      ..scale(isHovered ? 1.02 : 1.0);
   }
 
   // 像素化动画颜色
