@@ -16,11 +16,9 @@ class BamcEffects {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: borderRadius ?? BorderRadius.circular(8),
-        border: border ??
-            Border.all(
-              color: Colors.white.withValues(alpha: 0.2),
-              width: 1,
-            ),
+        border:
+            border ??
+            Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
         boxShadow: shadow != null
             ? [shadow]
             : [
@@ -114,10 +112,7 @@ class BamcEffects {
     return const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [
-        Color(0xFF87CEEB),
-        Color(0xFF4682B4),
-      ],
+      colors: [Color(0xFF87CEEB), Color(0xFF4682B4)],
     );
   }
 
@@ -126,10 +121,7 @@ class BamcEffects {
     return const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [
-        Color(0xFF7CB342),
-        Color(0xFF558B2F),
-      ],
+      colors: [Color(0xFF7CB342), Color(0xFF558B2F)],
     );
   }
 
@@ -225,10 +217,7 @@ class BamcEffects {
     Color color = BamcColors.border,
     double width = 1,
   }) {
-    return Border.all(
-      color: color,
-      width: width,
-    );
+    return Border.all(color: color, width: width);
   }
 
   // 方块化边框
@@ -265,23 +254,21 @@ class BamcEffects {
   // 按钮按下效果
   static Matrix4 buttonPressTransform() {
     return Matrix4.identity()
-      ..scale(0.95)
-      ..translate(0, 2, 0);
+      ..scaleByDouble(0.95)
+      ..translateByDouble(0, 2, 0);
   }
 
   // 悬浮缩放效果
   static Matrix4 hoverScaleTransform() {
-    return Matrix4.identity()..scale(1.05);
+    return Matrix4.identity()..scaleByDouble(1.05);
   }
 
   // 渐入动画
   static Animation<double> fadeInAnimation(AnimationController controller) {
-    return Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: controller,
-        curve: Curves.easeInOut,
-      ),
-    );
+    return Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
   }
 
   // 滑入动画
@@ -290,43 +277,32 @@ class BamcEffects {
     Offset begin = const Offset(0, 0.1),
     Offset end = Offset.zero,
   }) {
-    return Tween<Offset>(begin: begin, end: end).animate(
-      CurvedAnimation(
-        parent: controller,
-        curve: Curves.easeOut,
-      ),
-    );
+    return Tween<Offset>(
+      begin: begin,
+      end: end,
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOut));
   }
 
   // 弹跳动画
   static Animation<double> bounceAnimation(AnimationController controller) {
-    return Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: controller,
-        curve: Curves.bounceOut,
-      ),
-    );
+    return Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.bounceOut));
   }
 
   // 页面切换动画 - 淡入淡出+轻微位移
   static Widget pageTransition(Widget child, Animation<double> animation) {
     return FadeTransition(
-      opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeOutQuad,
-        ),
-      ),
+      opacity: Tween<double>(
+        begin: 0.0,
+        end: 1.0,
+      ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutQuad)),
       child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, 0.05),
-          end: Offset.zero,
-        ).animate(
-          CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOutCubic,
-          ),
-        ),
+        position: Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero)
+            .animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+            ),
         child: child,
       ),
     );
@@ -335,8 +311,8 @@ class BamcEffects {
   // 悬浮卡片转换 - 轻微上浮与阴影加深
   static Matrix4 hoverCardTransform(bool isHovered) {
     return Matrix4.identity()
-      ..translate(0, isHovered ? -8 : 0, 0)
-      ..scale(isHovered ? 1.02 : 1.0);
+      ..translateByDouble(0, isHovered ? -8 : 0, 0)
+      ..scaleByDouble(isHovered ? 1.02 : 1.0);
   }
 
   // 像素化动画颜色
@@ -359,13 +335,12 @@ class BamcEffects {
 
   // 像素颗粒缩放动画
   static Animation<double> pixelParticleAnimation(
-      AnimationController controller) {
-    return Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: controller,
-        curve: Curves.easeOutCubic,
-      ),
-    );
+    AnimationController controller,
+  ) {
+    return Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOutCubic));
   }
 
   // 像素加载动画
@@ -430,10 +405,7 @@ class BamcEffects {
           currentScale = 1.0;
         }
 
-        return Transform.scale(
-          scale: currentScale,
-          child: child,
-        );
+        return Transform.scale(scale: currentScale, child: child);
       },
       child: child,
     );
