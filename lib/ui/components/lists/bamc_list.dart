@@ -146,7 +146,22 @@ class _BamcListState<T> extends State<BamcList<T>> {
   void _handleContextMenu() {
     if (_keyboardSelectedIndex != null &&
         _keyboardSelectedIndex! < widget.items.length) {
-      // 显示右键菜单
+      final item = widget.items[_keyboardSelectedIndex!];
+      if (widget.contextMenuItems != null) {
+        final context = _focusNode?.context;
+        if (context != null) {
+          final renderBox = context.findRenderObject() as RenderBox?;
+          if (renderBox != null) {
+            final size = renderBox.size;
+            final center = renderBox.localToGlobal(Offset(size.width / 2, size.height / 2));
+            BamcContextMenu.showMenuAtPosition(
+              context,
+              center,
+              widget.contextMenuItems!(item, _keyboardSelectedIndex!),
+            );
+          }
+        }
+      }
     }
   }
 

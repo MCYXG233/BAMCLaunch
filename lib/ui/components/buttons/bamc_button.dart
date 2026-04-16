@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../theme/colors.dart';
 import '../../utils/effects.dart';
@@ -47,10 +48,12 @@ class BamcButton extends StatefulWidget {
   State<BamcButton> createState() => _BamcButtonState();
 }
 
-class _BamcButtonState extends State<BamcButton> with SingleTickerProviderStateMixin {
+class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
   late AnimationController _animationController;
+  late AnimationController _particleController;
   late Animation<double> _scaleAnimation;
   bool _isHovered = false;
+  List<_PixelParticle> _particles = [];
 
   @override
   void initState() {
@@ -59,6 +62,14 @@ class _BamcButtonState extends State<BamcButton> with SingleTickerProviderStateM
       duration: const Duration(milliseconds: 100),
       vsync: this,
     );
+    _particleController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    )..addListener(() {
+        setState(() {
+          _particles.removeWhere((p) => p.animation.value <= 0);
+        });
+      });
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
       CurvedAnimation(
         parent: _animationController,
@@ -70,6 +81,7 @@ class _BamcButtonState extends State<BamcButton> with SingleTickerProviderStateM
   @override
   void dispose() {
     _animationController.dispose();
+    _particleController.dispose();
     super.dispose();
   }
 
@@ -81,6 +93,26 @@ class _BamcButtonState extends State<BamcButton> with SingleTickerProviderStateM
 
   void _handleTapDown(TapDownDetails details) {
     _animationController.forward();
+    _spawnParticles(details.localPosition);
+  }
+
+  void _spawnParticles(Offset position) {
+    final random = DateTime.now().microsecond % 1000;
+    for (int i = 0; i < 8; i++) {
+      final angle = (i / 8) * 2 * 3.14159;
+      final distance = 20 + (random % 20).toDouble();
+      final particle = _PixelParticle(
+        position: position,
+        dx: cos(angle) * distance,
+        dy: sin(angle) * distance,
+        color: BamcEffects.pixelLoadingColors[i % BamcEffects.pixelLoadingColors.length],
+        controller: _particleController,
+      );
+      setState(() {
+        _particles.add(particle);
+      });
+    }
+    _particleController.forward(from: 0);
   }
 
   void _handleTapUp(TapUpDetails details) {
@@ -276,31 +308,80 @@ class _BamcButtonState extends State<BamcButton> with SingleTickerProviderStateM
         onTapDown: isDisabled ? null : _handleTapDown,
         onTapUp: isDisabled ? null : _handleTapUp,
         onTapCancel: isDisabled ? null : _handleTapCancel,
-        child: Transform.scale(
-          scale: scale,
-          child: Container(
-            width: widget.fullWidth ? double.infinity : null,
-            padding: EdgeInsets.symmetric(
-              vertical: _getPaddingVertical(),
-              horizontal: _getPaddingHorizontal(),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Transform.scale(
+              scale: scale,
+              child: Container(
+                width: widget.fullWidth ? double.infinity : null,
+                padding: EdgeInsets.symmetric(
+                  vertical: _getPaddingVertical(),
+                  horizontal: _getPaddingHorizontal(),
+                ),
+                decoration: isDisabled
+                    ? BoxDecoration(
+                        color: BamcColors.textDisabled.withOpacity(0.3),
+                        borderRadius: widget.borderRadius ?? BorderRadius.circular(4),
+                        border: Border.all(
+                          color: BamcColors.border,
+                          width: 1,
+                        ),
+                      )
+                    : _getDecoration(),
+                child: Opacity(
+                  opacity: isDisabled ? 0.6 : (_isHovered ? 1.1 : 1.0),
+                  child: _buildButtonContent(),
+                ),
+              ),
             ),
-            decoration: isDisabled
-                ? BoxDecoration(
-                    color: BamcColors.textDisabled.withOpacity(0.3),
-                    borderRadius: widget.borderRadius ?? BorderRadius.circular(4),
-                    border: Border.all(
-                      color: BamcColors.border,
-                      width: 1,
-                    ),
-                  )
-                : _getDecoration(),
-            child: Opacity(
-              opacity: isDisabled ? 0.6 : (_isHovered ? 1.1 : 1.0),
-              child: _buildButtonContent(),
-            ),
-          ),
+            ..._particles.map((particle) => _buildParticle(particle)),
+          ],
         ),
       ),
     );
   }
+
+  Widget _buildParticle(_PixelParticle particle) {
+    return AnimatedBuilder(
+      animation: particle.animation,
+      builder: (context, child) {
+        final progress = particle.animation.value;
+        return Positioned(
+          left: particle.position.dx + particle.dx * (1 - progress) - 4,
+          top: particle.position.dy + particle.dy * (1 - progress) - 4,
+          child: Opacity(
+            opacity: progress,
+            child: Transform.scale(
+              scale: progress,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: particle.color,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PixelParticle {
+  final Offset position;
+  final double dx;
+  final double dy;
+  final Color color;
+  final Animation<double> animation;
+
+  _PixelParticle({
+    required this.position,
+    required this.dx,
+    required this.dy,
+    required this.color,
+    required AnimationController controller,
+  }) : animation = BamcEffects.pixelParticleAnimation(controller);
 }

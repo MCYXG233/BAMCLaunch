@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../components/layout/breadcrumb_navigation.dart';
 import '../../components/tabs/bamc_tab_bar.dart';
 import '../../components/layout/bamc_card.dart';
+import '../../components/dialogs/glass_dialog.dart';
 import '../../theme/colors.dart';
 
 class ComponentsDemoPage extends StatelessWidget {
@@ -124,6 +125,16 @@ class ComponentsDemoPage extends StatelessWidget {
                           foregroundColor: BamcColors.primary,
                         ),
                         child: const Text('次要操作'),
+                      ),
+                      const SizedBox(width: 12),
+                      ElevatedButton(
+                        onPressed: () => _showGlassDialog(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: BamcColors.secondary,
+                          foregroundColor: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text('打开毛玻璃弹窗'),
                       ),
                     ],
                   ),
@@ -411,6 +422,102 @@ class ComponentsDemoPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showGlassDialog(BuildContext context) {
+    GlassDialog.show(
+      context: context,
+      title: '毛玻璃弹窗',
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '欢迎使用毛玻璃弹窗！',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: BamcColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            '这是一个使用毛玻璃效果的弹窗组件，具有以下特点：',
+            style: TextStyle(
+              fontSize: 14,
+              color: BamcColors.textSecondary,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildFeatureItem('毛玻璃背景效果', '使用 BackdropFilter 实现现代化的毛玻璃视觉效果'),
+          const SizedBox(height: 12),
+          _buildFeatureItem('像素风关闭按钮', '采用复古像素风格设计，带有悬停和按下反馈'),
+          const SizedBox(height: 12),
+          _buildFeatureItem('充足的内容留白', '内容区域有 24px 的内边距，视觉效果更加舒适'),
+          const SizedBox(height: 12),
+          _buildFeatureItem('可自定义尺寸', '支持自定义弹窗宽度和最大高度'),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          style: TextButton.styleFrom(
+            foregroundColor: BamcColors.textSecondary,
+          ),
+          child: const Text('取消'),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: BamcColors.primary,
+            foregroundColor: Colors.white,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: const Text('确定'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeatureItem(String title, String description) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          margin: const EdgeInsets.only(top: 6, right: 12),
+          decoration: BoxDecoration(
+            color: BamcColors.primary,
+            shape: BoxShape.circle,
+          ),
+        ),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: BamcColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                description,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: BamcColors.textSecondary,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

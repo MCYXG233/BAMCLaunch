@@ -308,4 +308,62 @@ class BamcEffects {
       ),
     );
   }
+
+  // 页面切换动画 - 淡入淡出+轻微位移
+  static Widget pageTransition(Widget child, Animation<double> animation) {
+    return FadeTransition(
+      opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutQuad,
+        ),
+      ),
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.05),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          ),
+        ),
+        child: child,
+      ),
+    );
+  }
+
+  // 悬浮卡片转换 - 轻微上浮
+  static Matrix4 hoverCardTransform(bool isHovered) {
+    return Matrix4.identity()
+      ..translate(0, isHovered ? -8 : 0);
+  }
+
+  // 像素化动画颜色
+  static const List<Color> pixelLoadingColors = [
+    Color(0xFF4A90D9),
+    Color(0xFF7CB342),
+    Color(0xFFFF9800),
+    Color(0xFFE53935),
+  ];
+
+  // 方块弹出动画
+  static Animation<double> blockPopAnimation(AnimationController controller) {
+    return Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: controller,
+        curve: const Interval(0.0, 0.5, curve: Curves.elasticOut),
+      ),
+    );
+  }
+
+  // 像素颗粒缩放动画
+  static Animation<double> pixelParticleAnimation(AnimationController controller) {
+    return Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: controller,
+        curve: Curves.easeOutCubic,
+      ),
+    );
+  }
 }

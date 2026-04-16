@@ -5,12 +5,12 @@ import 'core/core.dart';
 import 'core/performance/memory_optimizer.dart';
 import 'ui/theme/theme.dart';
 import 'ui/components/layout/main_layout.dart' hide logger;
+import 'ui/components/progress/pixel_loading_animation.dart';
+import 'ui/pages/components/minecraft_xp_bar_demo_page.dart';
 
 void main() async {
-  // 初始化Flutter绑定
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 创建日志文件路径
   final platformAdapter = PlatformAdapterFactory.getInstance();
   final logDirectory = Directory(platformAdapter.logsDirectory);
   if (!logDirectory.existsSync()) {
@@ -20,57 +20,63 @@ void main() async {
   final logFilePath =
       '${logDirectory.path}${Platform.pathSeparator}${DateTime.now().toIso8601String().replaceAll(':', '-')}.log';
 
-  // 初始化日志系统
   await logger.initialize(logFilePath);
-
-  // 初始化异常处理器
   ExceptionHandler().initialize();
-
-  // 初始化错误报告服务
   ErrorReportService().initialize(
     enableReporting: true,
-    // 这里可以配置实际的错误报告端点
-    // reportEndpoint: 'https://api.bamclauncher.com/error-report',
-    // apiKey: 'your_api_key_here',
   );
 
-  // 全局异常捕获
   runZonedGuarded(() async {
-    // 初始化窗口管理器
-    await WindowManagerService.getInstance().initialize();
-
-    // 启动内存优化器
-    MemoryOptimizer().startOptimization();
-
-    // 初始化账户管理器
-    // 加载已保存的账户信息，准备用户认证
-    await accountManager.initialize();
-
     runApp(const MyApp());
   }, (error, stackTrace) {
     ExceptionHandler.handleZoneError(error, stackTrace);
-
-    // 发送错误报告
     ErrorReportService().sendReportFromException(
       error,
       stackTrace,
       isAnonymous: true,
     );
-
     logger.error('Global error caught: $error');
     logger.error('Stack trace: $stackTrace');
   });
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    await WindowManagerService.getInstance().initialize();
+    MemoryOptimizer().startOptimization();
+    await accountManager.initialize();
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'BAMCLauncher',
       theme: BamcTheme.lightTheme,
-      home: const MainLayout(),
+      home: _isLoading
+          ? const LoadingScreen(message: '正在启动BAMCLauncher...')
+          : const MinecraftXpBarDemoPage(),
       debugShowCheckedModeBanner: false,
     );
   }

@@ -96,23 +96,37 @@ class BamcCard extends StatelessWidget {
     }
 
     if (hoverable) {
-      return SizedBox(
-        width: width,
-        child: MouseRegion(
-          onHover: (_) {},
-          onExit: (_) {},
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            margin: margin ?? const EdgeInsets.all(0),
-            padding: padding ?? const EdgeInsets.all(16),
-            decoration: cardDecoration.copyWith(
-              boxShadow: [
-                BamcEffects.hoverShadow(),
-              ],
+      return StatefulBuilder(
+        builder: (context, setState) {
+          bool isHovered = false;
+          return MouseRegion(
+            onEnter: (_) => setState(() => isHovered = true),
+            onExit: (_) => setState(() => isHovered = false),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              width: width,
+              margin: margin ?? const EdgeInsets.all(0),
+              padding: padding ?? const EdgeInsets.all(16),
+              transform: BamcEffects.hoverCardTransform(isHovered),
+              decoration: cardDecoration.copyWith(
+                boxShadow: isHovered
+                    ? [
+                        BamcEffects.hoverShadow(blurRadius: 20, offset: const Offset(0, 8)),
+                        BamcEffects.glowEffect(color: BamcColors.primary.withOpacity(0.2), blurRadius: 12),
+                      ]
+                    : (elevation != null
+                        ? [
+                            BamcEffects.standardShadow(
+                              blurRadius: elevation!,
+                            ),
+                          ]
+                        : null),
+              ),
+              child: cardContent,
             ),
-            child: cardContent,
-          ),
-        ),
+          );
+        },
       );
     }
 

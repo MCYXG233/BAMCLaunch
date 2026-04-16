@@ -73,7 +73,7 @@
   - `human-judgment` TR-5.3: 图标风格统一
 - **Notes**: 参考现有bamc_button.dart文件进行优化
 
-## [/] Task 6: 优化输入框组件
+## [x] Task 6: 优化输入框组件
 - **Priority**: P1
 - **Depends On**: Task 1
 - **Description**: 
@@ -87,7 +87,7 @@
   - `human-judgment` TR-6.3: 图标风格统一
 - **Notes**: 参考现有bamc_input.dart文件进行优化
 
-## [ ] Task 7: 优化列表组件
+## [x] Task 7: 优化列表组件
 - **Priority**: P1
 - **Depends On**: Task 1
 - **Description**: 
@@ -103,7 +103,7 @@
   - `human-judgment` TR-7.3: 支持右键菜单和键盘导航
 - **Notes**: 参考现有bamc_list.dart文件进行优化
 
-## [ ] Task 8: 优化进度条组件
+## [x] Task 8: 优化进度条组件
 - **Priority**: P1
 - **Depends On**: Task 1
 - **Description**: 
@@ -116,7 +116,7 @@
   - `human-judgment` TR-8.2: 动画效果流畅自然
 - **Notes**: 参考现有bamc_progress_bar.dart文件进行优化
 
-## [ ] Task 9: 优化弹窗组件
+## [x] Task 9: 优化弹窗组件
 - **Priority**: P1
 - **Depends On**: Task 1
 - **Description**: 
@@ -129,7 +129,7 @@
   - `human-judgment` TR-9.2: 交互流畅自然
 - **Notes**: 参考现有dialogs目录下的文件进行优化
 
-## [ ] Task 10: 优化动效设计
+## [x] Task 10: 优化动效设计
 - **Priority**: P1
 - **Depends On**: All previous tasks
 - **Description**: 

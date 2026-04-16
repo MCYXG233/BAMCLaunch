@@ -48,6 +48,7 @@ class BamcColors {
   
   static const Color textPrimary = Color(0xFF212121);
   static const Color textSecondary = Color(0xFF6D6D6D); // 更清晰的次要文字
+  static const Color textTertiary = Color(0xFF9E9E9E); // 第三级文字
   static const Color textDisabled = Color(0xFFBDBDBD);
 
   static const Color divider = Color(0xFFE0E0E0);

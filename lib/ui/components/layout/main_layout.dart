@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../../core/core.dart';
 import '../../../core/performance/performance_monitor.dart'
     as performance_monitor;
+import '../../utils/effects.dart';
 import 'custom_title_bar.dart';
 import 'sidebar.dart';
 import 'breadcrumb_navigation.dart';
@@ -22,8 +23,11 @@ class MainLayout extends StatefulWidget {
   State<MainLayout> createState() => _MainLayoutState();
 }
 
-class _MainLayoutState extends State<MainLayout> {
+class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
   NavigationItem _selectedItem = NavigationItem.home;
+  NavigationItem? _previousItem;
+  late AnimationController _pageAnimationController;
+  late Animation<double> _pageAnimation;
   late IServerManager _serverManager;
   late IConfigManager _configManager;
   late IGameLauncher _gameLauncher;
@@ -36,6 +40,18 @@ class _MainLayoutState extends State<MainLayout> {
     super.initState();
     _initializePerformanceMonitor();
     _initializeManagers();
+    
+    _pageAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _pageAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _pageAnimationController,
+        curve: Curves.easeOutQuad,
+      ),
+    );
+    _pageAnimationController.forward();
   }
 
   void _initializePerformanceMonitor() {
@@ -79,11 +95,22 @@ class _MainLayoutState extends State<MainLayout> {
   }
 
   void _handleNavigationItemSelected(NavigationItem item) {
-    setState(() {
-      _selectedItem = item;
-    });
-    // 记录页面切换性能
-    _performanceMonitor.onFrameRendered();
+    if (_selectedItem != item) {
+      setState(() {
+        _previousItem = _selectedItem;
+        _selectedItem = item;
+      });
+      _pageAnimationController.reset();
+      _pageAnimationController.forward();
+      // 记录页面切换性能
+      _performanceMonitor.onFrameRendered();
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageAnimationController.dispose();
+    super.dispose();
   }
 
   void _togglePerformanceOverlay() {
@@ -93,22 +120,21 @@ class _MainLayoutState extends State<MainLayout> {
   }
 
   Widget _buildContent() {
-    // 使用懒加载优化页面性能
-      final pages = [
-        HomePage(
-          versionManager: versionManager,
-          contentManager: contentManager,
-          gameLauncher: gameLauncher,
-          accountManager: accountManager,
-          onNavigateToVersions: () => _handleNavigationItemSelected(NavigationItem.versions),
-          onNavigateToModpacks: () => _handleNavigationItemSelected(NavigationItem.modpacks),
-        ),
+    final pages = [
+      HomePage(
+        versionManager: versionManager,
+        contentManager: contentManager,
+        gameLauncher: gameLauncher,
+        accountManager: accountManager,
+        onNavigateToVersions: () => _handleNavigationItemSelected(NavigationItem.versions),
+        onNavigateToModpacks: () => _handleNavigationItemSelected(NavigationItem.modpacks),
+      ),
       VersionPage(
-          versionManager: versionManager, 
-          contentManager: contentManager,
-          gameLauncher: gameLauncher,
-          accountManager: accountManager,
-        ),
+        versionManager: versionManager, 
+        contentManager: contentManager,
+        gameLauncher: gameLauncher,
+        accountManager: accountManager,
+      ),
       ContentPage(versionManager: versionManager),
       const ModpackPage(),
       ServerPage(serverManager: _serverManager),
@@ -118,13 +144,37 @@ class _MainLayoutState extends State<MainLayout> {
 
     return PageStorage(
       bucket: PageStorageBucket(),
-      child: IndexedStack(
-        index: _selectedItem.index,
-        children: pages.asMap().entries.map((entry) {
-          final index = entry.key;
-          final page = entry.value;
-          return _buildLazyLoadedPage(index, page);
-        }).toList(),
+      child: AnimatedBuilder(
+        animation: _pageAnimation,
+        builder: (context, child) {
+          return Stack(
+            children: [
+              if (_previousItem != null)
+                Opacity(
+                  opacity: 0.0,
+                  child: IndexedStack(
+                    index: _previousItem!.index,
+                    children: pages.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final page = entry.value;
+                      return _buildLazyLoadedPage(index, page);
+                    }).toList(),
+                  ),
+                ),
+              BamcEffects.pageTransition(
+                IndexedStack(
+                  index: _selectedItem.index,
+                  children: pages.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final page = entry.value;
+                    return _buildLazyLoadedPage(index, page);
+                  }).toList(),
+                ),
+                _pageAnimation,
+              ),
+            ],
+          );
+        },
       ),
     );
   }
