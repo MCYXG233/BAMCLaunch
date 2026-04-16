@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -126,7 +128,7 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
 
       // 将账户添加到账户管理器
       Account savedAccount = await widget.accountManager.addAccount(account);
-      
+
       // 选择新添加的账户
       await widget.accountManager.selectAccount(savedAccount.id);
 
@@ -148,7 +150,7 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
       widget.logger.error('微软登录失败: $e');
       if (mounted) {
         setState(() => _isLoading = false);
-        
+
         // 分析错误类型，提供更具体的错误信息
         String errorMessage = '登录失败';
         if (e.toString().contains('网络')) {
@@ -162,7 +164,7 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
         } else {
           errorMessage = '登录失败: ${e.toString()}';
         }
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -188,11 +190,11 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
   Widget build(BuildContext context) {
     final isMobile = Platform.isMobile;
     final isWeb = Platform.isWeb;
-    
+
     // 根据平台调整布局参数
     final headerHeight = isMobile ? 56.0 : 64.0;
     final padding = isMobile ? 12.0 : 16.0;
-    
+
     return Scaffold(
       backgroundColor: BamcColors.background,
       body: Column(
@@ -200,7 +202,7 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
           // 风格化标题栏
           Container(
             height: headerHeight,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -209,7 +211,7 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
               boxShadow: [
                 BoxShadow(
                   color: BamcColors.shadow,
-                  offset: const Offset(0, 2),
+                  offset: Offset(0, 2),
                   blurRadius: 4,
                 ),
               ],
@@ -222,8 +224,6 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
                   onPressed: () => Navigator.pop(context),
                   type: BamcButtonType.outline,
                   size: isMobile ? BamcButtonSize.small : BamcButtonSize.medium,
-                  textColor: Colors.white,
-                  borderColor: Colors.white.withOpacity(0.8),
                 ),
                 const Expanded(
                   child: Center(
@@ -251,7 +251,7 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
 
           // 加载指示器
           if (_isLoading)
-            Container(
+            SizedBox(
               height: 4,
               child: const LinearProgressIndicator(
                 backgroundColor: BamcColors.surface,
@@ -269,25 +269,24 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
                 ),
               ),
               child: WebViewWidget(
-                controller: _controller,
-                // 为不同平台提供适当的配置
-                gestureRecognizers: Set<Factory<OneSequenceGestureRecognizer>>.from([
-                  Factory(() => EagerGestureRecognizer()),
-                ])
-              ),
+                  controller: _controller,
+                  // 为不同平台提供适当的配置
+                  gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                    Factory(() => EagerGestureRecognizer()),
+                  }),
             ),
           ),
 
           // 底部提示
           Container(
             padding: EdgeInsets.all(padding),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: BamcColors.card,
               border: Border(top: BorderSide(color: BamcColors.border)),
               boxShadow: [
                 BoxShadow(
                   color: BamcColors.shadow,
-                  offset: const Offset(0, -2),
+                  offset: Offset(0, -2),
                   blurRadius: 4,
                 ),
               ],
@@ -329,9 +328,9 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  isMobile 
-                    ? '请在浏览器中完成微软账户登录，登录成功后将自动返回启动器。' 
-                    : '请在上方窗口中完成微软账户登录，登录成功后将自动返回启动器。',
+                  isMobile
+                      ? '请在浏览器中完成微软账户登录，登录成功后将自动返回启动器。'
+                      : '请在上方窗口中完成微软账户登录，登录成功后将自动返回启动器。',
                   style: const TextStyle(
                     fontSize: 14,
                     color: BamcColors.textSecondary,

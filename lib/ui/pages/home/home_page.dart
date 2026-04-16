@@ -52,7 +52,7 @@ class _HomePageState extends State<HomePage> {
       // 处理推荐版本
       final manifest = results[1] as VersionManifest;
       final latestRelease = manifest.versions.firstWhere(
-        (v) => v.type == 'release',
+        (v) => v.type.toString() == 'release',
         orElse: () => manifest.versions.first,
       );
       
@@ -397,10 +397,10 @@ class _HomePageState extends State<HomePage> {
           ),
           const SizedBox(height: 4),
           Text(
-            version.type == 'release' ? '稳定版' : '快照版',
+            version.type.toString() == 'release' ? '稳定版' : '快照版',
             style: TextStyle(
               fontSize: 12,
-              color: version.type == 'release' ? BamcColors.success : BamcColors.warning,
+              color: version.type.toString() == 'release' ? BamcColors.success : BamcColors.warning,
             ),
           ),
           const SizedBox(height: 12),

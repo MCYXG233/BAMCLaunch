@@ -186,7 +186,7 @@ class _MinecraftXpBarState extends State<MinecraftXpBar>
                   if (widget.label != null)
                     Text(
                       widget.label!,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: BamcColors.textPrimary,
@@ -197,7 +197,8 @@ class _MinecraftXpBarState extends State<MinecraftXpBar>
                     AnimatedBuilder(
                       animation: _progressAnimation,
                       builder: (context, child) {
-                        final displayPercentage = (_progressAnimation.value * 100).toStringAsFixed(0);
+                        final displayPercentage =
+                            (_progressAnimation.value * 100).toStringAsFixed(0);
                         return Text(
                           '$displayPercentage%',
                           style: TextStyle(
@@ -238,17 +239,22 @@ class _MinecraftXpBarState extends State<MinecraftXpBar>
                       ],
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(widget.height / 2 - 2),
+                      borderRadius:
+                          BorderRadius.circular(widget.height / 2 - 2),
                       child: AnimatedBuilder(
                         animation: _progressAnimation,
                         builder: (context, child) {
                           final progress = _progressAnimation.value;
                           return Row(
-                            children: List.generate(widget.totalBlocks, (index) {
-                              final blockProgress = (index + 1) / widget.totalBlocks;
-                              final prevBlockProgress = index / widget.totalBlocks;
+                            children:
+                                List.generate(widget.totalBlocks, (index) {
+                              final blockProgress =
+                                  (index + 1) / widget.totalBlocks;
+                              final prevBlockProgress =
+                                  index / widget.totalBlocks;
                               final isFilled = progress >= blockProgress;
-                              final partial = ((progress - prevBlockProgress) * widget.totalBlocks)
+                              final partial = ((progress - prevBlockProgress) *
+                                      widget.totalBlocks)
                                   .clamp(0.0, 1.0);
                               final isPartial = !isFilled && partial > 0;
 
@@ -262,8 +268,10 @@ class _MinecraftXpBarState extends State<MinecraftXpBar>
                                     children: [
                                       Container(
                                         decoration: BoxDecoration(
-                                          color: BamcColors.border.withOpacity(0.2),
-                                          borderRadius: BorderRadius.circular(3),
+                                          color: BamcColors.border
+                                              .withOpacity(0.2),
+                                          borderRadius:
+                                              BorderRadius.circular(3),
                                         ),
                                       ),
                                       if (isFilled || isPartial)

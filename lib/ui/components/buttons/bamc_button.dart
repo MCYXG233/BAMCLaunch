@@ -53,7 +53,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
   late AnimationController _particleController;
   late Animation<double> _scaleAnimation;
   bool _isHovered = false;
-  List<_PixelParticle> _particles = [];
+  final List<_PixelParticle> _particles = [];
 
   @override
   void initState() {
@@ -105,7 +105,8 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
         position: position,
         dx: cos(angle) * distance,
         dy: sin(angle) * distance,
-        color: BamcEffects.pixelLoadingColors[i % BamcEffects.pixelLoadingColors.length],
+        color: BamcEffects
+            .pixelLoadingColors[i % BamcEffects.pixelLoadingColors.length],
         controller: _particleController,
       );
       setState(() {
@@ -179,7 +180,8 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
             child: CircularProgressIndicator(
               strokeWidth: 2,
               valueColor: AlwaysStoppedAnimation<Color>(
-                widget.type == BamcButtonType.outline || widget.type == BamcButtonType.text
+                widget.type == BamcButtonType.outline ||
+                        widget.type == BamcButtonType.text
                     ? BamcColors.primary
                     : Colors.white,
               ),
@@ -189,7 +191,8 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
           Icon(
             widget.icon,
             size: _getIconSize(),
-            color: widget.type == BamcButtonType.outline || widget.type == BamcButtonType.text
+            color: widget.type == BamcButtonType.outline ||
+                    widget.type == BamcButtonType.text
                 ? BamcColors.primary
                 : Colors.white,
           ),
@@ -201,10 +204,12 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
             style: TextStyle(
               fontSize: _getFontSize(),
               fontWeight: FontWeight.w600,
-              color: widget.type == BamcButtonType.outline || widget.type == BamcButtonType.text
+              color: widget.type == BamcButtonType.outline ||
+                      widget.type == BamcButtonType.text
                   ? BamcColors.primary
                   : Colors.white,
-              fontFamily: widget.type != BamcButtonType.text ? 'Minecraft' : null,
+              fontFamily:
+                  widget.type != BamcButtonType.text ? 'Minecraft' : null,
             ),
           ),
       ],
@@ -213,11 +218,11 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
 
   BoxDecoration _getDecoration() {
     final borderRadius = widget.borderRadius ?? BorderRadius.circular(6);
-    
+
     switch (widget.type) {
       case BamcButtonType.primary:
         return BoxDecoration(
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
@@ -230,28 +235,31 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
             color: Colors.white.withOpacity(0.4),
             width: 1,
           ),
-          boxShadow: widget.shadows ?? (_isHovered ? [
-            BoxShadow(
-              color: BamcColors.primary.withOpacity(0.4),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-            BoxShadow(
-              color: BamcColors.primary.withOpacity(0.2),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ] : [
-            BoxShadow(
-              color: BamcColors.primary.withOpacity(0.2),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ]),
+          boxShadow: widget.shadows ??
+              (_isHovered
+                  ? [
+                      BoxShadow(
+                        color: BamcColors.primary.withOpacity(0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: BamcColors.primary.withOpacity(0.2),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ]
+                  : [
+                      BoxShadow(
+                        color: BamcColors.primary.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]),
         );
       case BamcButtonType.secondary:
         return BoxDecoration(
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
@@ -264,28 +272,31 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
             color: Colors.white.withOpacity(0.4),
             width: 1,
           ),
-          boxShadow: widget.shadows ?? (_isHovered ? [
-            BoxShadow(
-              color: BamcColors.secondary.withOpacity(0.4),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-            BoxShadow(
-              color: BamcColors.secondary.withOpacity(0.2),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ] : [
-            BoxShadow(
-              color: BamcColors.secondary.withOpacity(0.2),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ]),
+          boxShadow: widget.shadows ??
+              (_isHovered
+                  ? [
+                      BoxShadow(
+                        color: BamcColors.secondary.withOpacity(0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: BamcColors.secondary.withOpacity(0.2),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ]
+                  : [
+                      BoxShadow(
+                        color: BamcColors.secondary.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]),
         );
       case BamcButtonType.warning:
         return BoxDecoration(
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
@@ -298,28 +309,31 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
             color: Colors.white.withOpacity(0.4),
             width: 1,
           ),
-          boxShadow: widget.shadows ?? (_isHovered ? [
-            BoxShadow(
-              color: BamcColors.warning.withOpacity(0.4),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-            BoxShadow(
-              color: BamcColors.warning.withOpacity(0.2),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ] : [
-            BoxShadow(
-              color: BamcColors.warning.withOpacity(0.2),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ]),
+          boxShadow: widget.shadows ??
+              (_isHovered
+                  ? [
+                      BoxShadow(
+                        color: BamcColors.warning.withOpacity(0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: BamcColors.warning.withOpacity(0.2),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ]
+                  : [
+                      BoxShadow(
+                        color: BamcColors.warning.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]),
         );
       case BamcButtonType.success:
         return BoxDecoration(
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
@@ -332,24 +346,27 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
             color: Colors.white.withOpacity(0.4),
             width: 1,
           ),
-          boxShadow: widget.shadows ?? (_isHovered ? [
-            BoxShadow(
-              color: BamcColors.success.withOpacity(0.4),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-            BoxShadow(
-              color: BamcColors.success.withOpacity(0.2),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ] : [
-            BoxShadow(
-              color: BamcColors.success.withOpacity(0.2),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ]),
+          boxShadow: widget.shadows ??
+              (_isHovered
+                  ? [
+                      BoxShadow(
+                        color: BamcColors.success.withOpacity(0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: BamcColors.success.withOpacity(0.2),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ]
+                  : [
+                      BoxShadow(
+                        color: BamcColors.success.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]),
         );
       case BamcButtonType.outline:
         return BoxDecoration(
@@ -359,13 +376,16 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
             color: _isHovered ? BamcColors.primaryLight : BamcColors.primary,
             width: 2,
           ),
-          boxShadow: widget.shadows ?? (_isHovered ? [
-            BoxShadow(
-              color: BamcColors.primary.withOpacity(0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ] : null),
+          boxShadow: widget.shadows ??
+              (_isHovered
+                  ? [
+                      BoxShadow(
+                        color: BamcColors.primary.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : null),
         );
       case BamcButtonType.text:
         return BoxDecoration(
@@ -378,8 +398,11 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final isDisabled = widget.disabled || widget.isLoading;
-    final scale = _animationController.isAnimating && _animationController.value > 0.5 ? 0.95 : (_isHovered ? 1.05 : 1.0);
-    
+    final scale =
+        _animationController.isAnimating && _animationController.value > 0.5
+            ? 0.95
+            : (_isHovered ? 1.05 : 1.0);
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => _handleHover(true),
@@ -403,7 +426,8 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
                 decoration: isDisabled
                     ? BoxDecoration(
                         color: BamcColors.textDisabled.withOpacity(0.3),
-                        borderRadius: widget.borderRadius ?? BorderRadius.circular(6),
+                        borderRadius:
+                            widget.borderRadius ?? BorderRadius.circular(6),
                         border: Border.all(
                           color: BamcColors.border,
                           width: 1,
@@ -470,3 +494,4 @@ class _PixelParticle {
             curve: Curves.easeOut,
           ),
         );
+}

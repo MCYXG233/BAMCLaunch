@@ -3,7 +3,6 @@ import '../../../core/core.dart';
 import '../../../ui/theme/colors.dart';
 import '../../components/buttons/bamc_button.dart';
 import '../../components/inputs/bamc_input.dart';
-import '../../components/lists/bamc_list.dart';
 import './mod_detail_page.dart';
 
 class ModDownloadPage extends StatefulWidget {
@@ -47,9 +46,11 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
         setState(() => _mods = popular);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('加载模组失败: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('加载模组失败: $e')),
+        );
+      }
     } finally {
       setState(() => _isLoading = false);
     }
@@ -81,7 +82,7 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
   Widget _buildFilters() {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
@@ -94,11 +95,11 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
           color: BamcColors.border.withOpacity(0.5),
           width: 2,
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: BamcColors.shadow,
             blurRadius: 8,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -120,7 +121,7 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: DropdownButton<String>(
                     value: _selectedGameVersion,
-                    hint: Text(
+                    hint: const Text(
                       '选择游戏版本',
                       style: TextStyle(
                         color: BamcColors.textSecondary,
@@ -139,7 +140,7 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
                     onChanged: (value) {
                       setState(() => _selectedGameVersion = value);
                     },
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: BamcColors.textPrimary,
                       fontFamily: 'Minecraft',
                     ),
@@ -160,7 +161,7 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: DropdownButton<String>(
                     value: _selectedLoader,
-                    hint: Text(
+                    hint: const Text(
                       '选择模组加载器',
                       style: TextStyle(
                         color: BamcColors.textSecondary,
@@ -173,12 +174,13 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
                       DropdownMenuItem(value: 'forge', child: Text('Forge')),
                       DropdownMenuItem(value: 'fabric', child: Text('Fabric')),
                       DropdownMenuItem(value: 'quilt', child: Text('Quilt')),
-                      DropdownMenuItem(value: 'neoforge', child: Text('NeoForge')),
+                      DropdownMenuItem(
+                          value: 'neoforge', child: Text('NeoForge')),
                     ],
                     onChanged: (value) {
                       setState(() => _selectedLoader = value);
                     },
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: BamcColors.textPrimary,
                       fontFamily: 'Minecraft',
                     ),
@@ -203,7 +205,7 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: DropdownButton<String>(
                     value: _selectedCategory,
-                    hint: Text(
+                    hint: const Text(
                       '选择分类',
                       style: TextStyle(
                         color: BamcColors.textSecondary,
@@ -216,14 +218,15 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
                       DropdownMenuItem(value: 'technology', child: Text('科技')),
                       DropdownMenuItem(value: 'magic', child: Text('魔法')),
                       DropdownMenuItem(value: 'adventure', child: Text('冒险')),
-                      DropdownMenuItem(value: 'performance', child: Text('性能优化')),
+                      DropdownMenuItem(
+                          value: 'performance', child: Text('性能优化')),
                       DropdownMenuItem(value: 'utility', child: Text('实用工具')),
                       DropdownMenuItem(value: 'decoration', child: Text('装饰')),
                     ],
                     onChanged: (value) {
                       setState(() => _selectedCategory = value);
                     },
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: BamcColors.textPrimary,
                       fontFamily: 'Minecraft',
                     ),
@@ -233,13 +236,13 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
               const SizedBox(width: 12),
               Expanded(
                 child: BamcInput(
-                    hintText: '作者名称',
-                    initialValue: _selectedAuthor,
-                    onChanged: (value) => setState(() => _selectedAuthor = value),
-                    suffixIcon: Icons.person,
-                    fillColor: BamcColors.surface,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  hintText: '作者名称',
+                  initialValue: _selectedAuthor,
+                  onChanged: (value) => setState(() => _selectedAuthor = value),
+                  suffixIcon: Icons.person,
+                  fillColor: BamcColors.surface,
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ],
           ),
@@ -259,7 +262,7 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: DropdownButton<SortType>(
                     value: _selectedSortType,
-                    hint: Text(
+                    hint: const Text(
                       '选择排序方式',
                       style: TextStyle(
                         color: BamcColors.textSecondary,
@@ -293,7 +296,7 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
                     onChanged: (value) {
                       setState(() => _selectedSortType = value!);
                     },
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: BamcColors.textPrimary,
                       fontFamily: 'Minecraft',
                     ),
@@ -368,7 +371,7 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
+                gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
@@ -394,7 +397,7 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
               ),
             ),
             const SizedBox(height: 16),
-            Text(
+            const Text(
               '加载中...',
               style: TextStyle(
                 color: BamcColors.primary,
@@ -416,7 +419,7 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
+                gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
@@ -441,7 +444,7 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
             const SizedBox(height: 16),
             Text(
               _searchQuery.isNotEmpty ? '没有找到相关模组' : '暂无模组数据',
-              style: TextStyle(
+              style: const TextStyle(
                 color: BamcColors.textSecondary,
                 fontSize: 16,
                 fontFamily: 'Minecraft',
@@ -471,7 +474,7 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
   Widget _buildModCard(ContentItem mod) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
@@ -484,11 +487,11 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
           color: BamcColors.border.withOpacity(0.5),
           width: 2,
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: BamcColors.shadow,
             blurRadius: 8,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -542,7 +545,7 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
                 // 模组名称
                 Text(
                   mod.name,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: BamcColors.textPrimary,
@@ -555,7 +558,7 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
                 // 模组作者
                 Text(
                   '作者: ${mod.author}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     color: BamcColors.textSecondary,
                     fontFamily: 'Minecraft',
@@ -567,7 +570,7 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
                 // 模组版本和下载量
                 Text(
                   '版本: ${mod.version} · 下载: ${mod.downloadCount}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 10,
                     color: BamcColors.textTertiary,
                     fontFamily: 'Minecraft',
@@ -593,28 +596,12 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
     );
   }
 
-  Widget _buildModIcon(ContentItem mod) {
-    if (mod.iconUrl != null) {
-      return Image.network(
-        mod.iconUrl!,
-        width: 48,
-        height: 48,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return _buildDefaultIcon();
-        },
-      );
-    } else {
-      return _buildDefaultIcon();
-    }
-  }
-
   Widget _buildDefaultIcon() {
     return Container(
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: BamcColors.primary.withOpacity(0.1),
+        color: BamcColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: const Icon(Icons.extension, color: Colors.blue, size: 24),
@@ -663,48 +650,30 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
       );
 
       if (result) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('模组 ${mod.name} 安装成功')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('模组 ${mod.name} 安装成功')),
+          );
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('安装失败')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('安装失败')),
+          );
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('安装失败: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('安装失败: $e')),
+        );
+      }
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
-  void _showModDetails(ContentItem mod) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('模组详情: ${mod.name}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('作者: ${mod.author}'),
-            Text('版本: ${mod.version}'),
-            Text('下载量: ${mod.downloadCount}'),
-            const SizedBox(height: 16),
-            Text('描述: ${mod.description}'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('关闭'),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   void _showAdvancedSearch() {
     showDialog(
@@ -789,9 +758,11 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
 
   void _switchToFavorites() {
     // 切换到收藏夹模式
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('切换到收藏夹模式')),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('切换到收藏夹模式')),
+      );
+    }
   }
 
   @override

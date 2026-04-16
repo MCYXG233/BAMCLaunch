@@ -63,7 +63,7 @@ class _SidebarState extends State<Sidebar> {
                     : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
             gradient: isSelected
-                ? LinearGradient(
+                ? const LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
@@ -159,7 +159,7 @@ class _SidebarState extends State<Sidebar> {
   Widget build(BuildContext context) {
     return Container(
       width: 250,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: BamcColors.surface,
         border: Border(
           right: BorderSide(
@@ -171,7 +171,7 @@ class _SidebarState extends State<Sidebar> {
           BoxShadow(
             color: BamcColors.shadow,
             blurRadius: 8,
-            offset: const Offset(2, 0),
+            offset: Offset(2, 0),
           ),
         ],
       ),

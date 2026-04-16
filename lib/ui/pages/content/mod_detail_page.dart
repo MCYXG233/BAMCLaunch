@@ -196,7 +196,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
@@ -209,11 +209,11 @@ class _ModDetailPageState extends State<ModDetailPage> {
           color: BamcColors.border.withOpacity(0.5),
           width: 2,
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: BamcColors.shadow,
             blurRadius: 8,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -230,7 +230,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
                   children: [
                     Text(
                       widget.mod.name,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
                         color: BamcColors.textPrimary,
@@ -240,7 +240,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
                     const SizedBox(height: 8),
                     Text(
                       '作者: ${widget.mod.author}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
                         color: BamcColors.textSecondary,
                         fontFamily: 'Minecraft',
@@ -249,7 +249,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
                     const SizedBox(height: 4),
                     Text(
                       '版本: ${widget.mod.version} · 下载: ${widget.mod.downloadCount}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
                         color: BamcColors.textTertiary,
                         fontFamily: 'Minecraft',
@@ -261,7 +261,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
             ],
           ),
           const SizedBox(height: 20),
-          Text(
+          const Text(
             '描述:',
             style: TextStyle(
               fontSize: 16,
@@ -290,7 +290,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
             ),
             child: Text(
               widget.mod.description,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 color: BamcColors.textPrimary,
                 lineHeight: 1.5,
@@ -360,7 +360,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
@@ -373,18 +373,18 @@ class _ModDetailPageState extends State<ModDetailPage> {
           color: BamcColors.border.withOpacity(0.5),
           width: 2,
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: BamcColors.shadow,
             blurRadius: 8,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             '版本列表',
             style: TextStyle(
               fontSize: 18,
@@ -436,7 +436,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
                       children: [
                         Text(
                           version.name,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: BamcColors.textPrimary,
@@ -446,7 +446,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
                         const SizedBox(height: 4),
                         Text(
                           '${version.gameVersion} · ${version.loader} · ${version.releaseTime} · ${version.fileSize}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             color: BamcColors.textSecondary,
                             fontFamily: 'Minecraft',
@@ -468,7 +468,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
@@ -481,18 +481,18 @@ class _ModDetailPageState extends State<ModDetailPage> {
           color: BamcColors.border.withOpacity(0.5),
           width: 2,
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: BamcColors.shadow,
             blurRadius: 8,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             '依赖管理',
             style: TextStyle(
               fontSize: 18,
@@ -562,7 +562,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
                       children: [
                         Text(
                           dep.name,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: BamcColors.textPrimary,
@@ -572,7 +572,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
                         const SizedBox(height: 4),
                         Text(
                           '版本要求: ${dep.version} · ${dep.required ? '必需' : '可选'}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             color: BamcColors.textSecondary,
                             fontFamily: 'Minecraft',
@@ -592,7 +592,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   if (dep.installed)
-                    Text(
+                    const Text(
                       '已安装',
                       style: TextStyle(
                         fontSize: 12,
@@ -628,7 +628,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
@@ -641,18 +641,18 @@ class _ModDetailPageState extends State<ModDetailPage> {
           color: BamcColors.border.withOpacity(0.5),
           width: 2,
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: BamcColors.shadow,
             blurRadius: 8,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             '兼容性检测',
             style: TextStyle(
               fontSize: 18,
@@ -734,7 +734,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
                       children: [
                         Text(
                           instance.name,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: BamcColors.textPrimary,
@@ -744,16 +744,15 @@ class _ModDetailPageState extends State<ModDetailPage> {
                         const SizedBox(height: 4),
                         Text(
                           '${instance.gameVersion} · ${instance.loader}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             color: BamcColors.textSecondary,
                             fontFamily: 'Minecraft',
                           ),
                         ),
+                        if (!instance.compatible) const SizedBox(height: 4),
                         if (!instance.compatible)
-                          const SizedBox(height: 4),
-                        if (!instance.compatible)
-                          Text(
+                          const Text(
                             '不兼容',
                             style: TextStyle(
                               fontSize: 12,
@@ -830,19 +829,13 @@ class _ModDetailPageState extends State<ModDetailPage> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  _isFavorite
-                      ? BamcColors.danger
-                      : BamcColors.surface,
-                  _isFavorite
-                      ? BamcColors.dangerDark
-                      : BamcColors.background,
+                  _isFavorite ? BamcColors.danger : BamcColors.surface,
+                  _isFavorite ? BamcColors.dangerDark : BamcColors.background,
                 ],
               ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: _isFavorite
-                    ? BamcColors.danger
-                    : BamcColors.border,
+                color: _isFavorite ? BamcColors.danger : BamcColors.border,
                 width: 2,
               ),
               boxShadow: [
@@ -869,7 +862,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
@@ -882,11 +875,11 @@ class _ModDetailPageState extends State<ModDetailPage> {
                 color: BamcColors.border,
                 width: 2,
               ),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
                   color: BamcColors.shadow,
                   blurRadius: 8,
-                  offset: const Offset(0, 4),
+                  offset: Offset(0, 4),
                 ),
               ],
             ),
@@ -939,7 +932,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
@@ -965,7 +958,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text(
+                    const Text(
                       '加载中...',
                       style: TextStyle(
                         color: BamcColors.primary,

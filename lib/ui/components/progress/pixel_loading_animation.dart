@@ -69,20 +69,22 @@ class _PixelLoadingPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final pixelSize = size.width / 10;
-    final gridSize = 8;
+    const gridSize = 8;
 
     for (int row = 0; row < gridSize; row++) {
       for (int col = 0; col < gridSize; col++) {
         final x = (col - gridSize / 2 + 0.5) * pixelSize;
         final y = (row - gridSize / 2 + 0.5) * pixelSize;
-        
+
         final distance = sqrt(x * x + y * y) / (size.width / 2);
         final phase = (distance + animation.value) % 1.0;
-        
+
         final opacity = (0.3 + 0.7 * sin(phase * pi * 2)).clamp(0.0, 1.0);
         final scale = 0.5 + 0.5 * sin(phase * pi * 2);
-        final colorIndex = (row * gridSize + col) % BamcEffects.pixelLoadingColors.length;
-        final color = BamcEffects.pixelLoadingColors[colorIndex].withOpacity(opacity);
+        final colorIndex =
+            (row * gridSize + col) % BamcEffects.pixelLoadingColors.length;
+        final color =
+            BamcEffects.pixelLoadingColors[colorIndex].withOpacity(opacity);
 
         final paint = Paint()..color = color;
         final pixelRect = Rect.fromLTWH(
@@ -91,7 +93,7 @@ class _PixelLoadingPainter extends CustomPainter {
           pixelSize * scale,
           pixelSize * scale,
         );
-        
+
         canvas.drawRect(pixelRect, paint);
       }
     }

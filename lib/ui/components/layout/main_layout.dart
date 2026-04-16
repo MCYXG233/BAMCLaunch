@@ -110,7 +110,7 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
     _initializePerformanceMonitor();
     _initializeManagers();
     _initializePages();
-    
+
     _pageAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -131,11 +131,13 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
         contentManager: contentManager,
         gameLauncher: gameLauncher,
         accountManager: accountManager,
-        onNavigateToVersions: () => _handleNavigationItemSelected(NavigationItem.versions),
-        onNavigateToModpacks: () => _handleNavigationItemSelected(NavigationItem.modpacks),
+        onNavigateToVersions: () =>
+            _handleNavigationItemSelected(NavigationItem.versions),
+        onNavigateToModpacks: () =>
+            _handleNavigationItemSelected(NavigationItem.modpacks),
       ),
       VersionPage(
-        versionManager: versionManager, 
+        versionManager: versionManager,
         contentManager: contentManager,
         gameLauncher: gameLauncher,
         accountManager: accountManager,
@@ -327,11 +329,11 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
                                         color: BamcColors.border,
                                         width: 1,
                                       ),
-                                      boxShadow: [
+                                      boxShadow: const [
                                         BoxShadow(
                                           color: BamcColors.shadow,
                                           blurRadius: 8,
-                                          offset: const Offset(0, 2),
+                                          offset: Offset(0, 2),
                                         ),
                                       ],
                                     ),
@@ -363,6 +365,4 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
       ),
     );
   }
-
-
 }

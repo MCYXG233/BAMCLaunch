@@ -77,14 +77,16 @@ class _PixelInputState extends State<PixelInput> {
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller ?? TextEditingController(text: widget.initialValue);
+    _controller =
+        widget.controller ?? TextEditingController(text: widget.initialValue);
   }
 
   @override
   void didUpdateWidget(covariant PixelInput oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
-      _controller = widget.controller ?? TextEditingController(text: widget.initialValue);
+      _controller =
+          widget.controller ?? TextEditingController(text: widget.initialValue);
     }
   }
 
@@ -187,7 +189,7 @@ class _PixelInputState extends State<PixelInput> {
 
     return OutlineInputBorder(
       borderRadius: borderRadius,
-      borderSide: BorderSide(
+      borderSide: const BorderSide(
         color: BamcColors.border,
         width: 1.5,
         style: BorderStyle.solid,
@@ -344,7 +346,7 @@ class _PixelInputState extends State<PixelInput> {
                   disabledBorder: OutlineInputBorder(
                     borderRadius:
                         widget.borderRadius ?? BorderRadius.circular(12),
-                    borderSide: BorderSide(
+                    borderSide: const BorderSide(
                       color: BamcColors.border,
                       width: 1.5,
                     ),

@@ -173,9 +173,9 @@ class BamcTheme {
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return BamcColors.primary.withOpacity(0.3);
+            return BamcColors.primary.withValues(alpha: 0.3);
           }
-          return Colors.grey.withOpacity(0.3);
+          return Colors.grey.withValues(alpha: 0.3);
         }),
       ),
 
@@ -203,7 +203,7 @@ class BamcTheme {
         activeTrackColor: BamcColors.primary,
         inactiveTrackColor: BamcColors.border,
         thumbColor: BamcColors.primary,
-        overlayColor: BamcColors.primary.withOpacity(0.1),
+        overlayColor: BamcColors.primary.withValues(alpha: 0.1),
         trackHeight: 4,
       ),
 

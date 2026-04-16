@@ -22,7 +22,7 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
   double _dragStartX = 0;
   double _dragStartY = 0;
   bool _isHovering = false;
-  Map<String, bool> _hoverStates = {};
+  final Map<String, bool> _hoverStates = {};
 
   Future<void> _handleMinimize() async {
     await windowManager.minimize();
@@ -55,7 +55,7 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
   }
 
   Widget _buildPixelIcon(String type) {
-    return Container(
+    return SizedBox(
       width: 14,
       height: 14,
       child: CustomPaint(
@@ -125,7 +125,7 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
     required String iconType,
   }) {
     bool isHovering = _hoverStates[id] ?? false;
-    
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hoverStates[id] = true),
@@ -179,7 +179,7 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
 
   Widget _buildPerformanceButton() {
     bool isHovering = _hoverStates['performance'] ?? false;
-    
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hoverStates['performance'] = true),
@@ -376,30 +376,75 @@ class _PixelIconPainter extends CustomPainter {
     switch (type) {
       case 'close':
         // Pixel close icon (X)
-        canvas.drawRect(Rect.fromLTWH(4 * pixelSize, 4 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(6 * pixelSize, 4 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(8 * pixelSize, 4 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(4 * pixelSize, 6 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(8 * pixelSize, 6 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(4 * pixelSize, 8 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(6 * pixelSize, 8 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(8 * pixelSize, 8 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(
+            Rect.fromLTWH(
+                4 * pixelSize, 4 * pixelSize, 2 * pixelSize, 2 * pixelSize),
+            paint);
+        canvas.drawRect(
+            Rect.fromLTWH(
+                6 * pixelSize, 4 * pixelSize, 2 * pixelSize, 2 * pixelSize),
+            paint);
+        canvas.drawRect(
+            Rect.fromLTWH(
+                8 * pixelSize, 4 * pixelSize, 2 * pixelSize, 2 * pixelSize),
+            paint);
+        canvas.drawRect(
+            Rect.fromLTWH(
+                4 * pixelSize, 6 * pixelSize, 2 * pixelSize, 2 * pixelSize),
+            paint);
+        canvas.drawRect(
+            Rect.fromLTWH(
+                8 * pixelSize, 6 * pixelSize, 2 * pixelSize, 2 * pixelSize),
+            paint);
+        canvas.drawRect(
+            Rect.fromLTWH(
+                4 * pixelSize, 8 * pixelSize, 2 * pixelSize, 2 * pixelSize),
+            paint);
+        canvas.drawRect(
+            Rect.fromLTWH(
+                6 * pixelSize, 8 * pixelSize, 2 * pixelSize, 2 * pixelSize),
+            paint);
+        canvas.drawRect(
+            Rect.fromLTWH(
+                8 * pixelSize, 8 * pixelSize, 2 * pixelSize, 2 * pixelSize),
+            paint);
         break;
       case 'minimize':
         // Pixel minimize icon (horizontal line)
-        canvas.drawRect(Rect.fromLTWH(4 * pixelSize, 6 * pixelSize, 6 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(
+            Rect.fromLTWH(
+                4 * pixelSize, 6 * pixelSize, 6 * pixelSize, 2 * pixelSize),
+            paint);
         break;
       case 'maximize':
         // Pixel maximize icon (square)
-        canvas.drawRect(Rect.fromLTWH(4 * pixelSize, 4 * pixelSize, 6 * pixelSize, 6 * pixelSize), paint);
+        canvas.drawRect(
+            Rect.fromLTWH(
+                4 * pixelSize, 4 * pixelSize, 6 * pixelSize, 6 * pixelSize),
+            paint);
         break;
       case 'performance':
         // Pixel performance icon (speed lines)
-        canvas.drawRect(Rect.fromLTWH(5 * pixelSize, 4 * pixelSize, 4 * pixelSize, 6 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(4 * pixelSize, 5 * pixelSize, 1 * pixelSize, 4 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(9 * pixelSize, 5 * pixelSize, 1 * pixelSize, 4 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(3 * pixelSize, 6 * pixelSize, 1 * pixelSize, 2 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(10 * pixelSize, 6 * pixelSize, 1 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(
+            Rect.fromLTWH(
+                5 * pixelSize, 4 * pixelSize, 4 * pixelSize, 6 * pixelSize),
+            paint);
+        canvas.drawRect(
+            Rect.fromLTWH(
+                4 * pixelSize, 5 * pixelSize, 1 * pixelSize, 4 * pixelSize),
+            paint);
+        canvas.drawRect(
+            Rect.fromLTWH(
+                9 * pixelSize, 5 * pixelSize, 1 * pixelSize, 4 * pixelSize),
+            paint);
+        canvas.drawRect(
+            Rect.fromLTWH(
+                3 * pixelSize, 6 * pixelSize, 1 * pixelSize, 2 * pixelSize),
+            paint);
+        canvas.drawRect(
+            Rect.fromLTWH(
+                10 * pixelSize, 6 * pixelSize, 1 * pixelSize, 2 * pixelSize),
+            paint);
         break;
     }
   }

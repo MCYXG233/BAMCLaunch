@@ -1,7 +1,6 @@
 import '../i_http_client.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
-import 'dart:convert';
 import '../../logger/logger.dart';
 
 class HttpClient implements IHttpClient {
@@ -25,7 +24,7 @@ class HttpClient implements IHttpClient {
     final cachedResponse = _getCachedResponse(url);
     if (cachedResponse != null) {
       logger.debug('Cache hit for $url');
-      return cachedResponse;
+      return cachedResponse.response;
     }
 
     // 创建新的请求
@@ -35,10 +34,12 @@ class HttpClient implements IHttpClient {
     try {
       // 带超时和重试的请求
       final response = await _executeWithRetry(() async {
-        return await _client.get(
-          Uri.parse(url),
-          headers: headers,
-        ).timeout(_timeout);
+        return await _client
+            .get(
+              Uri.parse(url),
+              headers: headers,
+            )
+            .timeout(_timeout);
       });
 
       final httpResponse = HttpResponse(
@@ -64,13 +65,16 @@ class HttpClient implements IHttpClient {
   }
 
   @override
-  Future<HttpResponse> post(String url, {Map<String, String>? headers, dynamic body}) async {
+  Future<HttpResponse> post(String url,
+      {Map<String, String>? headers, dynamic body}) async {
     return _executeWithRetry(() async {
-      final response = await _client.post(
-        Uri.parse(url),
-        headers: headers,
-        body: body,
-      ).timeout(_timeout);
+      final response = await _client
+          .post(
+            Uri.parse(url),
+            headers: headers,
+            body: body,
+          )
+          .timeout(_timeout);
 
       return HttpResponse(
         statusCode: response.statusCode,
@@ -81,13 +85,16 @@ class HttpClient implements IHttpClient {
   }
 
   @override
-  Future<HttpResponse> put(String url, {Map<String, String>? headers, dynamic body}) async {
+  Future<HttpResponse> put(String url,
+      {Map<String, String>? headers, dynamic body}) async {
     return _executeWithRetry(() async {
-      final response = await _client.put(
-        Uri.parse(url),
-        headers: headers,
-        body: body,
-      ).timeout(_timeout);
+      final response = await _client
+          .put(
+            Uri.parse(url),
+            headers: headers,
+            body: body,
+          )
+          .timeout(_timeout);
 
       return HttpResponse(
         statusCode: response.statusCode,
@@ -98,12 +105,15 @@ class HttpClient implements IHttpClient {
   }
 
   @override
-  Future<HttpResponse> delete(String url, {Map<String, String>? headers}) async {
+  Future<HttpResponse> delete(String url,
+      {Map<String, String>? headers}) async {
     return _executeWithRetry(() async {
-      final response = await _client.delete(
-        Uri.parse(url),
-        headers: headers,
-      ).timeout(_timeout);
+      final response = await _client
+          .delete(
+            Uri.parse(url),
+            headers: headers,
+          )
+          .timeout(_timeout);
 
       return HttpResponse(
         statusCode: response.statusCode,
@@ -113,7 +123,8 @@ class HttpClient implements IHttpClient {
     });
   }
 
-  Future<HttpResponse> _executeWithRetry(Future<http.Response> Function() request) async {
+  Future<http.Response> _executeWithRetry(
+      Future<http.Response> Function() request) async {
     int retries = 0;
     while (true) {
       try {
@@ -139,7 +150,7 @@ class HttpClient implements IHttpClient {
       return null;
     }
 
-    return cached.response;
+    return cached;
   }
 
   void _cacheResponse(String url, HttpResponse response) {

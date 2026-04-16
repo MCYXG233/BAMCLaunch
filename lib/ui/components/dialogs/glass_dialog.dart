@@ -37,7 +37,6 @@ class _GlassDialogContent extends StatelessWidget {
   final double? height;
 
   const _GlassDialogContent({
-    super.key,
     required this.title,
     required this.content,
     this.actions,
@@ -54,11 +53,11 @@ class _GlassDialogContent extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: BamcColors.shadow,
             blurRadius: 20,
-            offset: const Offset(0, 8),
+            offset: Offset(0, 8),
           ),
         ],
       ),
@@ -162,7 +161,6 @@ class _PixelCloseButton extends StatefulWidget {
   final VoidCallback onPressed;
 
   const _PixelCloseButton({
-    super.key,
     required this.onPressed,
   });
 

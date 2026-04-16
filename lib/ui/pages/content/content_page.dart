@@ -54,7 +54,7 @@ class _ContentPageState extends State<ContentPage> {
     return Container(
       width: 220,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
@@ -68,11 +68,11 @@ class _ContentPageState extends State<ContentPage> {
             width: 2,
           ),
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: BamcColors.shadow,
             blurRadius: 10,
-            offset: const Offset(2, 0),
+            offset: Offset(2, 0),
           ),
         ],
       ),
@@ -82,7 +82,7 @@ class _ContentPageState extends State<ContentPage> {
           // 标题
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Text(
+            child: const Text(
               '资源中心',
               style: TextStyle(
                 fontSize: 18,
@@ -134,7 +134,7 @@ class _ContentPageState extends State<ContentPage> {
           // 底部信息
           Container(
             padding: const EdgeInsets.all(16),
-            child: Text(
+            child: const Text(
               'BAM Launcher',
               style: TextStyle(
                 fontSize: 12,
@@ -195,7 +195,7 @@ class _ContentPageState extends State<ContentPage> {
                   height: 32,
                   decoration: BoxDecoration(
                     gradient: isSelected
-                        ? LinearGradient(
+                        ? const LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
@@ -203,7 +203,7 @@ class _ContentPageState extends State<ContentPage> {
                               BamcColors.primaryDark,
                             ],
                           )
-                        : LinearGradient(
+                        : const LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
@@ -221,9 +221,7 @@ class _ContentPageState extends State<ContentPage> {
                   ),
                   child: Icon(
                     icon,
-                    color: isSelected
-                        ? Colors.white
-                        : BamcColors.textSecondary,
+                    color: isSelected ? Colors.white : BamcColors.textSecondary,
                     size: 18,
                   ),
                 ),
@@ -234,7 +232,8 @@ class _ContentPageState extends State<ContentPage> {
                     color: isSelected
                         ? BamcColors.primary
                         : BamcColors.textPrimary,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
+                    fontWeight:
+                        isSelected ? FontWeight.w700 : FontWeight.normal,
                     fontFamily: 'Minecraft',
                     fontSize: 14,
                   ),
