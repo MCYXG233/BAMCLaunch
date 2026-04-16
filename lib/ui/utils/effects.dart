@@ -265,13 +265,13 @@ class BamcEffects {
   // 按钮按下效果
   static Matrix4 buttonPressTransform() {
     return Matrix4.identity()
-      ..scaleByDouble(0.95)
-      ..translateByDouble(0, 2, 0);
+      ..scale(0.95)
+      ..translate(0, 2, 0);
   }
 
   // 悬浮缩放效果
   static Matrix4 hoverScaleTransform() {
-    return Matrix4.identity()..scaleByDouble(1.05);
+    return Matrix4.identity()..scale(1.05);
   }
 
   // 渐入动画
@@ -335,8 +335,8 @@ class BamcEffects {
   // 悬浮卡片转换 - 轻微上浮与阴影加深
   static Matrix4 hoverCardTransform(bool isHovered) {
     return Matrix4.identity()
-      ..translateByDouble(0, isHovered ? -8 : 0, 0)
-      ..scaleByDouble(isHovered ? 1.02 : 1.0);
+      ..translate(0, isHovered ? -8 : 0, 0)
+      ..scale(isHovered ? 1.02 : 1.0);
   }
 
   // 像素化动画颜色

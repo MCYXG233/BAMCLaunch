@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage> {
       setState(() => _recommendedVersions = [latestVersion]);
 
       // 处理模组数量
-      final installedMods = results[2] as List<Content>;
+      final installedMods = results[2] as List<ContentItem>;
       setState(() => _installedModsCount = installedMods.length);
 
       // 加载游戏时长（这里应该从统计数据获取，暂时使用0h）

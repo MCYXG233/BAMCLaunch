@@ -271,8 +271,8 @@ class _MicrosoftLoginPageState extends State<MicrosoftLoginPage> {
               child: WebViewWidget(
                   controller: _controller,
                   // 为不同平台提供适当的配置
-                  gestureRecognizers: <OneSequenceGestureRecognizerFactoryWithHandlers<OneSequenceGestureRecognizer>>{
-                    EagerGestureRecognizer: () => EagerGestureRecognizer(),
+                  gestureRecognizers: {
+                    Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer()),
                   }),
             ),
           ),
