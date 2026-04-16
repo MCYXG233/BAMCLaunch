@@ -162,6 +162,10 @@ class ModrinthApi {
         return 'shader';
       case ContentType.dataPack:
         return 'datapack';
+      case ContentType.modpack:
+        return 'modpack';
+      case ContentType.map:
+        return 'mod'; // Modrinth API中地图也归类为mod
       default:
         return 'mod';
     }

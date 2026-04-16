@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../theme/colors.dart';
-import '../../utils/effects.dart';
 
 enum BamcInputSize {
   small,
@@ -76,16 +75,14 @@ class _BamcInputState extends State<BamcInput> {
   @override
   void initState() {
     super.initState();
-    _controller =
-        widget.controller ?? TextEditingController(text: widget.initialValue);
+    _controller = widget.controller ?? TextEditingController(text: widget.initialValue);
   }
 
   @override
   void didUpdateWidget(covariant BamcInput oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
-      _controller =
-          widget.controller ?? TextEditingController(text: widget.initialValue);
+      _controller = widget.controller ?? TextEditingController(text: widget.initialValue);
     }
   }
 
@@ -154,7 +151,7 @@ class _BamcInputState extends State<BamcInput> {
   }
 
   InputBorder _getBorder() {
-    final borderRadius = widget.borderRadius ?? BorderRadius.circular(6);
+    final borderRadius = widget.borderRadius ?? BorderRadius.circular(8);
 
     if (widget.errorText != null && widget.errorText!.isNotEmpty) {
       return OutlineInputBorder(
@@ -180,7 +177,7 @@ class _BamcInputState extends State<BamcInput> {
       return OutlineInputBorder(
         borderRadius: borderRadius,
         borderSide: BorderSide(
-          color: BamcColors.primary.withOpacity(0.5),
+          color: BamcColors.primary.withOpacity(0.6),
           width: 1,
         ),
       );
@@ -199,9 +196,10 @@ class _BamcInputState extends State<BamcInput> {
   List<BoxShadow>? _getBoxShadow() {
     if (_isFocused && widget.enabled) {
       return [
-        BamcEffects.glowEffect(
-          color: BamcColors.primary,
+        BoxShadow(
+          color: BamcColors.primary.withOpacity(0.3),
           blurRadius: 20,
+          offset: const Offset(0, 0),
         ),
       ];
     }
@@ -233,6 +231,7 @@ class _BamcInputState extends State<BamcInput> {
                         : (_isFocused
                             ? BamcColors.primary
                             : BamcColors.textPrimary),
+                    fontFamily: 'Minecraft',
                   ),
                 ),
               ),
@@ -269,15 +268,15 @@ class _BamcInputState extends State<BamcInput> {
                   ),
                   prefixIcon: widget.prefixIcon != null
                       ? Container(
-                          margin: const EdgeInsets.only(left: 4),
-                          padding: const EdgeInsets.all(4),
+                          margin: const EdgeInsets.only(left: 8, right: 4),
+                          padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: isDisabled
                                 ? BamcColors.background
                                 : (_isFocused
-                                    ? BamcColors.primary.withOpacity(0.1)
+                                    ? BamcColors.primary.withOpacity(0.15)
                                     : BamcColors.background),
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(6),
                             border: Border.all(
                               color: isDisabled
                                   ? BamcColors.border
@@ -310,7 +309,7 @@ class _BamcInputState extends State<BamcInput> {
                                     : BamcColors.textSecondary),
                           ),
                           onPressed: widget.onSuffixIconPressed,
-                          padding: EdgeInsets.zero,
+                          padding: const EdgeInsets.all(8),
                           constraints: BoxConstraints(
                             minWidth: _getIconSize() + 16,
                             minHeight: _getIconSize() + 16,
@@ -331,8 +330,7 @@ class _BamcInputState extends State<BamcInput> {
                   errorBorder: _getBorder(),
                   focusedErrorBorder: _getBorder(),
                   disabledBorder: OutlineInputBorder(
-                    borderRadius:
-                        widget.borderRadius ?? BorderRadius.circular(8),
+                    borderRadius: widget.borderRadius ?? BorderRadius.circular(8),
                     borderSide: const BorderSide(
                       color: BamcColors.border,
                       width: 1,

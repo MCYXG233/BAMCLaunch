@@ -79,174 +79,331 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
   }
 
   Widget _buildFilters() {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: '游戏版本',
-                  border: OutlineInputBorder(),
-                ),
-                initialValue: _selectedGameVersion,
-                hint: const Text('选择版本'),
-                items: const [
-                  DropdownMenuItem(value: '1.20.1', child: Text('1.20.1')),
-                  DropdownMenuItem(value: '1.19.4', child: Text('1.19.4')),
-                  DropdownMenuItem(value: '1.18.2', child: Text('1.18.2')),
-                  DropdownMenuItem(value: '1.17.1', child: Text('1.17.1')),
-                  DropdownMenuItem(value: '1.16.5', child: Text('1.16.5')),
-                ],
-                onChanged: (value) {
-                  setState(() => _selectedGameVersion = value);
-                },
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: '模组加载器',
-                  border: OutlineInputBorder(),
-                ),
-                initialValue: _selectedLoader,
-                hint: const Text('选择加载器'),
-                items: const [
-                  DropdownMenuItem(value: 'forge', child: Text('Forge')),
-                  DropdownMenuItem(value: 'fabric', child: Text('Fabric')),
-                  DropdownMenuItem(value: 'quilt', child: Text('Quilt')),
-                  DropdownMenuItem(value: 'neoforge', child: Text('NeoForge')),
-                ],
-                onChanged: (value) {
-                  setState(() => _selectedLoader = value);
-                },
-              ),
-            ),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            BamcColors.surface,
+            BamcColors.background,
           ],
         ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: '分类',
-                  border: OutlineInputBorder(),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: BamcColors.border.withOpacity(0.5),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: BamcColors.shadow,
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: BamcColors.border,
+                      width: 1,
+                    ),
+                    color: BamcColors.surface,
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: DropdownButton<String>(
+                    value: _selectedGameVersion,
+                    hint: Text(
+                      '选择游戏版本',
+                      style: TextStyle(
+                        color: BamcColors.textSecondary,
+                        fontFamily: 'Minecraft',
+                      ),
+                    ),
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    items: const [
+                      DropdownMenuItem(value: '1.20.1', child: Text('1.20.1')),
+                      DropdownMenuItem(value: '1.19.4', child: Text('1.19.4')),
+                      DropdownMenuItem(value: '1.18.2', child: Text('1.18.2')),
+                      DropdownMenuItem(value: '1.17.1', child: Text('1.17.1')),
+                      DropdownMenuItem(value: '1.16.5', child: Text('1.16.5')),
+                    ],
+                    onChanged: (value) {
+                      setState(() => _selectedGameVersion = value);
+                    },
+                    style: TextStyle(
+                      color: BamcColors.textPrimary,
+                      fontFamily: 'Minecraft',
+                    ),
+                  ),
                 ),
-                initialValue: _selectedCategory,
-                hint: const Text('选择分类'),
-                items: const [
-                  DropdownMenuItem(value: 'technology', child: Text('科技')),
-                  DropdownMenuItem(value: 'magic', child: Text('魔法')),
-                  DropdownMenuItem(value: 'adventure', child: Text('冒险')),
-                  DropdownMenuItem(value: 'performance', child: Text('性能优化')),
-                  DropdownMenuItem(value: 'utility', child: Text('实用工具')),
-                  DropdownMenuItem(value: 'decoration', child: Text('装饰')),
-                ],
-                onChanged: (value) {
-                  setState(() => _selectedCategory = value);
-                },
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: BamcInput(
-                hintText: '作者名称',
-                initialValue: _selectedAuthor,
-                onChanged: (value) => setState(() => _selectedAuthor = value),
-                suffixIcon: Icons.person,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: DropdownButtonFormField<SortType>(
-                decoration: const InputDecoration(
-                  labelText: '排序方式',
-                  border: OutlineInputBorder(),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: BamcColors.border,
+                      width: 1,
+                    ),
+                    color: BamcColors.surface,
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: DropdownButton<String>(
+                    value: _selectedLoader,
+                    hint: Text(
+                      '选择模组加载器',
+                      style: TextStyle(
+                        color: BamcColors.textSecondary,
+                        fontFamily: 'Minecraft',
+                      ),
+                    ),
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    items: const [
+                      DropdownMenuItem(value: 'forge', child: Text('Forge')),
+                      DropdownMenuItem(value: 'fabric', child: Text('Fabric')),
+                      DropdownMenuItem(value: 'quilt', child: Text('Quilt')),
+                      DropdownMenuItem(value: 'neoforge', child: Text('NeoForge')),
+                    ],
+                    onChanged: (value) {
+                      setState(() => _selectedLoader = value);
+                    },
+                    style: TextStyle(
+                      color: BamcColors.textPrimary,
+                      fontFamily: 'Minecraft',
+                    ),
+                  ),
                 ),
-                initialValue: _selectedSortType,
-                hint: const Text('选择排序'),
-                items: const [
-                  DropdownMenuItem(
-                    value: SortType.relevance,
-                    child: Text('相关性'),
-                  ),
-                  DropdownMenuItem(
-                    value: SortType.downloads,
-                    child: Text('下载量'),
-                  ),
-                  DropdownMenuItem(
-                    value: SortType.recentlyUpdated,
-                    child: Text('最近更新'),
-                  ),
-                  DropdownMenuItem(
-                    value: SortType.recentlyAdded,
-                    child: Text('最近添加'),
-                  ),
-                  DropdownMenuItem(
-                    value: SortType.featured,
-                    child: Text('推荐'),
-                  ),
-                ],
-                onChanged: (value) {
-                  setState(() => _selectedSortType = value!);
-                },
               ),
-            ),
-            const SizedBox(width: 12),
-            BamcButton(
-              text: '重置',
-              onPressed: () {
-                setState(() {
-                  _selectedGameVersion = null;
-                  _selectedLoader = null;
-                  _selectedCategory = null;
-                  _selectedAuthor = null;
-                  _selectedSortType = SortType.relevance;
-                });
-              },
-              type: BamcButtonType.outline,
-              size: BamcButtonSize.medium,
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            BamcButton(
-              text: '高级搜索',
-              onPressed: () {
-                _showAdvancedSearch();
-              },
-              type: BamcButtonType.outline,
-              size: BamcButtonSize.small,
-              icon: Icons.filter_alt,
-            ),
-            const SizedBox(width: 12),
-            BamcButton(
-              text: '收藏夹',
-              onPressed: () {
-                _switchToFavorites();
-              },
-              type: BamcButtonType.outline,
-              size: BamcButtonSize.small,
-              icon: Icons.favorite,
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: BamcColors.border,
+                      width: 1,
+                    ),
+                    color: BamcColors.surface,
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: DropdownButton<String>(
+                    value: _selectedCategory,
+                    hint: Text(
+                      '选择分类',
+                      style: TextStyle(
+                        color: BamcColors.textSecondary,
+                        fontFamily: 'Minecraft',
+                      ),
+                    ),
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    items: const [
+                      DropdownMenuItem(value: 'technology', child: Text('科技')),
+                      DropdownMenuItem(value: 'magic', child: Text('魔法')),
+                      DropdownMenuItem(value: 'adventure', child: Text('冒险')),
+                      DropdownMenuItem(value: 'performance', child: Text('性能优化')),
+                      DropdownMenuItem(value: 'utility', child: Text('实用工具')),
+                      DropdownMenuItem(value: 'decoration', child: Text('装饰')),
+                    ],
+                    onChanged: (value) {
+                      setState(() => _selectedCategory = value);
+                    },
+                    style: TextStyle(
+                      color: BamcColors.textPrimary,
+                      fontFamily: 'Minecraft',
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: BamcInput(
+                    hintText: '作者名称',
+                    initialValue: _selectedAuthor,
+                    onChanged: (value) => setState(() => _selectedAuthor = value),
+                    suffixIcon: Icons.person,
+                    fillColor: BamcColors.surface,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: BamcColors.border,
+                      width: 1,
+                    ),
+                    color: BamcColors.surface,
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: DropdownButton<SortType>(
+                    value: _selectedSortType,
+                    hint: Text(
+                      '选择排序方式',
+                      style: TextStyle(
+                        color: BamcColors.textSecondary,
+                        fontFamily: 'Minecraft',
+                      ),
+                    ),
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    items: const [
+                      DropdownMenuItem(
+                        value: SortType.relevance,
+                        child: Text('相关性'),
+                      ),
+                      DropdownMenuItem(
+                        value: SortType.downloads,
+                        child: Text('下载量'),
+                      ),
+                      DropdownMenuItem(
+                        value: SortType.recentlyUpdated,
+                        child: Text('最近更新'),
+                      ),
+                      DropdownMenuItem(
+                        value: SortType.recentlyAdded,
+                        child: Text('最近添加'),
+                      ),
+                      DropdownMenuItem(
+                        value: SortType.featured,
+                        child: Text('推荐'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() => _selectedSortType = value!);
+                    },
+                    style: TextStyle(
+                      color: BamcColors.textPrimary,
+                      fontFamily: 'Minecraft',
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              BamcButton(
+                text: '重置',
+                onPressed: () {
+                  setState(() {
+                    _selectedGameVersion = null;
+                    _selectedLoader = null;
+                    _selectedCategory = null;
+                    _selectedAuthor = null;
+                    _selectedSortType = SortType.relevance;
+                  });
+                },
+                type: BamcButtonType.outline,
+                size: BamcButtonSize.medium,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              BamcButton(
+                text: '高级搜索',
+                onPressed: () {
+                  _showAdvancedSearch();
+                },
+                type: BamcButtonType.outline,
+                size: BamcButtonSize.small,
+                icon: Icons.filter_alt,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              const SizedBox(width: 12),
+              BamcButton(
+                text: '收藏夹',
+                onPressed: () {
+                  _switchToFavorites();
+                },
+                type: BamcButtonType.outline,
+                size: BamcButtonSize.small,
+                icon: Icons.favorite,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              const Spacer(),
+              BamcButton(
+                text: '应用筛选',
+                onPressed: _loadMods,
+                type: BamcButtonType.primary,
+                size: BamcButtonSize.medium,
+                icon: Icons.filter_list,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildModList() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    BamcColors.primary,
+                    BamcColors.primaryDark,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: BamcColors.primary.withOpacity(0.4),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.extension,
+                  color: Colors.white,
+                  size: 32,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '加载中...',
+              style: TextStyle(
+                color: BamcColors.primary,
+                fontSize: 16,
+                fontFamily: 'Minecraft',
+              ),
+            ),
+          ],
+        ),
       );
     }
 
@@ -255,47 +412,184 @@ class _ModDownloadPageState extends State<ModDownloadPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.extension_off, size: 64, color: Colors.grey),
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    BamcColors.surface,
+                    BamcColors.background,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: BamcColors.border,
+                  width: 2,
+                ),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.extension_off,
+                  color: Colors.grey,
+                  size: 32,
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
             Text(
               _searchQuery.isNotEmpty ? '没有找到相关模组' : '暂无模组数据',
-              style: const TextStyle(color: BamcColors.textSecondary),
+              style: TextStyle(
+                color: BamcColors.textSecondary,
+                fontSize: 16,
+                fontFamily: 'Minecraft',
+              ),
             ),
           ],
         ),
       );
     }
 
-    return BamcList<ContentItem>(
-      items: _mods,
-      itemBuilder: (context, mod, index, isSelected) {
-        return BamcListItem(
-          leading: _buildModIcon(mod),
-          title: Text(mod.name),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('作者: ${mod.author}'),
-              Text('版本: ${mod.version} · 下载量: ${mod.downloadCount}'),
-            ],
-          ),
-          trailing: BamcButton(
-            text: '安装',
-            onPressed: () => _handleInstallMod(mod),
-            type: BamcButtonType.primary,
-            size: BamcButtonSize.small,
-          ),
-          selected: isSelected,
-        );
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 0.85,
+      ),
+      itemCount: _mods.length,
+      itemBuilder: (context, index) {
+        final mod = _mods[index];
+        return _buildModCard(mod);
       },
-      onTap: (mod) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ModDetailPage(mod: mod),
+      padding: const EdgeInsets.all(8),
+    );
+  }
+
+  Widget _buildModCard(ContentItem mod) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            BamcColors.surface,
+            BamcColors.background,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: BamcColors.border.withOpacity(0.5),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: BamcColors.shadow,
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
-        );
-      },
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ModDetailPage(mod: mod),
+              ),
+            );
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 模组图标
+                Container(
+                  width: double.infinity,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        BamcColors.primary.withOpacity(0.1),
+                        BamcColors.primary.withOpacity(0.05),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: BamcColors.primary.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: mod.iconUrl != null
+                      ? Image.network(
+                          mod.iconUrl!,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return _buildDefaultIcon();
+                          },
+                        )
+                      : _buildDefaultIcon(),
+                ),
+                const SizedBox(height: 12),
+                // 模组名称
+                Text(
+                  mod.name,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: BamcColors.textPrimary,
+                    fontFamily: 'Minecraft',
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                // 模组作者
+                Text(
+                  '作者: ${mod.author}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: BamcColors.textSecondary,
+                    fontFamily: 'Minecraft',
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                // 模组版本和下载量
+                Text(
+                  '版本: ${mod.version} · 下载: ${mod.downloadCount}',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: BamcColors.textTertiary,
+                    fontFamily: 'Minecraft',
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 12),
+                // 安装按钮
+                BamcButton(
+                  text: '安装',
+                  onPressed: () => _handleInstallMod(mod),
+                  type: BamcButtonType.primary,
+                  size: BamcButtonSize.small,
+                  fullWidth: true,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 

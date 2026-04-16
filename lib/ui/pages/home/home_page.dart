@@ -36,12 +36,21 @@ class _HomePageState extends State<HomePage> {
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
-      // 加载已安装版本数量
-      final installedVersions = await widget.versionManager.getInstalledVersions();
+      // 并行加载数据以提高速度
+      final futures = [
+        widget.versionManager.getInstalledVersions(),
+        widget.versionManager.getVersionManifest(),
+        widget.contentManager.getInstalledContent(ContentType.mod),
+      ];
+
+      final results = await Future.wait(futures, eagerError: true);
+
+      // 处理版本数量
+      final installedVersions = results[0] as List<Version>;
       setState(() => _installedVersionsCount = installedVersions.length);
 
-      // 加载推荐版本（最新稳定版）
-      final manifest = await widget.versionManager.getVersionManifest();
+      // 处理推荐版本
+      final manifest = results[1] as VersionManifest;
       final latestRelease = manifest.versions.firstWhere(
         (v) => v.type == 'release',
         orElse: () => manifest.versions.first,
@@ -50,8 +59,8 @@ class _HomePageState extends State<HomePage> {
       final latestVersion = await widget.versionManager.getVersionInfo(latestRelease.id);
       setState(() => _recommendedVersions = [latestVersion]);
 
-      // 加载模组数量
-      final installedMods = await widget.contentManager.getInstalledContent(ContentType.mod);
+      // 处理模组数量
+      final installedMods = results[2] as List<Content>;
       setState(() => _installedModsCount = installedMods.length);
 
       // 加载游戏时长（这里应该从统计数据获取，暂时使用0h）

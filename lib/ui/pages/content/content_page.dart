@@ -52,16 +52,49 @@ class _ContentPageState extends State<ContentPage> {
 
   Widget _buildNavigationMenu() {
     return Container(
-      width: 200,
-      decoration: const BoxDecoration(
-        color: BamcColors.surface,
-        border: Border(
-          right: BorderSide(color: BamcColors.border),
+      width: 220,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            BamcColors.surface,
+            BamcColors.background,
+          ],
         ),
+        border: Border(
+          right: BorderSide(
+            color: BamcColors.border.withOpacity(0.5),
+            width: 2,
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: BamcColors.shadow,
+            blurRadius: 10,
+            offset: const Offset(2, 0),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
+          // 标题
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Text(
+              '资源中心',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: BamcColors.primary,
+                fontFamily: 'Minecraft',
+                letterSpacing: 1.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // 导航项
           _buildNavigationItem(
             ResourceCenterTab.autoInstall,
             '自动安装',
@@ -97,6 +130,19 @@ class _ContentPageState extends State<ContentPage> {
             '地图存档下载',
             Icons.map,
           ),
+          const Spacer(),
+          // 底部信息
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              'BAM Launcher',
+              style: TextStyle(
+                fontSize: 12,
+                color: BamcColors.textTertiary,
+                fontFamily: 'Minecraft',
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -106,38 +152,91 @@ class _ContentPageState extends State<ContentPage> {
       ResourceCenterTab tab, String label, IconData icon) {
     final isSelected = _selectedTab == tab;
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () => setState(() => _selectedTab = tab),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
           child: Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? BamcColors.primary.withOpacity(0.1)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
+              gradient: isSelected
+                  ? LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        BamcColors.primary.withOpacity(0.2),
+                        BamcColors.primary.withOpacity(0.1),
+                      ],
+                    )
+                  : null,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: isSelected
+                    ? BamcColors.primary
+                    : BamcColors.border.withOpacity(0.3),
+                width: 2,
+              ),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: BamcColors.primary.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : null,
             ),
             child: Row(
               children: [
-                Icon(
-                  icon,
-                  color: isSelected
-                      ? BamcColors.primary
-                      : BamcColors.textSecondary,
-                  size: 20,
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    gradient: isSelected
+                        ? LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              BamcColors.primary,
+                              BamcColors.primaryDark,
+                            ],
+                          )
+                        : LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              BamcColors.surface,
+                              BamcColors.background,
+                            ],
+                          ),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isSelected
+                          ? Colors.white.withOpacity(0.5)
+                          : BamcColors.border,
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: isSelected
+                        ? Colors.white
+                        : BamcColors.textSecondary,
+                    size: 18,
+                  ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 Text(
                   label,
                   style: TextStyle(
                     color: isSelected
                         ? BamcColors.primary
                         : BamcColors.textPrimary,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
+                    fontFamily: 'Minecraft',
+                    fontSize: 14,
                   ),
                 ),
               ],

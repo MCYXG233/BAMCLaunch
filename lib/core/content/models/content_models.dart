@@ -172,6 +172,7 @@ enum ContentType {
   shaderPack,
   dataPack,
   modpack,
+  map,
 }
 
 enum ContentSource {

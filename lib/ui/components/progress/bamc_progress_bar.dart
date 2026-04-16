@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../theme/colors.dart';
-import '../../utils/effects.dart';
 
 enum BamcProgressBarType {
   primary,
@@ -95,75 +94,101 @@ class BamcProgressBar extends StatelessWidget {
 
   Widget _buildPixelProgressBar() {
     final progress = (value / max!).clamp(0.0, 1.0);
-    const totalBlocks = 20; // 20个方块
+    const totalBlocks = 24; // 24个方块，更细腻
     final filledBlocks = (progress * totalBlocks).floor();
 
-    return Row(
-      children: List.generate(totalBlocks, (index) {
-        final isFilled = index < filledBlocks;
-        final isPartial =
-            index == filledBlocks && progress * totalBlocks % 1 != 0;
-        final partialWidth = (progress * totalBlocks % 1) * 100;
+    return Container(
+      height: _getBarHeight(),
+      decoration: BoxDecoration(
+        color: _getBackgroundColor(),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: BamcColors.border,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: List.generate(totalBlocks, (index) {
+          final isFilled = index < filledBlocks;
+          final isPartial = index == filledBlocks && progress * totalBlocks % 1 != 0;
+          final partialWidth = (progress * totalBlocks % 1) * 100;
 
-        return Expanded(
-          child: Container(
-            height: _getBarHeight(),
-            margin: const EdgeInsets.symmetric(horizontal: 0.5),
-            child: isFilled
-                ? Container(
-                    decoration: BoxDecoration(
-                      color: _getProgressColor(),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  )
-                : isPartial
-                    ? Row(
-                        children: [
-                          Container(
-                            width: partialWidth,
-                            decoration: BoxDecoration(
-                              color: _getProgressColor(),
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(2),
-                                bottomLeft: Radius.circular(2),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
+          return Expanded(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 0.5),
+              child: isFilled
+                  ? Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            _getProgressColor().withOpacity(1.0),
+                            _getProgressColor().withOpacity(0.8),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    )
+                  : isPartial
+                      ? Row(
+                          children: [
+                            Container(
+                              width: partialWidth,
                               decoration: BoxDecoration(
-                                color: _getBackgroundColor(),
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    _getProgressColor().withOpacity(1.0),
+                                    _getProgressColor().withOpacity(0.8),
+                                  ],
+                                ),
                                 borderRadius: const BorderRadius.only(
-                                  topRight: Radius.circular(2),
-                                  bottomRight: Radius.circular(2),
+                                  topLeft: Radius.circular(2),
+                                  bottomLeft: Radius.circular(2),
                                 ),
                               ),
                             ),
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: _getBackgroundColor(),
+                                  borderRadius: const BorderRadius.only(
+                                    topRight: Radius.circular(2),
+                                    bottomRight: Radius.circular(2),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Container(
+                          decoration: BoxDecoration(
+                            color: _getBackgroundColor(),
+                            borderRadius: BorderRadius.circular(2),
                           ),
-                        ],
-                      )
-                    : Container(
-                        decoration: BoxDecoration(
-                          color: _getBackgroundColor(),
-                          borderRadius: BorderRadius.circular(2),
                         ),
-                      ),
-          ),
-        );
-      }),
+            ),
+          );
+        }),
+      ),
     );
   }
 
   Widget _buildStandardProgressBar() {
     final progress = (value / max!).clamp(0.0, 1.0);
-    final borderRadius =
-        this.borderRadius ?? BorderRadius.circular(_getBarHeight() / 2);
+    final borderRadius = this.borderRadius ?? BorderRadius.circular(8);
 
     return Container(
       height: _getBarHeight(),
       decoration: BoxDecoration(
         color: _getBackgroundColor(),
         borderRadius: borderRadius,
+        border: Border.all(
+          color: BamcColors.border,
+          width: 1,
+        ),
       ),
       child: ClipRRect(
         borderRadius: borderRadius,
@@ -171,16 +196,16 @@ class BamcProgressBar extends StatelessWidget {
             ? AnimatedContainer(
                 duration: animationDuration,
                 width: fullWidth ? progress * 100 : null,
-                constraints:
-                    fullWidth ? BoxConstraints.expand(width: progress) : null,
+                constraints: fullWidth ? BoxConstraints.expand(width: progress) : null,
                 decoration: BoxDecoration(
-                  gradient: type == BamcProgressBarType.primary
-                      ? BamcEffects.primaryGradient()
-                      : type == BamcProgressBarType.secondary
-                          ? BamcEffects.secondaryGradient()
-                          : type == BamcProgressBarType.warning
-                              ? BamcEffects.warningGradient()
-                              : BamcEffects.successGradient(),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      _getProgressColor(),
+                      _getProgressColor().withOpacity(0.8),
+                    ],
+                  ),
                   borderRadius: borderRadius,
                 ),
               )
@@ -189,13 +214,14 @@ class BamcProgressBar extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: Container(
                   decoration: BoxDecoration(
-                    gradient: type == BamcProgressBarType.primary
-                        ? BamcEffects.primaryGradient()
-                        : type == BamcProgressBarType.secondary
-                            ? BamcEffects.secondaryGradient()
-                            : type == BamcProgressBarType.warning
-                                ? BamcEffects.warningGradient()
-                                : BamcEffects.successGradient(),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        _getProgressColor(),
+                        _getProgressColor().withOpacity(0.8),
+                      ],
+                    ),
                     borderRadius: borderRadius,
                   ),
                 ),
@@ -223,7 +249,7 @@ class BamcProgressBar extends StatelessWidget {
         children: [
           if (label != null || valueLabel != null || showPercentage)
             Padding(
-              padding: const EdgeInsets.only(bottom: 4),
+              padding: const EdgeInsets.only(bottom: 6),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -234,6 +260,7 @@ class BamcProgressBar extends StatelessWidget {
                         fontSize: _getFontSize(),
                         fontWeight: FontWeight.w600,
                         color: BamcColors.textPrimary,
+                        fontFamily: 'Minecraft',
                       ),
                     ),
                   const Spacer(),
@@ -252,6 +279,7 @@ class BamcProgressBar extends StatelessWidget {
                         fontSize: _getFontSize(),
                         fontWeight: FontWeight.w600,
                         color: _getProgressColor(),
+                        fontFamily: 'Minecraft',
                       ),
                     ),
                 ],
@@ -263,7 +291,7 @@ class BamcProgressBar extends StatelessWidget {
               children: [
                 if (leading != null)
                   Padding(
-                    padding: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.only(right: 10),
                     child: leading,
                   ),
                 Expanded(
@@ -271,7 +299,7 @@ class BamcProgressBar extends StatelessWidget {
                 ),
                 if (trailing != null)
                   Padding(
-                    padding: const EdgeInsets.only(left: 8),
+                    padding: const EdgeInsets.only(left: 10),
                     child: trailing,
                   ),
               ],

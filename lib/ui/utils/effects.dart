@@ -18,7 +18,7 @@ class BamcEffects {
         borderRadius: borderRadius ?? BorderRadius.circular(8),
         border: border ??
             Border.all(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: Colors.white.withOpacity(0.2),
               width: 1,
             ),
         boxShadow: shadow != null
@@ -151,8 +151,8 @@ class BamcEffects {
   // 悬浮阴影
   static BoxShadow hoverShadow({
     Color color = BamcColors.shadow,
-    double blurRadius = 12,
-    Offset offset = const Offset(0, 4),
+    double blurRadius = 16,
+    Offset offset = const Offset(0, 6),
     double spreadRadius = 0,
   }) {
     return BoxShadow(
@@ -166,8 +166,8 @@ class BamcEffects {
   // 强烈阴影（用于重要元素）
   static BoxShadow strongShadow({
     Color color = BamcColors.shadow,
-    double blurRadius = 20,
-    Offset offset = const Offset(0, 8),
+    double blurRadius = 24,
+    Offset offset = const Offset(0, 10),
     double spreadRadius = 0,
   }) {
     return BoxShadow(
@@ -186,7 +186,7 @@ class BamcEffects {
     double spreadRadius = 0,
   }) {
     return BoxShadow(
-      color: color.withValues(alpha: 0.2),
+      color: color.withOpacity(0.2),
       blurRadius: blurRadius,
       offset: offset,
       spreadRadius: spreadRadius,
@@ -196,11 +196,11 @@ class BamcEffects {
   // 发光效果
   static BoxShadow glowEffect({
     Color color = BamcColors.primary,
-    double blurRadius = 20,
+    double blurRadius = 24,
     double spreadRadius = 0,
   }) {
     return BoxShadow(
-      color: color.withValues(alpha: 0.3),
+      color: color.withOpacity(0.3),
       blurRadius: blurRadius,
       offset: Offset.zero,
       spreadRadius: spreadRadius,
@@ -249,12 +249,12 @@ class BamcEffects {
     return BoxDecoration(
       color: color,
       border: Border.all(
-        color: Colors.white.withValues(alpha: 0.3),
+        color: Colors.white.withOpacity(0.3),
         width: borderWidth,
       ),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.3),
+          color: Colors.black.withOpacity(0.3),
           blurRadius: 8,
           offset: const Offset(2, 2),
         ),
@@ -333,18 +333,19 @@ class BamcEffects {
     );
   }
 
-  // 悬浮卡片转换 - 轻微上浮
+  // 悬浮卡片转换 - 轻微上浮与阴影加深
   static Matrix4 hoverCardTransform(bool isHovered) {
     return Matrix4.identity()
-      ..translate(0, isHovered ? -8 : 0);
+      ..translate(0, isHovered ? -8 : 0)
+      ..scale(isHovered ? 1.02 : 1.0);
   }
 
   // 像素化动画颜色
   static const List<Color> pixelLoadingColors = [
-    Color(0xFF4A90D9),
-    Color(0xFF7CB342),
-    Color(0xFFFF9800),
-    Color(0xFFE53935),
+    BamcColors.primary,
+    BamcColors.secondary,
+    BamcColors.success,
+    BamcColors.warning,
   ];
 
   // 方块弹出动画
@@ -365,5 +366,110 @@ class BamcEffects {
         curve: Curves.easeOutCubic,
       ),
     );
+  }
+
+  // 像素加载动画
+  static Widget pixelLoadingAnimation({
+    required AnimationController controller,
+    double size = 40,
+  }) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, child) {
+        final progress = controller.value;
+        const totalPixels = 4;
+        final activePixels = (progress * totalPixels).floor();
+        
+        return Container(
+          width: size,
+          height: size,
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              spacing: 4,
+            ),
+            itemCount: totalPixels,
+            itemBuilder: (context, index) {
+              final isActive = index < activePixels;
+              return Container(
+                decoration: BoxDecoration(
+                  color: isActive ? pixelLoadingColors[index % pixelLoadingColors.length] : BamcColors.border,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  // 下载完成的方块弹出动效
+  static Widget blockPopEffect({
+    required AnimationController controller,
+    Widget child,
+    double scale = 1.2,
+  }) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, child) {
+        final progress = controller.value;
+        double currentScale = 1.0;
+        
+        if (progress < 0.3) {
+          // 弹出阶段
+          currentScale = 1.0 + (scale - 1.0) * (progress / 0.3);
+        } else if (progress < 0.6) {
+          // 回落阶段
+          currentScale = scale - (scale - 1.0) * ((progress - 0.3) / 0.3);
+        } else {
+          // 稳定阶段
+          currentScale = 1.0;
+        }
+        
+        return Transform.scale(
+          scale: currentScale,
+          child: child,
+        );
+      },
+      child: child,
+    );
+  }
+
+  // 按钮点击的像素颗粒反馈
+  static List<Widget> pixelParticleEffect({
+    required List<Offset> positions,
+    required AnimationController controller,
+  }) {
+    return positions.map((position) {
+      return AnimatedBuilder(
+        animation: controller,
+        builder: (context, child) {
+          final progress = controller.value;
+          final random = position.dx.toInt() + position.dy.toInt();
+          final offsetX = (random % 100 - 50) * progress;
+          final offsetY = (random % 100 - 50) * progress;
+          
+          return Positioned(
+            left: position.dx + offsetX - 4,
+            top: position.dy + offsetY - 4,
+            child: Opacity(
+              opacity: 1.0 - progress,
+              child: Transform.scale(
+                scale: 1.0 - progress,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: pixelLoadingColors[random % pixelLoadingColors.length],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }).toList();
   }
 }

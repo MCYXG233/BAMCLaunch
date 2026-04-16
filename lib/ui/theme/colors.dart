@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class BamcColors {
   // 主色调 - 蔚蓝档案风格
-  static const Color primary = Color(0xFF4A86E8); // 蔚蓝档案主蓝
-  static const Color primaryLight = Color(0xFF7AA9F5);
-  static const Color primaryDark = Color(0xFF2E6CD4);
+  static const Color primary = Color(0xFF64B5F6); // 蔚蓝档案经典清新蓝
+  static const Color primaryLight = Color(0xFF90CAF9);
+  static const Color primaryDark = Color(0xFF42A5F5);
 
   // 辅助色 - Minecraft风格
   static const Color secondary = Color(0xFF7CB342); // MC草方块绿
@@ -32,23 +32,23 @@ class BamcColors {
   static const Color dangerDark = Color(0xFFD32F2F);
 
   // 信息色
-  static const Color info = Color(0xFF2196F3);
-  static const Color infoLight = Color(0xFF64B5F6);
-  static const Color infoDark = Color(0xFF1976D2);
+  static const Color info = Color(0xFF64B5F6);
+  static const Color infoLight = Color(0xFF90CAF9);
+  static const Color infoDark = Color(0xFF42A5F5);
 
   // 成功色
   static const Color success = Color(0xFFFDD835); // MC金块黄
   static const Color successLight = Color(0xFFFFEB3B);
   static const Color successDark = Color(0xFFFBC02D);
 
-  // 中性色 - 优化视觉效果
-  static const Color background = Color(0xFFF5F7FA); // 更柔和的背景色
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color card = Color(0xFFFFFFFF);
+  // 中性色 - 柔和米白、低饱和浅灰/深灰
+  static const Color background = Color(0xFFF8F9FA); // 柔和米白
+  static const Color surface = Color(0xFFF5F5F5);
+  static const Color card = Color(0xFFFAFAFA);
   
-  static const Color textPrimary = Color(0xFF212121);
-  static const Color textSecondary = Color(0xFF6D6D6D); // 更清晰的次要文字
-  static const Color textTertiary = Color(0xFF9E9E9E); // 第三级文字
+  static const Color textPrimary = Color(0xFF333333); // 低饱和深灰，杜绝纯黑
+  static const Color textSecondary = Color(0xFF666666); // 低饱和中灰
+  static const Color textTertiary = Color(0xFF999999); // 低饱和浅灰
   static const Color textDisabled = Color(0xFFBDBDBD);
 
   static const Color divider = Color(0xFFE0E0E0);
@@ -56,8 +56,8 @@ class BamcColors {
   static const Color shadow = Color(0x1A000000);
 
   // 毛玻璃效果背景色
-  static const Color glassBackground = Color(0xCCFFFFFF);
-  static const Color glassBackgroundDark = Color(0xCC000000);
+  static const Color glassBackground = Color(0xCCF8F9FA);
+  static const Color glassBackgroundDark = Color(0xCC333333);
 
   // 透明色
   static const Color transparent = Colors.transparent;

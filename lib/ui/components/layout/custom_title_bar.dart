@@ -56,8 +56,8 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
 
   Widget _buildPixelIcon(String type) {
     return Container(
-      width: 12,
-      height: 12,
+      width: 14,
+      height: 14,
       child: CustomPaint(
         painter: _PixelIconPainter(type),
       ),
@@ -74,14 +74,14 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
             onPressed: _handleClose,
             iconType: 'close',
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           _buildControlButton(
             id: 'minimize',
             color: BamcColors.success,
             onPressed: _handleMinimize,
             iconType: 'minimize',
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           _buildControlButton(
             id: 'maximize',
             color: BamcColors.secondary,
@@ -99,14 +99,14 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
             onPressed: _handleMinimize,
             iconType: 'minimize',
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           _buildControlButton(
             id: 'maximize',
             color: BamcColors.border,
             onPressed: _handleMaximize,
             iconType: 'maximize',
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           _buildControlButton(
             id: 'close',
             color: BamcColors.warning,
@@ -132,9 +132,10 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
       onExit: (_) => setState(() => _hoverStates[id] = false),
       child: GestureDetector(
         onTap: onPressed,
-        child: Container(
-          width: 32,
-          height: 32,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: 36,
+          height: 36,
           decoration: BoxDecoration(
             gradient: isHovering
                 ? LinearGradient(
@@ -153,17 +154,17 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
                       color.withOpacity(0.9),
                     ],
                   ),
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(6),
             border: Border.all(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withOpacity(0.3),
               width: 1,
             ),
             boxShadow: isHovering
                 ? [
                     BoxShadow(
-                      color: color.withOpacity(0.3),
-                      blurRadius: 4,
-                      offset: Offset(0, 2),
+                      color: color.withOpacity(0.4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
                     ),
                   ]
                 : [],
@@ -185,40 +186,41 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
       onExit: (_) => setState(() => _hoverStates['performance'] = false),
       child: GestureDetector(
         onTap: widget.onPerformanceToggle,
-        child: Container(
-          width: 32,
-          height: 32,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: 36,
+          height: 36,
           decoration: BoxDecoration(
             gradient: isHovering
                 ? LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      BamcColors.primary.withOpacity(0.2),
-                      BamcColors.secondary.withOpacity(0.2),
+                      BamcColors.primary.withOpacity(0.3),
+                      BamcColors.secondary.withOpacity(0.3),
                     ],
                   )
                 : LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      BamcColors.primary.withOpacity(0.1),
-                      BamcColors.secondary.withOpacity(0.1),
+                      BamcColors.primary.withOpacity(0.15),
+                      BamcColors.secondary.withOpacity(0.15),
                     ],
                   ),
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(6),
             border: Border.all(
               color: isHovering
-                  ? BamcColors.primary.withOpacity(0.5)
-                  : BamcColors.primary.withOpacity(0.3),
+                  ? BamcColors.primary.withOpacity(0.6)
+                  : BamcColors.primary.withOpacity(0.4),
               width: 1,
             ),
             boxShadow: isHovering
                 ? [
                     BoxShadow(
-                      color: BamcColors.primary.withOpacity(0.2),
-                      blurRadius: 4,
-                      offset: Offset(0, 2),
+                      color: BamcColors.primary.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
                     ),
                   ]
                 : [],
@@ -259,14 +261,14 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
           _handleMouseUp(event);
         },
         child: Container(
-          height: 48,
+          height: 52,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                BamcColors.primary.withOpacity(0.05),
-                BamcColors.secondary.withOpacity(0.05),
+                BamcColors.primary.withOpacity(0.1),
+                BamcColors.secondary.withOpacity(0.1),
               ],
             ),
             border: const Border(
@@ -278,13 +280,13 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
             boxShadow: const [
               BoxShadow(
                 color: BamcColors.shadow,
-                blurRadius: 4,
-                offset: Offset(0, 1),
+                blurRadius: 8,
+                offset: Offset(0, 2),
               ),
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
                 if (widget.isMacOS)
@@ -297,9 +299,9 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          width: 20,
-                          height: 20,
-                          margin: const EdgeInsets.only(right: 8),
+                          width: 24,
+                          height: 24,
+                          margin: const EdgeInsets.only(right: 10),
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
                               begin: Alignment.topCenter,
@@ -309,22 +311,29 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
                                 BamcColors.secondary,
                               ],
                             ),
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(6),
                             border: Border.all(
                               color: Colors.white,
                               width: 1,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: BamcColors.primary.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: const Icon(
                             Icons.gamepad_rounded,
-                            size: 12,
+                            size: 14,
                             color: Colors.white,
                           ),
                         ),
                         Text(
                           widget.title,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: BamcColors.primary,
                             fontFamily: 'Minecraft',
@@ -339,7 +348,7 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
                     children: [
                       if (widget.onPerformanceToggle != null)
                         _buildPerformanceButton(),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 16),
                       _buildWindowControls(),
                     ],
                   )
@@ -362,35 +371,35 @@ class _PixelIconPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.white;
-    final pixelSize = size.width / 12;
+    final pixelSize = size.width / 14;
 
     switch (type) {
       case 'close':
         // Pixel close icon (X)
-        canvas.drawRect(Rect.fromLTWH(3 * pixelSize, 3 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(5 * pixelSize, 3 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(7 * pixelSize, 3 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(3 * pixelSize, 5 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(7 * pixelSize, 5 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(3 * pixelSize, 7 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(5 * pixelSize, 7 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(7 * pixelSize, 7 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(4 * pixelSize, 4 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(6 * pixelSize, 4 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(8 * pixelSize, 4 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(4 * pixelSize, 6 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(8 * pixelSize, 6 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(4 * pixelSize, 8 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(6 * pixelSize, 8 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(8 * pixelSize, 8 * pixelSize, 2 * pixelSize, 2 * pixelSize), paint);
         break;
       case 'minimize':
         // Pixel minimize icon (horizontal line)
-        canvas.drawRect(Rect.fromLTWH(3 * pixelSize, 5 * pixelSize, 6 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(4 * pixelSize, 6 * pixelSize, 6 * pixelSize, 2 * pixelSize), paint);
         break;
       case 'maximize':
         // Pixel maximize icon (square)
-        canvas.drawRect(Rect.fromLTWH(3 * pixelSize, 3 * pixelSize, 6 * pixelSize, 6 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(4 * pixelSize, 4 * pixelSize, 6 * pixelSize, 6 * pixelSize), paint);
         break;
       case 'performance':
         // Pixel performance icon (speed lines)
-        canvas.drawRect(Rect.fromLTWH(4 * pixelSize, 3 * pixelSize, 4 * pixelSize, 6 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(3 * pixelSize, 4 * pixelSize, 1 * pixelSize, 4 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(8 * pixelSize, 4 * pixelSize, 1 * pixelSize, 4 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(2 * pixelSize, 5 * pixelSize, 1 * pixelSize, 2 * pixelSize), paint);
-        canvas.drawRect(Rect.fromLTWH(9 * pixelSize, 5 * pixelSize, 1 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(5 * pixelSize, 4 * pixelSize, 4 * pixelSize, 6 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(4 * pixelSize, 5 * pixelSize, 1 * pixelSize, 4 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(9 * pixelSize, 5 * pixelSize, 1 * pixelSize, 4 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(3 * pixelSize, 6 * pixelSize, 1 * pixelSize, 2 * pixelSize), paint);
+        canvas.drawRect(Rect.fromLTWH(10 * pixelSize, 6 * pixelSize, 1 * pixelSize, 2 * pixelSize), paint);
         break;
     }
   }

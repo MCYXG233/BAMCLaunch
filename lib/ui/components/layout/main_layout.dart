@@ -4,6 +4,7 @@ import '../../../core/core.dart';
 import '../../../core/performance/performance_monitor.dart'
     as performance_monitor;
 import '../../utils/effects.dart';
+import '../../theme/colors.dart';
 import 'custom_title_bar.dart';
 import 'sidebar.dart';
 import 'breadcrumb_navigation.dart';
@@ -34,25 +35,6 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
   late IUpdateManager _updateManager;
   late performance_monitor.PerformanceMonitor _performanceMonitor;
   bool _showPerformanceOverlay = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _initializePerformanceMonitor();
-    _initializeManagers();
-    
-    _pageAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 400),
-      vsync: this,
-    );
-    _pageAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _pageAnimationController,
-        curve: Curves.easeOutQuad,
-      ),
-    );
-    _pageAnimationController.forward();
-  }
 
   void _initializePerformanceMonitor() {
     _performanceMonitor = performance_monitor.PerformanceMonitor();
@@ -120,8 +102,30 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
     });
   }
 
-  Widget _buildContent() {
-    final pages = [
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePerformanceMonitor();
+    _initializeManagers();
+    _initializePages();
+    
+    _pageAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _pageAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _pageAnimationController,
+        curve: Curves.easeOutQuad,
+      ),
+    );
+    _pageAnimationController.forward();
+  }
+
+  void _initializePages() {
+    _pages = [
       HomePage(
         versionManager: versionManager,
         contentManager: contentManager,
@@ -139,10 +143,13 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
       ContentPage(versionManager: versionManager),
       const ModpackPage(),
       ServerPage(serverManager: _serverManager),
+      ContentPage(versionManager: versionManager),
       AccountPage(accountManager: accountManager),
       SettingsPage(configManager: _configManager),
     ];
+  }
 
+  Widget _buildContent() {
     return PageStorage(
       bucket: PageStorageBucket(),
       child: AnimatedBuilder(
@@ -155,7 +162,7 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
                   opacity: 0.0,
                   child: IndexedStack(
                     index: _previousItem!.index,
-                    children: pages.asMap().entries.map((entry) {
+                    children: _pages.asMap().entries.map((entry) {
                       final index = entry.key;
                       final page = entry.value;
                       return _buildLazyLoadedPage(index, page);
@@ -165,7 +172,7 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
               BamcEffects.pageTransition(
                 IndexedStack(
                   index: _selectedItem.index,
-                  children: pages.asMap().entries.map((entry) {
+                  children: _pages.asMap().entries.map((entry) {
                     final index = entry.key;
                     final page = entry.value;
                     return _buildLazyLoadedPage(index, page);
@@ -255,6 +262,13 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
               onTap: () => _handleNavigationItemSelected(NavigationItem.home)),
           BreadcrumbItem(title: '服务器', isActive: true),
         ];
+      case NavigationItem.content:
+        return [
+          BreadcrumbItem(
+              title: '主页',
+              onTap: () => _handleNavigationItemSelected(NavigationItem.home)),
+          BreadcrumbItem(title: '资源中心', isActive: true),
+        ];
       case NavigationItem.accounts:
         return [
           BreadcrumbItem(
@@ -295,19 +309,38 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
                         onItemSelected: _handleNavigationItemSelected,
                       ),
                       Expanded(
-                        child: Column(
-                          children: [
-                            // 面包屑导航
-                            BreadcrumbNavigation(items: _buildBreadcrumbs()),
-                            // 主内容区
-                            Expanded(
-                              child: Container(
-                                color:
-                                    Theme.of(context).scaffoldBackgroundColor,
-                                child: _buildContent(),
+                        child: Container(
+                          color: BamcColors.background,
+                          child: Column(
+                            children: [
+                              // 面包屑导航
+                              BreadcrumbNavigation(items: _buildBreadcrumbs()),
+                              // 主内容区
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20.0),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: BamcColors.surface,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: BamcColors.border,
+                                        width: 1,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: BamcColors.shadow,
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: _buildContent(),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ],

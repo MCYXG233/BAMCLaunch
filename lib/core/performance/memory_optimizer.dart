@@ -61,7 +61,7 @@ class MemoryLeakDetector {
       final age = now.difference(creationTime).inMinutes;
 
       // 检查长时间存在的对象（可能的内存泄漏）
-      if (age > 10) {
+      if (age > 5) {
         suspiciousObjects.add(key);
       }
     }
@@ -69,15 +69,18 @@ class MemoryLeakDetector {
     if (suspiciousObjects.isNotEmpty) {
       logger.warn(
           'Potential memory leaks detected: ${suspiciousObjects.length} objects');
-      for (final key in suspiciousObjects.take(5)) {
+      for (final key in suspiciousObjects.take(10)) {
         final parts = key.split(':');
         final objectType = parts[0];
         final objectId = parts[1];
         final creationTime = _objectCreationTimes[key];
-        final age =
-            creationTime != null ? now.difference(creationTime).inMinutes : 0;
+        final age = creationTime != null ? now.difference(creationTime).inMinutes : 0;
+        final trace = _objectCreationTraces[key];
 
         logger.warn('  - $objectType:$objectId (${age}m old)');
+        if (trace != null) {
+          logger.warn('    Creation trace: ${trace.toString().split('\n').take(3).join('\n    ')}');
+        }
       }
     }
   }
@@ -195,19 +198,19 @@ abstract class MemoryOptimizationRule {
 
 class ImageCacheOptimizationRule implements MemoryOptimizationRule {
   Timer? _optimizationTimer;
+  int _cleanupCount = 0;
 
   @override
   void apply() {
     logger.info('Applying image cache optimization');
 
     // 设置图片缓存大小限制
-    PaintingBinding.instance.imageCache.maximumSize = 100;
-    PaintingBinding.instance.imageCache.maximumSizeBytes =
-        100 * 1024 * 1024; // 100MB
+    PaintingBinding.instance.imageCache.maximumSize = 80;
+    PaintingBinding.instance.imageCache.maximumSizeBytes = 80 * 1024 * 1024; // 80MB
 
     // 定期清理图片缓存
     _optimizationTimer = Timer.periodic(
-      const Duration(minutes: 5),
+      const Duration(minutes: 3),
       (_) => optimize(),
     );
   }
@@ -218,10 +221,19 @@ class ImageCacheOptimizationRule implements MemoryOptimizationRule {
     final currentSize = cache.currentSize;
     final currentSizeBytes = cache.currentSizeBytes;
 
-    if (currentSize > 50 || currentSizeBytes > 50 * 1024 * 1024) {
-      cache.clear();
+    if (currentSize > 60 || currentSizeBytes > 60 * 1024 * 1024) {
+      // 先尝试清理未使用的图片
+      cache.clearLiveImages();
       logger.info(
-          'Image cache cleared: $currentSize images, ${_formatBytes(currentSizeBytes)}');
+          'Image cache live images cleared: $currentSize images, ${_formatBytes(currentSizeBytes)}');
+    }
+
+    if (currentSize > 70 || currentSizeBytes > 70 * 1024 * 1024) {
+      // 清理所有缓存
+      cache.clear();
+      _cleanupCount++;
+      logger.info(
+          'Image cache fully cleared: $currentSize images, ${_formatBytes(currentSizeBytes)}, Cleanup count: $_cleanupCount');
     }
   }
 

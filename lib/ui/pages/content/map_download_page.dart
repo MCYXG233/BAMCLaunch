@@ -32,14 +32,14 @@ class _MapDownloadPageState extends State<MapDownloadPage> {
       if (_searchQuery.isNotEmpty) {
         final result = await contentManager.searchContent(
           query: _searchQuery,
-          type: ContentType.dataPack, // 使用 dataPack 类型代替 map
+          type: ContentType.map, // 使用正确的 map 类型
           gameVersion: _selectedGameVersion,
         );
         setState(() => _maps = result);
       } else {
         // 加载热门地图
         final popular = await contentManager.getPopularContent(
-          type: ContentType.dataPack, // 使用 dataPack 类型代替 map
+          type: ContentType.map, // 使用正确的 map 类型
         );
         setState(() => _maps = popular);
       }

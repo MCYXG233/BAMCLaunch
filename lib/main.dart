@@ -55,10 +55,17 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _initializeApp() async {
-    await WindowManagerService.getInstance().initialize();
+    // 并行执行初始化操作以减少启动时间
+    final futures = [
+      WindowManagerService.getInstance().initialize(),
+      accountManager.initialize(),
+    ];
+
+    // 启动内存优化
     MemoryOptimizer().startOptimization();
-    await accountManager.initialize();
-    await Future.delayed(const Duration(seconds: 2));
+
+    // 等待所有初始化完成
+    await Future.wait(futures);
 
     if (mounted) {
       setState(() {

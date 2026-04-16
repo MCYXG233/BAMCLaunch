@@ -194,11 +194,28 @@ class _ModDetailPageState extends State<ModDetailPage> {
 
   Widget _buildModInfo() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: BamcColors.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BamcColors.border),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            BamcColors.surface,
+            BamcColors.background,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: BamcColors.border.withOpacity(0.5),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: BamcColors.shadow,
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,30 +223,81 @@ class _ModDetailPageState extends State<ModDetailPage> {
           Row(
             children: [
               _buildModIcon(),
-              const SizedBox(width: 16),
+              const SizedBox(width: 20),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       widget.mod.name,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: BamcColors.textPrimary,
+                        fontFamily: 'Minecraft',
                       ),
                     ),
-                    Text('作者: ${widget.mod.author}'),
-                    Text('版本: ${widget.mod.version}'),
+                    const SizedBox(height: 8),
+                    Text(
+                      '作者: ${widget.mod.author}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: BamcColors.textSecondary,
+                        fontFamily: 'Minecraft',
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '版本: ${widget.mod.version} · 下载: ${widget.mod.downloadCount}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: BamcColors.textTertiary,
+                        fontFamily: 'Minecraft',
+                      ),
+                    ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          const Text('描述:'),
-          const SizedBox(height: 8),
-          Text(widget.mod.description),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
+          Text(
+            '描述:',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: BamcColors.textPrimary,
+              fontFamily: 'Minecraft',
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  BamcColors.primary.withOpacity(0.05),
+                  BamcColors.surface,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: BamcColors.primary.withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+            child: Text(
+              widget.mod.description,
+              style: TextStyle(
+                fontSize: 14,
+                color: BamcColors.textPrimary,
+                lineHeight: 1.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
           Row(
             children: [
               BamcButton(
@@ -240,6 +308,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
                 type: BamcButtonType.outline,
                 size: BamcButtonSize.small,
                 icon: Icons.open_in_new,
+                borderRadius: BorderRadius.circular(8),
               ),
               const SizedBox(width: 12),
               BamcButton(
@@ -250,6 +319,7 @@ class _ModDetailPageState extends State<ModDetailPage> {
                 type: BamcButtonType.outline,
                 size: BamcButtonSize.small,
                 icon: Icons.code,
+                borderRadius: BorderRadius.circular(8),
               ),
             ],
           ),
@@ -288,30 +358,105 @@ class _ModDetailPageState extends State<ModDetailPage> {
 
   Widget _buildVersionList() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: BamcColors.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BamcColors.border),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            BamcColors.surface,
+            BamcColors.background,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: BamcColors.border.withOpacity(0.5),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: BamcColors.shadow,
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             '版本列表',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: BamcColors.textPrimary,
+              fontFamily: 'Minecraft',
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           ..._versions.map((version) {
-            return RadioListTile<ModVersion>(
-              title: Text(version.name),
-              subtitle: Text(
-                  '${version.gameVersion} · ${version.loader} · ${version.releaseTime}'),
-              value: version,
-              groupValue: _selectedVersion,
-              onChanged: (value) {
-                setState(() => _selectedVersion = value);
-              },
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    _selectedVersion == version
+                        ? BamcColors.primary.withOpacity(0.1)
+                        : BamcColors.surface,
+                    _selectedVersion == version
+                        ? BamcColors.primary.withOpacity(0.05)
+                        : BamcColors.background,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: _selectedVersion == version
+                      ? BamcColors.primary
+                      : BamcColors.border.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Radio<ModVersion>(
+                    value: version,
+                    groupValue: _selectedVersion,
+                    onChanged: (value) {
+                      setState(() => _selectedVersion = value);
+                    },
+                    activeColor: BamcColors.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          version.name,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: BamcColors.textPrimary,
+                            fontFamily: 'Minecraft',
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${version.gameVersion} · ${version.loader} · ${version.releaseTime} · ${version.fileSize}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: BamcColors.textSecondary,
+                            fontFamily: 'Minecraft',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             );
           }),
         ],
@@ -321,33 +466,119 @@ class _ModDetailPageState extends State<ModDetailPage> {
 
   Widget _buildDependencies() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: BamcColors.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BamcColors.border),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            BamcColors.surface,
+            BamcColors.background,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: BamcColors.border.withOpacity(0.5),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: BamcColors.shadow,
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             '依赖管理',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: BamcColors.textPrimary,
+              fontFamily: 'Minecraft',
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           ..._dependencies.map((dep) {
-            return ListTile(
-              title: Text(dep.name),
-              subtitle: Text('版本要求: ${dep.version}'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    dep.installed
+                        ? BamcColors.success.withOpacity(0.1)
+                        : BamcColors.danger.withOpacity(0.1),
+                    dep.installed
+                        ? BamcColors.success.withOpacity(0.05)
+                        : BamcColors.danger.withOpacity(0.05),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: dep.installed
+                      ? BamcColors.success.withOpacity(0.3)
+                      : BamcColors.danger.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
                 children: [
-                  Text(
-                    dep.installed ? '已安装' : '未安装',
-                    style: TextStyle(
-                      color: dep.installed
-                          ? BamcColors.success
-                          : BamcColors.danger,
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          dep.installed
+                              ? BamcColors.success
+                              : BamcColors.danger,
+                          dep.installed
+                              ? BamcColors.successDark
+                              : BamcColors.dangerDark,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        dep.installed ? Icons.check : Icons.error,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          dep.name,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: BamcColors.textPrimary,
+                            fontFamily: 'Minecraft',
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '版本要求: ${dep.version} · ${dep.required ? '必需' : '可选'}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: BamcColors.textSecondary,
+                            fontFamily: 'Minecraft',
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   if (!dep.installed)
@@ -358,19 +589,35 @@ class _ModDetailPageState extends State<ModDetailPage> {
                       },
                       type: BamcButtonType.primary,
                       size: BamcButtonSize.small,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  if (dep.installed)
+                    Text(
+                      '已安装',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: BamcColors.success,
+                        fontFamily: 'Minecraft',
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                 ],
               ),
             );
           }),
           if (_dependencies.any((dep) => !dep.installed))
-            BamcButton(
-              text: '一键安装所有缺失依赖',
-              onPressed: () {
-                // 一键安装所有缺失依赖
-              },
-              type: BamcButtonType.primary,
-              size: BamcButtonSize.small,
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              child: BamcButton(
+                text: '一键安装所有缺失依赖',
+                onPressed: () {
+                  // 一键安装所有缺失依赖
+                },
+                type: BamcButtonType.primary,
+                size: BamcButtonSize.medium,
+                fullWidth: true,
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
         ],
       ),
@@ -379,37 +626,145 @@ class _ModDetailPageState extends State<ModDetailPage> {
 
   Widget _buildCompatibility() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: BamcColors.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BamcColors.border),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            BamcColors.surface,
+            BamcColors.background,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: BamcColors.border.withOpacity(0.5),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: BamcColors.shadow,
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             '兼容性检测',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: BamcColors.textPrimary,
+              fontFamily: 'Minecraft',
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           ..._compatibleInstances.map((instance) {
-            return RadioListTile<GameInstance>(
-              title: Text(instance.name),
-              subtitle: Text('${instance.gameVersion} · ${instance.loader}'),
-              value: instance,
-              groupValue: _selectedInstance,
-              onChanged: instance.compatible
-                  ? (value) {
-                      setState(() => _selectedInstance = value);
-                    }
-                  : null,
-              enabled: instance.compatible,
-              secondary: Icon(
-                instance.compatible ? Icons.check_circle : Icons.cancel,
-                color: instance.compatible
-                    ? BamcColors.success
-                    : BamcColors.danger,
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    instance.compatible
+                        ? BamcColors.success.withOpacity(0.1)
+                        : BamcColors.danger.withOpacity(0.1),
+                    instance.compatible
+                        ? BamcColors.success.withOpacity(0.05)
+                        : BamcColors.danger.withOpacity(0.05),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: instance.compatible
+                      ? BamcColors.success.withOpacity(0.3)
+                      : BamcColors.danger.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Radio<GameInstance>(
+                    value: instance,
+                    groupValue: _selectedInstance,
+                    onChanged: instance.compatible
+                        ? (value) {
+                            setState(() => _selectedInstance = value);
+                          }
+                        : null,
+                    activeColor: BamcColors.primary,
+                    enabled: instance.compatible,
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          instance.compatible
+                              ? BamcColors.success
+                              : BamcColors.danger,
+                          instance.compatible
+                              ? BamcColors.successDark
+                              : BamcColors.dangerDark,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        instance.compatible ? Icons.check : Icons.cancel,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          instance.name,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: BamcColors.textPrimary,
+                            fontFamily: 'Minecraft',
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${instance.gameVersion} · ${instance.loader}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: BamcColors.textSecondary,
+                            fontFamily: 'Minecraft',
+                          ),
+                        ),
+                        if (!instance.compatible)
+                          const SizedBox(height: 4),
+                        if (!instance.compatible)
+                          Text(
+                            '不兼容',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: BamcColors.danger,
+                              fontFamily: 'Minecraft',
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             );
           }),
@@ -420,11 +775,28 @@ class _ModDetailPageState extends State<ModDetailPage> {
 
   Widget _buildActionButtons() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: BamcColors.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BamcColors.border),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            BamcColors.primary.withOpacity(0.1),
+            BamcColors.surface,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: BamcColors.primary.withOpacity(0.3),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: BamcColors.primary.withOpacity(0.2),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -435,9 +807,10 @@ class _ModDetailPageState extends State<ModDetailPage> {
               type: BamcButtonType.primary,
               size: BamcButtonSize.large,
               icon: Icons.install_desktop,
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           BamcButton(
             text: '下载到本地',
             onPressed: () {
@@ -446,18 +819,85 @@ class _ModDetailPageState extends State<ModDetailPage> {
             type: BamcButtonType.outline,
             size: BamcButtonSize.large,
             icon: Icons.download,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          const SizedBox(width: 16),
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  _isFavorite
+                      ? BamcColors.danger
+                      : BamcColors.surface,
+                  _isFavorite
+                      ? BamcColors.dangerDark
+                      : BamcColors.background,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _isFavorite
+                    ? BamcColors.danger
+                    : BamcColors.border,
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: _isFavorite
+                      ? BamcColors.danger.withOpacity(0.3)
+                      : BamcColors.shadow,
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: IconButton(
+              icon: Icon(
+                _isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: _isFavorite ? Colors.white : BamcColors.textSecondary,
+                size: 24,
+              ),
+              onPressed: _toggleFavorite,
+            ),
           ),
           const SizedBox(width: 12),
-          IconButton(
-            icon: Icon(
-              _isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: _isFavorite ? BamcColors.danger : BamcColors.textSecondary,
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  BamcColors.surface,
+                  BamcColors.background,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: BamcColors.border,
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: BamcColors.shadow,
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            onPressed: _toggleFavorite,
-          ),
-          IconButton(
-            icon: const Icon(Icons.share, color: BamcColors.textSecondary),
-            onPressed: _shareMod,
+            child: IconButton(
+              icon: const Icon(
+                Icons.share,
+                color: BamcColors.textSecondary,
+                size: 24,
+              ),
+              onPressed: _shareMod,
+            ),
           ),
         ],
       ),
@@ -475,22 +915,79 @@ class _ModDetailPageState extends State<ModDetailPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                BamcColors.primary.withOpacity(0.1),
+                BamcColors.surface,
+              ],
+            ),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            BamcColors.primary,
+                            BamcColors.primaryDark,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: BamcColors.primary.withOpacity(0.4),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.extension,
+                          color: Colors.white,
+                          size: 32,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '加载中...',
+                      style: TextStyle(
+                        color: BamcColors.primary,
+                        fontSize: 16,
+                        fontFamily: 'Minecraft',
+                      ),
+                    ),
+                  ],
+                ),
+              )
             : Column(
                 children: [
                   _buildModInfo(),
-                  const SizedBox(height: 16),
-                  _buildVersionList(),
-                  const SizedBox(height: 16),
-                  _buildDependencies(),
-                  const SizedBox(height: 16),
-                  _buildCompatibility(),
                   const SizedBox(height: 20),
+                  _buildVersionList(),
+                  const SizedBox(height: 20),
+                  _buildDependencies(),
+                  const SizedBox(height: 20),
+                  _buildCompatibility(),
+                  const SizedBox(height: 24),
                   _buildActionButtons(),
+                  const SizedBox(height: 40),
                 ],
               ),
       ),
