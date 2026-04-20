@@ -54,14 +54,14 @@ class _SidebarState extends State<Sidebar> {
             ..translate(isHovering ? 6.0 : 0.0, isHovering ? -3.0 : 0.0)
             ..scale(isHovering ? 1.02 : 1.0),
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
             color: isSelected
                 ? BamcColors.primary
                 : isHovering
                     ? BamcColors.primary.withOpacity(0.1)
                     : Colors.transparent,
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(8),
             gradient: isSelected
                 ? const LinearGradient(
                     begin: Alignment.topLeft,
@@ -69,18 +69,17 @@ class _SidebarState extends State<Sidebar> {
                     colors: [
                       BamcColors.primary,
                       BamcColors.primaryDark,
-                      BamcColors.secondaryDark,
                     ],
                   )
                 : null,
             border: isSelected
                 ? Border.all(
-                    color: Colors.white.withOpacity(0.6),
-                    width: 2,
+                    color: Colors.white,
+                    width: 1,
                   )
                 : isHovering
                     ? Border.all(
-                        color: BamcColors.primary.withOpacity(0.6),
+                        color: BamcColors.primary.withOpacity(0.5),
                         width: 1,
                       )
                     : Border.all(
@@ -90,14 +89,9 @@ class _SidebarState extends State<Sidebar> {
             boxShadow: isSelected || isHovering
                 ? [
                     BoxShadow(
-                      color: BamcColors.primary.withOpacity(0.4),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                    BoxShadow(
-                      color: BamcColors.primary.withOpacity(0.15),
-                      blurRadius: 24,
-                      offset: const Offset(0, 10),
+                      color: BamcColors.primary.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
                   ]
                 : null,
@@ -105,15 +99,15 @@ class _SidebarState extends State<Sidebar> {
           child: Row(
             children: [
               Container(
-                width: 30,
-                height: 30,
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? Colors.white.withOpacity(0.3)
+                      ? Colors.white.withOpacity(0.2)
                       : isHovering
-                          ? BamcColors.primary.withOpacity(0.3)
+                          ? BamcColors.primary.withOpacity(0.2)
                           : Colors.transparent,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(6),
                   border: Border.all(
                     color: isSelected
                         ? Colors.white
@@ -158,8 +152,8 @@ class _SidebarState extends State<Sidebar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 250,
-      decoration: const BoxDecoration(
+      width: 260,
+      decoration: BoxDecoration(
         color: BamcColors.surface,
         border: Border(
           right: BorderSide(
@@ -171,7 +165,7 @@ class _SidebarState extends State<Sidebar> {
           BoxShadow(
             color: BamcColors.shadow,
             blurRadius: 8,
-            offset: Offset(2, 0),
+            offset: const Offset(2, 0),
           ),
         ],
       ),

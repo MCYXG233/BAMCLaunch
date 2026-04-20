@@ -62,18 +62,30 @@ class _GlassDialogContent extends StatelessWidget {
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-          child: Container(
-            decoration: BoxDecoration(
-              color: BamcColors.glassBackground,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: BamcColors.border.withOpacity(0.5),
-                width: 1,
+          borderRadius: BorderRadius.circular(16),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(
+              decoration: BoxDecoration(
+                color: BamcColors.glassBackground,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: BamcColors.border.withOpacity(0.6),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: BamcColors.shadow,
+                    blurRadius: 24,
+                    offset: const Offset(0, 12),
+                  ),
+                  BoxShadow(
+                    color: BamcColors.shadow.withOpacity(0.5),
+                    blurRadius: 32,
+                    offset: const Offset(0, 16),
+                  ),
+                ],
               ),
-            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -91,8 +103,16 @@ class _GlassDialogContent extends StatelessWidget {
 
   Widget _buildTitleBar(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
       decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            BamcColors.primary.withOpacity(0.1),
+            BamcColors.secondary.withOpacity(0.1),
+          ],
+        ),
         border: Border(
           bottom: BorderSide(
             color: BamcColors.border.withOpacity(0.3),
@@ -124,7 +144,7 @@ class _GlassDialogContent extends StatelessWidget {
   Widget _buildContent() {
     return Flexible(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(28),
         child: content,
       ),
     );

@@ -217,7 +217,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
   }
 
   BoxDecoration _getDecoration() {
-    final borderRadius = widget.borderRadius ?? BorderRadius.circular(6);
+    final borderRadius = widget.borderRadius ?? BorderRadius.circular(8);
 
     switch (widget.type) {
       case BamcButtonType.primary:
@@ -232,7 +232,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
           ),
           borderRadius: borderRadius,
           border: Border.all(
-            color: Colors.white.withOpacity(0.4),
+            color: Colors.white.withOpacity(0.6),
             width: 1,
           ),
           boxShadow: widget.shadows ??
@@ -269,7 +269,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
           ),
           borderRadius: borderRadius,
           border: Border.all(
-            color: Colors.white.withOpacity(0.4),
+            color: Colors.white.withOpacity(0.6),
             width: 1,
           ),
           boxShadow: widget.shadows ??
@@ -306,7 +306,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
           ),
           borderRadius: borderRadius,
           border: Border.all(
-            color: Colors.white.withOpacity(0.4),
+            color: Colors.white.withOpacity(0.6),
             width: 1,
           ),
           boxShadow: widget.shadows ??
@@ -343,7 +343,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
           ),
           borderRadius: borderRadius,
           border: Border.all(
-            color: Colors.white.withOpacity(0.4),
+            color: Colors.white.withOpacity(0.6),
             width: 1,
           ),
           boxShadow: widget.shadows ??

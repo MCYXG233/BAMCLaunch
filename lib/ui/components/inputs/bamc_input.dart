@@ -197,9 +197,14 @@ class _BamcInputState extends State<BamcInput> {
     if (_isFocused && widget.enabled) {
       return [
         BoxShadow(
-          color: BamcColors.primary.withOpacity(0.3),
-          blurRadius: 20,
-          offset: const Offset(0, 0),
+          color: BamcColors.primary.withOpacity(0.25),
+          blurRadius: 16,
+          offset: const Offset(0, 2),
+        ),
+        BoxShadow(
+          color: BamcColors.primary.withOpacity(0.15),
+          blurRadius: 24,
+          offset: const Offset(0, 4),
         ),
       ];
     }
@@ -268,15 +273,15 @@ class _BamcInputState extends State<BamcInput> {
                   ),
                   prefixIcon: widget.prefixIcon != null
                       ? Container(
-                          margin: const EdgeInsets.only(left: 8, right: 4),
-                          padding: const EdgeInsets.all(6),
+                          margin: const EdgeInsets.only(left: 12, right: 8),
+                          padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: isDisabled
                                 ? BamcColors.background
                                 : (_isFocused
                                     ? BamcColors.primary.withOpacity(0.15)
                                     : BamcColors.background),
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: isDisabled
                                   ? BamcColors.border

@@ -94,7 +94,7 @@ class BamcProgressBar extends StatelessWidget {
 
   Widget _buildPixelProgressBar() {
     final progress = (value / max!).clamp(0.0, 1.0);
-    const totalBlocks = 24; // 24个方块，更细腻
+    const totalBlocks = 20; // 20个方块，更符合MC风格
     final filledBlocks = (progress * totalBlocks).floor();
 
     return Container(
@@ -106,6 +106,13 @@ class BamcProgressBar extends StatelessWidget {
           color: BamcColors.border,
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: BamcColors.shadow,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: List.generate(totalBlocks, (index) {
@@ -123,11 +130,15 @@ class BamcProgressBar extends StatelessWidget {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            _getProgressColor().withOpacity(1.0),
-                            _getProgressColor().withOpacity(0.8),
+                            _getProgressColor(),
+                            _getProgressColor().withOpacity(0.7),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(2),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.3),
+                          width: 1,
+                        ),
                       ),
                     )
                   : isPartial
@@ -140,13 +151,17 @@ class BamcProgressBar extends StatelessWidget {
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
                                   colors: [
-                                    _getProgressColor().withOpacity(1.0),
-                                    _getProgressColor().withOpacity(0.8),
+                                    _getProgressColor(),
+                                    _getProgressColor().withOpacity(0.7),
                                   ],
                                 ),
                                 borderRadius: const BorderRadius.only(
                                   topLeft: Radius.circular(2),
                                   bottomLeft: Radius.circular(2),
+                                ),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.3),
+                                  width: 1,
                                 ),
                               ),
                             ),

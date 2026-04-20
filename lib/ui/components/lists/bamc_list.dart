@@ -196,27 +196,29 @@ class _BamcListState<T> extends State<BamcList<T>> {
       child: GestureDetector(
         onTap: () => _handleItemTap(item, index),
         onDoubleTap: () => _handleItemDoubleTap(item),
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
             color: isSelected
-                ? BamcColors.primary.withOpacity(0.1)
+                ? BamcColors.primary.withOpacity(0.15)
                 : isHovered
                     ? BamcColors.background
                     : BamcColors.surface,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isSelected
                   ? BamcColors.primary
                   : isHovered
-                      ? BamcColors.border
-                      : BamcColors.transparent,
+                      ? BamcColors.primary.withOpacity(0.3)
+                      : BamcColors.border,
               width: isSelected ? 2 : 1,
             ),
             boxShadow: isHovered || isSelected
                 ? [
-                    BamcEffects.standardShadow(
-                      blurRadius: 4,
+                    BoxShadow(
+                      color: BamcColors.shadow,
+                      blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ]

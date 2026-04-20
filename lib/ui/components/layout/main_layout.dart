@@ -108,8 +108,9 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _initializePerformanceMonitor();
-    _initializeManagers();
-    _initializePages();
+    _initializeManagers().then((_) {
+      _initializePages();
+    });
 
     _pageAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
@@ -324,16 +325,16 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: BamcColors.surface,
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
                                         color: BamcColors.border,
                                         width: 1,
                                       ),
-                                      boxShadow: const [
+                                      boxShadow: [
                                         BoxShadow(
                                           color: BamcColors.shadow,
-                                          blurRadius: 8,
-                                          offset: Offset(0, 2),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 4),
                                         ),
                                       ],
                                     ),

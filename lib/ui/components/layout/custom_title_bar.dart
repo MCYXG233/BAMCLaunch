@@ -134,37 +134,37 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
         onTap: onPressed,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          width: 36,
-          height: 36,
+          width: 32,
+          height: 32,
           decoration: BoxDecoration(
             gradient: isHovering
                 ? LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      color.withOpacity(1.0),
-                      color.withOpacity(0.7),
+                      color,
+                      color.withOpacity(0.8),
                     ],
                   )
                 : LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      color.withOpacity(0.8),
+                      color.withOpacity(0.7),
                       color.withOpacity(0.9),
                     ],
                   ),
             borderRadius: BorderRadius.circular(6),
             border: Border.all(
-              color: Colors.white.withOpacity(0.3),
+              color: Colors.white.withOpacity(0.4),
               width: 1,
             ),
             boxShadow: isHovering
                 ? [
                     BoxShadow(
-                      color: color.withOpacity(0.4),
+                      color: color.withOpacity(0.3),
                       blurRadius: 8,
-                      offset: const Offset(0, 3),
+                      offset: const Offset(0, 2),
                     ),
                   ]
                 : [],
@@ -188,8 +188,8 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
         onTap: widget.onPerformanceToggle,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          width: 36,
-          height: 36,
+          width: 32,
+          height: 32,
           decoration: BoxDecoration(
             gradient: isHovering
                 ? LinearGradient(
@@ -220,7 +220,7 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
                     BoxShadow(
                       color: BamcColors.primary.withOpacity(0.3),
                       blurRadius: 8,
-                      offset: const Offset(0, 3),
+                      offset: const Offset(0, 2),
                     ),
                   ]
                 : [],
@@ -261,14 +261,14 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
           _handleMouseUp(event);
         },
         child: Container(
-          height: 52,
+          height: 56,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                BamcColors.primary.withOpacity(0.1),
-                BamcColors.secondary.withOpacity(0.1),
+                BamcColors.primary.withOpacity(0.15),
+                BamcColors.secondary.withOpacity(0.15),
               ],
             ),
             border: const Border(
@@ -277,11 +277,11 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
                 width: 1,
               ),
             ),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
                 color: BamcColors.shadow,
-                blurRadius: 8,
-                offset: Offset(0, 2),
+                blurRadius: 12,
+                offset: const Offset(0, 2),
               ),
             ],
           ),

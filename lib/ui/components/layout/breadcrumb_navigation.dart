@@ -35,9 +35,10 @@ class BreadcrumbNavigation extends StatelessWidget {
           ),
         ),
         boxShadow: [
-          BamcEffects.standardShadow(
-            blurRadius: 4,
-            offset: const Offset(0, 1),
+          BoxShadow(
+            color: BamcColors.shadow,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -57,12 +58,18 @@ class BreadcrumbNavigation extends StatelessWidget {
             child: GestureDetector(
               onTap: item.onTap,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(6),
                   color: item.isActive
-                      ? BamcColors.primary.withOpacity(0.1)
+                      ? BamcColors.primary.withOpacity(0.15)
                       : Colors.transparent,
+                  border: item.isActive
+                      ? Border.all(
+                          color: BamcColors.primary.withOpacity(0.3),
+                          width: 1,
+                        )
+                      : null,
                 ),
                 child: Text(
                   item.title,
@@ -82,13 +89,13 @@ class BreadcrumbNavigation extends StatelessWidget {
           // 分隔符
           if (!isLast) {
             parts.addAll([
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Icon(
                 Icons.chevron_right,
-                size: 16,
+                size: 18,
                 color: BamcColors.textSecondary.withOpacity(0.6),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
             ]);
           }
 
