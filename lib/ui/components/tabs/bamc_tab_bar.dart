@@ -96,7 +96,7 @@ class _BamcTabBarState extends State<BamcTabBar>
                   ? BamcColors.primary.withOpacity(0.05)
                   : Colors.transparent,
           gradient: isSelected && widget.useGradient
-              ? BamcEffects.primaryGradient()
+              ? BamcColors.primaryGradient
               : null,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(8),

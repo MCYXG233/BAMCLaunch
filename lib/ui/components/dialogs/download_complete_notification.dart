@@ -175,7 +175,7 @@ class _DownloadCompleteNotificationState
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        gradient: BamcEffects.successGradient(),
+        gradient: BamcColors.successGradient,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(

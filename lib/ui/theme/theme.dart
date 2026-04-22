@@ -7,7 +7,6 @@ class BamcTheme {
       primaryColor: BamcColors.primary,
       primaryColorLight: BamcColors.primaryLight,
       primaryColorDark: BamcColors.primaryDark,
-      backgroundColor: BamcColors.background,
       scaffoldBackgroundColor: BamcColors.background,
 
       colorScheme: ColorScheme.fromSwatch(
@@ -289,7 +288,7 @@ class BamcTheme {
         backgroundColor: BamcColors.surface,
         headerBackgroundColor: BamcColors.primary,
         headerForegroundColor: Colors.white,
-        yearForegroundColor: BamcColors.textPrimary,
+        yearForegroundColor: WidgetStateProperty.all(BamcColors.textPrimary),
         dayForegroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return Colors.white;

@@ -38,73 +38,7 @@ class BamcEffects {
     );
   }
 
-  // 主色调渐变
-  static LinearGradient primaryGradient({
-    Alignment begin = Alignment.topLeft,
-    Alignment end = Alignment.bottomRight,
-  }) {
-    return LinearGradient(
-      begin: begin,
-      end: end,
-      colors: const [
-        BamcColors.primaryLight,
-        BamcColors.primary,
-        BamcColors.primaryDark,
-      ],
-      stops: const [0.0, 0.5, 1.0],
-    );
-  }
 
-  // 辅助色渐变
-  static LinearGradient secondaryGradient({
-    Alignment begin = Alignment.topLeft,
-    Alignment end = Alignment.bottomRight,
-  }) {
-    return LinearGradient(
-      begin: begin,
-      end: end,
-      colors: const [
-        BamcColors.secondaryLight,
-        BamcColors.secondary,
-        BamcColors.secondaryDark,
-      ],
-      stops: const [0.0, 0.5, 1.0],
-    );
-  }
-
-  // 警告色渐变
-  static LinearGradient warningGradient({
-    Alignment begin = Alignment.topLeft,
-    Alignment end = Alignment.bottomRight,
-  }) {
-    return LinearGradient(
-      begin: begin,
-      end: end,
-      colors: const [
-        BamcColors.warningLight,
-        BamcColors.warning,
-        BamcColors.warningDark,
-      ],
-      stops: const [0.0, 0.5, 1.0],
-    );
-  }
-
-  // 成功色渐变
-  static LinearGradient successGradient({
-    Alignment begin = Alignment.topLeft,
-    Alignment end = Alignment.bottomRight,
-  }) {
-    return LinearGradient(
-      begin: begin,
-      end: end,
-      colors: const [
-        BamcColors.successLight,
-        BamcColors.success,
-        BamcColors.successDark,
-      ],
-      stops: const [0.0, 0.5, 1.0],
-    );
-  }
 
   // 清新蓝渐变（MC方块风格）
   static LinearGradient minecraftBlueGradient() {
