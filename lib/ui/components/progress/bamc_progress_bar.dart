@@ -94,7 +94,7 @@ class BamcProgressBar extends StatelessWidget {
 
   Widget _buildPixelProgressBar() {
     final progress = (value / max!).clamp(0.0, 1.0);
-    const totalBlocks = 20; // 20个方块，更符合MC风格
+    const totalBlocks = 24; // 24个方块，更符合MC风格
     final filledBlocks = (progress * totalBlocks).floor();
 
     return Container(
@@ -139,6 +139,13 @@ class BamcProgressBar extends StatelessWidget {
                           color: Colors.white.withOpacity(0.3),
                           width: 1,
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _getProgressColor().withOpacity(0.3),
+                            blurRadius: 2,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
                       ),
                     )
                   : isPartial
@@ -204,6 +211,13 @@ class BamcProgressBar extends StatelessWidget {
           color: BamcColors.border,
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: BamcColors.shadow,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: ClipRRect(
         borderRadius: borderRadius,
@@ -222,6 +236,13 @@ class BamcProgressBar extends StatelessWidget {
                     ],
                   ),
                   borderRadius: borderRadius,
+                  boxShadow: [
+                    BoxShadow(
+                      color: _getProgressColor().withOpacity(0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
               )
             : FractionallySizedBox(
@@ -238,6 +259,13 @@ class BamcProgressBar extends StatelessWidget {
                       ],
                     ),
                     borderRadius: borderRadius,
+                    boxShadow: [
+                      BoxShadow(
+                        color: _getProgressColor().withOpacity(0.3),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -276,6 +304,13 @@ class BamcProgressBar extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: BamcColors.textPrimary,
                         fontFamily: 'Minecraft',
+                        shadows: [
+                          Shadow(
+                            color: BamcColors.primary.withOpacity(0.2),
+                            offset: const Offset(0, 1),
+                            blurRadius: 2,
+                          ),
+                        ],
                       ),
                     ),
                   const Spacer(),
@@ -295,6 +330,13 @@ class BamcProgressBar extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: _getProgressColor(),
                         fontFamily: 'Minecraft',
+                        shadows: [
+                          Shadow(
+                            color: _getProgressColor().withOpacity(0.3),
+                            offset: const Offset(0, 1),
+                            blurRadius: 2,
+                          ),
+                        ],
                       ),
                     ),
                 ],
@@ -307,7 +349,18 @@ class BamcProgressBar extends StatelessWidget {
                 if (leading != null)
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
-                    child: leading,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: BamcColors.background,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: BamcColors.border,
+                          width: 1,
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(4),
+                      child: leading,
+                    ),
                   ),
                 Expanded(
                   child: _buildProgressBar(),

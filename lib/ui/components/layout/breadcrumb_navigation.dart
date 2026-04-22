@@ -57,7 +57,8 @@ class BreadcrumbNavigation extends StatelessWidget {
                 : SystemMouseCursors.basic,
             child: GestureDetector(
               onTap: item.onTap,
-              child: Container(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
@@ -66,9 +67,21 @@ class BreadcrumbNavigation extends StatelessWidget {
                       : Colors.transparent,
                   border: item.isActive
                       ? Border.all(
-                          color: BamcColors.primary.withOpacity(0.3),
+                          color: BamcColors.primary,
                           width: 1,
                         )
+                      : Border.all(
+                          color: Colors.transparent,
+                          width: 1,
+                        ),
+                  boxShadow: item.isActive
+                      ? [
+                          BoxShadow(
+                            color: BamcColors.primary.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
                       : null,
                 ),
                 child: Text(
@@ -80,6 +93,7 @@ class BreadcrumbNavigation extends StatelessWidget {
                     color: item.isActive
                         ? BamcColors.primary
                         : BamcColors.textSecondary,
+                    fontFamily: item.isActive ? 'Minecraft' : null,
                   ),
                 ),
               ),
@@ -90,10 +104,21 @@ class BreadcrumbNavigation extends StatelessWidget {
           if (!isLast) {
             parts.addAll([
               const SizedBox(width: 12),
-              Icon(
-                Icons.chevron_right,
-                size: 18,
-                color: BamcColors.textSecondary.withOpacity(0.6),
+              Container(
+                width: 16,
+                height: 16,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(2),
+                  border: Border.all(
+                    color: BamcColors.textSecondary.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Icon(
+                  Icons.chevron_right,
+                  size: 12,
+                  color: BamcColors.textSecondary.withOpacity(0.6),
+                ),
               ),
               const SizedBox(width: 12),
             ]);

@@ -205,10 +205,29 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.construction,
-            size: 64,
-            color: Theme.of(context).primaryColor,
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              gradient: BamcColors.primaryGradient,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.white,
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: BamcColors.primary.withOpacity(0.4),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.construction,
+              size: 32,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
@@ -216,6 +235,7 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
+              color: BamcColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -223,7 +243,7 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
             '功能开发中',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey,
+              color: BamcColors.textSecondary,
             ),
           ),
         ],
@@ -338,7 +358,24 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
                                         ),
                                       ],
                                     ),
-                                    child: _buildContent(),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                            top: BorderSide(
+                                              color: BamcColors.primary.withOpacity(0.2),
+                                              width: 1,
+                                            ),
+                                            left: BorderSide(
+                                              color: BamcColors.primary.withOpacity(0.1),
+                                              width: 1,
+                                            ),
+                                          ),
+                                        ),
+                                        child: _buildContent(),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),

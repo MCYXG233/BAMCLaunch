@@ -7,6 +7,8 @@ class BamcTheme {
       primaryColor: BamcColors.primary,
       primaryColorLight: BamcColors.primaryLight,
       primaryColorDark: BamcColors.primaryDark,
+      backgroundColor: BamcColors.background,
+      scaffoldBackgroundColor: BamcColors.background,
 
       colorScheme: ColorScheme.fromSwatch(
         primarySwatch: Colors.blue,
@@ -14,6 +16,7 @@ class BamcTheme {
       ).copyWith(
         secondary: BamcColors.secondary,
         error: BamcColors.warning,
+        surface: BamcColors.surface,
       ),
 
       // 文本主题
@@ -137,6 +140,10 @@ class BamcTheme {
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
+          side: const BorderSide(
+            color: BamcColors.border,
+            width: 1,
+          ),
         ),
       ),
 
@@ -173,9 +180,9 @@ class BamcTheme {
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return BamcColors.primary.withValues(alpha: 0.3);
+            return BamcColors.primary.withOpacity(0.3);
           }
-          return Colors.grey.withValues(alpha: 0.3);
+          return Colors.grey.withOpacity(0.3);
         }),
       ),
 
@@ -203,7 +210,7 @@ class BamcTheme {
         activeTrackColor: BamcColors.primary,
         inactiveTrackColor: BamcColors.border,
         thumbColor: BamcColors.primary,
-        overlayColor: BamcColors.primary.withValues(alpha: 0.1),
+        overlayColor: BamcColors.primary.withOpacity(0.1),
         trackHeight: 4,
       ),
 
@@ -236,6 +243,10 @@ class BamcTheme {
         backgroundColor: BamcColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(
+            color: BamcColors.border,
+            width: 1,
+          ),
         ),
         elevation: 8,
       ),
@@ -250,6 +261,53 @@ class BamcTheme {
         elevation: 8,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
+          side: const BorderSide(
+            color: BamcColors.border,
+            width: 1,
+          ),
+        ),
+      ),
+
+      // 时间选择器主题
+      timePickerTheme: TimePickerThemeData(
+        backgroundColor: BamcColors.surface,
+        dialHandColor: BamcColors.primary,
+        dialBackgroundColor: BamcColors.card,
+        hourMinuteTextColor: BamcColors.textPrimary,
+        dayPeriodTextColor: BamcColors.textSecondary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(
+            color: BamcColors.border,
+            width: 1,
+          ),
+        ),
+      ),
+
+      // 日期选择器主题
+      datePickerTheme: DatePickerThemeData(
+        backgroundColor: BamcColors.surface,
+        headerBackgroundColor: BamcColors.primary,
+        headerForegroundColor: Colors.white,
+        yearForegroundColor: BamcColors.textPrimary,
+        dayForegroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return Colors.white;
+          }
+          return BamcColors.textPrimary;
+        }),
+        dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return BamcColors.primary;
+          }
+          return null;
+        }),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(
+            color: BamcColors.border,
+            width: 1,
+          ),
         ),
       ),
     );

@@ -198,31 +198,39 @@ class _BamcListState<T> extends State<BamcList<T>> {
         onDoubleTap: () => _handleItemDoubleTap(item),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
+          transform: Matrix4.identity()
+            ..translate(0, isHovered ? -2.0 : 0.0),
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
             color: isSelected
                 ? BamcColors.primary.withOpacity(0.15)
                 : isHovered
-                    ? BamcColors.background
-                    : BamcColors.surface,
-            borderRadius: BorderRadius.circular(12),
+                    ? BamcColors.cardHover
+                    : BamcColors.card,
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: isSelected
                   ? BamcColors.primary
                   : isHovered
-                      ? BamcColors.primary.withOpacity(0.3)
+                      ? BamcColors.primary
                       : BamcColors.border,
               width: isSelected ? 2 : 1,
             ),
             boxShadow: isHovered || isSelected
                 ? [
                     BoxShadow(
-                      color: BamcColors.shadow,
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: BamcColors.shadowHover,
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
                   ]
-                : null,
+                : [
+                    BoxShadow(
+                      color: BamcColors.shadow,
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
           ),
           child: itemWidget,
         ),
@@ -279,7 +287,18 @@ class BamcListItem extends StatelessWidget {
           if (leading != null)
             Padding(
               padding: const EdgeInsets.only(right: 12),
-              child: leading,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: selected ? BamcColors.primary.withOpacity(0.15) : BamcColors.background,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: selected ? BamcColors.primary : BamcColors.border,
+                    width: 1,
+                  ),
+                ),
+                padding: const EdgeInsets.all(8),
+                child: leading,
+              ),
             ),
           Expanded(
             child: Column(
@@ -292,6 +311,16 @@ class BamcListItem extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color:
                         selected ? BamcColors.primary : BamcColors.textPrimary,
+                    fontFamily: selected ? 'Minecraft' : null,
+                    shadows: selected
+                        ? [
+                            Shadow(
+                              color: BamcColors.primary.withOpacity(0.3),
+                              offset: const Offset(0, 1),
+                              blurRadius: 2,
+                            ),
+                          ]
+                        : null,
                   ),
                   child: title,
                 ),
@@ -299,9 +328,9 @@ class BamcListItem extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: DefaultTextStyle(
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: BamcColors.textSecondary,
+                        color: selected ? BamcColors.primary.withOpacity(0.8) : BamcColors.textSecondary,
                       ),
                       child: subtitle!,
                     ),

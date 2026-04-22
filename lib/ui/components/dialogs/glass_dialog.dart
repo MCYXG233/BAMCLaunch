@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import '../../theme/colors.dart';
 import '../icons/pixel_icon.dart';
 
@@ -46,54 +47,101 @@ class _GlassDialogContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width ?? 480,
-      constraints: BoxConstraints(
-        maxHeight: height ?? MediaQuery.of(context).size.height * 0.8,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: BamcColors.shadow,
-            blurRadius: 20,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
+    return Center(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+        width: width ?? 520,
+        constraints: BoxConstraints(
+          maxHeight: height ?? MediaQuery.of(context).size.height * 0.85,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: BamcColors.shadow.withOpacity(0.3),
+              blurRadius: 30,
+              offset: const Offset(0, 15),
+            ),
+            BoxShadow(
+              color: BamcColors.shadow.withOpacity(0.15),
+              blurRadius: 45,
+              offset: const Offset(0, 25),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
             child: Container(
               decoration: BoxDecoration(
                 color: BamcColors.glassBackground,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: BamcColors.border.withOpacity(0.6),
+                  color: BamcColors.border.withOpacity(0.7),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: BamcColors.shadow,
-                    blurRadius: 24,
-                    offset: const Offset(0, 12),
-                  ),
-                  BoxShadow(
-                    color: BamcColors.shadow.withOpacity(0.5),
-                    blurRadius: 32,
-                    offset: const Offset(0, 16),
+                    color: BamcColors.primary.withOpacity(0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildTitleBar(context),
-                _buildContent(),
-                if (actions != null && actions!.isNotEmpty) _buildActions(),
-              ],
+              child: Stack(
+                children: [
+                  // Pixel line decorations
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 2,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            BamcColors.primary.withOpacity(0),
+                            BamcColors.primary,
+                            BamcColors.primary.withOpacity(0),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: 2,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            BamcColors.secondary.withOpacity(0),
+                            BamcColors.secondary,
+                            BamcColors.secondary.withOpacity(0),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildTitleBar(context),
+                      _buildContent(),
+                      if (actions != null && actions!.isNotEmpty) _buildActions(),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -103,19 +151,19 @@ class _GlassDialogContent extends StatelessWidget {
 
   Widget _buildTitleBar(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            BamcColors.primary.withOpacity(0.1),
-            BamcColors.secondary.withOpacity(0.1),
+            BamcColors.primary.withOpacity(0.15),
+            BamcColors.secondary.withOpacity(0.15),
           ],
         ),
         border: Border(
           bottom: BorderSide(
-            color: BamcColors.border.withOpacity(0.3),
+            color: BamcColors.border.withOpacity(0.4),
             width: 1,
           ),
         ),
@@ -127,12 +175,13 @@ class _GlassDialogContent extends StatelessWidget {
               title,
               style: const TextStyle(
                 color: BamcColors.textPrimary,
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                fontSize: 20,
+                letterSpacing: 0.5,
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           _PixelCloseButton(
             onPressed: () => Navigator.pop(context),
           ),
@@ -144,7 +193,7 @@ class _GlassDialogContent extends StatelessWidget {
   Widget _buildContent() {
     return Flexible(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(28),
+        padding: const EdgeInsets.all(36),
         child: content,
       ),
     );
@@ -152,11 +201,11 @@ class _GlassDialogContent extends StatelessWidget {
 
   Widget _buildActions() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: BamcColors.border.withOpacity(0.3),
+            color: BamcColors.border.withOpacity(0.4),
             width: 1,
           ),
         ),
@@ -166,7 +215,7 @@ class _GlassDialogContent extends StatelessWidget {
         children: actions!.map((action) {
           if (actions!.indexOf(action) > 0) {
             return Padding(
-              padding: const EdgeInsets.only(left: 12),
+              padding: const EdgeInsets.only(left: 16),
               child: action,
             );
           }
@@ -204,9 +253,12 @@ class _PixelCloseButtonState extends State<_PixelCloseButton> {
           widget.onPressed();
         },
         onTapCancel: () => setState(() => _isPressed = false),
-        child: Container(
-          width: 32,
-          height: 32,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: 36,
+          height: 36,
+          transform: Matrix4.identity()
+            ..scale(_isPressed ? 0.9 : _isHovered ? 1.05 : 1.0),
           decoration: BoxDecoration(
             color: _getBackgroundColor(),
             borderRadius: BorderRadius.circular(8),
@@ -214,11 +266,20 @@ class _PixelCloseButtonState extends State<_PixelCloseButton> {
               color: _getBorderColor(),
               width: 2,
             ),
+            boxShadow: _isHovered
+                ? [
+                    BoxShadow(
+                      color: BamcColors.error.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : [],
           ),
           child: Center(
             child: PixelIcon(
               iconType: PixelIconType.close,
-              size: 20,
+              size: 22,
               color: _getIconColor(),
             ),
           ),
@@ -229,10 +290,10 @@ class _PixelCloseButtonState extends State<_PixelCloseButton> {
 
   Color _getBackgroundColor() {
     if (_isPressed) {
-      return BamcColors.error.withOpacity(0.3);
+      return BamcColors.error.withOpacity(0.35);
     }
     if (_isHovered) {
-      return BamcColors.error.withOpacity(0.15);
+      return BamcColors.error.withOpacity(0.2);
     }
     return Colors.transparent;
   }
@@ -241,7 +302,7 @@ class _PixelCloseButtonState extends State<_PixelCloseButton> {
     if (_isPressed || _isHovered) {
       return BamcColors.error;
     }
-    return BamcColors.border.withOpacity(0.3);
+    return BamcColors.border.withOpacity(0.4);
   }
 
   Color _getIconColor() {

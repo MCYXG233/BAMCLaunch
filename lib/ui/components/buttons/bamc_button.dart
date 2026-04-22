@@ -210,6 +210,15 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
                   : Colors.white,
               fontFamily:
                   widget.type != BamcButtonType.text ? 'Minecraft' : null,
+              shadows: widget.type != BamcButtonType.outline && widget.type != BamcButtonType.text
+                  ? [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.3),
+                        offset: const Offset(0, 1),
+                        blurRadius: 2,
+                      ),
+                    ]
+                  : null,
             ),
           ),
       ],
@@ -222,14 +231,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
     switch (widget.type) {
       case BamcButtonType.primary:
         return BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              BamcColors.primary,
-              BamcColors.primaryDark,
-            ],
-          ),
+          gradient: BamcColors.primaryGradient,
           borderRadius: borderRadius,
           border: Border.all(
             color: Colors.white.withOpacity(0.6),
@@ -259,14 +261,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
         );
       case BamcButtonType.secondary:
         return BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              BamcColors.secondary,
-              BamcColors.secondaryDark,
-            ],
-          ),
+          gradient: BamcColors.secondaryGradient,
           borderRadius: borderRadius,
           border: Border.all(
             color: Colors.white.withOpacity(0.6),
@@ -296,14 +291,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
         );
       case BamcButtonType.warning:
         return BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              BamcColors.warning,
-              BamcColors.warningDark,
-            ],
-          ),
+          gradient: BamcColors.warningGradient,
           borderRadius: borderRadius,
           border: Border.all(
             color: Colors.white.withOpacity(0.6),
@@ -333,14 +321,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
         );
       case BamcButtonType.success:
         return BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              BamcColors.success,
-              BamcColors.successDark,
-            ],
-          ),
+          gradient: BamcColors.successGradient,
           borderRadius: borderRadius,
           border: Border.all(
             color: Colors.white.withOpacity(0.6),
@@ -398,7 +379,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final isDisabled = widget.disabled || widget.isLoading;
-    final scale =
+    final scale = 
         _animationController.isAnimating && _animationController.value > 0.5
             ? 0.95
             : (_isHovered ? 1.05 : 1.0);
@@ -427,7 +408,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
                     ? BoxDecoration(
                         color: BamcColors.textDisabled.withOpacity(0.3),
                         borderRadius:
-                            widget.borderRadius ?? BorderRadius.circular(6),
+                            widget.borderRadius ?? BorderRadius.circular(8),
                         border: Border.all(
                           color: BamcColors.border,
                           width: 1,
@@ -465,6 +446,10 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
                 decoration: BoxDecoration(
                   color: particle.color,
                   borderRadius: BorderRadius.circular(2),
+                  border: Border.all(
+                    color: Colors.white,
+                    width: 1,
+                  ),
                 ),
               ),
             ),

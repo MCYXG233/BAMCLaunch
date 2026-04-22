@@ -290,19 +290,24 @@ class BamcEffects {
     ).animate(CurvedAnimation(parent: controller, curve: Curves.bounceOut));
   }
 
-  // 页面切换动画 - 淡入淡出+轻微位移
+  // 页面切换动画 - 淡入淡出+轻微位移+缩放效果
   static Widget pageTransition(Widget child, Animation<double> animation) {
     return FadeTransition(
       opacity: Tween<double>(
         begin: 0.0,
         end: 1.0,
-      ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutQuad)),
+      ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutQuart)),
       child: SlideTransition(
-        position: Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero)
+        position: Tween<Offset>(begin: const Offset(0, 0.08), end: Offset.zero)
             .animate(
           CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
         ),
-        child: child,
+        child: ScaleTransition(
+          scale: Tween<double>(begin: 0.98, end: 1.0).animate(
+            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+          ),
+          child: child,
+        ),
       ),
     );
   }

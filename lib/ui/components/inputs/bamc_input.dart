@@ -208,6 +208,15 @@ class _BamcInputState extends State<BamcInput> {
         ),
       ];
     }
+    if (_isHovered && widget.enabled) {
+      return [
+        BoxShadow(
+          color: BamcColors.primary.withOpacity(0.1),
+          blurRadius: 8,
+          offset: const Offset(0, 1),
+        ),
+      ];
+    }
     return null;
   }
 
@@ -237,6 +246,15 @@ class _BamcInputState extends State<BamcInput> {
                             ? BamcColors.primary
                             : BamcColors.textPrimary),
                     fontFamily: 'Minecraft',
+                    shadows: _isFocused
+                        ? [
+                            Shadow(
+                              color: BamcColors.primary.withOpacity(0.3),
+                              offset: const Offset(0, 1),
+                              blurRadius: 2,
+                            ),
+                          ]
+                        : null,
                   ),
                 ),
               ),
@@ -281,7 +299,7 @@ class _BamcInputState extends State<BamcInput> {
                                 : (_isFocused
                                     ? BamcColors.primary.withOpacity(0.15)
                                     : BamcColors.background),
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(6),
                             border: Border.all(
                               color: isDisabled
                                   ? BamcColors.border
@@ -321,8 +339,8 @@ class _BamcInputState extends State<BamcInput> {
                           ),
                         )
                       : null,
-                  filled: widget.fillColor != null,
-                  fillColor: widget.fillColor,
+                  filled: widget.fillColor != null || !isDisabled,
+                  fillColor: widget.fillColor ?? (isDisabled ? BamcColors.background : BamcColors.card),
                   contentPadding: EdgeInsets.symmetric(
                     vertical: _getPaddingVertical(),
                     horizontal: widget.prefixIcon != null
@@ -345,6 +363,7 @@ class _BamcInputState extends State<BamcInput> {
                   errorStyle: TextStyle(
                     fontSize: _getFontSize() - 2,
                     color: BamcColors.warning,
+                    fontFamily: 'Minecraft',
                   ),
                   counterStyle: TextStyle(
                     fontSize: _getFontSize() - 2,

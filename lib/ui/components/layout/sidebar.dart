@@ -63,15 +63,17 @@ class _SidebarState extends State<Sidebar> {
                     : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
             gradient: isSelected
-                ? const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      BamcColors.primary,
-                      BamcColors.primaryDark,
-                    ],
-                  )
-                : null,
+                ? BamcColors.primaryGradient
+                : isHovering
+                    ? LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          BamcColors.primary.withOpacity(0.1),
+                          BamcColors.primary.withOpacity(0.05),
+                        ],
+                      )
+                    : null,
             border: isSelected
                 ? Border.all(
                     color: Colors.white,
@@ -79,7 +81,7 @@ class _SidebarState extends State<Sidebar> {
                   )
                 : isHovering
                     ? Border.all(
-                        color: BamcColors.primary.withOpacity(0.5),
+                        color: BamcColors.primary,
                         width: 1,
                       )
                     : Border.all(
@@ -116,6 +118,15 @@ class _SidebarState extends State<Sidebar> {
                             : BamcColors.border,
                     width: 1,
                   ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
                 ),
                 child: Icon(
                   icon,
@@ -142,6 +153,24 @@ class _SidebarState extends State<Sidebar> {
                       : null,
                 ),
               ),
+              if (isSelected)
+                const SizedBox(width: 8),
+              if (isSelected)
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 2,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                ),
             ],
           ),
         ),
