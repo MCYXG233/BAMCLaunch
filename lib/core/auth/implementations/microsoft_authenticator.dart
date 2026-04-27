@@ -7,6 +7,11 @@ import '../models/account.dart';
 import '../interfaces/i_authenticator.dart';
 import '../../logger/logger.dart';
 
+/// HTTP 方法枚举
+enum _HttpMethod {
+  get, post, put, delete, patch
+}
+
 class MicrosoftAuthenticator implements IAuthenticator {
   static const String clientId = '0b1a81c9-6e23-41fd-8690-98a17d81bf4a';
   static const String redirectUri = 'https://login.live.com/oauth20_desktop.srf';
@@ -366,18 +371,66 @@ class MicrosoftAuthenticator implements IAuthenticator {
     );
   }
 
-  Future<Map<String, dynamic>> _httpPost(Uri uri, Map<String, String> headers, String body, String operation) async {
+
+
+  /// 通用 HTTP 请求方法
+  /// [method]: HTTP 方法类型
+  /// [uri]: 请求 URI
+  /// [headers]: 请求头
+  /// [body]: 请求体（仅对 POST/PUT/PATCH 有效）
+  /// [operation]: 操作名称（用于日志记录）
+  Future<Map<String, dynamic>> _httpRequest(
+    _HttpMethod method,
+    Uri uri,
+    Map<String, String> headers, {
+    String? body,
+    required String operation,
+  }) async {
     int retries = 3;
     int delay = 1000;
     
     for (int i = 0; i < retries; i++) {
       try {
-        final response = await http.post(
-          uri,
-          headers: headers,
-          body: body,
-        ).timeout(const Duration(seconds: 30));
+        late http.Response response;
+        
+        // 根据方法类型执行不同的请求
+        switch (method) {
+          case _HttpMethod.get:
+            response = await http.get(
+              uri,
+              headers: headers,
+            ).timeout(const Duration(seconds: 30));
+            break;
+          case _HttpMethod.post:
+            response = await http.post(
+              uri,
+              headers: headers,
+              body: body,
+            ).timeout(const Duration(seconds: 30));
+            break;
+          case _HttpMethod.put:
+            response = await http.put(
+              uri,
+              headers: headers,
+              body: body,
+            ).timeout(const Duration(seconds: 30));
+            break;
+          case _HttpMethod.delete:
+            response = await http.delete(
+              uri,
+              headers: headers,
+            ).timeout(const Duration(seconds: 30));
+            break;
+          case _HttpMethod.patch:
+            response = await http.patch(
+              uri,
+              headers: headers,
+              body: body,
+            ).timeout(const Duration(seconds: 30));
+            break;
+        }
 
+        // 检查响应状态码
         if (response.statusCode >= 200 && response.statusCode < 300) {
           return jsonDecode(response.body) as Map<String, dynamic>;
         } else {
@@ -400,37 +453,25 @@ class MicrosoftAuthenticator implements IAuthenticator {
     throw Exception('$operation失败：达到最大重试次数');
   }
 
-  Future<Map<String, dynamic>> _httpGet(Uri uri, Map<String, String> headers, String operation) async {
-    int retries = 3;
-    int delay = 1000;
-    
-    for (int i = 0; i < retries; i++) {
-      try {
-        final response = await http.get(
-          uri,
-          headers: headers,
-        ).timeout(const Duration(seconds: 30));
+  /// POST 请求的便捷方法
+  Future<Map<String, dynamic>> _httpPost(Uri uri, Map<String, String> headers, String body, String operation) async {
+    return _httpRequest(
+      _HttpMethod.post,
+      uri,
+      headers,
+      body: body,
+      operation: operation,
+    );
+  }
 
-        if (response.statusCode >= 200 && response.statusCode < 300) {
-          return jsonDecode(response.body) as Map<String, dynamic>;
-        } else {
-          logger.error('$operation失败: ${response.statusCode} - ${response.body}');
-          if (i == retries - 1) {
-            throw Exception('$operation失败: ${response.statusCode} - ${response.body}');
-          }
-          await Future.delayed(Duration(milliseconds: delay));
-          delay *= 2;
-        }
-      } catch (e) {
-        logger.error('$operation网络请求失败: $e');
-        if (i == retries - 1) {
-          throw Exception('$operation网络请求失败: $e');
-        }
-        await Future.delayed(Duration(milliseconds: delay));
-        delay *= 2;
-      }
-    }
-    throw Exception('$operation失败：达到最大重试次数');
+  /// GET 请求的便捷方法
+  Future<Map<String, dynamic>> _httpGet(Uri uri, Map<String, String> headers, String operation) async {
+    return _httpRequest(
+      _HttpMethod.get,
+      uri,
+      headers,
+      operation: operation,
+    );
   }
 
   String _generateRandomString(int length) {
