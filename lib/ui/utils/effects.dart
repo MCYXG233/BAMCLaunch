@@ -185,6 +185,7 @@ class BamcEffects {
   }
 
   // 按钮按下效果
+  // ignore: deprecated_member_use
   static Matrix4 buttonPressTransform() {
     return Matrix4.identity()
       ..scale(0.95)
@@ -192,6 +193,7 @@ class BamcEffects {
   }
 
   // 悬浮缩放效果
+  // ignore: deprecated_member_use
   static Matrix4 hoverScaleTransform() {
     return Matrix4.identity()..scale(1.05);
   }
@@ -247,6 +249,7 @@ class BamcEffects {
   }
 
   // 悬浮卡片转换 - 轻微上浮与阴影加深
+  // ignore: deprecated_member_use
   static Matrix4 hoverCardTransform(bool isHovered) {
     return Matrix4.identity()
       ..translate(0, isHovered ? -8 : 0, 0)

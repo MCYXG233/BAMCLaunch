@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../theme/colors.dart';
-import '../../utils/effects.dart';
 import '../menus/bamc_context_menu.dart';
 
 class BamcList<T> extends StatefulWidget {
@@ -178,7 +177,6 @@ class _BamcListState<T> extends State<BamcList<T>> {
         ? widget.selectedItems?.contains(item) ?? false
         : widget.selectedItem == item;
     final isHovered = _hoveredIndex == index;
-    final isKeyboardSelected = _keyboardSelectedIndex == index;
 
     Widget itemWidget = widget.itemBuilder(context, item, index, isSelected);
 

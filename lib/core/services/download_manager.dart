@@ -313,9 +313,6 @@ class DownloadTask {
   }
 
   Future<void> _download() async {
-    const chunkSize = 8192;
-    final buffer = Uint8List(chunkSize);
-
     await for (var chunk in _response) {
       if (_isCancelled) {
         break;

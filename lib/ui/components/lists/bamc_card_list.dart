@@ -444,7 +444,6 @@ class _ContextMenuOverlay extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: items.asMap().entries.map((entry) {
-                    final index = entry.key;
                     final item = entry.value;
 
                     if (item is ContextMenuDivider) {

@@ -288,8 +288,6 @@ class _AutoInstallPageState extends State<AutoInstallPage> {
         return '远古Beta';
       case VersionType.custom:
         return '自定义';
-      default:
-        return '未知';
     }
   }
 

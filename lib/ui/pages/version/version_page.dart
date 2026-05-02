@@ -281,10 +281,10 @@ class _VersionPageState extends State<VersionPage> {
           ),
           Expanded(
             child: Text(
-              version.type == 'release' ? '稳定版' : '快照版',
+              version.type == VersionType.release ? '稳定版' : '快照版',
               style: TextStyle(
                 fontSize: 14,
-                color: version.type == 'release'
+                color: version.type == VersionType.release
                     ? BamcColors.textPrimary
                     : BamcColors.warning,
               ),

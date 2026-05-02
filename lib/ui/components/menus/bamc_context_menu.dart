@@ -58,7 +58,6 @@ class _BamcContextMenuState extends State<BamcContextMenu> {
 
     final renderBox = context.findRenderObject() as RenderBox;
     final offset = renderBox.localToGlobal(Offset.zero);
-    final size = renderBox.size;
 
     _menuPosition = widget.preferredPosition ??
         Offset(

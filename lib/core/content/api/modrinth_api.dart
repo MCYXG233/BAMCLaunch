@@ -55,8 +55,6 @@ class ModrinthApi {
         return 'newest';
       case SortType.featured:
         return 'featured';
-      default:
-        return 'relevance';
     }
   }
   
@@ -166,8 +164,6 @@ class ModrinthApi {
         return 'modpack';
       case ContentType.map:
         return 'mod'; // Modrinth API中地图也归类为mod
-      default:
-        return 'mod';
     }
   }
 

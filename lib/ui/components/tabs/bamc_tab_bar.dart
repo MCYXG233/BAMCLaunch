@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../theme/colors.dart';
-import '../../utils/effects.dart';
 
 class BamcTab {
   final String title;

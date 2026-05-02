@@ -77,4 +77,34 @@ Many source files originally had corrupted UTF-8 (truncated Chinese characters i
 
 ## Warnings
 
-69 warnings remain (unused fields/variables, unused imports, dead code). These are non-blocking but should be cleaned up over time. Run `flutter analyze` to see them.
+44 warnings remain (unused fields/variables, unused imports, dead code). These are non-blocking but should be cleaned up over time. Run `flutter analyze` to see them.
+
+## Architecture Improvements
+
+参考 HMCL/PCL2 架构，已完成以下改进：
+
+### 下载引擎优化
+- `DownloadTaskManager`: 统一的下载任务管理，支持任务状态流和进度流
+- `DownloadSourceManager`: 下载源管理器，支持源健康检查和自动切换
+- 支持多线程分块下载、断点续传、自动重试
+
+### 游戏启动流程改进
+- `GameLaunchManager`: 游戏启动管理器，记录启动历史和事件
+- 支持崩溃分析、启动状态跟踪、错误恢复
+
+### 错误处理增强
+- `ErrorRecoveryManager`: 错误恢复管理器，支持自动错误恢复
+- 定义了网络、下载、文件、版本、游戏启动等错误类型的恢复策略
+- 支持重试机制和错误历史记录
+
+## Testing
+
+Tests have been added to cover core functionality:
+- `test/core/config/global_config_test.dart` - Config model serialization tests
+- `test/core/auth/account_test.dart` - Account model tests
+- `test/core/version/version_models_test.dart` - Version model tests
+- `test/comprehensive_integration_test.dart` - Integration tests
+- `test/enhanced_cross_platform_test.dart` - Cross-platform tests
+- `test/stress_test.dart` - Performance stress tests
+
+Run tests with: `flutter test test/`

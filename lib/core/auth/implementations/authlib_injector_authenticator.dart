@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import '../interfaces/i_authenticator.dart';
 import '../models/account.dart';
 import '../../http/i_http_client.dart';
@@ -24,8 +23,8 @@ class AuthlibInjectorAuthenticator implements IAuthenticator {
     final username = credentials['username'] as String;
     final password = credentials['password'] as String;
 
-    // 1. 获取服务器元数据
-    final metadata = await _getServerMetadata(serverUrl);
+    // 1. 验证服务器元数据
+    await _getServerMetadata(serverUrl);
 
     // 2. 使用 Yggdrasil 协议认证
     final authResponse = await _authenticate(

@@ -152,7 +152,6 @@ class LaunchProcessManager {
       // 如果不存在，需要提取 natives
       _logger.info('提取 natives 库...');
       final librariesDir = '$gameDir/libraries';
-      final versionDir = '$gameDir/versions/$gameVersion';
 
       // 创建 natives 目录
       await Directory(nativesDir).create(recursive: true);

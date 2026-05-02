@@ -13,9 +13,22 @@ enum _HttpMethod {
 }
 
 class MicrosoftAuthenticator implements IAuthenticator {
+  // 参考 HMCL 的 Microsoft OAuth 实现
+  // 客户端ID: Minecraft 启动器官方 Azure AD 应用
   static const String clientId = '0b1a81c9-6e23-41fd-8690-98a17d81bf4a';
   static const String redirectUri = 'https://login.live.com/oauth20_desktop.srf';
+  // HMCL 使用的 scope: "XboxLive.signin offline_access"
   static const String scope = 'XboxLive.signin offline_access';
+  
+  // OAuth 端点 (参考 HMCL OAuth.java)
+  // 授权码流使用 login.live.com
+  static const String _authUrl = 'https://login.live.com/oauth20_authorize.srf';
+  static const String _tokenUrl = 'https://login.live.com/oauth20_token.srf';
+  // 设备代码流使用 login.microsoftonline.com/consumers
+  static const String _deviceCodeUrl = 'https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode';
+  static const String _deviceTokenUrl = 'https://login.microsoftonline.com/consumers/oauth2/v2.0/token';
+  // 刷新令牌也使用 consumers 端点
+  static const String _refreshUrl = 'https://login.microsoftonline.com/consumers/oauth2/v2.0/token';
   
   String? _codeVerifier;
   String? _state;
@@ -160,7 +173,8 @@ class MicrosoftAuthenticator implements IAuthenticator {
     _codeVerifier = _generateRandomString(128);
     String codeChallenge = _generateCodeChallenge(_codeVerifier!);
 
-    String url = 'https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?'
+    // 参考 HMCL: 授权码流使用 login.live.com 端点
+    String url = '$_authUrl?'
         'client_id=$clientId'
         '&response_type=code'
         '&redirect_uri=${Uri.encodeComponent(redirectUri)}'
@@ -180,7 +194,8 @@ class MicrosoftAuthenticator implements IAuthenticator {
     try {
       logger.info('获取设备代码');
       
-      Uri uri = Uri.parse('https://login.microsoftonline.com/common/oauth2/v2.0/devicecode');
+      // 参考 HMCL: 设备代码流使用 login.microsoftonline.com/consumers 端点
+      Uri uri = Uri.parse(_deviceCodeUrl);
       Map<String, String> headers = {'Content-Type': 'application/x-www-form-urlencoded'};
       String body = 'client_id=$clientId'
           '&scope=${Uri.encodeComponent(scope)}';
@@ -210,11 +225,12 @@ class MicrosoftAuthenticator implements IAuthenticator {
       try {
         logger.info('轮询令牌，尝试 $attempts/$maxAttempts');
         
-        Uri uri = Uri.parse('https://login.microsoftonline.com/common/oauth2/v2.0/token');
+        // 参考 HMCL: 轮询令牌使用 consumers 端点
+        Uri uri = Uri.parse(_deviceTokenUrl);
         Map<String, String> headers = {'Content-Type': 'application/x-www-form-urlencoded'};
         String body = 'client_id=$clientId'
             '&grant_type=urn:ietf:params:oauth:grant-type:device_code'
-            '&device_code=$_deviceCode';
+            '&code=$_deviceCode';
 
         Map<String, dynamic> response = await _httpPost(uri, headers, body, '轮询令牌');
         return response;
@@ -244,7 +260,7 @@ class MicrosoftAuthenticator implements IAuthenticator {
       logger.info('开始设备代码流登录');
       
       logger.info('1. 获取设备代码');
-      Map<String, dynamic> deviceCodeData = await getDeviceCode();
+      await getDeviceCode();
       
       logger.info('2. 等待用户登录');
       Map<String, dynamic> azureTokens = await pollForToken();
@@ -289,7 +305,8 @@ class MicrosoftAuthenticator implements IAuthenticator {
   }
 
   Future<Map<String, dynamic>> _getAzureTokens(String authorizationCode) async {
-    Uri uri = Uri.parse('https://login.microsoftonline.com/consumers/oauth2/v2.0/token');
+    // 参考 HMCL: 授权码换token使用 login.live.com 端点
+    Uri uri = Uri.parse(_tokenUrl);
     Map<String, String> headers = {'Content-Type': 'application/x-www-form-urlencoded'};
     String body = 'client_id=$clientId'
         '&grant_type=authorization_code'
@@ -301,12 +318,12 @@ class MicrosoftAuthenticator implements IAuthenticator {
   }
 
   Future<Map<String, dynamic>> _refreshAzureTokens(String refreshToken) async {
-    Uri uri = Uri.parse('https://login.microsoftonline.com/consumers/oauth2/v2.0/token');
+    // 参考 HMCL: 刷新令牌使用 consumers 端点
+    Uri uri = Uri.parse(_refreshUrl);
     Map<String, String> headers = {'Content-Type': 'application/x-www-form-urlencoded'};
     String body = 'client_id=$clientId'
         '&grant_type=refresh_token'
-        '&refresh_token=$refreshToken'
-        '&scope=${Uri.encodeComponent(scope)}';
+        '&refresh_token=$refreshToken';
 
     return await _httpPost(uri, headers, body, '刷新Azure令牌');
   }

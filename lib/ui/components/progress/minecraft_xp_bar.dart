@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../theme/colors.dart';
-import '../../utils/effects.dart';
 
 enum MinecraftXpBarStyle {
   grass,
@@ -170,8 +169,6 @@ class _MinecraftXpBarState extends State<MinecraftXpBar>
 
   @override
   Widget build(BuildContext context) {
-    final percentage = ((widget.value / widget.max) * 100).toStringAsFixed(0);
-
     return GestureDetector(
       onTap: widget.onTap,
       child: Column(

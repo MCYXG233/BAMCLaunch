@@ -175,7 +175,6 @@ class DownloadEngine implements IDownloadEngine {
 
     task.status = DownloadStatus.downloading;
 
-    final file = File(task.savePath);
     final tempFile = File('${task.savePath}.part');
 
     // 确保目录存在

@@ -25,6 +25,9 @@ class VersionManager implements IVersionManager {
   /// 清单最后更新时间
   DateTime? _manifestLastUpdated;
 
+  /// BMCLAPI 镜像地址
+  static const String _bmclapiBase = 'https://bmclapi2.bangbang93.com';
+
   /// 构造函数
   /// [platformAdapter]: 平台适配器实例
   /// [logger]: 日志记录器实例
@@ -36,6 +39,38 @@ class VersionManager implements IVersionManager {
   })  : _platformAdapter = platformAdapter,
         _logger = logger,
         _downloadEngine = downloadEngine ?? DownloadEngine();
+
+  /// 将 Mojang 官方 URL 替换为 BMCLAPI 镜像
+  /// [url]: 原始 URL
+  /// 返回镜像 URL
+  String _mirrorUrl(String url) {
+    // launchermeta.mojang.com → bmclapi
+    url = url.replaceAll(
+      'https://launchermeta.mojang.com',
+      _bmclapiBase,
+    );
+    // libraries.minecraft.net → bmclapi/maven
+    url = url.replaceAll(
+      'https://libraries.minecraft.net',
+      '$_bmclapiBase/maven',
+    );
+    // resources.download.minecraft.net → bmclapi/assets
+    url = url.replaceAll(
+      'https://resources.download.minecraft.net',
+      '$_bmclapiBase/assets',
+    );
+    // piston-data.mojang.com → bmclapi
+    url = url.replaceAll(
+      'https://piston-data.mojang.com',
+      _bmclapiBase,
+    );
+    // piston-meta.mojang.com → bmclapi
+    url = url.replaceAll(
+      'https://piston-meta.mojang.com',
+      _bmclapiBase,
+    );
+    return url;
+  }
 
   /// 获取版本清单
   /// [forceRefresh]: 是否强制刷新缓存
@@ -57,8 +92,8 @@ class VersionManager implements IVersionManager {
 
     _logger.info('Fetching version manifest');
 
-    const manifestUrl =
-        'https://launchermeta.mojang.com/mc/game/version_manifest.json';
+    final manifestUrl = _mirrorUrl(
+        'https://launchermeta.mojang.com/mc/game/version_manifest.json');
     final cacheDir = Directory(_platformAdapter.cacheDirectory);
 
     // 确保缓存目录存在
@@ -126,7 +161,7 @@ class VersionManager implements IVersionManager {
       orElse: () => throw Exception('Version $versionId not found'),
     );
 
-    final versionJsonUrl = versionEntry.url;
+    final versionJsonUrl = _mirrorUrl(versionEntry.url);
     final tempFile =
         File('${_platformAdapter.cacheDirectory}/versions/$versionId.json');
 
@@ -156,9 +191,9 @@ class VersionManager implements IVersionManager {
 
     if (version.download != null) {
       final jarFile = File('${versionDir.path}/$versionId.jar');
-      // 使用多线程分块下载
+      // 使用多线程分块下载（通过 BMCLAPI 镜像）
       await _downloadEngine.downloadFile(
-        version.download!.url,
+        _mirrorUrl(version.download!.url),
         jarFile.path,
         checksum: version.download!.sha1,
         checksumType: 'sha1',
@@ -306,12 +341,6 @@ class VersionManager implements IVersionManager {
       version = version.copyWith(
         download: version.download ?? parentVersion.download,
         assetIndex: version.assetIndex ?? parentVersion.assetIndex,
-        libraries: version.libraries ?? parentVersion.libraries,
-        arguments: version.arguments ?? parentVersion.arguments,
-        jvmArguments: version.jvmArguments ?? parentVersion.jvmArguments,
-        mainClass: version.mainClass ?? parentVersion.mainClass,
-        complianceLevel:
-            version.complianceLevel ?? parentVersion.complianceLevel,
         inheritsFrom: parentVersion.inheritsFrom,
       );
     }
@@ -358,7 +387,7 @@ class VersionManager implements IVersionManager {
     final version = await getVersionInfo(versionId);
 
     if (version.assetIndex != null) {
-      final assetIndexUrl = version.assetIndex!.url;
+      final assetIndexUrl = _mirrorUrl(version.assetIndex!.url);
       final tempFile = File(
           '${_platformAdapter.cacheDirectory}/assets/indexes/${version.assetIndex!.id}.json');
 
@@ -377,10 +406,8 @@ class VersionManager implements IVersionManager {
       var downloadedAssets = 0;
 
       for (final entry in assets.entries) {
-        final assetPath = entry.key;
         final assetInfo = entry.value as Map<String, dynamic>;
         final hash = assetInfo['hash'] as String;
-        final size = assetInfo['size'] as int;
 
         final assetDir = Directory(
             '${_platformAdapter.gameDirectory}/assets/objects/${hash.substring(0, 2)}');
@@ -389,8 +416,8 @@ class VersionManager implements IVersionManager {
         final assetFile = File('${assetDir.path}/$hash');
 
         if (!await assetFile.exists()) {
-          final assetUrl =
-              'https://resources.download.minecraft.net/${hash.substring(0, 2)}/$hash';
+          final assetUrl = _mirrorUrl(
+              'https://resources.download.minecraft.net/${hash.substring(0, 2)}/$hash');
 
           await _downloadEngine.downloadFile(
             assetUrl,
@@ -427,7 +454,7 @@ class VersionManager implements IVersionManager {
           await libraryFile.parent.create(recursive: true);
 
           await _downloadEngine.downloadFile(
-            artifact.url,
+            _mirrorUrl(artifact.url),
             libraryFile.path,
             checksum: artifact.sha1,
             checksumType: 'sha1',
@@ -507,7 +534,6 @@ class VersionManager implements IVersionManager {
 
     final versionDir =
         Directory('${_platformAdapter.gameDirectory}/versions/$versionId');
-    final jsonFile = File('${versionDir.path}/$versionId.json');
 
     List<String> backupFiles = [];
 
@@ -796,8 +822,6 @@ class VersionManager implements IVersionManager {
   /// [onProgress]: 进度回调
   Future<void> _installFabric(String mcVersion, String loaderVersion,
       String versionId, Function(double)? onProgress) async {
-    final baseVersion = await getVersionInfo(mcVersion);
-
     final fabricVersionUrl =
         'https://meta.fabricmc.net/v2/versions/loader/$mcVersion/$loaderVersion/profile/json';
     final tempFile = File(

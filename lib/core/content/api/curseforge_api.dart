@@ -66,8 +66,6 @@ class CurseForgeApi {
         return '2';
       case SortType.featured:
         return '5';
-      default:
-        return '0';
     }
   }
   

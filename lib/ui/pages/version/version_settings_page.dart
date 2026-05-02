@@ -177,10 +177,10 @@ class _VersionSettingsPageState extends State<VersionSettingsPage> {
               ),
               const SizedBox(width: 12),
               Text(
-                widget.version.type == 'release' ? '稳定版' : '快照版',
+                widget.version.type == VersionType.release ? '稳定版' : '快照版',
                 style: TextStyle(
                   fontSize: 14,
-                  color: widget.version.type == 'release'
+                  color: widget.version.type == VersionType.release
                       ? BamcColors.success
                       : BamcColors.warning,
                 ),

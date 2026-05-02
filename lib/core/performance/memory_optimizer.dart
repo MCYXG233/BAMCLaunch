@@ -322,7 +322,7 @@ class IsolateMemoryOptimizationRule implements MemoryOptimizationRule {
   @override
   void optimize() {
     // 监控Isolate内存使用情况
-    for (final isolate in _trackedIsolates) {
+    for (final _ in _trackedIsolates) {
       // 这里可以添加Isolate内存监控逻辑
     }
   }

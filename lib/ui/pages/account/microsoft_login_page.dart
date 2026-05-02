@@ -9,7 +9,6 @@ import '../../../core/auth/models/account.dart';
 import '../../../core/auth/account_manager.dart';
 import '../../../core/logger/i_logger.dart';
 import '../../components/buttons/bamc_button.dart';
-import '../../components/progress/pixel_loading_animation.dart';
 import '../../theme/colors.dart';
 
 class MicrosoftLoginPage extends StatefulWidget {
