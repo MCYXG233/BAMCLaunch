@@ -62,7 +62,7 @@ Many source files originally had corrupted UTF-8 (truncated Chinese characters i
 ## CI pipeline
 
 - Runs on: push to `main`/`develop`, PRs to `main`/`develop`
-- Flutter version: 3.22.x (stable channel)
+- Flutter version: 3.24.x (stable channel)
 - Checks: `flutter analyze`, `dart format`, unused imports, test coverage
 - Test matrix: Ubuntu, Windows, macOS
 
