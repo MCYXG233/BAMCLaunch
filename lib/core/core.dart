@@ -11,4 +11,6 @@ export 'update/update.dart';
 export 'performance/performance_monitor.dart';
 export 'cache/image_cache_manager.dart';
 export 'auth/auth.dart';
+export 'task/task.dart';
+export 'event/event.dart';
 export 'globals.dart';

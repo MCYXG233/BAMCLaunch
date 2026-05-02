@@ -1,21 +1,29 @@
 import 'package:flutter/material.dart';
 import '../../theme/colors.dart';
-import '../../utils/effects.dart';
 
-class BamcCard extends StatelessWidget {
+/// BAMC 卡片组件
+///
+/// 融合 Minecraft × 蔚蓝档案风格的卡片
+/// 特点：
+/// - 柔和圆角
+/// - 精致边框
+/// - 悬浮动效
+/// - 点击反馈
+class BamcCard extends StatefulWidget {
   final Widget child;
   final String? title;
   final Widget? header;
   final Widget? footer;
-  final double? elevation;
   final Color? color;
   final BorderRadius? borderRadius;
   final Border? border;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
-  final bool useGlassEffect;
-  final bool hoverable;
   final double? width;
+  final double? height;
+  final VoidCallback? onTap;
+  final bool hoverable;
+  final Gradient? gradient;
 
   const BamcCard({
     super.key,
@@ -23,113 +31,175 @@ class BamcCard extends StatelessWidget {
     this.title,
     this.header,
     this.footer,
-    this.elevation,
     this.color,
     this.borderRadius,
     this.border,
     this.padding,
     this.margin,
-    this.useGlassEffect = false,
-    this.hoverable = false,
     this.width,
+    this.height,
+    this.onTap,
+    this.hoverable = false,
+    this.gradient,
   });
 
   @override
+  State<BamcCard> createState() => _BamcCardState();
+}
+
+class _BamcCardState extends State<BamcCard> {
+  bool _isHovered = false;
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
-    final cardContent = Column(
+    final borderRadius = widget.borderRadius ?? BorderRadius.circular(12);
+    
+    Widget cardContent = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        if (header != null) header!,
-        if (title != null)
+        if (widget.header != null) widget.header!,
+        if (widget.title != null)
           Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.only(bottom: 12),
             child: Text(
-              title!,
+              widget.title!,
               style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
                 color: BamcColors.textPrimary,
               ),
             ),
           ),
-        child,
-        if (footer != null) footer!,
+        widget.child,
+        if (widget.footer != null) widget.footer!,
       ],
     );
 
-    final cardDecoration = BoxDecoration(
-      color: color ?? BamcColors.surface,
-      borderRadius: borderRadius ?? BorderRadius.circular(8),
-      border: border ??
+    // 卡片装饰
+    final decoration = BoxDecoration(
+      color: widget.gradient == null ? (widget.color ?? BamcColors.card) : null,
+      gradient: widget.gradient,
+      borderRadius: borderRadius,
+      border: widget.border ??
           Border.all(
-            color: BamcColors.border,
+            color: _isHovered
+                ? BamcColors.primary.withValues(alpha: 0.3)
+                : BamcColors.border,
             width: 1,
           ),
-      boxShadow: elevation != null
+      boxShadow: _isHovered
           ? [
-              BamcEffects.standardShadow(
-                blurRadius: elevation!,
+              BoxShadow(
+                color: BamcColors.shadowMedium,
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+              BoxShadow(
+                color: BamcColors.primary.withValues(alpha: 0.05),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
               ),
             ]
-          : null,
+          : [
+              BoxShadow(
+                color: BamcColors.shadowLight,
+                blurRadius: 4,
+                offset: const Offset(0, 1),
+              ),
+            ],
     );
 
-    final cardWidget = SizedBox(
-      width: width,
-      child: Container(
-        margin: margin ?? const EdgeInsets.all(0),
-        padding: padding ?? const EdgeInsets.all(16),
-        decoration: cardDecoration,
-        child: cardContent,
-      ),
+    Widget card = Container(
+      width: widget.width,
+      height: widget.height,
+      margin: widget.margin,
+      padding: widget.padding ?? const EdgeInsets.all(16),
+      decoration: decoration,
+      child: cardContent,
     );
 
-    if (useGlassEffect) {
-      return SizedBox(
-        width: width,
-        child: BamcEffects.glassEffect(
-          child: cardContent,
-          borderRadius: borderRadius ?? BorderRadius.circular(8),
-          border: border,
+    // 可悬浮效果
+    if (widget.hoverable || widget.onTap != null) {
+      card = MouseRegion(
+        cursor: widget.onTap != null
+            ? SystemMouseCursors.click
+            : SystemMouseCursors.basic,
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() {
+          _isHovered = false;
+          _isPressed = false;
+        }),
+        child: GestureDetector(
+          onTapDown: widget.onTap != null
+              ? (_) => setState(() => _isPressed = true)
+              : null,
+          onTapUp: widget.onTap != null
+              ? (_) => setState(() => _isPressed = false)
+              : null,
+          onTapCancel: widget.onTap != null
+              ? () => setState(() => _isPressed = false)
+              : null,
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutCubic,
+            width: widget.width,
+            height: widget.height,
+            margin: widget.margin,
+            padding: widget.padding ?? const EdgeInsets.all(16),
+            transform: Matrix4.identity()
+              ..translate(
+                0.0,
+                _isPressed ? 1.0 : (_isHovered ? -2.0 : 0.0),
+              )
+              ..scale(_isPressed ? 0.99 : (_isHovered ? 1.01 : 1.0)),
+            decoration: decoration.copyWith(
+              border: widget.border ??
+                  Border.all(
+                    color: _isHovered
+                        ? BamcColors.primary.withValues(alpha: 0.4)
+                        : _isPressed
+                            ? BamcColors.primary.withValues(alpha: 0.5)
+                            : BamcColors.border,
+                    width: _isHovered ? 1.5 : 1,
+                  ),
+              boxShadow: _isPressed
+                  ? [
+                      BoxShadow(
+                        color: BamcColors.shadowLight,
+                        blurRadius: 2,
+                        offset: const Offset(0, 1),
+                      ),
+                    ]
+                  : _isHovered
+                      ? [
+                          BoxShadow(
+                            color: BamcColors.shadowMedium,
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                          ),
+                          BoxShadow(
+                            color: BamcColors.primary.withValues(alpha: 0.08),
+                            blurRadius: 24,
+                            offset: const Offset(0, 10),
+                          ),
+                        ]
+                      : [
+                          BoxShadow(
+                            color: BamcColors.shadowLight,
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+            ),
+            child: cardContent,
+          ),
         ),
       );
     }
 
-    if (hoverable) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          bool isHovered = false;
-          return MouseRegion(
-            onEnter: (_) => setState(() => isHovered = true),
-            onExit: (_) => setState(() => isHovered = false),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOutCubic,
-              width: width,
-              margin: margin ?? const EdgeInsets.all(0),
-              padding: padding ?? const EdgeInsets.all(16),
-              transform: BamcEffects.hoverCardTransform(isHovered),
-              decoration: cardDecoration.copyWith(
-                boxShadow: isHovered
-                    ? [
-                        BamcEffects.hoverShadow(blurRadius: 20, offset: const Offset(0, 8)),
-                        BamcEffects.glowEffect(color: BamcColors.primary.withOpacity(0.2), blurRadius: 12),
-                      ]
-                    : (elevation != null
-                        ? [
-                            BamcEffects.standardShadow(
-                              blurRadius: elevation!,
-                            ),
-                          ]
-                        : null),
-              ),
-              child: cardContent,
-            ),
-          );
-        },
-      );
-    }
-
-    return cardWidget;
+    return card;
   }
 }

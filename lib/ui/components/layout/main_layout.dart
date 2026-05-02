@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import '../../../core/core.dart';
 import '../../../core/performance/performance_monitor.dart'
     as performance_monitor;
-import '../../utils/effects.dart';
 import '../../theme/colors.dart';
 import 'custom_title_bar.dart';
 import 'sidebar.dart';
@@ -17,6 +16,15 @@ import '../../pages/modpack/modpack_page.dart';
 import '../../pages/server/server_page.dart';
 import '../../pages/settings/settings_page.dart';
 
+/// 主布局组件
+///
+/// 融合 Minecraft × 蔚蓝档案风格的主布局
+/// 特点：
+/// - 自定义标题栏
+/// - 侧边导航
+/// - 面包屑导航
+/// - 毛玻璃质感
+/// - 流畅页面切换
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
 
@@ -43,7 +51,6 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
       metricsInterval: 2000,
     );
 
-    // 监听性能告警
     _performanceMonitor.onAlert = (alert) {
       logger.warn('Performance Alert: ${alert.type} - ${alert.message}');
     };
@@ -84,7 +91,6 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
       });
       _pageAnimationController.reset();
       _pageAnimationController.forward();
-      // 记录页面切换性能
       _performanceMonitor.onFrameRendered();
     }
   }
@@ -113,13 +119,13 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
     });
 
     _pageAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 250),
       vsync: this,
     );
     _pageAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _pageAnimationController,
-        curve: Curves.easeOutQuad,
+        curve: Curves.easeOutCubic,
       ),
     );
     _pageAnimationController.forward();
@@ -146,7 +152,6 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
       ContentPage(versionManager: versionManager),
       const ModpackPage(),
       ServerPage(serverManager: _serverManager),
-      ContentPage(versionManager: versionManager),
       AccountPage(accountManager: accountManager),
       SettingsPage(configManager: _configManager),
     ];
@@ -158,32 +163,13 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
       child: AnimatedBuilder(
         animation: _pageAnimation,
         builder: (context, child) {
-          return Stack(
-            children: [
-              if (_previousItem != null)
-                Opacity(
-                  opacity: 0.0,
-                  child: IndexedStack(
-                    index: _previousItem!.index,
-                    children: _pages.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final page = entry.value;
-                      return _buildLazyLoadedPage(index, page);
-                    }).toList(),
-                  ),
-                ),
-              BamcEffects.pageTransition(
-                IndexedStack(
-                  index: _selectedItem.index,
-                  children: _pages.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final page = entry.value;
-                    return _buildLazyLoadedPage(index, page);
-                  }).toList(),
-                ),
-                _pageAnimation,
-              ),
-            ],
+          return IndexedStack(
+            index: _selectedItem.index,
+            children: _pages.asMap().entries.map((entry) {
+              final index = entry.key;
+              final page = entry.value;
+              return _buildLazyLoadedPage(index, page);
+            }).toList(),
           );
         },
       ),
@@ -200,110 +186,56 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildPlaceholderPage(String title) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              gradient: BamcColors.primaryGradient,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.white,
-                width: 2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: BamcColors.primary.withOpacity(0.4),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.construction,
-              size: 32,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: BamcColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            '功能开发中',
-            style: TextStyle(
-              fontSize: 16,
-              color: BamcColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   List<BreadcrumbItem> _buildBreadcrumbs() {
     switch (_selectedItem) {
       case NavigationItem.home:
-        return [
-          BreadcrumbItem(title: '主页', isActive: true),
-        ];
+        return [BreadcrumbItem(title: '主页', isActive: true)];
       case NavigationItem.versions:
         return [
           BreadcrumbItem(
-              title: '主页',
-              onTap: () => _handleNavigationItemSelected(NavigationItem.home)),
+            title: '主页',
+            onTap: () => _handleNavigationItemSelected(NavigationItem.home),
+          ),
           BreadcrumbItem(title: '版本管理', isActive: true),
         ];
-      case NavigationItem.mods:
+      case NavigationItem.content:
         return [
           BreadcrumbItem(
-              title: '主页',
-              onTap: () => _handleNavigationItemSelected(NavigationItem.home)),
-          BreadcrumbItem(title: '模组管理', isActive: true),
+            title: '主页',
+            onTap: () => _handleNavigationItemSelected(NavigationItem.home),
+          ),
+          BreadcrumbItem(title: '资源中心', isActive: true),
         ];
       case NavigationItem.modpacks:
         return [
           BreadcrumbItem(
-              title: '主页',
-              onTap: () => _handleNavigationItemSelected(NavigationItem.home)),
+            title: '主页',
+            onTap: () => _handleNavigationItemSelected(NavigationItem.home),
+          ),
           BreadcrumbItem(title: '整合包', isActive: true),
         ];
       case NavigationItem.servers:
         return [
           BreadcrumbItem(
-              title: '主页',
-              onTap: () => _handleNavigationItemSelected(NavigationItem.home)),
+            title: '主页',
+            onTap: () => _handleNavigationItemSelected(NavigationItem.home),
+          ),
           BreadcrumbItem(title: '服务器', isActive: true),
-        ];
-      case NavigationItem.content:
-        return [
-          BreadcrumbItem(
-              title: '主页',
-              onTap: () => _handleNavigationItemSelected(NavigationItem.home)),
-          BreadcrumbItem(title: '资源中心', isActive: true),
         ];
       case NavigationItem.accounts:
         return [
           BreadcrumbItem(
-              title: '主页',
-              onTap: () => _handleNavigationItemSelected(NavigationItem.home)),
+            title: '主页',
+            onTap: () => _handleNavigationItemSelected(NavigationItem.home),
+          ),
           BreadcrumbItem(title: '账户', isActive: true),
         ];
       case NavigationItem.settings:
         return [
           BreadcrumbItem(
-              title: '主页',
-              onTap: () => _handleNavigationItemSelected(NavigationItem.home)),
+            title: '主页',
+            onTap: () => _handleNavigationItemSelected(NavigationItem.home),
+          ),
           BreadcrumbItem(title: '设置', isActive: true),
         ];
     }
@@ -312,9 +244,11 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Material(
+      color: BamcColors.background,
       child: Stack(
         children: [
           Scaffold(
+            backgroundColor: BamcColors.background,
             body: Column(
               children: [
                 // 自定义标题栏
@@ -331,50 +265,44 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
                         selectedItem: _selectedItem,
                         onItemSelected: _handleNavigationItemSelected,
                       ),
+                      // 主内容区
                       Expanded(
                         child: Container(
                           color: BamcColors.background,
                           child: Column(
                             children: [
                               // 面包屑导航
-                              BreadcrumbNavigation(items: _buildBreadcrumbs()),
-                              // 主内容区
+                              BreadcrumbNavigation(
+                                items: _buildBreadcrumbs(),
+                              ),
+                              // 内容区域
                               Expanded(
                                 child: Padding(
-                                  padding: const EdgeInsets.all(20.0),
+                                  padding: const EdgeInsets.fromLTRB(
+                                    20,
+                                    0,
+                                    20,
+                                    20,
+                                  ),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: BamcColors.surface,
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(14),
                                       border: Border.all(
                                         color: BamcColors.border,
                                         width: 1,
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: BamcColors.shadow,
-                                          blurRadius: 12,
-                                          offset: const Offset(0, 4),
+                                          color: BamcColors.shadowLight,
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
                                         ),
                                       ],
                                     ),
                                     child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          border: Border(
-                                            top: BorderSide(
-                                              color: BamcColors.primary.withOpacity(0.2),
-                                              width: 1,
-                                            ),
-                                            left: BorderSide(
-                                              color: BamcColors.primary.withOpacity(0.1),
-                                              width: 1,
-                                            ),
-                                          ),
-                                        ),
-                                        child: _buildContent(),
-                                      ),
+                                      borderRadius: BorderRadius.circular(14),
+                                      child: _buildContent(),
                                     ),
                                   ),
                                 ),

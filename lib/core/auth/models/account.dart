@@ -1,6 +1,7 @@
 enum AccountType {
   offline,
   microsoft,
+  authlibInjector,
 }
 
 class Account {
@@ -13,6 +14,9 @@ class Account {
   final DateTime? lastLogin;
   bool isSelected;
 
+  /// Authlib Injector 服务器 URL（仅对 authlibInjector 类型有效）
+  final String? serverUrl;
+
   Account({
     required this.id,
     required this.username,
@@ -22,6 +26,7 @@ class Account {
     DateTime? createdAt,
     this.lastLogin,
     this.isSelected = false,
+    this.serverUrl,
   }) : createdAt = createdAt ?? DateTime.now();
 
   Map<String, dynamic> toJson() {
@@ -34,6 +39,7 @@ class Account {
       'createdAt': createdAt.toIso8601String(),
       'lastLogin': lastLogin?.toIso8601String(),
       'isSelected': isSelected,
+      'serverUrl': serverUrl,
     };
   }
 
@@ -52,6 +58,7 @@ class Account {
       lastLogin:
           json['lastLogin'] != null ? DateTime.parse(json['lastLogin']) : null,
       isSelected: json['isSelected'] ?? false,
+      serverUrl: json['serverUrl'],
     );
   }
 
@@ -64,6 +71,7 @@ class Account {
     DateTime? createdAt,
     DateTime? lastLogin,
     bool? isSelected,
+    String? serverUrl,
   }) {
     return Account(
       id: id ?? this.id,
@@ -74,6 +82,7 @@ class Account {
       createdAt: createdAt ?? this.createdAt,
       lastLogin: lastLogin ?? this.lastLogin,
       isSelected: isSelected ?? this.isSelected,
+      serverUrl: serverUrl ?? this.serverUrl,
     );
   }
 }

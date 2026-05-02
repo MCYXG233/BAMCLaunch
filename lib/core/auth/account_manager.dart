@@ -5,6 +5,7 @@ import 'models/account.dart';
 import 'interfaces/i_authenticator.dart';
 import 'implementations/offline_authenticator.dart';
 import 'implementations/microsoft_authenticator.dart';
+import 'implementations/authlib_injector_authenticator.dart';
 
 class AccountManager {
   final IConfigManager _configManager;
@@ -104,6 +105,8 @@ class AccountManager {
         return OfflineAuthenticator();
       case AccountType.microsoft:
         return MicrosoftAuthenticator();
+      case AccountType.authlibInjector:
+        return AuthlibInjectorAuthenticator();
     }
   }
 

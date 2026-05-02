@@ -5,6 +5,14 @@ import '../../components/buttons/bamc_button.dart';
 import '../../components/layout/bamc_card.dart';
 import '../../components/dialogs/error_dialog.dart';
 
+/// 主页
+///
+/// 融合 Minecraft × 蔚蓝档案风格的主页
+/// 特点：
+/// - 欢迎横幅带渐变
+/// - 统计卡片带图标
+/// - 快速启动卡片
+/// - 推荐版本横向滚动
 class HomePage extends StatefulWidget {
   final IVersionManager versionManager;
   final IContentManager contentManager;
@@ -13,7 +21,15 @@ class HomePage extends StatefulWidget {
   final VoidCallback? onNavigateToVersions;
   final VoidCallback? onNavigateToModpacks;
   
-  const HomePage({super.key, required this.versionManager, required this.contentManager, required this.gameLauncher, required this.accountManager, this.onNavigateToVersions, this.onNavigateToModpacks});
+  const HomePage({
+    super.key,
+    required this.versionManager,
+    required this.contentManager,
+    required this.gameLauncher,
+    required this.accountManager,
+    this.onNavigateToVersions,
+    this.onNavigateToModpacks,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -22,6 +38,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool _isLoading = false;
   int _installedVersionsCount = 0;
+  int _installedModsCount = 0;
+  String _playTime = '0h';
   List<Version> _recommendedVersions = [];
 
   @override
@@ -30,13 +48,9 @@ class _HomePageState extends State<HomePage> {
     _loadData();
   }
 
-  int _installedModsCount = 0;
-  String _playTime = '0h';
-
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
-      // 并行加载数据以提高速度
       final futures = [
         widget.versionManager.getInstalledVersions(),
         widget.versionManager.getVersionManifest(),
@@ -45,11 +59,9 @@ class _HomePageState extends State<HomePage> {
 
       final results = await Future.wait(futures, eagerError: true);
 
-      // 处理版本数量
       final installedVersions = results[0] as List<Version>;
       setState(() => _installedVersionsCount = installedVersions.length);
 
-      // 处理推荐版本
       final manifest = results[1] as VersionManifest;
       final latestRelease = manifest.versions.firstWhere(
         (v) => v.type.toString() == 'release',
@@ -59,12 +71,8 @@ class _HomePageState extends State<HomePage> {
       final latestVersion = await widget.versionManager.getVersionInfo(latestRelease.id);
       setState(() => _recommendedVersions = [latestVersion]);
 
-      // 处理模组数量
       final installedMods = results[2] as List<ContentItem>;
       setState(() => _installedModsCount = installedMods.length);
-
-      // 加载游戏时长（这里应该从统计数据获取，暂时使用0h）
-      // 实际项目中应该从存储或统计服务获取
       setState(() => _playTime = '0h');
     } catch (e) {
       logger.error('Failed to load home page data: $e');
@@ -76,60 +84,239 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 欢迎区域
-          _buildWelcomeSection(),
-          const SizedBox(height: 32),
+          // 欢迎横幅
+          _buildWelcomeBanner(),
+          const SizedBox(height: 24),
 
-          // 快速启动区域
-          _buildQuickLaunchSection(),
-          const SizedBox(height: 32),
-
-          // 统计信息区域
+          // 统计信息
           _buildStatisticsSection(),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
 
-          // 推荐版本区域
+          // 快速启动
+          _buildQuickLaunchSection(),
+          const SizedBox(height: 24),
+
+          // 推荐版本
           _buildRecommendedVersionsSection(),
         ],
       ),
     );
   }
 
-  Widget _buildWelcomeSection() {
+  /// 构建欢迎横幅
+  Widget _buildWelcomeBanner() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      width: double.infinity,
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            BamcColors.primary,
-            BamcColors.primaryDark,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(12),
+        gradient: BamcColors.welcomeGradient,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF5C6BC0).withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: BamcColors.primary.withValues(alpha: 0.2),
+            blurRadius: 40,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          const Text(
-            '欢迎回来！',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+          // 装饰性圆形元素
+          Positioned(
+            right: -20,
+            top: -20,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+          Positioned(
+            right: 40,
+            bottom: -30,
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.06),
+              ),
+            ),
+          ),
+          // 主内容
+          Row(
+            children: [
+              // 像素风图标
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.gamepad_rounded,
+                  size: 28,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 18),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '欢迎回来！',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        height: 1.2,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '准备好开始新的冒险了吗？',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withValues(alpha: 0.9),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // 右侧装饰图标
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.rocket_launch_rounded,
+                  size: 24,
+                  color: Colors.white.withValues(alpha: 0.9),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建统计信息
+  Widget _buildStatisticsSection() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatisticCard(
+            title: '已安装版本',
+            value: _installedVersionsCount.toString(),
+            icon: Icons.gamepad_rounded,
+            gradient: BamcColors.statPrimaryGradient,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildStatisticCard(
+            title: '已安装模组',
+            value: _installedModsCount.toString(),
+            icon: Icons.extension_rounded,
+            gradient: BamcColors.statSecondaryGradient,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildStatisticCard(
+            title: '游戏时长',
+            value: _playTime,
+            icon: Icons.timer_rounded,
+            gradient: BamcColors.statAccentGradient,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 构建统计卡片
+  Widget _buildStatisticCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Gradient gradient,
+  }) {
+    return BamcCard(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          // 图标
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              gradient: gradient,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: BamcColors.primary.withValues(alpha: 0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(
+              icon,
+              size: 22,
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
+          // 数值
           Text(
-            '准备好开始新的冒险了吗？',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.white.withOpacity(0.9),
+            value,
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              color: BamcColors.textPrimary,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 6),
+          // 标题
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: BamcColors.textSecondary,
+              height: 1.2,
             ),
           ),
         ],
@@ -137,6 +324,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// 构建快速启动
   Widget _buildQuickLaunchSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,8 +332,8 @@ class _HomePageState extends State<HomePage> {
         const Text(
           '快速启动',
           style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
             color: BamcColors.textPrimary,
           ),
         ),
@@ -156,40 +344,28 @@ class _HomePageState extends State<HomePage> {
           crossAxisCount: 3,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
-          childAspectRatio: 2,
+          childAspectRatio: 1.8,
           children: [
             _buildQuickLaunchCard(
               title: '最近启动',
-              icon: Icons.history,
+              subtitle: '继续上次的游戏',
+              icon: Icons.history_rounded,
               color: BamcColors.primary,
-              onTap: () {
-                // 导航到版本管理页面
-                if (widget.onNavigateToVersions != null) {
-                  widget.onNavigateToVersions!();
-                }
-              },
+              onTap: () => widget.onNavigateToVersions?.call(),
             ),
             _buildQuickLaunchCard(
               title: '创建新游戏',
-              icon: Icons.add,
+              subtitle: '安装新版本',
+              icon: Icons.add_rounded,
               color: BamcColors.secondary,
-              onTap: () {
-                // 导航到版本管理页面的安装版本功能
-                if (widget.onNavigateToVersions != null) {
-                  widget.onNavigateToVersions!();
-                }
-              },
+              onTap: () => widget.onNavigateToVersions?.call(),
             ),
             _buildQuickLaunchCard(
               title: '导入整合包',
-              icon: Icons.import_export,
-              color: BamcColors.success,
-              onTap: () {
-                // 导航到整合包页面
-                if (widget.onNavigateToModpacks != null) {
-                  widget.onNavigateToModpacks!();
-                }
-              },
+              subtitle: '从本地导入',
+              icon: Icons.file_download_outlined,
+              color: BamcColors.accent,
+              onTap: () => widget.onNavigateToModpacks?.call(),
             ),
           ],
         ),
@@ -197,125 +373,78 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// 构建快速启动卡片
   Widget _buildQuickLaunchCard({
     required String title,
+    required String subtitle,
     required IconData icon,
     required Color color,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
+    return BamcCard(
       onTap: onTap,
-      child: BamcCard(
-        padding: const EdgeInsets.all(16),
-        elevation: 4,
-        hoverable: true,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
+      padding: const EdgeInsets.all(18),
+      child: Row(
+        children: [
+          // 图标
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: color.withValues(alpha: 0.2),
+                width: 1,
+              ),
+            ),
+            child: Icon(
               icon,
-              size: 32,
+              size: 24,
               color: color,
             ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: BamcColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatisticsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          '统计信息',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: BamcColors.textPrimary,
           ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatisticCard(
-                title: '已安装版本',
-                value: _installedVersionsCount.toString(),
-                icon: Icons.gamepad,
-                color: BamcColors.primary,
-              ),
+          const SizedBox(width: 14),
+          // 文字
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: BamcColors.textPrimary,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    color: BamcColors.textSecondary,
+                    height: 1.3,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildStatisticCard(
-                title: '已安装模组',
-                value: _installedModsCount.toString(),
-                icon: Icons.extension,
-                color: BamcColors.secondary,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildStatisticCard(
-                title: '游戏时长',
-                value: _playTime,
-                icon: Icons.timer,
-                color: BamcColors.success,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatisticCard({
-    required String title,
-    required String value,
-    required IconData icon,
-    required Color color,
-  }) {
-    return BamcCard(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
+          ),
+          // 箭头
           Icon(
-            icon,
-            size: 24,
-            color: color,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: BamcColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 12,
-              color: BamcColors.textSecondary,
-            ),
+            Icons.arrow_forward_ios_rounded,
+            size: 14,
+            color: BamcColors.textTertiary,
           ),
         ],
       ),
     );
   }
 
+  /// 构建推荐版本
   Widget _buildRecommendedVersionsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,19 +455,14 @@ class _HomePageState extends State<HomePage> {
             const Text(
               '推荐版本',
               style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
                 color: BamcColors.textPrimary,
               ),
             ),
             BamcButton(
               text: '查看全部',
-              onPressed: () {
-                // 导航到版本管理页面
-                if (widget.onNavigateToVersions != null) {
-                  widget.onNavigateToVersions!();
-                }
-              },
+              onPressed: () => widget.onNavigateToVersions?.call(),
               type: BamcButtonType.outline,
               size: BamcButtonSize.small,
             ),
@@ -346,9 +470,14 @@ class _HomePageState extends State<HomePage> {
         ),
         const SizedBox(height: 16),
         _isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(40),
+                  child: CircularProgressIndicator(),
+                ),
+              )
             : SizedBox(
-                height: 200,
+                height: 220,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: _recommendedVersions.length,
@@ -361,56 +490,88 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /// 构建版本卡片
   Widget _buildVersionCard(Version version) {
+    final isRelease = version.type.toString() == 'release';
+    
     return BamcCard(
       margin: const EdgeInsets.only(right: 16),
       padding: const EdgeInsets.all(16),
       width: 200,
-      elevation: 4,
-      hoverable: true,
+      onTap: () => _launchGame(version),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 版本图标区域
           Container(
             width: double.infinity,
             height: 100,
             decoration: BoxDecoration(
-              color: BamcColors.background,
-              borderRadius: BorderRadius.circular(6),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  BamcColors.background,
+                  BamcColors.backgroundDark,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: BamcColors.borderLight,
+                width: 1,
+              ),
             ),
-            child: const Center(
+            child: Center(
               child: Icon(
-                Icons.gamepad,
-                size: 48,
-                color: BamcColors.textSecondary,
+                isRelease ? Icons.gamepad_rounded : Icons.science_rounded,
+                size: 40,
+                color: isRelease ? BamcColors.primary : BamcColors.accent,
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
+          // 版本名称
           Text(
             'Minecraft ${version.id}',
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 15,
               fontWeight: FontWeight.w600,
               color: BamcColors.textPrimary,
+              height: 1.3,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            version.type.toString() == 'release' ? '稳定版' : '快照版',
-            style: TextStyle(
-              fontSize: 12,
-              color: version.type.toString() == 'release' ? BamcColors.success : BamcColors.warning,
+          const SizedBox(height: 6),
+          // 版本类型标签
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: isRelease
+                  ? BamcColors.successSurface
+                  : BamcColors.accentSurface,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: isRelease
+                    ? BamcColors.success.withValues(alpha: 0.3)
+                    : BamcColors.accent.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Text(
+              isRelease ? '稳定版' : '快照版',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: isRelease ? BamcColors.successDark : BamcColors.accentDark,
+              ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
+          // 启动按钮
           SizedBox(
             width: double.infinity,
             child: BamcButton(
               text: '启动游戏',
-              onPressed: () async {
-                await _launchGame(version);
-              },
+              onPressed: () => _launchGame(version),
               type: BamcButtonType.primary,
               size: BamcButtonSize.small,
             ),
@@ -422,7 +583,6 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _launchGame(Version version) async {
     try {
-      // 检查是否有选中的账户
       final selectedAccount = widget.accountManager.selectedAccount;
       if (selectedAccount == null) {
         if (mounted) {
@@ -431,7 +591,6 @@ class _HomePageState extends State<HomePage> {
         return;
       }
 
-      // 检查Java环境
       final javaResult = await widget.gameLauncher.detectJava();
       if (!javaResult.found) {
         if (mounted) {
@@ -440,18 +599,15 @@ class _HomePageState extends State<HomePage> {
         return;
       }
 
-      // 构建启动配置
       final config = await widget.gameLauncher.buildLaunchConfig(
         gameVersion: version.id,
         username: selectedAccount.username,
         uuid: selectedAccount.id,
         accessToken: selectedAccount.tokenData?.accessToken ?? '',
-        memoryMb: 4096, // 默认4GB内存
+        memoryMb: 4096,
       );
 
-      // 启动游戏
       await widget.gameLauncher.launchGame(config);
-      
       logger.info('Game launched successfully: ${version.id}');
     } catch (e) {
       logger.error('Failed to launch game: $e');
