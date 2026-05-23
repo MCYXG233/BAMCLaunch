@@ -32,41 +32,41 @@ class BamcTheme {
       
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
-          fontSize: 28,
+          fontSize: 32,
           fontWeight: FontWeight.w700,
           color: BamcColors.textPrimary,
           letterSpacing: -0.5,
-          height: 1.3,
+          height: 1.2,
         ),
         headlineMedium: TextStyle(
-          fontSize: 22,
+          fontSize: 24,
           fontWeight: FontWeight.w700,
           color: BamcColors.textPrimary,
           letterSpacing: -0.3,
           height: 1.3,
         ),
         headlineSmall: TextStyle(
-          fontSize: 18,
+          fontSize: 20,
           fontWeight: FontWeight.w600,
           color: BamcColors.textPrimary,
           letterSpacing: -0.2,
           height: 1.4,
         ),
         titleLarge: TextStyle(
-          fontSize: 16,
+          fontSize: 17,
           fontWeight: FontWeight.w600,
           color: BamcColors.textPrimary,
           letterSpacing: -0.1,
           height: 1.4,
         ),
         titleMedium: TextStyle(
-          fontSize: 14,
+          fontSize: 15,
           fontWeight: FontWeight.w600,
           color: BamcColors.textPrimary,
           height: 1.4,
         ),
         titleSmall: TextStyle(
-          fontSize: 12,
+          fontSize: 13,
           fontWeight: FontWeight.w600,
           color: BamcColors.textSecondary,
           height: 1.4,
@@ -90,19 +90,19 @@ class BamcTheme {
           height: 1.5,
         ),
         labelLarge: TextStyle(
-          fontSize: 14,
+          fontSize: 15,
           fontWeight: FontWeight.w600,
           color: BamcColors.textPrimary,
           letterSpacing: 0.1,
         ),
         labelMedium: TextStyle(
-          fontSize: 12,
+          fontSize: 13,
           fontWeight: FontWeight.w600,
           color: BamcColors.textPrimary,
           letterSpacing: 0.1,
         ),
         labelSmall: TextStyle(
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: FontWeight.w600,
           color: BamcColors.textSecondary,
           letterSpacing: 0.2,
@@ -111,7 +111,7 @@ class BamcTheme {
       
       iconTheme: const IconThemeData(
         color: BamcColors.textSecondary,
-        size: 20,
+        size: 22,
       ),
       
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -122,12 +122,12 @@ class BamcTheme {
           disabledForegroundColor: BamcColors.textTertiary,
           elevation: 0,
           shadowColor: Colors.transparent,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
           ),
           textStyle: const TextStyle(
-            fontSize: 14,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.2,
           ),
@@ -137,9 +137,9 @@ class BamcTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: BamcColors.primary,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(10),
           ),
           textStyle: const TextStyle(
             fontSize: 14,
@@ -153,14 +153,14 @@ class BamcTheme {
           foregroundColor: BamcColors.primary,
           side: const BorderSide(
             color: BamcColors.border,
-            width: 1.5,
+            width: 2,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
           ),
           textStyle: const TextStyle(
-            fontSize: 14,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -169,48 +169,48 @@ class BamcTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: BamcColors.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(
             color: BamcColors.border,
-            width: 1.5,
+            width: 2,
           ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(
             color: BamcColors.border,
-            width: 1.5,
+            width: 2,
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(
             color: BamcColors.borderFocus,
-            width: 2,
+            width: 2.5,
           ),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(
-            color: BamcColors.error,
-            width: 1.5,
-          ),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(
             color: BamcColors.error,
             width: 2,
           ),
         ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+            color: BamcColors.error,
+            width: 2.5,
+          ),
+        ),
         disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(
             color: BamcColors.borderLight,
-            width: 1.5,
+            width: 2,
           ),
         ),
         
@@ -240,7 +240,7 @@ class BamcTheme {
         shadowColor: Colors.transparent,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           side: const BorderSide(
             color: BamcColors.border,
             width: 1,
@@ -257,11 +257,11 @@ class BamcTheme {
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: BamcColors.primary,
         foregroundColor: Colors.white,
-        elevation: 2,
-        hoverElevation: 4,
-        focusElevation: 4,
+        elevation: 4,
+        hoverElevation: 8,
+        focusElevation: 8,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
         ),
       ),
       
@@ -301,10 +301,10 @@ class BamcTheme {
         }),
         side: const BorderSide(
           color: BamcColors.border,
-          width: 1.5,
+          width: 2,
         ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(6),
         ),
       ),
       
@@ -312,20 +312,20 @@ class BamcTheme {
         activeTrackColor: BamcColors.primary,
         inactiveTrackColor: BamcColors.border,
         thumbColor: BamcColors.primary,
-        overlayColor: BamcColors.primary.withOpacity(0.1),
-        trackHeight: 4,
+        overlayColor: BamcColors.primary.withOpacity(0.15),
+        trackHeight: 6,
         thumbShape: const RoundSliderThumbShape(
-          enabledThumbRadius: 8,
-          elevation: 2,
+          enabledThumbRadius: 10,
+          elevation: 3,
         ),
         overlayShape: const RoundSliderOverlayShape(
-          overlayRadius: 16,
+          overlayRadius: 18,
         ),
       ),
       
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: BamcColors.primary,
-        linearMinHeight: 6,
+        linearMinHeight: 8,
         linearTrackColor: BamcColors.border,
         circularTrackColor: BamcColors.border,
       ),
@@ -336,41 +336,41 @@ class BamcTheme {
         elevation: 0,
         shadowColor: Colors.transparent,
         centerTitle: false,
-        titleSpacing: 16,
+        titleSpacing: 20,
         titleTextStyle: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
           color: BamcColors.textPrimary,
         ),
       ),
       
       dialogTheme: DialogThemeData(
         backgroundColor: BamcColors.surface,
-        elevation: 8,
-        shadowColor: BamcColors.shadowMedium,
+        elevation: 12,
+        shadowColor: BamcColors.shadowHeavy,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
         ),
         titleTextStyle: const TextStyle(
-          fontSize: 20,
+          fontSize: 22,
           fontWeight: FontWeight.w700,
           color: BamcColors.textPrimary,
         ),
         contentTextStyle: const TextStyle(
-          fontSize: 14,
+          fontSize: 15,
           fontWeight: FontWeight.w400,
           color: BamcColors.textSecondary,
-          height: 1.5,
+          height: 1.6,
         ),
       ),
       
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: BamcColors.surface,
-        elevation: 8,
-        shadowColor: BamcColors.shadowMedium,
+        elevation: 12,
+        shadowColor: BamcColors.shadowHeavy,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(20),
+            top: Radius.circular(24),
           ),
         ),
       ),
@@ -379,13 +379,13 @@ class BamcTheme {
         backgroundColor: BamcColors.surface,
         contentTextStyle: const TextStyle(
           color: BamcColors.textPrimary,
-          fontSize: 14,
+          fontSize: 15,
           fontWeight: FontWeight.w500,
         ),
         actionTextColor: BamcColors.primary,
         elevation: 8,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
         ),
         behavior: SnackBarBehavior.floating,
       ),
@@ -393,32 +393,32 @@ class BamcTheme {
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
           color: BamcColors.surface,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(color: BamcColors.border),
           boxShadow: [
             BoxShadow(
               color: BamcColors.shadowMedium,
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         textStyle: const TextStyle(
           color: BamcColors.textPrimary,
-          fontSize: 12,
+          fontSize: 13,
           fontWeight: FontWeight.w500,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       ),
       
       menuTheme: MenuThemeData(
         style: MenuStyle(
           backgroundColor: WidgetStateProperty.all(BamcColors.surface),
-          elevation: WidgetStateProperty.all(8),
-          shadowColor: WidgetStateProperty.all(BamcColors.shadowMedium),
+          elevation: WidgetStateProperty.all(12),
+          shadowColor: WidgetStateProperty.all(BamcColors.shadowHeavy),
           shape: WidgetStateProperty.all(
             RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
               side: const BorderSide(color: BamcColors.border),
             ),
           ),
@@ -432,11 +432,11 @@ class BamcTheme {
         labelColor: BamcColors.primary,
         unselectedLabelColor: BamcColors.textSecondary,
         labelStyle: TextStyle(
-          fontSize: 14,
+          fontSize: 15,
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelStyle: TextStyle(
-          fontSize: 14,
+          fontSize: 15,
           fontWeight: FontWeight.w500,
         ),
         indicatorSize: TabBarIndicatorSize.label,

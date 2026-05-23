@@ -10,6 +10,7 @@ enum BamcButtonType {
   success,
   outline,
   text,
+  glow,
 }
 
 enum BamcButtonSize {
@@ -29,6 +30,7 @@ class BamcButton extends StatefulWidget {
   final bool fullWidth;
   final BorderRadius? borderRadius;
   final List<BoxShadow>? shadows;
+  final bool showGlow;
 
   const BamcButton({
     super.key,
@@ -42,6 +44,7 @@ class BamcButton extends StatefulWidget {
     this.fullWidth = false,
     this.borderRadius,
     this.shadows,
+    this.showGlow = true,
   });
 
   @override
@@ -50,29 +53,35 @@ class BamcButton extends StatefulWidget {
 
 class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
   late AnimationController _animationController;
-  late AnimationController _particleController;
+  late AnimationController _glowController;
   late Animation<double> _scaleAnimation;
+  late Animation<double> _glowAnimation;
   bool _isHovered = false;
-  final List<_PixelParticle> _particles = [];
+  bool _isPressed = false;
+  Offset? _pressPosition;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 100),
+      duration: const Duration(milliseconds: 120),
       vsync: this,
     );
-    _particleController = AnimationController(
-      duration: const Duration(milliseconds: 600),
+    _glowController = AnimationController(
+      duration: const Duration(milliseconds: 400),
       vsync: this,
-    )..addListener(() {
-        setState(() {
-          _particles.removeWhere((p) => p.animation.value <= 0);
-        });
-      });
+    )..repeat(reverse: true);
+    
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
       CurvedAnimation(
         parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+    
+    _glowAnimation = Tween<double>(begin: 0.8, end: 1.2).animate(
+      CurvedAnimation(
+        parent: _glowController,
         curve: Curves.easeInOut,
       ),
     );
@@ -81,7 +90,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
-    _particleController.dispose();
+    _glowController.dispose();
     super.dispose();
   }
 
@@ -89,38 +98,32 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
     setState(() {
       _isHovered = isHovered;
     });
+    if (isHovered && widget.showGlow && !_glowController.isAnimating) {
+      _glowController.forward();
+    }
   }
 
   void _handleTapDown(TapDownDetails details) {
+    setState(() {
+      _isPressed = true;
+      _pressPosition = details.localPosition;
+    });
     _animationController.forward();
-    _spawnParticles(details.localPosition);
-  }
-
-  void _spawnParticles(Offset position) {
-    final random = DateTime.now().microsecond % 1000;
-    for (int i = 0; i < 8; i++) {
-      final angle = (i / 8) * 2 * 3.14159;
-      final distance = 20 + (random % 20).toDouble();
-      final particle = _PixelParticle(
-        position: position,
-        dx: cos(angle) * distance,
-        dy: sin(angle) * distance,
-        color: BamcEffects
-            .pixelLoadingColors[i % BamcEffects.pixelLoadingColors.length],
-        controller: _particleController,
-      );
-      setState(() {
-        _particles.add(particle);
-      });
-    }
-    _particleController.forward(from: 0);
   }
 
   void _handleTapUp(TapUpDetails details) {
+    setState(() {
+      _isPressed = false;
+      _pressPosition = null;
+    });
     _animationController.reverse();
   }
 
   void _handleTapCancel() {
+    setState(() {
+      _isPressed = false;
+      _pressPosition = null;
+    });
     _animationController.reverse();
   }
 
@@ -129,20 +132,20 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
       case BamcButtonSize.small:
         return 8;
       case BamcButtonSize.medium:
-        return 12;
+        return 14;
       case BamcButtonSize.large:
-        return 16;
+        return 18;
     }
   }
 
   double _getPaddingHorizontal() {
     switch (widget.size) {
       case BamcButtonSize.small:
-        return 12;
+        return 14;
       case BamcButtonSize.medium:
-        return 16;
-      case BamcButtonSize.large:
         return 20;
+      case BamcButtonSize.large:
+        return 28;
     }
   }
 
@@ -151,9 +154,9 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
       case BamcButtonSize.small:
         return 12;
       case BamcButtonSize.medium:
-        return 14;
+        return 15;
       case BamcButtonSize.large:
-        return 16;
+        return 17;
     }
   }
 
@@ -188,72 +191,112 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
             ),
           )
         else if (widget.icon != null)
-          Icon(
-            widget.icon,
-            size: _getIconSize(),
-            color: widget.type == BamcButtonType.outline ||
-                    widget.type == BamcButtonType.text
-                ? BamcColors.primary
-                : Colors.white,
+          AnimatedBuilder(
+            animation: _glowAnimation,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _isHovered ? _glowAnimation.value : 1.0,
+                child: Icon(
+                  widget.icon,
+                  size: _getIconSize(),
+                  color: _getIconColor(),
+                  shadows: _isHovered && widget.type != BamcButtonType.outline && widget.type != BamcButtonType.text
+                      ? [
+                          Shadow(
+                            color: BamcColors.neonBlue,
+                            blurRadius: 10,
+                          ),
+                        ]
+                      : null,
+                ),
+              );
+            },
           ),
         if ((widget.isLoading || widget.icon != null) && widget.text.isNotEmpty)
-          SizedBox(width: widget.size == BamcButtonSize.small ? 6 : 8),
+          SizedBox(width: widget.size == BamcButtonSize.small ? 6 : 10),
         if (!widget.isLoading)
           Text(
             widget.text,
             style: TextStyle(
               fontSize: _getFontSize(),
               fontWeight: FontWeight.w600,
-              color: widget.type == BamcButtonType.outline ||
-                      widget.type == BamcButtonType.text
-                  ? BamcColors.primary
-                  : Colors.white,
-              shadows: widget.type != BamcButtonType.outline && widget.type != BamcButtonType.text
+              color: _getTextColor(),
+              shadows: _isHovered && widget.type != BamcButtonType.outline && widget.type != BamcButtonType.text
                   ? [
                       Shadow(
-                        color: Colors.black.withOpacity(0.3),
-                        offset: const Offset(0, 1),
-                        blurRadius: 2,
+                        color: BamcColors.neonBlue.withOpacity(0.5),
+                        offset: const Offset(0, 0),
+                        blurRadius: 8,
                       ),
                     ]
-                  : null,
+                  : (widget.type != BamcButtonType.outline && widget.type != BamcButtonType.text
+                      ? [
+                          Shadow(
+                            color: Colors.black.withOpacity(0.3),
+                            offset: const Offset(0, 1),
+                            blurRadius: 2,
+                          ),
+                        ]
+                      : null),
             ),
           ),
       ],
     );
   }
 
+  Color _getTextColor() {
+    if (widget.type == BamcButtonType.outline || widget.type == BamcButtonType.text) {
+      return _isHovered ? BamcColors.neonBlue : BamcColors.primary;
+    }
+    return Colors.white;
+  }
+
+  Color _getIconColor() {
+    if (widget.type == BamcButtonType.outline || widget.type == BamcButtonType.text) {
+      return _isHovered ? BamcColors.neonBlue : BamcColors.primary;
+    }
+    return Colors.white;
+  }
+
   BoxDecoration _getDecoration() {
-    final borderRadius = widget.borderRadius ?? BorderRadius.circular(8);
+    final borderRadius = widget.borderRadius ?? BorderRadius.circular(12);
+    final glowColor = widget.type == BamcButtonType.secondary
+        ? BamcColors.neonGreen
+        : widget.type == BamcButtonType.warning
+            ? BamcColors.neonOrange
+            : widget.type == BamcButtonType.success
+                ? BamcColors.success
+                : BamcColors.neonBlue;
 
     switch (widget.type) {
       case BamcButtonType.primary:
+      case BamcButtonType.glow:
         return BoxDecoration(
           gradient: BamcColors.primaryGradient,
           borderRadius: borderRadius,
           border: Border.all(
-            color: Colors.white.withOpacity(0.2),
-            width: 1,
+            color: _isHovered ? BamcColors.neonBlue : Colors.white.withOpacity(0.2),
+            width: _isHovered ? 1.5 : 1,
           ),
           boxShadow: widget.shadows ??
               (_isHovered
                   ? [
                       BoxShadow(
-                        color: BamcColors.primary.withOpacity(0.4),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
+                        color: BamcColors.neonBlue.withOpacity(0.4),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
                       ),
                       BoxShadow(
-                        color: BamcColors.primary.withOpacity(0.2),
-                        blurRadius: 24,
-                        offset: const Offset(0, 10),
+                        color: BamcColors.neonBlue.withOpacity(0.2),
+                        blurRadius: 35,
+                        offset: const Offset(0, 12),
                       ),
                     ]
                   : [
                       BoxShadow(
                         color: BamcColors.shadowMedium,
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
                       ),
                     ]),
         );
@@ -262,28 +305,28 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
           gradient: BamcColors.secondaryGradient,
           borderRadius: borderRadius,
           border: Border.all(
-            color: Colors.white.withOpacity(0.2),
-            width: 1,
+            color: _isHovered ? BamcColors.neonGreen : Colors.white.withOpacity(0.2),
+            width: _isHovered ? 1.5 : 1,
           ),
           boxShadow: widget.shadows ??
               (_isHovered
                   ? [
                       BoxShadow(
-                        color: BamcColors.secondary.withOpacity(0.4),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
+                        color: BamcColors.neonGreen.withOpacity(0.4),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
                       ),
                       BoxShadow(
-                        color: BamcColors.secondary.withOpacity(0.2),
-                        blurRadius: 24,
-                        offset: const Offset(0, 10),
+                        color: BamcColors.neonGreen.withOpacity(0.2),
+                        blurRadius: 35,
+                        offset: const Offset(0, 12),
                       ),
                     ]
                   : [
                       BoxShadow(
                         color: BamcColors.shadowMedium,
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
                       ),
                     ]),
         );
@@ -292,28 +335,28 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
           gradient: BamcColors.warningGradient,
           borderRadius: borderRadius,
           border: Border.all(
-            color: Colors.white.withOpacity(0.2),
-            width: 1,
+            color: _isHovered ? BamcColors.neonOrange : Colors.white.withOpacity(0.2),
+            width: _isHovered ? 1.5 : 1,
           ),
           boxShadow: widget.shadows ??
               (_isHovered
                   ? [
                       BoxShadow(
                         color: BamcColors.warning.withOpacity(0.4),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
                       ),
                       BoxShadow(
                         color: BamcColors.warning.withOpacity(0.2),
-                        blurRadius: 24,
-                        offset: const Offset(0, 10),
+                        blurRadius: 35,
+                        offset: const Offset(0, 12),
                       ),
                     ]
                   : [
                       BoxShadow(
                         color: BamcColors.shadowMedium,
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
                       ),
                     ]),
         );
@@ -322,68 +365,96 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
           gradient: BamcColors.successGradient,
           borderRadius: borderRadius,
           border: Border.all(
-            color: Colors.white.withOpacity(0.2),
-            width: 1,
+            color: _isHovered ? BamcColors.success : Colors.white.withOpacity(0.2),
+            width: _isHovered ? 1.5 : 1,
           ),
           boxShadow: widget.shadows ??
               (_isHovered
                   ? [
                       BoxShadow(
                         color: BamcColors.success.withOpacity(0.4),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
                       ),
                       BoxShadow(
                         color: BamcColors.success.withOpacity(0.2),
-                        blurRadius: 24,
-                        offset: const Offset(0, 10),
+                        blurRadius: 35,
+                        offset: const Offset(0, 12),
                       ),
                     ]
                   : [
                       BoxShadow(
                         color: BamcColors.shadowMedium,
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
                       ),
                     ]),
         );
       case BamcButtonType.outline:
         return BoxDecoration(
-          color: Colors.transparent,
+          color: _isHovered ? BamcColors.primary.withOpacity(0.08) : Colors.transparent,
           borderRadius: borderRadius,
           border: Border.all(
-            color: _isHovered ? BamcColors.primaryLight : BamcColors.primary,
-            width: 2,
+            color: _isHovered ? BamcColors.neonBlue : BamcColors.primary,
+            width: _isHovered ? 2 : 2,
           ),
           boxShadow: widget.shadows ??
               (_isHovered
                   ? [
                       BoxShadow(
-                        color: BamcColors.primary.withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+                        color: BamcColors.neonBlue.withOpacity(0.25),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5),
                       ),
                     ]
                   : null),
         );
       case BamcButtonType.text:
         return BoxDecoration(
-          color: Colors.transparent,
+          color: _isHovered ? BamcColors.surfaceLight : Colors.transparent,
           borderRadius: borderRadius,
         );
     }
   }
 
+  Widget _buildRippleEffect() {
+    if (_pressPosition == null || !_isPressed) return const SizedBox();
+    
+    return Positioned(
+      left: _pressPosition!.dx - 20,
+      top: _pressPosition!.dy - 20,
+      child: AnimatedBuilder(
+        animation: _animationController,
+        builder: (context, child) {
+          final progress = _animationController.value;
+          return Opacity(
+            opacity: 1 - progress,
+            child: Transform.scale(
+              scale: 1 + progress * 3,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDisabled = widget.disabled || widget.isLoading;
-    final scale = 
-        _animationController.isAnimating && _animationController.value > 0.5
-            ? 0.95
-            : (_isHovered ? 1.05 : 1.0);
+    final scale = _animationController.isAnimating && _animationController.value > 0.5
+        ? 0.95
+        : (_isHovered ? 1.03 : 1.0);
 
     return MouseRegion(
-      cursor: SystemMouseCursors.click,
+      cursor: isDisabled ? SystemMouseCursors.basic : SystemMouseCursors.click,
       onEnter: (_) => _handleHover(true),
       onExit: (_) => _handleHover(false),
       child: GestureDetector(
@@ -404,9 +475,8 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
                 ),
                 decoration: isDisabled
                     ? BoxDecoration(
-                        color: BamcColors.textDisabled.withOpacity(0.2),
-                        borderRadius:
-                            widget.borderRadius ?? BorderRadius.circular(8),
+                        color: BamcColors.textDisabled.withOpacity(0.15),
+                        borderRadius: widget.borderRadius ?? BorderRadius.circular(12),
                         border: Border.all(
                           color: BamcColors.border,
                           width: 1,
@@ -414,67 +484,15 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
                       )
                     : _getDecoration(),
                 child: Opacity(
-                  opacity: isDisabled ? 0.6 : 1.0,
+                  opacity: isDisabled ? 0.5 : 1.0,
                   child: _buildButtonContent(),
                 ),
               ),
             ),
-            ..._particles.map((particle) => _buildParticle(particle)),
+            _buildRippleEffect(),
           ],
         ),
       ),
     );
   }
-
-  Widget _buildParticle(_PixelParticle particle) {
-    return AnimatedBuilder(
-      animation: particle.animation,
-      builder: (context, child) {
-        final progress = particle.animation.value;
-        return Positioned(
-          left: particle.position.dx + particle.dx * (1 - progress) - 4,
-          top: particle.position.dy + particle.dy * (1 - progress) - 4,
-          child: Opacity(
-            opacity: progress,
-            child: Transform.scale(
-              scale: progress,
-              child: Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: particle.color,
-                  borderRadius: BorderRadius.circular(2),
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 1,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _PixelParticle {
-  final Offset position;
-  final double dx;
-  final double dy;
-  final Color color;
-  final Animation<double> animation;
-
-  _PixelParticle({
-    required this.position,
-    required this.dx,
-    required this.dy,
-    required this.color,
-    required AnimationController controller,
-  }) : animation = Tween<double>(begin: 1.0, end: 0.0).animate(
-          CurvedAnimation(
-            parent: controller,
-            curve: Curves.easeOut,
-          ),
-        );
 }

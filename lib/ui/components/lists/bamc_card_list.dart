@@ -279,7 +279,7 @@ class _BamcCardListState<T> extends State<BamcCardList<T>> {
                         ? BamcColors.primaryLight
                         : isHovered
                             ? BamcColors.border
-                            : BamcColors.transparent,
+                            : Colors.transparent,
                 width: isSelected || isKeyboardSelected ? 2 : 1,
               ),
               boxShadow: isHovered || isSelected || isKeyboardSelected

@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import '../../../core/core.dart';
@@ -34,6 +35,7 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
   late IUpdateManager _updateManager;
   late performance_monitor.PerformanceMonitor _performanceMonitor;
   bool _showPerformanceOverlay = false;
+  bool _isSidebarCollapsed = false;
 
   void _initializePerformanceMonitor() {
     _performanceMonitor = performance_monitor.PerformanceMonitor();
@@ -86,6 +88,12 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
     }
   }
 
+  void _toggleSidebar() {
+    setState(() {
+      _isSidebarCollapsed = !_isSidebarCollapsed;
+    });
+  }
+
   @override
   void dispose() {
     _pageAnimationController.dispose();
@@ -110,7 +118,7 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
     });
 
     _pageAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 300),
       vsync: this,
     );
     _pageAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -238,11 +246,7 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
       color: BamcColors.background,
       child: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              gradient: BamcColors.contentBackgroundGradient,
-            ),
-          ),
+          _buildBackgroundEffects(),
           Scaffold(
             backgroundColor: Colors.transparent,
             body: Column(
@@ -255,30 +259,42 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
                 Expanded(
                   child: Row(
                     children: [
-                      Sidebar(
-                        selectedItem: _selectedItem,
-                        onItemSelected: _handleNavigationItemSelected,
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOutCubic,
+                        width: _isSidebarCollapsed ? 80 : 260,
+                        child: Sidebar(
+                          selectedItem: _selectedItem,
+                          onItemSelected: _handleNavigationItemSelected,
+                          isCollapsed: _isSidebarCollapsed,
+                          onToggle: _toggleSidebar,
+                        ),
                       ),
                       Expanded(
                         child: Container(
                           margin: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: BamcColors.surface.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(16),
+                            gradient: BamcColors.glassCardGradient,
+                            borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: BamcColors.border,
+                              color: BamcColors.glassBorder,
                               width: 1,
                             ),
                             boxShadow: [
                               BoxShadow(
                                 color: BamcColors.shadowHeavy,
-                                blurRadius: 16,
-                                offset: const Offset(0, 4),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
+                              ),
+                              BoxShadow(
+                                color: BamcColors.primary.withOpacity(0.05),
+                                blurRadius: 30,
+                                offset: const Offset(0, 0),
                               ),
                             ],
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(20),
                             child: Column(
                               children: [
                                 BreadcrumbNavigation(
@@ -310,5 +326,112 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
         ],
       ),
     );
+  }
+
+  Widget _buildBackgroundEffects() {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        gradient: BamcColors.contentBackgroundGradient,
+      ),
+      child: Stack(
+        children: [
+          _buildDynamicStars(),
+          _buildOrbitalEffects(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDynamicStars() {
+    return Positioned.fill(
+      child: Opacity(
+        opacity: 0.4,
+        child: CustomPaint(
+          painter: _DynamicStarFieldPainter(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOrbitalEffects() {
+    return Stack(
+      children: [
+        Positioned(
+          top: 100,
+          right: -150,
+          child: AnimatedContainer(
+            duration: const Duration(seconds: 20),
+            curve: Curves.linear,
+            width: 500,
+            height: 500,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: BamcColors.primary.withOpacity(0.1),
+                width: 2,
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: -100,
+          left: -100,
+          child: AnimatedContainer(
+            duration: const Duration(seconds: 15),
+            curve: Curves.linear,
+            width: 400,
+            height: 400,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: BamcColors.accent.withOpacity(0.08),
+                width: 1,
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 300,
+          left: 300,
+          child: Container(
+            width: 200,
+            height: 200,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: BamcColors.secondary.withOpacity(0.06),
+                width: 1,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DynamicStarFieldPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size canvasSize) {
+    final random = Random(42);
+    final paint = Paint()..style = PaintingStyle.fill;
+
+    for (int i = 0; i < 150; i++) {
+      final x = random.nextDouble() * canvasSize.width;
+      final y = random.nextDouble() * canvasSize.height;
+      final starSize = random.nextDouble() * 2.5 + 0.3;
+      final opacity = random.nextDouble() * 0.7 + 0.15;
+      final twinkle = (random.nextDouble() * 0.5 + 0.5);
+
+      paint.color = Colors.white.withOpacity(opacity * twinkle);
+      canvas.drawCircle(Offset(x, y), starSize, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
   }
 }
