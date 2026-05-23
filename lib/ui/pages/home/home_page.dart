@@ -13,7 +13,7 @@ class HomePage extends StatefulWidget {
   final AccountManager accountManager;
   final VoidCallback? onNavigateToVersions;
   final VoidCallback? onNavigateToModpacks;
-  
+
   const HomePage({
     super.key,
     required this.versionManager,
@@ -73,8 +73,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         (v) => v.type.toString() == 'release',
         orElse: () => manifest.versions.first,
       );
-      
-      final latestVersion = await widget.versionManager.getVersionInfo(latestRelease.id);
+
+      final latestVersion =
+          await widget.versionManager.getVersionInfo(latestRelease.id);
       setState(() => _recommendedVersions = [latestVersion]);
 
       final installedMods = results[2] as List<ContentItem>;
@@ -123,7 +124,24 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildStars() {
+  Widget _buildMainContent() {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildCharacter(),
+          _buildVersionInfo(),
+          _buildModpackInfo(),
+          _buildPlayTime(),
+          _buildRecommendations(),
+        ],
+      ),
+    );
+  }
+}
+Stars() {
     return Positioned.fill(
       child: Opacity(
         opacity: 0.5,
