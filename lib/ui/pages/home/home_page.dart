@@ -303,8 +303,7 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                      opacity: 0.9,
+                      color: Color.fromRGBO(255, 255, 255, 0.9),
                     ),
                   ),
                   const Spacer(),

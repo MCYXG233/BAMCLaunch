@@ -194,7 +194,7 @@ class _CustomTitleBarState extends State<CustomTitleBar> {
           ),
           child: Center(
             child: Icon(
-              Icons.performance_rounded,
+              Icons.speed,
               size: 16,
               color: isHovering ? BamcColors.primaryLight : BamcColors.textSecondary,
             ),
