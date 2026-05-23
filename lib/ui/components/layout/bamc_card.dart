@@ -1,14 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/colors.dart';
 
-/// BAMC 卡片组件
-///
-/// 融合 Minecraft × 蔚蓝档案风格的卡片
-/// 特点：
-/// - 柔和圆角
-/// - 精致边框
-/// - 悬浮动效
-/// - 点击反馈
 class BamcCard extends StatefulWidget {
   final Widget child;
   final String? title;
@@ -77,7 +69,6 @@ class _BamcCardState extends State<BamcCard> {
       ],
     );
 
-    // 卡片装饰
     final decoration = BoxDecoration(
       color: widget.gradient == null ? (widget.color ?? BamcColors.card) : null,
       gradient: widget.gradient,
@@ -85,21 +76,21 @@ class _BamcCardState extends State<BamcCard> {
       border: widget.border ??
           Border.all(
             color: _isHovered
-                ? BamcColors.primary.withValues(alpha: 0.3)
+                ? BamcColors.primary.withOpacity(0.4)
                 : BamcColors.border,
             width: 1,
           ),
       boxShadow: _isHovered
           ? [
               BoxShadow(
-                color: BamcColors.shadowMedium,
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+                color: BamcColors.shadowHeavy,
+                blurRadius: 16,
+                offset: const Offset(0, 6),
               ),
               BoxShadow(
-                color: BamcColors.primary.withValues(alpha: 0.05),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
+                color: BamcColors.primary.withOpacity(0.1),
+                blurRadius: 24,
+                offset: const Offset(0, 10),
               ),
             ]
           : [
@@ -120,7 +111,6 @@ class _BamcCardState extends State<BamcCard> {
       child: cardContent,
     );
 
-    // 可悬浮效果
     if (widget.hoverable || widget.onTap != null) {
       card = MouseRegion(
         cursor: widget.onTap != null
@@ -159,9 +149,9 @@ class _BamcCardState extends State<BamcCard> {
               border: widget.border ??
                   Border.all(
                     color: _isHovered
-                        ? BamcColors.primary.withValues(alpha: 0.4)
+                        ? BamcColors.primary.withOpacity(0.5)
                         : _isPressed
-                            ? BamcColors.primary.withValues(alpha: 0.5)
+                            ? BamcColors.primary.withOpacity(0.6)
                             : BamcColors.border,
                     width: _isHovered ? 1.5 : 1,
                   ),
@@ -176,14 +166,14 @@ class _BamcCardState extends State<BamcCard> {
                   : _isHovered
                       ? [
                           BoxShadow(
-                            color: BamcColors.shadowMedium,
-                            blurRadius: 16,
-                            offset: const Offset(0, 6),
+                            color: BamcColors.shadowHeavy,
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
                           ),
                           BoxShadow(
-                            color: BamcColors.primary.withValues(alpha: 0.08),
-                            blurRadius: 24,
-                            offset: const Offset(0, 10),
+                            color: BamcColors.primary.withOpacity(0.12),
+                            blurRadius: 30,
+                            offset: const Offset(0, 12),
                           ),
                         ]
                       : [

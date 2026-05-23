@@ -16,15 +16,6 @@ import '../../pages/modpack/modpack_page.dart';
 import '../../pages/server/server_page.dart';
 import '../../pages/settings/settings_page.dart';
 
-/// 主布局组件
-///
-/// 融合 Minecraft × 蔚蓝档案风格的主布局
-/// 特点：
-/// - 自定义标题栏
-/// - 侧边导航
-/// - 面包屑导航
-/// - 毛玻璃质感
-/// - 流畅页面切换
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
 
@@ -247,11 +238,15 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
       color: BamcColors.background,
       child: Stack(
         children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: BamcColors.contentBackgroundGradient,
+            ),
+          ),
           Scaffold(
-            backgroundColor: BamcColors.background,
+            backgroundColor: Colors.transparent,
             body: Column(
               children: [
-                // 自定义标题栏
                 CustomTitleBar(
                   title: 'BAMCLauncher',
                   isMacOS: defaultTargetPlatform == TargetPlatform.macOS,
@@ -260,54 +255,40 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
                 Expanded(
                   child: Row(
                     children: [
-                      // 侧边栏
                       Sidebar(
                         selectedItem: _selectedItem,
                         onItemSelected: _handleNavigationItemSelected,
                       ),
-                      // 主内容区
                       Expanded(
                         child: Container(
-                          color: BamcColors.background,
-                          child: Column(
-                            children: [
-                              // 面包屑导航
-                              BreadcrumbNavigation(
-                                items: _buildBreadcrumbs(),
-                              ),
-                              // 内容区域
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    20,
-                                    0,
-                                    20,
-                                    20,
-                                  ),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: BamcColors.surface,
-                                      borderRadius: BorderRadius.circular(14),
-                                      border: Border.all(
-                                        color: BamcColors.border,
-                                        width: 1,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: BamcColors.shadowLight,
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(14),
-                                      child: _buildContent(),
-                                    ),
-                                  ),
-                                ),
+                          margin: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: BamcColors.surface.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: BamcColors.border,
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: BamcColors.shadowHeavy,
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
                               ),
                             ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Column(
+                              children: [
+                                BreadcrumbNavigation(
+                                  items: _buildBreadcrumbs(),
+                                ),
+                                Expanded(
+                                  child: _buildContent(),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -317,7 +298,6 @@ class _MainLayoutState extends State<MainLayout> with TickerProviderStateMixin {
               ],
             ),
           ),
-          // 性能叠加层
           if (_showPerformanceOverlay)
             performance_monitor.PerformanceOverlay(
               monitor: _performanceMonitor,

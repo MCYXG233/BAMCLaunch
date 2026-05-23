@@ -208,8 +208,6 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
                       widget.type == BamcButtonType.text
                   ? BamcColors.primary
                   : Colors.white,
-              fontFamily:
-                  widget.type != BamcButtonType.text ? 'Minecraft' : null,
               shadows: widget.type != BamcButtonType.outline && widget.type != BamcButtonType.text
                   ? [
                       Shadow(
@@ -234,7 +232,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
           gradient: BamcColors.primaryGradient,
           borderRadius: borderRadius,
           border: Border.all(
-            color: Colors.white.withOpacity(0.6),
+            color: Colors.white.withOpacity(0.2),
             width: 1,
           ),
           boxShadow: widget.shadows ??
@@ -242,18 +240,18 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
                   ? [
                       BoxShadow(
                         color: BamcColors.primary.withOpacity(0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
                       ),
                       BoxShadow(
                         color: BamcColors.primary.withOpacity(0.2),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
+                        blurRadius: 24,
+                        offset: const Offset(0, 10),
                       ),
                     ]
                   : [
                       BoxShadow(
-                        color: BamcColors.primary.withOpacity(0.2),
+                        color: BamcColors.shadowMedium,
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -264,7 +262,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
           gradient: BamcColors.secondaryGradient,
           borderRadius: borderRadius,
           border: Border.all(
-            color: Colors.white.withOpacity(0.6),
+            color: Colors.white.withOpacity(0.2),
             width: 1,
           ),
           boxShadow: widget.shadows ??
@@ -272,18 +270,18 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
                   ? [
                       BoxShadow(
                         color: BamcColors.secondary.withOpacity(0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
                       ),
                       BoxShadow(
                         color: BamcColors.secondary.withOpacity(0.2),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
+                        blurRadius: 24,
+                        offset: const Offset(0, 10),
                       ),
                     ]
                   : [
                       BoxShadow(
-                        color: BamcColors.secondary.withOpacity(0.2),
+                        color: BamcColors.shadowMedium,
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -294,7 +292,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
           gradient: BamcColors.warningGradient,
           borderRadius: borderRadius,
           border: Border.all(
-            color: Colors.white.withOpacity(0.6),
+            color: Colors.white.withOpacity(0.2),
             width: 1,
           ),
           boxShadow: widget.shadows ??
@@ -302,18 +300,18 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
                   ? [
                       BoxShadow(
                         color: BamcColors.warning.withOpacity(0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
                       ),
                       BoxShadow(
                         color: BamcColors.warning.withOpacity(0.2),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
+                        blurRadius: 24,
+                        offset: const Offset(0, 10),
                       ),
                     ]
                   : [
                       BoxShadow(
-                        color: BamcColors.warning.withOpacity(0.2),
+                        color: BamcColors.shadowMedium,
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -324,7 +322,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
           gradient: BamcColors.successGradient,
           borderRadius: borderRadius,
           border: Border.all(
-            color: Colors.white.withOpacity(0.6),
+            color: Colors.white.withOpacity(0.2),
             width: 1,
           ),
           boxShadow: widget.shadows ??
@@ -332,18 +330,18 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
                   ? [
                       BoxShadow(
                         color: BamcColors.success.withOpacity(0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
                       ),
                       BoxShadow(
                         color: BamcColors.success.withOpacity(0.2),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
+                        blurRadius: 24,
+                        offset: const Offset(0, 10),
                       ),
                     ]
                   : [
                       BoxShadow(
-                        color: BamcColors.success.withOpacity(0.2),
+                        color: BamcColors.shadowMedium,
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -406,7 +404,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
                 ),
                 decoration: isDisabled
                     ? BoxDecoration(
-                        color: BamcColors.textDisabled.withOpacity(0.3),
+                        color: BamcColors.textDisabled.withOpacity(0.2),
                         borderRadius:
                             widget.borderRadius ?? BorderRadius.circular(8),
                         border: Border.all(
@@ -416,7 +414,7 @@ class _BamcButtonState extends State<BamcButton> with TickerProviderStateMixin {
                       )
                     : _getDecoration(),
                 child: Opacity(
-                  opacity: isDisabled ? 0.6 : (_isHovered ? 1.1 : 1.0),
+                  opacity: isDisabled ? 0.6 : 1.0,
                   child: _buildButtonContent(),
                 ),
               ),

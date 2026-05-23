@@ -78,7 +78,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'BAMCLauncher',
-      theme: BamcTheme.lightTheme,
+      theme: BamcTheme.darkTheme,
       home: _isLoading
           ? Container(
               color: Theme.of(context).scaffoldBackgroundColor,

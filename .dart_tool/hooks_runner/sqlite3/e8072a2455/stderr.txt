@@ -1,0 +1,6 @@
+Unhandled exception:
+By default, this package downloads a pre-compiled SQLite library.
+This failed (attepted to download https://github.com/simolus3/sqlite3.dart/releases/download/sqlite3-3.3.0/sqlite3.x64.windows.dll).
+For alternatives to downloading SQLite, see https://pub.dev/documentation/sqlite3/latest/topics/hook-topic.html
+Original cause: HttpException: 淇″彿鐏秴鏃舵椂闂村凡鍒? uri = https://github.com/simolus3/sqlite3.dart/releases/download/sqlite3-3.3.0/sqlite3.x64.windows.dll
+

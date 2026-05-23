@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/colors.dart';
 
-/// 导航项枚举
 enum NavigationItem {
   home,
   versions,
@@ -12,14 +11,6 @@ enum NavigationItem {
   settings,
 }
 
-/// 侧边栏组件
-///
-/// 融合 Minecraft × 蔚蓝档案风格的侧边导航
-/// 特点：
-/// - 毛玻璃质感
-/// - 柔和渐变选中态
-/// - 像素风图标点缀
-/// - 流畅动效
 class Sidebar extends StatefulWidget {
   final NavigationItem selectedItem;
   final Function(NavigationItem) onItemSelected;
@@ -59,7 +50,6 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
     });
   }
 
-  /// 构建导航项
   Widget _buildNavigationItem({
     required NavigationItem item,
     required String title,
@@ -85,7 +75,7 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
               color: isSelected
                   ? BamcColors.primary
                   : isHovering
-                      ? BamcColors.primarySurface
+                      ? BamcColors.surfaceLight
                       : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
               gradient: isSelected
@@ -93,41 +83,53 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
                   : null,
               border: Border.all(
                 color: isSelected
-                    ? BamcColors.primary
+                    ? BamcColors.primaryLight
                     : isHovering
-                        ? BamcColors.primary.withValues(alpha: 0.3)
+                        ? BamcColors.primary.withOpacity(0.3)
                         : Colors.transparent,
                 width: 1,
               ),
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: BamcColors.primary.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                        color: BamcColors.primary.withOpacity(0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: BamcColors.primary.withOpacity(0.2),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
                       ),
                     ]
-                  : null,
+                  : isHovering
+                      ? [
+                          BoxShadow(
+                            color: BamcColors.shadowMedium,
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
             ),
             child: Row(
               children: [
-                // 图标容器
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   width: 34,
                   height: 34,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? Colors.white.withValues(alpha: 0.2)
+                        ? Colors.white.withOpacity(0.2)
                         : isHovering
-                            ? BamcColors.primary.withValues(alpha: 0.1)
-                            : BamcColors.background,
+                            ? BamcColors.primary.withOpacity(0.15)
+                            : BamcColors.surface,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: isSelected
-                          ? Colors.white.withValues(alpha: 0.3)
+                          ? Colors.white.withOpacity(0.4)
                           : isHovering
-                              ? BamcColors.primary.withValues(alpha: 0.2)
+                              ? BamcColors.primary.withOpacity(0.3)
                               : BamcColors.borderLight,
                       width: 1,
                     ),
@@ -138,12 +140,11 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
                     color: isSelected
                         ? Colors.white
                         : isHovering
-                            ? BamcColors.primary
+                            ? BamcColors.primaryLight
                             : BamcColors.textSecondary,
                   ),
                 ),
                 const SizedBox(width: 12),
-                // 标题
                 Expanded(
                   child: Text(
                     title,
@@ -153,13 +154,12 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
                       color: isSelected
                           ? Colors.white
                           : isHovering
-                              ? BamcColors.primary
-                              : BamcColors.textPrimary,
+                              ? BamcColors.textPrimary
+                              : BamcColors.textSecondary,
                       height: 1.2,
                     ),
                   ),
                 ),
-                // 选中指示器
                 if (isSelected)
                   Container(
                     width: 4,
@@ -169,8 +169,8 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
                       borderRadius: BorderRadius.circular(2),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.2),
-                          blurRadius: 2,
+                          color: BamcColors.primaryLight,
+                          blurRadius: 4,
                         ),
                       ],
                     ),
@@ -183,7 +183,6 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
     );
   }
 
-  /// 构建分隔线
   Widget _buildDivider() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -192,9 +191,9 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              BamcColors.border.withValues(alpha: 0),
+              BamcColors.border.withOpacity(0),
               BamcColors.border,
-              BamcColors.border.withValues(alpha: 0),
+              BamcColors.border.withOpacity(0),
             ],
           ),
         ),
@@ -207,7 +206,7 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
     return Container(
       width: 240,
       decoration: BoxDecoration(
-        color: BamcColors.surface,
+        gradient: BamcColors.sidebarGradient,
         border: const Border(
           right: BorderSide(
             color: BamcColors.border,
@@ -216,18 +215,15 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
         ),
         boxShadow: [
           BoxShadow(
-            color: BamcColors.shadowLight,
-            blurRadius: 8,
+            color: BamcColors.shadowMedium,
+            blurRadius: 12,
             offset: const Offset(2, 0),
           ),
         ],
       ),
       child: Column(
         children: [
-          // Logo 区域
           _buildLogoSection(),
-          
-          // 主导航
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -267,11 +263,7 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
               ),
             ),
           ),
-          
-          // 分隔线
           _buildDivider(),
-          
-          // 底部导航
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Column(
@@ -296,7 +288,6 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
     );
   }
 
-  /// 构建 Logo 区域
   Widget _buildLogoSection() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -311,16 +302,15 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            BamcColors.primarySurface.withValues(alpha: 0.6),
-            BamcColors.secondarySurface.withValues(alpha: 0.3),
-            BamcColors.accentSurface.withValues(alpha: 0.2),
+            BamcColors.primary.withOpacity(0.2),
+            BamcColors.secondary.withOpacity(0.1),
+            BamcColors.accent.withOpacity(0.05),
           ],
           stops: const [0.0, 0.5, 1.0],
         ),
       ),
       child: Row(
         children: [
-          // Logo 图标
           Container(
             width: 40,
             height: 40,
@@ -329,9 +319,9 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: BamcColors.primary.withValues(alpha: 0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+                  color: BamcColors.primary.withOpacity(0.4),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
@@ -342,7 +332,6 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
             ),
           ),
           const SizedBox(width: 12),
-          // Logo 文字
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

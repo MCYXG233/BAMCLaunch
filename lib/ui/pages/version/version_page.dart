@@ -42,12 +42,10 @@ class _VersionPageState extends State<VersionPage> {
   Future<void> _loadVersions() async {
     setState(() => _isLoading = true);
     try {
-      // 加载已安装版本
       final installedVersions =
           await widget.versionManager.getInstalledVersions();
       setState(() => _installedVersions = installedVersions);
 
-      // 加载可用版本列表
       final manifest = await widget.versionManager.getVersionManifest();
       setState(() => _availableVersions = manifest.versions);
     } catch (e) {
@@ -74,15 +72,12 @@ class _VersionPageState extends State<VersionPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 顶部操作栏
           _buildActionBar(context),
-          const SizedBox(height: 20),
-
-          // 版本列表 - 占满剩余空间
+          const SizedBox(height: 24),
           Expanded(
             child: _buildVersionList(),
           ),
@@ -149,16 +144,16 @@ class _VersionPageState extends State<VersionPage> {
       padding: EdgeInsets.zero,
       child: Column(
         children: [
-          // 列表头部
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: BamcColors.border)),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            decoration: BoxDecoration(
+              color: BamcColors.surfaceDark,
+              border: const Border(bottom: BorderSide(color: BamcColors.border)),
             ),
             child: const Row(
               children: [
                 Expanded(
-                  flex: 2,
+                  flex: 3,
                   child: Text(
                     '版本名称',
                     style: TextStyle(
@@ -202,7 +197,6 @@ class _VersionPageState extends State<VersionPage> {
               ],
             ),
           ),
-          // 版本列表项 - 使用ListView.builder实现懒加载
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -227,51 +221,65 @@ class _VersionPageState extends State<VersionPage> {
   }
 
   Widget _buildVersionItem(Version version) {
+    final isRelease = version.type == VersionType.release;
+    
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: BamcColors.border)),
+        border: Border(bottom: BorderSide(color: BamcColors.borderLight)),
       ),
       child: Row(
         children: [
           Expanded(
-            flex: 2,
+            flex: 3,
             child: Row(
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
-                    color: BamcColors.background,
-                    borderRadius: BorderRadius.circular(6),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        isRelease ? BamcColors.primary.withOpacity(0.2) : BamcColors.accent.withOpacity(0.2),
+                        isRelease ? BamcColors.primary.withOpacity(0.1) : BamcColors.accent.withOpacity(0.1),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isRelease ? BamcColors.primary.withOpacity(0.3) : BamcColors.accent.withOpacity(0.3),
+                      width: 1,
+                    ),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Icon(
-                      Icons.gamepad,
-                      size: 24,
-                      color: BamcColors.textSecondary,
+                      isRelease ? Icons.gamepad_rounded : Icons.science_rounded,
+                      size: 22,
+                      color: isRelease ? BamcColors.primary : BamcColors.accent,
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 14),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Minecraft ${version.id}',
                       style: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 15,
                         fontWeight: FontWeight.w600,
                         color: BamcColors.textPrimary,
                       ),
                     ),
+                    const SizedBox(height: 4),
                     Text(
                       version.status == VersionStatus.installed ? '已安装' : '未安装',
                       style: TextStyle(
                         fontSize: 12,
                         color: version.status == VersionStatus.installed
                             ? BamcColors.success
-                            : BamcColors.textSecondary,
+                            : BamcColors.textTertiary,
                       ),
                     ),
                   ],
@@ -280,13 +288,28 @@ class _VersionPageState extends State<VersionPage> {
             ),
           ),
           Expanded(
-            child: Text(
-              version.type == VersionType.release ? '稳定版' : '快照版',
-              style: TextStyle(
-                fontSize: 14,
-                color: version.type == VersionType.release
-                    ? BamcColors.textPrimary
-                    : BamcColors.warning,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: isRelease 
+                    ? BamcColors.success.withOpacity(0.15) 
+                    : BamcColors.warning.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: isRelease 
+                      ? BamcColors.success.withOpacity(0.3) 
+                      : BamcColors.warning.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                isRelease ? '稳定版' : '快照版',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: isRelease ? BamcColors.success : BamcColors.warning,
+                ),
               ),
             ),
           ),
@@ -295,7 +318,7 @@ class _VersionPageState extends State<VersionPage> {
               version.id,
               style: const TextStyle(
                 fontSize: 14,
-                color: BamcColors.textPrimary,
+                color: BamcColors.textSecondary,
               ),
             ),
           ),
@@ -319,10 +342,10 @@ class _VersionPageState extends State<VersionPage> {
                   type: BamcButtonType.primary,
                   size: BamcButtonSize.small,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.more_vert,
-                      color: BamcColors.textSecondary),
+                      color: BamcColors.textTertiary),
                   itemBuilder: (context) => [
                     const PopupMenuItem(
                       value: 'settings',
@@ -379,7 +402,6 @@ class _VersionPageState extends State<VersionPage> {
 
   Future<void> _launchGame(Version version) async {
     try {
-      // 检查是否有选中的账户
       final selectedAccount = widget.accountManager.selectedAccount;
       if (selectedAccount == null) {
         if (mounted) {
@@ -388,7 +410,6 @@ class _VersionPageState extends State<VersionPage> {
         return;
       }
 
-      // 检查Java环境
       final javaResult = await widget.gameLauncher.detectJava();
       if (!javaResult.found) {
         if (mounted) {
@@ -397,16 +418,14 @@ class _VersionPageState extends State<VersionPage> {
         return;
       }
 
-      // 构建启动配置
       final config = await widget.gameLauncher.buildLaunchConfig(
         gameVersion: version.id,
         username: selectedAccount.username,
         uuid: selectedAccount.id,
         accessToken: selectedAccount.tokenData?.accessToken ?? '',
-        memoryMb: 4096, // 默认4GB内存
+        memoryMb: 4096,
       );
 
-      // 启动游戏
       await widget.gameLauncher.launchGame(config);
       
       logger.info('Game launched successfully: ${version.id}');

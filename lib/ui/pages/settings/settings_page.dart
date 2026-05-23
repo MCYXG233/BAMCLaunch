@@ -218,7 +218,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       child: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -226,15 +226,19 @@ class _SettingsPageState extends State<SettingsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildSectionHeader('游戏设置'),
+                  const SizedBox(height: 16),
                   _buildGameSettings(),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
                   _buildSectionHeader('启动设置'),
+                  const SizedBox(height: 16),
                   _buildLaunchSettings(),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
                   _buildSectionHeader('高级设置'),
+                  const SizedBox(height: 16),
                   _buildAdvancedSettings(),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
                   _buildSectionHeader('关于'),
+                  const SizedBox(height: 16),
                   _buildAboutSection(),
                   const SizedBox(height: 32),
                   _buildSaveButton(),
@@ -249,7 +253,7 @@ class _SettingsPageState extends State<SettingsPage> {
       title,
       style: const TextStyle(
         fontSize: 20,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w700,
         color: BamcColors.textPrimary,
       ),
     );
@@ -257,12 +261,25 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildGameSettings() {
     return Container(
-      margin: const EdgeInsets.only(top: 16),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: BamcColors.surface,
-        borderRadius: BorderRadius.circular(8),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            BamcColors.surface,
+            BamcColors.surfaceDark,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: BamcColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: BamcColors.shadowMedium,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -278,12 +295,12 @@ class _SettingsPageState extends State<SettingsPage> {
               BamcButton(
                 text: '浏览',
                 onPressed: _pickGamePath,
-                type: BamcButtonType.outline,
-                size: BamcButtonSize.small,
+                type: BamcButtonType.primary,
+                size: BamcButtonSize.medium,
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
@@ -296,8 +313,8 @@ class _SettingsPageState extends State<SettingsPage> {
               BamcButton(
                 text: '浏览',
                 onPressed: _pickJavaPath,
-                type: BamcButtonType.outline,
-                size: BamcButtonSize.small,
+                type: BamcButtonType.primary,
+                size: BamcButtonSize.medium,
               ),
             ],
           ),
@@ -308,12 +325,25 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildLaunchSettings() {
     return Container(
-      margin: const EdgeInsets.only(top: 16),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: BamcColors.surface,
-        borderRadius: BorderRadius.circular(8),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            BamcColors.surface,
+            BamcColors.surfaceDark,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: BamcColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: BamcColors.shadowMedium,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -323,7 +353,7 @@ class _SettingsPageState extends State<SettingsPage> {
             value: _autoUpdate,
             onChanged: (value) => setState(() => _autoUpdate = value),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           _buildSwitchTile(
             title: '自动登录',
             subtitle: '启动时自动登录上次使用的账户',
@@ -337,12 +367,25 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildAdvancedSettings() {
     return Container(
-      margin: const EdgeInsets.only(top: 16),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: BamcColors.surface,
-        borderRadius: BorderRadius.circular(8),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            BamcColors.surface,
+            BamcColors.surfaceDark,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: BamcColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: BamcColors.shadowMedium,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -365,31 +408,52 @@ class _SettingsPageState extends State<SettingsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: BamcColors.textPrimary,
-          ),
+        Row(
+          children: [
+            Container(
+              width: 4,
+              height: 16,
+              decoration: BoxDecoration(
+                gradient: BamcColors.statPrimaryGradient,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: BamcColors.textPrimary,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Container(
-          height: 48,
+          height: 52,
           decoration: BoxDecoration(
-            color: BamcColors.background,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: BamcColors.border),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                BamcColors.surfaceLight,
+                BamcColors.surface,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: BamcColors.borderLight),
           ),
           child: TextField(
             controller: controller,
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle: const TextStyle(color: BamcColors.textSecondary),
+              hintStyle: const TextStyle(color: BamcColors.textTertiary),
               border: InputBorder.none,
               contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             ),
+            style: const TextStyle(color: BamcColors.textPrimary),
           ),
         ),
       ],
@@ -404,6 +468,29 @@ class _SettingsPageState extends State<SettingsPage> {
   }) {
     return Row(
       children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            gradient: value
+                ? BamcColors.statPrimaryGradient
+                : LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      BamcColors.surfaceLight,
+                      BamcColors.surface,
+                    ],
+                  ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            value ? Icons.check_rounded : Icons.settings_rounded,
+            size: 22,
+            color: value ? Colors.white : BamcColors.textSecondary,
+          ),
+        ),
+        const SizedBox(width: 16),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -411,7 +498,7 @@ class _SettingsPageState extends State<SettingsPage> {
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 15,
                   fontWeight: FontWeight.w600,
                   color: BamcColors.textPrimary,
                 ),
@@ -419,17 +506,59 @@ class _SettingsPageState extends State<SettingsPage> {
               Text(
                 subtitle,
                 style: const TextStyle(
-                  fontSize: 12,
+                  fontSize: 13,
                   color: BamcColors.textSecondary,
                 ),
               ),
             ],
           ),
         ),
-        Switch(
-          value: value,
-          onChanged: onChanged,
-          activeThumbColor: BamcColors.primary,
+        Container(
+          width: 52,
+          height: 32,
+          decoration: BoxDecoration(
+            gradient: value
+                ? BamcColors.statPrimaryGradient
+                : LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      BamcColors.surfaceLight,
+                      BamcColors.surface,
+                    ],
+                  ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: value
+                  ? BamcColors.primary.withOpacity(0.5)
+                  : BamcColors.borderLight,
+            ),
+          ),
+          child: GestureDetector(
+            onTap: () => onChanged(!value),
+            child: AnimatedAlign(
+              alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+              duration: const Duration(milliseconds: 200),
+              child: Container(
+                width: 26,
+                height: 26,
+                margin: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(13),
+                  boxShadow: [
+                    BoxShadow(
+                      color: value
+                          ? BamcColors.primary.withOpacity(0.3)
+                          : BamcColors.shadowLight,
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -437,33 +566,64 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildAboutSection() {
     return Container(
-      margin: const EdgeInsets.only(top: 16),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: BamcColors.surface,
-        borderRadius: BorderRadius.circular(8),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            BamcColors.surface,
+            BamcColors.surfaceDark,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: BamcColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: BamcColors.shadowMedium,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
           Row(
             children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  gradient: BamcColors.statAccentGradient,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.rocket_launch_rounded,
+                    size: 32,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      '版本信息',
+                      'BAMCLauncher',
                       style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
                         color: BamcColors.textPrimary,
                       ),
                     ),
+                    const SizedBox(height: 4),
                     Text(
-                      '当前版本: $_currentVersion',
+                      '版本: $_currentVersion',
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                         color: BamcColors.textSecondary,
                       ),
                     ),
@@ -474,26 +634,35 @@ class _SettingsPageState extends State<SettingsPage> {
                 text: '检查更新',
                 onPressed: _isCheckingUpdate ? null : _checkForUpdates,
                 type: BamcButtonType.primary,
-                size: BamcButtonSize.small,
+                size: BamcButtonSize.medium,
                 isLoading: _isCheckingUpdate,
+                icon: Icons.update_rounded,
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: BamcColors.background,
-              borderRadius: BorderRadius.circular(8),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  BamcColors.background,
+                  BamcColors.surfaceDark,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: BamcColors.borderLight),
             ),
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'BAMCLauncher',
+                  '关于',
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                     color: BamcColors.textPrimary,
                   ),
                 ),
@@ -501,17 +670,83 @@ class _SettingsPageState extends State<SettingsPage> {
                 Text(
                   '一款跨平台的Minecraft启动器，支持多版本管理、模组加载器安装、整合包管理等功能。',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 13,
                     color: BamcColors.textSecondary,
                   ),
                 ),
-                SizedBox(height: 8),
-                Text(
-                  '© 2026 BAMCLauncher Team',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: BamcColors.textSecondary,
-                  ),
+                SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '开发者',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: BamcColors.textTertiary,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'BAMCLauncher Team',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: BamcColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '许可证',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: BamcColors.textTertiary,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'MIT License',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: BamcColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '版权',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: BamcColors.textTertiary,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            '© 2026',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: BamcColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

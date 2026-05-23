@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../core/server/server.dart';
+import '../../../ui/theme/colors.dart';
 import '../../components/layout/breadcrumb_navigation.dart';
 import '../../components/buttons/bamc_button.dart';
-import '../../components/lists/bamc_list.dart';
 import '../../components/inputs/bamc_input.dart';
 import '../../components/dialogs/copyright_dialog.dart';
 
@@ -297,53 +297,163 @@ class _ServerPageState extends State<ServerPage> {
   }
 
   Widget _buildServerItem(Server server) {
-    return BamcListItem(
-      title: Text(server.name),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('${server.address}:${server.port}'),
-          if (server.description != null)
-            Text(
-              server.description!,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-        ],
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            BamcColors.surfaceLight,
+            BamcColors.surface,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: BamcColors.borderLight),
       ),
-      leading: const Icon(Icons.computer),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
         children: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => _pingServer(server),
-            tooltip: 'Ping服务器',
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              gradient: BamcColors.statSecondaryGradient,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.computer_rounded,
+              size: 24,
+              color: Colors.white,
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.play_arrow),
-            onPressed: () => _connectToServer(server),
-            tooltip: '连接服务器',
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  server.name,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: BamcColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_on_rounded,
+                      size: 14,
+                      color: BamcColors.textSecondary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${server.address}:${server.port}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: BamcColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                if (server.description != null)
+                  Container(
+                    margin: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      server.description!,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: BamcColors.textTertiary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () => _editServer(server),
-            tooltip: '编辑服务器',
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () => _deleteServer(server),
-            tooltip: '删除服务器',
-            color: Colors.red,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildActionButton(
+                Icons.refresh_rounded,
+                BamcColors.accent,
+                () => _pingServer(server),
+                'Ping服务器',
+              ),
+              const SizedBox(width: 4),
+              _buildActionButton(
+                Icons.play_arrow_rounded,
+                BamcColors.success,
+                () => _connectToServer(server),
+                '连接服务器',
+              ),
+              const SizedBox(width: 4),
+              _buildActionButton(
+                Icons.edit_rounded,
+                BamcColors.primary,
+                () => _editServer(server),
+                '编辑服务器',
+              ),
+              const SizedBox(width: 4),
+              _buildActionButton(
+                Icons.delete_rounded,
+                BamcColors.warning,
+                () => _deleteServer(server),
+                '删除服务器',
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
+  Widget _buildActionButton(
+    IconData icon,
+    Color color,
+    VoidCallback onPressed,
+    String tooltip,
+  ) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onPressed,
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: color.withOpacity(0.3)),
+          ),
+          child: Icon(
+            icon,
+            size: 18,
+            color: color,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final filteredServers = _searchQuery.isEmpty
+        ? _servers
+        : _servers
+            .where((server) =>
+                server.name
+                    .toLowerCase()
+                    .contains(_searchQuery.toLowerCase()) ||
+                server.address
+                    .toLowerCase()
+                    .contains(_searchQuery.toLowerCase()))
+            .toList();
+
     return Column(
       children: [
         BreadcrumbNavigation(
@@ -369,6 +479,9 @@ class _ServerPageState extends State<ServerPage> {
             BamcButton(
               onPressed: _addServer,
               text: '添加服务器',
+              type: BamcButtonType.primary,
+              size: BamcButtonSize.large,
+              icon: Icons.add_rounded,
             ),
           ],
         ),
@@ -378,7 +491,11 @@ class _ServerPageState extends State<ServerPage> {
           children: [
             const Text(
               '服务器列表',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: BamcColors.textPrimary,
+              ),
             ),
             Row(
               children: [
@@ -397,14 +514,77 @@ class _ServerPageState extends State<ServerPage> {
           const Center(child: CircularProgressIndicator())
         else
           Expanded(
-            child: ListView(
-              children: [
-                if (_servers.isEmpty)
-                  const Center(
-                    child: Text('暂无服务器，点击"添加服务器"添加'),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    BamcColors.surface,
+                    BamcColors.surfaceDark,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: BamcColors.border),
+                boxShadow: [
+                  BoxShadow(
+                    color: BamcColors.shadowMedium,
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
-                ..._servers.map(_buildServerItem),
-              ],
+                ],
+              ),
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                children: [
+                  if (filteredServers.isEmpty)
+                    Container(
+                      padding: const EdgeInsets.all(48),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  BamcColors.primary.withOpacity(0.2),
+                                  BamcColors.primary.withOpacity(0.05),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Icon(
+                              Icons.computer_rounded,
+                              size: 48,
+                              color: BamcColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            '暂无服务器',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: BamcColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            '点击"添加服务器"按钮添加新服务器',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: BamcColors.textTertiary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ...filteredServers.map(_buildServerItem),
+                ],
+              ),
             ),
           ),
       ],

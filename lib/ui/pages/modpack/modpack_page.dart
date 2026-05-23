@@ -362,22 +362,30 @@ class _ModpackPageState extends State<ModpackPage> {
       children: [
         Expanded(
           child: Container(
-            height: 48,
+            height: 52,
             decoration: BoxDecoration(
-              color: BamcColors.surface,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: BamcColors.border),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  BamcColors.surfaceLight,
+                  BamcColors.surface,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: BamcColors.borderLight),
             ),
             child: TextField(
               onChanged: (value) => setState(() => _searchQuery = value),
               decoration: const InputDecoration(
                 hintText: '搜索整合包...',
-                hintStyle: TextStyle(color: BamcColors.textSecondary),
-                prefixIcon: Icon(Icons.search, color: BamcColors.textSecondary),
+                hintStyle: TextStyle(color: BamcColors.textTertiary),
+                prefixIcon: Icon(Icons.search_rounded, color: BamcColors.textSecondary),
                 border: InputBorder.none,
                 contentPadding:
-                    EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),
+              style: const TextStyle(color: BamcColors.textPrimary),
             ),
           ),
         ),
@@ -386,16 +394,16 @@ class _ModpackPageState extends State<ModpackPage> {
           text: '导入整合包',
           onPressed: _importModpack,
           type: BamcButtonType.primary,
-          size: BamcButtonSize.medium,
-          icon: Icons.upload_file,
+          size: BamcButtonSize.large,
+          icon: Icons.upload_file_rounded,
         ),
         const SizedBox(width: 16),
         BamcButton(
           text: '创建整合包',
           onPressed: _createModpack,
           type: BamcButtonType.outline,
-          size: BamcButtonSize.medium,
-          icon: Icons.add,
+          size: BamcButtonSize.large,
+          icon: Icons.add_rounded,
         ),
       ],
     );
@@ -451,51 +459,72 @@ class _ModpackPageState extends State<ModpackPage> {
   Widget _buildModpackCard(Modpack modpack) {
     return Container(
       decoration: BoxDecoration(
-        color: BamcColors.surface,
-        borderRadius: BorderRadius.circular(8),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            BamcColors.surface,
+            BamcColors.surfaceDark,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: BamcColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: BamcColors.shadowMedium,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          // 整合包图标
           Expanded(
             child: Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    width: 80,
-                    height: 80,
+                    width: 88,
+                    height: 88,
                     decoration: BoxDecoration(
-                      color: BamcColors.background,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: BamcColors.border),
+                      gradient: BamcColors.statPrimaryGradient,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: BamcColors.primary.withOpacity(0.2),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: const Center(
                       child: Icon(
-                        Icons.archive,
+                        Icons.archive_rounded,
                         size: 48,
-                        color: BamcColors.primary,
+                        color: Colors.white,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Text(
                     modpack.name,
                     style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
                       color: BamcColors.textPrimary,
                     ),
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
-                    '作者: ${modpack.author}',
+                    modpack.author,
                     style: const TextStyle(
-                      fontSize: 12,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
                       color: BamcColors.textSecondary,
                     ),
                     textAlign: TextAlign.center,
@@ -505,11 +534,22 @@ class _ModpackPageState extends State<ModpackPage> {
               ),
             ),
           ),
-          // 底部信息和操作按钮
           Container(
-            padding: const EdgeInsets.all(12),
-            decoration: const BoxDecoration(
-              border: Border(top: BorderSide(color: BamcColors.border)),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  BamcColors.surfaceDark,
+                  BamcColors.background,
+                ],
+              ),
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(16),
+                bottomRight: Radius.circular(16),
+              ),
+              border: const Border(top: BorderSide(color: BamcColors.borderLight)),
             ),
             child: Column(
               children: [
@@ -518,17 +558,27 @@ class _ModpackPageState extends State<ModpackPage> {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                          horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: BamcColors.primary.withAlpha(20),
-                        borderRadius: BorderRadius.circular(4),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            BamcColors.primary.withOpacity(0.2),
+                            BamcColors.primary.withOpacity(0.05),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: BamcColors.primary.withOpacity(0.3),
+                        ),
                       ),
                       child: Text(
                         modpack.minecraftVersion,
                         style: const TextStyle(
                           fontSize: 12,
                           color: BamcColors.primary,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -536,23 +586,33 @@ class _ModpackPageState extends State<ModpackPage> {
                       Container(
                         margin: const EdgeInsets.only(left: 8),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                            horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: BamcColors.success.withAlpha(20),
-                          borderRadius: BorderRadius.circular(4),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              BamcColors.success.withOpacity(0.2),
+                              BamcColors.success.withOpacity(0.05),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: BamcColors.success.withOpacity(0.3),
+                          ),
                         ),
                         child: Text(
                           modpack.loaderType!.toUpperCase(),
                           style: const TextStyle(
                             fontSize: 12,
                             color: BamcColors.success,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
@@ -561,24 +621,49 @@ class _ModpackPageState extends State<ModpackPage> {
                         onPressed: () => _showInstallProgress(modpack),
                         type: BamcButtonType.primary,
                         size: BamcButtonSize.small,
+                        icon: Icons.download_rounded,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 10),
                     PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert,
-                          color: BamcColors.textSecondary),
+                      icon: const Icon(
+                        Icons.more_vert_rounded,
+                        color: BamcColors.textSecondary,
+                        size: 20,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       itemBuilder: (context) => [
                         const PopupMenuItem(
                           value: 'export',
-                          child: Text('导出'),
+                          child: Row(
+                            children: [
+                              Icon(Icons.download_rounded, size: 16),
+                              SizedBox(width: 8),
+                              Text('导出'),
+                            ],
+                          ),
                         ),
                         const PopupMenuItem(
                           value: 'repair',
-                          child: Text('修复'),
+                          child: Row(
+                            children: [
+                              Icon(Icons.build_rounded, size: 16),
+                              SizedBox(width: 8),
+                              Text('修复'),
+                            ],
+                          ),
                         ),
                         const PopupMenuItem(
                           value: 'delete',
-                          child: Text('删除'),
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_rounded, size: 16, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('删除'),
+                            ],
+                          ),
                         ),
                       ],
                       onSelected: (value) {
