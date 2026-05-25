@@ -52,9 +52,7 @@ class SearchService {
     if (_initialized) return;
 
     _apis[SearchSource.modrinth] = ModrinthApi();
-    _apis[SearchSource.curseforge] = CurseForgeApi();
-
-    await _cacheManager.initialize();
+    _apis[SearchSource.curseforge] = CurseForgeApi(apiKey: '');
 
     _initialized = true;
     _logger.info('SearchService initialized');
@@ -113,7 +111,7 @@ class SearchService {
 
     final result = await api.search(params);
 
-    await _cacheManager.cacheSearchResult(cacheKey, result);
+    _cacheManager.setSearchResult(cacheKey, result);
 
     _eventBus.publish(SearchCompletedEvent(result: result));
     return result;
@@ -165,10 +163,8 @@ class SearchService {
       throw Exception('API not found for source: $source');
     }
 
-    final cacheKey = 'resource_${source.name}_$resourceId';
-
     if (useCache) {
-      final cached = await _cacheManager.getResource(cacheKey);
+      final cached = _cacheManager.getResource(source.name, resourceId);
       if (cached != null) {
         _logger.info('Returning cached resource details');
         _eventBus.publish(ResourceRetrievedEvent(resource: cached));
@@ -178,7 +174,7 @@ class SearchService {
 
     final resource = await api.getResource(resourceId);
 
-    await _cacheManager.cacheResource(cacheKey, resource);
+    _cacheManager.setResource(resource);
 
     _eventBus.publish(ResourceRetrievedEvent(resource: resource));
     return resource;
@@ -199,10 +195,8 @@ class SearchService {
       throw Exception('API not found for source: $source');
     }
 
-    final cacheKey = 'versions_${source.name}_$resourceId';
-
     if (useCache) {
-      final cached = await _cacheManager.getVersions(cacheKey);
+      final cached = _cacheManager.getVersions(source.name, resourceId);
       if (cached != null) {
         _logger.info('Returning cached versions');
         _eventBus.publish(VersionsRetrievedEvent(versions: cached));
@@ -212,7 +206,7 @@ class SearchService {
 
     final versions = await api.getVersions(resourceId);
 
-    await _cacheManager.cacheVersions(cacheKey, versions);
+    _cacheManager.setVersions(source.name, resourceId, versions);
 
     _eventBus.publish(VersionsRetrievedEvent(versions: versions));
     return versions;
@@ -262,7 +256,7 @@ class SearchService {
 
   /// 清除缓存
   Future<void> clearCache() async {
-    await _cacheManager.clear();
+    _cacheManager.clear();
     _logger.info('Search cache cleared');
   }
 }

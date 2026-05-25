@@ -135,9 +135,7 @@ class DownloadEngine implements IDownloadEngine {
         if (_autoSwitchMirror && attemptCount < maxAttempts) {
           _downloadSource = _mirrorManager.switchToNextMirror();
           _eventBus.publish(
-            DownloadInfoEvent(
-              message: '镜像源不可用，正在切换到 ${_downloadSource.name}...',
-            ),
+            DownloadInfoEvent(message: '镜像源不可用，正在切换到 ${_downloadSource.name}...'),
           );
         }
       }
@@ -145,7 +143,7 @@ class DownloadEngine implements IDownloadEngine {
 
     // 如果所有尝试都失败了，抛出友好的错误信息
     throw DownloadException(
-      '下载失败，所有镜像源均不可用。最后一个错误: ${lastError?.message ?? lastError.toString()}',
+      '下载失败，所有镜像源均不可用。最后一个错误: ${lastError?.toString() ?? '未知错误'}',
       lastError,
     );
   }
@@ -192,7 +190,7 @@ class DownloadException implements Exception {
 }
 
 /// 下载信息事件
-class DownloadInfoEvent {
+class DownloadInfoEvent extends Event {
   final String message;
 
   DownloadInfoEvent({required this.message});

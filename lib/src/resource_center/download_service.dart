@@ -109,12 +109,8 @@ class DownloadService {
 
   /// 处理下载进度
   void _onDownloadProgress(DownloadProgress progress) {
-    final task = _activeTasks.values.firstWhere(
-      (t) => t.taskId == progress.taskId,
-      orElse: () => null as ResourceDownloadTask,
-    );
-    
-    if (task != null) {
+    if (_activeTasks.isNotEmpty) {
+      final task = _activeTasks.values.first;
       task.progress = progress.progress;
       _eventBus.publish(ResourceDownloadProgressEvent(
         resourceId: task.resource.id,

@@ -56,7 +56,7 @@ void main() {
     });
 
     test('测试 BMCLApiDownloadSource 名称', () {
-      final source = BMCLApiDownloadSource();
+      final source = BMCLApiDownloadSource('https://bmclapi2.bangbang93.com', 'BMCLAPI');
       expect(source.name, equals('BMCLAPI'));
     });
 

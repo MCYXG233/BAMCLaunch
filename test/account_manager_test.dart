@@ -40,6 +40,36 @@ class MockConfigManager implements IConfigManager {
   }
 
   @override
+  String? getString(String key, {String? defaultValue}) {
+    return get<String>(key, defaultValue: defaultValue);
+  }
+
+  @override
+  Future<void> setString(String key, String value) async {
+    await set(key, value);
+  }
+
+  @override
+  int? getInt(String key, {int? defaultValue}) {
+    return get<int>(key, defaultValue: defaultValue);
+  }
+
+  @override
+  Future<void> setInt(String key, int value) async {
+    await set(key, value);
+  }
+
+  @override
+  bool? getBool(String key, {bool? defaultValue}) {
+    return get<bool>(key, defaultValue: defaultValue);
+  }
+
+  @override
+  Future<void> setBool(String key, bool value) async {
+    await set(key, value);
+  }
+
+  @override
   Future<void> remove(String key) async {
     _config.remove(key);
     _configChangesController.add(key);

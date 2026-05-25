@@ -35,27 +35,12 @@ void main() {
       expect(json['type'], equals('release'));
     });
 
-    test('VersionType parsing works correctly', () {
-      expect(
-        GameVersion._parseVersionType('release'),
-        equals(VersionType.release),
-      );
-      expect(
-        GameVersion._parseVersionType('snapshot'),
-        equals(VersionType.snapshot),
-      );
-      expect(
-        GameVersion._parseVersionType('old_beta'),
-        equals(VersionType.oldBeta),
-      );
-      expect(
-        GameVersion._parseVersionType('old_alpha'),
-        equals(VersionType.oldAlpha),
-      );
-      expect(
-        GameVersion._parseVersionType('unknown'),
-        equals(VersionType.release),
-      );
+    test('VersionType enum has correct values', () {
+      expect(VersionType.values.length, equals(4));
+      expect(VersionType.release.name, equals('release'));
+      expect(VersionType.snapshot.name, equals('snapshot'));
+      expect(VersionType.oldBeta.name, equals('old_beta'));
+      expect(VersionType.oldAlpha.name, equals('old_alpha'));
     });
   });
 

@@ -81,7 +81,7 @@ void main() {
 
       final error = Exception('test error');
       final stackTrace = StackTrace.current;
-      logger.error('test with error', error: error, stackTrace: stackTrace);
+      logger.error('test with error', error, stackTrace);
 
       expect(receivedEvent, isNotNull);
       expect(receivedEvent!.error, error);

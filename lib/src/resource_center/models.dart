@@ -534,6 +534,20 @@ class InstalledResource {
     return '${source}_$resourceId';
   }
 
+  /// 解析资源类型字符串
+  static ResourceType _parseResourceType(String type) {
+    switch (type) {
+      case 'mod':
+        return ResourceType.mod;
+      case 'resourcePack':
+        return ResourceType.resourcePack;
+      case 'modpack':
+        return ResourceType.modpack;
+      default:
+        return ResourceType.mod;
+    }
+  }
+
   /// 从JSON创建
   factory InstalledResource.fromJson(Map<String, dynamic> json) {
     return InstalledResource(
