@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
-import 'package:http/http.dart' as http;
+import '../core/network_client.dart';
 import 'models.dart';
 
 /// Microsoft OAuth2认证服务
 class MicrosoftAuthService {
-  /// 客户端ID
-  static const String _clientId = '00000000402b5328';
+  /// 客户端 ID
+  static const String _clientId = '0b1a81c9-6e23-41fd-8690-98a17d81bf4a';
 
   /// 重定向URI
   static const String _redirectUri = 'https://login.live.com/oauth20_desktop.srf';
@@ -15,11 +15,14 @@ class MicrosoftAuthService {
   /// 授权范围
   static const String _scope = 'XboxLive.signin offline_access';
 
-  /// 授权端点
-  static const String _authorizationEndpoint = 'https://login.live.com/oauth20_authorize.srf';
+  /// 授权端点 (正确的端点)
+  static const String _authorizationEndpoint = 'https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize';
 
-  /// 令牌端点
-  static const String _tokenEndpoint = 'https://login.live.com/oauth20_token.srf';
+  /// 令牌端点 (正确的端点)
+  static const String _tokenEndpoint = 'https://login.microsoftonline.com/consumers/oauth2/v2.0/token';
+
+  /// 设备码流端点
+  static const String _deviceCodeEndpoint = 'https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode';
 
   /// 生成随机代码验证器
   String _generateCodeVerifier() {
@@ -72,11 +75,10 @@ class MicrosoftAuthService {
     required String code,
     required String codeVerifier,
   }) async {
-    final response = await http.post(
-      Uri.parse(_tokenEndpoint),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+    final networkClient = NetworkClient();
+    final response = await networkClient.post(
+      _tokenEndpoint,
+      headers: NetworkClient.microsoftHeaders,
       body: {
         'client_id': _clientId,
         'grant_type': 'authorization_code',
@@ -102,16 +104,14 @@ class MicrosoftAuthService {
 
   /// 刷新令牌
   Future<OAuthToken> refreshToken(String refreshToken) async {
-    final response = await http.post(
-      Uri.parse(_tokenEndpoint),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+    final networkClient = NetworkClient();
+    final response = await networkClient.post(
+      _tokenEndpoint,
+      headers: NetworkClient.microsoftHeaders,
       body: {
         'client_id': _clientId,
         'grant_type': 'refresh_token',
         'refresh_token': refreshToken,
-        'redirect_uri': _redirectUri,
       },
     );
 
@@ -148,4 +148,96 @@ class MicrosoftAuthService {
     final state = uri.queryParameters['state'];
     return state == expectedState;
   }
+
+  /// 设备代码流 - 获取设备代码
+  Future<DeviceCodeResponse> getDeviceCode() async {
+    final networkClient = NetworkClient();
+    final response = await networkClient.post(
+      _deviceCodeEndpoint,
+      headers: NetworkClient.microsoftHeaders,
+      body: {
+        'client_id': _clientId,
+        'scope': _scope,
+        'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to get device code: ${response.statusCode} ${response.body}');
+    }
+
+    final Map<String, dynamic> data = json.decode(response.body);
+    return DeviceCodeResponse(
+      deviceCode: data['device_code'] as String,
+      userCode: data['user_code'] as String,
+      verificationUri: data['verification_uri'] as String,
+      expiresIn: data['expires_in'] as int,
+      interval: data['interval'] as int,
+      message: data['message'] as String?,
+    );
+  }
+
+  /// 设备代码流 - 轮询获取令牌
+  Future<OAuthToken> pollForToken(String deviceCode) async {
+    final networkClient = NetworkClient();
+    
+    while (true) {
+      final response = await networkClient.post(
+        _tokenEndpoint,
+        headers: NetworkClient.microsoftHeaders,
+        body: {
+          'client_id': _clientId,
+          'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
+          'device_code': deviceCode,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        return OAuthToken(
+          accessToken: data['access_token'] as String,
+          tokenType: data['token_type'] as String,
+          expiresIn: data['expires_in'] as int,
+          refreshToken: data['refresh_token'] as String?,
+          scope: data['scope'] as String?,
+        );
+      }
+
+      final Map<String, dynamic> data = json.decode(response.body);
+      final String error = data['error'] as String;
+
+      if (error == 'authorization_pending') {
+        await Future.delayed(const Duration(seconds: 5));
+        continue;
+      } else if (error == 'slow_down') {
+        await Future.delayed(const Duration(seconds: 10));
+        continue;
+      } else if (error == 'expired_token') {
+        throw Exception('Device code expired');
+      } else if (error == 'access_denied') {
+        throw Exception('User denied authorization');
+      } else {
+        throw Exception('Token polling failed: $error');
+      }
+    }
+  }
+}
+
+/// 设备代码响应
+class DeviceCodeResponse {
+  final String deviceCode;
+  final String userCode;
+  final String verificationUri;
+  final int expiresIn;
+  final int interval;
+  final String? message;
+
+  DeviceCodeResponse({
+    required this.deviceCode,
+    required this.userCode,
+    required this.verificationUri,
+    required this.expiresIn,
+    required this.interval,
+    this.message,
+  });
 }

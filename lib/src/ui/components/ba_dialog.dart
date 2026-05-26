@@ -151,6 +151,9 @@ class BAConfirmDialog extends StatelessWidget {
   /// 取消回调
   final VoidCallback? onCancel;
 
+  /// 确认按钮样式（主色/危险色/成功色）
+  final BAButtonStyle confirmButtonStyle;
+
   const BAConfirmDialog({
     super.key,
     required this.title,
@@ -159,6 +162,7 @@ class BAConfirmDialog extends StatelessWidget {
     this.cancelText = '取消',
     this.onConfirm,
     this.onCancel,
+    this.confirmButtonStyle = BAButtonStyle.primary,
   });
 
   /// 显示确认弹窗
@@ -168,6 +172,7 @@ class BAConfirmDialog extends StatelessWidget {
     required String content,
     String confirmText = '确认',
     String cancelText = '取消',
+    BAButtonStyle confirmButtonStyle = BAButtonStyle.primary,
   }) async {
     final result = await BAFrostedDialog.show<bool>(
       context: context,
@@ -182,15 +187,35 @@ class BAConfirmDialog extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(false),
         ),
         const SizedBox(width: 12),
-        BAPrimaryButton(
-          text: confirmText,
-          onPressed: () => Navigator.of(context).pop(true),
+        _buildConfirmButton(
+          confirmText,
+          confirmButtonStyle,
+          () => Navigator.of(context).pop(true),
         ),
       ],
       showCloseButton: false,
       barrierDismissible: false,
     );
     return result ?? false;
+  }
+
+  static Widget _buildConfirmButton(
+    String text,
+    BAButtonStyle style,
+    VoidCallback onPressed,
+  ) {
+    switch (style) {
+      case BAButtonStyle.danger:
+        return BADangerButton(text: text, onPressed: onPressed);
+      case BAButtonStyle.success:
+        return BAButton(
+          style: BAButtonStyle.success,
+          onPressed: onPressed,
+          child: Text(text),
+        );
+      default:
+        return BAPrimaryButton(text: text, onPressed: onPressed);
+    }
   }
 
   @override
@@ -210,13 +235,10 @@ class BAConfirmDialog extends StatelessWidget {
           },
         ),
         const SizedBox(width: 12),
-        BAPrimaryButton(
-          text: confirmText,
-          onPressed: () {
-            onConfirm?.call();
-            Navigator.of(context).pop();
-          },
-        ),
+        _buildConfirmButton(confirmText, confirmButtonStyle, () {
+          onConfirm?.call();
+          Navigator.of(context).pop();
+        }),
       ],
       showCloseButton: false,
       onClose: onCancel,

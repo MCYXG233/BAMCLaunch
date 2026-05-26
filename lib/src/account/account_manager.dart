@@ -51,10 +51,10 @@ class AccountManager implements IAccountManager {
   }
 
   /// 配置管理器
-  late final IConfigManager _configManager;
+  IConfigManager? _configManager;
 
   /// 事件总线
-  late final EventBus _eventBus;
+  EventBus? _eventBus;
 
   /// 账户缓存
   List<Account> _cachedAccounts = [];
@@ -82,9 +82,25 @@ class AccountManager implements IAccountManager {
     _isInitialized = true;
   }
 
+  /// 确保已初始化
+  Future<void> _ensureInitialized() async {
+    if (_isInitialized) return;
+
+    _configManager = ConfigManager.instance;
+    _eventBus = EventBus.instance;
+    _accountsStreamController = StreamController<List<Account>>.broadcast();
+
+    await _loadAccounts();
+    _isInitialized = true;
+  }
+
   /// 从配置加载账户
   Future<void> _loadAccounts() async {
-    final accountsJson = _configManager.get<List<dynamic>>(
+    if (_configManager == null) {
+      _configManager = ConfigManager.instance;
+    }
+
+    final accountsJson = _configManager!.get<List<dynamic>>(
       ConfigKeys.accounts,
       defaultValue: [],
     );
@@ -101,21 +117,32 @@ class AccountManager implements IAccountManager {
 
   /// 保存账户到配置
   Future<void> _saveAccounts() async {
+    if (_configManager == null) {
+      _configManager = ConfigManager.instance;
+    }
+
     final accountsJson = _cachedAccounts
         .map((account) => account.toJson())
         .toList();
-    await _configManager.set(ConfigKeys.accounts, accountsJson);
+    await _configManager!.set(ConfigKeys.accounts, accountsJson);
     _accountsStreamController?.add(_cachedAccounts);
   }
 
   @override
   Future<List<Account>> getAccounts() async {
+    await _ensureInitialized();
     return List.unmodifiable(_cachedAccounts);
   }
 
   @override
   Future<Account?> getSelectedAccount() async {
-    final selectedId = _configManager.get<String>(ConfigKeys.selectedAccount);
+    await _ensureInitialized();
+
+    if (_configManager == null) {
+      _configManager = ConfigManager.instance;
+    }
+
+    final selectedId = _configManager!.get<String>(ConfigKeys.selectedAccount);
     if (selectedId == null) return null;
 
     try {
@@ -127,7 +154,13 @@ class AccountManager implements IAccountManager {
 
   @override
   Future<void> selectAccount(String accountId) async {
-    final oldAccountId = _configManager.get<String>(ConfigKeys.selectedAccount);
+    await _ensureInitialized();
+
+    if (_configManager == null) {
+      _configManager = ConfigManager.instance;
+    }
+
+    final oldAccountId = _configManager!.get<String>(ConfigKeys.selectedAccount);
 
     // 检查账户是否存在
     final accountExists = _cachedAccounts.any(
@@ -137,7 +170,7 @@ class AccountManager implements IAccountManager {
       throw ArgumentError('账户不存在: $accountId');
     }
 
-    await _configManager.set(ConfigKeys.selectedAccount, accountId);
+    await _configManager!.set(ConfigKeys.selectedAccount, accountId);
 
     // 更新账户的最后使用时间
     final index = _cachedAccounts.indexWhere(
@@ -150,7 +183,10 @@ class AccountManager implements IAccountManager {
       await _saveAccounts();
     }
 
-    _eventBus.publish(
+    if (_eventBus == null) {
+      _eventBus = EventBus.instance;
+    }
+    _eventBus!.publish(
       SelectedAccountChangedEvent(
         newAccountId: accountId,
         oldAccountId: oldAccountId,
@@ -160,6 +196,8 @@ class AccountManager implements IAccountManager {
 
   @override
   Future<Account> addOfflineAccount(String username) async {
+    await _ensureInitialized();
+
     if (username.trim().isEmpty) {
       throw ArgumentError('用户名不能为空');
     }
@@ -176,13 +214,18 @@ class AccountManager implements IAccountManager {
     _cachedAccounts.add(account);
     await _saveAccounts();
 
-    _eventBus.publish(AccountAddedEvent(accountId: account.id));
+    if (_eventBus == null) {
+      _eventBus = EventBus.instance;
+    }
+    _eventBus!.publish(AccountAddedEvent(accountId: account.id));
 
     return account;
   }
 
   @override
   Future<Account> addMicrosoftAccount(String username, String uuid) async {
+    await _ensureInitialized();
+
     if (username.trim().isEmpty) {
       throw ArgumentError('用户名不能为空');
     }
@@ -204,7 +247,11 @@ class AccountManager implements IAccountManager {
       );
       _cachedAccounts[existingAccountIndex] = updatedAccount;
       await _saveAccounts();
-      _eventBus.publish(AccountUpdatedEvent(accountId: updatedAccount.id));
+
+      if (_eventBus == null) {
+        _eventBus = EventBus.instance;
+      }
+      _eventBus!.publish(AccountUpdatedEvent(accountId: updatedAccount.id));
       return updatedAccount;
     }
 
@@ -221,13 +268,18 @@ class AccountManager implements IAccountManager {
     _cachedAccounts.add(account);
     await _saveAccounts();
 
-    _eventBus.publish(AccountAddedEvent(accountId: account.id));
+    if (_eventBus == null) {
+      _eventBus = EventBus.instance;
+    }
+    _eventBus!.publish(AccountAddedEvent(accountId: account.id));
 
     return account;
   }
 
   @override
   Future<void> updateAccount(Account account) async {
+    await _ensureInitialized();
+
     final index = _cachedAccounts.indexWhere((a) => a.id == account.id);
     if (index == -1) {
       throw ArgumentError('账户不存在: ${account.id}');
@@ -236,11 +288,20 @@ class AccountManager implements IAccountManager {
     _cachedAccounts[index] = account;
     await _saveAccounts();
 
-    _eventBus.publish(AccountUpdatedEvent(accountId: account.id));
+    if (_eventBus == null) {
+      _eventBus = EventBus.instance;
+    }
+    _eventBus!.publish(AccountUpdatedEvent(accountId: account.id));
   }
 
   @override
   Future<void> removeAccount(String accountId) async {
+    await _ensureInitialized();
+
+    if (_configManager == null) {
+      _configManager = ConfigManager.instance;
+    }
+
     final index = _cachedAccounts.indexWhere(
       (account) => account.id == accountId,
     );
@@ -249,10 +310,14 @@ class AccountManager implements IAccountManager {
     }
 
     // 如果删除的是当前选中的账户，则取消选中
-    final selectedId = _configManager.get<String>(ConfigKeys.selectedAccount);
+    final selectedId = _configManager!.get<String>(ConfigKeys.selectedAccount);
     if (selectedId == accountId) {
-      await _configManager.remove(ConfigKeys.selectedAccount);
-      _eventBus.publish(
+      await _configManager!.remove(ConfigKeys.selectedAccount);
+
+      if (_eventBus == null) {
+        _eventBus = EventBus.instance;
+      }
+      _eventBus!.publish(
         SelectedAccountChangedEvent(
           newAccountId: null,
           oldAccountId: selectedId,
@@ -263,13 +328,16 @@ class AccountManager implements IAccountManager {
     _cachedAccounts.removeAt(index);
     await _saveAccounts();
 
-    _eventBus.publish(AccountDeletedEvent(accountId: accountId));
+    if (_eventBus == null) {
+      _eventBus = EventBus.instance;
+    }
+    _eventBus!.publish(AccountDeletedEvent(accountId: accountId));
   }
 
   @override
   Stream<List<Account>> get accountsStream {
     if (_accountsStreamController == null) {
-      throw StateError('AccountManager未初始化，请先调用initialize()');
+      _accountsStreamController = StreamController<List<Account>>.broadcast();
     }
     return _accountsStreamController!.stream;
   }
@@ -284,5 +352,7 @@ class AccountManager implements IAccountManager {
     _accountsStreamController?.close();
     _accountsStreamController = null;
     _isInitialized = false;
+    _configManager = null;
+    _eventBus = null;
   }
 }

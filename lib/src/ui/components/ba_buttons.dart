@@ -3,416 +3,412 @@ import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/app_theme.dart';
 
-/// 主按钮 - 清新蓝色，立体悬浮效果
-class BAPrimaryButton extends StatefulWidget {
-  /// 按钮文字
-  final String text;
-
-  /// 点击回调
+/// 蔚蓝档案风格按钮组件
+class BAButton extends StatefulWidget {
   final VoidCallback? onPressed;
-
-  /// 是否禁用
-  final bool disabled;
-
-  /// 是否加载中
-  final bool loading;
-
-  /// 左侧图标
-  final Widget? leadingIcon;
-
-  /// 右侧图标
-  final Widget? trailingIcon;
-
-  /// 按钮高度
-  final double height;
-
-  /// 按钮宽度
+  final Widget child;
+  final BAButtonStyle style;
+  final double? height;
   final double? width;
+  final bool loading;
+  final bool enabled;
+  final Widget? leadingIcon;
+  final Widget? trailingIcon;
+  final EdgeInsets? padding;
+
+  const BAButton({
+    super.key,
+    required this.onPressed,
+    required this.child,
+    this.style = BAButtonStyle.primary,
+    this.height,
+    this.width,
+    this.loading = false,
+    this.enabled = true,
+    this.leadingIcon,
+    this.trailingIcon,
+    this.padding,
+  });
+
+  @override
+  State<BAButton> createState() => _BAButtonState();
+}
+
+class _BAButtonState extends State<BAButton> {
+  bool _isHovered = false;
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDisabled = widget.loading || !widget.enabled;
+    final effectiveOnPressed = isDisabled ? null : widget.onPressed;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: effectiveOnPressed,
+        onTapDown: (_) => setState(() => _isPressed = true),
+        onTapUp: (_) => setState(() => _isPressed = false),
+        onTapCancel: () => setState(() => _isPressed = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          height: widget.height ?? 48,
+          width: widget.width,
+          padding: widget.padding ??
+              const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          decoration: _getDecoration(context, isDisabled),
+          child: AnimatedScale(
+            scale: _isPressed ? 0.98 : 1.0,
+            duration: const Duration(milliseconds: 100),
+            child: widget.loading
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            _getLoadingColor(context, isDisabled),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (widget.leadingIcon != null) ...[
+                        widget.leadingIcon!,
+                        const SizedBox(width: 8),
+                      ],
+                      DefaultTextStyle(
+                        style: _getTextStyle(context, isDisabled),
+                        child: widget.child,
+                      ),
+                      if (widget.trailingIcon != null) ...[
+                        const SizedBox(width: 8),
+                        widget.trailingIcon!,
+                      ],
+                    ],
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  BoxDecoration _getDecoration(BuildContext context, bool isDisabled) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    Color backgroundColor;
+    Color borderColor;
+    List<BoxShadow> shadows;
+
+    switch (widget.style) {
+      case BAButtonStyle.primary:
+        backgroundColor = isDisabled
+            ? BAColors.primary.withOpacity(0.4)
+            : (_isHovered ? BAColors.primaryDark : BAColors.primary);
+        borderColor = Colors.transparent;
+        shadows = isDisabled ? [] : BATheme.shadowsSmallOf(context);
+        break;
+      case BAButtonStyle.secondary:
+        backgroundColor = isDisabled
+            ? BAColors.surfaceVariantOf(context).withOpacity(0.4)
+            : BAColors.surfaceVariantOf(context);
+        borderColor = isDisabled
+            ? BAColors.borderOf(context)
+            : (_isHovered
+                ? BAColors.primary.withOpacity(0.5)
+                : BAColors.borderOf(context));
+        shadows = isDisabled ? [] : BATheme.shadowsSmallOf(context);
+        break;
+      case BAButtonStyle.text:
+        backgroundColor = Colors.transparent;
+        borderColor = Colors.transparent;
+        shadows = [];
+        break;
+      case BAButtonStyle.outline:
+        backgroundColor = Colors.transparent;
+        borderColor = isDisabled
+            ? BAColors.borderOf(context)
+            : (_isHovered ? BAColors.primary : BAColors.borderOf(context));
+        shadows = [];
+        break;
+      case BAButtonStyle.danger:
+        backgroundColor = isDisabled
+            ? BAColors.danger.withOpacity(0.4)
+            : (_isHovered
+                ? BAColors.danger.withOpacity(0.8)
+                : BAColors.danger);
+        borderColor = Colors.transparent;
+        shadows = isDisabled ? [] : BATheme.shadowsSmallOf(context);
+        break;
+      case BAButtonStyle.success:
+        backgroundColor = isDisabled
+            ? BAColors.success.withOpacity(0.4)
+            : (_isHovered
+                ? BAColors.success.withOpacity(0.8)
+                : BAColors.success);
+        borderColor = Colors.transparent;
+        shadows = isDisabled ? [] : BATheme.shadowsSmallOf(context);
+        break;
+    }
+
+    return BoxDecoration(
+      color: backgroundColor,
+      borderRadius: BATheme.borderRadiusMedium,
+      border: Border.all(color: borderColor, width: 1.5),
+      boxShadow: shadows,
+    );
+  }
+
+  TextStyle _getTextStyle(BuildContext context, bool isDisabled) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    Color textColor;
+
+    switch (widget.style) {
+      case BAButtonStyle.primary:
+      case BAButtonStyle.danger:
+      case BAButtonStyle.success:
+        textColor = isDisabled
+            ? Colors.white.withOpacity(0.5)
+            : Colors.white;
+        break;
+      case BAButtonStyle.secondary:
+        textColor = isDisabled
+            ? BAColors.textDisabledOf(context)
+            : BAColors.textPrimaryOf(context);
+        break;
+      case BAButtonStyle.text:
+      case BAButtonStyle.outline:
+        textColor = isDisabled
+            ? BAColors.textDisabledOf(context)
+            : (_isHovered ? BAColors.primary : BAColors.textPrimaryOf(context));
+        break;
+    }
+
+    return BATypography.button.copyWith(color: textColor);
+  }
+
+  Color _getLoadingColor(BuildContext context, bool isDisabled) {
+    switch (widget.style) {
+      case BAButtonStyle.primary:
+      case BAButtonStyle.danger:
+      case BAButtonStyle.success:
+        return Colors.white.withOpacity(isDisabled ? 0.5 : 1.0);
+      case BAButtonStyle.secondary:
+      case BAButtonStyle.text:
+      case BAButtonStyle.outline:
+        return isDisabled
+            ? BAColors.textDisabledOf(context)
+            : BAColors.primary;
+    }
+  }
+}
+
+/// 蔚蓝档案按钮样式
+enum BAButtonStyle {
+  primary,
+  secondary,
+  text,
+  outline,
+  danger,
+  success,
+}
+
+/// 蔚蓝档案风格主按钮
+class BAPrimaryButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+  final String text;
+  final bool loading;
+  final Widget? leadingIcon;
+  final Widget? trailingIcon;
+  final double? height;
+  final double? width;
+  final bool enabled;
+  final EdgeInsets? padding;
 
   const BAPrimaryButton({
     super.key,
+    required this.onPressed,
     required this.text,
-    this.onPressed,
-    this.disabled = false,
     this.loading = false,
     this.leadingIcon,
     this.trailingIcon,
-    this.height = 48,
+    this.height,
     this.width,
+    this.enabled = true,
+    this.padding,
   });
 
   @override
-  State<BAPrimaryButton> createState() => _BAPrimaryButtonState();
-}
-
-class _BAPrimaryButtonState extends State<BAPrimaryButton> {
-  bool _isHovered = false;
-  bool _isPressed = false;
-
-  bool get _isEnabled => !widget.disabled && !widget.loading;
-
-  @override
   Widget build(BuildContext context) {
-    final translateY = _isPressed ? 2.0 : 0.0;
-    final shadowOpacity = _isPressed ? 0.15 : 0.3;
-    final blurRadius = _isPressed ? 4.0 : 8.0;
-    final offsetY = _isPressed ? 2.0 : 4.0;
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: GestureDetector(
-        onTapDown: (_) => _isEnabled ? setState(() => _isPressed = true) : null,
-        onTapUp: (_) {
-          if (_isEnabled) {
-            setState(() => _isPressed = false);
-            widget.onPressed?.call();
-          }
-        },
-        onTapCancel: () =>
-            _isEnabled ? setState(() => _isPressed = false) : null,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 100),
-          curve: Curves.easeOutCubic,
-          height: widget.height,
-          width: widget.width,
-          transform: Matrix4.translationValues(0, translateY, 0),
-          decoration: BoxDecoration(
-            color: _isEnabled
-                ? (_isHovered ? BAColors.primaryDark : BAColors.primary)
-                : BAColors.textDisabled,
-            borderRadius: BATheme.borderRadius,
-            boxShadow: _isEnabled
-                ? [
-                    BoxShadow(
-                      color: BAColors.shadowOf(context).withOpacity(shadowOpacity),
-                      blurRadius: blurRadius,
-                      offset: Offset(0, offsetY),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BATheme.borderRadius,
-            child: InkWell(
-              onTap: _isEnabled ? widget.onPressed : null,
-              borderRadius: BATheme.borderRadius,
-              child: Center(
-                child: widget.loading
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation(
-                            Colors.white.withOpacity(0.8),
-                          ),
-                        ),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (widget.leadingIcon != null) ...[
-                            widget.leadingIcon!,
-                            const SizedBox(width: 8),
-                          ],
-                          Text(
-                            widget.text,
-                            style: BATypography.button.copyWith(
-                              color: Colors.white,
-                            ),
-                          ),
-                          if (widget.trailingIcon != null) ...[
-                            const SizedBox(width: 8),
-                            widget.trailingIcon!,
-                          ],
-                        ],
-                      ),
-              ),
-            ),
-          ),
-        ),
-      ),
+    return BAButton(
+      onPressed: onPressed,
+      style: BAButtonStyle.primary,
+      loading: loading,
+      height: height,
+      width: width,
+      enabled: enabled,
+      leadingIcon: leadingIcon,
+      trailingIcon: trailingIcon,
+      padding: padding,
+      child: Text(text),
     );
   }
 }
 
-/// 次要按钮 - 草绿色/描边样式，立体悬浮效果
-class BASecondaryButton extends StatefulWidget {
-  /// 按钮文字
-  final String text;
-
-  /// 点击回调
+/// 蔚蓝档案风格次要按钮
+class BASecondaryButton extends StatelessWidget {
   final VoidCallback? onPressed;
-
-  /// 是否禁用
-  final bool disabled;
-
-  /// 是否加载中
+  final String text;
   final bool loading;
-
-  /// 左侧图标
   final Widget? leadingIcon;
-
-  /// 右侧图标
   final Widget? trailingIcon;
-
-  /// 按钮高度
-  final double height;
-
-  /// 按钮宽度
+  final double? height;
   final double? width;
+  final bool enabled;
 
   const BASecondaryButton({
     super.key,
+    required this.onPressed,
     required this.text,
-    this.onPressed,
-    this.disabled = false,
     this.loading = false,
     this.leadingIcon,
     this.trailingIcon,
-    this.height = 48,
+    this.height,
     this.width,
+    this.enabled = true,
   });
 
   @override
-  State<BASecondaryButton> createState() => _BASecondaryButtonState();
-}
-
-class _BASecondaryButtonState extends State<BASecondaryButton> {
-  bool _isHovered = false;
-  bool _isPressed = false;
-
-  bool get _isEnabled => !widget.disabled && !widget.loading;
-
-  @override
   Widget build(BuildContext context) {
-    final translateY = _isPressed ? 2.0 : 0.0;
-    final shadowOpacity = _isPressed ? 0.15 : 0.3;
-    final blurRadius = _isPressed ? 4.0 : 8.0;
-    final offsetY = _isPressed ? 2.0 : 4.0;
-
-    final backgroundColor = _isEnabled
-        ? (_isHovered ? BAColors.surfaceVariant : BAColors.surface)
-        : BAColors.surfaceVariant;
-
-    final borderColor = _isEnabled
-        ? (_isHovered ? BAColors.secondaryDark : BAColors.secondary)
-        : BAColors.textDisabled;
-
-    final textColor = _isEnabled
-        ? (_isHovered ? BAColors.secondaryDark : BAColors.secondary)
-        : BAColors.textDisabled;
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: GestureDetector(
-        onTapDown: (_) => _isEnabled ? setState(() => _isPressed = true) : null,
-        onTapUp: (_) {
-          if (_isEnabled) {
-            setState(() => _isPressed = false);
-            widget.onPressed?.call();
-          }
-        },
-        onTapCancel: () =>
-            _isEnabled ? setState(() => _isPressed = false) : null,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 100),
-          curve: Curves.easeOutCubic,
-          height: widget.height,
-          width: widget.width,
-          transform: Matrix4.translationValues(0, translateY, 0),
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: BATheme.borderRadius,
-            border: Border.all(color: borderColor, width: 2),
-            boxShadow: _isEnabled
-                ? [
-                    BoxShadow(
-                      color: BAColors.shadowOf(context).withOpacity(shadowOpacity),
-                      blurRadius: blurRadius,
-                      offset: Offset(0, offsetY),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BATheme.borderRadius,
-            child: InkWell(
-              onTap: _isEnabled ? widget.onPressed : null,
-              borderRadius: BATheme.borderRadius,
-              child: Center(
-                child: widget.loading
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation(
-                            textColor.withOpacity(0.8),
-                          ),
-                        ),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (widget.leadingIcon != null) ...[
-                            widget.leadingIcon!,
-                            const SizedBox(width: 8),
-                          ],
-                          Text(
-                            widget.text,
-                            style: BATypography.button.copyWith(
-                              color: textColor,
-                            ),
-                          ),
-                          if (widget.trailingIcon != null) ...[
-                            const SizedBox(width: 8),
-                            widget.trailingIcon!,
-                          ],
-                        ],
-                      ),
-              ),
-            ),
-          ),
-        ),
-      ),
+    return BAButton(
+      onPressed: onPressed,
+      style: BAButtonStyle.secondary,
+      loading: loading,
+      height: height,
+      width: width,
+      enabled: enabled,
+      leadingIcon: leadingIcon,
+      trailingIcon: trailingIcon,
+      child: Text(text),
     );
   }
 }
 
-/// 危险按钮 - 红色，立体悬浮效果
-class BADangerButton extends StatefulWidget {
-  /// 按钮文字
-  final String text;
-
-  /// 点击回调
+/// 蔚蓝档案风格危险按钮
+class BADangerButton extends StatelessWidget {
   final VoidCallback? onPressed;
-
-  /// 是否禁用
-  final bool disabled;
-
-  /// 是否加载中
+  final String text;
   final bool loading;
-
-  /// 左侧图标
   final Widget? leadingIcon;
-
-  /// 右侧图标
   final Widget? trailingIcon;
-
-  /// 按钮高度
-  final double height;
-
-  /// 按钮宽度
+  final double? height;
   final double? width;
+  final bool enabled;
 
   const BADangerButton({
     super.key,
+    required this.onPressed,
     required this.text,
-    this.onPressed,
-    this.disabled = false,
     this.loading = false,
     this.leadingIcon,
     this.trailingIcon,
-    this.height = 48,
+    this.height,
     this.width,
+    this.enabled = true,
   });
 
   @override
-  State<BADangerButton> createState() => _BADangerButtonState();
+  Widget build(BuildContext context) {
+    return BAButton(
+      onPressed: onPressed,
+      style: BAButtonStyle.danger,
+      loading: loading,
+      height: height,
+      width: width,
+      enabled: enabled,
+      leadingIcon: leadingIcon,
+      trailingIcon: trailingIcon,
+      child: Text(text),
+    );
+  }
 }
 
-class _BADangerButtonState extends State<BADangerButton> {
+/// 蔚蓝档案风格图标按钮
+class BAIconButton extends StatefulWidget {
+  final VoidCallback? onPressed;
+  final IconData icon;
+  final String? tooltip;
+  final double size;
+  final bool enabled;
+  final Color? color;
+  final Color? backgroundColor;
+
+  const BAIconButton({
+    super.key,
+    required this.onPressed,
+    required this.icon,
+    this.tooltip,
+    this.size = 20,
+    this.enabled = true,
+    this.color,
+    this.backgroundColor,
+  });
+
+  @override
+  State<BAIconButton> createState() => _BAIconButtonState();
+}
+
+class _BAIconButtonState extends State<BAIconButton> {
   bool _isHovered = false;
   bool _isPressed = false;
 
-  bool get _isEnabled => !widget.disabled && !widget.loading;
-
   @override
   Widget build(BuildContext context) {
-    final translateY = _isPressed ? 2.0 : 0.0;
-    final shadowOpacity = _isPressed ? 0.15 : 0.3;
-    final blurRadius = _isPressed ? 4.0 : 8.0;
-    final offsetY = _isPressed ? 2.0 : 4.0;
+    final isDisabled = !widget.enabled;
+    final effectiveOnPressed = isDisabled ? null : widget.onPressed;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
-        onTapDown: (_) => _isEnabled ? setState(() => _isPressed = true) : null,
-        onTapUp: (_) {
-          if (_isEnabled) {
-            setState(() => _isPressed = false);
-            widget.onPressed?.call();
-          }
-        },
-        onTapCancel: () =>
-            _isEnabled ? setState(() => _isPressed = false) : null,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 100),
-          curve: Curves.easeOutCubic,
-          height: widget.height,
-          width: widget.width,
-          transform: Matrix4.translationValues(0, translateY, 0),
-          decoration: BoxDecoration(
-            color: _isEnabled
-                ? (_isHovered ? BAColors.dangerDark : BAColors.danger)
-                : BAColors.textDisabledOf(context),
-            borderRadius: BATheme.borderRadius,
-            boxShadow: _isEnabled
-                ? [
-                    BoxShadow(
-                      color: BAColors.shadowOf(context).withOpacity(shadowOpacity),
-                      blurRadius: blurRadius,
-                      offset: Offset(0, offsetY),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BATheme.borderRadius,
-            child: InkWell(
-              onTap: _isEnabled ? widget.onPressed : null,
-              borderRadius: BATheme.borderRadius,
-              child: Center(
-                child: widget.loading
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation(
-                            Colors.white.withOpacity(0.8),
-                          ),
-                        ),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (widget.leadingIcon != null) ...[
-                            widget.leadingIcon!,
-                            const SizedBox(width: 8),
-                          ],
-                          Text(
-                            widget.text,
-                            style: BATypography.button.copyWith(
-                              color: Colors.white,
-                            ),
-                          ),
-                          if (widget.trailingIcon != null) ...[
-                            const SizedBox(width: 8),
-                            widget.trailingIcon!,
-                          ],
-                        ],
-                      ),
+        onTapDown: (_) => setState(() => _isPressed = true),
+        onTapUp: (_) => setState(() => _isPressed = false),
+        onTapCancel: () => setState(() => _isPressed = false),
+        child: Tooltip(
+          message: widget.tooltip,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeOutCubic,
+            decoration: BoxDecoration(
+              color: widget.backgroundColor ??
+                  (_isHovered
+                      ? BAColors.surfaceVariantOf(context)
+                      : Colors.transparent),
+              borderRadius: BATheme.borderRadiusSmall,
+            ),
+            child: AnimatedScale(
+              scale: _isPressed ? 0.92 : 1.0,
+              duration: const Duration(milliseconds: 100),
+              child: IconButton(
+                onPressed: effectiveOnPressed,
+                icon: Icon(widget.icon),
+                iconSize: widget.size,
+                color: isDisabled
+                    ? BAColors.textDisabledOf(context)
+                    : (widget.color ?? BAColors.textPrimaryOf(context)),
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                padding: const EdgeInsets.all(8),
               ),
             ),
           ),

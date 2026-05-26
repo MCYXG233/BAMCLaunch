@@ -45,7 +45,7 @@ class SearchService {
   bool _initialized = false;
 
   /// 当前搜索来源
-  SearchSource currentSource = SearchSource.all;
+  SearchSource currentSource = SearchSource.modrinth;
 
   /// 初始化搜索服务
   Future<void> initialize() async {

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'colors.dart';
 import 'typography.dart';
 
-/// 蔚蓝档案UI主题数据
+/// 蔚蓝档案 (Blue Archive) UI 主题数据
+/// 完全按照蔚蓝档案的视觉风格设计
 class BATheme {
   /// 向后兼容：获取默认主题数据（深色）
   static ThemeData get theme => darkTheme;
@@ -14,15 +15,12 @@ class BATheme {
       colorScheme: _darkColorScheme,
       scaffoldBackgroundColor: BAColors.darkBackground,
       cardColor: BAColors.darkSurface,
-      cardTheme: _darkCardTheme,
-      buttonTheme: _buttonTheme,
       textTheme: _textTheme,
       inputDecorationTheme: _darkInputDecorationTheme,
       iconTheme: _darkIconTheme,
       dividerTheme: _darkDividerTheme,
-      dialogTheme: _darkDialogTheme,
-      tooltipTheme: _darkTooltipTheme,
       appBarTheme: _darkAppBarTheme,
+      bottomNavigationBarTheme: _darkBottomNavBarTheme,
     );
   }
 
@@ -33,15 +31,12 @@ class BATheme {
       colorScheme: _lightColorScheme,
       scaffoldBackgroundColor: BAColors.lightBackground,
       cardColor: BAColors.lightSurface,
-      cardTheme: _lightCardTheme,
-      buttonTheme: _buttonTheme,
       textTheme: _textTheme,
       inputDecorationTheme: _lightInputDecorationTheme,
       iconTheme: _lightIconTheme,
       dividerTheme: _lightDividerTheme,
-      dialogTheme: _lightDialogTheme,
-      tooltipTheme: _lightTooltipTheme,
       appBarTheme: _lightAppBarTheme,
+      bottomNavigationBarTheme: _lightBottomNavBarTheme,
     );
   }
 
@@ -71,8 +66,8 @@ class BATheme {
       onSecondaryContainer: Colors.white,
       error: BAColors.danger,
       onError: Colors.white,
-      errorContainer: BAColors.dangerDark,
-      onErrorContainer: Colors.white,
+      errorContainer: Color(0xFFFFCDD2),
+      onErrorContainer: Color(0xFFB71C1C),
       surface: BAColors.darkSurface,
       onSurface: BAColors.darkTextPrimary,
       surfaceVariant: BAColors.darkSurfaceVariant,
@@ -81,6 +76,7 @@ class BATheme {
       shadow: BAColors.darkShadow,
       background: BAColors.darkBackground,
       onBackground: BAColors.darkTextPrimary,
+      surfaceTint: BAColors.primary,
     );
   }
 
@@ -97,8 +93,8 @@ class BATheme {
       onSecondaryContainer: Color(0xFF1A1A2E),
       error: BAColors.danger,
       onError: Colors.white,
-      errorContainer: BAColors.dangerLight,
-      onErrorContainer: Colors.white,
+      errorContainer: Color(0xFFFFCDD2),
+      onErrorContainer: Color(0xFFB71C1C),
       surface: BAColors.lightSurface,
       onSurface: BAColors.lightTextPrimary,
       surfaceVariant: BAColors.lightSurfaceVariant,
@@ -107,56 +103,28 @@ class BATheme {
       shadow: BAColors.lightShadow,
       background: BAColors.lightBackground,
       onBackground: BAColors.lightTextPrimary,
-    );
-  }
-
-  /// 深色主题卡片主题
-  static CardThemeData get _darkCardTheme {
-    return CardThemeData(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: BAColors.darkSurface,
-      shadowColor: BAColors.darkShadow,
-      margin: EdgeInsets.zero,
-    );
-  }
-
-  /// 浅色主题卡片主题
-  static CardThemeData get _lightCardTheme {
-    return CardThemeData(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: BAColors.lightSurface,
-      shadowColor: BAColors.lightShadow,
-      margin: EdgeInsets.zero,
-    );
-  }
-
-  /// 按钮主题（通用）
-  static ButtonThemeData get _buttonTheme {
-    return ButtonThemeData(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      buttonColor: BAColors.primary,
-      textTheme: ButtonTextTheme.primary,
+      surfaceTint: BAColors.primary,
     );
   }
 
   /// 文本主题（通用）
   static TextTheme get _textTheme {
-    return const TextTheme(
+    return TextTheme(
       displayLarge: BATypography.headlineLarge,
       displayMedium: BATypography.headlineMedium,
       displaySmall: BATypography.headlineSmall,
+      headlineLarge: BATypography.headlineLarge,
+      headlineMedium: BATypography.headlineMedium,
+      headlineSmall: BATypography.headlineSmall,
+      titleLarge: BATypography.titleLarge,
+      titleMedium: BATypography.titleMedium,
+      titleSmall: BATypography.titleSmall,
       bodyLarge: BATypography.bodyLarge,
       bodyMedium: BATypography.bodyMedium,
       bodySmall: BATypography.bodySmall,
       labelLarge: BATypography.button,
       labelMedium: BATypography.label,
-      labelSmall: TextStyle(
-        fontSize: 10,
-        fontWeight: FontWeight.normal,
-        letterSpacing: 0.2,
-      ),
+      labelSmall: BATypography.labelSmall,
     );
   }
 
@@ -164,26 +132,26 @@ class BATheme {
   static InputDecorationTheme get _darkInputDecorationTheme {
     return InputDecorationTheme(
       filled: true,
-      fillColor: BAColors.darkSurface,
+      fillColor: BAColors.darkSurfaceVariant,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: borderRadiusMedium,
         borderSide: const BorderSide(color: BAColors.darkBorder, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: borderRadiusMedium,
         borderSide: const BorderSide(color: BAColors.darkBorder, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: borderRadiusMedium,
         borderSide: const BorderSide(color: BAColors.primary, width: 2),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: borderRadiusMedium,
         borderSide: const BorderSide(color: BAColors.danger, width: 2),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: borderRadiusMedium,
         borderSide: const BorderSide(color: BAColors.danger, width: 2),
       ),
       hintStyle: const TextStyle(color: BAColors.darkTextDisabled, fontSize: 14),
@@ -196,26 +164,26 @@ class BATheme {
   static InputDecorationTheme get _lightInputDecorationTheme {
     return InputDecorationTheme(
       filled: true,
-      fillColor: BAColors.lightSurface,
+      fillColor: BAColors.lightSurfaceVariant,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: borderRadiusMedium,
         borderSide: const BorderSide(color: BAColors.lightBorder, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: borderRadiusMedium,
         borderSide: const BorderSide(color: BAColors.lightBorder, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: borderRadiusMedium,
         borderSide: const BorderSide(color: BAColors.primary, width: 2),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: borderRadiusMedium,
         borderSide: const BorderSide(color: BAColors.danger, width: 2),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: borderRadiusMedium,
         borderSide: const BorderSide(color: BAColors.danger, width: 2),
       ),
       hintStyle: const TextStyle(color: BAColors.lightTextDisabled, fontSize: 14),
@@ -226,12 +194,12 @@ class BATheme {
 
   /// 深色主题图标主题
   static IconThemeData get _darkIconTheme {
-    return const IconThemeData(color: BAColors.darkTextPrimary, size: 20);
+    return const IconThemeData(color: BAColors.darkTextPrimary, size: 24);
   }
 
   /// 浅色主题图标主题
   static IconThemeData get _lightIconTheme {
-    return const IconThemeData(color: BAColors.lightTextPrimary, size: 20);
+    return const IconThemeData(color: BAColors.lightTextPrimary, size: 24);
   }
 
   /// 深色主题分割线主题
@@ -249,60 +217,6 @@ class BATheme {
       color: BAColors.lightBorder,
       thickness: 1,
       space: 1,
-    );
-  }
-
-  /// 深色主题对话框主题
-  static DialogThemeData get _darkDialogTheme {
-    return DialogThemeData(
-      backgroundColor: BAColors.darkSurface,
-      elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      titleTextStyle: BATypography.headlineMedium.copyWith(
-        color: BAColors.darkTextPrimary,
-      ),
-      contentTextStyle: BATypography.bodyMedium.copyWith(
-        color: BAColors.darkTextSecondary,
-      ),
-    );
-  }
-
-  /// 浅色主题对话框主题
-  static DialogThemeData get _lightDialogTheme {
-    return DialogThemeData(
-      backgroundColor: BAColors.lightSurface,
-      elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      titleTextStyle: BATypography.headlineMedium.copyWith(
-        color: BAColors.lightTextPrimary,
-      ),
-      contentTextStyle: BATypography.bodyMedium.copyWith(
-        color: BAColors.lightTextSecondary,
-      ),
-    );
-  }
-
-  /// 深色主题工具提示主题
-  static TooltipThemeData get _darkTooltipTheme {
-    return TooltipThemeData(
-      decoration: BoxDecoration(
-        color: BAColors.darkSurfaceVariant,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      textStyle: BATypography.bodySmall.copyWith(color: BAColors.darkTextPrimary),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    );
-  }
-
-  /// 浅色主题工具提示主题
-  static TooltipThemeData get _lightTooltipTheme {
-    return TooltipThemeData(
-      decoration: BoxDecoration(
-        color: BAColors.lightSurfaceVariant,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      textStyle: BATypography.bodySmall.copyWith(color: BAColors.lightTextPrimary),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     );
   }
 
@@ -332,11 +246,46 @@ class BATheme {
     );
   }
 
+  /// 深色主题底部导航栏主题
+  static BottomNavigationBarThemeData get _darkBottomNavBarTheme {
+    return const BottomNavigationBarThemeData(
+      backgroundColor: BAColors.darkSurface,
+      selectedItemColor: BAColors.primary,
+      unselectedItemColor: BAColors.darkTextSecondary,
+      elevation: 2,
+      type: BottomNavigationBarType.fixed,
+    );
+  }
+
+  /// 浅色主题底部导航栏主题
+  static BottomNavigationBarThemeData get _lightBottomNavBarTheme {
+    return const BottomNavigationBarThemeData(
+      backgroundColor: BAColors.lightSurface,
+      selectedItemColor: BAColors.primary,
+      unselectedItemColor: BAColors.lightTextSecondary,
+      elevation: 2,
+      type: BottomNavigationBarType.fixed,
+    );
+  }
+
+  // ========== 圆角半径 ==========
+  
   /// 标准圆角半径
   static BorderRadius get borderRadius => BorderRadius.circular(12);
 
   /// 小圆角半径
   static BorderRadius get borderRadiusSmall => BorderRadius.circular(8);
+
+  /// 中圆角半径
+  static BorderRadius get borderRadiusMedium => BorderRadius.circular(12);
+
+  /// 大圆角半径
+  static BorderRadius get borderRadiusLarge => BorderRadius.circular(16);
+
+  /// 超大圆角半径
+  static BorderRadius get borderRadiusExtraLarge => BorderRadius.circular(24);
+
+  // ========== 阴影 ==========
 
   /// 向后兼容：获取标准阴影（默认深色）
   static List<BoxShadow> get shadows => darkShadows;
@@ -346,49 +295,57 @@ class BATheme {
 
   /// 获取深色主题标准阴影
   static List<BoxShadow> get darkShadows => [
-    BoxShadow(
-      color: BAColors.darkShadow.withOpacity(0.3),
-      blurRadius: 8,
-      offset: const Offset(0, 4),
-    ),
-    BoxShadow(
-      color: BAColors.darkShadow.withOpacity(0.15),
-      blurRadius: 16,
-      offset: const Offset(0, 8),
-    ),
-  ];
+        BoxShadow(
+          color: BAColors.darkShadow.withOpacity(0.2),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ];
 
   /// 获取浅色主题标准阴影
   static List<BoxShadow> get lightShadows => [
-    BoxShadow(
-      color: BAColors.lightShadow.withOpacity(0.3),
-      blurRadius: 8,
-      offset: const Offset(0, 4),
-    ),
-    BoxShadow(
-      color: BAColors.lightShadow.withOpacity(0.15),
-      blurRadius: 16,
-      offset: const Offset(0, 8),
-    ),
-  ];
+        BoxShadow(
+          color: BAColors.lightShadow.withOpacity(0.15),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ];
 
   /// 获取深色主题小阴影
   static List<BoxShadow> get darkShadowsSmall => [
-    BoxShadow(
-      color: BAColors.darkShadow.withOpacity(0.2),
-      blurRadius: 4,
-      offset: const Offset(0, 2),
-    ),
-  ];
+        BoxShadow(
+          color: BAColors.darkShadow.withOpacity(0.15),
+          blurRadius: 6,
+          offset: const Offset(0, 2),
+        ),
+      ];
 
   /// 获取浅色主题小阴影
   static List<BoxShadow> get lightShadowsSmall => [
-    BoxShadow(
-      color: BAColors.lightShadow.withOpacity(0.2),
-      blurRadius: 4,
-      offset: const Offset(0, 2),
-    ),
-  ];
+        BoxShadow(
+          color: BAColors.lightShadow.withOpacity(0.1),
+          blurRadius: 6,
+          offset: const Offset(0, 2),
+        ),
+      ];
+
+  /// 获取深色主题大阴影
+  static List<BoxShadow> get darkShadowsLarge => [
+        BoxShadow(
+          color: BAColors.darkShadow.withOpacity(0.3),
+          blurRadius: 20,
+          offset: const Offset(0, 8),
+        ),
+      ];
+
+  /// 获取浅色主题大阴影
+  static List<BoxShadow> get lightShadowsLarge => [
+        BoxShadow(
+          color: BAColors.lightShadow.withOpacity(0.2),
+          blurRadius: 20,
+          offset: const Offset(0, 8),
+        ),
+      ];
 
   /// 根据当前主题获取标准阴影
   static List<BoxShadow> shadowsOf(BuildContext context) {
@@ -402,6 +359,17 @@ class BATheme {
     return brightness == Brightness.light ? lightShadowsSmall : darkShadowsSmall;
   }
 
+  /// 根据当前主题获取大阴影
+  static List<BoxShadow> shadowsLargeOf(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    return brightness == Brightness.light ? lightShadowsLarge : darkShadowsLarge;
+  }
+
+  // ========== 毛玻璃效果 ==========
+  
   /// 毛玻璃效果模糊值
   static const double blurSigma = 10;
+  
+  /// 毛玻璃效果轻量模糊值
+  static const double blurSigmaLight = 5;
 }

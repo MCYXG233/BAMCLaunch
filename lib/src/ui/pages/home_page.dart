@@ -3,9 +3,9 @@ import 'package:window_manager/window_manager.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/app_theme.dart';
-import '../components/custom_title_bar.dart';
-import '../components/ba_sidebar.dart';
+import '../theme/animations.dart';
 import '../components/ba_buttons.dart';
+import '../components/index.dart';
 import '../../config/config_manager_impl.dart';
 import '../../account/account_manager.dart';
 import '../../version/version_manager.dart';
@@ -13,13 +13,14 @@ import '../../game/java/java_manager.dart';
 import '../../game/launcher/game_launcher.dart';
 import '../../game/launcher/models.dart';
 import '../../core/logger.dart';
+import '../../instance/index.dart';
+import '../../extension/index.dart';
 import 'version_page.dart';
 import 'account_page.dart';
 import 'settings_page.dart';
 import 'resource_center_page.dart';
 
-/// 主界面页面
-/// 包含侧边栏导航、启动卡片、最近游戏记录等功能
+/// 蔚蓝档案风格主界面
 class BAMCHomePage extends StatefulWidget {
   const BAMCHomePage({super.key});
 
@@ -27,36 +28,117 @@ class BAMCHomePage extends StatefulWidget {
   State<BAMCHomePage> createState() => _BAMCHomePageState();
 }
 
-class _BAMCHomePageState extends State<BAMCHomePage> {
+class _BAMCHomePageState extends State<BAMCHomePage>
+    with SingleTickerProviderStateMixin {
   String _selectedNavItem = 'home';
   bool _isLaunching = false;
   String? _selectedVersion;
   String? _selectedAccountName;
   String? _javaStatus;
-  final List<Map<String, String>> _recentGames = [
-    {'version': '1.20.1', 'time': '2小时前', 'account': '玩家1'},
-    {'version': '1.19.4', 'time': '昨天', 'account': '玩家2'},
-    {'version': '1.18.2', 'time': '3天前', 'account': '玩家1'},
-  ];
+  bool _sidebarCollapsed = false;
+  bool _isLoading = true;
 
-  final List<BASidebarItem> _navItems = const [
-    BASidebarItem(icon: Icons.home, label: '主页', id: 'home'),
-    BASidebarItem(icon: Icons.extension, label: '版本管理', id: 'versions'),
-    BASidebarItem(icon: Icons.inventory_2, label: '资源中心', id: 'resource-center'),
-    BASidebarItem(icon: Icons.people, label: '账户管理', id: 'accounts'),
-    BASidebarItem(icon: Icons.settings, label: '设置', id: 'settings'),
+  late AnimationController _animationController;
+  late Animation<double> _sidebarAnimation;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _slideAnimation;
+
+  final List<BASidebarItem> _navItems = [
+    BASidebarItem(
+      id: 'home',
+      icon: Icons.home_rounded,
+      label: '主页',
+      badge: null,
+      onTap: () {},
+    ),
+    BASidebarItem(
+      id: 'instances',
+      icon: Icons.folder_rounded,
+      label: '实例管理',
+      badge: null,
+      onTap: () {},
+    ),
+    BASidebarItem(
+      id: 'versions',
+      icon: Icons.system_update_alt_rounded,
+      label: '版本管理',
+      badge: null,
+      onTap: () {},
+    ),
+    BASidebarItem(
+      id: 'resource-center',
+      icon: Icons.inventory_2_rounded,
+      label: '资源中心',
+      badge: null,
+      onTap: () {},
+    ),
+    BASidebarItem(
+      id: 'accounts',
+      icon: Icons.people_rounded,
+      label: '账户管理',
+      badge: null,
+      onTap: () {},
+    ),
+    BASidebarItem(
+      id: 'extensions',
+      icon: Icons.extension_rounded,
+      label: '扩展管理',
+      badge: null,
+      onTap: () {},
+    ),
+    BASidebarItem(
+      id: 'settings',
+      icon: Icons.settings_rounded,
+      label: '设置',
+      badge: null,
+      onTap: () {},
+    ),
   ];
 
   @override
   void initState() {
     super.initState();
-    _loadInitialData();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _sidebarAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: BAAnimations.elasticInOut,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.2, 0.8, curve: Curves.easeOut),
+      ),
+    );
+    _scaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: BAAnimations.elasticOut,
+      ),
+    );
+    _slideAnimation = Tween<double>(begin: 20.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: BAAnimations.smooth,
+      ),
+    );
+
+    _loadInitialData().then((_) {
+      _animationController.forward();
+    });
   }
 
-  /// 加载初始数据
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadInitialData() async {
     try {
-      // 加载已安装版本
       final versionManager = VersionManager();
       final installedVersions = await versionManager.getInstalledVersions();
       if (installedVersions.isNotEmpty) {
@@ -65,7 +147,6 @@ class _BAMCHomePageState extends State<BAMCHomePage> {
         });
       }
 
-      // 加载选中账户
       final accountManager = AccountManager();
       final selectedAccount = await accountManager.getSelectedAccount();
       if (selectedAccount != null) {
@@ -74,20 +155,22 @@ class _BAMCHomePageState extends State<BAMCHomePage> {
         });
       }
 
-      // 检查Java状态
       final javaManager = JavaManager();
       final selectedJava = await javaManager.getSelectedJava();
       setState(() {
         _javaStatus = selectedJava != null
             ? 'Java ${selectedJava.majorVersion}'
             : '未检测到Java';
+        _isLoading = false;
       });
     } catch (e) {
       Logger().error('加载初始数据失败', e);
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
-  /// 启动游戏
   Future<void> _launchGame() async {
     if (_isLaunching) return;
     if (_selectedVersion == null) {
@@ -107,29 +190,24 @@ class _BAMCHomePageState extends State<BAMCHomePage> {
       final logger = Logger();
       logger.info('正在启动游戏: $_selectedVersion');
 
-      // 获取必要的管理器
       final accountManager = AccountManager();
       final javaManager = JavaManager();
       final gameLauncher = GameLauncher();
       final configManager = ConfigManagerImpl();
 
-      // 获取账户
       final accounts = await accountManager.getAccounts();
       final account = accounts.firstWhere(
         (a) => a.username == _selectedAccountName,
         orElse: () => accounts.first,
       );
 
-      // 获取Java
       final java = await javaManager.getSelectedJava();
       if (java == null) {
         throw Exception('未找到有效的Java安装');
       }
 
-      // 获取游戏目录
       final gameDir = await VersionManager().getGameDir();
 
-      // 构建启动参数
       final launchArgs = LaunchArguments(
         gameVersion: _selectedVersion!,
         gameDirectory: gameDir,
@@ -140,7 +218,6 @@ class _BAMCHomePageState extends State<BAMCHomePage> {
         gameArguments: [],
       );
 
-      // 启动游戏
       await gameLauncher.launch(launchArgs);
 
       if (mounted) {
@@ -160,239 +237,56 @@ class _BAMCHomePageState extends State<BAMCHomePage> {
     }
   }
 
-  /// 显示成功提示
   void _showSuccessSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: BAColors.secondary,
+        backgroundColor: BAColors.success,
         duration: const Duration(seconds: 2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BATheme.borderRadiusSmall,
+        ),
       ),
     );
   }
 
-  /// 显示错误提示
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: BAColors.danger,
         duration: const Duration(seconds: 3),
+        shape: RoundedRectangleBorder(
+          borderRadius: BATheme.borderRadiusSmall,
+        ),
       ),
     );
+  }
+
+  void _toggleSidebar() {
+    setState(() {
+      _sidebarCollapsed = !_sidebarCollapsed;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: BAColors.background,
-      body: Column(
-        children: [
-          // 自定义标题栏
-          CustomTitleBar(title: 'BAMC 启动器', showWindowControls: true),
-          // 主内容区域
-          Expanded(
-            child: Row(
-              children: [
-                // 左侧侧边栏
-                BASidebar(
-                  items: _navItems,
-                  selectedId: _selectedNavItem,
-                  onSelected: (id) {
-                    setState(() {
-                      _selectedNavItem = id;
-                    });
-                  },
-                  collapsible: true,
-                  initiallyCollapsed: false,
-                ),
-                // 右侧内容区
-                Expanded(child: _buildContentArea()),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 构建内容区域
-  Widget _buildContentArea() {
-    switch (_selectedNavItem) {
-      case 'home':
-        return _buildHomeContent();
-      case 'versions':
-        return const BAMCVersionPage();
-      case 'resource-center':
-        return const ResourceCenterPage();
-      case 'accounts':
-        return const BAMCAccountPage();
-      case 'settings':
-        return const BAMCSettingsPage();
-      default:
-        return _buildHomeContent();
-    }
-  }
-
-  /// 构建主页内容
-  Widget _buildHomeContent() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 欢迎文本
-          Text(
-            '欢迎回来，老师',
-            style: BATypography.headlineMedium.copyWith(
-              color: BAColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '准备好开始新的冒险了吗？',
-            style: BATypography.bodyMedium.copyWith(
-              color: BAColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 32),
-          // 启动卡片
-          _buildLaunchCard(),
-          const SizedBox(height: 32),
-          // 最近游戏记录
-          _buildRecentGames(),
-        ],
-      ),
-    );
-  }
-
-  /// 构建启动卡片
-  Widget _buildLaunchCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: BAColors.surface,
-        borderRadius: BATheme.borderRadius,
-        boxShadow: BATheme.shadows,
-        border: Border.all(color: BAColors.border, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '快速启动',
-            style: BATypography.headlineSmall.copyWith(
-              color: BAColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 24),
-          // 配置信息行
-          Row(
-            children: [
-              Expanded(
-                child: _buildInfoItem(
-                  icon: Icons.extension,
-                  label: '游戏版本',
-                  value: _selectedVersion ?? '未选择',
-                  color: BAColors.primary,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildInfoItem(
-                  icon: Icons.person,
-                  label: '游戏账户',
-                  value: _selectedAccountName ?? '未选择',
-                  color: BAColors.secondary,
-                  onTap: () {
-                    // 跳转到账户管理页面
-                    setState(() {
-                      _selectedNavItem = 'accounts';
-                    });
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildInfoItem(
-                  icon: Icons.code,
-                  label: 'Java环境',
-                  value: _javaStatus ?? '检测中...',
-                  color: BAColors.success,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          // 启动按钮
-          SizedBox(
-            width: double.infinity,
-            child: BAPrimaryButton(
-              text: '启动游戏',
-              onPressed: _launchGame,
-              loading: _isLaunching,
-              height: 56,
-              leadingIcon: const Icon(
-                Icons.play_arrow,
-                color: Colors.white,
-                size: 24,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 构建信息项组件
-  Widget _buildInfoItem({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-    VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
+      backgroundColor: BAColors.backgroundOf(context),
+      body: Container(
         decoration: BoxDecoration(
-          color: BAColors.surfaceVariant,
-          borderRadius: BATheme.borderRadiusSmall,
+          gradient: BAColors.backgroundGradientOf(context),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Icon(icon, color: color, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: BATypography.label.copyWith(
-                    color: BAColors.textSecondary,
-                  ),
-                ),
-                if (onTap != null) ...[
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.edit,
-                    color: color,
-                    size: 14,
-                  ),
+            CustomTitleBar(title: 'BAMC 启动器', showWindowControls: true),
+            Expanded(
+              child: Row(
+                children: [
+                  _buildSidebar(),
+                  Expanded(child: _buildContent()),
                 ],
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: BATypography.bodyLarge.copyWith(
-                color: BAColors.textPrimary,
-                fontWeight: FontWeight.w600,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -400,78 +294,586 @@ class _BAMCHomePageState extends State<BAMCHomePage> {
     );
   }
 
-  /// 构建最近游戏记录
+  Widget _buildSidebar() {
+    return AnimatedBuilder(
+      animation: _sidebarAnimation,
+      builder: (context, child) {
+        return Container(
+          width: _sidebarCollapsed ? 72 : 260,
+          decoration: BoxDecoration(
+            color: BAColors.surfaceOf(context),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(2, 0),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              _buildSidebarHeader(),
+              Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  itemCount: _navItems.length,
+                  separatorBuilder: (context, index) => const SizedBox(height: 4),
+                  itemBuilder: (context, index) => _buildNavItem(_navItems[index]),
+                ),
+              ),
+              _buildSidebarFooter(),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSidebarHeader() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            BAColors.primary.withOpacity(0.2),
+            Colors.transparent,
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: Row(
+        children: [
+          BAPulseBuilder(
+            enabled: true,
+            duration: const Duration(seconds: 2),
+            scaleFactor: 1.05,
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                gradient: BAColors.primaryGradient,
+                borderRadius: BATheme.borderRadiusMedium,
+                boxShadow: BATheme.shadowsSmallOf(context),
+              ),
+              child: Icon(
+                Icons.sports_esports_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          ),
+          if (!_sidebarCollapsed) ...[
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'BAMC 启动器',
+                    style: BATypography.titleMedium.copyWith(
+                      color: BAColors.textPrimaryOf(context),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    'v2.0.0',
+                    style: BATypography.bodySmall.copyWith(
+                      color: BAColors.textSecondaryOf(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(BASidebarItem item) {
+    final isSelected = item.id == _selectedNavItem;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _selectedNavItem = item.id;
+          });
+        },
+        borderRadius: BATheme.borderRadiusSmall,
+        child: BAFloatBuilder(
+          enabled: isSelected,
+          floatDistance: 3,
+          duration: const Duration(seconds: 2),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            curve: BAAnimations.smooth,
+            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+            padding: EdgeInsets.symmetric(
+              horizontal: _sidebarCollapsed ? 14 : 16,
+              vertical: 12,
+            ),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? BAColors.primary.withOpacity(0.15)
+                  : Colors.transparent,
+              borderRadius: BATheme.borderRadiusSmall,
+              border: isSelected
+                  ? Border.all(color: BAColors.primary.withOpacity(0.3), width: 1)
+                  : null,
+              boxShadow: isSelected ? BATheme.shadowsSmallOf(context) : [],
+            ),
+            child: Row(
+              children: [
+                AnimatedScale(
+                  scale: isSelected ? 1.15 : 1.0,
+                  duration: const Duration(milliseconds: 250),
+                  curve: BAAnimations.elasticOut,
+                  child: Icon(
+                    item.icon,
+                    color: isSelected
+                        ? BAColors.primary
+                        : BAColors.textSecondaryOf(context),
+                    size: 22,
+                  ),
+                ),
+                if (!_sidebarCollapsed) ...[
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: AnimatedOpacity(
+                      opacity: _sidebarCollapsed ? 0.0 : 1.0,
+                      duration: const Duration(milliseconds: 200),
+                      child: Text(
+                        item.label,
+                        style: BATypography.bodyMedium.copyWith(
+                          color: isSelected
+                              ? BAColors.primary
+                              : BAColors.textPrimaryOf(context),
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (item.badge != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: BAColors.danger,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        item.badge!,
+                        style: BATypography.labelSmall.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSidebarFooter() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      child: BAIconButton(
+        onPressed: _toggleSidebar,
+        icon: _sidebarCollapsed
+            ? Icons.arrow_right_rounded
+            : Icons.arrow_left_rounded,
+        tooltip: _sidebarCollapsed ? '展开侧边栏' : '收起侧边栏',
+        size: 24,
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: AnimatedBuilder(
+        animation: _fadeAnimation,
+        builder: (context, child) {
+          return Opacity(
+            opacity: _fadeAnimation.value,
+            child: Transform.translate(
+              offset: Offset(_slideAnimation.value, 0),
+              child: Transform.scale(
+                scale: _scaleAnimation.value,
+                child: _buildContentArea(),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildContentArea() {
+    switch (_selectedNavItem) {
+      case 'home':
+        return _buildHomeContent();
+      case 'instances':
+        return const InstanceManagerPage();
+      case 'versions':
+        return const BAMCVersionPage();
+      case 'resource-center':
+        return const ResourceCenterPage();
+      case 'accounts':
+        return const BAMCAccountPage();
+      case 'extensions':
+        return const ExtensionManagerPage();
+      case 'settings':
+        return const BAMCSettingsPage();
+      default:
+        return _buildHomeContent();
+    }
+  }
+
+  Widget _buildHomeContent() {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildWelcomeSection(),
+          const SizedBox(height: 32),
+          _buildLaunchSection(),
+          const SizedBox(height: 32),
+          _buildRecentGames(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWelcomeSection() {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '欢迎回来，老师',
+            style: BATypography.headlineLarge.copyWith(
+              color: BAColors.textPrimaryOf(context),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '准备好开始新的冒险了吗？',
+            style: BATypography.bodyLarge.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLaunchSection() {
+    return BAGlowBuilder(
+      enabled: true,
+      glowColor: BAColors.primary,
+      maxGlowRadius: 5,
+      duration: const Duration(seconds: 3),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(28),
+        decoration: BoxDecoration(
+          color: BAColors.surfaceOf(context),
+          borderRadius: BATheme.borderRadiusLarge,
+          boxShadow: BATheme.shadowsOf(context),
+          border: Border.all(
+            color: BAColors.borderOf(context),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: BAColors.primary.withOpacity(0.15),
+                    borderRadius: BATheme.borderRadiusSmall,
+                  ),
+                  child: Icon(
+                    Icons.rocket_launch_rounded,
+                    color: BAColors.primary,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Text(
+                  '快速启动',
+                  style: BATypography.titleLarge.copyWith(
+                    color: BAColors.textPrimaryOf(context),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 28),
+            _buildInfoGrid(),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: BAPrimaryButton(
+                text: '启动游戏',
+                onPressed: _launchGame,
+                loading: _isLaunching,
+                leadingIcon: Icon(
+                  Icons.play_arrow_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoGrid() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildInfoItem(
+            icon: Icons.extension_rounded,
+            label: '游戏版本',
+            value: _selectedVersion ?? '未选择',
+            color: BAColors.primary,
+            onTap: () {
+              setState(() {
+                _selectedNavItem = 'versions';
+              });
+            },
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildInfoItem(
+            icon: Icons.person_rounded,
+            label: '游戏账户',
+            value: _selectedAccountName ?? '未选择',
+            color: BAColors.secondary,
+            onTap: () {
+              setState(() {
+                _selectedNavItem = 'accounts';
+              });
+            },
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildInfoItem(
+            icon: Icons.code_rounded,
+            label: 'Java环境',
+            value: _javaStatus ?? '检测中...',
+            color: BAColors.success,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoItem({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+    VoidCallback? onTap,
+  }) {
+    return BAFloatBuilder(
+      enabled: onTap != null,
+      floatDistance: 2,
+      duration: const Duration(seconds: 3),
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: BAAnimations.smooth,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: BAColors.surfaceVariantOf(context),
+            borderRadius: BATheme.borderRadiusMedium,
+            border: Border.all(
+              color: BAColors.borderOf(context),
+              width: 1,
+            ),
+            boxShadow: onTap != null ? BATheme.shadowsSmallOf(context) : [],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, color: color, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    label,
+                    style: BATypography.label.copyWith(
+                      color: BAColors.textSecondaryOf(context),
+                    ),
+                  ),
+                  if (onTap != null) ...[
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.edit,
+                      color: color,
+                      size: 14,
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                value,
+                style: BATypography.bodyLarge.copyWith(
+                  color: BAColors.textPrimaryOf(context),
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildRecentGames() {
+    final recentGames = [
+      {'version': '1.20.1', 'time': '2小时前', 'account': '玩家1'},
+      {'version': '1.19.4', 'time': '昨天', 'account': '玩家2'},
+      {'version': '1.18.2', 'time': '3天前', 'account': '玩家1'},
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           '最近游戏',
-          style: BATypography.headlineSmall.copyWith(
-            color: BAColors.textPrimary,
+          style: BATypography.titleLarge.copyWith(
+            color: BAColors.textPrimaryOf(context),
+            fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 16),
-        ..._recentGames.map((game) => _buildGameRecordItem(game)).toList(),
+        const SizedBox(height: 18),
+        Container(
+          decoration: BoxDecoration(
+            color: BAColors.surfaceOf(context),
+            borderRadius: BATheme.borderRadiusLarge,
+            boxShadow: BATheme.shadowsOf(context),
+            border: Border.all(
+              color: BAColors.borderOf(context),
+              width: 1,
+            ),
+          ),
+          child: ListView.separated(
+            shrinkWrap: true,
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: recentGames.length,
+            separatorBuilder: (context, index) => Container(
+              height: 1,
+              color: BAColors.borderOf(context),
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+            ),
+            itemBuilder: (context, index) =>
+                _buildGameRecordItem(recentGames[index], index),
+          ),
+        ),
       ],
     );
   }
 
-  /// 构建游戏记录项
-  Widget _buildGameRecordItem(Map<String, String> game) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: BAColors.surface,
-        borderRadius: BATheme.borderRadius,
-        border: Border.all(color: BAColors.border, width: 1),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: BAColors.primary.withOpacity(0.2),
-              borderRadius: BATheme.borderRadiusSmall,
-            ),
-            child: Icon(
-              Icons.sports_esports,
-              color: BAColors.primary,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Minecraft ${game['version']}',
-                  style: BATypography.bodyLarge.copyWith(
-                    color: BAColors.textPrimary,
-                    fontWeight: FontWeight.w600,
+  Widget _buildGameRecordItem(Map<String, String> game, int index) {
+    return BAAnimationBuilder(
+      builder: (context, animation) {
+        return Opacity(
+          opacity: animation.value,
+          child: Transform.translate(
+            offset: Offset(20 * (1 - animation.value), 0),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _selectedVersion = game['version'];
+                  });
+                },
+                borderRadius: BATheme.borderRadiusSmall,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          gradient: BAColors.primaryGradient,
+                          borderRadius: BATheme.borderRadiusMedium,
+                        ),
+                        child: Icon(
+                          Icons.sports_esports_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Minecraft ${game['version']}',
+                              style: BATypography.bodyLarge.copyWith(
+                                color: BAColors.textPrimaryOf(context),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '玩家: ${game['account']}',
+                              style: BATypography.bodySmall.copyWith(
+                                color: BAColors.textSecondaryOf(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        game['time'] ?? '',
+                        style: BATypography.bodySmall.copyWith(
+                          color: BAColors.textSecondaryOf(context),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '玩家: ${game['account']}',
-                  style: BATypography.bodySmall.copyWith(
-                    color: BAColors.textSecondary,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-          Text(
-            game['time'] ?? '',
-            style: BATypography.bodySmall.copyWith(
-              color: BAColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
+      duration: const Duration(milliseconds: 400),
+      delay: Duration(milliseconds: index * 100),
+      curve: BAAnimations.smooth,
     );
   }
 }

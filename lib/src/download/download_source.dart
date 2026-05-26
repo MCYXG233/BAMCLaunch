@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:http/http.dart' as http;
+import '../core/network_client.dart';
 
 /// 下载源接口
 abstract class IDownloadSource {
@@ -47,9 +47,12 @@ class BMCLApiDownloadSource implements IDownloadSource {
   @override
   Future<bool> isAvailable() async {
     try {
-      final response = await http
-          .get(Uri.parse('$baseUrl/minecraft/version/1.20.4'))
-          .timeout(const Duration(seconds: 5));
+      final networkClient = NetworkClient();
+      final response = await networkClient.get(
+        '$baseUrl/minecraft/version/1.20.4',
+        headers: NetworkClient.bmclapiHeaders,
+        timeoutSeconds: 5,
+      );
       return response.statusCode == 200;
     } catch (e) {
       return false;
@@ -73,13 +76,11 @@ class OfficialDownloadSource implements IDownloadSource {
   @override
   Future<bool> isAvailable() async {
     try {
-      final response = await http
-          .get(
-            Uri.parse(
-              'https://launchermeta.mojang.com/mc/game/version_manifest.json',
-            ),
-          )
-          .timeout(const Duration(seconds: 10));
+      final networkClient = NetworkClient();
+      final response = await networkClient.get(
+        'https://launchermeta.mojang.com/mc/game/version_manifest.json',
+        timeoutSeconds: 10,
+      );
       return response.statusCode == 200;
     } catch (e) {
       return false;

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as path;
+import 'package:crypto/crypto.dart';
 import '../../account/account.dart';
 import '../java/models.dart';
 import '../../version/models.dart';
@@ -136,7 +137,7 @@ class ArgumentBuilder {
   /// 生成离线UUID
   String _generateOfflineUUID(String username) {
     final bytes = utf8.encode('OfflinePlayer:$username');
-    final hash = _md5(bytes);
+    final hash = md5.convert(bytes).bytes;
 
     final uuidBytes = List<int>.from(hash);
     uuidBytes[6] = (uuidBytes[6] & 0x0F) | 0x30;
@@ -144,18 +145,6 @@ class ArgumentBuilder {
 
     final uuidStr = _bytesToHex(uuidBytes);
     return '${uuidStr.substring(0, 8)}-${uuidStr.substring(8, 12)}-${uuidStr.substring(12, 16)}-${uuidStr.substring(16, 20)}-${uuidStr.substring(20, 32)}';
-  }
-
-  /// 简单MD5实现（仅用于生成离线UUID）
-  List<int> _md5(List<int> input) {
-    final result = List<int>.filled(16, 0);
-    for (int i = 0; i < input.length && i < 16; i++) {
-      result[i] = input[i] ^ (i * 31);
-    }
-    for (int i = input.length; i < 16; i++) {
-      result[i] = i * 17;
-    }
-    return result;
   }
 
   /// 字节转十六进制

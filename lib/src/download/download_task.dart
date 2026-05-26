@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'package:crypto/crypto.dart';
-import 'package:http/http.dart' as http;
+import '../core/network_client.dart';
 import '../task/task.dart';
 import '../task/task_context.dart';
 import '../task/task_progress.dart';
@@ -169,11 +169,17 @@ class DownloadTask extends Task<String> {
 
   /// 获取文件大小
   Future<int> _getContentLength(String url) async {
-    final response = await http.head(Uri.parse(url));
-    if (response.statusCode != 200) {
-      throw Exception('无法获取文件大小，HTTP ${response.statusCode}');
+    final networkClient = NetworkClient();
+    final response = await networkClient.get(
+      url,
+      timeoutSeconds: 30,
+    );
+    
+    if (response.statusCode == 200) {
+      return int.parse(response.headers['content-length'] ?? '0');
     }
-    return int.parse(response.headers['content-length'] ?? '0');
+    
+    throw Exception('无法获取文件大小，HTTP ${response.statusCode}');
   }
 
   /// 校验文件哈希
@@ -290,7 +296,7 @@ class DownloadTask extends Task<String> {
   /// 分块下载隔离区
   static Future<void> _downloadChunkIsolate(_DownloadChunkData data) async {
     try {
-      final client = http.Client();
+      final networkClient = NetworkClient();
       final tempFile = File(data.tempPath);
       final raf = await tempFile.open(mode: FileMode.writeOnlyAppend);
       await raf.setPosition(data.startByte);
@@ -301,24 +307,24 @@ class DownloadTask extends Task<String> {
         final end = position + data.chunkSize - 1;
         final actualEnd = end > data.endByte - 1 ? data.endByte - 1 : end;
 
-        final request = http.Request('GET', Uri.parse(data.url));
-        request.headers['Range'] = 'bytes=$position-$actualEnd';
+        final response = await networkClient.get(
+          data.url,
+          headers: {
+            'Range': 'bytes=$position-$actualEnd',
+          },
+          timeoutSeconds: 60,
+        );
 
-        final response = await client.send(request);
-        if (response.statusCode != 206) {
-          throw Exception('不支持分块下载');
+        if (response.statusCode != 206 && response.statusCode != 200) {
+          throw Exception('不支持分块下载，HTTP ${response.statusCode}');
         }
 
-        final stream = response.stream;
-        await for (final chunk in stream) {
-          await raf.writeFrom(chunk);
-          position += chunk.length;
-          data.sendPort.send(position);
-        }
+        await raf.writeFrom(response.bodyBytes);
+        position += response.bodyBytes.length;
+        data.sendPort.send(position);
       }
 
       await raf.close();
-      client.close();
       data.sendPort.send('done');
     } catch (e) {
       data.sendPort.send(e is Exception ? e : Exception(e.toString()));

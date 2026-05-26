@@ -1,76 +1,46 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
-import '../theme/app_theme.dart';
-import 'ba_buttons.dart';
+import '../theme/animations.dart';
 
 /// 侧边栏导航项
 class BASidebarItem {
-  /// 图标
-  final IconData icon;
-
-  /// 标签
-  final String label;
-
-  /// 唯一标识符
   final String id;
-
-  /// 是否启用
-  final bool enabled;
+  final String label;
+  final IconData icon;
+  final IconData? selectedIcon;
+  final String? badge;
+  final VoidCallback onTap;
 
   const BASidebarItem({
-    required this.icon,
-    required this.label,
     required this.id,
-    this.enabled = true,
+    required this.label,
+    required this.icon,
+    this.selectedIcon,
+    this.badge,
+    required this.onTap,
   });
 }
 
-/// 左侧固定侧边栏
+/// 简化的侧边栏组件
 class BASidebar extends StatefulWidget {
-  /// 导航项列表
   final List<BASidebarItem> items;
-
-  /// 当前选中项的ID
-  final String? selectedId;
-
-  /// 选中项变化回调
-  final ValueChanged<String>? onSelected;
-
-  /// 是否可折叠
+  final String selectedId;
+  final void Function(String id) onSelected;
   final bool collapsible;
-
-  /// 初始是否折叠
   final bool initiallyCollapsed;
-
-  /// 折叠状态变化回调
-  final ValueChanged<bool>? onCollapsedChanged;
-
-  /// 头部组件
   final Widget? header;
-
-  /// 底部组件
   final Widget? footer;
-
-  /// 宽度（展开时）
-  final double expandedWidth;
-
-  /// 宽度（折叠时）
-  final double collapsedWidth;
 
   const BASidebar({
     super.key,
     required this.items,
-    this.selectedId,
-    this.onSelected,
+    required this.selectedId,
+    required this.onSelected,
     this.collapsible = true,
     this.initiallyCollapsed = false,
-    this.onCollapsedChanged,
     this.header,
     this.footer,
-    this.expandedWidth = 240,
-    this.collapsedWidth = 72,
   });
 
   @override
@@ -79,214 +49,561 @@ class BASidebar extends StatefulWidget {
 
 class _BASidebarState extends State<BASidebar>
     with SingleTickerProviderStateMixin {
-  late bool _isCollapsed;
-  late AnimationController _breathController;
-  late Animation<double> _breathAnimation;
+  late bool _isExpanded;
+  late AnimationController _controller;
+  late Animation<double> _widthAnimation;
+  late Animation<double> _iconAnimation;
+  late Animation<double> _textAnimation;
 
   @override
   void initState() {
     super.initState();
-    _isCollapsed = widget.initiallyCollapsed;
-    _breathController = AnimationController(
-      duration: const Duration(seconds: 2),
+    _isExpanded = !widget.initiallyCollapsed;
+
+    _controller = AnimationController(
       vsync: this,
-    )..repeat(reverse: true);
-    _breathAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _breathController, curve: Curves.easeInOut),
+      duration: const Duration(milliseconds: 300),
     );
+
+    _widthAnimation = Tween<double>(
+      begin: 72.0,
+      end: 240.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: BAAnimations.elasticInOut,
+      ),
+    );
+
+    _iconAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOutCubic,
+      ),
+    );
+
+    _textAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: BAAnimations.smooth,
+      ),
+    );
+
+    if (_isExpanded) {
+      _controller.value = 1.0;
+    }
   }
 
   @override
   void dispose() {
-    _breathController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
-  void _toggleCollapsed() {
+  void _toggle() {
     setState(() {
-      _isCollapsed = !_isCollapsed;
+      _isExpanded = !_isExpanded;
     });
-    widget.onCollapsedChanged?.call(_isCollapsed);
+
+    if (_isExpanded) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeInOutCubic,
-      width: _isCollapsed ? widget.collapsedWidth : widget.expandedWidth,
-      decoration: BoxDecoration(
-        color: BAColors.surface,
-        border: Border(right: BorderSide(color: BAColors.border, width: 1)),
-        boxShadow: [
-          BoxShadow(
-            color: BAColors.shadow.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(4, 0),
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Container(
+          width: _widthAnimation.value,
+          decoration: BoxDecoration(
+            color: BAColors.surfaceOf(context),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 5,
+                offset: const Offset(2, 0),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          if (widget.header != null) ...[
-            widget.header!,
-            const Divider(height: 1, thickness: 1, color: BAColors.border),
-          ],
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: widget.items.length,
-              itemBuilder: (context, index) {
-                final item = widget.items[index];
-                final isSelected = widget.selectedId == item.id;
-                return _BASidebarItemWidget(
-                  item: item,
-                  isSelected: isSelected,
-                  isCollapsed: _isCollapsed,
-                  breathAnimation: _breathAnimation,
-                  onTap: item.enabled
-                      ? () => widget.onSelected?.call(item.id)
-                      : null,
-                );
-              },
-            ),
-          ),
-          if (widget.collapsible || widget.footer != null) ...[
-            const Divider(height: 1, thickness: 1, color: BAColors.border),
-            if (widget.footer != null) widget.footer!,
-            if (widget.collapsible)
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: BASecondaryButton(
-                  text: _isCollapsed ? '' : '折叠',
-                  leadingIcon: Icon(
-                    _isCollapsed ? Icons.chevron_right : Icons.chevron_left,
-                  ),
-                  onPressed: _toggleCollapsed,
-                  height: 40,
+          child: Column(
+            children: [
+              if (widget.header != null) widget.header!,
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  itemCount: widget.items.length,
+                  itemBuilder: (context, index) {
+                    return _buildSidebarItem(context, index);
+                  },
                 ),
               ),
-          ],
-        ],
+              if (widget.footer != null) widget.footer!,
+              if (widget.collapsible) _buildToggleButton(context),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSidebarItem(BuildContext context, int index) {
+    final item = widget.items[index];
+    final isSelected = item.id == widget.selectedId;
+
+    return BAFloatBuilder(
+      enabled: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () {
+              widget.onSelected(item.id);
+              if (!_isExpanded) {
+                _toggle();
+              }
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: BAAnimations.smooth,
+              padding: EdgeInsets.symmetric(
+                horizontal: _isExpanded ? 16 : 12,
+                vertical: 12,
+              ),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? BAColors.primary.withOpacity(0.1)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+                border: isSelected
+                    ? Border.all(color: BAColors.primary.withOpacity(0.3))
+                    : null,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    isSelected
+                        ? (item.selectedIcon ?? item.icon)
+                        : item.icon,
+                    color: isSelected
+                        ? BAColors.primary
+                        : BAColors.textSecondary,
+                    size: 24,
+                  ),
+                  if (_isExpanded) ...[
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FadeTransition(
+                        opacity: _textAnimation,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(-0.2, 0),
+                            end: Offset.zero,
+                          ).animate(_textAnimation),
+                          child: Text(
+                            item.label,
+                            style: BATypography.bodyMedium.copyWith(
+                              color: isSelected
+                                  ? BAColors.primary
+                                  : BAColors.textPrimary,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (item.badge != null) ...[
+                      const SizedBox(width: 8),
+                      FadeTransition(
+                        opacity: _textAnimation,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: BAColors.danger,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            item.badge!,
+                            style: BATypography.labelSmall.copyWith(
+                              color: Colors.white,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToggleButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: _toggle,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: BAColors.surfaceVariant,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  _isExpanded ? Icons.chevron_left : Icons.chevron_right,
+                  color: BAColors.textSecondary,
+                  size: 24,
+                ),
+                if (_isExpanded) ...[
+                  const SizedBox(width: 8),
+                  FadeTransition(
+                    opacity: _textAnimation,
+                    child: Text(
+                      '收起',
+                      style: BATypography.bodySmall.copyWith(
+                        color: BAColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 }
 
-/// 侧边栏项组件
-class _BASidebarItemWidget extends StatefulWidget {
-  final BASidebarItem item;
-  final bool isSelected;
-  final bool isCollapsed;
-  final Animation<double> breathAnimation;
-  final VoidCallback? onTap;
+/// 增强的侧边栏组件
+class BAAnimatedSidebar extends StatefulWidget {
+  final List<BASidebarItem> items;
+  final int selectedIndex;
+  final bool expanded;
+  final Duration animationDuration;
+  final double collapsedWidth;
+  final double expandedWidth;
+  final VoidCallback? onToggle;
+  final Widget? header;
+  final Widget? footer;
 
-  const _BASidebarItemWidget({
-    required this.item,
-    required this.isSelected,
-    required this.isCollapsed,
-    required this.breathAnimation,
-    this.onTap,
+  const BAAnimatedSidebar({
+    super.key,
+    required this.items,
+    required this.selectedIndex,
+    this.expanded = true,
+    this.animationDuration = const Duration(milliseconds: 300),
+    this.collapsedWidth = 72.0,
+    this.expandedWidth = 240.0,
+    this.onToggle,
+    this.header,
+    this.footer,
   });
 
   @override
-  State<_BASidebarItemWidget> createState() => _BASidebarItemWidgetState();
+  State<BAAnimatedSidebar> createState() => _BAAnimatedSidebarState();
 }
 
-class _BASidebarItemWidgetState extends State<_BASidebarItemWidget> {
+class _BAAnimatedSidebarState extends State<BAAnimatedSidebar>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _widthAnimation;
+  late Animation<double> _iconAnimation;
+  late Animation<double> _textAnimation;
+  late Animation<double> _rotateAnimation;
+
+  bool _isExpanded = true;
   bool _isHovered = false;
 
   @override
+  void initState() {
+    super.initState();
+    _isExpanded = widget.expanded;
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: widget.animationDuration,
+    );
+
+    _widthAnimation = Tween<double>(
+      begin: widget.collapsedWidth,
+      end: widget.expandedWidth,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: BAAnimations.elasticInOut,
+      ),
+    );
+
+    _iconAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOutCubic,
+      ),
+    );
+
+    _textAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: BAAnimations.smooth,
+      ),
+    );
+
+    _rotateAnimation = Tween<double>(
+      begin: 0.0,
+      end: 0.5,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: BAAnimations.smooth,
+      ),
+    );
+
+    if (_isExpanded) {
+      _controller.value = 1.0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+    });
+
+    if (_isExpanded) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+
+    widget.onToggle?.call();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final enabled = widget.item.enabled;
-
     return MouseRegion(
-      onEnter: enabled ? (_) => setState(() => _isHovered = true) : null,
+      onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedBuilder(
-          animation: widget.breathAnimation,
-          builder: (context, child) {
-            final breathScale = widget.isSelected
-                ? 1.0 + (widget.breathAnimation.value * 0.02)
-                : 1.0;
-            final breathOpacity = widget.isSelected
-                ? 0.15 + (widget.breathAnimation.value * 0.1)
-                : 0.0;
-
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: Transform.scale(
-                scale: breathScale,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: widget.isCollapsed ? 12 : 16,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: widget.isSelected
-                        ? BAColors.primary.withOpacity(breathOpacity + 0.15)
-                        : (_isHovered
-                              ? BAColors.surfaceVariant
-                              : Colors.transparent),
-                    borderRadius: BATheme.borderRadius,
-                    border: Border.all(
-                      color: widget.isSelected
-                          ? BAColors.primary
-                          : Colors.transparent,
-                      width: 1.5,
-                    ),
-                    boxShadow: widget.isSelected
-                        ? [
-                            BoxShadow(
-                              color: BAColors.primary.withOpacity(0.2),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        widget.item.icon,
-                        color: enabled
-                            ? (widget.isSelected
-                                  ? BAColors.primary
-                                  : (_isHovered
-                                        ? BAColors.textPrimary
-                                        : BAColors.textSecondary))
-                            : BAColors.textDisabled,
-                        size: 24,
-                      ),
-                      if (!widget.isCollapsed) ...[
-                        const SizedBox(width: 12),
-                        Text(
-                          widget.item.label,
-                          style: BATypography.bodyMedium.copyWith(
-                            color: enabled
-                                ? (widget.isSelected
-                                      ? BAColors.primary
-                                      : (_isHovered
-                                            ? BAColors.textPrimary
-                                            : BAColors.textSecondary))
-                                : BAColors.textDisabled,
-                            fontWeight: widget.isSelected
-                                ? FontWeight.w600
-                                : FontWeight.normal,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ],
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return Container(
+            width: _widthAnimation.value,
+            decoration: BoxDecoration(
+              color: BAColors.surfaceOf(context),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(_isHovered ? 0.1 : 0.05),
+                  blurRadius: _isHovered ? 10 : 5,
+                  offset: const Offset(2, 0),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                if (widget.header != null) widget.header!,
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    itemCount: widget.items.length,
+                    itemBuilder: (context, index) {
+                      return _buildSidebarItem(context, index);
+                    },
                   ),
                 ),
+                if (widget.footer != null) widget.footer!,
+                _buildToggleButton(context),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSidebarItem(BuildContext context, int index) {
+    final item = widget.items[index];
+    final isSelected = index == widget.selectedIndex;
+
+    return BAFloatBuilder(
+      enabled: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () {
+              item.onTap();
+              if (!_isExpanded) {
+                _toggle();
+              }
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: BAAnimations.smooth,
+              padding: EdgeInsets.symmetric(
+                horizontal: _isExpanded ? 16 : 12,
+                vertical: 12,
               ),
-            );
-          },
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? BAColors.primary.withOpacity(0.1)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+                border: isSelected
+                    ? Border.all(color: BAColors.primary.withOpacity(0.3))
+                    : null,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    isSelected
+                        ? (item.selectedIcon ?? item.icon)
+                        : item.icon,
+                    color: isSelected
+                        ? BAColors.primary
+                        : BAColors.textSecondary,
+                    size: 24,
+                  ),
+                  if (_isExpanded) ...[
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FadeTransition(
+                        opacity: _textAnimation,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(-0.2, 0),
+                            end: Offset.zero,
+                          ).animate(_textAnimation),
+                          child: Text(
+                            item.label,
+                            style: BATypography.bodyMedium.copyWith(
+                              color: isSelected
+                                  ? BAColors.primary
+                                  : BAColors.textPrimary,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (item.badge != null) ...[
+                      const SizedBox(width: 8),
+                      FadeTransition(
+                        opacity: _textAnimation,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: BAColors.danger,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            item.badge!,
+                            style: BATypography.labelSmall.copyWith(
+                              color: Colors.white,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToggleButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: _toggle,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: BAColors.surfaceVariant,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                RotationTransition(
+                  turns: _rotateAnimation,
+                  child: Icon(
+                    Icons.chevron_right,
+                    color: BAColors.textSecondary,
+                    size: 24,
+                  ),
+                ),
+                if (_isExpanded) ...[
+                  const SizedBox(width: 8),
+                  FadeTransition(
+                    opacity: _textAnimation,
+                    child: Text(
+                      '收起',
+                      style: BATypography.bodySmall.copyWith(
+                        color: BAColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );

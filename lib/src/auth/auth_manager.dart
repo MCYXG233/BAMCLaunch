@@ -4,6 +4,7 @@ import 'models.dart';
 import 'microsoft_auth.dart';
 import 'xbox_auth.dart';
 import 'minecraft_auth.dart';
+export 'microsoft_auth.dart' show DeviceCodeResponse;
 
 /// 认证进度回调
 typedef AuthProgressCallback = void Function(String step);
@@ -166,5 +167,50 @@ class AuthManager {
     if (credentials == null) return true;
     if (credentials.microsoftToken == null) return true;
     return credentials.microsoftToken!.isNearExpiry || credentials.microsoftToken!.isExpired;
+  }
+
+  /// 设备代码流 - 获取设备代码
+  Future<DeviceCodeResponse> getDeviceCode() async {
+    return await _microsoftAuth.getDeviceCode();
+  }
+
+  /// 设备代码流 - 使用设备代码进行完整认证
+  Future<AuthCredentials> authenticateWithDeviceCode(
+    String deviceCode, {
+    AuthProgressCallback? onProgress,
+  }) async {
+    AuthCredentials credentials = AuthCredentials();
+
+    try {
+      onProgress?.call('获取Microsoft令牌...');
+      final microsoftToken = await _microsoftAuth.pollForToken(deviceCode);
+      credentials = credentials.copyWith(microsoftToken: microsoftToken);
+
+      onProgress?.call('Xbox Live认证...');
+      final xboxToken = await _xboxAuth.authenticateUser(microsoftToken.accessToken);
+      credentials = credentials.copyWith(xboxLiveToken: xboxToken);
+
+      onProgress?.call('获取XSTS令牌...');
+      final xstsToken = await _xboxAuth.acquireXstsToken(xboxToken.token);
+      credentials = credentials.copyWith(xstsToken: xstsToken);
+
+      onProgress?.call('登录Minecraft...');
+      final minecraftToken = await _minecraftAuth.loginWithXbox(
+        userHash: xstsToken.userHash,
+        xstsToken: xstsToken.token,
+      );
+      credentials = credentials.copyWith(minecraftToken: minecraftToken);
+
+      onProgress?.call('获取Minecraft档案...');
+      final profile = await _minecraftAuth.getProfile(minecraftToken.accessToken);
+      credentials = credentials.copyWith(minecraftProfile: profile);
+
+      // 保存凭据
+      await _saveCredentials(credentials);
+
+      return credentials;
+    } catch (e) {
+      rethrow;
+    }
   }
 }

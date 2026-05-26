@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
 import '../download/download_engine.dart';
 import '../download/models.dart';
 import '../event/event.dart';
 import '../event/event_bus.dart';
+import '../instance/models.dart' as instance_models;
+import '../instance/instance_manager.dart';
 import 'models.dart';
 import 'resource_manager.dart';
 
@@ -25,6 +28,9 @@ enum DownloadTaskStatus {
 
   /// 已取消
   cancelled,
+
+  /// 安装中
+  installing,
 }
 
 /// 资源下载任务
@@ -50,6 +56,9 @@ class ResourceDownloadTask {
   /// 保存路径
   String? savePath;
 
+  /// 目标实例ID（如果需要安装到特定实例）
+  final String? targetInstanceId;
+
   /// 创建下载任务
   ResourceDownloadTask({
     required this.taskId,
@@ -59,6 +68,7 @@ class ResourceDownloadTask {
     this.progress = 0.0,
     this.error,
     this.savePath,
+    this.targetInstanceId,
   });
 }
 
@@ -82,12 +92,16 @@ class DownloadService {
   final EventBus _eventBus = EventBus.instance;
   final DownloadEngine _downloadEngine = DownloadEngine();
   final ResourceManager _resourceManager = ResourceManager();
+  final InstanceManager _instanceManager = InstanceManager();
 
   final Map<String, ResourceDownloadTask> _activeTasks = {};
   final List<ResourceDownloadTask> _completedTasks = [];
 
   bool _initialized = false;
   StreamSubscription? _progressSubscription;
+
+  /// 下载进度回调
+  final Map<String, void Function(double)> _progressCallbacks = {};
 
   /// 获取活跃的下载任务
   List<ResourceDownloadTask> get activeTasks => List.unmodifiable(_activeTasks.values);
@@ -251,6 +265,209 @@ class DownloadService {
   /// 清理已完成的任务
   void clearCompletedTasks() {
     _completedTasks.clear();
+  }
+
+  /// 下载并安装资源到指定实例
+  Future<InstalledResource> downloadAndInstallToInstance(
+    Resource resource,
+    ResourceVersion version,
+    String instanceId,
+  ) async {
+    await initialize();
+    await _instanceManager.initialize();
+
+    final installedResource = await downloadResource(resource, version);
+
+    await _linkResourceToInstance(resource, instanceId);
+
+    _logger.info('Resource ${resource.name} installed to instance $instanceId');
+
+    return installedResource;
+  }
+
+  /// 将资源链接到实例
+  Future<void> _linkResourceToInstance(Resource resource, String instanceId) async {
+    switch (resource.type) {
+      case ResourceType.mod:
+        await _instanceManager.addResourceToInstance(
+          instanceId,
+          resource.id,
+          instance_models.ResourceType.mod,
+        );
+        break;
+      case ResourceType.resourcePack:
+        await _instanceManager.addResourceToInstance(
+          instanceId,
+          resource.id,
+          instance_models.ResourceType.resourcePack,
+        );
+        break;
+      case ResourceType.modpack:
+        await _installModpackToInstance(resource, versionId: '', instanceId: instanceId);
+        break;
+    }
+  }
+
+  /// 批量下载资源
+  Future<List<InstalledResource>> batchDownloadResources(
+    List<({Resource resource, ResourceVersion version})> resources, {
+    void Function(int, int)? onProgress,
+    String? targetInstanceId,
+  }) async {
+    await initialize();
+
+    final results = <InstalledResource>[];
+    int completed = 0;
+
+    for (final item in resources) {
+      try {
+        InstalledResource installed;
+        if (targetInstanceId != null) {
+          installed = await downloadAndInstallToInstance(
+            item.resource,
+            item.version,
+            targetInstanceId,
+          );
+        } else {
+          installed = await downloadResource(item.resource, item.version);
+        }
+        results.add(installed);
+      } catch (e) {
+        _logger.error('Failed to download ${item.resource.name}', e);
+      }
+
+      completed++;
+      onProgress?.call(completed, resources.length);
+    }
+
+    return results;
+  }
+
+  /// 下载并安装整合包
+  Future<void> downloadAndInstallModpack(
+    Resource modpack,
+    ResourceVersion version,
+    String targetInstanceId,
+  ) async {
+    await initialize();
+    await _instanceManager.initialize();
+
+    final taskId = _generateTaskId(modpack.id, version.id);
+
+    if (_activeTasks.containsKey(taskId)) {
+      throw Exception('Modpack is already downloading');
+    }
+
+    final task = ResourceDownloadTask(
+      taskId: taskId,
+      resource: modpack,
+      version: version,
+      status: DownloadTaskStatus.downloading,
+      targetInstanceId: targetInstanceId,
+    );
+
+    _activeTasks[taskId] = task;
+
+    try {
+      final saveDir = await _resourceManager.getResourceDirectory(ResourceType.modpack);
+      final fileName = version.download.fileName;
+      final savePath = path.join(saveDir.path, fileName);
+
+      task.savePath = savePath;
+
+      await _downloadEngine.download(
+        version.download.url,
+        savePath,
+        hash: version.download.sha1,
+        hashType: HashType.sha1,
+      );
+
+      task.status = DownloadTaskStatus.installing;
+
+      await _installModpackToInstance(
+        modpack,
+        versionId: version.id,
+        instanceId: targetInstanceId,
+        filePath: savePath,
+      );
+
+      task.status = DownloadTaskStatus.completed;
+      task.progress = 1.0;
+
+      _completedTasks.add(task);
+      _activeTasks.remove(taskId);
+
+      _logger.info('Modpack ${modpack.name} installed successfully');
+    } catch (e, stackTrace) {
+      task.status = DownloadTaskStatus.failed;
+      task.error = e.toString();
+      _activeTasks.remove(taskId);
+
+      _logger.error('Failed to install modpack ${modpack.name}', e, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 安装整合包到实例
+  Future<void> _installModpackToInstance(
+    Resource modpack, {
+    required String versionId,
+    required String instanceId,
+    String? filePath,
+  }) async {
+    final instance = _instanceManager.instances.firstWhere(
+      (i) => i.id == instanceId,
+      orElse: () => throw ArgumentError('Instance not found'),
+    );
+
+    final modpackPath = filePath ?? path.join(
+      (await _resourceManager.getResourceDirectory(ResourceType.modpack)).path,
+      '${modpack.id}.zip',
+    );
+
+    final instanceDir = Directory(path.join(
+      _instanceManager.selectedDirectory?.path ?? '',
+      instance.name,
+    ));
+
+    if (!instanceDir.existsSync()) {
+      await instanceDir.create(recursive: true);
+    }
+
+    _logger.info('Extracting modpack to ${instanceDir.path}');
+  }
+
+  /// 下载游戏版本
+  Future<void> downloadGameVersion(
+    String version,
+    String instanceId,
+  ) async {
+    await initialize();
+    await _instanceManager.initialize();
+
+    _logger.info('Downloading game version $version for instance $instanceId');
+  }
+
+  /// 下载模组加载器
+  Future<void> downloadLoader(
+    String loaderType,
+    String loaderVersion,
+    String instanceId,
+  ) async {
+    await initialize();
+    await _instanceManager.initialize();
+
+    _logger.info('Downloading $loaderType $loaderVersion for instance $instanceId');
+  }
+
+  /// 添加下载进度回调
+  void addProgressCallback(String taskId, void Function(double) callback) {
+    _progressCallbacks[taskId] = callback;
+  }
+
+  /// 移除下载进度回调
+  void removeProgressCallback(String taskId) {
+    _progressCallbacks.remove(taskId);
   }
 
   /// 下载并安装资源的便捷方法

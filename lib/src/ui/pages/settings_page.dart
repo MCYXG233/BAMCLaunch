@@ -109,6 +109,39 @@ class _BAMCSettingsPageState extends State<BAMCSettingsPage> {
   /// 是否正在加载
   bool _isLoading = false;
 
+  /// 背景类型 ('solid', 'gradient', 'image')
+  String _backgroundType = 'gradient';
+
+  /// 纯色背景颜色
+  Color _solidBackgroundColor = const Color(0xFF1E1E2E);
+
+  /// 渐变背景开始颜色
+  Color _gradientStartColor = const Color(0xFF1E1E2E);
+
+  /// 渐变背景结束颜色
+  Color _gradientEndColor = const Color(0xFF11111B);
+
+  /// 背景图片路径
+  String _backgroundImagePath = '';
+
+  /// 背景透明度 (0-1)
+  double _backgroundOpacity = 1.0;
+
+  /// 主色调
+  Color _primaryColor = const Color(0xFF6C77FF);
+
+  /// 次要色调
+  Color _secondaryColor = const Color(0xFFFF7CA4);
+
+  /// 圆角大小 (0-32)
+  double _cornerRadius = 16.0;
+
+  /// 是否启用模糊效果
+  bool _enableBlur = true;
+
+  /// 模糊程度 (0-100)
+  double _blurIntensity = 10.0;
+
   @override
   void initState() {
     super.initState();
@@ -244,6 +277,7 @@ class _BAMCSettingsPageState extends State<BAMCSettingsPage> {
   Widget _buildSidebar() {
     final categories = [
       {'id': 'general', 'icon': Icons.settings, 'label': '通用'},
+      {'id': 'appearance', 'icon': Icons.palette, 'label': '外观'},
       {'id': 'download', 'icon': Icons.download, 'label': '下载'},
       {'id': 'game', 'icon': Icons.sports_esports, 'label': '游戏'},
       {'id': 'about', 'icon': Icons.info, 'label': '关于'},
@@ -381,6 +415,8 @@ class _BAMCSettingsPageState extends State<BAMCSettingsPage> {
     switch (_selectedCategory) {
       case 'general':
         return '通用设置';
+      case 'appearance':
+        return '外观设置';
       case 'download':
         return '下载设置';
       case 'game':
@@ -397,6 +433,8 @@ class _BAMCSettingsPageState extends State<BAMCSettingsPage> {
     switch (_selectedCategory) {
       case 'general':
         return _buildGeneralSettings();
+      case 'appearance':
+        return _buildAppearanceSettings();
       case 'download':
         return _buildDownloadSettings();
       case 'game':
@@ -499,6 +537,336 @@ class _BAMCSettingsPageState extends State<BAMCSettingsPage> {
             },
             activeColor: BAColors.primary,
           ),
+        ),
+      ],
+    );
+  }
+
+  /// 构建外观设置
+  Widget _buildAppearanceSettings() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle('主题'),
+        _buildSettingItem(
+          title: '主题模式',
+          subtitle: '选择应用的主题',
+          child: _buildThemeSelector(),
+        ),
+        const SizedBox(height: 24),
+        _buildSectionTitle('背景'),
+        _buildSettingItem(
+          title: '背景类型',
+          subtitle: '选择背景样式',
+          child: _buildBackgroundTypeSelector(),
+        ),
+        const SizedBox(height: 24),
+        if (_backgroundType == 'solid')
+          _buildSettingItem(
+            title: '背景颜色',
+            subtitle: '选择纯色背景',
+            child: _buildColorPicker(_solidBackgroundColor, (color) {
+              setState(() {
+                _solidBackgroundColor = color;
+              });
+            }),
+          )
+        else if (_backgroundType == 'gradient') ...[
+          _buildSettingItem(
+            title: '渐变开始色',
+            subtitle: '选择渐变起始颜色',
+            child: _buildColorPicker(_gradientStartColor, (color) {
+              setState(() {
+                _gradientStartColor = color;
+              });
+            }),
+          ),
+          const SizedBox(height: 24),
+          _buildSettingItem(
+            title: '渐变结束色',
+            subtitle: '选择渐变结束颜色',
+            child: _buildColorPicker(_gradientEndColor, (color) {
+              setState(() {
+                _gradientEndColor = color;
+              });
+            }),
+          ),
+        ] else if (_backgroundType == 'image')
+          _buildSettingItem(
+            title: '背景图片',
+            subtitle: '选择自定义背景图片',
+            child: _buildBackgroundImageSelector(),
+          ),
+        const SizedBox(height: 24),
+        _buildSettingItem(
+          title: '背景透明度',
+          subtitle: '调整背景的透明度',
+          child: _buildOpacitySlider(),
+        ),
+        const SizedBox(height: 24),
+        _buildSectionTitle('颜色'),
+        _buildSettingItem(
+          title: '主色调',
+          subtitle: '选择主要强调色',
+          child: _buildColorPicker(_primaryColor, (color) {
+            setState(() {
+              _primaryColor = color;
+            });
+          }),
+        ),
+        const SizedBox(height: 24),
+        _buildSettingItem(
+          title: '次要色调',
+          subtitle: '选择次要强调色',
+          child: _buildColorPicker(_secondaryColor, (color) {
+            setState(() {
+              _secondaryColor = color;
+            });
+          }),
+        ),
+        const SizedBox(height: 24),
+        _buildSectionTitle('界面'),
+        _buildSettingItem(
+          title: '圆角大小',
+          subtitle: '调整界面元素的圆角',
+          child: _buildCornerRadiusSlider(),
+        ),
+        const SizedBox(height: 24),
+        _buildSettingItem(
+          title: '启用模糊效果',
+          subtitle: '启用毛玻璃效果',
+          child: Switch(
+            value: _enableBlur,
+            onChanged: (value) {
+              setState(() {
+                _enableBlur = value;
+              });
+            },
+            activeColor: BAColors.primary,
+          ),
+        ),
+        if (_enableBlur)
+          Padding(
+            padding: const EdgeInsets.only(top: 24),
+            child: _buildSettingItem(
+              title: '模糊程度',
+              subtitle: '调整模糊效果强度',
+              child: _buildBlurSlider(),
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// 构建背景类型选择器
+  Widget _buildBackgroundTypeSelector() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: BAColors.surfaceVariant,
+        borderRadius: BATheme.borderRadiusSmall,
+        border: Border.all(color: BAColors.border, width: 1),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _backgroundType,
+          icon: Icon(Icons.arrow_drop_down, color: BAColors.textSecondary),
+          items: const [
+            DropdownMenuItem(value: 'gradient', child: Text('渐变背景')),
+            DropdownMenuItem(value: 'solid', child: Text('纯色背景')),
+            DropdownMenuItem(value: 'image', child: Text('图片背景')),
+          ],
+          onChanged: (value) {
+            if (value != null) {
+              setState(() {
+                _backgroundType = value;
+              });
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  /// 构建颜色选择器
+  Widget _buildColorPicker(Color currentColor, ValueChanged<Color> onChanged) {
+    final colors = [
+      const Color(0xFF6C77FF),
+      const Color(0xFFFF7CA4),
+      const Color(0xFF00D9FF),
+      const Color(0xFFFFD700),
+      const Color(0xFF00FF88),
+      const Color(0xFFFF6B6B),
+      const Color(0xFF9B59B6),
+      const Color(0xFF3498DB),
+      const Color(0xFF1E1E2E),
+      const Color(0xFF11111B),
+      const Color(0xFFFFF8F0),
+      const Color(0xFFFFE4F1),
+    ];
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: colors.map((color) {
+        final isSelected = color == currentColor;
+        return GestureDetector(
+          onTap: () => onChanged(color),
+          child: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: isSelected ? BAColors.primary : BAColors.border,
+                width: isSelected ? 3 : 1,
+              ),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: color.withOpacity(0.5),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                      )
+                    ]
+                  : null,
+            ),
+            child: isSelected
+                ? Icon(Icons.check, color: Colors.white, size: 18)
+                : null,
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  /// 构建背景图片选择器
+  Widget _buildBackgroundImageSelector() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 200,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: BAColors.surfaceVariant,
+            borderRadius: BATheme.borderRadiusSmall,
+            border: Border.all(color: BAColors.border, width: 1),
+          ),
+          child: Text(
+            _backgroundImagePath.isEmpty ? '未选择' : _backgroundImagePath,
+            style: BATypography.bodyMedium.copyWith(
+              color: _backgroundImagePath.isEmpty
+                  ? BAColors.textDisabled
+                  : BAColors.textPrimary,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: 8),
+        BASecondaryButton(
+          text: '选择图片',
+          onPressed: () {
+            // TODO: 实现图片选择
+            setState(() {
+              _backgroundImagePath = '/path/to/image.png';
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  /// 构建透明度滑块
+  Widget _buildOpacitySlider() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        SizedBox(
+          width: 200,
+          child: Slider(
+            value: _backgroundOpacity,
+            min: 0.1,
+            max: 1.0,
+            divisions: 18,
+            label: '${(_backgroundOpacity * 100).round()}%',
+            activeColor: BAColors.primary,
+            onChanged: (value) {
+              setState(() {
+                _backgroundOpacity = value;
+              });
+            },
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${(_backgroundOpacity * 100).round()}%',
+          style: BATypography.bodySmall.copyWith(color: BAColors.textSecondary),
+        ),
+      ],
+    );
+  }
+
+  /// 构建圆角滑块
+  Widget _buildCornerRadiusSlider() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        SizedBox(
+          width: 200,
+          child: Slider(
+            value: _cornerRadius,
+            min: 0,
+            max: 32,
+            divisions: 32,
+            label: '${_cornerRadius.round()} px',
+            activeColor: BAColors.primary,
+            onChanged: (value) {
+              setState(() {
+                _cornerRadius = value;
+              });
+            },
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${_cornerRadius.round()} px',
+          style: BATypography.bodySmall.copyWith(color: BAColors.textSecondary),
+        ),
+      ],
+    );
+  }
+
+  /// 构建模糊滑块
+  Widget _buildBlurSlider() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        SizedBox(
+          width: 200,
+          child: Slider(
+            value: _blurIntensity,
+            min: 0,
+            max: 100,
+            divisions: 20,
+            label: '${_blurIntensity.round()}',
+            activeColor: BAColors.primary,
+            onChanged: (value) {
+              setState(() {
+                _blurIntensity = value;
+              });
+            },
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${_blurIntensity.round()}',
+          style: BATypography.bodySmall.copyWith(color: BAColors.textSecondary),
         ),
       ],
     );
@@ -752,12 +1120,12 @@ class _BAMCSettingsPageState extends State<BAMCSettingsPage> {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: BAColors.surface,
+            color: BAColors.surfaceVariant,
             borderRadius: BATheme.borderRadius,
             border: Border.all(color: BAColors.border, width: 1),
           ),
           child: Text(
-            '本项目采用 MIT 许可证开源。',
+            '本项目采用 GNU General Public License v3 (GPLv3) 开源许可证。\n\n完整许可证文本请参阅项目根目录的 LICENSE 文件。\n\n使用 BMCLAPI 时，请遵守 BMCLAPI 的使用协议，在下载界面标注来源。',
             style: BATypography.bodyMedium.copyWith(
               color: BAColors.textSecondary,
             ),

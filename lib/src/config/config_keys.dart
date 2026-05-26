@@ -39,6 +39,12 @@ class ConfigKeys {
   static const String selectedAccount = 'selectedAccount';
   static const String accounts = 'accounts';
 
+  /// 外置登录配置
+  static const String authlibPath = 'authlibPath';
+  static const String authlibServers = 'authlibServers';
+  static const String authlibSelectedServer = 'authlibSelectedServer';
+  static const String authlibAccounts = 'authlibAccounts';
+
   /// 加密相关配置前缀
   static const String encryptedPrefix = 'encrypted_';
 

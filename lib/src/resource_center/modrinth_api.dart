@@ -1,49 +1,42 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import '../core/network_client.dart';
 import 'models.dart';
 import 'api_interface.dart';
+import 'package:archive/archive.dart' as archive;
 
 /// Modrinth API客户端
 class ModrinthApi implements ResourceApi {
-  final http.Client _httpClient;
-
   static const String baseUrl = 'https://api.modrinth.com/v2';
-  static const String userAgent = 'BAMCLauncher/1.0';
-
-  ModrinthApi({
-    http.Client? httpClient,
-  }) : _httpClient = httpClient ?? http.Client();
 
   @override
   String get source => 'modrinth';
 
-  Map<String, String> get _headers => {
-        'Accept': 'application/json',
-        'User-Agent': userAgent,
-      };
+  Map<String, String> get _headers => NetworkClient.modrinthHeaders;
 
   @override
   Future<SearchResult> search(SearchParams params) async {
-    final facets = <String>[];
+    final facetGroups = <List<String>>[];
 
     if (params.type != null) {
       final type = _projectTypeToString(params.type!);
-      facets.add('project_type:$type');
+      facetGroups.add(['project_type:$type']);
     }
 
     if (params.gameVersions != null && params.gameVersions!.isNotEmpty) {
-      final versions = params.gameVersions!.map((v) => 'versions:$v').join(',');
-      facets.add('[$versions]');
+      final versions = params.gameVersions!.map((v) => 'versions:$v').toList();
+      facetGroups.add(versions);
     }
 
     if (params.loaders != null && params.loaders!.isNotEmpty) {
-      final loaders = params.loaders!.map((l) => 'categories:$l').join(',');
-      facets.add('[$loaders]');
+      final loaders = params.loaders!.map((l) => 'categories:$l').toList();
+      facetGroups.add(loaders);
     }
 
     if (params.categories != null && params.categories!.isNotEmpty) {
-      final cats = params.categories!.map((c) => 'categories:$c').join(',');
-      facets.add('[$cats]');
+      final cats = params.categories!.map((c) => 'categories:$c').toList();
+      facetGroups.add(cats);
     }
 
     final queryParams = <String, String>{
@@ -56,20 +49,25 @@ class ModrinthApi implements ResourceApi {
       queryParams['query'] = params.query;
     }
 
-    if (facets.isNotEmpty) {
-      queryParams['facets'] = '[${facets.join(',')}]';
+    if (facetGroups.isNotEmpty) {
+      // 正确的 Modrinth facets 格式是: [["a", "b"], ["c"]]
+      final jsonFacets = jsonEncode(facetGroups);
+      queryParams['facets'] = jsonFacets;
     }
 
-    final uri = Uri.parse('$baseUrl/search')
-        .replace(queryParameters: queryParams);
-
-    final response = await _httpClient.get(uri, headers: _headers);
+    final networkClient = NetworkClient();
+    final response = await networkClient.get(
+      '$baseUrl/search',
+      headers: _headers,
+      queryParameters: queryParams,
+    );
 
     if (response.statusCode != 200) {
       throw Exception('Failed to search: ${response.statusCode}');
     }
 
-    final data = json.decode(response.body);
+    // 处理可能的 gzip 压缩响应
+    final data = _parseJsonResponse(response);
     final hits = data['hits'] as List<dynamic>;
 
     return SearchResult(
@@ -84,8 +82,11 @@ class ModrinthApi implements ResourceApi {
 
   @override
   Future<Resource> getResource(String id) async {
-    final uri = Uri.parse('$baseUrl/project/$id');
-    final response = await _httpClient.get(uri, headers: _headers);
+    final networkClient = NetworkClient();
+    final response = await networkClient.get(
+      '$baseUrl/project/$id',
+      headers: _headers,
+    );
 
     if (response.statusCode != 200) {
       throw Exception('Failed to get resource: ${response.statusCode}');
@@ -97,8 +98,11 @@ class ModrinthApi implements ResourceApi {
 
   @override
   Future<List<ResourceVersion>> getVersions(String id) async {
-    final uri = Uri.parse('$baseUrl/project/$id/version');
-    final response = await _httpClient.get(uri, headers: _headers);
+    final networkClient = NetworkClient();
+    final response = await networkClient.get(
+      '$baseUrl/project/$id/version',
+      headers: _headers,
+    );
 
     if (response.statusCode != 200) {
       throw Exception('Failed to get versions: ${response.statusCode}');
@@ -112,8 +116,11 @@ class ModrinthApi implements ResourceApi {
 
   @override
   Future<ResourceVersion> getVersion(String resourceId, String versionId) async {
-    final uri = Uri.parse('$baseUrl/version/$versionId');
-    final response = await _httpClient.get(uri, headers: _headers);
+    final networkClient = NetworkClient();
+    final response = await networkClient.get(
+      '$baseUrl/version/$versionId',
+      headers: _headers,
+    );
 
     if (response.statusCode != 200) {
       throw Exception('Failed to get version: ${response.statusCode}');
@@ -125,8 +132,11 @@ class ModrinthApi implements ResourceApi {
 
   @override
   Future<List<Category>> getCategories(ResourceType type) async {
-    final uri = Uri.parse('$baseUrl/tag/category');
-    final response = await _httpClient.get(uri, headers: _headers);
+    final networkClient = NetworkClient();
+    final response = await networkClient.get(
+      '$baseUrl/tag/category',
+      headers: _headers,
+    );
 
     if (response.statusCode != 200) {
       throw Exception('Failed to get categories: ${response.statusCode}');
@@ -311,5 +321,16 @@ class ModrinthApi implements ResourceApi {
       default:
         return 'relevance';
     }
+  }
+
+  /// 解析JSON响应，处理gzip压缩
+  Map<String, dynamic> _parseJsonResponse(http.Response response) {
+    final contentEncoding = response.headers['content-encoding'];
+    if (contentEncoding != null && contentEncoding.contains('gzip')) {
+      final gzipDecoder = archive.GZipDecoder();
+      final decodedBytes = gzipDecoder.decodeBytes(response.bodyBytes);
+      return json.decode(utf8.decode(decodedBytes)) as Map<String, dynamic>;
+    }
+    return json.decode(response.body) as Map<String, dynamic>;
   }
 }

@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
 import '../config/config_keys.dart';
 import '../config/config_manager.dart';
 import '../core/logger.dart';
+import '../core/network_client.dart';
 import '../download/download_engine.dart';
 import '../event/event.dart';
 import '../event/event_bus.dart';
@@ -124,7 +124,11 @@ class VersionManager implements IVersionManager {
 
       _logger.info('Fetching version manifest from BMCLAPI');
 
-      final response = await http.get(Uri.parse(_versionManifestUrl));
+      final networkClient = NetworkClient();
+      final response = await networkClient.get(
+        _versionManifestUrl,
+        headers: NetworkClient.bmclapiHeaders,
+      );
 
       if (response.statusCode != 200) {
         throw Exception(
@@ -162,7 +166,11 @@ class VersionManager implements IVersionManager {
       );
 
       _logger.info('Fetching version JSON for $versionId');
-      final response = await http.get(Uri.parse(version.url));
+      final networkClient = NetworkClient();
+      final response = await networkClient.get(
+        version.url,
+        headers: NetworkClient.bmclapiHeaders,
+      );
 
       if (response.statusCode != 200) {
         throw Exception('Failed to fetch version JSON: ${response.statusCode}');

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../account/account_manager.dart';
 import '../../account/account_widgets.dart';
 import '../../account/account.dart';
 import '../../event/event.dart';
 import '../../event/event_bus.dart';
 import '../../core/logger.dart';
+import '../../auth/auth_manager.dart';
+import '../../auth/microsoft_auth.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/app_theme.dart';
@@ -103,18 +106,245 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
 
   /// 添加账户
   Future<void> _addAccount() async {
-    final username = await showAddAccountDialog(context);
+    final result = await _showAddAccountTypeDialog();
 
-    if (username != null && username.isNotEmpty) {
-      try {
-        await _accountManager.addOfflineAccount(username);
-      } catch (e, stackTrace) {
-        _logger.error('添加账户失败', e, stackTrace);
-        if (mounted) {
-          _showSnackBar('添加账户失败: $e');
+    if (result == null) return;
+
+    if (result == 'microsoft') {
+      // 跳转到登录页面进行Microsoft登录
+      if (mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const _MicrosoftLoginWrapper(),
+          ),
+        );
+      }
+    } else if (result == 'offline') {
+      final username = await _showOfflineAccountDialog();
+      if (username != null && username.isNotEmpty) {
+        try {
+          await _accountManager.addOfflineAccount(username);
+        } catch (e, stackTrace) {
+          _logger.error('添加账户失败', e, stackTrace);
+          if (mounted) {
+            _showSnackBar('添加账户失败: $e');
+          }
         }
       }
+    } else if (result == 'authlib') {
+      // 跳转到Authlib登录页面
+      if (mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const _AuthlibLoginWrapper(),
+          ),
+        );
+      }
     }
+  }
+
+  /// 显示添加账户类型选择对话框
+  Future<String?> _showAddAccountTypeDialog() async {
+    return BAFrostedDialog.show<String>(
+      context: context,
+      title: '添加账户',
+      width: 400,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '选择账户类型',
+            style: BATypography.bodyMedium.copyWith(
+              color: BAColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 20),
+          _buildAccountTypeOption(
+            icon: Icons.window,
+            title: 'Microsoft账户',
+            description: '使用Microsoft账号登录Minecraft',
+            color: BAColors.primary,
+            onTap: () => Navigator.pop(context, 'microsoft'),
+          ),
+          const SizedBox(height: 12),
+          _buildAccountTypeOption(
+            icon: Icons.person_outline,
+            title: '离线账户',
+            description: '不需要网络，仅用于单机游戏',
+            color: BAColors.secondary,
+            onTap: () => Navigator.pop(context, 'offline'),
+          ),
+          const SizedBox(height: 12),
+          _buildAccountTypeOption(
+            icon: Icons.link,
+            title: 'Authlib账户',
+            description: '使用第三方皮肤站登录',
+            color: BAColors.success,
+            onTap: () => Navigator.pop(context, 'authlib'),
+          ),
+        ],
+      ),
+      actions: [
+        BASecondaryButton(
+          text: '取消',
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+    );
+  }
+
+  /// 构建账户类型选项
+  Widget _buildAccountTypeOption({
+    required IconData icon,
+    required String title,
+    required String description,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: BAColors.surfaceVariant,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: BAColors.border),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: color, size: 28),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: BATypography.bodyLarge.copyWith(
+                        color: BAColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: BATypography.bodySmall.copyWith(
+                        color: BAColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios, color: BAColors.textSecondary, size: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 显示离线账户对话框
+  Future<String?> _showOfflineAccountDialog() async {
+    final TextEditingController usernameController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    final result = await BAFrostedDialog.show<String>(
+      context: context,
+      title: '添加离线账户',
+      width: 400,
+      actions: [
+        BASecondaryButton(
+          text: '取消',
+          onPressed: () => Navigator.pop(context),
+        ),
+        const SizedBox(width: 12),
+        BAPrimaryButton(
+          text: '添加',
+          onPressed: () {
+            if (formKey.currentState?.validate() ?? false) {
+              Navigator.pop(context, usernameController.text.trim());
+            }
+          },
+        ),
+      ],
+      child: Form(
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '输入用户名',
+              style: BATypography.bodyMedium.copyWith(
+                color: BAColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: usernameController,
+              decoration: InputDecoration(
+                hintText: 'Player',
+                filled: true,
+                fillColor: BAColors.surfaceVariant,
+                border: OutlineInputBorder(
+                  borderRadius: BATheme.borderRadiusSmall,
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BATheme.borderRadiusSmall,
+                  borderSide: BorderSide(color: BAColors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BATheme.borderRadiusSmall,
+                  borderSide: BorderSide(color: BAColors.primary, width: 2),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                prefixIcon: Icon(
+                  Icons.person_outline,
+                  color: BAColors.textSecondary,
+                ),
+              ),
+              style: BATypography.bodyMedium.copyWith(
+                color: BAColors.textPrimary,
+              ),
+              autofocus: true,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return '用户名不能为空';
+                }
+                if (value.length < 3) {
+                  return '用户名至少3个字符';
+                }
+                if (value.length > 16) {
+                  return '用户名最多16个字符';
+                }
+                if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value)) {
+                  return '用户名只能包含字母、数字和下划线';
+                }
+                return null;
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    usernameController.dispose();
+    return result;
   }
 
   /// 编辑账户
@@ -500,5 +730,608 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
   /// 格式化日期
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+}
+
+/// Microsoft登录包装组件
+class _MicrosoftLoginWrapper extends StatefulWidget {
+  const _MicrosoftLoginWrapper();
+
+  @override
+  State<_MicrosoftLoginWrapper> createState() => _MicrosoftLoginWrapperState();
+}
+
+class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
+  final AuthManager _authManager = AuthManager();
+  final AccountManager _accountManager = AccountManager();
+  bool _isAuthenticating = false;
+  String? _authProgress;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: BAColors.background,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(32),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: BAColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(32),
+                  ),
+                  child: Icon(
+                    Icons.window,
+                    size: 64,
+                    color: BAColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Microsoft登录',
+                  style: BATypography.headlineMedium.copyWith(
+                    color: BAColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '使用Microsoft账号登录Minecraft',
+                  style: BATypography.bodyMedium.copyWith(
+                    color: BAColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 48),
+                if (_isAuthenticating) ...[
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(
+                    _authProgress ?? '登录中...',
+                    style: BATypography.bodyMedium.copyWith(
+                      color: BAColors.textSecondary,
+                    ),
+                  ),
+                ] else ...[
+                  BAPrimaryButton(
+                    text: '开始登录',
+                    onPressed: _startMicrosoftLogin,
+                    height: 56,
+                    width: double.infinity,
+                    leadingIcon: const Icon(Icons.login, color: Colors.white),
+                  ),
+                  const SizedBox(height: 16),
+                  BASecondaryButton(
+                    text: '返回',
+                    onPressed: () => Navigator.pop(context),
+                    height: 56,
+                    width: double.infinity,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _startMicrosoftLogin() async {
+    if (_isAuthenticating) return;
+
+    setState(() {
+      _isAuthenticating = true;
+      _authProgress = '正在获取设备代码...';
+    });
+
+    try {
+      final deviceCodeResponse = await _authManager.getDeviceCode();
+      
+      if (mounted) {
+        setState(() {
+          _authProgress = '请在浏览器中完成登录';
+        });
+      }
+
+      final loginResult = await _showDeviceCodeLoginDialog(deviceCodeResponse);
+      if (!loginResult) {
+        setState(() {
+          _isAuthenticating = false;
+          _authProgress = null;
+        });
+        return;
+      }
+
+      setState(() {
+        _authProgress = '等待用户授权...';
+      });
+
+      final credentials = await _authManager.authenticateWithDeviceCode(
+        deviceCodeResponse.deviceCode,
+        onProgress: (progress) {
+          if (mounted) {
+            setState(() {
+              _authProgress = progress;
+            });
+          }
+        },
+      );
+
+      if (credentials.minecraftProfile == null) {
+        throw Exception('无法获取Minecraft档案');
+      }
+
+      final profile = credentials.minecraftProfile!;
+      await _accountManager.addMicrosoftAccount(profile.name, profile.id);
+      await _accountManager.selectAccount(profile.id);
+
+      if (mounted) {
+        _showSuccessSnackBar('登录成功！欢迎，${profile.name}');
+        Navigator.pop(context);
+        Navigator.pop(context);
+      }
+    } catch (e, stackTrace) {
+      Logger().error('Microsoft登录失败', e, stackTrace);
+      if (mounted) {
+        _showErrorSnackBar('登录失败: $e');
+      }
+      setState(() {
+        _isAuthenticating = false;
+        _authProgress = null;
+      });
+    }
+  }
+
+  Future<String?> _showRedirectUrlDialog() async {
+    final TextEditingController redirectController = TextEditingController();
+    String? result;
+
+    await BAFrostedDialog.show<String>(
+      context: context,
+      title: '完成授权',
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '请在浏览器中完成登录后，将浏览器地址栏中的完整URL粘贴到下方：',
+            style: BATypography.bodyMedium.copyWith(
+              color: BAColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: redirectController,
+            decoration: InputDecoration(
+              hintText: '粘贴重定向URL...',
+              filled: true,
+              fillColor: BAColors.surfaceVariant,
+              border: OutlineInputBorder(
+                borderRadius: BATheme.borderRadiusSmall,
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BATheme.borderRadiusSmall,
+                borderSide: BorderSide(color: BAColors.border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BATheme.borderRadiusSmall,
+                borderSide: BorderSide(color: BAColors.primary, width: 2),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+            ),
+            style: BATypography.bodyMedium.copyWith(
+              color: BAColors.textPrimary,
+            ),
+            autofocus: true,
+          ),
+        ],
+      ),
+      actions: [
+        BASecondaryButton(
+          text: '取消',
+          onPressed: () => Navigator.pop(context),
+        ),
+        const SizedBox(width: 8),
+        BAPrimaryButton(
+          text: '确认',
+          onPressed: () {
+            result = redirectController.text;
+            Navigator.pop(context);
+          },
+        ),
+      ],
+      showCloseButton: false,
+      barrierDismissible: false,
+    );
+
+    return result?.trim().isEmpty == true ? null : result;
+  }
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: BAColors.success,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: BAColors.danger,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  Future<bool> _showDeviceCodeLoginDialog(DeviceCodeResponse deviceCode) async {
+    bool result = false;
+
+    await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: BAColors.surface,
+        title: Text(
+          'Microsoft登录',
+          style: BATypography.headlineSmall.copyWith(color: BAColors.textPrimary),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 16),
+            Text(
+              '请按照以下步骤完成登录:',
+              style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const CircleAvatar(child: Text('1')),
+              title: Text(
+                '打开浏览器访问:',
+                style: BATypography.bodyMedium.copyWith(color: BAColors.textPrimary),
+              ),
+              subtitle: SelectableText(
+                deviceCode.verificationUri,
+                style: BATypography.bodySmall.copyWith(color: BAColors.primary),
+              ),
+            ),
+            ListTile(
+              leading: const CircleAvatar(child: Text('2')),
+              title: Text(
+                '输入代码:',
+                style: BATypography.bodyMedium.copyWith(color: BAColors.textPrimary),
+              ),
+              subtitle: SelectableText(
+                deviceCode.userCode,
+                style: BATypography.bodyLarge.copyWith(color: BAColors.success),
+              ),
+            ),
+            ListTile(
+              leading: const CircleAvatar(child: Text('3')),
+              title: Text(
+                '完成登录后点击继续',
+                style: BATypography.bodyMedium.copyWith(color: BAColors.textPrimary),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context, false);
+            },
+            child: Text(
+              '取消',
+              style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              result = true;
+              Navigator.pop(context, true);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: BAColors.primary,
+            ),
+            child: Text(
+              '继续',
+              style: BATypography.bodyMedium.copyWith(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return result;
+  }
+}
+
+/// Authlib登录包装组件
+class _AuthlibLoginWrapper extends StatefulWidget {
+  const _AuthlibLoginWrapper();
+
+  @override
+  State<_AuthlibLoginWrapper> createState() => _AuthlibLoginWrapperState();
+}
+
+class _AuthlibLoginWrapperState extends State<_AuthlibLoginWrapper> {
+  final AccountManager _accountManager = AccountManager();
+  final TextEditingController _serverController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    _serverController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: BAColors.background,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(32),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: BAColors.success.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(32),
+                    ),
+                    child: Icon(
+                      Icons.link,
+                      size: 64,
+                      color: BAColors.success,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Authlib登录',
+                    style: BATypography.headlineMedium.copyWith(
+                      color: BAColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '使用第三方皮肤站登录',
+                    style: BATypography.bodyMedium.copyWith(
+                      color: BAColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 48),
+                  _buildServerInput(),
+                  const SizedBox(height: 16),
+                  _buildEmailInput(),
+                  const SizedBox(height: 16),
+                  _buildPasswordInput(),
+                  const SizedBox(height: 24),
+                  if (_isLoading)
+                    const CircularProgressIndicator()
+                  else ...[
+                    BAPrimaryButton(
+                      text: '登录',
+                      onPressed: _login,
+                      height: 56,
+                      width: double.infinity,
+                    ),
+                    const SizedBox(height: 16),
+                    BASecondaryButton(
+                      text: '返回',
+                      onPressed: () => Navigator.pop(context),
+                      height: 56,
+                      width: double.infinity,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildServerInput() {
+    return TextFormField(
+      controller: _serverController,
+      decoration: InputDecoration(
+        hintText: 'https://example.com',
+        labelText: '皮肤站地址',
+        filled: true,
+        fillColor: BAColors.surfaceVariant,
+        border: OutlineInputBorder(
+          borderRadius: BATheme.borderRadiusSmall,
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BATheme.borderRadiusSmall,
+          borderSide: BorderSide(color: BAColors.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BATheme.borderRadiusSmall,
+          borderSide: BorderSide(color: BAColors.primary, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        prefixIcon: Icon(Icons.public, color: BAColors.textSecondary),
+      ),
+      style: BATypography.bodyMedium.copyWith(
+        color: BAColors.textPrimary,
+      ),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return '请输入皮肤站地址';
+        }
+        try {
+          Uri.parse(value.trim());
+        } catch (_) {
+          return '请输入有效的URL';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildEmailInput() {
+    return TextFormField(
+      controller: _emailController,
+      decoration: InputDecoration(
+        hintText: 'you@example.com',
+        labelText: '邮箱',
+        filled: true,
+        fillColor: BAColors.surfaceVariant,
+        border: OutlineInputBorder(
+          borderRadius: BATheme.borderRadiusSmall,
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BATheme.borderRadiusSmall,
+          borderSide: BorderSide(color: BAColors.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BATheme.borderRadiusSmall,
+          borderSide: BorderSide(color: BAColors.primary, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        prefixIcon: Icon(Icons.email_outlined, color: BAColors.textSecondary),
+      ),
+      style: BATypography.bodyMedium.copyWith(
+        color: BAColors.textPrimary,
+      ),
+      keyboardType: TextInputType.emailAddress,
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return '请输入邮箱';
+        }
+        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+          return '请输入有效的邮箱地址';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildPasswordInput() {
+    return TextFormField(
+      controller: _passwordController,
+      obscureText: _obscurePassword,
+      decoration: InputDecoration(
+        hintText: '••••••••',
+        labelText: '密码',
+        filled: true,
+        fillColor: BAColors.surfaceVariant,
+        border: OutlineInputBorder(
+          borderRadius: BATheme.borderRadiusSmall,
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BATheme.borderRadiusSmall,
+          borderSide: BorderSide(color: BAColors.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BATheme.borderRadiusSmall,
+          borderSide: BorderSide(color: BAColors.primary, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        prefixIcon: Icon(Icons.lock_outline, color: BAColors.textSecondary),
+        suffixIcon: IconButton(
+          icon: Icon(
+            _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+            color: BAColors.textSecondary,
+          ),
+          onPressed: () {
+            setState(() {
+              _obscurePassword = !_obscurePassword;
+            });
+          },
+        ),
+      ),
+      style: BATypography.bodyMedium.copyWith(
+        color: BAColors.textPrimary,
+      ),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return '请输入密码';
+        }
+        if (value.length < 6) {
+          return '密码至少6个字符';
+        }
+        return null;
+      },
+    );
+  }
+
+  Future<void> _login() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // TODO: 实现Authlib登录逻辑
+      // 这里是一个简化的示例，实际实现需要与Authlib服务器通信
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (mounted) {
+        _showErrorSnackBar('Authlib登录功能尚未完全实现');
+      }
+    } catch (e, stackTrace) {
+      Logger().error('Authlib登录失败', e, stackTrace);
+      if (mounted) {
+        _showErrorSnackBar('登录失败: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: BAColors.danger,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 }

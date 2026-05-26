@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import '../core/network_client.dart';
 import 'models.dart';
 
 /// Xbox Live认证服务
@@ -12,13 +12,10 @@ class XboxAuthService {
 
   /// 获取Xbox Live令牌
   Future<XboxLiveToken> authenticateUser(String accessToken) async {
-    final response = await http.post(
-      Uri.parse(_userAuthenticateEndpoint),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: json.encode({
+    final networkClient = NetworkClient();
+    final response = await networkClient.postJson(
+      _userAuthenticateEndpoint,
+      {
         'Properties': {
           'AuthMethod': 'RPS',
           'SiteName': 'user.auth.xboxlive.com',
@@ -26,7 +23,8 @@ class XboxAuthService {
         },
         'RelyingParty': 'http://auth.xboxlive.com',
         'TokenType': 'JWT',
-      }),
+      },
+      headers: NetworkClient.xboxLiveHeaders,
     );
 
     if (response.statusCode != 200) {
@@ -45,20 +43,18 @@ class XboxAuthService {
 
   /// 获取XSTS令牌
   Future<XstsToken> acquireXstsToken(String xboxLiveToken) async {
-    final response = await http.post(
-      Uri.parse(_xstsAuthenticateEndpoint),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: json.encode({
+    final networkClient = NetworkClient();
+    final response = await networkClient.postJson(
+      _xstsAuthenticateEndpoint,
+      {
         'Properties': {
           'SandboxId': 'RETAIL',
           'UserTokens': [xboxLiveToken],
         },
         'RelyingParty': 'rp://api.minecraftservices.com/',
         'TokenType': 'JWT',
-      }),
+      },
+      headers: NetworkClient.xboxLiveHeaders,
     );
 
     if (response.statusCode != 200) {
