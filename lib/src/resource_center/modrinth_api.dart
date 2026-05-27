@@ -325,12 +325,16 @@ class ModrinthApi implements ResourceApi {
 
   /// 解析JSON响应，处理gzip压缩
   Map<String, dynamic> _parseJsonResponse(http.Response response) {
-    final contentEncoding = response.headers['content-encoding'];
-    if (contentEncoding != null && contentEncoding.contains('gzip')) {
-      final gzipDecoder = archive.GZipDecoder();
-      final decodedBytes = gzipDecoder.decodeBytes(response.bodyBytes);
-      return json.decode(utf8.decode(decodedBytes)) as Map<String, dynamic>;
+    try {
+      final contentEncoding = response.headers['content-encoding'];
+      if (contentEncoding != null && contentEncoding.contains('gzip')) {
+        final gzipDecoder = archive.GZipDecoder();
+        final decodedBytes = gzipDecoder.decodeBytes(response.bodyBytes);
+        return json.decode(utf8.decode(decodedBytes)) as Map<String, dynamic>;
+      }
+      return json.decode(utf8.decode(response.bodyBytes, allowMalformed: true)) as Map<String, dynamic>;
+    } catch (e) {
+      return json.decode(response.body) as Map<String, dynamic>;
     }
-    return json.decode(response.body) as Map<String, dynamic>;
   }
 }

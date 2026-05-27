@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'splash_page.dart';
+import 'ba_main_page.dart';
 import 'home_page.dart';
 import 'version_page.dart';
 import 'account_page.dart';
@@ -34,7 +35,7 @@ class AppRouter {
         );
       case AppRoutes.home:
         return MaterialPageRoute(
-          builder: (_) => const BAMCHomePage(),
+          builder: (_) => const BAMCMainPage(),
           settings: settings,
         );
       case AppRoutes.versions:

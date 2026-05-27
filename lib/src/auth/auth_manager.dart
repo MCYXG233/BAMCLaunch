@@ -29,18 +29,36 @@ class AuthManager {
 
   /// 完整的认证流程
   Future<AuthCredentials> authenticate({
-    required String authorizationCode,
-    required String codeVerifier,
+    String? authorizationCode,
+    String? codeVerifier,
+    String? accessToken,
+    String? refreshToken,
     AuthProgressCallback? onProgress,
   }) async {
     AuthCredentials credentials = AuthCredentials();
 
     try {
-      onProgress?.call('Authenticating with Microsoft...');
-      final microsoftToken = await _microsoftAuth.exchangeCodeForToken(
-        code: authorizationCode,
-        codeVerifier: codeVerifier,
-      );
+      OAuthToken microsoftToken;
+      
+      if (accessToken != null && refreshToken != null) {
+        // 直接使用令牌
+        microsoftToken = OAuthToken(
+          accessToken: accessToken,
+          tokenType: 'Bearer',
+          expiresIn: 3600,
+          refreshToken: refreshToken,
+        );
+      } else if (authorizationCode != null && codeVerifier != null) {
+        // 使用授权码交换令牌
+        onProgress?.call('Authenticating with Microsoft...');
+        microsoftToken = await _microsoftAuth.exchangeCodeForToken(
+          code: authorizationCode,
+          codeVerifier: codeVerifier,
+        );
+      } else {
+        throw Exception('必须提供授权码或访问令牌');
+      }
+      
       credentials = credentials.copyWith(microsoftToken: microsoftToken);
 
       onProgress?.call('Authenticating with Xbox Live...');

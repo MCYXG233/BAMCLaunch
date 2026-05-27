@@ -4,6 +4,9 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:archive/archive.dart' as archive;
+import 'error_codes.dart';
+import 'retry_helper.dart';
+import 'logger.dart';
 
 /// 网络请求工具类
 /// 处理所有HTTP请求，添加正确的请求头以避免403错误
@@ -15,6 +18,7 @@ class NetworkClient {
   NetworkClient._internal();
 
   final http.Client _client = http.Client();
+  final Logger _logger = Logger('NetworkClient');
 
   /// 默认请求头
   static Map<String, String> get defaultHeaders {
@@ -89,27 +93,55 @@ class NetworkClient {
     Map<String, String>? headers,
     Map<String, String>? queryParameters,
     int timeoutSeconds = 30,
+    RetryConfig? retryConfig,
   }) async {
-    final uri = queryParameters != null
-        ? Uri.parse(url).replace(queryParameters: queryParameters)
-        : Uri.parse(url);
+    return RetryHelper.execute(
+      config: retryConfig ?? RetryConfig.network,
+      operation: () async {
+        final uri = queryParameters != null
+            ? Uri.parse(url).replace(queryParameters: queryParameters)
+            : Uri.parse(url);
 
-    final finalHeaders = {...defaultHeaders, if (headers != null) ...headers};
+        final finalHeaders = {...defaultHeaders, if (headers != null) ...headers};
 
-    try {
-      final response = await _client
-          .get(uri, headers: finalHeaders)
-          .timeout(Duration(seconds: timeoutSeconds));
-      return response;
-    } on TimeoutException {
-      throw NetworkException('请求超时');
-    } on SocketException {
-      throw NetworkException('网络连接失败');
-    } on HttpException catch (e) {
-      throw NetworkException('HTTP错误: ${e.message}');
-    } catch (e) {
-      throw NetworkException('网络请求失败: $e');
-    }
+        try {
+          final response = await _client
+              .get(uri, headers: finalHeaders)
+              .timeout(Duration(seconds: timeoutSeconds));
+          return response;
+        } on TimeoutException catch (e, stackTrace) {
+          throw AppException.fromCode(
+            ErrorCodes.networkTimeout,
+            originalError: e,
+            stackTrace: stackTrace,
+            retryable: true,
+          );
+        } on SocketException catch (e, stackTrace) {
+          throw AppException.fromCode(
+            ErrorCodes.networkConnectionFailed,
+            originalError: e,
+            stackTrace: stackTrace,
+            retryable: true,
+          );
+        } on HttpException catch (e, stackTrace) {
+          throw AppException.fromCode(
+            ErrorCodes.networkHttpError,
+            detail: e.message,
+            originalError: e,
+            stackTrace: stackTrace,
+            retryable: true,
+          );
+        } catch (e, stackTrace) {
+          throw AppException.fromCode(
+            ErrorCodes.networkHttpError,
+            detail: e.toString(),
+            originalError: e,
+            stackTrace: stackTrace,
+            retryable: true,
+          );
+        }
+      },
+    );
   }
 
   /// 发送POST请求
@@ -118,24 +150,52 @@ class NetworkClient {
     Map<String, String>? headers,
     Object? body,
     int timeoutSeconds = 30,
+    RetryConfig? retryConfig,
   }) async {
-    final uri = Uri.parse(url);
-    final finalHeaders = {...defaultHeaders, if (headers != null) ...headers};
+    return RetryHelper.execute(
+      config: retryConfig ?? RetryConfig.network,
+      operation: () async {
+        final uri = Uri.parse(url);
+        final finalHeaders = {...defaultHeaders, if (headers != null) ...headers};
 
-    try {
-      final response = await _client
-          .post(uri, headers: finalHeaders, body: body)
-          .timeout(Duration(seconds: timeoutSeconds));
-      return response;
-    } on TimeoutException {
-      throw NetworkException('请求超时');
-    } on SocketException {
-      throw NetworkException('网络连接失败');
-    } on HttpException catch (e) {
-      throw NetworkException('HTTP错误: ${e.message}');
-    } catch (e) {
-      throw NetworkException('网络请求失败: $e');
-    }
+        try {
+          final response = await _client
+              .post(uri, headers: finalHeaders, body: body)
+              .timeout(Duration(seconds: timeoutSeconds));
+          return response;
+        } on TimeoutException catch (e, stackTrace) {
+          throw AppException.fromCode(
+            ErrorCodes.networkTimeout,
+            originalError: e,
+            stackTrace: stackTrace,
+            retryable: true,
+          );
+        } on SocketException catch (e, stackTrace) {
+          throw AppException.fromCode(
+            ErrorCodes.networkConnectionFailed,
+            originalError: e,
+            stackTrace: stackTrace,
+            retryable: true,
+          );
+        } on HttpException catch (e, stackTrace) {
+          throw AppException.fromCode(
+            ErrorCodes.networkHttpError,
+            detail: e.message,
+            originalError: e,
+            stackTrace: stackTrace,
+            retryable: true,
+          );
+        } catch (e, stackTrace) {
+          throw AppException.fromCode(
+            ErrorCodes.networkHttpError,
+            detail: e.toString(),
+            originalError: e,
+            stackTrace: stackTrace,
+            retryable: true,
+          );
+        }
+      },
+    );
   }
 
   /// 发送JSON POST请求
@@ -144,32 +204,60 @@ class NetworkClient {
     Map<String, dynamic> body, {
     Map<String, String>? headers,
     int timeoutSeconds = 30,
+    RetryConfig? retryConfig,
   }) async {
-    final uri = Uri.parse(url);
-    final finalHeaders = {
-      ...defaultHeaders,
-      'Content-Type': 'application/json',
-      if (headers != null) ...headers,
-    };
+    return RetryHelper.execute(
+      config: retryConfig ?? RetryConfig.network,
+      operation: () async {
+        final uri = Uri.parse(url);
+        final finalHeaders = {
+          ...defaultHeaders,
+          'Content-Type': 'application/json',
+          if (headers != null) ...headers,
+        };
 
-    try {
-      final response = await _client
-          .post(
-            uri,
-            headers: finalHeaders,
-            body: jsonEncode(body),
-          )
-          .timeout(Duration(seconds: timeoutSeconds));
-      return response;
-    } on TimeoutException {
-      throw NetworkException('请求超时');
-    } on SocketException {
-      throw NetworkException('网络连接失败');
-    } on HttpException catch (e) {
-      throw NetworkException('HTTP错误: ${e.message}');
-    } catch (e) {
-      throw NetworkException('网络请求失败: $e');
-    }
+        try {
+          final response = await _client
+              .post(
+                uri,
+                headers: finalHeaders,
+                body: jsonEncode(body),
+              )
+              .timeout(Duration(seconds: timeoutSeconds));
+          return response;
+        } on TimeoutException catch (e, stackTrace) {
+          throw AppException.fromCode(
+            ErrorCodes.networkTimeout,
+            originalError: e,
+            stackTrace: stackTrace,
+            retryable: true,
+          );
+        } on SocketException catch (e, stackTrace) {
+          throw AppException.fromCode(
+            ErrorCodes.networkConnectionFailed,
+            originalError: e,
+            stackTrace: stackTrace,
+            retryable: true,
+          );
+        } on HttpException catch (e, stackTrace) {
+          throw AppException.fromCode(
+            ErrorCodes.networkHttpError,
+            detail: e.message,
+            originalError: e,
+            stackTrace: stackTrace,
+            retryable: true,
+          );
+        } catch (e, stackTrace) {
+          throw AppException.fromCode(
+            ErrorCodes.networkHttpError,
+            detail: e.toString(),
+            originalError: e,
+            stackTrace: stackTrace,
+            retryable: true,
+          );
+        }
+      },
+    );
   }
 
   /// 下载文件
@@ -179,41 +267,68 @@ class NetworkClient {
     Map<String, String>? headers,
     void Function(int, int)? onProgress,
     int timeoutSeconds = 120,
+    RetryConfig? retryConfig,
   }) async {
-    final uri = Uri.parse(url);
-    final finalHeaders = {...defaultHeaders, if (headers != null) ...headers};
+    return RetryHelper.execute(
+      config: retryConfig ?? RetryConfig.network,
+      operation: () async {
+        final uri = Uri.parse(url);
+        final finalHeaders = {...defaultHeaders, if (headers != null) ...headers};
 
-    try {
-      final request = http.Request('GET', uri)..headers.addAll(finalHeaders);
-      final response = await _client.send(request).timeout(
-            Duration(seconds: timeoutSeconds),
+        try {
+          final request = http.Request('GET', uri)..headers.addAll(finalHeaders);
+          final response = await _client.send(request).timeout(
+                Duration(seconds: timeoutSeconds),
+              );
+
+          if (response.statusCode != 200) {
+            throw AppException.fromCode(
+              ErrorCodes.networkDownloadFailed,
+              detail: 'HTTP ${response.statusCode}',
+              retryable: response.statusCode >= 500,
+            );
+          }
+
+          final file = File(destinationPath);
+          final sink = file.openWrite();
+          int downloadedBytes = 0;
+          final contentLength = response.contentLength ?? 0;
+
+          await for (final chunk in response.stream) {
+            sink.add(chunk);
+            downloadedBytes += chunk.length;
+            if (onProgress != null && contentLength > 0) {
+              onProgress(downloadedBytes, contentLength);
+            }
+          }
+
+          await sink.close();
+          _logger.info('Download completed: $destinationPath');
+        } on TimeoutException catch (e, stackTrace) {
+          throw AppException.fromCode(
+            ErrorCodes.networkTimeout,
+            originalError: e,
+            stackTrace: stackTrace,
+            retryable: true,
           );
-
-      if (response.statusCode != 200) {
-        throw NetworkException('下载失败: HTTP ${response.statusCode}');
-      }
-
-      final file = File(destinationPath);
-      final sink = file.openWrite();
-      int downloadedBytes = 0;
-      final contentLength = response.contentLength ?? 0;
-
-      await for (final chunk in response.stream) {
-        sink.add(chunk);
-        downloadedBytes += chunk.length;
-        if (onProgress != null && contentLength > 0) {
-          onProgress(downloadedBytes, contentLength);
+        } on SocketException catch (e, stackTrace) {
+          throw AppException.fromCode(
+            ErrorCodes.networkConnectionFailed,
+            originalError: e,
+            stackTrace: stackTrace,
+            retryable: true,
+          );
+        } catch (e, stackTrace) {
+          throw AppException.fromCode(
+            ErrorCodes.networkDownloadFailed,
+            detail: e.toString(),
+            originalError: e,
+            stackTrace: stackTrace,
+            retryable: true,
+          );
         }
-      }
-
-      await sink.close();
-    } on TimeoutException {
-      throw NetworkException('下载超时');
-    } on SocketException {
-      throw NetworkException('网络连接失败');
-    } catch (e) {
-      throw NetworkException('下载失败: $e');
-    }
+      },
+    );
   }
 
   /// 获取JSON数据
@@ -222,12 +337,14 @@ class NetworkClient {
     Map<String, String>? headers,
     Map<String, String>? queryParameters,
     int timeoutSeconds = 30,
+    RetryConfig? retryConfig,
   }) async {
     final response = await get(
       url,
       headers: headers,
       queryParameters: queryParameters,
       timeoutSeconds: timeoutSeconds,
+      retryConfig: retryConfig,
     );
 
     if (response.statusCode == 200) {
@@ -241,11 +358,20 @@ class NetworkClient {
           return jsonDecode(utf8.decode(decodedBytes));
         }
         return jsonDecode(response.body);
-      } catch (e) {
-        throw NetworkException('JSON解析失败: $e');
+      } catch (e, stackTrace) {
+        throw AppException.fromCode(
+          ErrorCodes.networkHttpError,
+          detail: 'JSON解析失败: $e',
+          originalError: e,
+          stackTrace: stackTrace,
+        );
       }
     } else {
-      throw NetworkException('请求失败: ${response.statusCode}');
+      throw AppException.fromCode(
+        ErrorCodes.networkHttpError,
+        detail: 'HTTP ${response.statusCode}',
+        retryable: response.statusCode >= 500,
+      );
     }
   }
 

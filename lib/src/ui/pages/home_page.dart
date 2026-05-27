@@ -19,6 +19,7 @@ import 'version_page.dart';
 import 'account_page.dart';
 import 'settings_page.dart';
 import 'resource_center_page.dart';
+import 'game_library_page.dart';
 
 /// 蔚蓝档案风格主界面
 class BAMCHomePage extends StatefulWidget {
@@ -53,16 +54,9 @@ class _BAMCHomePageState extends State<BAMCHomePage>
       onTap: () {},
     ),
     BASidebarItem(
-      id: 'instances',
-      icon: Icons.folder_rounded,
-      label: '实例管理',
-      badge: null,
-      onTap: () {},
-    ),
-    BASidebarItem(
-      id: 'versions',
-      icon: Icons.system_update_alt_rounded,
-      label: '版本管理',
+      id: 'game-library',
+      icon: Icons.gamepad_rounded,
+      label: '游戏库',
       badge: null,
       onTap: () {},
     ),
@@ -77,13 +71,6 @@ class _BAMCHomePageState extends State<BAMCHomePage>
       id: 'accounts',
       icon: Icons.people_rounded,
       label: '账户管理',
-      badge: null,
-      onTap: () {},
-    ),
-    BASidebarItem(
-      id: 'extensions',
-      icon: Icons.extension_rounded,
-      label: '扩展管理',
       badge: null,
       onTap: () {},
     ),
@@ -522,16 +509,12 @@ class _BAMCHomePageState extends State<BAMCHomePage>
     switch (_selectedNavItem) {
       case 'home':
         return _buildHomeContent();
-      case 'instances':
-        return const InstanceManagerPage();
-      case 'versions':
-        return const BAMCVersionPage();
+      case 'game-library':
+        return const GameLibraryPage();
       case 'resource-center':
         return const ResourceCenterPage();
       case 'accounts':
         return const BAMCAccountPage();
-      case 'extensions':
-        return const ExtensionManagerPage();
       case 'settings':
         return const BAMCSettingsPage();
       default:

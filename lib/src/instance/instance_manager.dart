@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:convert';
 import 'dart:math';
+import 'package:archive/archive.dart' as archive;
+import 'package:path/path.dart' as path;
 import 'models.dart';
 import '../config/config_manager.dart';
 import '../core/logger.dart';
@@ -275,6 +277,7 @@ class InstanceManager {
       _selectedInstanceId = id;
     }
 
+    await ensureInstanceDirectories(id);
     await save();
     _logger.info('Created instance: $name');
 
@@ -354,6 +357,65 @@ class InstanceManager {
 
     await save();
     _logger.info('Selected instance: $id');
+  }
+
+  String getInstancePath(String instanceId) {
+    final instance = _instances.firstWhere(
+      (i) => i.id == instanceId,
+      orElse: () => throw ArgumentError('Instance not found: $instanceId'),
+    );
+    final directory = _directories.firstWhere(
+      (d) => d.id == instance.directoryId,
+      orElse: () => throw ArgumentError('Directory not found: ${instance.directoryId}'),
+    );
+    return '${directory.path}\\instances\\${instance.id}';
+  }
+
+  String getInstanceModsPath(String instanceId) {
+    return '${getInstancePath(instanceId)}\\mods';
+  }
+
+  String getInstanceConfigPath(String instanceId) {
+    return '${getInstancePath(instanceId)}\\config';
+  }
+
+  String getInstanceSavesPath(String instanceId) {
+    return '${getInstancePath(instanceId)}\\saves';
+  }
+
+  String getInstanceResourcePacksPath(String instanceId) {
+    return '${getInstancePath(instanceId)}\\resourcepacks';
+  }
+
+  String getInstanceShaderPacksPath(String instanceId) {
+    return '${getInstancePath(instanceId)}\\shaderpacks';
+  }
+
+  String getInstanceScreenshotsPath(String instanceId) {
+    return '${getInstancePath(instanceId)}\\screenshots';
+  }
+
+  String getInstanceLogsPath(String instanceId) {
+    return '${getInstancePath(instanceId)}\\logs';
+  }
+
+  Future<void> ensureInstanceDirectories(String instanceId) async {
+    final basePath = getInstancePath(instanceId);
+    final dirs = [
+      '$basePath\\mods',
+      '$basePath\\config',
+      '$basePath\\saves',
+      '$basePath\\resourcepacks',
+      '$basePath\\shaderpacks',
+      '$basePath\\screenshots',
+      '$basePath\\logs',
+    ];
+    for (final dir in dirs) {
+      final directory = Directory(dir);
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+      }
+    }
   }
 
   /// 添加资源到实例
@@ -441,10 +503,19 @@ class InstanceManager {
   }
 
   /// 复制实例
-  Future<GameInstance> duplicateInstance(String instanceId, String newName) async {
+  Future<GameInstance> duplicateInstance(
+    String instanceId,
+    String newName, {
+    bool copyFiles = true,
+  }) async {
     final instance = _instances.firstWhere(
       (i) => i.id == instanceId,
       orElse: () => throw ArgumentError('Instance not found: $instanceId'),
+    );
+
+    final directory = _directories.firstWhere(
+      (d) => d.id == instance.directoryId,
+      orElse: () => throw ArgumentError('Directory not found: ${instance.directoryId}'),
     );
 
     final id = _generateId();
@@ -460,10 +531,158 @@ class InstanceManager {
     );
 
     _instances.add(duplicated);
+
+    // 复制实例文件
+    if (copyFiles) {
+      try {
+        final sourceDir = Directory(path.join(directory.path, 'instances', instance.id));
+        final targetDir = Directory(path.join(directory.path, 'instances', id));
+
+        if (await sourceDir.exists()) {
+          await _copyDirectory(sourceDir, targetDir);
+          _logger.info('Copied instance files: ${instance.id} -> $id');
+        }
+      } catch (e, stackTrace) {
+        _logger.error('Failed to copy instance files', e, stackTrace);
+      }
+    }
+
     await save();
     _logger.info('Duplicated instance: $newName');
 
     return duplicated;
+  }
+
+  /// 复制目录
+  Future<void> _copyDirectory(Directory source, Directory target) async {
+    if (!await target.exists()) {
+      await target.create(recursive: true);
+    }
+
+    await for (final entity in source.list()) {
+      final targetPath = path.join(target.path, path.basename(entity.path));
+      if (entity is Directory) {
+        await _copyDirectory(entity, Directory(targetPath));
+      } else if (entity is File) {
+        await entity.copy(targetPath);
+      }
+    }
+  }
+
+  /// 导出实例为ZIP
+  Future<File> exportInstance(String instanceId, String exportPath) async {
+    final instance = _instances.firstWhere(
+      (i) => i.id == instanceId,
+      orElse: () => throw ArgumentError('Instance not found: $instanceId'),
+    );
+
+    final directory = _directories.firstWhere(
+      (d) => d.id == instance.directoryId,
+      orElse: () => throw ArgumentError('Directory not found: ${instance.directoryId}'),
+    );
+
+    // 创建ZIP文件
+    final zipFile = File(exportPath);
+    final zipArchive = archive.Archive();
+    final encoder = archive.ZipEncoder();
+
+    // 压缩实例文件
+    final instanceDir = Directory(path.join(directory.path, 'instances', instanceId));
+    if (await instanceDir.exists()) {
+      await for (final entity in instanceDir.list(recursive: true)) {
+        if (entity is File) {
+          final relativePath = path.relative(entity.path, from: instanceDir.path);
+          final bytes = await entity.readAsBytes();
+          zipArchive.addFile(archive.ArchiveFile('instances/$relativePath', bytes.length, bytes));
+        }
+      }
+    }
+
+    // 添加实例配置到ZIP
+    final configJson = jsonEncode(instance.toJson());
+    zipArchive.addFile(archive.ArchiveFile('instance.json', configJson.length, utf8.encode(configJson)));
+
+    // 写入ZIP文件
+    final zipBytes = encoder.encode(zipArchive);
+    if (zipBytes != null) {
+      await zipFile.writeAsBytes(zipBytes);
+    }
+
+    _logger.info('Exported instance: $instanceId -> $exportPath');
+    return zipFile;
+  }
+
+  /// 从ZIP导入实例
+  Future<GameInstance> importInstance(String zipPath, String directoryId) async {
+    if (!_directories.any((d) => d.id == directoryId)) {
+      throw ArgumentError('Directory not found: $directoryId');
+    }
+
+    final directory = _directories.firstWhere((d) => d.id == directoryId);
+
+    // 读取ZIP文件
+    final bytes = await File(zipPath).readAsBytes();
+    final zipArchive = archive.ZipDecoder().decodeBytes(bytes);
+
+    // 查找并解析实例配置
+    archive.ArchiveFile? configFile;
+    for (final file in zipArchive.files) {
+      if (file.name == 'instance.json' && file.isFile) {
+        configFile = file;
+        break;
+      }
+    }
+
+    if (configFile == null) {
+      throw ArgumentError('Invalid instance package: missing instance.json');
+    }
+
+    // 解析配置
+    final configJson = utf8.decode(configFile.content as List<int>);
+    final config = jsonDecode(configJson) as Map<String, dynamic>;
+
+    // 生成新ID
+    final id = _generateId();
+    final now = DateTime.now();
+
+    // 创建新实例
+    final instance = GameInstance.fromJson(config).copyWith(
+      id: id,
+      directoryId: directoryId,
+      createdAt: now,
+      updatedAt: now,
+      lastPlayed: null,
+      playTimeSeconds: 0,
+    );
+
+    _instances.add(instance);
+
+    // 提取实例文件
+    final targetDir = Directory('${directory.path}\\instances\\$id');
+    if (!await targetDir.exists()) {
+      await targetDir.create(recursive: true);
+    }
+
+    for (final file in zipArchive.files) {
+      if (file.name.startsWith('instances/') && file.isFile) {
+        final subPath = file.name.substring('instances/'.length);
+        final destPath = path.join(targetDir.path, subPath.replaceAll('/', path.separator));
+
+        // 创建目录
+        final destDir = Directory(path.dirname(destPath));
+        if (!await destDir.exists()) {
+          await destDir.create(recursive: true);
+        }
+
+        // 写入文件
+        await File(destPath).writeAsBytes(file.content as List<int>);
+      }
+    }
+
+    await save();
+    _logger.info('Imported instance: $id');
+
+    return instance;
   }
 
   /// 生成唯一 ID

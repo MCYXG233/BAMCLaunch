@@ -6,6 +6,7 @@ import '../../ui/theme/typography.dart';
 import '../../ui/components/ba_buttons.dart';
 import '../../ui/components/ba_dialog.dart';
 import '../../core/logger.dart';
+import '../../modpack/modpack_import_dialog.dart';
 import 'instance_config_page.dart';
 
 /// 实例管理主页面
@@ -298,6 +299,18 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
     }
   }
 
+  Future<void> _importModpack() async {
+    try {
+      final instanceId = await ModpackImportDialog.show(context);
+      if (instanceId != null && mounted) {
+        setState(() {});
+        _showSuccess('整合包导入成功！');
+      }
+    } catch (e) {
+      _showError('导入失败: $e');
+    }
+  }
+
   void _showSuccess(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -379,6 +392,12 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
               color: BAColors.textSecondary,
             ),
             onPressed: () => setState(() => _showGrid = !_showGrid),
+          ),
+          const SizedBox(width: 12),
+          BASecondaryButton(
+            text: '导入整合包',
+            onPressed: _importModpack,
+            leadingIcon: const Icon(Icons.archive, size: 18),
           ),
           const SizedBox(width: 12),
           BAPrimaryButton(

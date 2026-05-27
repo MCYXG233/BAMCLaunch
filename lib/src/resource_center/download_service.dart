@@ -8,6 +8,9 @@ import '../download/models.dart';
 import '../event/event.dart';
 import '../event/event_bus.dart';
 import '../instance/models.dart' as instance_models;
+import '../core/error_codes.dart';
+import '../core/network_client.dart';
+import '../core/retry_helper.dart';
 import '../instance/instance_manager.dart';
 import 'models.dart';
 import 'resource_manager.dart';
@@ -485,5 +488,186 @@ class DownloadService {
     _activeTasks.clear();
     _completedTasks.clear();
     _initialized = false;
+  }
+}
+
+class ResourceDownloadService {
+  static ResourceDownloadService? _instance;
+
+  factory ResourceDownloadService() {
+    return _instance ??= ResourceDownloadService._internal();
+  }
+
+  ResourceDownloadService._internal();
+
+  static ResourceDownloadService get instance =>
+      _instance ??= ResourceDownloadService._internal();
+
+  static void reset() {
+    _instance = null;
+  }
+
+  final Logger _logger = Logger('ResourceDownloadService');
+  final EventBus _eventBus = EventBus.instance;
+  final NetworkClient _networkClient = NetworkClient();
+  final ResourceManager _resourceManager = ResourceManager();
+  final InstanceManager _instanceManager = InstanceManager();
+
+  Future<void> downloadAndInstall({
+    required ResourceVersion version,
+    required String instanceId,
+    Function(double progress)? onProgress,
+  }) async {
+    await _resourceManager.initialize();
+    await _instanceManager.initialize();
+
+    final url = version.download.url;
+    final fileName = _sanitizeFileName(version.download.fileName);
+    final resourceType = _inferResourceType(fileName);
+    final targetDir = _getResourceDirectory(instanceId, resourceType);
+
+    await Directory(targetDir).create(recursive: true);
+
+    final savePath = path.join(targetDir, fileName);
+
+    _eventBus.publish(ResourceDownloadStartedEvent(
+      resourceId: version.id,
+      versionId: version.id,
+      taskId: 'resource_download_${version.id}',
+    ));
+
+    try {
+      await RetryHelper.execute(
+        config: RetryConfig.network,
+        operation: () async {
+          await _networkClient.downloadFile(
+            url,
+            savePath,
+            onProgress: (downloaded, total) {
+              if (total > 0) {
+                onProgress?.call(downloaded / total);
+              }
+            },
+          );
+        },
+      );
+
+      final installedResource = InstalledResource(
+        localId: InstalledResource.generateLocalId('manual', version.id),
+        resourceId: version.id,
+        source: 'manual',
+        type: resourceType,
+        name: version.name,
+        installedVersion: version.versionNumber,
+        versionId: version.id,
+        filePath: savePath,
+        fileSize: version.download.fileSize,
+        installedAt: DateTime.now(),
+      );
+
+      await _resourceManager.addInstalledResource(installedResource);
+
+      _eventBus.publish(ResourceDownloadCompletedEvent(
+        resourceId: version.id,
+        versionId: version.id,
+        savePath: savePath,
+      ));
+
+      onProgress?.call(1.0);
+    } catch (e, stackTrace) {
+      _logger.error('Failed to download and install resource', e, stackTrace);
+      _eventBus.publish(ResourceDownloadFailedEvent(
+        resourceId: version.id,
+        versionId: version.id,
+        error: e,
+      ));
+      rethrow;
+    }
+  }
+
+  Future<String> downloadToFile({
+    required String url,
+    required String fileName,
+    required String targetDirectory,
+    Function(double progress)? onProgress,
+  }) async {
+    await Directory(targetDirectory).create(recursive: true);
+
+    final sanitizedFileName = _sanitizeFileName(fileName);
+    final savePath = path.join(targetDirectory, sanitizedFileName);
+
+    try {
+      await RetryHelper.execute(
+        config: RetryConfig.network,
+        operation: () async {
+          await _networkClient.downloadFile(
+            url,
+            savePath,
+            onProgress: (downloaded, total) {
+              if (total > 0) {
+                onProgress?.call(downloaded / total);
+              }
+            },
+          );
+        },
+      );
+
+      onProgress?.call(1.0);
+      return savePath;
+    } catch (e, stackTrace) {
+      _logger.error('Failed to download file: $url', e, stackTrace);
+      throw AppException.fromCode(
+        ErrorCodes.networkDownloadFailed,
+        detail: 'Failed to download $fileName from $url',
+        originalError: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  String _getResourceDirectory(String instanceId, ResourceType type) {
+    final instance = _instanceManager.instances.firstWhere(
+      (i) => i.id == instanceId,
+      orElse: () => throw AppException.fromCode(
+        ErrorCodes.instanceNotFound,
+        detail: instanceId,
+      ),
+    );
+
+    final directory = _instanceManager.directories.firstWhere(
+      (d) => d.id == instance.directoryId,
+      orElse: () => throw AppException.fromCode(
+        ErrorCodes.instanceNotFound,
+        detail: 'Directory not found for instance $instanceId',
+      ),
+    );
+
+    String subDir;
+    switch (type) {
+      case ResourceType.mod:
+        subDir = 'mods';
+        break;
+      case ResourceType.resourcePack:
+        subDir = 'resourcepacks';
+        break;
+      case ResourceType.modpack:
+        subDir = 'mods';
+        break;
+    }
+    return path.join(directory.path, 'instances', instanceId, subDir);
+  }
+
+  String _sanitizeFileName(String name) {
+    return name
+        .replaceAll(RegExp(r'[<>:"/\\|?*]'), '_')
+        .replaceAll(RegExp(r'\s+'), '_');
+  }
+
+  ResourceType _inferResourceType(String fileName) {
+    final lower = fileName.toLowerCase();
+    if (lower.endsWith('.jar')) {
+      return ResourceType.mod;
+    }
+    return ResourceType.resourcePack;
   }
 }

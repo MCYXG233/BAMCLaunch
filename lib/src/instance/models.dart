@@ -200,6 +200,8 @@ class InstanceConfig {
   final bool? fullscreen;
   final bool? demo;
   final Map<String, String>? customProperties;
+  final String? modLoader;
+  final String? modLoaderVersion;
 
   InstanceConfig({
     this.javaPath,
@@ -212,6 +214,8 @@ class InstanceConfig {
     this.fullscreen,
     this.demo,
     this.customProperties,
+    this.modLoader,
+    this.modLoaderVersion,
   });
 
   InstanceConfig copyWith({
@@ -225,6 +229,8 @@ class InstanceConfig {
     bool? fullscreen,
     bool? demo,
     Map<String, String>? customProperties,
+    String? modLoader,
+    String? modLoaderVersion,
   }) {
     return InstanceConfig(
       javaPath: javaPath ?? this.javaPath,
@@ -237,6 +243,8 @@ class InstanceConfig {
       fullscreen: fullscreen ?? this.fullscreen,
       demo: demo ?? this.demo,
       customProperties: customProperties ?? this.customProperties,
+      modLoader: modLoader ?? this.modLoader,
+      modLoaderVersion: modLoaderVersion ?? this.modLoaderVersion,
     );
   }
 
@@ -252,6 +260,8 @@ class InstanceConfig {
       'fullscreen': fullscreen,
       'demo': demo,
       'customProperties': customProperties,
+      'modLoader': modLoader,
+      'modLoaderVersion': modLoaderVersion,
     };
   }
 
@@ -272,6 +282,8 @@ class InstanceConfig {
       demo: json['demo'] as bool?,
       customProperties: (json['customProperties'] as Map<String, dynamic>?)
           ?.map((key, value) => MapEntry(key, value as String)),
+      modLoader: json['modLoader'] as String?,
+      modLoaderVersion: json['modLoaderVersion'] as String?,
     );
   }
 }

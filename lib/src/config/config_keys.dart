@@ -11,6 +11,9 @@ class ConfigKeys {
   static const String windowHeight = 'windowHeight';
   static const String enableSplashAnimation = 'enableSplashAnimation';
   static const String enableSoundEffects = 'enableSoundEffects';
+  static const String launchAtStartup = 'launchAtStartup';
+  static const String minimizeToTray = 'minimizeToTray';
+  static const String closeToTray = 'closeToTray';
 
   /// 下载配置类
   static const String downloadPath = 'downloadPath';
@@ -72,4 +75,8 @@ class ConfigKeys {
   static const String resourceCenterCacheDuration = 'resourceCenterCacheDuration';
   static const String resourceCenterShowInstalledOnly = 'resourceCenterShowInstalledOnly';
   static const String resourceCenterAutoUpdateResources = 'resourceCenterAutoUpdateResources';
+
+  static const String gameWindowSize = 'gameWindowSize';
+  static const String autoRetryDownload = 'autoRetryDownload';
+  static const String proxyHost = 'proxyHost';
 }

@@ -6,6 +6,7 @@ import '../../ui/theme/typography.dart';
 import '../../ui/components/ba_buttons.dart';
 import '../../ui/components/ba_dialog.dart';
 import '../../core/logger.dart';
+import '../../loader/java_selector_dialog.dart';
 
 /// 实例配置编辑页面
 class InstanceConfigPage extends StatefulWidget {
@@ -63,6 +64,34 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
 
   void _markChanged() {
     setState(() => _hasChanges = true);
+  }
+
+  Future<void> _selectJava() async {
+    try {
+      final javaPath = await JavaSelectorDialog.show(
+        context,
+        currentJavaPath: _javaPathController.text,
+        recommendedVersion: 17,
+      );
+
+      if (javaPath != null) {
+        setState(() {
+          _javaPathController.text = javaPath;
+          _hasChanges = true;
+        });
+      }
+    } catch (e, stackTrace) {
+      _logger.error('Failed to select Java', e, stackTrace);
+      if (mounted) {
+        BAConfirmDialog.show(
+          context: context,
+          title: '错误',
+          content: '选择 Java 失败: $e',
+          confirmText: '确定',
+          cancelText: '取消',
+        );
+      }
+    }
   }
 
   Future<void> _saveConfig() async {
@@ -229,7 +258,7 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
               const SizedBox(width: 12),
               BASecondaryButton(
                 text: '浏览',
-                onPressed: () => _markChanged(),
+                onPressed: _selectJava,
               ),
             ],
           ),

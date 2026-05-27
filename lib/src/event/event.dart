@@ -371,6 +371,38 @@ class GameCrashedEvent extends GameLaunchEvent {
   GameCrashedEvent({required this.processId, this.error, this.logs});
 }
 
+/// 实例相关事件基类
+abstract class InstanceEvent extends Event {}
+
+/// 实例创建事件
+class InstanceCreatedEvent extends InstanceEvent {
+  final String instanceId;
+
+  InstanceCreatedEvent({required this.instanceId});
+}
+
+/// 实例更新事件
+class InstanceUpdatedEvent extends InstanceEvent {
+  final String instanceId;
+
+  InstanceUpdatedEvent({required this.instanceId});
+}
+
+/// 实例删除事件
+class InstanceDeletedEvent extends InstanceEvent {
+  final String instanceId;
+
+  InstanceDeletedEvent({required this.instanceId});
+}
+
+/// 选中实例变更事件
+class SelectedInstanceChangedEvent extends InstanceEvent {
+  final String? newInstanceId;
+  final String? oldInstanceId;
+
+  SelectedInstanceChangedEvent({this.newInstanceId, this.oldInstanceId});
+}
+
 /// 资源中心相关事件基类
 abstract class ResourceCenterEvent extends Event {}
 

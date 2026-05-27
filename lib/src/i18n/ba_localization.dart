@@ -1,0 +1,228 @@
+import 'package:flutter/material.dart';
+
+class BALocalizations {
+  static BALocalizations? _instance;
+  Locale _locale = const Locale('zh', 'CN');
+
+  static BALocalizations get instance {
+    _instance ??= BALocalizations._internal();
+    return _instance!;
+  }
+
+  BALocalizations._internal();
+
+  Locale get locale => _locale;
+
+  void setLocale(Locale locale) {
+    _locale = locale;
+  }
+
+  String translate(String key) {
+    return _translations[_locale.languageCode]?[key] ??
+        _translations['zh']?[key] ??
+        key;
+  }
+
+  static const Map<String, Map<String, String>> _translations = {
+    'zh': {
+      'app_name': 'BAMC Launcher',
+      'ok': '确定',
+      'cancel': '取消',
+      'confirm': '确认',
+      'delete': '删除',
+      'save': '保存',
+      'close': '关闭',
+      'loading': '加载中...',
+      'error': '错误',
+      'success': '成功',
+      'warning': '警告',
+      'retry': '重试',
+      'refresh': '刷新',
+      'search': '搜索',
+      'export': '导出',
+      'import': '导入',
+
+      'nav_home': '主页',
+      'nav_game_library': '游戏库',
+      'nav_resource_center': '资源中心',
+      'nav_settings': '设置',
+
+      'home_welcome': '欢迎回来，老师',
+      'home_subtitle': '准备好开始新的冒险了吗？',
+      'home_start_game': '开始游戏',
+      'home_create_instance': '创建实例',
+      'home_recent_games': '最近游戏',
+
+      'library_title': '游戏库',
+      'library_search_hint': '搜索实例...',
+      'library_empty': '还没有游戏实例',
+      'library_empty_hint': '还没有游戏实例，点击新建实例开始吧',
+      'library_create': '创建实例',
+      'library_import_modpack': '导入整合包',
+      'library_filter_all': '全部',
+      'library_filter_running': '游戏中',
+      'library_filter_installed': '已安装',
+      'library_filter_updatable': '可更新',
+      'library_status_ready': '就绪',
+      'library_status_running': '运行中',
+      'library_status_launching': '启动中',
+      'library_status_crashed': '崩溃',
+
+      'resource_title': '资源中心',
+      'resource_search_hint': '搜索资源...',
+      'resource_empty': '没有找到相关资源',
+      'resource_empty_hint': '试试换个关键词或切换分类吧',
+      'resource_category_all': '全部',
+      'resource_category_mod': '模组',
+      'resource_category_resourcepack': '资源包',
+      'resource_category_modpack': '整合包',
+      'resource_install': '安装',
+      'resource_sort_downloads': '最多下载',
+      'resource_sort_newest': '最新发布',
+      'resource_sort_updated': '最近更新',
+
+      'settings_title': '设置',
+      'settings_general': '通用设置',
+      'settings_game': '游戏设置',
+      'settings_download': '下载设置',
+      'settings_about': '关于',
+      'settings_language': '语言',
+      'settings_theme': '主题',
+      'settings_theme_dark': '深色',
+      'settings_theme_light': '浅色',
+      'settings_theme_system': '跟随系统',
+      'settings_java_path': 'Java路径',
+      'settings_memory': '内存分配',
+      'settings_max_downloads': '最大并行下载',
+      'settings_game_directory': '游戏目录',
+      'settings_launch_at_startup': '开机自启动',
+      'settings_minimize_to_tray': '最小化到托盘',
+
+      'mod_manager_title': '模组管理',
+      'mod_manager_empty': '还没有安装任何模组',
+      'mod_manager_empty_hint': '从资源中心下载模组后会在这里显示',
+
+      'log_title': '游戏日志',
+      'log_waiting': '等待游戏输出...',
+      'log_export': '导出日志',
+      'log_clear': '清空',
+      'log_stop_game': '停止游戏',
+      'log_filter_all': '全部',
+
+      'diagnostic_title': '自动诊断',
+      'diagnostic_start': '开始诊断',
+      'diagnostic_java': 'Java环境检查',
+      'diagnostic_memory': '内存配置检查',
+      'diagnostic_disk': '磁盘空间检查',
+      'diagnostic_mod': '模组兼容性检查',
+
+      'modpack_export_title': '导出整合包',
+      'modpack_name': '整合包名称',
+      'modpack_description': '描述',
+      'modpack_version': '版本号',
+      'modpack_author': '作者',
+      'modpack_format': '导出格式',
+      'modpack_include_mods': '模组',
+      'modpack_include_config': '配置文件',
+      'modpack_include_saves': '存档',
+    },
+    'en': {
+      'app_name': 'BAMC Launcher',
+      'ok': 'OK',
+      'cancel': 'Cancel',
+      'confirm': 'Confirm',
+      'delete': 'Delete',
+      'save': 'Save',
+      'close': 'Close',
+      'loading': 'Loading...',
+      'error': 'Error',
+      'success': 'Success',
+      'warning': 'Warning',
+      'retry': 'Retry',
+      'refresh': 'Refresh',
+      'search': 'Search',
+      'export': 'Export',
+      'import': 'Import',
+      'nav_home': 'Home',
+      'nav_game_library': 'Library',
+      'nav_resource_center': 'Resources',
+      'nav_settings': 'Settings',
+      'home_welcome': 'Welcome back, Sensei',
+      'home_subtitle': 'Ready for a new adventure?',
+      'home_start_game': 'Play',
+      'home_create_instance': 'Create Instance',
+      'home_recent_games': 'Recent Games',
+      'library_title': 'Game Library',
+      'library_search_hint': 'Search instances...',
+      'library_empty': 'No game instances yet',
+      'library_empty_hint': 'Create a new instance to get started',
+      'library_create': 'Create Instance',
+      'library_import_modpack': 'Import Modpack',
+      'library_filter_all': 'All',
+      'library_filter_running': 'Running',
+      'library_filter_installed': 'Installed',
+      'library_filter_updatable': 'Updatable',
+      'library_status_ready': 'Ready',
+      'library_status_running': 'Running',
+      'library_status_launching': 'Launching',
+      'library_status_crashed': 'Crashed',
+      'resource_title': 'Resource Center',
+      'resource_search_hint': 'Search resources...',
+      'resource_empty': 'No resources found',
+      'resource_empty_hint': 'Try different keywords or switch category',
+      'resource_category_all': 'All',
+      'resource_category_mod': 'Mods',
+      'resource_category_resourcepack': 'Resource Packs',
+      'resource_category_modpack': 'Modpacks',
+      'resource_install': 'Install',
+      'resource_sort_downloads': 'Most Downloads',
+      'resource_sort_newest': 'Newest',
+      'resource_sort_updated': 'Recently Updated',
+      'settings_title': 'Settings',
+      'settings_general': 'General',
+      'settings_game': 'Game',
+      'settings_download': 'Download',
+      'settings_about': 'About',
+      'settings_language': 'Language',
+      'settings_theme': 'Theme',
+      'settings_theme_dark': 'Dark',
+      'settings_theme_light': 'Light',
+      'settings_theme_system': 'System',
+      'settings_java_path': 'Java Path',
+      'settings_memory': 'Memory Allocation',
+      'settings_max_downloads': 'Max Parallel Downloads',
+      'settings_game_directory': 'Game Directory',
+      'settings_launch_at_startup': 'Launch at Startup',
+      'settings_minimize_to_tray': 'Minimize to Tray',
+      'mod_manager_title': 'Mod Manager',
+      'mod_manager_empty': 'No mods installed yet',
+      'mod_manager_empty_hint':
+          'Mods downloaded from Resource Center will appear here',
+      'log_title': 'Game Log',
+      'log_waiting': 'Waiting for game output...',
+      'log_export': 'Export Log',
+      'log_clear': 'Clear',
+      'log_stop_game': 'Stop Game',
+      'log_filter_all': 'All',
+      'diagnostic_title': 'Auto Diagnostic',
+      'diagnostic_start': 'Start Diagnostic',
+      'diagnostic_java': 'Java Environment',
+      'diagnostic_memory': 'Memory Configuration',
+      'diagnostic_disk': 'Disk Space',
+      'diagnostic_mod': 'Mod Compatibility',
+      'modpack_export_title': 'Export Modpack',
+      'modpack_name': 'Modpack Name',
+      'modpack_description': 'Description',
+      'modpack_version': 'Version',
+      'modpack_author': 'Author',
+      'modpack_format': 'Export Format',
+      'modpack_include_mods': 'Mods',
+      'modpack_include_config': 'Configs',
+      'modpack_include_saves': 'Saves',
+    },
+  };
+}
+
+extension LocalizationExtension on String {
+  String get tr => BALocalizations.instance.translate(this);
+}

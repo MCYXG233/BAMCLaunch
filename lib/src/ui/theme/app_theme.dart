@@ -21,6 +21,146 @@ class BATheme {
       dividerTheme: _darkDividerTheme,
       appBarTheme: _darkAppBarTheme,
       bottomNavigationBarTheme: _darkBottomNavBarTheme,
+      cardTheme: CardThemeData(
+        color: BAColors.darkSurface,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        margin: EdgeInsets.zero,
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return BAColors.primary;
+          }
+          return BAColors.darkTextSecondary;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return BAColors.primary.withOpacity(0.3);
+          }
+          return BAColors.darkSurfaceVariant;
+        }),
+      ),
+      sliderTheme: SliderThemeData(
+        activeTrackColor: BAColors.primary,
+        inactiveTrackColor: BAColors.darkSurfaceVariant,
+        thumbColor: BAColors.primary,
+        overlayColor: BAColors.primary.withOpacity(0.2),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: BAColors.primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          textStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: BAColors.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: BAColors.primary,
+          side: const BorderSide(color: BAColors.primary, width: 1),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        ),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: BAColors.darkSurface,
+        elevation: 8,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: BAColors.darkSurfaceTertiary,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: BAColors.darkBorder),
+        ),
+        textStyle: const TextStyle(fontSize: 12),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: BAColors.darkSurfaceVariant,
+        selectedColor: BAColors.primary.withOpacity(0.2),
+        labelStyle: const TextStyle(fontSize: 13),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        side: const BorderSide(color: BAColors.darkBorder),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return BAColors.primary;
+          }
+          return null;
+        }),
+        checkColor: WidgetStateProperty.all(Colors.white),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ),
+      radioTheme: RadioThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return BAColors.primary;
+          }
+          return null;
+        }),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        linearTrackColor: BAColors.darkSurfaceVariant,
+        circularTrackColor: BAColors.darkSurfaceVariant,
+        color: BAColors.primary,
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: BAColors.darkSurface,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      dataTableTheme: DataTableThemeData(
+        headingTextStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: BAColors.darkTextPrimary,
+        ),
+        dataTextStyle: const TextStyle(
+          fontSize: 13,
+          color: BAColors.darkTextSecondary,
+        ),
+        headingRowColor: WidgetStateProperty.all(BAColors.darkSurfaceVariant),
+        dividerThickness: 0.5,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: BAColors.darkSurface,
+        contentTextStyle: BATypography.bodyMedium.copyWith(
+          color: BAColors.darkTextPrimary,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
     );
   }
 
@@ -37,6 +177,146 @@ class BATheme {
       dividerTheme: _lightDividerTheme,
       appBarTheme: _lightAppBarTheme,
       bottomNavigationBarTheme: _lightBottomNavBarTheme,
+      cardTheme: CardThemeData(
+        color: BAColors.lightSurface,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        margin: EdgeInsets.zero,
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return BAColors.primary;
+          }
+          return BAColors.lightTextSecondary;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return BAColors.primary.withOpacity(0.3);
+          }
+          return BAColors.lightSurfaceVariant;
+        }),
+      ),
+      sliderTheme: SliderThemeData(
+        activeTrackColor: BAColors.primary,
+        inactiveTrackColor: BAColors.lightSurfaceVariant,
+        thumbColor: BAColors.primary,
+        overlayColor: BAColors.primary.withOpacity(0.2),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: BAColors.primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          textStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: BAColors.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: BAColors.primary,
+          side: const BorderSide(color: BAColors.primary, width: 1),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        ),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: BAColors.lightSurface,
+        elevation: 8,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: BAColors.lightSurfaceTertiary,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: BAColors.lightBorder),
+        ),
+        textStyle: const TextStyle(fontSize: 12),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: BAColors.lightSurfaceVariant,
+        selectedColor: BAColors.primary.withOpacity(0.2),
+        labelStyle: const TextStyle(fontSize: 13),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        side: const BorderSide(color: BAColors.lightBorder),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return BAColors.primary;
+          }
+          return null;
+        }),
+        checkColor: WidgetStateProperty.all(Colors.white),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ),
+      radioTheme: RadioThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return BAColors.primary;
+          }
+          return null;
+        }),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        linearTrackColor: BAColors.lightSurfaceVariant,
+        circularTrackColor: BAColors.lightSurfaceVariant,
+        color: BAColors.primary,
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: BAColors.lightSurface,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      dataTableTheme: DataTableThemeData(
+        headingTextStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: BAColors.lightTextPrimary,
+        ),
+        dataTextStyle: const TextStyle(
+          fontSize: 13,
+          color: BAColors.lightTextSecondary,
+        ),
+        headingRowColor: WidgetStateProperty.all(BAColors.lightSurfaceVariant),
+        dividerThickness: 0.5,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: BAColors.lightSurface,
+        contentTextStyle: BATypography.bodyMedium.copyWith(
+          color: BAColors.lightTextPrimary,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
     );
   }
 

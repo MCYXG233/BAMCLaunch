@@ -1092,6 +1092,15 @@ class _BAMCSettingsPageState extends State<BAMCSettingsPage> {
                   color: BAColors.textSecondary,
                 ),
               ),
+              const SizedBox(height: 24),
+              BAPrimaryButton(
+                text: '检查更新',
+                onPressed: () {
+                  // TODO: 实现检查更新逻辑
+                  _showSnackBar('正在检查更新...', success: true);
+                },
+                leadingIcon: const Icon(Icons.update, color: Colors.white),
+              ),
             ],
           ),
         ),
