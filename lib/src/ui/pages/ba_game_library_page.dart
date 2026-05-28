@@ -466,14 +466,14 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
           icon: Icons.refresh,
           label: '刷新',
           onTap: _loadInstances,
-          context: context,
+          buttonContext: context,
         ),
         const SizedBox(width: 8),
         _ActionButton(
           icon: Icons.sort,
           label: '排序',
           onTap: () {},
-          context: context,
+          buttonContext: context,
         ),
       ],
     );
@@ -580,6 +580,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
               instance: instance,
               isLaunching: _launchingIds.contains(instance.id),
               onLaunch: () => _launchGame(instance),
+              cardContext: context,
             ),
           );
         },
@@ -619,13 +620,13 @@ class _ActionButton extends StatefulWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  final BuildContext context;
+  final BuildContext buttonContext;
 
   const _ActionButton({
     required this.icon,
     required this.label,
     required this.onTap,
-    required this.context,
+    required this.buttonContext,
   });
 
   @override
@@ -637,7 +638,7 @@ class _ActionButtonState extends State<_ActionButton> {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(widget.context).brightness == Brightness.light;
+    final isLight = Theme.of(widget.buttonContext).brightness == Brightness.light;
     final cardBg = isLight ? BAColors.lightSurface : BAColors.darkSurface;
     final cardBorder = isLight ? BAColors.lightBorder : BAColors.darkBorder;
     final textSecondary = isLight ? BAColors.lightTextSecondary : BAColors.darkTextSecondary;
@@ -749,13 +750,13 @@ class _InstanceCard extends StatefulWidget {
   final GameInstance instance;
   final bool isLaunching;
   final VoidCallback? onLaunch;
-  final BuildContext context;
+  final BuildContext cardContext;
 
   const _InstanceCard({
     required this.instance,
     this.isLaunching = false,
     this.onLaunch,
-    required this.context,
+    required this.cardContext,
   });
 
   @override
@@ -767,7 +768,7 @@ class _InstanceCardState extends State<_InstanceCard> {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(widget.context).brightness == Brightness.light;
+    final isLight = Theme.of(widget.cardContext).brightness == Brightness.light;
     final cardBg = isLight ? BAColors.lightSurface : BAColors.darkSurface;
     final cardBorder = isLight ? BAColors.lightBorder : BAColors.darkBorder;
     final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
@@ -799,7 +800,7 @@ class _InstanceCardState extends State<_InstanceCard> {
                     offset: const Offset(0, 8),
                   ),
                 ]
-              : BATheme.shadowsSmallOf(widget.context),
+              : BATheme.shadowsSmallOf(widget.cardContext),
         ),
         child: Material(
           color: Colors.transparent,

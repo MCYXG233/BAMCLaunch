@@ -325,7 +325,7 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
   Widget _buildContent() {
     switch (_currentPage) {
       case 0:
-        return _HomeContent();
+        return _HomeContent(mainContext: context);
       case 1:
         return const BAGameLibraryPage();
       case 2:
@@ -945,11 +945,13 @@ class _GameRecordItem extends StatefulWidget {
   final String name;
   final String version;
   final String time;
+  final BuildContext cardContext;
 
   const _GameRecordItem({
     required this.name,
     required this.version,
     required this.time,
+    required this.cardContext,
   });
 
   @override
@@ -961,7 +963,7 @@ class _GameRecordItemState extends State<_GameRecordItem> {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
+    final isLight = Theme.of(widget.cardContext).brightness == Brightness.light;
     final cardBg = isLight ? BAColors.lightSurfaceVariant : BAColors.darkSurfaceVariant;
     final cardBorder = isLight ? BAColors.lightBorder : BAColors.darkBorder;
 
@@ -972,7 +974,7 @@ class _GameRecordItemState extends State<_GameRecordItem> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: _isHovered ? cardBg : BAColors.surfaceOf(context),
+          color: _isHovered ? cardBg : BAColors.surfaceOf(widget.cardContext),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: _isHovered ? BAColors.primary.withOpacity(0.4) : cardBorder,
@@ -1003,7 +1005,7 @@ class _GameRecordItemState extends State<_GameRecordItem> {
                   Text(
                     widget.name,
                     style: TextStyle(
-                      color: BAColors.textPrimaryOf(context),
+                      color: BAColors.textPrimaryOf(widget.cardContext),
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1012,7 +1014,7 @@ class _GameRecordItemState extends State<_GameRecordItem> {
                   Text(
                     'Minecraft ${widget.version}',
                     style: TextStyle(
-                      color: BAColors.textSecondaryOf(context),
+                      color: BAColors.textSecondaryOf(widget.cardContext),
                       fontSize: 13,
                     ),
                   ),
@@ -1022,7 +1024,7 @@ class _GameRecordItemState extends State<_GameRecordItem> {
             Text(
               widget.time,
               style: TextStyle(
-                color: BAColors.textSecondaryOf(context).withOpacity(0.7),
+                color: BAColors.textSecondaryOf(widget.cardContext).withOpacity(0.7),
                 fontSize: 11,
               ),
             ),
@@ -1031,12 +1033,12 @@ class _GameRecordItemState extends State<_GameRecordItem> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: _isHovered ? BAColors.primary : BAColors.surfaceVariantOf(context),
+                color: _isHovered ? BAColors.primary : BAColors.surfaceVariantOf(widget.cardContext),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 Icons.play_circle_fill,
-                color: _isHovered ? Colors.white : BAColors.textSecondaryOf(context).withOpacity(0.7),
+                color: _isHovered ? Colors.white : BAColors.textSecondaryOf(widget.cardContext).withOpacity(0.7),
                 size: 28,
               ),
             ),
