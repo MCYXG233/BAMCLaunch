@@ -333,7 +333,7 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
       case 3:
         return const BASettingsPage();
       default:
-        return _HomeContent();
+        return _HomeContent(mainContext: context);
     }
   }
 
