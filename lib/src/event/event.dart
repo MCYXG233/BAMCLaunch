@@ -371,6 +371,38 @@ class GameCrashedEvent extends GameLaunchEvent {
   GameCrashedEvent({required this.processId, this.error, this.logs});
 }
 
+/// 游戏就绪事件
+class GameReadyEvent extends GameLaunchEvent {
+  /// 进程ID
+  final String processId;
+
+  /// 游戏版本
+  final String version;
+
+  /// 账户名
+  final String username;
+
+  GameReadyEvent({
+    required this.processId,
+    required this.version,
+    required this.username,
+  });
+}
+
+/// 游玩时长记录事件
+class PlayTimeRecordedEvent extends GameLaunchEvent {
+  /// 游戏版本
+  final String version;
+
+  /// 游玩时长
+  final Duration playTime;
+
+  PlayTimeRecordedEvent({
+    required this.version,
+    required this.playTime,
+  });
+}
+
 /// 实例相关事件基类
 abstract class InstanceEvent extends Event {}
 
@@ -631,4 +663,75 @@ class TokenRefreshFailedEvent extends AuthEvent {
   final Object error;
 
   TokenRefreshFailedEvent({required this.error});
+}
+
+/// 加载器相关事件基类
+abstract class LoaderEvent extends Event {}
+
+/// 加载器状态变化事件
+class LoaderStatusChangedEvent extends LoaderEvent {
+  /// 实例ID
+  final String instanceId;
+
+  /// 新的加载器状态
+  final String newStatus;
+
+  /// 旧的加载器状态
+  final String? oldStatus;
+
+  LoaderStatusChangedEvent({
+    required this.instanceId,
+    required this.newStatus,
+    this.oldStatus,
+  });
+}
+
+/// 加载器安装开始事件
+class LoaderInstallStartedEvent extends LoaderEvent {
+  /// 实例ID
+  final String instanceId;
+
+  /// 加载器类型
+  final String loaderType;
+
+  /// 加载器版本
+  final String loaderVersion;
+
+  LoaderInstallStartedEvent({
+    required this.instanceId,
+    required this.loaderType,
+    required this.loaderVersion,
+  });
+}
+
+/// 加载器安装完成事件
+class LoaderInstallCompletedEvent extends LoaderEvent {
+  /// 实例ID
+  final String instanceId;
+
+  /// 加载器类型
+  final String loaderType;
+
+  /// 加载器版本
+  final String loaderVersion;
+
+  LoaderInstallCompletedEvent({
+    required this.instanceId,
+    required this.loaderType,
+    required this.loaderVersion,
+  });
+}
+
+/// 加载器安装失败事件
+class LoaderInstallFailedEvent extends LoaderEvent {
+  /// 实例ID
+  final String instanceId;
+
+  /// 错误信息
+  final Object error;
+
+  LoaderInstallFailedEvent({
+    required this.instanceId,
+    required this.error,
+  });
 }

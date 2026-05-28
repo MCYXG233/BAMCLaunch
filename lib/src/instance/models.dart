@@ -8,6 +8,15 @@ enum InstanceStatus {
   crashed,
 }
 
+/// 加载器状态
+enum LoaderStatus {
+  notInstalled,
+  downloading,
+  installing,
+  installed,
+  downloadFailed,
+}
+
 /// 资源类型
 enum ResourceType {
   mod,
@@ -81,6 +90,7 @@ class GameInstance {
   final String? icon;
   final String? description;
   final InstanceStatus status;
+  final LoaderStatus loaderStatus;
   final InstanceConfig config;
   final InstanceResources resources;
   final DateTime createdAt;
@@ -98,6 +108,7 @@ class GameInstance {
     this.icon,
     this.description,
     this.status = InstanceStatus.idle,
+    this.loaderStatus = LoaderStatus.notInstalled,
     required this.config,
     required this.resources,
     required this.createdAt,
@@ -116,6 +127,7 @@ class GameInstance {
     String? icon,
     String? description,
     InstanceStatus? status,
+    LoaderStatus? loaderStatus,
     InstanceConfig? config,
     InstanceResources? resources,
     DateTime? createdAt,
@@ -133,6 +145,7 @@ class GameInstance {
       icon: icon ?? this.icon,
       description: description ?? this.description,
       status: status ?? this.status,
+      loaderStatus: loaderStatus ?? this.loaderStatus,
       config: config ?? this.config,
       resources: resources ?? this.resources,
       createdAt: createdAt ?? this.createdAt,
@@ -153,6 +166,7 @@ class GameInstance {
       'icon': icon,
       'description': description,
       'status': status.name,
+      'loaderStatus': loaderStatus.name,
       'config': config.toJson(),
       'resources': resources.toJson(),
       'createdAt': createdAt.toIso8601String(),
@@ -175,6 +189,10 @@ class GameInstance {
       status: InstanceStatus.values.firstWhere(
         (e) => e.name == json['status'] as String,
         orElse: () => InstanceStatus.idle,
+      ),
+      loaderStatus: LoaderStatus.values.firstWhere(
+        (e) => e.name == json['loaderStatus'] as String?,
+        orElse: () => LoaderStatus.notInstalled,
       ),
       config: InstanceConfig.fromJson(json['config'] as Map<String, dynamic>),
       resources: InstanceResources.fromJson(json['resources'] as Map<String, dynamic>),

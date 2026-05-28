@@ -1,8 +1,9 @@
 import 'dart:async';
 import '../event/event_bus.dart';
 import '../event/event.dart';
+import '../core/logger.dart';
 import 'download_source.dart';
-import 'download_task.dart';
+import 'multi_source_downloader.dart' as msd;
 import 'models.dart';
 
 /// 下载引擎接口
@@ -62,14 +63,17 @@ class DownloadEngine implements IDownloadEngine {
   /// 是否启用自动切换镜像源
   bool _autoSwitchMirror = true;
 
-  /// 活跃的下载任务
-  final List<DownloadTask> _activeTasks = [];
+  /// 活跃的下载任务取消令牌
+  final List<msd.CancellationToken> _activeCancellationTokens = [];
 
   /// 进度流控制器
   final _progressController = StreamController<DownloadProgress>.broadcast();
 
   /// 事件总线
   final EventBus _eventBus = EventBus.instance;
+
+  /// 日志记录器
+  final Logger _logger = Logger();
 
   @override
   Stream<DownloadProgress> get progressStream => _progressController.stream;
@@ -94,44 +98,63 @@ class DownloadEngine implements IDownloadEngine {
     String? hash,
     HashType? hashType,
   }) async {
+    _logger.info('开始下载: $url -> $savePath');
     int attemptCount = 0;
     int maxAttempts = _mirrorManager.allMirrorSources.length;
     Exception? lastError;
 
     while (attemptCount < maxAttempts) {
       try {
-        final actualUrl = await _downloadSource.getUrl(url);
+        final sources = _buildDownloadSources();
+        final downloader = msd.MultiSourceDownloader(sources: sources);
+        final cancellationToken = msd.CancellationToken();
+        _activeCancellationTokens.add(cancellationToken);
+        final taskId = DateTime.now().millisecondsSinceEpoch.toString();
 
-        final task = DownloadTask(
-          url: actualUrl,
-          savePath: savePath,
-          hash: hash,
-          hashType: hashType,
-        );
-
-        _activeTasks.add(task);
         _eventBus.publish(
-          DownloadStartedEvent(taskId: task.id, url: actualUrl, savePath: savePath),
+          DownloadStartedEvent(taskId: taskId, url: url, savePath: savePath),
         );
 
         try {
-          final result = await task.run();
+          final result = await downloader.download(
+            url: url,
+            savePath: savePath,
+            expectedHash: hash,
+            hashType: hashType != null ? msd.HashType.values[hashType.index] : null,
+            onProgress: (progress, downloaded, total) {
+              _progressController.add(
+                DownloadProgress(
+                  downloadedBytes: downloaded,
+                  totalBytes: total,
+                  progress: progress,
+                ),
+              );
+            },
+            onSourceSwitch: (sourceName) {
+              _eventBus.publish(
+                DownloadInfoEvent(message: '切换到下载源: $sourceName'),
+              );
+            },
+            cancellationToken: cancellationToken,
+          );
+
           _eventBus.publish(
             DownloadCompletedEvent(
-              taskId: task.id,
-              url: actualUrl,
+              taskId: taskId,
+              url: url,
               savePath: savePath,
             ),
           );
+          _logger.info('下载完成: $savePath');
           return result;
         } finally {
-          _activeTasks.remove(task);
+          _activeCancellationTokens.remove(cancellationToken);
         }
       } catch (e) {
         lastError = e is Exception ? e : Exception(e.toString());
+        _logger.warn('下载尝试失败: ${lastError.toString()}');
         attemptCount++;
 
-        // 如果启用了自动切换且还有其他镜像源，尝试切换
         if (_autoSwitchMirror && attemptCount < maxAttempts) {
           _downloadSource = _mirrorManager.switchToNextMirror();
           _eventBus.publish(
@@ -141,11 +164,24 @@ class DownloadEngine implements IDownloadEngine {
       }
     }
 
-    // 如果所有尝试都失败了，抛出友好的错误信息
     throw DownloadException(
       '下载失败，所有镜像源均不可用。最后一个错误: ${lastError?.toString() ?? '未知错误'}',
       lastError,
     );
+  }
+
+  List<msd.DownloadSource> _buildDownloadSources() {
+    final sources = <msd.DownloadSource>[];
+    for (final mirror in _mirrorManager.allMirrorSources) {
+      sources.add(
+        msd.DownloadSource(
+          name: mirror.name,
+          urlResolver: (path) async => await mirror.getUrl(path),
+          availabilityChecker: () async => await mirror.isAvailable(),
+        ),
+      );
+    }
+    return sources;
   }
 
   @override
@@ -165,11 +201,12 @@ class DownloadEngine implements IDownloadEngine {
 
   @override
   Future<void> cancelAll() async {
-    for (final task in _activeTasks) {
-      task.cancel();
-      _eventBus.publish(DownloadCancelledEvent(taskId: task.id));
+    _logger.info('取消所有下载任务');
+    for (final token in _activeCancellationTokens) {
+      token.cancel();
     }
-    _activeTasks.clear();
+    _activeCancellationTokens.clear();
+    _eventBus.publish(DownloadCancelledEvent(taskId: 'all'));
   }
 }
 

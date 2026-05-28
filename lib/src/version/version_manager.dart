@@ -10,6 +10,8 @@ import '../core/network_client.dart';
 import '../download/download_engine.dart';
 import '../event/event.dart';
 import '../event/event_bus.dart';
+import '../game/launcher/game_file_validator.dart';
+import '../game/launcher/models.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
 import '../task/task.dart';
@@ -48,6 +50,9 @@ abstract class IVersionManager {
 
   /// 获取游戏目录
   Future<String> getGameDir();
+
+  /// 补全版本文件
+  Future<List<InvalidFile>> repairVersionFiles(String versionId);
 }
 
 /// 版本管理器实现（单例）
@@ -330,6 +335,34 @@ class VersionManager implements IVersionManager {
   Future<String> getLibrariesDir() async {
     final gameDir = await getGameDir();
     return path.join(gameDir, 'libraries');
+  }
+
+  @override
+  Future<List<InvalidFile>> repairVersionFiles(String versionId) async {
+    _logger.info('Repairing files for version $versionId');
+    
+    final versionJson = await fetchVersionJson(versionId);
+    final gameDir = await getGameDir();
+    final invalidFiles = await GameFileValidator.instance.validateAll(
+      versionJson, 
+      gameDir, 
+      FileValidatePolicy.full,
+    );
+    
+    if (invalidFiles.isEmpty) {
+      _logger.info('All files are valid, no repair needed');
+      return [];
+    }
+    
+    _logger.info('Found ${invalidFiles.length} invalid files, starting repair');
+    for (final file in invalidFiles) {
+      if (file.url != null) {
+        await _downloadEngine.download(file.url!, file.path);
+      }
+    }
+    
+    _logger.info('Repair completed for version $versionId');
+    return invalidFiles;
   }
 
   /// 检查库文件是否需要下载

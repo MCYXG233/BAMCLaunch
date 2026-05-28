@@ -4,6 +4,8 @@ import 'package:path/path.dart' as path;
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
 import '../core/logger.dart';
+import '../event/event_bus.dart';
+import '../event/event.dart';
 
 /// Mod 加载器类型
 enum LoaderType {
@@ -42,6 +44,7 @@ class LoaderDownloadService {
 
   final Logger _logger = Logger('LoaderDownloadService');
   final NetworkClient _networkClient = NetworkClient();
+  final EventBus _eventBus = EventBus.instance;
 
   /// 获取 Forge 可用版本列表
   Future<List<String>> getForgeVersions(String mcVersion) async {
@@ -155,6 +158,7 @@ class LoaderDownloadService {
 
   /// 下载并安装 Mod 加载器
   Future<void> installLoader({
+    required String instanceId,
     required LoaderType loaderType,
     required String version,
     required String mcVersion,
@@ -162,8 +166,18 @@ class LoaderDownloadService {
     void Function(int received, int total)? onProgress,
     void Function(String status)? onStatus,
   }) async {
+    String? oldStatus;
     try {
       onStatus?.call('正在获取下载链接...');
+      
+      _eventBus.publish(LoaderInstallStartedEvent(
+        instanceId: instanceId,
+        loaderType: loaderType.name,
+        loaderVersion: version,
+      ));
+      
+      _updateLoaderStatus(instanceId, 'downloading', oldStatus);
+      oldStatus = 'downloading';
 
       String? downloadUrl;
       String fileName;
@@ -218,6 +232,9 @@ class LoaderDownloadService {
       _logger.info('Loader downloaded to: $filePath');
       onStatus?.call('$loaderType 下载完成!');
 
+      _updateLoaderStatus(instanceId, 'installing', oldStatus);
+      oldStatus = 'installing';
+
       // 安装加载器
       await _installLoaderFiles(
         loaderType: loaderType,
@@ -230,10 +247,32 @@ class LoaderDownloadService {
 
       _logger.info('$loaderType installation completed');
       onStatus?.call('$loaderType 安装完成!');
+      
+      _updateLoaderStatus(instanceId, 'installed', oldStatus);
+      _eventBus.publish(LoaderInstallCompletedEvent(
+        instanceId: instanceId,
+        loaderType: loaderType.name,
+        loaderVersion: version,
+      ));
     } catch (e, stackTrace) {
       _logger.error('Failed to install loader', e, stackTrace);
+      _updateLoaderStatus(instanceId, 'downloadFailed', oldStatus);
+      _eventBus.publish(LoaderInstallFailedEvent(
+        instanceId: instanceId,
+        error: e,
+      ));
       rethrow;
     }
+  }
+  
+  /// 更新加载器状态
+  void _updateLoaderStatus(String instanceId, String newStatus, String? oldStatus) {
+    _eventBus.publish(LoaderStatusChangedEvent(
+      instanceId: instanceId,
+      newStatus: newStatus,
+      oldStatus: oldStatus,
+    ));
+    _logger.info('Loader status changed for instance $instanceId: $oldStatus -> $newStatus');
   }
 
   /// 安装加载器文件到游戏目录

@@ -549,17 +549,21 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final bgColor = isLight ? BAColors.lightBackground : BAColors.darkBackground;
+    final textColor = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
+
     return Container(
-      color: BAThemeColors.background,
+      color: bgColor,
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
           Row(
             children: [
-              const Text(
+              Text(
                 '设置',
                 style: TextStyle(
-                  color: BAThemeColors.textPrimary,
+                  color: textColor,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -570,7 +574,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
           Expanded(
             child: Row(
               children: [
-                _buildCategoryList(),
+                _buildCategoryList(context),
                 const SizedBox(width: 24),
                 Expanded(
                   child: _buildSettingsList(),
@@ -583,7 +587,13 @@ class _BASettingsPageState extends State<BASettingsPage> {
     );
   }
 
-  Widget _buildCategoryList() {
+  Widget _buildCategoryList(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final cardBg = isLight ? BAColors.lightSurface : BAColors.darkSurface;
+    final cardBorder = isLight ? BAColors.lightBorder : BAColors.darkBorder;
+    final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
+    final textSecondary = isLight ? BAColors.lightTextSecondary : BAColors.darkTextSecondary;
+
     final categoryNames = {
       'general': '通用',
       'game': '游戏',
@@ -594,9 +604,10 @@ class _BASettingsPageState extends State<BASettingsPage> {
     return Container(
       width: 200,
       decoration: BoxDecoration(
-        color: BAThemeColors.surface,
-        borderRadius: BARadius.large,
-        border: Border.all(color: BAThemeColors.border),
+        color: cardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: cardBorder),
+        boxShadow: BATheme.shadowsSmallOf(context),
       ),
       child: ListView.builder(
         padding: const EdgeInsets.all(8),
@@ -616,29 +627,29 @@ class _BASettingsPageState extends State<BASettingsPage> {
                     _selectedCategory = categoryId;
                   });
                 },
-                borderRadius: BARadius.normal,
+                borderRadius: BorderRadius.circular(10),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: isSelected ? BAThemeColors.primary.withOpacity(0.1) : Colors.transparent,
-                    borderRadius: BARadius.normal,
+                    color: isSelected ? BAColors.primary.withOpacity(0.1) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: isSelected ? BAThemeColors.primary : Colors.transparent,
+                      color: isSelected ? BAColors.primary : Colors.transparent,
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         _getCategoryIcon(categoryId),
-                        color: isSelected ? BAThemeColors.primary : BAThemeColors.textSecondary,
+                        color: isSelected ? BAColors.primary : textSecondary,
                         size: 20,
                       ),
                       const SizedBox(width: 12),
                       Text(
                         categoryName,
                         style: TextStyle(
-                          color: isSelected ? BAThemeColors.primary : BAThemeColors.textPrimary,
+                          color: isSelected ? BAColors.primary : textPrimary,
                           fontSize: 14,
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                         ),
@@ -688,18 +699,17 @@ class _BASettingsPageState extends State<BASettingsPage> {
     required String title,
     required List<Widget> children,
   }) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final cardBg = isLight ? BAColors.lightSurface : BAColors.darkSurface;
+    final cardBorder = isLight ? BAColors.lightBorder : BAColors.darkBorder;
+    final dividerColor = isLight ? BAColors.lightBorder : BAColors.darkBorder;
+
     return Container(
       decoration: BoxDecoration(
-        color: BAColors.darkSurface.withOpacity(0.8),
+        color: cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: BAColors.darkBorder),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: cardBorder),
+        boxShadow: BATheme.shadowsSmallOf(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -718,7 +728,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
           ...List.generate(children.length * 2 - 1, (index) {
             if (index.isOdd) {
               return Divider(
-                color: BAColors.darkBorder.withOpacity(0.5),
+                color: dividerColor.withOpacity(0.5),
                 height: 1,
                 indent: 20,
                 endIndent: 20,
@@ -738,6 +748,10 @@ class _BASettingsPageState extends State<BASettingsPage> {
     required String description,
     required Widget control,
   }) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
+    final textSecondary = isLight ? BAColors.lightTextSecondary : BAColors.darkTextSecondary;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       child: Row(
@@ -758,8 +772,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: BAColors.darkTextPrimary,
+                  style: TextStyle(
+                    color: textPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -767,8 +781,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 const SizedBox(height: 2),
                 Text(
                   description,
-                  style: const TextStyle(
-                    color: BAColors.darkTextSecondary,
+                  style: TextStyle(
+                    color: textSecondary,
                     fontSize: 12,
                   ),
                   maxLines: 1,
@@ -1285,21 +1299,27 @@ class _BASettingsPageState extends State<BASettingsPage> {
     required List<DropdownMenuItem<T>> items,
     required ValueChanged<T?> onChanged,
   }) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final surfaceVariant = isLight ? BAColors.lightSurfaceVariant : BAColors.darkSurfaceVariant;
+    final borderColor = isLight ? BAColors.lightBorder : BAColors.darkBorder;
+    final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
+    final textSecondary = isLight ? BAColors.lightTextSecondary : BAColors.darkTextSecondary;
+
     final validValues = items.map((item) => item.value).toList();
     final effectiveValue = validValues.contains(value) ? value : items.first.value;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: BAColors.darkSurfaceVariant,
+        color: surfaceVariant,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BAColors.darkBorder),
+        border: Border.all(color: borderColor),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<T>(
           value: effectiveValue,
-          icon: const Icon(Icons.arrow_drop_down, color: BAColors.darkTextSecondary),
-          style: const TextStyle(color: BAColors.darkTextPrimary, fontSize: 13),
+          icon: Icon(Icons.arrow_drop_down, color: textSecondary),
+          style: TextStyle(color: textPrimary, fontSize: 13),
           items: items,
           onChanged: onChanged,
         ),
@@ -1313,6 +1333,12 @@ class _BASettingsPageState extends State<BASettingsPage> {
     required String buttonText,
     required VoidCallback onBrowse,
   }) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final surfaceVariant = isLight ? BAColors.lightSurfaceVariant : BAColors.darkSurfaceVariant;
+    final borderColor = isLight ? BAColors.lightBorder : BAColors.darkBorder;
+    final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
+    final textDisabled = isLight ? BAColors.lightTextDisabled : BAColors.darkTextDisabled;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -1320,14 +1346,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
           width: 200,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: BAColors.darkSurfaceVariant,
+            color: surfaceVariant,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: BAColors.darkBorder),
+            border: Border.all(color: borderColor),
           ),
           child: Text(
             path.isEmpty ? placeholder : path,
             style: TextStyle(
-              color: path.isEmpty ? BAColors.darkTextDisabled : BAColors.darkTextPrimary,
+              color: path.isEmpty ? textDisabled : textPrimary,
               fontSize: 12,
             ),
             maxLines: 1,
@@ -1356,25 +1382,31 @@ class _BASettingsPageState extends State<BASettingsPage> {
     required FocusNode focusNode,
     required String placeholder,
   }) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final surfaceVariant = isLight ? BAColors.lightSurfaceVariant : BAColors.darkSurfaceVariant;
+    final borderColor = isLight ? BAColors.lightBorder : BAColors.darkBorder;
+    final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
+    final textDisabled = isLight ? BAColors.lightTextDisabled : BAColors.darkTextDisabled;
+
     return SizedBox(
       width: 250,
       child: TextField(
         controller: controller,
         focusNode: focusNode,
-        style: const TextStyle(color: BAColors.darkTextPrimary, fontSize: 13),
+        style: TextStyle(color: textPrimary, fontSize: 13),
         decoration: InputDecoration(
           hintText: placeholder,
-          hintStyle: const TextStyle(color: BAColors.darkTextDisabled, fontSize: 13),
+          hintStyle: TextStyle(color: textDisabled, fontSize: 13),
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           filled: true,
-          fillColor: BAColors.darkSurfaceVariant,
+          fillColor: surfaceVariant,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: BAColors.darkBorder),
+            borderSide: BorderSide(color: borderColor),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: BAColors.darkBorder),
+            borderSide: BorderSide(color: borderColor),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),

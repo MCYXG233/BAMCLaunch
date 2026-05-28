@@ -187,14 +187,14 @@ class _BAMCSplashPageState extends State<BAMCSplashPage>
     );
   }
 
-  /// 构建夏莱Logo
+  /// 构建BAMCLaunch Logo
   Widget _buildSchaleLogo() {
     return Container(
-      width: 120,
-      height: 120,
+      width: 140,
+      height: 60,
       decoration: BoxDecoration(
         color: BAColors.surface,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: BAColors.primary.withOpacity(0.3),
@@ -202,29 +202,15 @@ class _BAMCSplashPageState extends State<BAMCSplashPage>
             spreadRadius: 5,
           ),
         ],
-        border: Border.all(color: BAColors.primary, width: 3),
+        border: Border.all(color: BAColors.primary, width: 2),
       ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'S',
-              style: BATypography.headlineLarge.copyWith(
-                color: BAColors.primary,
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              'CHALE',
-              style: BATypography.label.copyWith(
-                color: BAColors.secondary,
-                fontSize: 12,
-                letterSpacing: 4,
-              ),
-            ),
-          ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.asset(
+          'assets/images/BAMCLaunch_Logo.png',
+          fit: BoxFit.contain,
+          width: 120,
+          height: 50,
         ),
       ),
     );

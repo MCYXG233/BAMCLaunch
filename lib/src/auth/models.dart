@@ -1,3 +1,13 @@
+/// 登录状态枚举
+enum LoginState {
+  initial,
+  gettingDeviceCode,
+  waitingForUser,
+  polling,
+  authenticating,
+  error,
+}
+
 /// OAuth2令牌模型
 class OAuthToken {
   /// 访问令牌

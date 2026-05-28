@@ -135,4 +135,51 @@ class JavaVersion {
     }
     return '可能不兼容';
   }
+
+  /// 根据游戏版本获取推荐的Java版本列表（按优先级排序）
+  ///
+  /// Minecraft版本与Java版本的对应关系：
+  /// - 1.16及以下: Java 8 (推荐), Java 11 (兼容)
+  /// - 1.17-1.18: Java 17 (推荐), Java 8 (兼容)
+  /// - 1.19-1.20.4: Java 17 (推荐)
+  /// - 1.20.5+: Java 21 (推荐), Java 17 (兼容)
+  static List<int> getRecommendedForGameVersion(String gameVersion) {
+    try {
+      final versionParts = gameVersion.split('.');
+      if (versionParts.length < 2) {
+        return [17, 11, 8];
+      }
+
+      final major = int.tryParse(versionParts[0]) ?? 1;
+      final minor = int.tryParse(versionParts[1]) ?? 0;
+
+      int? patch;
+      if (versionParts.length >= 3) {
+        patch = int.tryParse(versionParts[2].replaceAll(RegExp(r'[^0-9]'), ''));
+      }
+
+      if (major == 1) {
+        if (minor <= 16) {
+          return [8, 11];
+        } else if (minor >= 17 && minor <= 18) {
+          return [17, 8];
+        } else if (minor >= 19 && minor <= 20) {
+          if (minor == 20 && patch != null && patch >= 5) {
+            return [21, 17];
+          }
+          return [17];
+        }
+      }
+
+      return [17, 11, 8];
+    } catch (e) {
+      return [17, 11, 8];
+    }
+  }
+
+  /// 判断游戏版本是否需要特定的Java版本
+  static bool requiresSpecificJava(String gameVersion, int javaMajorVersion) {
+    final recommended = getRecommendedForGameVersion(gameVersion);
+    return recommended.isNotEmpty && recommended.first == javaMajorVersion;
+  }
 }

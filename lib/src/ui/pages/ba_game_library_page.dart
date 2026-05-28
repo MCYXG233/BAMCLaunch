@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../theme/ba_theme_colors.dart';
+import '../theme/colors.dart';
+import '../theme/app_theme.dart';
 import '../../instance/instance_manager.dart';
 import '../../instance/models.dart';
 import '../../event/event_bus.dart';
@@ -15,6 +17,7 @@ import '../components/ba_notification.dart';
 import '../components/ba_context_menu.dart';
 import '../components/ba_buttons.dart';
 import '../components/ba_create_instance_dialog.dart';
+import 'ba_mod_manager_page.dart';
 
 class BAGameLibraryPage extends StatefulWidget {
   const BAGameLibraryPage({super.key});
@@ -270,6 +273,14 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
     }
   }
 
+  void _openModManager(GameInstance instance) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => BAModManagerPage(instanceId: instance.id),
+      ),
+    );
+  }
+
   Future<void> _importInstance() async {
     try {
       final result = await FilePicker.platform.pickFiles(
@@ -311,13 +322,20 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
   @override
   Widget build(BuildContext context) {
     NotificationManager().init(context);
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final bgColor = isLight ? BAColors.lightBackground : BAColors.darkBackground;
+    final cardBg = isLight ? BAColors.lightSurface : BAColors.darkSurface;
+    final cardBorder = isLight ? BAColors.lightBorder : BAColors.darkBorder;
+    final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
+    final textSecondary = isLight ? BAColors.lightTextSecondary : BAColors.darkTextSecondary;
+    final textDisabled = isLight ? BAColors.lightTextDisabled : BAColors.darkTextDisabled;
 
     return Container(
-      color: BAThemeColors.background,
+      color: bgColor,
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          _buildHeader(),
+          _buildHeader(context, textPrimary),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -325,9 +343,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                 child: Container(
                   height: 40,
                   decoration: BoxDecoration(
-                    color: BAThemeColors.surface.withOpacity(0.7),
+                    color: cardBg,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: BAThemeColors.border.withOpacity(0.5)),
+                    border: Border.all(color: cardBorder),
+                    boxShadow: BATheme.shadowsSmallOf(context),
                   ),
                   child: TextField(
                     controller: _searchController,
@@ -336,25 +355,25 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                         _searchQuery = value;
                       });
                     },
-                    style: const TextStyle(
-                      color: BAThemeColors.textPrimary,
+                    style: TextStyle(
+                      color: textPrimary,
                       fontSize: 14,
                     ),
                     decoration: InputDecoration(
                       hintText: '搜索实例...',
-                      hintStyle: const TextStyle(
-                        color: BAThemeColors.textDisabled,
+                      hintStyle: TextStyle(
+                        color: textDisabled,
                       ),
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.search,
-                        color: BAThemeColors.textSecondary,
+                        color: textSecondary,
                         size: 20,
                       ),
                       suffixIcon: _searchQuery.isNotEmpty
                           ? IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.clear,
-                                color: BAThemeColors.textSecondary,
+                                color: textSecondary,
                                 size: 18,
                               ),
                               onPressed: () {
@@ -394,13 +413,13 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                         ),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? BAThemeColors.primary
-                              : BAThemeColors.surfaceVariant,
+                              ? BAColors.primary
+                              : cardBg,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: isSelected
-                                ? BAThemeColors.primary
-                                : BAThemeColors.border,
+                                ? BAColors.primary
+                                : cardBorder,
                           ),
                         ),
                         child: Text(
@@ -408,7 +427,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                           style: TextStyle(
                             color: isSelected
                                 ? Colors.white
-                                : BAThemeColors.textSecondary,
+                                : textSecondary,
                             fontSize: 13,
                             fontWeight:
                                 isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -423,7 +442,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: _buildInstanceGrid(),
+            child: _buildInstanceGrid(context),
           ),
           _buildBottomActions(),
         ],
@@ -431,13 +450,13 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context, Color textPrimary) {
     return Row(
       children: [
-        const Text(
+        Text(
           '游戏库',
           style: TextStyle(
-            color: BAThemeColors.textPrimary,
+            color: textPrimary,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -447,18 +466,23 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
           icon: Icons.refresh,
           label: '刷新',
           onTap: _loadInstances,
+          context: context,
         ),
         const SizedBox(width: 8),
         _ActionButton(
           icon: Icons.sort,
           label: '排序',
           onTap: () {},
+          context: context,
         ),
       ],
     );
   }
 
-  Widget _buildInstanceGrid() {
+  Widget _buildInstanceGrid(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
+    final textSecondary = isLight ? BAColors.lightTextSecondary : BAColors.darkTextSecondary;
     final instances = _getFilteredInstances();
 
     if (instances.isEmpty) {
@@ -470,7 +494,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
               width: 96,
               height: 96,
               decoration: BoxDecoration(
-                color: BAThemeColors.primary.withOpacity(0.08),
+                color: BAColors.primary.withOpacity(0.08),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -478,7 +502,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                     ? Icons.search_off_rounded
                     : Icons.rocket_launch_rounded,
                 size: 48,
-                color: BAThemeColors.primary.withOpacity(0.5),
+                color: BAColors.primary.withOpacity(0.5),
               ),
             ),
             const SizedBox(height: 20),
@@ -486,8 +510,8 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
               _searchQuery.isNotEmpty || _selectedFilter != 0
                   ? '没有找到匹配的实例'
                   : '还没有游戏实例',
-              style: const TextStyle(
-                color: BAThemeColors.textPrimary,
+              style: TextStyle(
+                color: textPrimary,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -497,8 +521,8 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
               _searchQuery.isNotEmpty || _selectedFilter != 0
                   ? '尝试修改搜索条件或切换筛选项'
                   : '还没有游戏实例，点击新建实例开始吧',
-              style: const TextStyle(
-                color: BAThemeColors.textSecondary,
+              style: TextStyle(
+                color: textSecondary,
                 fontSize: 13,
               ),
             ),
@@ -538,6 +562,11 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                 icon: Icons.file_upload,
                 label: '导出',
                 onTap: () => _exportInstance(instance),
+              ),
+              BAContextMenuItem(
+                icon: Icons.extension,
+                label: '模组管理',
+                onTap: () => _openModManager(instance),
               ),
               const BAContextMenuDivider(),
               BAContextMenuItem(
@@ -590,11 +619,13 @@ class _ActionButton extends StatefulWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final BuildContext context;
 
   const _ActionButton({
     required this.icon,
     required this.label,
     required this.onTap,
+    required this.context,
   });
 
   @override
@@ -606,6 +637,11 @@ class _ActionButtonState extends State<_ActionButton> {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(widget.context).brightness == Brightness.light;
+    final cardBg = isLight ? BAColors.lightSurface : BAColors.darkSurface;
+    final cardBorder = isLight ? BAColors.lightBorder : BAColors.darkBorder;
+    final textSecondary = isLight ? BAColors.lightTextSecondary : BAColors.darkTextSecondary;
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -615,10 +651,10 @@ class _ActionButtonState extends State<_ActionButton> {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: _isHovered ? BAThemeColors.surfaceHover : BAThemeColors.surface,
-            borderRadius: BARadius.normal,
+            color: _isHovered ? BAColors.primary.withOpacity(0.1) : cardBg,
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: _isHovered ? BAThemeColors.primary : BAThemeColors.border,
+              color: _isHovered ? BAColors.primary : cardBorder,
             ),
           ),
           child: Row(
@@ -626,14 +662,14 @@ class _ActionButtonState extends State<_ActionButton> {
             children: [
               Icon(
                 widget.icon,
-                color: _isHovered ? BAThemeColors.primary : BAThemeColors.textSecondary,
+                color: _isHovered ? BAColors.primary : textSecondary,
                 size: 16,
               ),
               const SizedBox(width: 6),
               Text(
                 widget.label,
                 style: TextStyle(
-                  color: _isHovered ? BAThemeColors.primary : BAThemeColors.textSecondary,
+                  color: _isHovered ? BAColors.primary : textSecondary,
                   fontSize: 12,
                 ),
               ),
@@ -713,11 +749,13 @@ class _InstanceCard extends StatefulWidget {
   final GameInstance instance;
   final bool isLaunching;
   final VoidCallback? onLaunch;
+  final BuildContext context;
 
   const _InstanceCard({
     required this.instance,
     this.isLaunching = false,
     this.onLaunch,
+    required this.context,
   });
 
   @override
@@ -729,6 +767,11 @@ class _InstanceCardState extends State<_InstanceCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(widget.context).brightness == Brightness.light;
+    final cardBg = isLight ? BAColors.lightSurface : BAColors.darkSurface;
+    final cardBorder = isLight ? BAColors.lightBorder : BAColors.darkBorder;
+    final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
+
     final status = widget.instance.status;
     final statusColor = _getStatusColor(status);
 
@@ -742,21 +785,21 @@ class _InstanceCardState extends State<_InstanceCard> {
         child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: BAThemeColors.surface,
+          color: cardBg,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: _isHovered ? BAThemeColors.primary : BAThemeColors.border,
+            color: _isHovered ? BAColors.primary : cardBorder,
             width: _isHovered ? 2 : 1,
           ),
           boxShadow: _isHovered
               ? [
                   BoxShadow(
-                    color: BAThemeColors.primary.withOpacity(0.4),
+                    color: BAColors.primary.withOpacity(0.4),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
                 ]
-              : BAThemeColors.cardShadow,
+              : BATheme.shadowsSmallOf(widget.context),
         ),
         child: Material(
           color: Colors.transparent,
@@ -826,7 +869,7 @@ class _InstanceCardState extends State<_InstanceCard> {
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2.5,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    BAThemeColors.primary,
+                                    BAColors.primary,
                                   ),
                                 ),
                               ),
@@ -841,8 +884,8 @@ class _InstanceCardState extends State<_InstanceCard> {
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [
-                                    BAThemeColors.primary,
-                                    BAThemeColors.secondary,
+                                    BAColors.primary,
+                                    BAColors.secondary,
                                   ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
@@ -850,7 +893,7 @@ class _InstanceCardState extends State<_InstanceCard> {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: BAThemeColors.primary.withOpacity(0.5),
+                                    color: BAColors.primary.withOpacity(0.5),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -874,8 +917,8 @@ class _InstanceCardState extends State<_InstanceCard> {
                     children: [
                       Text(
                         widget.instance.name,
-                        style: const TextStyle(
-                          color: BAThemeColors.textPrimary,
+                        style: TextStyle(
+                          color: textPrimary,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
@@ -911,13 +954,13 @@ class _InstanceCardState extends State<_InstanceCard> {
   Color _getStatusColor(InstanceStatus status) {
     switch (status) {
       case InstanceStatus.running:
-        return BAThemeColors.success;
+        return BAColors.success;
       case InstanceStatus.launching:
-        return BAThemeColors.warning;
+        return BAColors.warning;
       case InstanceStatus.crashed:
-        return BAThemeColors.danger;
+        return BAColors.danger;
       default:
-        return BAThemeColors.primary;
+        return BAColors.primary;
     }
   }
 
@@ -946,21 +989,25 @@ class _InfoChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final surfaceVariant = isLight ? BAColors.lightSurfaceVariant : BAColors.darkSurfaceVariant;
+    final textSecondary = isLight ? BAColors.lightTextSecondary : BAColors.darkTextSecondary;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: BAThemeColors.surfaceVariant,
+        color: surfaceVariant,
         borderRadius: BorderRadius.circular(4),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: BAThemeColors.textSecondary),
+          Icon(icon, size: 12, color: textSecondary),
           const SizedBox(width: 4),
           Text(
             label,
-            style: const TextStyle(
-              color: BAThemeColors.textSecondary,
+            style: TextStyle(
+              color: textSecondary,
               fontSize: 10,
             ),
           ),

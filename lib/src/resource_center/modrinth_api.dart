@@ -326,15 +326,40 @@ class ModrinthApi implements ResourceApi {
   /// 解析JSON响应，处理gzip压缩
   Map<String, dynamic> _parseJsonResponse(http.Response response) {
     try {
+      // 首先尝试直接解析响应体
+      final body = response.body;
+      if (body.isNotEmpty) {
+        return json.decode(body) as Map<String, dynamic>;
+      }
+    } catch (e) {
+      // 直接解析失败，尝试其他方式
+    }
+
+    try {
+      // 尝试使用utf8解码bodyBytes
+      final decoded = utf8.decode(response.bodyBytes, allowMalformed: true);
+      return json.decode(decoded) as Map<String, dynamic>;
+    } catch (e) {
+      // 仍然失败，尝试gzip解压
+    }
+
+    try {
+      // 最后尝试gzip解压（仅当响应看起来像是gzip格式时）
       final contentEncoding = response.headers['content-encoding'];
       if (contentEncoding != null && contentEncoding.contains('gzip')) {
-        final gzipDecoder = archive.GZipDecoder();
-        final decodedBytes = gzipDecoder.decodeBytes(response.bodyBytes);
-        return json.decode(utf8.decode(decodedBytes)) as Map<String, dynamic>;
+        // 检查是否真的是gzip格式（gzip以0x1f8b开头）
+        if (response.bodyBytes.length >= 2 && 
+            response.bodyBytes[0] == 0x1f && 
+            response.bodyBytes[1] == 0x8b) {
+          final gzipDecoder = archive.GZipDecoder();
+          final decodedBytes = gzipDecoder.decodeBytes(response.bodyBytes);
+          return json.decode(utf8.decode(decodedBytes)) as Map<String, dynamic>;
+        }
       }
-      return json.decode(utf8.decode(response.bodyBytes, allowMalformed: true)) as Map<String, dynamic>;
     } catch (e) {
-      return json.decode(response.body) as Map<String, dynamic>;
+      // gzip解压失败
     }
+
+    throw Exception('Failed to parse JSON response');
   }
 }

@@ -30,6 +30,9 @@ class Account {
   /// 披风URL，可为空
   final String? capeUrl;
 
+  /// 访问令牌
+  final String? accessToken;
+
   /// 账户创建时间
   final DateTime createdAt;
 
@@ -44,6 +47,7 @@ class Account {
     required this.type,
     this.skinUrl,
     this.capeUrl,
+    this.accessToken,
     required this.createdAt,
     required this.lastUsedAt,
   });
@@ -57,6 +61,7 @@ class Account {
       'type': type.name,
       'skinUrl': skinUrl,
       'capeUrl': capeUrl,
+      'accessToken': accessToken,
       'createdAt': createdAt.toIso8601String(),
       'lastUsedAt': lastUsedAt.toIso8601String(),
     };
@@ -74,6 +79,7 @@ class Account {
       ),
       skinUrl: json['skinUrl'] as String?,
       capeUrl: json['capeUrl'] as String?,
+      accessToken: json['accessToken'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       lastUsedAt: DateTime.parse(json['lastUsedAt'] as String),
     );
@@ -90,6 +96,12 @@ class Account {
     return '$baseUrl/$username?size=64&default=MHF_Steve';
   }
 
+  /// 是否是Microsoft账户
+  bool get isMicrosoft => type == AccountType.microsoft;
+
+  /// 是否是离线账户
+  bool get isOffline => type == AccountType.offline;
+
   /// 创建副本并更新部分字段
   Account copyWith({
     String? id,
@@ -98,6 +110,7 @@ class Account {
     AccountType? type,
     String? skinUrl,
     String? capeUrl,
+    String? accessToken,
     DateTime? createdAt,
     DateTime? lastUsedAt,
   }) {
@@ -108,6 +121,7 @@ class Account {
       type: type ?? this.type,
       skinUrl: skinUrl ?? this.skinUrl,
       capeUrl: capeUrl ?? this.capeUrl,
+      accessToken: accessToken ?? this.accessToken,
       createdAt: createdAt ?? this.createdAt,
       lastUsedAt: lastUsedAt ?? this.lastUsedAt,
     );

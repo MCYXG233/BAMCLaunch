@@ -13,6 +13,7 @@ import '../event/event_bus.dart';
 import '../platform/platform_adapter.dart';
 import '../task/task.dart';
 import '../task/task_context.dart';
+import '../game/launcher/game_file_validator.dart';
 import 'models.dart';
 import 'version_manager.dart';
 

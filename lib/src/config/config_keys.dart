@@ -79,4 +79,9 @@ class ConfigKeys {
   static const String gameWindowSize = 'gameWindowSize';
   static const String autoRetryDownload = 'autoRetryDownload';
   static const String proxyHost = 'proxyHost';
+
+  /// 启动器窗口配置
+  static const String launcherVisibility = 'launcherVisibility';
+  static const String fileValidatePolicy = 'fileValidatePolicy';
+  static const String gcStrategy = 'gcStrategy';
 }

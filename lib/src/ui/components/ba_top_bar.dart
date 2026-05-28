@@ -44,10 +44,14 @@ class BATopBar extends StatelessWidget {
               gradient: BAThemeColors.primaryGradient,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
-              Icons.extension,
-              color: Colors.white,
-              size: 24,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'assets/images/BAMCLaunch_Logo.png',
+                fit: BoxFit.contain,
+                width: 32,
+                height: 20,
+              ),
             ),
           ),
           const SizedBox(width: 16),

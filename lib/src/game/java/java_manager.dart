@@ -177,6 +177,53 @@ class JavaManager implements IJavaManager {
     }
   }
 
+  Future<JavaInstallation?> getJavaForGameVersion(String gameVersion) async {
+    try {
+      final installations = await findJavaInstallations();
+
+      if (installations.isEmpty) {
+        _logger.warn('No Java installations found');
+        return null;
+      }
+
+      final requiredJavaVersions = JavaVersion.getRecommendedForGameVersion(gameVersion);
+
+      _logger.debug('Game version $gameVersion requires Java versions: $requiredJavaVersions');
+
+      for (final requiredVersion in requiredJavaVersions) {
+        final match64 = installations.firstWhere(
+          (inst) => inst.majorVersion == requiredVersion && inst.is64Bit,
+          orElse: () => installations.firstWhere(
+            (inst) => inst.majorVersion == requiredVersion,
+            orElse: () => installations.first,
+          ),
+        );
+        if (match64.majorVersion == requiredVersion) {
+          _logger.info(
+            'Found matching Java ${match64.version} for game $gameVersion at ${match64.path}',
+          );
+          return match64;
+        }
+      }
+
+      final fallback = await getRecommendedJava();
+      _logger.warn(
+        'No exact Java match for game $gameVersion, using fallback: ${fallback?.version}',
+      );
+      return fallback;
+    } catch (e, stackTrace) {
+      _logger.error('Failed to get Java for game version $gameVersion', e, stackTrace);
+      return await getRecommendedJava();
+    }
+  }
+
+  bool isJavaCompatibleWithGame(String javaVersion, String gameVersion) {
+    final javaMajor = JavaVersion.parseMajorVersion(javaVersion);
+    final requiredVersions = JavaVersion.getRecommendedForGameVersion(gameVersion);
+    return requiredVersions.contains(javaMajor) ||
+           JavaVersion.isCompatible(javaMajor);
+  }
+
   @override
   Future<JavaInstallation?> getSelectedJava() async {
     try {

@@ -1,6 +1,10 @@
 import 'dart:async';
 import '../event/event_bus.dart';
 import '../event/event.dart';
+import '../core/logger.dart';
+import 'download_engine.dart';
+import 'models.dart';
+import 'multi_source_downloader.dart' as msd;
 
 class DownloadQueueManager {
   static DownloadQueueManager? _instance;
@@ -21,6 +25,8 @@ class DownloadQueueManager {
   }
   
   final EventBus _eventBus = EventBus.instance;
+  final Logger _logger = Logger();
+  final DownloadEngine _downloadEngine = DownloadEngine();
   
   final List<DownloadQueueItem> _queue = [];
   final List<DownloadQueueItem> _downloading = [];
@@ -214,8 +220,9 @@ class DownloadQueueManager {
     item.status = QueueItemStatus.downloading;
     _downloading.add(item);
     _eventBus.publish(QueueItemStartedEvent(item));
-    
-    item.execute().then((result) {
+    _logger.info('开始下载队列项: ${item.request.url}');
+
+    item.execute(_downloadEngine).then((result) {
       _onDownloadComplete(item, result);
     }).catchError((error) {
       _onDownloadError(item, error);
@@ -290,9 +297,7 @@ class DownloadQueueItem {
   String? result;
   String? error;
   double progress = 0.0;
-  
-  final _cancelToken = _CancelToken();
-  
+
   DownloadQueueItem({
     required this.id,
     required this.request,
@@ -301,26 +306,21 @@ class DownloadQueueItem {
     this.result,
     this.error,
   });
-  
+
   void cancel() {
-    _cancelToken.cancel();
   }
-  
-  Future<String> execute() async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    return request.savePath;
+
+  Future<String> execute(DownloadEngine downloadEngine) async {
+    return await downloadEngine.download(
+      request.url,
+      request.savePath,
+      hash: request.hash,
+      hashType: request.hashType,
+    );
   }
 }
 
-class _CancelToken {
-  bool _cancelled = false;
-  
-  bool get isCancelled => _cancelled;
-  
-  void cancel() {
-    _cancelled = true;
-  }
-}
+
 
 enum QueueItemStatus {
   pending,
@@ -338,21 +338,7 @@ enum QueueSection {
   failed,
 }
 
-class DownloadRequest {
-  final String url;
-  final String savePath;
-  final String? hash;
-  final String? hashType;
-  final int priority;
-  
-  DownloadRequest({
-    required this.url,
-    required this.savePath,
-    this.hash,
-    this.hashType,
-    this.priority = 0,
-  });
-}
+
 
 class QueueStartedEvent extends Event {
   QueueStartedEvent();

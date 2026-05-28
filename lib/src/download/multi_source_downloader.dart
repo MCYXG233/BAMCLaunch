@@ -253,7 +253,7 @@ class MultiSourceDownloader {
 
 class DownloadSource {
   final String name;
-  final String Function(String path) urlResolver;
+  final Future<String> Function(String path) urlResolver;
   final Future<bool> Function()? availabilityChecker;
   
   const DownloadSource({
@@ -263,7 +263,7 @@ class DownloadSource {
   });
   
   Future<String> getUrl(String path) async {
-    return urlResolver(path);
+    return await urlResolver(path);
   }
   
   Future<bool> isAvailable() async {

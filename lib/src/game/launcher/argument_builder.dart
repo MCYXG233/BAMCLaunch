@@ -7,16 +7,104 @@ import '../java/models.dart';
 import '../../version/models.dart';
 import 'models.dart';
 
-/// 参数构建器
-/// 负责构建游戏启动所需的所有参数
-class ArgumentBuilder {
-  /// 游戏目录
+enum GarbageCollector {
+  auto,
+  g1gc,
+  zgc,
+  shenandoah,
+  parallel,
+  serial,
+}
+
+class LaunchTemplateArguments {
+  final String gameAssets;
+  final String assetsRoot;
+  final String assetsIndexName;
   final String gameDirectory;
+  final String versionName;
+  final String versionType;
+  final String nativesDirectory;
+  final String launcherName;
+  final String launcherVersion;
+  final String authAccessToken;
+  final String authPlayerName;
+  final String userType;
+  final String authUuid;
+  final String clientid;
+  final String authXuid;
+  final String userProperties;
+  final String libraryDirectory;
+  final String classpathSeparator;
+  final bool demo;
+  final int resolutionWidth;
+  final int resolutionHeight;
+  final String quickPlaySingleplayer;
+  final String quickPlayMultiplayer;
+  final String quickPlayRealms;
+  final String quickPlayPath;
 
-  /// 版本信息
+  const LaunchTemplateArguments({
+    required this.gameAssets,
+    required this.assetsRoot,
+    required this.assetsIndexName,
+    required this.gameDirectory,
+    required this.versionName,
+    required this.versionType,
+    required this.nativesDirectory,
+    required this.launcherName,
+    required this.launcherVersion,
+    required this.authAccessToken,
+    required this.authPlayerName,
+    required this.userType,
+    required this.authUuid,
+    required this.clientid,
+    required this.authXuid,
+    required this.userProperties,
+    required this.libraryDirectory,
+    required this.classpathSeparator,
+    this.demo = false,
+    this.resolutionWidth = 854,
+    this.resolutionHeight = 480,
+    this.quickPlaySingleplayer = '',
+    this.quickPlayMultiplayer = '',
+    this.quickPlayRealms = '',
+    this.quickPlayPath = '',
+  });
+
+  Map<String, String> toJson() {
+    return {
+      'gameAssets': gameAssets,
+      'assetsRoot': assetsRoot,
+      'assetsIndexName': assetsIndexName,
+      'gameDirectory': gameDirectory,
+      'versionName': versionName,
+      'versionType': versionType,
+      'nativesDirectory': nativesDirectory,
+      'launcherName': launcherName,
+      'launcherVersion': launcherVersion,
+      'authAccessToken': authAccessToken,
+      'authPlayerName': authPlayerName,
+      'userType': userType,
+      'authUuid': authUuid,
+      'clientid': clientid,
+      'authXuid': authXuid,
+      'userProperties': userProperties,
+      'libraryDirectory': libraryDirectory,
+      'classpathSeparator': classpathSeparator,
+      'demo': demo.toString(),
+      'resolutionWidth': resolutionWidth.toString(),
+      'resolutionHeight': resolutionHeight.toString(),
+      'quickPlaySingleplayer': quickPlaySingleplayer,
+      'quickPlayMultiplayer': quickPlayMultiplayer,
+      'quickPlayRealms': quickPlayRealms,
+      'quickPlayPath': quickPlayPath,
+    };
+  }
+}
+
+class ArgumentBuilder {
+  final String gameDirectory;
   final VersionJson versionJson;
-
-  /// 平台适配器
   final bool isWindows;
 
   ArgumentBuilder({
@@ -25,26 +113,234 @@ class ArgumentBuilder {
     required this.isWindows,
   });
 
-  /// 构建JVM参数
+  Map<String, String> buildTemplateMap({
+    required LaunchTemplateArguments args,
+  }) {
+    final map = <String, String>{};
+    final json = args.toJson();
+    for (final entry in json.entries) {
+      map['\${${entry.key}}'] = entry.value;
+    }
+    for (final entry in json.entries) {
+      map['\${${_camelToSnake(entry.key)}}'] = entry.value;
+    }
+    return map;
+  }
+
+  String _camelToSnake(String s) {
+    return s.replaceAllMapped(RegExp(r'([A-Z])'), (m) => '_${m[1]!.toLowerCase()}');
+  }
+
   List<String> buildJvmArguments({
     required int memory,
-    required List<String> additionalArgs,
+    required int javaMajorVersion,
+    required GameConfig gameConfig,
+    String? clientJarPath,
+    String? authlibJarPath,
+    String? authServerUrl,
+    String? authServerMeta,
+    String? unsafeAgentPath,
   }) {
     final args = <String>[];
 
     args.add('-Xmx${memory}M');
-    args.add('-Xms${memory}M');
 
-    args.addAll(additionalArgs);
+    if (!gameConfig.noJvmArgs) {
+      if (isWindows) {
+        args.add('-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump');
+      }
+
+      if (clientJarPath != null) {
+        args.add('-Dminecraft.client.jar=$clientJarPath');
+      }
+
+      if (gameConfig.gcStrategy == 'g1gc') {
+        args.add('-XX:+UseG1GC');
+      } else if (gameConfig.gcStrategy == 'zgc') {
+        args.add('-XX:+UseZGC');
+      } else if (gameConfig.gcStrategy == 'shenandoah') {
+        args.add('-XX:+UseShenandoahGC');
+      } else if (gameConfig.gcStrategy == 'parallel') {
+        args.add('-XX:+UseParallelGC');
+      } else if (gameConfig.gcStrategy == 'serial') {
+        args.add('-XX:+UseSerialGC');
+      }
+
+      args.addAll([
+        '-Djava.rmi.server.useCodebaseOnly=true',
+        '-Dcom.sun.jndi.rmi.object.trustURLCodebase=false',
+        '-Dcom.sun.jndi.cosnaming.object.trustURLCodebase=false',
+      ]);
+
+      args.addAll([
+        '-Dfml.ignoreInvalidMinecraftCertificates=true',
+        '-Dfml.ignorePatchDiscrepancies=true',
+      ]);
+
+      if (javaMajorVersion < 19) {
+        args.addAll([
+          '-Dsun.stdout.encoding=UTF-8',
+          '-Dsun.stderr.encoding=UTF-8',
+        ]);
+      } else {
+        args.addAll([
+          '-Dstdout.encoding=UTF-8',
+          '-Dstderr.encoding=UTF-8',
+        ]);
+      }
+    }
+
+    if (gameConfig.jvmArgs.isNotEmpty) {
+      args.addAll(gameConfig.jvmArgs);
+    }
+
+    if (authServerUrl != null && authServerMeta != null && authlibJarPath != null) {
+      args.add('-javaagent:$authlibJarPath=$authServerUrl');
+      args.add('-Dauthlibinjector.side=client');
+      args.add('-Dauthlibinjector.yggdrasil.prefetched=${_base64Encode(authServerMeta)}');
+    }
+
+    if (gameConfig.useLwjglUnsafeAgent && unsafeAgentPath != null) {
+      args.add('-javaagent:$unsafeAgentPath');
+    }
 
     return args;
   }
 
-  /// 构建类路径
-  Future<String> buildClasspath() async {
-    final paths = <String>[];
+  String _base64Encode(String s) {
+    return base64.encode(utf8.encode(s));
+  }
 
+  List<String> buildGameArguments({
+    required LaunchTemplateArguments templateArgs,
+    required GameConfig gameConfig,
+    String? quickPlaySingleplayer,
+    String? quickPlayMultiplayer,
+  }) {
+    final args = <String>[];
+    final templateMap = buildTemplateMap(args: templateArgs);
+
+    if (versionJson.arguments != null) {
+      final argsList = versionJson.arguments!.game ?? [];
+      for (final arg in argsList) {
+        if (arg is String) {
+          args.add(arg);
+        } else if (arg is Map<String, dynamic>) {
+          if (_shouldUseRule(arg)) {
+            final value = arg['value'];
+            if (value is String) {
+              args.add(value);
+            } else if (value is List) {
+              args.addAll(value.cast<String>());
+            }
+          }
+        }
+      }
+    } else if (versionJson.minecraftArguments != null) {
+      args.addAll(_splitMinecraftArguments(versionJson.minecraftArguments!));
+    }
+
+    final processedArgs = args.map((arg) {
+      var result = arg;
+      for (final entry in templateMap.entries) {
+        result = result.replaceAll(entry.key, entry.value);
+      }
+      return result;
+    }).toList();
+
+    if (gameConfig.fullscreen) {
+      processedArgs.add('--fullscreen');
+    }
+
+    if (quickPlaySingleplayer != null && quickPlaySingleplayer.isNotEmpty) {
+      processedArgs.addAll(['--quickPlaySingleplayer', quickPlaySingleplayer]);
+    } else if (quickPlayMultiplayer != null && quickPlayMultiplayer.isNotEmpty) {
+      processedArgs.addAll(['--quickPlayMultiplayer', quickPlayMultiplayer]);
+    } else if (gameConfig.autoJoinServer && gameConfig.serverAddress.isNotEmpty) {
+      processedArgs.addAll(['--server', gameConfig.serverAddress, '--port', gameConfig.serverPort.toString()]);
+    }
+
+    if (gameConfig.minecraftArgument.isNotEmpty) {
+      processedArgs.addAll(_splitMinecraftArguments(gameConfig.minecraftArgument));
+    }
+
+    return processedArgs;
+  }
+
+  bool _shouldUseRule(Map<String, dynamic> rule) {
+    final rules = rule['rules'] as List?;
+    if (rules == null || rules.isEmpty) {
+      return true;
+    }
+
+    bool allowed = false;
+    for (final r in rules) {
+      final ruleMap = r as Map<String, dynamic>;
+      final action = ruleMap['action'] as String?;
+      final os = ruleMap['os'] as Map<String, dynamic>?;
+
+      final matchesOs = _matchesOperatingSystem(os);
+      if (action == 'allow' && matchesOs) {
+        allowed = true;
+      } else if (action == 'disallow' && matchesOs) {
+        allowed = false;
+      }
+    }
+    return allowed;
+  }
+
+  bool _matchesOperatingSystem(Map<String, dynamic>? os) {
+    if (os == null) {
+      return true;
+    }
+    final name = os['name'] as String?;
+    if (name == null) {
+      return true;
+    }
+    if (isWindows && name == 'windows') {
+      return true;
+    }
+    if (!isWindows && Platform.isMacOS && name == 'osx') {
+      return true;
+    }
+    if (!isWindows && !Platform.isMacOS && name == 'linux') {
+      return true;
+    }
+    return false;
+  }
+
+  List<String> _splitMinecraftArguments(String args) {
+    final parts = <String>[];
+    final buffer = StringBuffer();
+    bool inQuotes = false;
+
+    for (var i = 0; i < args.length; i++) {
+      final char = args[i];
+      if (char == '"') {
+        inQuotes = !inQuotes;
+      } else if (char == ' ' && !inQuotes) {
+        if (buffer.isNotEmpty) {
+          parts.add(buffer.toString());
+          buffer.clear();
+        }
+      } else {
+        buffer.write(char);
+      }
+    }
+
+    if (buffer.isNotEmpty) {
+      parts.add(buffer.toString());
+    }
+
+    return parts;
+  }
+
+  Future<List<String>> buildClasspath({
+    required String nativesDirectory,
+  }) async {
+    final paths = <String>[];
     final librariesDir = path.join(gameDirectory, 'libraries');
+
     for (final library in versionJson.libraries) {
       if (library.downloads?.artifact != null) {
         final artifact = library.downloads!.artifact!;
@@ -61,136 +357,111 @@ class ArgumentBuilder {
       paths.add(jarPath);
     }
 
-    final separator = isWindows ? ';' : ':';
-    return paths.join(separator);
+    return paths;
   }
 
-  /// 构建游戏参数
-  List<String> buildGameArguments({
+  Future<LaunchCommand> buildLaunchCommand({
+    required String javaPath,
+    required GameConfig gameConfig,
     required Account account,
-    String? serverAddress,
-    int? serverPort,
-    List<String>? additionalArgs,
-  }) {
-    final args = <String>[];
-
-    final argsTemplate = versionJson.arguments?.game ?? [];
-    for (final arg in argsTemplate) {
-      if (arg is String) {
-        args.add(arg);
-      }
-    }
-
-    for (var i = 0; i < args.length; i++) {
-      args[i] = _replacePlaceholder(
-        args[i],
-        account,
-        serverAddress,
-        serverPort,
-      );
-    }
-
-    if (additionalArgs != null) {
-      args.addAll(additionalArgs);
-    }
-
-    if (serverAddress != null && serverPort != null) {
-      args.add('--server');
-      args.add(serverAddress);
-      args.add('--port');
-      args.add(serverPort.toString());
-    }
-
-    return args;
-  }
-
-  /// 替换参数中的占位符
-  String _replacePlaceholder(
-    String arg,
-    Account account,
-    String? serverAddress,
-    int? serverPort,
-  ) {
-    final assetIndex = versionJson.assetIndex?.id ?? 'legacy';
+    required int javaMajorVersion,
+    String? authServerUrl,
+    String? authServerMeta,
+    String? authlibJarPath,
+    String? quickPlaySingleplayer,
+    String? quickPlayMultiplayer,
+  }) async {
+    final versionDir = path.join(gameDirectory, 'versions', versionJson.id);
+    final clientJarPath = path.join(versionDir, '${versionJson.id}.jar');
+    final nativesDir = path.join(versionDir, 'natives');
+    final librariesDir = path.join(gameDirectory, 'libraries');
     final assetsDir = path.join(gameDirectory, 'assets');
 
-    arg = arg.replaceAll('\${auth_player_name}', account.username);
-    arg = arg.replaceAll('\${version_name}', versionJson.id);
-    arg = arg.replaceAll('\${game_directory}', gameDirectory);
-    arg = arg.replaceAll('\${assets_root}', assetsDir);
-    arg = arg.replaceAll('\${assets_index_name}', assetIndex);
-    arg = arg.replaceAll(
-      '\${auth_uuid}',
-      account.uuid ?? _generateOfflineUUID(account.username),
+    final templateArgs = LaunchTemplateArguments(
+      gameAssets: path.join(assetsDir, 'virtual', 'legacy'),
+      assetsRoot: assetsDir,
+      assetsIndexName: versionJson.assetIndex?.id ?? 'legacy',
+      gameDirectory: gameDirectory,
+      versionName: versionJson.id,
+      versionType: gameConfig.customInfo.isNotEmpty ? gameConfig.customInfo : 'BAMC Launcher',
+      nativesDirectory: nativesDir,
+      launcherName: 'BAMC Launcher',
+      launcherVersion: '1.0.0',
+      authAccessToken: account.accessToken ?? '0',
+      authPlayerName: account.username,
+      userType: 'msa',
+      authUuid: account.uuid ?? _generateOfflineUUID(account.username),
+      clientid: '0',
+      authXuid: '0',
+      userProperties: '{}',
+      libraryDirectory: librariesDir,
+      classpathSeparator: isWindows ? ';' : ':',
+      demo: false,
+      resolutionWidth: gameConfig.resolutionWidth,
+      resolutionHeight: gameConfig.resolutionHeight,
+      quickPlaySingleplayer: quickPlaySingleplayer ?? '',
+      quickPlayMultiplayer: quickPlayMultiplayer ?? (gameConfig.autoJoinServer ? gameConfig.serverAddress : ''),
+      quickPlayRealms: '',
+      quickPlayPath: '',
     );
-    arg = arg.replaceAll('\${auth_access_token}', '0');
-    arg = arg.replaceAll('\${clientid}', '0');
-    arg = arg.replaceAll('\${auth_xuid}', '0');
-    arg = arg.replaceAll('\${user_type}', 'legacy');
-    arg = arg.replaceAll('\${version_type}', 'release');
-    arg = arg.replaceAll('\${resolution_width}', '854');
-    arg = arg.replaceAll('\${resolution_height}', '480');
 
-    return arg;
+    final jvmArgs = buildJvmArguments(
+      memory: gameConfig.memory,
+      javaMajorVersion: javaMajorVersion,
+      gameConfig: gameConfig,
+      clientJarPath: clientJarPath,
+      authlibJarPath: authlibJarPath,
+      authServerUrl: authServerUrl,
+      authServerMeta: authServerMeta,
+      unsafeAgentPath: gameConfig.useLwjglUnsafeAgent ? path.join(librariesDir, 'lwjgl-unsafe-agent.jar') : null,
+    );
+
+    final classpaths = await buildClasspath(nativesDirectory: nativesDir);
+
+    final gameArgs = buildGameArguments(
+      templateArgs: templateArgs,
+      gameConfig: gameConfig,
+      quickPlaySingleplayer: quickPlaySingleplayer,
+      quickPlayMultiplayer: quickPlayMultiplayer,
+    );
+
+    final mainClass = versionJson.mainClass ?? 'net.minecraft.client.main.Main';
+
+    final fullCommand = <String>[];
+    fullCommand.add(javaPath);
+    fullCommand.addAll(jvmArgs);
+    fullCommand.add('-cp');
+    fullCommand.add(classpaths.join(isWindows ? ';' : ':'));
+    fullCommand.add(mainClass);
+    fullCommand.addAll(gameArgs);
+
+    return LaunchCommand(
+      classPaths: classpaths,
+      args: fullCommand,
+    );
   }
 
-  /// 生成离线UUID
+  String exportFullLaunchCommand({
+    required LaunchCommand command,
+  }) {
+    return command.args.join(' ');
+  }
+
   String _generateOfflineUUID(String username) {
     final bytes = utf8.encode('OfflinePlayer:$username');
     final hash = md5.convert(bytes).bytes;
-
     final uuidBytes = List<int>.from(hash);
     uuidBytes[6] = (uuidBytes[6] & 0x0F) | 0x30;
     uuidBytes[8] = (uuidBytes[8] & 0x3F) | 0x80;
-
     final uuidStr = _bytesToHex(uuidBytes);
     return '${uuidStr.substring(0, 8)}-${uuidStr.substring(8, 12)}-${uuidStr.substring(12, 16)}-${uuidStr.substring(16, 20)}-${uuidStr.substring(20, 32)}';
   }
 
-  /// 字节转十六进制
   String _bytesToHex(List<int> bytes) {
     final buffer = StringBuffer();
     for (final byte in bytes) {
       buffer.write(byte.toRadixString(16).padLeft(2, '0'));
     }
     return buffer.toString();
-  }
-
-  /// 构建完整命令
-  Future<List<String>> buildFullCommand({
-    required String javaPath,
-    required int memory,
-    required List<String> jvmArgs,
-    required Account account,
-    String? serverAddress,
-    int? serverPort,
-    List<String>? gameArgs,
-  }) async {
-    final command = <String>[];
-
-    command.add(javaPath);
-
-    final jvmArguments = buildJvmArguments(
-      memory: memory,
-      additionalArgs: jvmArgs,
-    );
-    command.addAll(jvmArguments);
-
-    final classpath = await buildClasspath();
-    command.add('-cp');
-    command.add(classpath);
-
-    final mainClass = versionJson.mainClass ?? 'net.minecraft.client.main.Main';
-    command.add(mainClass);
-
-    final gameArguments = buildGameArguments(
-      account: account,
-      serverAddress: serverAddress,
-      serverPort: serverPort,
-      additionalArgs: gameArgs,
-    );
-    command.addAll(gameArguments);
-
-    return command;
   }
 }

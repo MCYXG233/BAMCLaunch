@@ -162,6 +162,9 @@ class VersionJson {
   /// 主类名
   final String mainClass;
 
+  /// 游戏参数（旧版格式）
+  final String? minecraftArguments;
+
   /// 游戏参数
   final Arguments? arguments;
 
@@ -185,6 +188,7 @@ class VersionJson {
     required this.time,
     required this.releaseTime,
     required this.mainClass,
+    this.minecraftArguments,
     this.arguments,
     this.downloads,
     required this.libraries,
@@ -201,6 +205,7 @@ class VersionJson {
       time: DateTime.parse(json['time'] as String),
       releaseTime: DateTime.parse(json['releaseTime'] as String),
       mainClass: json['mainClass'] as String,
+      minecraftArguments: json['minecraftArguments'] as String?,
       arguments: json['arguments'] != null
           ? Arguments.fromJson(json['arguments'] as Map<String, dynamic>)
           : null,
@@ -228,6 +233,7 @@ class VersionJson {
       'time': time.toIso8601String(),
       'releaseTime': releaseTime.toIso8601String(),
       'mainClass': mainClass,
+      'minecraftArguments': minecraftArguments,
       'arguments': arguments?.toJson(),
       'downloads': downloads?.toJson(),
       'libraries': libraries.map((l) => l.toJson()).toList(),
