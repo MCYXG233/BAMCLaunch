@@ -83,10 +83,10 @@ class BAFrostedDialog extends StatelessWidget {
             height: height,
             constraints: const BoxConstraints(maxWidth: 560, minWidth: 320),
             decoration: BoxDecoration(
-              color: BAColors.glass,
+              color: BAColors.glassOf(context),
               borderRadius: BATheme.borderRadius,
-              border: Border.all(color: BAColors.border, width: 1),
-              boxShadow: BATheme.shadows,
+              border: Border.all(color: BAColors.borderOf(context), width: 1),
+              boxShadow: BATheme.shadowsOf(context),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -100,7 +100,7 @@ class BAFrostedDialog extends StatelessWidget {
                         child: Text(
                           title,
                           style: BATypography.headlineMedium.copyWith(
-                            color: BAColors.textPrimary,
+                            color: BAColors.textPrimaryOf(context),
                           ),
                         ),
                       ),
@@ -179,7 +179,7 @@ class BAConfirmDialog extends StatelessWidget {
       title: title,
       child: Text(
         content,
-        style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+        style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
       ),
       actions: [
         BASecondaryButton(
@@ -224,7 +224,7 @@ class BAConfirmDialog extends StatelessWidget {
       title: title,
       child: Text(
         content,
-        style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+        style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
       ),
       actions: [
         BASecondaryButton(
@@ -271,12 +271,12 @@ class _CloseButtonState extends State<_CloseButton> {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: _isHovered ? BAColors.surfaceVariant : Colors.transparent,
+            color: _isHovered ? BAColors.surfaceVariantOf(context) : Colors.transparent,
             borderRadius: BATheme.borderRadiusSmall,
           ),
           child: Icon(
             Icons.close,
-            color: _isHovered ? BAColors.textPrimary : BAColors.textSecondary,
+            color: _isHovered ? BAColors.textPrimaryOf(context) : BAColors.textSecondaryOf(context),
             size: 20,
           ),
         ),

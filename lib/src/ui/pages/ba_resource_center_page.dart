@@ -353,7 +353,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                     category.key,
                     style: TextStyle(
                       color:
-                          isSelected ? Colors.white : BAColors.textSecondaryOf(context),
+                          isSelected ? Colors.white : BAColors.textPrimaryOf(context).withOpacity(0.7),
                       fontSize: 13,
                       fontWeight:
                           isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -777,16 +777,16 @@ class _ResourceCardState extends State<_ResourceCard> {
                         child: InkWell(
                           onTap: widget.onTap,
                           borderRadius: BorderRadius.circular(10),
-                          child: const Row(
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.add,
-                                  color: Colors.white, size: 18),
+                                  color: BAColors.textOnPrimary, size: 18),
                               SizedBox(width: 6),
                               Text(
                                 '安装',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: BAColors.textOnPrimary,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                 ),

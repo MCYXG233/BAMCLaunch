@@ -330,20 +330,13 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
   @override
   Widget build(BuildContext context) {
     NotificationManager().init(context);
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final bgColor = isLight ? BAColors.lightBackground : BAColors.darkBackground;
-    final cardBg = isLight ? BAColors.lightSurface : BAColors.darkSurface;
-    final cardBorder = isLight ? BAColors.lightBorder : BAColors.darkBorder;
-    final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
-    final textSecondary = isLight ? BAColors.lightTextSecondary : BAColors.darkTextSecondary;
-    final textDisabled = isLight ? BAColors.lightTextDisabled : BAColors.darkTextDisabled;
 
     return Container(
-      color: bgColor,
+      color: BAColors.backgroundOf(context),
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          _buildHeader(context, textPrimary),
+          _buildHeader(context),
           const SizedBox(height: 16),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -354,9 +347,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                   child: Container(
                     height: 40,
                     decoration: BoxDecoration(
-                      color: cardBg,
+                      color: BAColors.surfaceOf(context),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: cardBorder),
+                      border: Border.all(color: BAColors.borderOf(context)),
                       boxShadow: BATheme.shadowsSmallOf(context),
                     ),
                     child: TextField(
@@ -367,24 +360,24 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                         });
                       },
                       style: TextStyle(
-                        color: textPrimary,
+                        color: BAColors.textPrimaryOf(context),
                         fontSize: 14,
                       ),
                       decoration: InputDecoration(
                         hintText: '搜索实例...',
                         hintStyle: TextStyle(
-                          color: textDisabled,
+                          color: BAColors.textDisabledOf(context),
                         ),
                         prefixIcon: Icon(
                           Icons.search,
-                          color: textSecondary,
+                          color: BAColors.textSecondaryOf(context),
                           size: 20,
                         ),
                         suffixIcon: _searchQuery.isNotEmpty
                             ? IconButton(
                                 icon: Icon(
                                   Icons.clear,
-                                  color: textSecondary,
+                                  color: BAColors.textSecondaryOf(context),
                                   size: 18,
                                 ),
                                 onPressed: () {
@@ -425,20 +418,20 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? BAColors.primaryOf(context)
-                                : cardBg,
+                                : BAColors.surfaceOf(context),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: isSelected
                                   ? BAColors.primaryOf(context)
-                                  : cardBorder,
+                                  : BAColors.borderOf(context),
                             ),
                           ),
                           child: Text(
                             _filters[index],
                             style: TextStyle(
                               color: isSelected
-                                  ? Colors.white
-                                  : textSecondary,
+                                  ? BAColors.textOnPrimary
+                                  : BAColors.textSecondaryOf(context),
                               fontSize: 13,
                               fontWeight:
                                   isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -462,13 +455,13 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
     );
   }
 
-  Widget _buildHeader(BuildContext context, Color textPrimary) {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
         Text(
           '游戏库',
           style: TextStyle(
-            color: textPrimary,
+            color: BAColors.textPrimaryOf(context),
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -492,9 +485,6 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
   }
 
   Widget _buildInstanceGrid(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
-    final textSecondary = isLight ? BAColors.lightTextSecondary : BAColors.darkTextSecondary;
     final instances = _getFilteredInstances();
 
     if (instances.isEmpty) {
@@ -523,7 +513,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                   ? '没有找到匹配的实例'
                   : '还没有游戏实例',
               style: TextStyle(
-                color: textPrimary,
+                color: BAColors.textPrimaryOf(context),
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -534,7 +524,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                   ? '尝试修改搜索条件或切换筛选项'
                   : '还没有游戏实例，点击新建实例开始吧',
               style: TextStyle(
-                color: textSecondary,
+                color: BAColors.textSecondaryOf(context),
                 fontSize: 13,
               ),
             ),
@@ -674,11 +664,6 @@ class _ActionButtonState extends State<_ActionButton> {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(widget.buttonContext).brightness == Brightness.light;
-    final cardBg = isLight ? BAColors.lightSurface : BAColors.darkSurface;
-    final cardBorder = isLight ? BAColors.lightBorder : BAColors.darkBorder;
-    final textSecondary = isLight ? BAColors.lightTextSecondary : BAColors.darkTextSecondary;
-
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -688,10 +673,14 @@ class _ActionButtonState extends State<_ActionButton> {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: _isHovered ? BAColors.primaryOf(widget.buttonContext).withOpacity(0.1) : cardBg,
+            color: _isHovered 
+                ? BAColors.primaryOf(widget.buttonContext).withOpacity(0.1) 
+                : BAColors.surfaceOf(widget.buttonContext),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: _isHovered ? BAColors.primaryOf(widget.buttonContext) : cardBorder,
+              color: _isHovered 
+                  ? BAColors.primaryOf(widget.buttonContext) 
+                  : BAColors.borderOf(widget.buttonContext),
             ),
           ),
           child: Row(
@@ -699,14 +688,18 @@ class _ActionButtonState extends State<_ActionButton> {
             children: [
               Icon(
                 widget.icon,
-                color: _isHovered ? BAColors.primaryOf(widget.buttonContext) : textSecondary,
+                color: _isHovered 
+                    ? BAColors.primaryOf(widget.buttonContext) 
+                    : BAColors.textSecondaryOf(widget.buttonContext),
                 size: 16,
               ),
               const SizedBox(width: 6),
               Text(
                 widget.label,
                 style: TextStyle(
-                  color: _isHovered ? BAColors.primaryOf(widget.buttonContext) : textSecondary,
+                  color: _isHovered 
+                      ? BAColors.primaryOf(widget.buttonContext) 
+                      : BAColors.textSecondaryOf(widget.buttonContext),
                   fontSize: 12,
                 ),
               ),
@@ -764,12 +757,12 @@ class _MainActionButtonState extends State<_MainActionButton> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(widget.icon, color: Colors.white, size: 20),
+              Icon(widget.icon, color: BAColors.textOnPrimary, size: 20),
               const SizedBox(width: 8),
               Text(
                 widget.label,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: BAColors.textOnPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -804,11 +797,6 @@ class _InstanceCardState extends State<_InstanceCard> {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(widget.cardContext).brightness == Brightness.light;
-    final cardBg = isLight ? BAColors.lightSurface : BAColors.darkSurface;
-    final cardBorder = isLight ? BAColors.lightBorder : BAColors.darkBorder;
-    final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
-
     final status = widget.instance.status;
     final statusColor = _getStatusColor(status, widget.cardContext);
 
@@ -822,10 +810,12 @@ class _InstanceCardState extends State<_InstanceCard> {
         child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: cardBg,
+          color: BAColors.surfaceOf(widget.cardContext),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: _isHovered ? BAColors.primaryOf(widget.cardContext) : cardBorder,
+            color: _isHovered 
+                ? BAColors.primaryOf(widget.cardContext) 
+                : BAColors.borderOf(widget.cardContext),
             width: _isHovered ? 2 : 1,
           ),
           boxShadow: _isHovered
@@ -884,8 +874,8 @@ class _InstanceCardState extends State<_InstanceCard> {
                             ),
                             child: Text(
                               _getStatusLabel(status),
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: BAColors.textOnPrimary,
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -897,9 +887,9 @@ class _InstanceCardState extends State<_InstanceCard> {
                             child: Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.5),
-                                shape: BoxShape.circle,
-                              ),
+                              color: BAColors.darkBackground.withOpacity(0.5),
+                              shape: BoxShape.circle,
+                            ),
                               child: SizedBox(
                                 width: 24,
                                 height: 24,
@@ -936,9 +926,9 @@ class _InstanceCardState extends State<_InstanceCard> {
                                   ),
                                 ],
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.play_arrow,
-                                color: Colors.white,
+                                color: BAColors.textOnPrimary,
                                 size: 20,
                               ),
                             ),
@@ -955,7 +945,7 @@ class _InstanceCardState extends State<_InstanceCard> {
                       Text(
                         widget.instance.name,
                         style: TextStyle(
-                          color: textPrimary,
+                          color: BAColors.textPrimaryOf(widget.cardContext),
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
@@ -972,7 +962,7 @@ class _InstanceCardState extends State<_InstanceCard> {
                           const SizedBox(width: 6),
                           _InfoChip(
                             icon: Icons.extension,
-                            label: widget.instance.loader ?? '原版',
+                            label: _getLoaderDisplay(widget.instance.loader),
                           ),
                         ],
                       ),
@@ -986,6 +976,24 @@ class _InstanceCardState extends State<_InstanceCard> {
         ),
       ),
     );
+  }
+
+  String _getLoaderDisplay(String? loader) {
+    if (loader == null || loader.isEmpty) {
+      return '原版';
+    }
+    // 确保正确显示 loader 名称，避免显示错误
+    final lowerLoader = loader.toLowerCase();
+    if (lowerLoader.contains('fabric')) {
+      return 'Fabric';
+    } else if (lowerLoader.contains('forge')) {
+      return 'Forge';
+    } else if (lowerLoader.contains('quilt')) {
+      return 'Quilt';
+    } else if (lowerLoader.contains('neoforge') || lowerLoader.contains('neo')) {
+      return 'NeoForge';
+    }
+    return loader;
   }
 
   Color _getStatusColor(InstanceStatus status, BuildContext context) {
@@ -1026,27 +1034,23 @@ class _InfoChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final surfaceVariant = isLight ? BAColors.lightSurfaceVariant : BAColors.darkSurfaceVariant;
-    final textSecondary = isLight ? BAColors.lightTextSecondary : BAColors.darkTextSecondary;
-
     return Flexible(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         decoration: BoxDecoration(
-          color: surfaceVariant,
+          color: BAColors.surfaceVariantOf(context),
           borderRadius: BorderRadius.circular(4),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 12, color: textSecondary),
+            Icon(icon, size: 12, color: BAColors.textSecondaryOf(context)),
             const SizedBox(width: 4),
             Flexible(
               child: Text(
                 label,
                 style: TextStyle(
-                  color: textSecondary,
+                  color: BAColors.textSecondaryOf(context),
                   fontSize: 10,
                 ),
                 maxLines: 1,

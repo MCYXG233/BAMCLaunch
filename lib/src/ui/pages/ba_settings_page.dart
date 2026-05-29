@@ -647,24 +647,24 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: isSelected ? BAColors.primary.withOpacity(0.1) : Colors.transparent,
+                    color: isSelected ? BAColors.primaryOf(context).withOpacity(0.1) : Colors.transparent,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: isSelected ? BAColors.primary : Colors.transparent,
+                      color: isSelected ? BAColors.primaryOf(context) : Colors.transparent,
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         _getCategoryIcon(categoryId),
-                        color: isSelected ? BAColors.primary : textSecondary,
+                        color: isSelected ? BAColors.primaryOf(context) : textSecondary,
                         size: 20,
                       ),
                       const SizedBox(width: 12),
                       Text(
                         categoryName,
                         style: TextStyle(
-                          color: isSelected ? BAColors.primary : textPrimary,
+                          color: isSelected ? BAColors.primaryOf(context) : textPrimary,
                           fontSize: 14,
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                         ),
@@ -733,8 +733,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
             child: Text(
               title,
-              style: const TextStyle(
-                color: BAColors.primary,
+              style: TextStyle(
+                color: BAColors.primaryOf(context),
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -775,10 +775,10 @@ class _BASettingsPageState extends State<BASettingsPage> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: BAColors.primary.withOpacity(0.15),
+              color: BAColors.primaryOf(context).withOpacity(0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: BAColors.primary, size: 18),
+            child: Icon(icon, color: BAColors.primaryOf(context), size: 18),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -864,7 +864,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               control: Switch(
                 value: _autoUpdate,
                 onChanged: _saveAutoUpdate,
-                activeColor: BAColors.primary,
+                activeColor: BAColors.primaryOf(context),
               ),
             ),
             _buildSettingsItem(
@@ -874,7 +874,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               control: Switch(
                 value: _launchAtStartup,
                 onChanged: _saveLaunchAtStartup,
-                activeColor: BAColors.primary,
+                activeColor: BAColors.primaryOf(context),
               ),
             ),
             _buildSettingsItem(
@@ -884,7 +884,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               control: Switch(
                 value: _minimizeToTray,
                 onChanged: _saveMinimizeToTray,
-                activeColor: BAColors.primary,
+                activeColor: BAColors.primaryOf(context),
               ),
             ),
             _buildSettingsItem(
@@ -894,7 +894,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               control: Switch(
                 value: _closeToTray,
                 onChanged: _saveCloseToTray,
-                activeColor: BAColors.primary,
+                activeColor: BAColors.primaryOf(context),
               ),
             ),
           ],
@@ -988,7 +988,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   max: 16384,
                   divisions: 15,
                   label: '${_memoryAllocation.toInt()} MB',
-                  activeColor: BAColors.primary,
+                  activeColor: BAColors.primaryOf(context),
                   onChanged: _saveMemoryAllocation,
                   onChangeEnd: _commitMemoryAllocation,
                 ),
@@ -1103,7 +1103,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               control: Switch(
                 value: _autoRetryDownload,
                 onChanged: _saveAutoRetryDownload,
-                activeColor: BAColors.primary,
+                activeColor: BAColors.primaryOf(context),
               ),
             ),
           ],
@@ -1138,7 +1138,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: BAColors.primary),
+                      borderSide: BorderSide(color: BAColors.primaryOf(context)),
                     ),
                   ),
                 ),
@@ -1254,7 +1254,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               control: ElevatedButton(
                 onPressed: () => _launchURL('https://github.com/TSSForsunshine/BAMCLaunch'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: BAColors.primary,
+                  backgroundColor: BAColors.primaryOf(context),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   shape: RoundedRectangleBorder(
@@ -1271,7 +1271,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               control: ElevatedButton(
                 onPressed: () => _launchURL('https://github.com/TSSForsunshine/BAMCLaunch/issues'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: BAColors.primary,
+                  backgroundColor: BAColors.primaryOf(context),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   shape: RoundedRectangleBorder(
@@ -1294,7 +1294,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               control: ElevatedButton(
                 onPressed: _clearCache,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: BAColors.primary,
+                  backgroundColor: BAColors.primaryOf(context),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   shape: RoundedRectangleBorder(
@@ -1387,7 +1387,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
           ElevatedButton(
             onPressed: onBrowse,
             style: ElevatedButton.styleFrom(
-              backgroundColor: BAColors.primary,
+              backgroundColor: BAColors.primaryOf(context),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               shape: RoundedRectangleBorder(
@@ -1434,7 +1434,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: BAColors.primary),
+            borderSide: BorderSide(color: BAColors.primaryOf(context)),
           ),
           isDense: true,
         ),

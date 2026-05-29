@@ -333,7 +333,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
               gradient: BAColors.primaryGradient,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.person, color: Colors.white, size: 28),
+            child: const Icon(Icons.person, color: BAColors.textOnPrimary, size: 28),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -420,7 +420,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
                 gradient: BAColors.primaryGradient,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.web, color: Colors.white, size: 20),
+              child: const Icon(Icons.web, color: BAColors.textOnPrimary, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -531,7 +531,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
               onPressed: _loginOffline,
               style: ElevatedButton.styleFrom(
                 backgroundColor: BAColors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: BAColors.textOnPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),

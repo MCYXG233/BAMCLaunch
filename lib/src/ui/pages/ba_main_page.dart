@@ -96,11 +96,8 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final scaffoldBackground = isLight ? BAColors.lightBackground : BAColors.darkBackground;
-
     return Scaffold(
-      backgroundColor: scaffoldBackground,
+      backgroundColor: BAColors.backgroundOf(context),
       body: Column(
         children: [
           // 标题栏
@@ -131,15 +128,11 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
 
   /// 标题栏
   Widget _buildTitleBar() {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final bgColor = isLight ? BAColors.lightSurface : BAColors.darkSurface;
-    final windowButtonHover = BAColors.surfaceVariantOf(context);
-
     return GestureDetector(
       onPanStart: (_) => windowManager.startDragging(),
       child: Container(
         height: 32,
-        color: bgColor,
+        color: BAColors.surfaceOf(context),
         child: Row(
           children: [
             const SizedBox(width: 12),
@@ -148,8 +141,8 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
               width: 24,
               height: 24,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [BAColors.primary, BAColors.primaryLight],
+                gradient: LinearGradient(
+                  colors: [BAColors.primaryOf(context), BAColors.primaryLight],
                 ),
                 borderRadius: BorderRadius.circular(6),
               ),
@@ -179,7 +172,7 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
               _WindowButton(
                 icon: Icons.remove,
                 onTap: () => windowManager.minimize(),
-                hoverColor: windowButtonHover,
+                hoverColor: BAColors.surfaceVariantOf(context),
               ),
               _WindowButton(
                 icon: _isMaximized ? Icons.filter_none : Icons.crop_square,
@@ -190,7 +183,7 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
                     await windowManager.maximize();
                   }
                 },
-                hoverColor: windowButtonHover,
+                hoverColor: BAColors.surfaceVariantOf(context),
               ),
               _WindowButton(
                 icon: Icons.close,
@@ -206,17 +199,13 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
 
   /// 顶部信息栏
   Widget _buildTopBar() {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final cardBg = isLight ? BAColors.lightSurface : BAColors.darkSurface;
-    final cardBorder = isLight ? BAColors.lightBorder : BAColors.darkBorder;
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: cardBg,
+        color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cardBorder),
+        border: Border.all(color: BAColors.borderOf(context)),
         boxShadow: BATheme.shadowsSmallOf(context),
       ),
       child: Row(
@@ -232,13 +221,13 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [BAColors.primary, BAColors.primaryLight],
+                    gradient: LinearGradient(
+                      colors: [BAColors.primaryOf(context), BAColors.primaryLight],
                     ),
                     borderRadius: BorderRadius.circular(26),
                     boxShadow: [
                       BoxShadow(
-                        color: BAColors.primary.withOpacity(0.3),
+                        color: BAColors.primaryOf(context).withOpacity(0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -246,7 +235,7 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
                   ),
                   child: Icon(
                     _selectedAccountName == null ? Icons.person_add : Icons.person,
-                    color: Colors.white,
+                    color: BAColors.textOnPrimary,
                     size: 28,
                   ),
                 ),
@@ -360,16 +349,12 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
   }
 
   Widget _buildBottomNav() {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final bgColor = isLight ? BAColors.lightSurface : BAColors.darkSurface;
-    final borderColor = isLight ? BAColors.lightBorder : BAColors.darkBorder;
-
     return Container(
       decoration: BoxDecoration(
-        color: bgColor,
+        color: BAColors.surfaceOf(context),
         border: Border(
           top: BorderSide(
-            color: borderColor,
+            color: BAColors.borderOf(context),
             width: 1,
           ),
         ),
@@ -388,7 +373,7 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
             ),
             Container(
               width: 1,
-              color: borderColor.withOpacity(0.4),
+              color: BAColors.borderOf(context).withOpacity(0.4),
             ),
             Expanded(
               child: _NavItem(
@@ -400,7 +385,7 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
             ),
             Container(
               width: 1,
-              color: borderColor.withOpacity(0.4),
+              color: BAColors.borderOf(context).withOpacity(0.4),
             ),
             Expanded(
               child: _NavItem(
@@ -440,10 +425,6 @@ class _WindowButtonState extends State<_WindowButton> {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final defaultHover = BAColors.surfaceVariantOf(context);
-    final hoverColor = widget.hoverColor ?? defaultHover;
-
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -453,12 +434,12 @@ class _WindowButtonState extends State<_WindowButton> {
           width: 46,
           height: 32,
           color: _isHovered
-              ? (widget.isClose ? Colors.red : hoverColor)
-              : Colors.transparent,
+                ? (widget.isClose ? BAColors.dangerOf(context) : widget.hoverColor)
+                : Colors.transparent,
           child: Icon(
             widget.icon,
             color: _isHovered && widget.isClose
-                ? Colors.white
+                ? BAColors.textOnPrimary
                 : BAColors.textSecondaryOf(context),
             size: 16,
           ),
@@ -542,9 +523,6 @@ class _ActionButtonState extends State<_ActionButton> {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final bgColor = isLight ? BAColors.lightSurfaceVariant : BAColors.darkSurfaceVariant;
-
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -555,10 +533,10 @@ class _ActionButtonState extends State<_ActionButton> {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: _isHovered ? bgColor : BAColors.surfaceVariantOf(context),
+            color: _isHovered ? BAColors.surfaceVariantOf(context) : BAColors.surfaceVariantOf(context),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _isHovered ? BAColors.primary : Colors.transparent,
+              color: _isHovered ? BAColors.primaryOf(context) : Colors.transparent,
             ),
           ),
           child: Stack(
@@ -582,8 +560,8 @@ class _ActionButtonState extends State<_ActionButton> {
                     ),
                     child: Text(
                       '${widget.badge}',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: BAColors.textOnPrimary,
                         fontSize: 9,
                         fontWeight: FontWeight.bold,
                       ),
@@ -658,9 +636,8 @@ class _NavItemState extends State<_NavItem>
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final selectedBg = BAColors.primary.withOpacity(0.12);
-    final hoverBg = isLight ? BAColors.primary.withOpacity(0.06) : BAColors.primary.withOpacity(0.08);
+    final selectedBg = BAColors.primaryOf(context).withOpacity(0.12);
+    final hoverBg = BAColors.primaryOf(context).withOpacity(0.08);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -707,12 +684,12 @@ class _NavItemState extends State<_NavItem>
                     width: _indicatorWidth.value,
                     height: 3,
                     decoration: BoxDecoration(
-                      color: BAColors.primary,
+                      color: BAColors.primaryOf(context),
                       borderRadius: BorderRadius.circular(1.5),
                       boxShadow: widget.isSelected
                           ? [
                               BoxShadow(
-                                color: BAColors.primary.withOpacity(0.4),
+                                color: BAColors.primaryOf(context).withOpacity(0.4),
                                 blurRadius: 8,
                                 spreadRadius: 1,
                               ),
@@ -787,10 +764,10 @@ class _HomeContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             '欢迎回来，老师',
             style: TextStyle(
-              color: Colors.white,
+              color: BAColors.textOnPrimary,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -801,7 +778,7 @@ class _HomeContent extends StatelessWidget {
           Text(
             '准备好开始新的冒险了吗？',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
+              color: BAColors.textOnPrimary.withOpacity(0.9),
               fontSize: 14,
             ),
             maxLines: 1,
@@ -831,10 +808,6 @@ class _HomeContent extends StatelessWidget {
   }
 
   Widget _buildRecentGamesCard() {
-    final isLight = Theme.of(mainContext).brightness == Brightness.light;
-    final cardBg = isLight ? BAColors.lightSurface : BAColors.darkSurface;
-    final cardBorder = isLight ? BAColors.lightBorder : BAColors.darkBorder;
-
     // 按 lastPlayed 排序，最近的在前
     final sortedInstances = List<GameInstance>.from(instances);
     sortedInstances.sort((a, b) {
@@ -847,9 +820,9 @@ class _HomeContent extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: cardBg,
+        color: BAColors.surfaceOf(mainContext),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cardBorder),
+        border: Border.all(color: BAColors.borderOf(mainContext)),
         boxShadow: BATheme.shadowsSmallOf(mainContext),
       ),
       child: Column(
@@ -858,18 +831,18 @@ class _HomeContent extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: BAColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.history,
-                  color: BAColors.primary,
-                  size: 20,
-                ),
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: BAColors.primaryOf(mainContext).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
               ),
+              child: Icon(
+                Icons.history,
+                color: BAColors.primaryOf(mainContext),
+                size: 20,
+              ),
+            ),
               const SizedBox(width: 10),
               Text(
                 '最近游戏',
@@ -945,11 +918,11 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           decoration: BoxDecoration(
             color: widget.isPrimary
-                ? (_isHovered ? Colors.white.withOpacity(0.95) : Colors.white)
-                : (_isHovered ? Colors.white.withOpacity(0.25) : Colors.white.withOpacity(0.15)),
+                ? (_isHovered ? BAColors.textOnPrimary.withOpacity(0.95) : BAColors.textOnPrimary)
+                : (_isHovered ? BAColors.textOnPrimary.withOpacity(0.25) : BAColors.textOnPrimary.withOpacity(0.15)),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _isHovered ? Colors.white.withOpacity(0.3) : Colors.white.withOpacity(0.2),
+              color: _isHovered ? BAColors.textOnPrimary.withOpacity(0.3) : BAColors.textOnPrimary.withOpacity(0.2),
             ),
           ),
           child: Row(
@@ -957,14 +930,14 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
             children: [
               Icon(
                 widget.icon,
-                color: widget.isPrimary ? BAColors.primary : Colors.white,
+                color: widget.isPrimary ? BAColors.primary : BAColors.textOnPrimary,
                 size: 20,
               ),
               const SizedBox(width: 8),
               Text(
                 widget.label,
                 style: TextStyle(
-                  color: widget.isPrimary ? BAColors.primary : Colors.white,
+                  color: widget.isPrimary ? BAColors.primary : BAColors.textOnPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1016,10 +989,6 @@ class _GameRecordItemState extends State<_GameRecordItem> {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(widget.cardContext).brightness == Brightness.light;
-    final cardBg = isLight ? BAColors.lightSurfaceVariant : BAColors.darkSurfaceVariant;
-    final cardBorder = isLight ? BAColors.lightBorder : BAColors.darkBorder;
-
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -1027,26 +996,26 @@ class _GameRecordItemState extends State<_GameRecordItem> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: _isHovered ? cardBg : BAColors.surfaceOf(widget.cardContext),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: _isHovered ? BAColors.primary.withOpacity(0.4) : cardBorder,
+            color: _isHovered ? BAColors.primaryOf(context) : BAColors.surfaceVariantOf(widget.cardContext),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: _isHovered ? BAColors.primaryOf(context).withOpacity(0.4) : BAColors.borderOf(widget.cardContext),
+            ),
           ),
-        ),
         child: Row(
           children: [
             Container(
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [BAColors.primary, BAColors.primaryLight],
+                gradient: LinearGradient(
+                  colors: [BAColors.primaryOf(context), BAColors.primaryLight],
                 ),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.landscape,
-                color: Colors.white,
+                color: BAColors.textOnPrimary,
                 size: 24,
               ),
             ),
@@ -1094,12 +1063,12 @@ class _GameRecordItemState extends State<_GameRecordItem> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: _isHovered ? BAColors.primary : BAColors.surfaceVariantOf(widget.cardContext),
+                color: _isHovered ? BAColors.primaryOf(context) : BAColors.surfaceVariantOf(widget.cardContext),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 Icons.play_circle_fill,
-                color: _isHovered ? Colors.white : BAColors.textSecondaryOf(widget.cardContext).withOpacity(0.7),
+                color: _isHovered ? BAColors.textOnPrimary : BAColors.textSecondaryOf(widget.cardContext).withOpacity(0.7),
                 size: 28,
               ),
             ),
