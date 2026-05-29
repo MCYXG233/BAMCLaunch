@@ -606,8 +606,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
     final isLight = Theme.of(context).brightness == Brightness.light;
     final cardBg = isLight ? BAColors.lightSurface : BAColors.darkSurface;
     final cardBorder = isLight ? BAColors.lightBorder : BAColors.darkBorder;
-    final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
-    final textSecondary = isLight ? BAColors.lightTextSecondary : BAColors.darkTextSecondary;
+    final textPrimary = BAColors.textPrimaryOf(context);
+    final textSecondary = BAColors.textSecondaryOf(context);
 
     final categoryNames = {
       'general': '通用',
@@ -764,8 +764,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
     required Widget control,
   }) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
-    final textSecondary = isLight ? BAColors.lightTextSecondary : BAColors.darkTextSecondary;
+    final textPrimary = BAColors.textPrimaryOf(context);
+    final textSecondary = BAColors.textSecondaryOf(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -911,7 +911,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 onPressed: _isCheckingUpdate ? null : _checkForUpdate,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: BAColors.primary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: BAColors.textOnPrimary,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -961,7 +961,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 onPressed: _pickJavaPath,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: BAColors.primary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: BAColors.textOnPrimary,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -1255,7 +1255,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 onPressed: () => _launchURL('https://github.com/TSSForsunshine/BAMCLaunch'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: BAColors.primaryOf(context),
-                  foregroundColor: Colors.white,
+                  foregroundColor: BAColors.textOnPrimary,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -1272,7 +1272,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 onPressed: () => _launchURL('https://github.com/TSSForsunshine/BAMCLaunch/issues'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: BAColors.primaryOf(context),
-                  foregroundColor: Colors.white,
+                  foregroundColor: BAColors.textOnPrimary,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -1295,7 +1295,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 onPressed: _clearCache,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: BAColors.primaryOf(context),
-                  foregroundColor: Colors.white,
+                  foregroundColor: BAColors.textOnPrimary,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -1318,8 +1318,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
     final isLight = Theme.of(context).brightness == Brightness.light;
     final surfaceVariant = isLight ? BAColors.lightSurfaceVariant : BAColors.darkSurfaceVariant;
     final borderColor = isLight ? BAColors.lightBorder : BAColors.darkBorder;
-    final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
-    final textSecondary = isLight ? BAColors.lightTextSecondary : BAColors.darkTextSecondary;
+    final textPrimary = BAColors.textPrimaryOf(context);
+    final textSecondary = BAColors.textSecondaryOf(context);
 
     final validValues = items.map((item) => item.value).toList();
     final effectiveValue = validValues.contains(value) ? value : items.first.value;
@@ -1356,7 +1356,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
     final isLight = Theme.of(context).brightness == Brightness.light;
     final surfaceVariant = isLight ? BAColors.lightSurfaceVariant : BAColors.darkSurfaceVariant;
     final borderColor = isLight ? BAColors.lightBorder : BAColors.darkBorder;
-    final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
+    final textPrimary = BAColors.textPrimaryOf(context);
     final textDisabled = isLight ? BAColors.lightTextDisabled : BAColors.darkTextDisabled;
 
     return Flexible(
@@ -1388,7 +1388,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
             onPressed: onBrowse,
             style: ElevatedButton.styleFrom(
               backgroundColor: BAColors.primaryOf(context),
-              foregroundColor: Colors.white,
+              foregroundColor: BAColors.textOnPrimary,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -1409,7 +1409,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
     final isLight = Theme.of(context).brightness == Brightness.light;
     final surfaceVariant = isLight ? BAColors.lightSurfaceVariant : BAColors.darkSurfaceVariant;
     final borderColor = isLight ? BAColors.lightBorder : BAColors.darkBorder;
-    final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
+    final textPrimary = BAColors.textPrimaryOf(context);
     final textDisabled = isLight ? BAColors.lightTextDisabled : BAColors.darkTextDisabled;
 
     return ConstrainedBox(
