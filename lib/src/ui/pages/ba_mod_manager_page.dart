@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/ba_theme_colors.dart';
+import '../theme/colors.dart';
 import '../../mod/mod_manager.dart';
 import '../../mod/mod_info.dart';
 import '../components/ba_notification.dart';
@@ -131,27 +131,27 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: BAThemeColors.background,
+      color: BAColors.backgroundOf(context),
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          _buildHeader(),
+          _buildHeader(context),
           const SizedBox(height: 16),
-          _buildToolbar(),
+          _buildToolbar(context),
           const SizedBox(height: 16),
-          Expanded(child: _buildModList()),
+          Expanded(child: _buildModList(context)),
         ],
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
-        const Text(
+        Text(
           '模组管理',
           style: TextStyle(
-            color: BAThemeColors.textPrimary,
+            color: BAColors.textPrimaryOf(context),
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -160,13 +160,13 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: BAThemeColors.surfaceVariant,
+            color: BAColors.surfaceVariantOf(context),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
             '${_mods.length} 个模组',
             style: TextStyle(
-              color: BAThemeColors.textSecondary,
+              color: BAColors.textSecondaryOf(context),
               fontSize: 13,
             ),
           ),
@@ -175,87 +175,95 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
     );
   }
 
-  Widget _buildToolbar() {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            height: 40,
-            decoration: BoxDecoration(
-              color: BAThemeColors.surface.withValues(alpha: 0.7),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: BAThemeColors.border.withValues(alpha: 0.5)),
-            ),
-            child: TextField(
-              onChanged: (value) {
-                setState(() => _searchQuery = value);
-              },
-              style: const TextStyle(
-                color: BAThemeColors.textPrimary,
-                fontSize: 14,
+  Widget _buildToolbar(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 150, maxWidth: 300),
+            child: Container(
+              height: 40,
+              decoration: BoxDecoration(
+                color: BAColors.surfaceOf(context).withValues(alpha: 0.7),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: BAColors.borderOf(context).withValues(alpha: 0.5)),
               ),
-              decoration: InputDecoration(
-                hintText: '搜索模组...',
-                hintStyle: const TextStyle(color: BAThemeColors.textDisabled),
-                prefixIcon: const Icon(
-                  Icons.search,
-                  color: BAThemeColors.textSecondary,
-                  size: 18,
+              child: TextField(
+                onChanged: (value) {
+                  setState(() => _searchQuery = value);
+                },
+                style: TextStyle(
+                  color: BAColors.textPrimaryOf(context),
+                  fontSize: 14,
                 ),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: InputDecoration(
+                  hintText: '搜索模组...',
+                  hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: BAColors.textSecondaryOf(context),
+                    size: 18,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                ),
               ),
             ),
           ),
-        ),
-        const SizedBox(width: 12),
-        _buildSortDropdown(),
-        const SizedBox(width: 12),
-        _buildShowDisabledSwitch(),
-      ],
+          const SizedBox(width: 12),
+          _buildSortDropdown(context),
+          const SizedBox(width: 12),
+          _buildShowDisabledSwitch(context),
+        ],
+      ),
     );
   }
 
-  Widget _buildSortDropdown() {
-    return Container(
-      height: 40,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: BAThemeColors.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BAThemeColors.border),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _sortBy,
-          dropdownColor: BAThemeColors.surface,
-          style: const TextStyle(
-            color: BAThemeColors.textPrimary,
-            fontSize: 13,
+  Widget _buildSortDropdown(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 120),
+      child: Container(
+        height: 40,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: BAColors.surfaceOf(context),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: BAColors.borderOf(context)),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            isDense: true,
+            value: _sortBy,
+            dropdownColor: BAColors.surfaceOf(context),
+            style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
+              fontSize: 13,
+            ),
+            icon: Icon(Icons.arrow_drop_down, color: BAColors.textSecondaryOf(context)),
+            items: const [
+              DropdownMenuItem(value: 'name', child: Text('按名称')),
+              DropdownMenuItem(value: 'version', child: Text('按版本')),
+              DropdownMenuItem(value: 'date', child: Text('按日期')),
+            ],
+            onChanged: (value) {
+              if (value != null) {
+                setState(() => _sortBy = value);
+              }
+            },
           ),
-          icon: const Icon(Icons.arrow_drop_down, color: BAThemeColors.textSecondary),
-          items: const [
-            DropdownMenuItem(value: 'name', child: Text('按名称')),
-            DropdownMenuItem(value: 'version', child: Text('按版本')),
-            DropdownMenuItem(value: 'date', child: Text('按日期')),
-          ],
-          onChanged: (value) {
-            if (value != null) {
-              setState(() => _sortBy = value);
-            }
-          },
         ),
       ),
     );
   }
 
-  Widget _buildShowDisabledSwitch() {
+  Widget _buildShowDisabledSwitch(BuildContext context) {
     return Row(
       children: [
-        const Text(
+        Text(
           '显示禁用',
           style: TextStyle(
-            color: BAThemeColors.textSecondary,
+            color: BAColors.textSecondaryOf(context),
             fontSize: 13,
           ),
         ),
@@ -263,13 +271,13 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
         Switch(
           value: _showDisabled,
           onChanged: (value) => setState(() => _showDisabled = value),
-          activeThumbColor: BAThemeColors.primary,
+          activeThumbColor: BAColors.primaryOf(context),
         ),
       ],
     );
   }
 
-  Widget _buildModList() {
+  Widget _buildModList(BuildContext context) {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -279,11 +287,11 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error, color: BAThemeColors.danger, size: 48),
+            Icon(Icons.error, color: BAColors.dangerOf(context), size: 48),
             const SizedBox(height: 16),
             Text(
               _errorMessage!,
-              style: const TextStyle(color: BAThemeColors.textSecondary),
+              style: TextStyle(color: BAColors.textSecondaryOf(context)),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -305,13 +313,13 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
             Icon(
               Icons.extension_outlined,
               size: 64,
-              color: BAThemeColors.textDisabled,
+              color: BAColors.textDisabledOf(context),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               '暂无模组',
               style: TextStyle(
-                color: BAThemeColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
                 fontSize: 16,
               ),
             ),
@@ -358,10 +366,10 @@ class _ModItem extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: BAThemeColors.surface,
+            color: BAColors.surfaceOf(context),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: mod.isEnabled ? BAThemeColors.border : BAThemeColors.textDisabled.withValues(alpha: 0.3),
+              color: mod.isEnabled ? BAColors.borderOf(context) : BAColors.textDisabledOf(context).withValues(alpha: 0.3),
             ),
           ),
           child: Row(
@@ -369,19 +377,19 @@ class _ModItem extends StatelessWidget {
               Switch(
                 value: mod.isEnabled,
                 onChanged: (_) => onToggle(),
-                activeThumbColor: BAThemeColors.primary,
+                activeThumbColor: BAColors.primaryOf(context),
               ),
               const SizedBox(width: 12),
               Container(
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: BAThemeColors.surfaceVariant,
+                  color: BAColors.surfaceVariantOf(context),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   Icons.extension,
-                  color: BAThemeColors.primary,
+                  color: BAColors.primaryOf(context),
                   size: 24,
                 ),
               ),
@@ -393,40 +401,49 @@ class _ModItem extends StatelessWidget {
                     Text(
                       mod.name,
                       style: TextStyle(
-                        color: mod.isEnabled ? BAThemeColors.textPrimary : BAThemeColors.textDisabled,
+                        color: mod.isEnabled ? BAColors.textPrimaryOf(context) : BAColors.textDisabledOf(context),
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        if (mod.version != null)
-                          Text(
-                            'v${mod.version}',
-                            style: TextStyle(
-                              color: BAThemeColors.textSecondary,
-                              fontSize: 12,
+                    Flexible(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (mod.version != null)
+                            Text(
+                              'v${mod.version}',
+                              style: TextStyle(
+                                color: BAColors.textSecondaryOf(context),
+                                fontSize: 12,
+                              ),
                             ),
-                          ),
-                        if (mod.modId != null) ...[
-                          const Text(' · ', style: TextStyle(color: BAThemeColors.textDisabled)),
-                          Text(
-                            mod.modId!,
-                            style: TextStyle(
-                              color: BAThemeColors.textSecondary,
-                              fontSize: 12,
+                          if (mod.modId != null) ...[
+                            Text(' · ', style: TextStyle(color: BAColors.textDisabledOf(context))),
+                            Flexible(
+                              child: Text(
+                                mod.modId!,
+                                style: TextStyle(
+                                  color: BAColors.textSecondaryOf(context),
+                                  fontSize: 12,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(width: 12),
               IconButton(
-                icon: const Icon(Icons.delete_outline, color: BAThemeColors.textDisabled),
+                icon: Icon(Icons.delete_outline, color: BAColors.textDisabledOf(context)),
                 onPressed: onDelete,
               ),
             ],
@@ -445,7 +462,7 @@ class _ModDetailDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: BAThemeColors.surface,
+      backgroundColor: BAColors.surfaceOf(context),
       insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 60),
       child: Container(
         width: 500,
@@ -453,9 +470,9 @@ class _ModDetailDialog extends StatelessWidget {
         child: Column(
           children: [
             _buildHeader(context),
-            const Divider(height: 1, color: BAThemeColors.border),
-            Expanded(child: _buildContent()),
-            const Divider(height: 1, color: BAThemeColors.border),
+            Divider(height: 1, color: BAColors.borderOf(context)),
+            Expanded(child: _buildContent(context)),
+            Divider(height: 1, color: BAColors.borderOf(context)),
             _buildFooter(context),
           ],
         ),
@@ -472,10 +489,10 @@ class _ModDetailDialog extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: BAThemeColors.primary.withValues(alpha: 0.1),
+              color: BAColors.primaryOf(context).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.extension, color: BAThemeColors.primary, size: 28),
+            child: Icon(Icons.extension, color: BAColors.primaryOf(context), size: 28),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -484,8 +501,8 @@ class _ModDetailDialog extends StatelessWidget {
               children: [
                 Text(
                   mod.name,
-                  style: const TextStyle(
-                    color: BAThemeColors.textPrimary,
+                  style: TextStyle(
+                    color: BAColors.textPrimaryOf(context),
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -493,13 +510,13 @@ class _ModDetailDialog extends StatelessWidget {
                 if (mod.version != null)
                   Text(
                     '版本: ${mod.version}',
-                    style: TextStyle(color: BAThemeColors.textSecondary),
+                    style: TextStyle(color: BAColors.textSecondaryOf(context)),
                   ),
               ],
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close, color: BAThemeColors.textSecondary),
+            icon: Icon(Icons.close, color: BAColors.textSecondaryOf(context)),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -507,17 +524,17 @@ class _ModDetailDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (mod.description != null && mod.description!.isNotEmpty) ...[
-            const Text(
+            Text(
               '描述',
               style: TextStyle(
-                color: BAThemeColors.primary,
+                color: BAColors.primaryOf(context),
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
@@ -525,25 +542,25 @@ class _ModDetailDialog extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               mod.description!,
-              style: TextStyle(color: BAThemeColors.textSecondary),
+              style: TextStyle(color: BAColors.textSecondaryOf(context)),
             ),
             const SizedBox(height: 20),
           ],
-          const Text(
+          Text(
             '模组信息',
             style: TextStyle(
-              color: BAThemeColors.primary,
+              color: BAColors.primaryOf(context),
               fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 12),
-          _InfoRow(label: '模组ID', value: mod.modId ?? '未知'),
-          _InfoRow(label: '作者', value: mod.author ?? '未知'),
-          _InfoRow(label: '文件名', value: mod.fileName),
-          _InfoRow(label: '文件大小', value: _formatSize(mod.fileSize)),
+          _InfoRow(label: '模组ID', value: mod.modId ?? '未知', context: context),
+          _InfoRow(label: '作者', value: mod.author ?? '未知', context: context),
+          _InfoRow(label: '文件名', value: mod.fileName, context: context),
+          _InfoRow(label: '文件大小', value: _formatSize(mod.fileSize), context: context),
           if (mod.lastModified != null)
-            _InfoRow(label: '更新日期', value: mod.lastModified!.toString().split(' ')[0]),
+            _InfoRow(label: '更新日期', value: mod.lastModified!.toString().split(' ')[0], context: context),
         ],
       ),
     );
@@ -576,8 +593,9 @@ class _ModDetailDialog extends StatelessWidget {
 class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
+  final BuildContext context;
 
-  const _InfoRow({required this.label, required this.value});
+  const _InfoRow({required this.label, required this.value, required this.context});
 
   @override
   Widget build(BuildContext context) {
@@ -587,13 +605,13 @@ class _InfoRow extends StatelessWidget {
         children: [
           Text(
             '$label:',
-            style: TextStyle(color: BAThemeColors.textSecondary),
+            style: TextStyle(color: BAColors.textSecondaryOf(context)),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               value,
-              style: TextStyle(color: BAThemeColors.textPrimary),
+              style: TextStyle(color: BAColors.textPrimaryOf(context)),
             ),
           ),
         ],

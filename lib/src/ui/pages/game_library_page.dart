@@ -34,11 +34,10 @@ class _GameLibraryPageState extends State<GameLibraryPage> {
   }
 
   Widget _buildTabBar() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       height: 48,
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E2E) : const Color(0xFFF1F1F1),
+        color: BAColors.surfaceVariantOf(context),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -79,7 +78,7 @@ class _GameLibraryPageState extends State<GameLibraryPage> {
     required VoidCallback onTap,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? const Color(0xFF5B8DEF) : const Color(0xFF4A7DD9);
+    final primaryColor = BAColors.primary;
     
     return Material(
       color: Colors.transparent,

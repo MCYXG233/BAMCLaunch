@@ -4,6 +4,8 @@ import 'package:window_manager/window_manager.dart';
 import '../../account/account_manager.dart';
 import '../../account/account.dart';
 import '../../core/logger.dart';
+import '../../instance/instance_manager.dart';
+import '../../instance/models.dart';
 import '../components/ba_login_dialog.dart';
 import '../theme/colors.dart';
 import '../theme/app_theme.dart';
@@ -26,18 +28,17 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
 
   // 账户相关
   final AccountManager _accountManager = AccountManager();
+  final InstanceManager _instanceManager = InstanceManager();
   String? _selectedAccountName;
   bool _isLoading = true;
-
-  // 模拟数据
-  int _instanceCount = 6;
-  int _activeDownloads = 2;
+  List<GameInstance> _instances = [];
 
   @override
   void initState() {
     super.initState();
     _initWindow();
     _loadAccountData();
+    _initInstanceManager();
   }
 
   Future<void> _loadAccountData() async {
@@ -56,6 +57,19 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _initInstanceManager() async {
+    try {
+      await _instanceManager.initialize();
+      if (mounted) {
+        setState(() {
+          _instances = _instanceManager.instances;
+        });
+      }
+    } catch (e) {
+      Logger.instance.error('初始化实例管理器失败', e);
     }
   }
 
@@ -119,7 +133,7 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
   Widget _buildTitleBar() {
     final isLight = Theme.of(context).brightness == Brightness.light;
     final bgColor = isLight ? BAColors.lightSurface : BAColors.darkSurface;
-    final windowButtonHover = isLight ? BAColors.lightBorder : const Color(0xFF232350);
+    final windowButtonHover = BAColors.surfaceVariantOf(context);
 
     return GestureDetector(
       onPanStart: (_) => windowManager.startDragging(),
@@ -211,6 +225,7 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
           GestureDetector(
             onTap: _openAccountSelector,
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // 头像
                 Container(
@@ -236,34 +251,38 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
                   ),
                 ),
                 const SizedBox(width: 14),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _selectedAccountName ?? '未登录',
-                      style: TextStyle(
-                        color: BAColors.textPrimaryOf(context),
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _selectedAccountName ?? '未登录',
+                        style: TextStyle(
+                          color: BAColors.textPrimaryOf(context),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: BAColors.primary.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        _selectedAccountName == null ? '点击登录' : 'Microsoft账户',
-                        style: const TextStyle(
-                          color: BAColors.primary,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: BAColors.primary.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          _selectedAccountName == null ? '点击登录' : 'Microsoft账户',
+                          style: const TextStyle(
+                            color: BAColors.primary,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Icon(
@@ -280,29 +299,32 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
           const SizedBox(width: 24),
 
           // 统计
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _StatItem(
-                icon: Icons.folder,
-                value: '$_instanceCount',
-                label: '实例',
-                color: BAColors.primary,
-              ),
-              const SizedBox(width: 32),
-              _StatItem(
-                icon: Icons.download,
-                value: '$_activeDownloads',
-                label: '下载中',
-                color: BAColors.success,
-              ),
-            ],
+          Flexible(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _StatItem(
+                  icon: Icons.folder,
+                  value: '${_instances.length}',
+                  label: '实例',
+                  color: BAColors.primary,
+                ),
+                const SizedBox(width: 32),
+                _StatItem(
+                  icon: Icons.download,
+                  value: '0', // TODO: 实现真实的下载计数
+                  label: '下载中',
+                  color: BAColors.success,
+                ),
+              ],
+            ),
           ),
 
           const Spacer(),
 
           // 功能按钮
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               _ActionButton(
                 icon: Icons.mail_outline,
@@ -325,7 +347,7 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
   Widget _buildContent() {
     switch (_currentPage) {
       case 0:
-        return _HomeContent(mainContext: context);
+        return _HomeContent(mainContext: context, instances: _instances);
       case 1:
         return const BAGameLibraryPage();
       case 2:
@@ -333,7 +355,7 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
       case 3:
         return const BASettingsPage();
       default:
-        return _HomeContent(mainContext: context);
+        return _HomeContent(mainContext: context, instances: _instances);
     }
   }
 
@@ -419,7 +441,7 @@ class _WindowButtonState extends State<_WindowButton> {
   @override
   Widget build(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final defaultHover = isLight ? const Color(0xFFE8ECF0) : const Color(0xFF232350);
+    final defaultHover = BAColors.surfaceVariantOf(context);
     final hoverColor = widget.hoverColor ?? defaultHover;
 
     return MouseRegion(
@@ -723,8 +745,9 @@ class _NavItemState extends State<_NavItem>
 /// 主页内容
 class _HomeContent extends StatelessWidget {
   final BuildContext mainContext;
+  final List<GameInstance> instances;
 
-  const _HomeContent({required this.mainContext});
+  const _HomeContent({required this.mainContext, required this.instances});
 
   @override
   Widget build(BuildContext context) {
@@ -771,6 +794,8 @@ class _HomeContent extends StatelessWidget {
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 8),
           Text(
@@ -779,9 +804,13 @@ class _HomeContent extends StatelessWidget {
               color: Colors.white.withOpacity(0.9),
               fontSize: 14,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 20),
-          Row(
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
             children: [
               _QuickActionButton(
                 icon: Icons.play_arrow,
@@ -789,7 +818,6 @@ class _HomeContent extends StatelessWidget {
                 isPrimary: true,
                 onTap: () {},
               ),
-              const SizedBox(width: 12),
               _QuickActionButton(
                 icon: Icons.add,
                 label: '创建实例',
@@ -806,6 +834,15 @@ class _HomeContent extends StatelessWidget {
     final isLight = Theme.of(mainContext).brightness == Brightness.light;
     final cardBg = isLight ? BAColors.lightSurface : BAColors.darkSurface;
     final cardBorder = isLight ? BAColors.lightBorder : BAColors.darkBorder;
+
+    // 按 lastPlayed 排序，最近的在前
+    final sortedInstances = List<GameInstance>.from(instances);
+    sortedInstances.sort((a, b) {
+      if (a.lastPlayed == null && b.lastPlayed == null) return 0;
+      if (a.lastPlayed == null) return 1;
+      if (b.lastPlayed == null) return -1;
+      return b.lastPlayed!.compareTo(a.lastPlayed!);
+    });
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -846,28 +883,28 @@ class _HomeContent extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: ListView(
-              children: [
-                _GameRecordItem(
-                  name: '原版生存',
-                  version: '1.20.1',
-                  time: '2小时前',
-                  cardContext: mainContext,
-                ),
-                _GameRecordItem(
-                  name: 'MOD服务器',
-                  version: '1.12.2',
-                  time: '昨天',
-                  cardContext: mainContext,
-                ),
-                _GameRecordItem(
-                  name: '科技模组',
-                  version: '1.19.2',
-                  time: '3天前',
-                  cardContext: mainContext,
-                ),
-              ],
-            ),
+            child: sortedInstances.isEmpty
+                ? Center(
+                    child: Text(
+                      '还没有游戏实例',
+                      style: TextStyle(
+                        color: BAColors.textSecondaryOf(mainContext),
+                        fontSize: 14,
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: sortedInstances.length,
+                    itemBuilder: (context, index) {
+                      final instance = sortedInstances[index];
+                      return _GameRecordItem(
+                        name: instance.name,
+                        version: instance.version,
+                        lastPlayed: instance.lastPlayed,
+                        cardContext: mainContext,
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -944,13 +981,13 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
 class _GameRecordItem extends StatefulWidget {
   final String name;
   final String version;
-  final String time;
+  final DateTime? lastPlayed;
   final BuildContext cardContext;
 
   const _GameRecordItem({
     required this.name,
     required this.version,
-    required this.time,
+    this.lastPlayed,
     required this.cardContext,
   });
 
@@ -960,6 +997,22 @@ class _GameRecordItem extends StatefulWidget {
 
 class _GameRecordItemState extends State<_GameRecordItem> {
   bool _isHovered = false;
+
+  String _formatTime(DateTime? time) {
+    if (time == null) return '从未玩过';
+    final now = DateTime.now();
+    final difference = now.difference(time);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays}天前';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}小时前';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}分钟前';
+    } else {
+      return '刚刚';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1009,6 +1062,8 @@ class _GameRecordItemState extends State<_GameRecordItem> {
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -1017,15 +1072,21 @@ class _GameRecordItemState extends State<_GameRecordItem> {
                       color: BAColors.textSecondaryOf(widget.cardContext),
                       fontSize: 13,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            Text(
-              widget.time,
-              style: TextStyle(
-                color: BAColors.textSecondaryOf(widget.cardContext).withOpacity(0.7),
-                fontSize: 11,
+            Flexible(
+              child: Text(
+                _formatTime(widget.lastPlayed),
+                style: TextStyle(
+                  color: BAColors.textSecondaryOf(widget.cardContext).withOpacity(0.7),
+                  fontSize: 11,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(width: 12),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/ba_theme_colors.dart';
+import '../theme/colors.dart';
 
 /// 蔚蓝档案风格顶部信息栏（MC启动器版）
 /// 显示账户信息、实例状态、通知、设置等
@@ -29,9 +29,9 @@ class BATopBar extends StatelessWidget {
       height: 60,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: BAThemeColors.surface,
+        color: BAColors.surfaceOf(context),
         border: Border(
-          bottom: BorderSide(color: BAThemeColors.border, width: 1),
+          bottom: BorderSide(color: BAColors.borderOf(context), width: 1),
         ),
       ),
       child: Row(
@@ -41,7 +41,7 @@ class BATopBar extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              gradient: BAThemeColors.primaryGradient,
+              gradient: BAColors.primaryGradient,
               borderRadius: BorderRadius.circular(10),
             ),
             child: ClipRRect(
@@ -55,10 +55,10 @@ class BATopBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          const Text(
+          Text(
             'BAMC Launcher',
             style: TextStyle(
-              color: BAThemeColors.textPrimary,
+              color: BAColors.textPrimaryOf(context),
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -71,7 +71,7 @@ class BATopBar extends StatelessWidget {
             icon: Icons.folder_outlined,
             label: '实例',
             value: '${instanceCount ?? 0}',
-            color: BAThemeColors.primary,
+            color: BAColors.primaryOf(context),
           ),
           const SizedBox(width: 12),
 
@@ -81,7 +81,7 @@ class BATopBar extends StatelessWidget {
               icon: Icons.download_outlined,
               label: '下载中',
               value: '$activeDownloads',
-              color: BAThemeColors.success,
+              color: BAColors.successOf(context),
             ),
             const SizedBox(width: 12),
           ],
@@ -90,12 +90,12 @@ class BATopBar extends StatelessWidget {
           Container(
             width: 1,
             height: 32,
-            color: BAThemeColors.border,
+            color: BAColors.borderOf(context),
           ),
           const SizedBox(width: 16),
 
           // 账户信息
-          _buildAccountInfo(),
+          _buildAccountInfo(context),
 
           const SizedBox(width: 16),
 
@@ -104,6 +104,7 @@ class BATopBar extends StatelessWidget {
             icon: hasNotification ? Icons.notifications : Icons.notifications_outlined,
             hasNotification: hasNotification,
             onTap: onNotificationTap,
+            context: context,
           ),
           const SizedBox(width: 8),
 
@@ -111,6 +112,7 @@ class BATopBar extends StatelessWidget {
           _buildIconButton(
             icon: Icons.settings_outlined,
             onTap: onSettingsTap,
+            context: context,
           ),
         ],
       ),
@@ -148,11 +150,11 @@ class BATopBar extends StatelessWidget {
     );
   }
 
-  Widget _buildAccountInfo() {
+  Widget _buildAccountInfo(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: BAThemeColors.surfaceVariant,
+        color: BAColors.surfaceVariantOf(context),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -162,12 +164,12 @@ class BATopBar extends StatelessWidget {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: BAThemeColors.secondary.withOpacity(0.2),
+              color: BAColors.secondary.withOpacity(0.2),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.person_outline,
-              color: BAThemeColors.secondary,
+              color: BAColors.secondary,
               size: 16,
             ),
           ),
@@ -179,8 +181,8 @@ class BATopBar extends StatelessWidget {
             children: [
               Text(
                 userName ?? '未登录',
-                style: const TextStyle(
-                  color: BAThemeColors.textPrimary,
+                style: TextStyle(
+                  color: BAColors.textPrimaryOf(context),
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -188,8 +190,8 @@ class BATopBar extends StatelessWidget {
               if (accountType != null)
                 Text(
                   accountType!,
-                  style: const TextStyle(
-                    color: BAThemeColors.textSecondary,
+                  style: TextStyle(
+                    color: BAColors.textSecondaryOf(context),
                     fontSize: 10,
                   ),
                 ),
@@ -204,6 +206,7 @@ class BATopBar extends StatelessWidget {
     required IconData icon,
     bool hasNotification = false,
     VoidCallback? onTap,
+    required BuildContext context,
   }) {
     return Material(
       color: Colors.transparent,
@@ -214,7 +217,7 @@ class BATopBar extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: BAThemeColors.surfaceVariant,
+            color: BAColors.surfaceVariantOf(context),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Stack(
@@ -222,7 +225,7 @@ class BATopBar extends StatelessWidget {
               Center(
                 child: Icon(
                   icon,
-                  color: BAThemeColors.textSecondary,
+                  color: BAColors.textSecondaryOf(context),
                   size: 20,
                 ),
               ),
@@ -233,8 +236,8 @@ class BATopBar extends StatelessWidget {
                   child: Container(
                     width: 8,
                     height: 8,
-                    decoration: const BoxDecoration(
-                      color: BAThemeColors.danger,
+                    decoration: BoxDecoration(
+                      color: BAColors.dangerOf(context),
                       shape: BoxShape.circle,
                     ),
                   ),

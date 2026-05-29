@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import '../core/logger.dart';
-import 'account.dart';
+import '../account/account.dart';
 
 class LocalYggdrasilServer {
   static LocalYggdrasilServer? _instance;
@@ -13,7 +14,8 @@ class LocalYggdrasilServer {
 
   LocalYggdrasilServer._internal();
 
-  static LocalYggdrasilServer get instance => _instance ??= LocalYggdrasilServer._internal();
+  static LocalYggdrasilServer get instance =>
+      _instance ??= LocalYggdrasilServer._internal();
 
   final Logger _logger = Logger('LocalYggdrasilServer');
 
@@ -34,7 +36,7 @@ class LocalYggdrasilServer {
     }
 
     _rootUrl = 'http://$host:$port';
-    
+
     try {
       _server = await HttpServer.bind(host, port);
       _server!.listen(_handleRequest);
@@ -119,7 +121,7 @@ class LocalYggdrasilServer {
   }
 
   Future<void> _handleAuthenticate(HttpRequest request) async {
-    final body = await request.transform(utf8.decoder).join();
+    final body = await _readRequestBody(request);
     final json = jsonDecode(body) as Map<String, dynamic>;
 
     final username = json['username'] as String? ?? '';
@@ -151,7 +153,7 @@ class LocalYggdrasilServer {
         {
           'id': account.uuid ?? _generateUuid(username),
           'name': account.username,
-        }
+        },
       ],
     });
 
@@ -159,7 +161,7 @@ class LocalYggdrasilServer {
   }
 
   Future<void> _handleRefresh(HttpRequest request) async {
-    final body = await request.transform(utf8.decoder).join();
+    final body = await _readRequestBody(request);
     final json = jsonDecode(body) as Map<String, dynamic>;
 
     final accessToken = json['accessToken'] as String? ?? '';
@@ -195,7 +197,7 @@ class LocalYggdrasilServer {
   }
 
   Future<void> _handleValidate(HttpRequest request) async {
-    final body = await request.transform(utf8.decoder).join();
+    final body = await _readRequestBody(request);
     final json = jsonDecode(body) as Map<String, dynamic>;
 
     final accessToken = json['accessToken'] as String? ?? '';
@@ -208,7 +210,7 @@ class LocalYggdrasilServer {
   }
 
   Future<void> _handleInvalidate(HttpRequest request) async {
-    final body = await request.transform(utf8.decoder).join();
+    final body = await _readRequestBody(request);
     final json = jsonDecode(body) as Map<String, dynamic>;
 
     final accessToken = json['accessToken'] as String? ?? '';
@@ -218,7 +220,7 @@ class LocalYggdrasilServer {
   }
 
   Future<void> _handleSignout(HttpRequest request) async {
-    final body = await request.transform(utf8.decoder).join();
+    final body = await _readRequestBody(request);
     final json = jsonDecode(body) as Map<String, dynamic>;
 
     final username = json['username'] as String? ?? '';
@@ -239,7 +241,7 @@ class LocalYggdrasilServer {
   }
 
   Future<void> _handleProfiles(HttpRequest request) async {
-    final body = await request.transform(utf8.decoder).join();
+    final body = await _readRequestBody(request);
     final json = jsonDecode(body) as List<dynamic>;
 
     final profiles = json.map((name) {
@@ -257,7 +259,7 @@ class LocalYggdrasilServer {
   }
 
   Future<void> _handleJoin(HttpRequest request) async {
-    final body = await request.transform(utf8.decoder).join();
+    final body = await _readRequestBody(request);
     final json = jsonDecode(body) as Map<String, dynamic>;
 
     final accessToken = json['accessToken'] as String? ?? '';
@@ -339,15 +341,23 @@ class LocalYggdrasilServer {
   String _generateUuid(String name) {
     final bytes = utf8.encode('OfflinePlayer:$name');
     final uuidBytes = List<int>.filled(16, 0);
-    
+
     for (int i = 0; i < bytes.length && i < 16; i++) {
       uuidBytes[i] = bytes[i];
     }
-    
+
     uuidBytes[6] = (uuidBytes[6] & 0x0F) | 0x30;
     uuidBytes[8] = (uuidBytes[8] & 0x3F) | 0x80;
 
     return _bytesToUuid(uuidBytes);
+  }
+
+  Future<String> _readRequestBody(HttpRequest request) async {
+    final bytes = await request.fold<List<int>>(
+      [],
+      (prev, elem) => prev..addAll(elem),
+    );
+    return utf8.decode(bytes);
   }
 
   String _bytesToUuid(List<int> bytes) {
@@ -356,10 +366,14 @@ class LocalYggdrasilServer {
   }
 
   String _randomString(int length) {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const chars =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final random = Random();
     return String.fromCharCodes(
-      List.generate(length, (_) => chars.codeUnitAt(random.nextInt(chars.length))),
+      List.generate(
+        length,
+        (_) => chars.codeUnitAt(random.nextInt(chars.length)),
+      ),
     );
   }
 }

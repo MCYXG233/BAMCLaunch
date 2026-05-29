@@ -26,12 +26,14 @@ void main() {
     // 配置窗口
     WindowOptions windowOptions = const WindowOptions(
       size: Size(1200, 800),
+      minimumSize: Size(900, 600),
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
       titleBarStyle: TitleBarStyle.hidden,
     );
     windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.setMinimumSize(const Size(900, 600));
       await windowManager.show();
       await windowManager.focus();
     });

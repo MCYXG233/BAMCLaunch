@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import '../core/logger.dart';
+import '../../core/logger.dart';
 import 'models.dart';
 
 class ProcessMonitor {

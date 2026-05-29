@@ -259,7 +259,8 @@ class ModLoaderManager {
       'net/neoforged',
     ];
 
-    final files = await libsDir.list(recursive: true).whereType<File>().toList();
+    final entities = await libsDir.list(recursive: true).toList();
+    final files = entities.whereType<File>().toList();
     
     for (final file in files) {
       final relativePath = path.relative(file.path, from: libsDir.path);
@@ -278,7 +279,8 @@ class ModLoaderManager {
       'neoforge',
     ];
 
-    final files = await modsDir.list().whereType<File>().toList();
+    final entities = await modsDir.list().toList();
+    final files = entities.whereType<File>().toList();
     
     for (final file in files) {
       final fileName = path.basename(file.path).toLowerCase();

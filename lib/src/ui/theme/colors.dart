@@ -242,6 +242,26 @@ class BAColors {
     final brightness = Theme.of(context).brightness;
     return brightness == Brightness.light ? lightBackgroundGradient : darkBackgroundGradient;
   }
+
+  /// 根据当前主题获取主色调
+  static Color primaryOf(BuildContext context) {
+    return primary;
+  }
+
+  /// 根据当前主题获取危险色
+  static Color dangerOf(BuildContext context) {
+    return danger;
+  }
+
+  /// 根据当前主题获取警告色
+  static Color warningOf(BuildContext context) {
+    return warning;
+  }
+
+  /// 根据当前主题获取成功色
+  static Color successOf(BuildContext context) {
+    return success;
+  }
   
   // ========== 向后兼容：默认深色主题颜色 ==========
   

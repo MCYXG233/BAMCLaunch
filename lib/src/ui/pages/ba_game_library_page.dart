@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import '../theme/ba_theme_colors.dart';
+
 import '../theme/colors.dart';
 import '../theme/app_theme.dart';
 import '../../instance/instance_manager.dart';
@@ -40,8 +40,16 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
   @override
   void initState() {
     super.initState();
-    _loadInstances();
+    _initializeAndLoadInstances();
     _subscribeToEvents();
+  }
+
+  Future<void> _initializeAndLoadInstances() async {
+    final manager = InstanceManager();
+    if (!manager.isInitialized) {
+      await manager.initialize();
+    }
+    _loadInstances();
   }
 
   @override
@@ -193,23 +201,23 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
         title: '复制实例',
         child: TextField(
           controller: nameController,
-          style: const TextStyle(color: BAThemeColors.textPrimary),
+          style: TextStyle(color: BAColors.textPrimaryOf(context)),
           decoration: InputDecoration(
             hintText: '请输入新实例名称',
-            hintStyle: const TextStyle(color: BAThemeColors.textDisabled),
+            hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
             filled: true,
-            fillColor: BAThemeColors.surface,
+            fillColor: BAColors.surfaceOf(context),
             border: OutlineInputBorder(
-              borderRadius: BARadius.normal,
-              borderSide: const BorderSide(color: BAThemeColors.border),
+              borderRadius: BATheme.borderRadiusMedium,
+              borderSide: BorderSide(color: BAColors.borderOf(context)),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BARadius.normal,
-              borderSide: const BorderSide(color: BAThemeColors.border),
+              borderRadius: BATheme.borderRadiusMedium,
+              borderSide: BorderSide(color: BAColors.borderOf(context)),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BARadius.normal,
-              borderSide: const BorderSide(color: BAThemeColors.primary),
+              borderRadius: BATheme.borderRadiusMedium,
+              borderSide: BorderSide(color: BAColors.primaryOf(context)),
             ),
           ),
         ),
@@ -337,108 +345,112 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
         children: [
           _buildHeader(context, textPrimary),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: cardBorder),
-                    boxShadow: BATheme.shadowsSmallOf(context),
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (value) {
-                      setState(() {
-                        _searchQuery = value;
-                      });
-                    },
-                    style: TextStyle(
-                      color: textPrimary,
-                      fontSize: 14,
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 200,
+                  child: Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: cardBorder),
+                      boxShadow: BATheme.shadowsSmallOf(context),
                     ),
-                    decoration: InputDecoration(
-                      hintText: '搜索实例...',
-                      hintStyle: TextStyle(
-                        color: textDisabled,
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
+                      },
+                      style: TextStyle(
+                        color: textPrimary,
+                        fontSize: 14,
                       ),
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: textSecondary,
-                        size: 20,
-                      ),
-                      suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(
-                              icon: Icon(
-                                Icons.clear,
-                                color: textSecondary,
-                                size: 18,
-                              ),
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() => _searchQuery = '');
-                              },
-                            )
-                          : null,
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
+                      decoration: InputDecoration(
+                        hintText: '搜索实例...',
+                        hintStyle: TextStyle(
+                          color: textDisabled,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: textSecondary,
+                          size: 20,
+                        ),
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: Icon(
+                                  Icons.clear,
+                                  color: textSecondary,
+                                  size: 18,
+                                ),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() => _searchQuery = '');
+                                },
+                              )
+                            : null,
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              ...List.generate(_filters.length, (index) {
-                final isSelected = _selectedFilter == index;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          _selectedFilter = index;
-                        });
-                      },
-                      borderRadius: BorderRadius.circular(20),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? BAColors.primary
-                              : cardBg,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: isSelected
-                                ? BAColors.primary
-                                : cardBorder,
+                const SizedBox(width: 12),
+                ...List.generate(_filters.length, (index) {
+                  final isSelected = _selectedFilter == index;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            _selectedFilter = index;
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(20),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
                           ),
-                        ),
-                        child: Text(
-                          _filters[index],
-                          style: TextStyle(
+                          decoration: BoxDecoration(
                             color: isSelected
-                                ? Colors.white
-                                : textSecondary,
-                            fontSize: 13,
-                            fontWeight:
-                                isSelected ? FontWeight.w600 : FontWeight.normal,
+                                ? BAColors.primaryOf(context)
+                                : cardBg,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isSelected
+                                  ? BAColors.primaryOf(context)
+                                  : cardBorder,
+                            ),
+                          ),
+                          child: Text(
+                            _filters[index],
+                            style: TextStyle(
+                              color: isSelected
+                                  ? Colors.white
+                                  : textSecondary,
+                              fontSize: 13,
+                              fontWeight:
+                                  isSelected ? FontWeight.w600 : FontWeight.normal,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              }),
-            ],
+                  );
+                }),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
           Expanded(
@@ -494,7 +506,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
               width: 96,
               height: 96,
               decoration: BoxDecoration(
-                color: BAColors.primary.withOpacity(0.08),
+                color: BAColors.primaryOf(context).withOpacity(0.08),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -502,7 +514,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                     ? Icons.search_off_rounded
                     : Icons.rocket_launch_rounded,
                 size: 48,
-                color: BAColors.primary.withOpacity(0.5),
+                color: BAColors.primaryOf(context).withOpacity(0.5),
               ),
             ),
             const SizedBox(height: 20),
@@ -591,26 +603,50 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
   Widget _buildBottomActions() {
     return Container(
       padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Expanded(
-            child: _MainActionButton(
-              icon: Icons.add,
-              label: '创建实例',
-              gradient: BAThemeColors.primaryGradient,
-              onTap: () => BACreateInstanceDialog.show(context),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: _MainActionButton(
-              icon: Icons.file_download,
-              label: '导入整合包',
-              gradient: BAThemeColors.secondaryGradient,
-              onTap: _importInstance,
-            ),
-          ),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 400) {
+            return Column(
+              children: [
+                _MainActionButton(
+                  icon: Icons.add,
+                  label: '创建实例',
+                  gradient: BAColors.primaryGradient as LinearGradient,
+                  onTap: () => BACreateInstanceDialog.show(context),
+                ),
+                const SizedBox(height: 12),
+                _MainActionButton(
+                  icon: Icons.file_download,
+                  label: '导入整合包',
+                  gradient: BAColors.secondaryGradient as LinearGradient,
+                  onTap: _importInstance,
+                ),
+              ],
+            );
+          } else {
+            return Row(
+              children: [
+                Expanded(
+                  child: _MainActionButton(
+                    icon: Icons.add,
+                    label: '创建实例',
+                    gradient: BAColors.primaryGradient as LinearGradient,
+                    onTap: () => BACreateInstanceDialog.show(context),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _MainActionButton(
+                    icon: Icons.file_download,
+                    label: '导入整合包',
+                    gradient: BAColors.secondaryGradient as LinearGradient,
+                    onTap: _importInstance,
+                  ),
+                ),
+              ],
+            );
+          }
+        },
       ),
     );
   }
@@ -652,10 +688,10 @@ class _ActionButtonState extends State<_ActionButton> {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: _isHovered ? BAColors.primary.withOpacity(0.1) : cardBg,
+            color: _isHovered ? BAColors.primaryOf(widget.buttonContext).withOpacity(0.1) : cardBg,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: _isHovered ? BAColors.primary : cardBorder,
+              color: _isHovered ? BAColors.primaryOf(widget.buttonContext) : cardBorder,
             ),
           ),
           child: Row(
@@ -663,14 +699,14 @@ class _ActionButtonState extends State<_ActionButton> {
             children: [
               Icon(
                 widget.icon,
-                color: _isHovered ? BAColors.primary : textSecondary,
+                color: _isHovered ? BAColors.primaryOf(widget.buttonContext) : textSecondary,
                 size: 16,
               ),
               const SizedBox(width: 6),
               Text(
                 widget.label,
                 style: TextStyle(
-                  color: _isHovered ? BAColors.primary : textSecondary,
+                  color: _isHovered ? BAColors.primaryOf(widget.buttonContext) : textSecondary,
                   fontSize: 12,
                 ),
               ),
@@ -714,7 +750,7 @@ class _MainActionButtonState extends State<_MainActionButton> {
           height: 48,
           decoration: BoxDecoration(
             gradient: widget.gradient,
-            borderRadius: BARadius.normal,
+            borderRadius: BATheme.borderRadiusMedium,
             boxShadow: _isHovered
                 ? [
                     BoxShadow(
@@ -774,7 +810,7 @@ class _InstanceCardState extends State<_InstanceCard> {
     final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
 
     final status = widget.instance.status;
-    final statusColor = _getStatusColor(status);
+    final statusColor = _getStatusColor(status, widget.cardContext);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -789,13 +825,13 @@ class _InstanceCardState extends State<_InstanceCard> {
           color: cardBg,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: _isHovered ? BAColors.primary : cardBorder,
+            color: _isHovered ? BAColors.primaryOf(widget.cardContext) : cardBorder,
             width: _isHovered ? 2 : 1,
           ),
           boxShadow: _isHovered
               ? [
                   BoxShadow(
-                    color: BAColors.primary.withOpacity(0.4),
+                    color: BAColors.primaryOf(widget.cardContext).withOpacity(0.4),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -870,7 +906,7 @@ class _InstanceCardState extends State<_InstanceCard> {
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2.5,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    BAColors.primary,
+                                    BAColors.primaryOf(widget.cardContext),
                                   ),
                                 ),
                               ),
@@ -883,9 +919,9 @@ class _InstanceCardState extends State<_InstanceCard> {
                             child: Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                gradient: const LinearGradient(
+                                gradient: LinearGradient(
                                   colors: [
-                                    BAColors.primary,
+                                    BAColors.primaryOf(widget.cardContext),
                                     BAColors.secondary,
                                   ],
                                   begin: Alignment.topLeft,
@@ -894,7 +930,7 @@ class _InstanceCardState extends State<_InstanceCard> {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: BAColors.primary.withOpacity(0.5),
+                                    color: BAColors.primaryOf(widget.cardContext).withOpacity(0.5),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -952,16 +988,16 @@ class _InstanceCardState extends State<_InstanceCard> {
     );
   }
 
-  Color _getStatusColor(InstanceStatus status) {
+  Color _getStatusColor(InstanceStatus status, BuildContext context) {
     switch (status) {
       case InstanceStatus.running:
-        return BAColors.success;
+        return BAColors.successOf(context);
       case InstanceStatus.launching:
-        return BAColors.warning;
+        return BAColors.warningOf(context);
       case InstanceStatus.crashed:
-        return BAColors.danger;
+        return BAColors.dangerOf(context);
       default:
-        return BAColors.primary;
+        return BAColors.primaryOf(context);
     }
   }
 
@@ -994,25 +1030,31 @@ class _InfoChip extends StatelessWidget {
     final surfaceVariant = isLight ? BAColors.lightSurfaceVariant : BAColors.darkSurfaceVariant;
     final textSecondary = isLight ? BAColors.lightTextSecondary : BAColors.darkTextSecondary;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: surfaceVariant,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: textSecondary),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: textSecondary,
-              fontSize: 10,
+    return Flexible(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: surfaceVariant,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 12, color: textSecondary),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: textSecondary,
+                  fontSize: 10,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

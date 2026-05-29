@@ -402,11 +402,11 @@ class _LoginPageState extends State<LoginPage> {
         decoration: const BoxDecoration(
           color: Colors.white,
         ),
-        child: const Icon(
-          Icons.window,
-          size: 18,
-          color: Color(0xFF00A4EF),
-        ),
+        child: Icon(
+            Icons.window,
+            size: 18,
+            color: BAColors.primary,
+          ),
       ),
     );
   }

@@ -1,4 +1,3 @@
-import 'package:semver/semver.dart';
 import '../core/logger.dart';
 import 'mod_info.dart';
 
@@ -67,30 +66,14 @@ class ModCompatibilityChecker {
       return;
     }
 
-    Version? targetVersion;
-    try {
-      targetVersion = Version.parse(gameVersion);
-    } catch (e) {
-      _logger.debug('Failed to parse game version: $gameVersion');
-      return;
-    }
-
     bool isCompatible = false;
     String? supportedVersions;
 
     for (final versionRange in mcVersions) {
       supportedVersions = versionRange;
-      try {
-        final constraint = Constraint.parse(versionRange);
-        if (constraint.allows(targetVersion)) {
-          isCompatible = true;
-          break;
-        }
-      } catch (e) {
-        if (versionRange.contains(gameVersion)) {
-          isCompatible = true;
-          break;
-        }
+      if (_versionMatches(gameVersion, versionRange)) {
+        isCompatible = true;
+        break;
       }
     }
 
@@ -111,9 +94,13 @@ class ModCompatibilityChecker {
     final loaderVersions = _extractLoaderVersions(mod, loaderType);
     if (loaderVersions.isEmpty) return;
 
-    Version? targetVersion;
+    int? targetVersion;
     try {
-      targetVersion = Version.parse(loaderVersion);
+      targetVersion = _parseVersion(loaderVersion);
+      if (targetVersion == null) {
+        _logger.debug('Failed to parse loader version: $loaderVersion');
+        return;
+      }
     } catch (e) {
       _logger.debug('Failed to parse loader version: $loaderVersion');
       return;
@@ -124,17 +111,9 @@ class ModCompatibilityChecker {
 
     for (final versionRange in loaderVersions) {
       supportedVersions = versionRange;
-      try {
-        final constraint = Constraint.parse(versionRange);
-        if (constraint.allows(targetVersion)) {
-          isCompatible = true;
-          break;
-        }
-      } catch (e) {
-        if (versionRange.contains(loaderVersion.split('.').take(2).join('.'))) {
-          isCompatible = true;
-          break;
-        }
+      if (_matchesConstraint(versionRange, targetVersion)) {
+        isCompatible = true;
+        break;
       }
     }
 
@@ -169,6 +148,75 @@ class ModCompatibilityChecker {
   static bool _isCompatibleLoader(String modLoader, String targetLoader) {
     return (modLoader == 'fabric' && targetLoader == 'quilt') ||
            (modLoader == 'quilt' && targetLoader == 'fabric');
+  }
+
+  static bool _versionMatches(String version, String range) {
+    if (range.contains(version)) {
+      return true;
+    }
+    
+    if (range.contains('>=') && _compareVersions(version, range.replaceAll('>=', '')) >= 0) {
+      return true;
+    }
+    if (range.contains('<=') && _compareVersions(version, range.replaceAll('<=', '')) <= 0) {
+      return true;
+    }
+    if (range.contains('>') && _compareVersions(version, range.replaceAll('>', '')) > 0) {
+      return true;
+    }
+    if (range.contains('<') && _compareVersions(version, range.replaceAll('<', '')) < 0) {
+      return true;
+    }
+    
+    return false;
+  }
+
+  static int _compareVersions(String v1, String v2) {
+    final parts1 = v1.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    final parts2 = v2.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    
+    final maxLen = parts1.length > parts2.length ? parts1.length : parts2.length;
+    for (var i = 0; i < maxLen; i++) {
+      final p1 = i < parts1.length ? parts1[i] : 0;
+      final p2 = i < parts2.length ? parts2[i] : 0;
+      if (p1 > p2) return 1;
+      if (p1 < p2) return -1;
+    }
+    return 0;
+  }
+
+  static int? _parseVersion(String version) {
+    try {
+      final parts = version.split('.').map((p) => int.tryParse(p) ?? 0).toList();
+      return parts[0] * 1000000 + (parts.length > 1 ? parts[1] * 1000 : 0) + (parts.length > 2 ? parts[2] : 0);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static bool _matchesConstraint(String constraint, int versionValue) {
+    try {
+      final parts = constraint.split(' ');
+      for (final part in parts) {
+        final otherValue = _parseVersion(part);
+        if (otherValue == null) return false;
+        
+        if (part.startsWith('>=')) {
+          if (versionValue < otherValue) return false;
+        } else if (part.startsWith('>')) {
+          if (versionValue <= otherValue) return false;
+        } else if (part.startsWith('<=')) {
+          if (versionValue >= otherValue) return false;
+        } else if (part.startsWith('<')) {
+          if (versionValue >= otherValue) return false;
+        } else {
+          if (versionValue != otherValue) return false;
+        }
+      }
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   static String _getLoaderDisplayName(String loaderType) {

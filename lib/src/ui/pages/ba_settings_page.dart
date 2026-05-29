@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../theme/ba_theme_colors.dart';
 import '../theme/colors.dart';
 import '../theme/app_theme.dart';
 import '../../config/config_manager.dart';
@@ -112,7 +112,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
       final gameDir = _configManager.getString(ConfigKeys.gameDirectory) ?? '';
       final javaPath = _configManager.getString(ConfigKeys.javaPath) ?? '';
       final memory = _configManager.getInt(ConfigKeys.memoryAllocation) ?? 4096;
-      final themeMode = _configManager.getString(ConfigKeys.themeMode) ?? 'dark';
       final autoUpdate = _configManager.getBool(ConfigKeys.autoUpdate) ?? true;
       final language = _configManager.getString(ConfigKeys.language) ?? '简体中文';
       final downloadSource = _configManager.getString(ConfigKeys.downloadSource) ?? 'official';
@@ -128,12 +127,27 @@ class _BASettingsPageState extends State<BASettingsPage> {
       final jvmArguments = _configManager.getString(ConfigKeys.jvmArguments) ?? '';
       final gameArguments = _configManager.getString(ConfigKeys.gameArguments) ?? '';
 
+      // 从 ThemeManager 获取当前主题模式，而不是从配置文件
+      final themeManager = ThemeManager();
+      await themeManager.initialize();
+      String themeModeStr;
+      switch (themeManager.themeMode) {
+        case ThemeMode.light:
+          themeModeStr = 'light';
+          break;
+        case ThemeMode.system:
+          themeModeStr = 'system';
+          break;
+        default:
+          themeModeStr = 'dark';
+      }
+
       if (mounted) {
         setState(() {
           _gameDirectory = gameDir;
           _javaPath = javaPath;
           _memoryAllocation = memory.toDouble();
-          _themeMode = themeMode;
+          _themeMode = themeModeStr;
           _autoUpdate = autoUpdate;
           _language = language;
           _downloadSource = downloadSource;
@@ -208,7 +222,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
     }
   }
 
-  Future<void> _saveThemeMode(String mode) async {
+  Future<void> _saveThemeMode(String mode, ThemeManager themeManager) async {
     try {
       ThemeMode themeMode;
       switch (mode) {
@@ -221,7 +235,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         default:
           themeMode = ThemeMode.dark;
       }
-      await ThemeManager().setThemeMode(themeMode);
+      await themeManager.setThemeMode(themeMode);
       if (!mounted) return;
       setState(() {
         _themeMode = mode;
@@ -799,6 +813,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
   }
 
   Widget _buildGeneralSettings() {
+    final themeManager = Provider.of<ThemeManager>(context, listen: false);
     return ListView(
       padding: const EdgeInsets.only(right: 8),
       children: [
@@ -832,7 +847,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   DropdownMenuItem(value: 'system', child: Text('跟随系统')),
                 ],
                 onChanged: (value) {
-                  if (value != null) _saveThemeMode(value);
+                  if (value != null) _saveThemeMode(value, themeManager);
                 },
               ),
             ),
@@ -1106,20 +1121,20 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 child: TextField(
                   controller: _proxyHostController,
                   focusNode: _proxyHostFocusNode,
-                  style: const TextStyle(color: BAColors.darkTextPrimary, fontSize: 13),
+                  style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 13),
                   decoration: InputDecoration(
                     hintText: '例如: 127.0.0.1',
-                    hintStyle: const TextStyle(color: BAColors.darkTextDisabled, fontSize: 13),
+                    hintStyle: TextStyle(color: BAColors.textDisabledOf(context), fontSize: 13),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     filled: true,
-                    fillColor: BAColors.darkSurfaceVariant,
+                    fillColor: BAColors.surfaceVariantOf(context),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: BAColors.darkBorder),
+                      borderSide: BorderSide(color: BAColors.borderOf(context)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: BAColors.darkBorder),
+                      borderSide: BorderSide(color: BAColors.borderOf(context)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -1139,20 +1154,20 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   controller: _proxyPortController,
                   focusNode: _proxyPortFocusNode,
                   keyboardType: TextInputType.number,
-                  style: const TextStyle(color: BAColors.darkTextPrimary, fontSize: 13),
+                  style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 13),
                   decoration: InputDecoration(
                     hintText: '例如: 7890',
-                    hintStyle: const TextStyle(color: BAColors.darkTextDisabled, fontSize: 13),
+                    hintStyle: TextStyle(color: BAColors.textDisabledOf(context), fontSize: 13),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     filled: true,
-                    fillColor: BAColors.darkSurfaceVariant,
+                    fillColor: BAColors.surfaceVariantOf(context),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: BAColors.darkBorder),
+                      borderSide: BorderSide(color: BAColors.borderOf(context)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: BAColors.darkBorder),
+                      borderSide: BorderSide(color: BAColors.borderOf(context)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -1309,20 +1324,24 @@ class _BASettingsPageState extends State<BASettingsPage> {
     final validValues = items.map((item) => item.value).toList();
     final effectiveValue = validValues.contains(value) ? value : items.first.value;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: surfaceVariant,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: borderColor),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<T>(
-          value: effectiveValue,
-          icon: Icon(Icons.arrow_drop_down, color: textSecondary),
-          style: TextStyle(color: textPrimary, fontSize: 13),
-          items: items,
-          onChanged: onChanged,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 200, minWidth: 80),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: surfaceVariant,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: borderColor),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<T>(
+            isDense: true,
+            value: effectiveValue,
+            icon: Icon(Icons.arrow_drop_down, color: textSecondary),
+            style: TextStyle(color: textPrimary, fontSize: 13),
+            items: items,
+            onChanged: onChanged,
+          ),
         ),
       ),
     );
@@ -1340,41 +1359,45 @@ class _BASettingsPageState extends State<BASettingsPage> {
     final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
     final textDisabled = isLight ? BAColors.lightTextDisabled : BAColors.darkTextDisabled;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 200,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: surfaceVariant,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: borderColor),
-          ),
-          child: Text(
-            path.isEmpty ? placeholder : path,
-            style: TextStyle(
-              color: path.isEmpty ? textDisabled : textPrimary,
-              fontSize: 12,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        const SizedBox(width: 8),
-        ElevatedButton(
-          onPressed: onBrowse,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: BAColors.primary,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+    return Flexible(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 250, minWidth: 100),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: surfaceVariant,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: borderColor),
+              ),
+              child: Text(
+                path.isEmpty ? placeholder : path,
+                style: TextStyle(
+                  color: path.isEmpty ? textDisabled : textPrimary,
+                  fontSize: 12,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
-          child: Text(buttonText, style: const TextStyle(fontSize: 12)),
-        ),
-      ],
+          const SizedBox(width: 8),
+          ElevatedButton(
+            onPressed: onBrowse,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: BAColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(buttonText, style: const TextStyle(fontSize: 12)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1389,8 +1412,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
     final textPrimary = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
     final textDisabled = isLight ? BAColors.lightTextDisabled : BAColors.darkTextDisabled;
 
-    return SizedBox(
-      width: 250,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 250, minWidth: 100),
       child: TextField(
         controller: controller,
         focusNode: focusNode,

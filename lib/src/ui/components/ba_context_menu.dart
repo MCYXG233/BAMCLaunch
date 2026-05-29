@@ -112,11 +112,13 @@ class _BAContextMenuOverlay extends StatelessWidget {
       behavior: HitTestBehavior.translucent,
       child: Stack(
         children: [
-          CompositedTransformFollower(
-            link: layerLink,
-            showWhenUnlinked: false,
-            offset: position,
-            child: _BAContextMenuContent(items: items, onClose: onClose),
+          Positioned(
+            left: position.dx,
+            top: position.dy,
+            child: CompositedTransformTarget(
+              link: layerLink,
+              child: _BAContextMenuContent(items: items, onClose: onClose),
+            ),
           ),
         ],
       ),
@@ -145,10 +147,10 @@ class _BAContextMenuContent extends StatelessWidget {
           child: Container(
             constraints: const BoxConstraints(minWidth: 200, maxWidth: 280),
             decoration: BoxDecoration(
-              color: BAColors.glass,
+              color: BAColors.glassOf(context),
               borderRadius: BATheme.borderRadius,
-              border: Border.all(color: BAColors.border, width: 1),
-              boxShadow: BATheme.shadows,
+              border: Border.all(color: BAColors.borderOf(context), width: 1),
+              boxShadow: BATheme.shadowsOf(context),
             ),
             child: Material(
               color: Colors.transparent,
@@ -160,12 +162,12 @@ class _BAContextMenuContent extends StatelessWidget {
                   final item = entry.value;
 
                   if (item is BAContextMenuDivider) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 4),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Divider(
                         height: 1,
                         thickness: 1,
-                        color: BAColors.border,
+                        color: BAColors.borderOf(context),
                       ),
                     );
                   }
@@ -206,11 +208,13 @@ class _BAContextMenuItemWidgetState extends State<_BAContextMenuItemWidget> {
   Widget build(BuildContext context) {
     final isEnabled = !widget.item.disabled;
     final textColor = isEnabled
-        ? (widget.item.danger ? BAColors.danger : BAColors.textPrimary)
-        : BAColors.textDisabled;
+        ? (widget.item.danger ? BAColors.dangerOf(context) : BAColors.textPrimaryOf(context))
+        : BAColors.textDisabledOf(context);
     final iconColor = isEnabled
-        ? (widget.item.danger ? BAColors.danger : BAColors.textSecondary)
-        : BAColors.textDisabled;
+        ? (widget.item.danger ? BAColors.dangerOf(context) : BAColors.textSecondaryOf(context))
+        : BAColors.textDisabledOf(context);
+    final primaryColor = BAColors.primaryOf(context);
+    final dangerColor = BAColors.dangerOf(context);
 
     return MouseRegion(
       onEnter: (_) => isEnabled ? setState(() => _isHovered = true) : null,
@@ -221,8 +225,8 @@ class _BAContextMenuItemWidgetState extends State<_BAContextMenuItemWidget> {
           duration: const Duration(milliseconds: 150),
           color: _isHovered
               ? (widget.item.danger
-                    ? BAColors.danger.withOpacity(0.2)
-                    : BAColors.primary.withOpacity(0.15))
+                    ? dangerColor.withOpacity(0.2)
+                    : primaryColor.withOpacity(0.15))
               : Colors.transparent,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
@@ -242,7 +246,7 @@ class _BAContextMenuItemWidgetState extends State<_BAContextMenuItemWidget> {
                 Text(
                   widget.item.shortcut!,
                   style: BATypography.bodySmall.copyWith(
-                    color: BAColors.textDisabled,
+                    color: BAColors.textDisabledOf(context),
                   ),
                 ),
             ],

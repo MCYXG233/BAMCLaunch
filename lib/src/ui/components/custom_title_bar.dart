@@ -178,17 +178,17 @@ class _CustomTitleBarState extends State<CustomTitleBar> with WindowListener {
       child: Row(
         children: [
           _MacOSWindowControlButton(
-            color: const Color(0xFFFF5F57),
+            color: BAColors.danger,
             onPressed: () => windowManager.close(),
           ),
           const SizedBox(width: 8),
           _MacOSWindowControlButton(
-            color: const Color(0xFFFEBC2E),
+            color: BAColors.warning,
             onPressed: () => windowManager.minimize(),
           ),
           const SizedBox(width: 8),
           _MacOSWindowControlButton(
-            color: const Color(0xFF28C840),
+            color: BAColors.success,
             onPressed: () {
               if (_isMaximized) {
                 windowManager.unmaximize();
@@ -268,25 +268,26 @@ class _WindowControlButtonState extends State<_WindowControlButton> {
   Color _getBackgroundColor() {
     final brightness = Theme.of(context).brightness;
     final isLight = brightness == Brightness.light;
+    final hoverColor = isLight ? BAColors.lightSurfaceTertiary : BAColors.darkSurfaceTertiary;
     
     if (_isPressed) {
       switch (widget.buttonType) {
         case _WindowButtonType.close:
-          return const Color(0xFFE81123);
+          return BAColors.danger;
         case _WindowButtonType.maximize:
-          return isLight ? const Color(0xFFE0E0E0) : const Color(0xFF3A3A5A);
+          return hoverColor;
         case _WindowButtonType.minimize:
-          return isLight ? const Color(0xFFE0E0E0) : const Color(0xFF3A3A5A);
+          return hoverColor;
       }
     }
     if (_isHovered) {
       switch (widget.buttonType) {
         case _WindowButtonType.close:
-          return const Color(0xFFFF5F57);
+          return BAColors.danger;
         case _WindowButtonType.maximize:
-          return isLight ? const Color(0xFFD0D0D0) : const Color(0xFF2A2A4A);
+          return BAColors.surfaceVariantOf(context);
         case _WindowButtonType.minimize:
-          return isLight ? const Color(0xFFD0D0D0) : const Color(0xFF2A2A4A);
+          return BAColors.surfaceVariantOf(context);
       }
     }
     return Colors.transparent;

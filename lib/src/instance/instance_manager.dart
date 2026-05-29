@@ -73,12 +73,98 @@ class InstanceManager {
       await _loadDirectories();
       await _loadInstances();
       await _loadSelectedIds();
+      
+      // 自动检测并添加常见的 Minecraft 目录
+      await _autoDetectDirectories();
 
       _isInitialized = true;
       _logger.info('InstanceManager initialized successfully');
     } catch (e, stackTrace) {
       _logger.error('Failed to initialize InstanceManager', e, stackTrace);
       rethrow;
+    }
+  }
+
+  /// 自动检测常见的 Minecraft 目录和实例
+  Future<void> _autoDetectDirectories() async {
+    try {
+      final List<String> candidatePaths = [
+        // 用户指定的路径
+        r'E:\TSSForsunshine\Minecraft',
+        // Windows 常见的 Minecraft 目录
+        path.join(Platform.environment['APPDATA'] ?? '', '.minecraft'),
+        // 其他可能的路径
+        r'C:\Minecraft',
+        r'D:\Minecraft',
+      ];
+
+      for (final candidatePath in candidatePaths) {
+        if (candidatePath.isEmpty) continue;
+        
+        final directory = Directory(candidatePath);
+        if (await directory.exists()) {
+          // 检查该目录是否已经存在
+          final existingDir = _directories.firstWhere(
+            (d) => d.path == candidatePath,
+            orElse: () => GameDirectory(id: '', name: '', path: '', createdAt: DateTime.now(), updatedAt: DateTime.now()),
+          );
+          
+          String? dirId;
+          
+          if (existingDir.id.isEmpty) {
+            // 目录不存在，创建新目录
+            _logger.info('Detected new Minecraft directory: $candidatePath');
+            final name = path.basename(candidatePath);
+            final newDir = await createDirectory(name: name, path: candidatePath);
+            dirId = newDir.id;
+          } else {
+            dirId = existingDir.id;
+          }
+          
+          // 检测目录中的游戏版本并创建实例
+          if (dirId != null) {
+            await _detectInstancesInDirectory(dirId, candidatePath);
+          }
+        }
+      }
+    } catch (e) {
+      _logger.warning('Failed to auto-detect directories', e);
+    }
+  }
+
+  /// 在指定目录中检测游戏版本并创建实例
+  Future<void> _detectInstancesInDirectory(String directoryId, String directoryPath) async {
+    try {
+      final versionsDir = Directory(path.join(directoryPath, 'versions'));
+      if (!await versionsDir.exists()) {
+        return;
+      }
+
+      final versionDirs = await versionsDir.list().where((entity) => entity is Directory).toList();
+      
+      for (final versionDir in versionDirs) {
+        final versionName = path.basename(versionDir.path);
+        final jsonFile = File(path.join(versionDir.path, '$versionName.json'));
+        
+        if (await jsonFile.exists()) {
+          // 检查该版本是否已创建为实例
+          final exists = _instances.any(
+            (i) => i.directoryId == directoryId && i.version == versionName,
+          );
+          
+          if (!exists) {
+            _logger.info('Detected Minecraft version: $versionName in $directoryPath');
+            await createInstance(
+              name: versionName,
+              directoryId: directoryId,
+              version: versionName,
+              description: '自动检测到的 $versionName 版本',
+            );
+          }
+        }
+      }
+    } catch (e) {
+      _logger.warning('Failed to detect instances in directory: $directoryPath', e);
     }
   }
 

@@ -113,13 +113,13 @@ class _BAMCSettingsPageState extends State<BAMCSettingsPage> {
   String _backgroundType = 'gradient';
 
   /// 纯色背景颜色
-  Color _solidBackgroundColor = const Color(0xFF1E1E2E);
+  Color _solidBackgroundColor = BAColors.darkBackground;
 
   /// 渐变背景开始颜色
-  Color _gradientStartColor = const Color(0xFF1E1E2E);
+  Color _gradientStartColor = BAColors.darkBackground;
 
   /// 渐变背景结束颜色
-  Color _gradientEndColor = const Color(0xFF11111B);
+  Color _gradientEndColor = BAColors.darkSurface;
 
   /// 背景图片路径
   String _backgroundImagePath = '';
@@ -128,10 +128,10 @@ class _BAMCSettingsPageState extends State<BAMCSettingsPage> {
   double _backgroundOpacity = 1.0;
 
   /// 主色调
-  Color _primaryColor = const Color(0xFF6C77FF);
+  Color _primaryColor = BAColors.primary;
 
   /// 次要色调
-  Color _secondaryColor = const Color(0xFFFF7CA4);
+  Color _secondaryColor = BAColors.secondary;
 
   /// 圆角大小 (0-32)
   double _cornerRadius = 16.0;

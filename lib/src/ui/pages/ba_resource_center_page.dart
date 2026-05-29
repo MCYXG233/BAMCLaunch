@@ -1,7 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import '../theme/ba_theme_colors.dart';
+import '../theme/colors.dart';
+import '../theme/app_theme.dart';
 import '../../resource_center/search_service.dart';
 import '../../resource_center/models.dart';
 import '../components/ba_notification.dart';
@@ -173,7 +174,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: BAThemeColors.background,
+      color: BAColors.backgroundOf(context),
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -188,19 +189,20 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
   }
 
   Widget _buildHeader() {
-    return Row(
+    return Wrap(
+      spacing: 16,
+      runSpacing: 12,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        const Text(
+        Text(
           '资源中心',
           style: TextStyle(
-            color: BAThemeColors.textPrimary,
+            color: BAColors.textPrimaryOf(context),
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(width: 16),
         _buildSortDropdown(),
-        const Spacer(),
         _buildSearchBar(),
       ],
     );
@@ -211,21 +213,21 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
       height: 40,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: BAThemeColors.surface,
-        borderRadius: BARadius.normal,
-        border: Border.all(color: BAThemeColors.border),
+        color: BAColors.surfaceOf(context),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: BAColors.borderOf(context)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _sortBy,
-          dropdownColor: BAThemeColors.surface,
-          style: const TextStyle(
-            color: BAThemeColors.textPrimary,
+          dropdownColor: BAColors.surfaceOf(context),
+          style: TextStyle(
+            color: BAColors.textPrimaryOf(context),
             fontSize: 13,
           ),
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_drop_down,
-            color: BAThemeColors.textSecondary,
+            color: BAColors.textSecondaryOf(context),
             size: 20,
           ),
           items: _sortOptions.map((option) {
@@ -243,61 +245,63 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
   }
 
   Widget _buildSearchBar() {
-    return Container(
-      width: 300,
-      height: 40,
-      decoration: BoxDecoration(
-        color: BAThemeColors.surface.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: BAThemeColors.border.withOpacity(0.4),
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: TextField(
-        controller: _searchController,
-        onChanged: (value) {
-          if (mounted) {
-            setState(() {
-              _searchQuery = value;
-            });
-          }
-        },
-        onSubmitted: _onSearchSubmitted,
-        style: const TextStyle(
-          color: BAThemeColors.textPrimary,
-          fontSize: 14,
-        ),
-        decoration: InputDecoration(
-          hintText: '搜索资源...',
-          hintStyle: const TextStyle(color: BAThemeColors.textDisabled),
-          prefixIcon: const Icon(
-            Icons.search,
-            color: BAThemeColors.textSecondary,
-            size: 20,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 300, minWidth: 150),
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          color: BAColors.surfaceOf(context).withOpacity(0.6),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: BAColors.borderOf(context).withOpacity(0.4),
           ),
-          suffixIcon: _searchQuery.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(
-                    Icons.clear,
-                    color: BAThemeColors.textSecondary,
-                    size: 18,
-                  ),
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() => _searchQuery = '');
-                    _performSearch();
-                  },
-                )
-              : null,
-          border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         ),
-      ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: TextField(
+          controller: _searchController,
+          onChanged: (value) {
+            if (mounted) {
+              setState(() {
+                _searchQuery = value;
+              });
+            }
+          },
+          onSubmitted: _onSearchSubmitted,
+          style: TextStyle(
+            color: BAColors.textPrimaryOf(context),
+            fontSize: 14,
+          ),
+          decoration: InputDecoration(
+            hintText: '搜索资源...',
+            hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
+            prefixIcon: Icon(
+              Icons.search,
+              color: BAColors.textSecondaryOf(context),
+              size: 20,
+            ),
+            suffixIcon: _searchQuery.isNotEmpty
+                ? IconButton(
+                    icon: Icon(
+                      Icons.clear,
+                      color: BAColors.textSecondaryOf(context),
+                      size: 18,
+                    ),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() => _searchQuery = '');
+                      _performSearch();
+                    },
+                  )
+                : null,
+            border: InputBorder.none,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          ),
+        ),
+          ),
         ),
       ),
     );
@@ -326,19 +330,19 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? BAThemeColors.primary
-                        : BAThemeColors.surface.withOpacity(0.6),
+                        ? BAColors.primary
+                        : BAColors.surfaceOf(context).withOpacity(0.6),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isSelected
-                          ? BAThemeColors.primary
-                          : BAThemeColors.border.withOpacity(0.4),
+                          ? BAColors.primary
+                          : BAColors.borderOf(context).withOpacity(0.4),
                       width: isSelected ? 1.5 : 1,
                     ),
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: BAThemeColors.primary.withOpacity(0.3),
+                              color: BAColors.primary.withOpacity(0.3),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -349,7 +353,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                     category.key,
                     style: TextStyle(
                       color:
-                          isSelected ? Colors.white : BAThemeColors.textSecondary,
+                          isSelected ? Colors.white : BAColors.textSecondaryOf(context),
                       fontSize: 13,
                       fontWeight:
                           isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -384,15 +388,15 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
               width: 40,
               height: 40,
               child: CircularProgressIndicator(
-                color: BAThemeColors.primary,
+                color: BAColors.primary,
                 strokeWidth: 3,
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               '正在搜索资源...',
               style: TextStyle(
-                color: BAThemeColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
                 fontSize: 13,
               ),
             ),
@@ -426,12 +430,12 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.error_outline, color: BAThemeColors.danger, size: 48),
+          Icon(Icons.error_outline, color: BAColors.danger, size: 48),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             '加载失败',
             style: TextStyle(
-              color: BAThemeColors.textPrimary,
+              color: BAColors.textPrimaryOf(context),
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -439,8 +443,8 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
           const SizedBox(height: 8),
           Text(
             _errorMessage!,
-            style: const TextStyle(
-              color: BAThemeColors.textSecondary,
+            style: TextStyle(
+              color: BAColors.textSecondaryOf(context),
               fontSize: 13,
             ),
             textAlign: TextAlign.center,
@@ -451,7 +455,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
             icon: const Icon(Icons.refresh, size: 18),
             label: const Text('重试'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: BAThemeColors.primary,
+              backgroundColor: BAColors.primary,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -472,29 +476,29 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
             width: 96,
             height: 96,
             decoration: BoxDecoration(
-              color: BAThemeColors.primary.withOpacity(0.08),
+              color: BAColors.primary.withOpacity(0.08),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.explore_off_rounded,
               size: 48,
-              color: BAThemeColors.primary.withOpacity(0.5),
+              color: BAColors.primary.withOpacity(0.5),
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             '没有找到相关资源',
             style: TextStyle(
-              color: BAThemeColors.textPrimary,
+              color: BAColors.textPrimaryOf(context),
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             '试试换个关键词或切换分类吧',
             style: TextStyle(
-              color: BAThemeColors.textSecondary,
+              color: BAColors.textSecondaryOf(context),
               fontSize: 13,
             ),
           ),
@@ -509,11 +513,11 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
             icon: const Icon(Icons.refresh, size: 18),
             label: const Text('清除筛选'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: BAThemeColors.surface,
-              foregroundColor: BAThemeColors.textSecondary,
+              backgroundColor: BAColors.surfaceOf(context),
+              foregroundColor: BAColors.textSecondaryOf(context),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
-                side: const BorderSide(color: BAThemeColors.border),
+                side: BorderSide(color: BAColors.borderOf(context)),
               ),
             ),
           ),
@@ -544,12 +548,12 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
           ),
         ),
         if (_isLoadingMore)
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.all(24),
+              padding: const EdgeInsets.all(24),
               child: Center(
                 child: CircularProgressIndicator(
-                  color: BAThemeColors.primary,
+                  color: BAColors.primary,
                   strokeWidth: 3,
                 ),
               ),
@@ -576,11 +580,11 @@ class _ResourceCardState extends State<_ResourceCard> {
   Color get _typeColor {
     switch (widget.resource.type) {
       case ResourceType.mod:
-        return BAThemeColors.primary;
+        return BAColors.primary;
       case ResourceType.resourcePack:
-        return BAThemeColors.success;
+        return BAColors.success;
       case ResourceType.modpack:
-        return BAThemeColors.secondary;
+        return BAColors.secondary;
     }
   }
 
@@ -619,23 +623,23 @@ class _ResourceCardState extends State<_ResourceCard> {
         child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: BAThemeColors.surface.withOpacity(0.85),
+          color: BAColors.surfaceOf(context).withOpacity(0.85),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: _isHovered
                 ? color
-                : BAThemeColors.border.withOpacity(0.6),
+                : BAColors.borderOf(context).withOpacity(0.6),
             width: _isHovered ? 2 : 1,
           ),
           boxShadow: _isHovered
               ? [
                   BoxShadow(
-                    color: color.withValues(alpha: 0.3),
+                    color: color.withOpacity(0.3),
                     blurRadius: 16,
                     offset: const Offset(0, 8),
                   ),
                 ]
-              : BAThemeColors.cardShadow,
+              : BATheme.shadowsSmallOf(context),
         ),
         child: Material(
           color: Colors.transparent,
@@ -653,7 +657,7 @@ class _ResourceCardState extends State<_ResourceCard> {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.1),
+                          color: color.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: widget.resource.iconUrl != null
@@ -678,19 +682,19 @@ class _ResourceCardState extends State<_ResourceCard> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: BAThemeColors.surfaceVariant,
+                          color: BAColors.surfaceVariantOf(context),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.download,
-                                color: BAThemeColors.textSecondary, size: 12),
+                            Icon(Icons.download,
+                                color: BAColors.textSecondaryOf(context), size: 12),
                             const SizedBox(width: 4),
                             Text(
                               _formatDownloads(widget.resource.downloads),
-                              style: const TextStyle(
-                                color: BAThemeColors.textSecondary,
+                              style: TextStyle(
+                                color: BAColors.textSecondaryOf(context),
                                 fontSize: 10,
                               ),
                             ),
@@ -702,8 +706,8 @@ class _ResourceCardState extends State<_ResourceCard> {
                   const SizedBox(height: 12),
                   Text(
                     widget.resource.name,
-                    style: const TextStyle(
-                      color: BAThemeColors.textPrimary,
+                    style: TextStyle(
+                      color: BAColors.textPrimaryOf(context),
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                     ),
@@ -727,8 +731,8 @@ class _ResourceCardState extends State<_ResourceCard> {
                   Expanded(
                     child: Text(
                       widget.resource.description,
-                      style: const TextStyle(
-                        color: BAThemeColors.textSecondary,
+                      style: TextStyle(
+                        color: BAColors.textSecondaryOf(context),
                         fontSize: 11,
                       ),
                       maxLines: 2,
@@ -745,8 +749,8 @@ class _ResourceCardState extends State<_ResourceCard> {
                         borderRadius: BorderRadius.circular(10),
                         gradient: const LinearGradient(
                           colors: [
-                            BAThemeColors.primary,
-                            BAThemeColors.secondary,
+                            BAColors.primary,
+                            BAColors.secondary,
                           ],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
@@ -754,13 +758,13 @@ class _ResourceCardState extends State<_ResourceCard> {
                         boxShadow: _isHovered
                             ? [
                                 BoxShadow(
-                                  color: BAThemeColors.primary
+                                  color: BAColors.primary
                                       .withOpacity(0.4),
                                   blurRadius: 12,
                                   offset: const Offset(0, 4),
                                 ),
                                 BoxShadow(
-                                  color: BAThemeColors.secondary
+                                  color: BAColors.secondary
                                       .withOpacity(0.3),
                                   blurRadius: 12,
                                   offset: const Offset(0, 4),
