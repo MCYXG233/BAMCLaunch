@@ -1,12 +1,10 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
-import '../theme/app_theme.dart';
 import '../../resource_center/search_service.dart';
 import '../../resource_center/models.dart';
 import '../components/ba_notification.dart';
 
+/// 蔚蓝档案风格资源中心页面（MC启动器版）
 class BAResourceCenterPage extends StatefulWidget {
   const BAResourceCenterPage({super.key});
 
@@ -28,15 +26,17 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
   ResourceType? _selectedType;
   String _sortBy = 'downloads';
   int _currentPage = 1;
-  bool _notificationInitialized = false;
 
   static const int _pageSize = 20;
 
+  // MC启动器资源分类
   static const _categories = <MapEntry<String, ResourceType?>>[
     MapEntry('全部', null),
     MapEntry('模组', ResourceType.mod),
     MapEntry('资源包', ResourceType.resourcePack),
     MapEntry('整合包', ResourceType.modpack),
+    MapEntry('光影', null), // 可扩展
+    MapEntry('材质包', ResourceType.resourcePack),
   ];
 
   static const _sortOptions = <MapEntry<String, String>>[
@@ -45,20 +45,27 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
     MapEntry('updated', '最近更新'),
   ];
 
+  // 资源图标映射
+  static const Map<ResourceType?, IconData> _typeIcons = {
+    null: Icons.apps,
+    ResourceType.mod: Icons.extension,
+    ResourceType.resourcePack: Icons.palette,
+    ResourceType.modpack: Icons.inventory_2,
+  };
+
+  // 资源颜色映射
+  static const Map<ResourceType?, Color> _typeColors = {
+    null: Color(0xFF6B8EFF),
+    ResourceType.mod: Color(0xFFFF96B5),
+    ResourceType.resourcePack: Color(0xFF6BCB77),
+    ResourceType.modpack: Color(0xFFFFD93D),
+  };
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
     _performSearch();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_notificationInitialized) {
-      NotificationManager().init(context);
-      _notificationInitialized = true;
-    }
   }
 
   @override
@@ -168,236 +175,342 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
   }
 
   void _onResourceTap(Resource resource) {
-    NotificationManager().showInfo('TODO', message: '资源详情页面开发中: ${resource.name}');
+    NotificationManager().showInfo('资源详情', message: '资源详情页面开发中: ${resource.name}');
   }
 
   @override
   Widget build(BuildContext context) {
+    NotificationManager().init(context);
+
     return Container(
-      color: BAColors.backgroundOf(context),
-      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: BAColors.backgroundGradientOf(context),
+      ),
       child: Column(
         children: [
-          _buildHeader(),
-          const SizedBox(height: 16),
-          _buildCategoryTabs(),
-          const SizedBox(height: 16),
-          Expanded(child: _buildBody()),
+          // 顶部标题栏
+          _buildHeader(context),
+          const SizedBox(height: 20),
+
+          // 搜索和分类区域
+          _buildSearchAndCategories(context),
+          const SizedBox(height: 20),
+
+          // 资源列表
+          Expanded(
+            child: _buildResourceList(context),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildHeader() {
-    return Wrap(
-      spacing: 16,
-      runSpacing: 12,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Text(
-          '资源中心',
-          style: TextStyle(
-            color: BAColors.textPrimaryOf(context),
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        _buildSortDropdown(),
-        _buildSearchBar(),
-      ],
-    );
-  }
-
-  Widget _buildSortDropdown() {
+  /// 顶部标题栏
+  Widget _buildHeader(BuildContext context) {
     return Container(
-      height: 40,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: BAColors.borderOf(context)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _sortBy,
-          dropdownColor: BAColors.surfaceOf(context),
-          style: TextStyle(
-            color: BAColors.textPrimaryOf(context),
-            fontSize: 13,
-          ),
-          icon: Icon(
-            Icons.arrow_drop_down,
-            color: BAColors.textSecondaryOf(context),
-            size: 20,
-          ),
-          items: _sortOptions.map((option) {
-            return DropdownMenuItem(
-              value: option.key,
-              child: Text(option.value),
-            );
-          }).toList(),
-          onChanged: (value) {
-            if (value != null) _onSortChanged(value);
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 300, minWidth: 150),
-      child: Container(
-        height: 40,
-        decoration: BoxDecoration(
-          color: BAColors.surfaceOf(context).withOpacity(0.6),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: BAColors.borderOf(context).withOpacity(0.4),
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: TextField(
-          controller: _searchController,
-          onChanged: (value) {
-            if (mounted) {
-              setState(() {
-                _searchQuery = value;
-              });
-            }
-          },
-          onSubmitted: _onSearchSubmitted,
-          style: TextStyle(
-            color: BAColors.textPrimaryOf(context),
-            fontSize: 14,
-          ),
-          decoration: InputDecoration(
-            hintText: '搜索资源...',
-            hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
-            prefixIcon: Icon(
-              Icons.search,
-              color: BAColors.textSecondaryOf(context),
-              size: 20,
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+      child: Row(
+        children: [
+          // 标题
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              gradient: BAColors.secondaryGradient,
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: BAColors.secondary.withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
-            suffixIcon: _searchQuery.isNotEmpty
-                ? IconButton(
-                    icon: Icon(
-                      Icons.clear,
-                      color: BAColors.textSecondaryOf(context),
-                      size: 18,
-                    ),
-                    onPressed: () {
-                      _searchController.clear();
-                      setState(() => _searchQuery = '');
-                      _performSearch();
-                    },
-                  )
-                : null,
-            border: InputBorder.none,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.extension,
+                  color: Colors.white,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'リソースセンター',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+          const SizedBox(width: 16),
+          Text(
+            '资源中心',
+            style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
+          const Spacer(),
+
+          // 统计信息
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: BAColors.surfaceOf(context).withOpacity(0.8),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: BAColors.borderOf(context).withOpacity(0.5),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.download,
+                  color: BAColors.secondary,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${_resources.length}',
+                  style: TextStyle(
+                    color: BAColors.textPrimaryOf(context),
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  ' 个资源',
+                  style: TextStyle(
+                    color: BAColors.textSecondaryOf(context),
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildCategoryTabs() {
-    return SizedBox(
-      height: 40,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: _categories.length,
-        itemBuilder: (context, index) {
-          final category = _categories[index];
-          final isSelected = _selectedType == category.value;
-
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => _onCategoryChanged(category.value),
-                borderRadius: BorderRadius.circular(20),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? BAColors.primary
-                        : BAColors.surfaceOf(context).withOpacity(0.6),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isSelected
-                          ? BAColors.primary
-                          : BAColors.borderOf(context).withOpacity(0.4),
-                      width: isSelected ? 1.5 : 1,
-                    ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: BAColors.primary.withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ]
-                        : [],
-                  ),
-                  child: Text(
-                    category.key,
-                    style: TextStyle(
-                      color:
-                          isSelected ? Colors.white : BAColors.textPrimaryOf(context).withOpacity(0.7),
-                      fontSize: 13,
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.normal,
-                    ),
-                  ),
+  /// 搜索和分类区域
+  Widget _buildSearchAndCategories(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 搜索框
+          Container(
+            height: 52,
+            decoration: BoxDecoration(
+              color: BAColors.glassOf(context),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: BAColors.borderOf(context).withOpacity(0.6),
+              ),
+            ),
+            child: TextField(
+              controller: _searchController,
+              onSubmitted: _onSearchSubmitted,
+              style: TextStyle(
+                color: BAColors.textPrimaryOf(context),
+                fontSize: 15,
+              ),
+              decoration: InputDecoration(
+                hintText: '搜索模组、资源包、整合包...',
+                hintStyle: TextStyle(
+                  color: BAColors.textDisabledOf(context),
+                ),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: BAColors.textSecondaryOf(context),
+                  size: 22,
+                ),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(
+                          Icons.clear,
+                          color: BAColors.textSecondaryOf(context),
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          _searchController.clear();
+                          _onSearchSubmitted('');
+                        },
+                      )
+                    : null,
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
                 ),
               ),
             ),
-          );
-        },
+          ),
+          const SizedBox(height: 16),
+
+          // 分类和排序
+          Row(
+            children: [
+              // 分类标签
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: _categories.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final category = entry.value;
+                      final isSelected = _selectedType == category.value;
+                      final typeColor = _typeColors[category.value] ?? BAColors.primary;
+
+                      return Padding(
+                        padding: EdgeInsets.only(right: index < _categories.length - 1 ? 8 : 0),
+                        child: InkWell(
+                          onTap: () => _onCategoryChanged(category.value),
+                          borderRadius: BorderRadius.circular(14),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: isSelected
+                                  ? LinearGradient(
+                                      colors: [
+                                        typeColor.withOpacity(0.8),
+                                        typeColor,
+                                      ],
+                                    )
+                                  : null,
+                              color: isSelected
+                                  ? null
+                                  : BAColors.surfaceOf(context).withOpacity(0.8),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: isSelected
+                                    ? Colors.transparent
+                                    : BAColors.borderOf(context).withOpacity(0.6),
+                              ),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: typeColor.withOpacity(0.3),
+                                        blurRadius: 8,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  _typeIcons[category.value] ?? Icons.apps,
+                                  size: 18,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : typeColor,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  category.key,
+                                  style: TextStyle(
+                                    color: isSelected
+                                        ? Colors.white
+                                        : BAColors.textSecondaryOf(context),
+                                    fontSize: 13,
+                                    fontWeight:
+                                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+
+              // 排序下拉菜单
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: BAColors.surfaceOf(context).withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: BAColors.borderOf(context).withOpacity(0.6),
+                  ),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _sortBy,
+                    icon: Icon(
+                      Icons.sort,
+                      color: BAColors.textSecondaryOf(context),
+                      size: 18,
+                    ),
+                    dropdownColor: BAColors.surfaceOf(context),
+                    style: TextStyle(
+                      color: BAColors.textPrimaryOf(context),
+                      fontSize: 13,
+                    ),
+                    items: _sortOptions.map((option) {
+                      return DropdownMenuItem<String>(
+                        value: option.key,
+                        child: Text(option.value),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        _onSortChanged(value);
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildBody() {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 250),
-      switchInCurve: Curves.easeOut,
-      switchOutCurve: Curves.easeIn,
-      child: _buildBodyContent(),
-    );
-  }
-
-  Widget _buildBodyContent() {
+  /// 资源列表
+  Widget _buildResourceList(BuildContext context) {
     if (_isLoading) {
       return Center(
-        key: const ValueKey('loading'),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 40,
-              height: 40,
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                gradient: BAColors.secondaryGradient,
+                shape: BoxShape.circle,
+              ),
               child: CircularProgressIndicator(
-                color: BAColors.primary,
+                color: Colors.white,
                 strokeWidth: 3,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             Text(
-              '正在搜索资源...',
+              '正在加载资源...',
               style: TextStyle(
                 color: BAColors.textSecondaryOf(context),
-                fontSize: 13,
+                fontSize: 16,
               ),
             ),
           ],
@@ -406,296 +519,182 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
     }
 
     if (_errorMessage != null) {
-      return KeyedSubtree(
-        key: const ValueKey('error'),
-        child: _buildErrorState(),
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: BAColors.danger.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.error_outline,
+                size: 48,
+                color: BAColors.danger,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              '加载失败',
+              style: TextStyle(
+                color: BAColors.textPrimaryOf(context),
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _errorMessage!,
+              style: TextStyle(
+                color: BAColors.textSecondaryOf(context),
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       );
     }
 
     if (_resources.isEmpty) {
-      return KeyedSubtree(
-        key: const ValueKey('empty'),
-        child: _buildEmptyState(),
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                gradient: BAColors.secondaryGradient,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: BAColors.secondary.withOpacity(0.3),
+                    blurRadius: 24,
+                    offset: Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.search_off,
+                size: 56,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 32),
+            Text(
+              _searchQuery.isNotEmpty
+                  ? '没有找到相关资源'
+                  : '还没有资源',
+              style: TextStyle(
+                color: BAColors.textPrimaryOf(context),
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _searchQuery.isNotEmpty
+                  ? '尝试搜索其他关键词'
+                  : '去下载一些模组和资源包吧',
+              style: TextStyle(
+                color: BAColors.textSecondaryOf(context),
+                fontSize: 15,
+              ),
+            ),
+          ],
+        ),
       );
     }
 
-    return KeyedSubtree(
-      key: const ValueKey('grid'),
-      child: _buildResourceGrid(),
-    );
-  }
-
-  Widget _buildErrorState() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.error_outline, color: BAColors.danger, size: 48),
-          const SizedBox(height: 16),
-          Text(
-            '加载失败',
-            style: TextStyle(
-              color: BAColors.textPrimaryOf(context),
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _errorMessage!,
-            style: TextStyle(
-              color: BAColors.textSecondaryOf(context),
-              fontSize: 13,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: _performSearch,
-            icon: const Icon(Icons.refresh, size: 18),
-            label: const Text('重试'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: BAColors.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 96,
-            height: 96,
-            decoration: BoxDecoration(
-              color: BAColors.primary.withOpacity(0.08),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.explore_off_rounded,
-              size: 48,
-              color: BAColors.primary.withOpacity(0.5),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            '没有找到相关资源',
-            style: TextStyle(
-              color: BAColors.textPrimaryOf(context),
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '试试换个关键词或切换分类吧',
-            style: TextStyle(
-              color: BAColors.textSecondaryOf(context),
-              fontSize: 13,
-            ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () {
-              _searchController.clear();
-              _searchQuery = '';
-              _selectedType = null;
-              _performSearch();
-            },
-            icon: const Icon(Icons.refresh, size: 18),
-            label: const Text('清除筛选'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: BAColors.surfaceOf(context),
-              foregroundColor: BAColors.textSecondaryOf(context),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: BorderSide(color: BAColors.borderOf(context)),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildResourceGrid() {
-    return CustomScrollView(
-      controller: _scrollController,
-      slivers: [
-        SliverGrid(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
-            childAspectRatio: 1.1,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-          ),
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              return _ResourceCard(
-                resource: _resources[index],
-                onTap: () => _onResourceTap(_resources[index]),
-              );
-            },
-            childCount: _resources.length,
-          ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: GridView.builder(
+        controller: _scrollController,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          childAspectRatio: 0.85,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
         ),
-        if (_isLoadingMore)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: BAColors.primary,
-                  strokeWidth: 3,
-                ),
+        itemCount: _resources.length + (_isLoadingMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index >= _resources.length) {
+            return Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(BAColors.secondary),
               ),
-            ),
-          ),
-      ],
+            );
+          }
+          final resource = _resources[index];
+          return _buildResourceCard(context, resource);
+        },
+      ),
     );
   }
-}
 
-class _ResourceCard extends StatefulWidget {
-  final Resource resource;
-  final VoidCallback? onTap;
-
-  const _ResourceCard({required this.resource, this.onTap});
-
-  @override
-  State<_ResourceCard> createState() => _ResourceCardState();
-}
-
-class _ResourceCardState extends State<_ResourceCard> {
-  bool _isHovered = false;
-
-  Color get _typeColor {
-    switch (widget.resource.type) {
-      case ResourceType.mod:
-        return BAColors.primary;
-      case ResourceType.resourcePack:
-        return BAColors.success;
-      case ResourceType.modpack:
-        return BAColors.secondary;
-    }
-  }
-
-  IconData get _typeIcon {
-    switch (widget.resource.type) {
-      case ResourceType.mod:
-        return Icons.extension;
-      case ResourceType.resourcePack:
-        return Icons.texture;
-      case ResourceType.modpack:
-        return Icons.inventory_2;
-    }
-  }
-
-  String _formatDownloads(int downloads) {
-    if (downloads >= 1000000) {
-      return '${(downloads / 1000000).toStringAsFixed(1)}M';
-    }
-    if (downloads >= 1000) {
-      return '${(downloads / 1000).toStringAsFixed(0)}K';
-    }
-    return downloads.toString();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final color = _typeColor;
+  /// 资源卡片
+  Widget _buildResourceCard(BuildContext context, Resource resource) {
+    final typeColor = _typeColors[resource.type] ?? BAColors.primary;
 
     return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedScale(
-        scale: _isHovered ? 1.02 : 1.0,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-        child: AnimatedContainer(
+      cursor: SystemMouseCursors.click,
+      child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: BAColors.surfaceOf(context).withOpacity(0.85),
+          color: BAColors.glassOf(context),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: _isHovered
-                ? color
-                : BAColors.borderOf(context).withOpacity(0.6),
-            width: _isHovered ? 2 : 1,
+            color: BAColors.borderOf(context).withOpacity(0.5),
           ),
-          boxShadow: _isHovered
-              ? [
-                  BoxShadow(
-                    color: color.withOpacity(0.3),
-                    blurRadius: 16,
-                    offset: const Offset(0, 8),
-                  ),
-                ]
-              : BATheme.shadowsSmallOf(context),
+          boxShadow: [
+            BoxShadow(
+              color: BAColors.shadowOf(context),
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
+          ],
         ),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: widget.onTap,
+            onTap: () => _onResourceTap(resource),
             borderRadius: BorderRadius.circular(16),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 顶部类型标签
                   Row(
                     children: [
                       Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: color.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: widget.resource.iconUrl != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  widget.resource.iconUrl!,
-                                  width: 48,
-                                  height: 48,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, a, b) => Icon(
-                                    _typeIcon,
-                                    color: color,
-                                    size: 24,
-                                  ),
-                                ),
-                              )
-                            : Icon(_typeIcon, color: color, size: 24),
-                      ),
-                      const Spacer(),
-                      Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
-                          color: BAColors.surfaceVariantOf(context),
+                          color: typeColor.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.download,
-                                color: BAColors.textSecondaryOf(context), size: 12),
+                            Icon(
+                              _typeIcons[resource.type] ?? Icons.apps,
+                              size: 14,
+                              color: typeColor,
+                            ),
                             const SizedBox(width: 4),
                             Text(
-                              _formatDownloads(widget.resource.downloads),
+                              _getTypeName(resource.type),
                               style: TextStyle(
-                                color: BAColors.textSecondaryOf(context),
-                                fontSize: 10,
+                                color: typeColor,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
@@ -704,106 +703,103 @@ class _ResourceCardState extends State<_ResourceCard> {
                     ],
                   ),
                   const SizedBox(height: 12),
+
+                  // 资源图标
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            typeColor.withOpacity(0.2),
+                            typeColor.withOpacity(0.1),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          _typeIcons[resource.type] ?? Icons.apps,
+                          size: 48,
+                          color: typeColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // 资源名称
                   Text(
-                    widget.resource.name,
+                    resource.name,
                     style: TextStyle(
                       color: BAColors.textPrimaryOf(context),
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    widget.resource.latestVersion != null
-                        ? 'v${widget.resource.latestVersion!.versionNumber}'
-                        : widget.resource.supportedGameVersions.isNotEmpty
-                            ? widget.resource.supportedGameVersions.first
-                            : '',
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 11,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
-                  Expanded(
-                    child: Text(
-                      widget.resource.description,
-                      style: TextStyle(
+
+                  // 下载量和作者
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.download,
+                        size: 14,
                         color: BAColors.textSecondaryOf(context),
-                        fontSize: 11,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 36,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        gradient: const LinearGradient(
-                          colors: [
-                            BAColors.primary,
-                            BAColors.secondary,
-                          ],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
-                        boxShadow: _isHovered
-                            ? [
-                                BoxShadow(
-                                  color: BAColors.primary
-                                      .withOpacity(0.4),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                                BoxShadow(
-                                  color: BAColors.secondary
-                                      .withOpacity(0.3),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ]
-                            : [],
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: widget.onTap,
-                          borderRadius: BorderRadius.circular(10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.add,
-                                  color: BAColors.textOnPrimary, size: 18),
-                              SizedBox(width: 6),
-                              Text(
-                                '安装',
-                                style: TextStyle(
-                                  color: BAColors.textOnPrimary,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
+                      const SizedBox(width: 4),
+                      Text(
+                        _formatDownloads(resource.downloads),
+                        style: TextStyle(
+                          color: BAColors.textSecondaryOf(context),
+                          fontSize: 12,
                         ),
                       ),
-                    ),
+                      const Spacer(),
+                      Text(
+                        resource.authors.isNotEmpty
+                            ? resource.authors.first.name
+                            : '未知作者',
+                        style: TextStyle(
+                          color: BAColors.textSecondaryOf(context),
+                          fontSize: 11,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
           ),
         ),
-        ),
       ),
     );
+  }
+
+  String _getTypeName(ResourceType? type) {
+    switch (type) {
+      case ResourceType.mod:
+        return '模组';
+      case ResourceType.resourcePack:
+        return '资源包';
+      case ResourceType.modpack:
+        return '整合包';
+      default:
+        return '其他';
+    }
+  }
+
+  String _formatDownloads(int downloads) {
+    if (downloads >= 1000000) {
+      return '${(downloads / 1000000).toStringAsFixed(1)}M';
+    } else if (downloads >= 1000) {
+      return '${(downloads / 1000).toStringAsFixed(1)}K';
+    }
+    return downloads.toString();
   }
 }

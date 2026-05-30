@@ -1,16 +1,14 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
-import '../theme/typography.dart';
-import '../theme/app_theme.dart';
 import 'ba_buttons.dart';
 
-/// 毛玻璃弹窗组件
-class BAFrostedDialog extends StatelessWidget {
-  /// 弹窗标题
+/// 蔚蓝档案风格对话框组件
+class BADialog extends StatelessWidget {
+  /// 对话框标题
   final String title;
 
-  /// 弹窗内容
+  /// 对话框内容
   final Widget child;
 
   /// 操作按钮列表
@@ -22,13 +20,13 @@ class BAFrostedDialog extends StatelessWidget {
   /// 关闭回调
   final VoidCallback? onClose;
 
-  /// 弹窗宽度
+  /// 对话框宽度
   final double? width;
 
-  /// 弹窗高度
+  /// 对话框高度
   final double? height;
 
-  const BAFrostedDialog({
+  const BADialog({
     super.key,
     required this.title,
     required this.child,
@@ -39,7 +37,7 @@ class BAFrostedDialog extends StatelessWidget {
     this.height,
   });
 
-  /// 显示毛玻璃弹窗
+  /// 显示蔚蓝档案风格对话框
   static Future<T?> show<T>({
     required BuildContext context,
     required String title,
@@ -53,8 +51,8 @@ class BAFrostedDialog extends StatelessWidget {
     return showDialog<T>(
       context: context,
       barrierDismissible: barrierDismissible,
-      barrierColor: Colors.black.withOpacity(0.3),
-      builder: (context) => BAFrostedDialog(
+      barrierColor: Colors.black.withOpacity(0.4),
+      builder: (context) => BADialog(
         title: title,
         child: child,
         actions: actions,
@@ -72,54 +70,118 @@ class BAFrostedDialog extends StatelessWidget {
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       child: ClipRRect(
-        borderRadius: BATheme.borderRadius,
+        borderRadius: BorderRadius.circular(20),
         child: BackdropFilter(
           filter: ImageFilter.blur(
-            sigmaX: BATheme.blurSigma,
-            sigmaY: BATheme.blurSigma,
+            sigmaX: 10,
+            sigmaY: 10,
           ),
           child: Container(
             width: width,
             height: height,
-            constraints: const BoxConstraints(maxWidth: 560, minWidth: 320),
+            constraints: const BoxConstraints(maxWidth: 520, minWidth: 360),
             decoration: BoxDecoration(
               color: BAColors.glassOf(context),
-              borderRadius: BATheme.borderRadius,
-              border: Border.all(color: BAColors.borderOf(context), width: 1),
-              boxShadow: BATheme.shadowsOf(context),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: BAColors.borderOf(context).withOpacity(0.6),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: BAColors.shadowOf(context),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                // 标题栏 - 带渐变装饰
+                Container(
+                  padding: const EdgeInsets.fromLTRB(24, 18, 24, 16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        BAColors.primary.withOpacity(0.2),
+                        BAColors.primary.withOpacity(0.05),
+                      ],
+                    ),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: BAColors.borderOf(context).withOpacity(0.4),
+                        width: 1,
+                      ),
+                    ),
+                  ),
                   child: Row(
                     children: [
                       Expanded(
                         child: Text(
                           title,
-                          style: BATypography.headlineMedium.copyWith(
+                          style: TextStyle(
                             color: BAColors.textPrimaryOf(context),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
                           ),
                         ),
                       ),
-                      if (showCloseButton) _CloseButton(onPressed: onClose),
+                      if (showCloseButton)
+                        InkWell(
+                          onTap: onClose,
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: BAColors.surfaceVariantOf(context).withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              size: 18,
+                              color: BAColors.textSecondaryOf(context),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
+                // 内容区域
                 Flexible(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
                     child: child,
                   ),
                 ),
+                // 按钮区域
                 if (actions != null && actions!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(24),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(
+                          color: BAColors.borderOf(context).withOpacity(0.4),
+                          width: 1,
+                        ),
+                      ),
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
-                      children: actions!.reversed.toList(),
+                      children: actions!.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final action = entry.value;
+                        return Padding(
+                          padding: EdgeInsets.only(
+                            left: index > 0 ? 12 : 0,
+                          ),
+                          child: action,
+                        );
+                      }).toList(),
                     ),
                   ),
               ],
@@ -131,41 +193,11 @@ class BAFrostedDialog extends StatelessWidget {
   }
 }
 
-/// 确认弹窗
-class BAConfirmDialog extends StatelessWidget {
-  /// 标题
-  final String title;
+// 向后兼容别名
+typedef BAFrostedDialog = BADialog;
 
-  /// 内容
-  final String content;
-
-  /// 确认按钮文字
-  final String confirmText;
-
-  /// 取消按钮文字
-  final String cancelText;
-
-  /// 确认回调
-  final VoidCallback? onConfirm;
-
-  /// 取消回调
-  final VoidCallback? onCancel;
-
-  /// 确认按钮样式（主色/危险色/成功色）
-  final BAButtonStyle confirmButtonStyle;
-
-  const BAConfirmDialog({
-    super.key,
-    required this.title,
-    required this.content,
-    this.confirmText = '确认',
-    this.cancelText = '取消',
-    this.onConfirm,
-    this.onCancel,
-    this.confirmButtonStyle = BAButtonStyle.primary,
-  });
-
-  /// 显示确认弹窗
+/// 确认对话框（向后兼容）
+class BAConfirmDialog {
   static Future<bool> show({
     required BuildContext context,
     required String title,
@@ -174,113 +206,34 @@ class BAConfirmDialog extends StatelessWidget {
     String cancelText = '取消',
     BAButtonStyle confirmButtonStyle = BAButtonStyle.primary,
   }) async {
-    final result = await BAFrostedDialog.show<bool>(
+    final result = await showDialog<bool>(
       context: context,
-      title: title,
-      child: Text(
-        content,
-        style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+      builder: (context) => BADialog(
+        title: title,
+        child: Text(
+          content,
+          style: TextStyle(
+            color: BAColors.textPrimaryOf(context),
+          ),
+        ),
+        actions: [
+          BASecondaryButton(
+            text: cancelText,
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          const SizedBox(width: 12),
+          confirmButtonStyle == BAButtonStyle.danger
+              ? BADangerButton(
+                  text: confirmText,
+                  onPressed: () => Navigator.of(context).pop(true),
+                )
+              : BAPrimaryButton(
+                  text: confirmText,
+                  onPressed: () => Navigator.of(context).pop(true),
+                ),
+        ],
       ),
-      actions: [
-        BASecondaryButton(
-          text: cancelText,
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-        const SizedBox(width: 12),
-        _buildConfirmButton(
-          confirmText,
-          confirmButtonStyle,
-          () => Navigator.of(context).pop(true),
-        ),
-      ],
-      showCloseButton: false,
-      barrierDismissible: false,
     );
     return result ?? false;
-  }
-
-  static Widget _buildConfirmButton(
-    String text,
-    BAButtonStyle style,
-    VoidCallback onPressed,
-  ) {
-    switch (style) {
-      case BAButtonStyle.danger:
-        return BADangerButton(text: text, onPressed: onPressed);
-      case BAButtonStyle.success:
-        return BAButton(
-          style: BAButtonStyle.success,
-          onPressed: onPressed,
-          child: Text(text),
-        );
-      default:
-        return BAPrimaryButton(text: text, onPressed: onPressed);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BAFrostedDialog(
-      title: title,
-      child: Text(
-        content,
-        style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
-      ),
-      actions: [
-        BASecondaryButton(
-          text: cancelText,
-          onPressed: () {
-            onCancel?.call();
-            Navigator.of(context).pop();
-          },
-        ),
-        const SizedBox(width: 12),
-        _buildConfirmButton(confirmText, confirmButtonStyle, () {
-          onConfirm?.call();
-          Navigator.of(context).pop();
-        }),
-      ],
-      showCloseButton: false,
-      onClose: onCancel,
-    );
-  }
-}
-
-/// 关闭按钮组件
-class _CloseButton extends StatefulWidget {
-  final VoidCallback? onPressed;
-
-  const _CloseButton({this.onPressed});
-
-  @override
-  State<_CloseButton> createState() => _CloseButtonState();
-}
-
-class _CloseButtonState extends State<_CloseButton> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: GestureDetector(
-        onTap: widget.onPressed,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: _isHovered ? BAColors.surfaceVariantOf(context) : Colors.transparent,
-            borderRadius: BATheme.borderRadiusSmall,
-          ),
-          child: Icon(
-            Icons.close,
-            color: _isHovered ? BAColors.textPrimaryOf(context) : BAColors.textSecondaryOf(context),
-            size: 20,
-          ),
-        ),
-      ),
-    );
   }
 }

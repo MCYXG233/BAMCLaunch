@@ -46,3 +46,4 @@ app.*.map.json
 
 # Trae IDE related
 .trae/
+docs/DESIGN_SPEC.md

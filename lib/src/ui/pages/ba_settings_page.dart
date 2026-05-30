@@ -24,9 +24,11 @@ class BASettingsPage extends StatefulWidget {
 
 class _BASettingsPageState extends State<BASettingsPage> {
   final ConfigManager _configManager = ConfigManager();
+  final ThemeManager _themeManager = ThemeManager();
 
   String _selectedCategory = 'general';
   bool _notificationInitialized = false;
+  bool _themeManagerInitialized = false;
 
   String _gameDirectory = '';
   String _javaPath = '';
@@ -66,7 +68,17 @@ class _BASettingsPageState extends State<BASettingsPage> {
     _proxyPortFocusNode.addListener(_onProxyPortFocusChange);
     _jvmArgsFocusNode.addListener(_onJvmArgsFocusChange);
     _gameArgsFocusNode.addListener(_onGameArgsFocusChange);
+    _initThemeManager();
     _loadSettings();
+  }
+
+  Future<void> _initThemeManager() async {
+    await _themeManager.initialize();
+    if (mounted) {
+      setState(() {
+        _themeManagerInitialized = true;
+      });
+    }
   }
 
   @override
@@ -127,11 +139,11 @@ class _BASettingsPageState extends State<BASettingsPage> {
       final jvmArguments = _configManager.getString(ConfigKeys.jvmArguments) ?? '';
       final gameArguments = _configManager.getString(ConfigKeys.gameArguments) ?? '';
 
-      // 从 ThemeManager 获取当前主题模式，而不是从配置文件
-      final themeManager = ThemeManager();
-      await themeManager.initialize();
+      // 等待 _themeManager 初始化完成
+      await _initThemeManager();
+
       String themeModeStr;
-      switch (themeManager.themeMode) {
+      switch (_themeManager.themeMode) {
         case ThemeMode.light:
           themeModeStr = 'light';
           break;
@@ -813,7 +825,12 @@ class _BASettingsPageState extends State<BASettingsPage> {
   }
 
   Widget _buildGeneralSettings() {
-    final themeManager = Provider.of<ThemeManager>(context, listen: false);
+    // 直接使用已初始化的 _themeManager
+    if (!_themeManagerInitialized) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
     return ListView(
       padding: const EdgeInsets.only(right: 8),
       children: [
@@ -847,7 +864,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   DropdownMenuItem(value: 'system', child: Text('跟随系统')),
                 ],
                 onChanged: (value) {
-                  if (value != null) _saveThemeMode(value, themeManager);
+                  if (value != null) _saveThemeMode(value, _themeManager);
                 },
               ),
             ),

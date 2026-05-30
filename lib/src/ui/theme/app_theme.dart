@@ -5,8 +5,8 @@ import 'typography.dart';
 /// 蔚蓝档案 (Blue Archive) UI 主题数据
 /// 完全按照蔚蓝档案的视觉风格设计
 class BATheme {
-  /// 向后兼容：获取默认主题数据（深色）
-  static ThemeData get theme => darkTheme;
+  /// 向后兼容：获取默认主题数据（浅色）
+  static ThemeData get theme => lightTheme;
 
   /// 获取深色主题数据
   static ThemeData get darkTheme {
@@ -329,7 +329,7 @@ class BATheme {
         return darkTheme;
       case ThemeMode.system:
       default:
-        return darkTheme;
+        return lightTheme;
     }
   }
 
@@ -550,43 +550,43 @@ class BATheme {
 
   // ========== 圆角半径 ==========
   
-  /// 标准圆角半径
-  static BorderRadius get borderRadius => BorderRadius.circular(12);
+  /// 标准圆角半径（蔚蓝档案风格）
+  static BorderRadius get borderRadius => BorderRadius.circular(16);
 
   /// 小圆角半径
-  static BorderRadius get borderRadiusSmall => BorderRadius.circular(8);
+  static BorderRadius get borderRadiusSmall => BorderRadius.circular(10);
 
   /// 中圆角半径
-  static BorderRadius get borderRadiusMedium => BorderRadius.circular(12);
+  static BorderRadius get borderRadiusMedium => BorderRadius.circular(14);
 
   /// 大圆角半径
-  static BorderRadius get borderRadiusLarge => BorderRadius.circular(16);
+  static BorderRadius get borderRadiusLarge => BorderRadius.circular(20);
 
   /// 超大圆角半径
-  static BorderRadius get borderRadiusExtraLarge => BorderRadius.circular(24);
+  static BorderRadius get borderRadiusExtraLarge => BorderRadius.circular(28);
 
   // ========== 阴影 ==========
 
-  /// 向后兼容：获取标准阴影（默认深色）
-  static List<BoxShadow> get shadows => darkShadows;
+  /// 向后兼容：获取标准阴影（默认浅色）
+  static List<BoxShadow> get shadows => lightShadows;
 
-  /// 向后兼容：获取小阴影（默认深色）
-  static List<BoxShadow> get shadowsSmall => darkShadowsSmall;
+  /// 向后兼容：获取小阴影（默认浅色）
+  static List<BoxShadow> get shadowsSmall => lightShadowsSmall;
 
   /// 获取深色主题标准阴影
   static List<BoxShadow> get darkShadows => [
         BoxShadow(
-          color: BAColors.darkShadow.withOpacity(0.2),
-          blurRadius: 12,
-          offset: const Offset(0, 4),
+          color: BAColors.darkShadow.withOpacity(0.25),
+          blurRadius: 16,
+          offset: const Offset(0, 6),
         ),
       ];
 
-  /// 获取浅色主题标准阴影
+  /// 获取浅色主题标准阴影（蔚蓝档案风格，更柔和）
   static List<BoxShadow> get lightShadows => [
         BoxShadow(
-          color: BAColors.lightShadow.withOpacity(0.15),
-          blurRadius: 12,
+          color: const Color(0xFF000000).withOpacity(0.06),
+          blurRadius: 16,
           offset: const Offset(0, 4),
         ),
       ];
@@ -594,17 +594,17 @@ class BATheme {
   /// 获取深色主题小阴影
   static List<BoxShadow> get darkShadowsSmall => [
         BoxShadow(
-          color: BAColors.darkShadow.withOpacity(0.15),
-          blurRadius: 6,
+          color: BAColors.darkShadow.withOpacity(0.18),
+          blurRadius: 8,
           offset: const Offset(0, 2),
         ),
       ];
 
-  /// 获取浅色主题小阴影
+  /// 获取浅色主题小阴影（蔚蓝档案风格，更柔和）
   static List<BoxShadow> get lightShadowsSmall => [
         BoxShadow(
-          color: BAColors.lightShadow.withOpacity(0.1),
-          blurRadius: 6,
+          color: const Color(0xFF000000).withOpacity(0.04),
+          blurRadius: 8,
           offset: const Offset(0, 2),
         ),
       ];
@@ -612,17 +612,17 @@ class BATheme {
   /// 获取深色主题大阴影
   static List<BoxShadow> get darkShadowsLarge => [
         BoxShadow(
-          color: BAColors.darkShadow.withOpacity(0.3),
-          blurRadius: 20,
-          offset: const Offset(0, 8),
+          color: BAColors.darkShadow.withOpacity(0.35),
+          blurRadius: 24,
+          offset: const Offset(0, 10),
         ),
       ];
 
-  /// 获取浅色主题大阴影
+  /// 获取浅色主题大阴影（蔚蓝档案风格，更柔和）
   static List<BoxShadow> get lightShadowsLarge => [
         BoxShadow(
-          color: BAColors.lightShadow.withOpacity(0.2),
-          blurRadius: 20,
+          color: const Color(0xFF000000).withOpacity(0.08),
+          blurRadius: 24,
           offset: const Offset(0, 8),
         ),
       ];

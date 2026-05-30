@@ -105,16 +105,7 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
 
           // 主界面
           Expanded(
-            child: Column(
-              children: [
-                // 顶部信息栏
-                _buildTopBar(),
-                const SizedBox(height: 12),
-
-                // 内容
-                Expanded(child: _buildContent()),
-              ],
-            ),
+            child: _buildContent(),
           ),
 
           // 底部导航
@@ -129,41 +120,135 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
     return GestureDetector(
       onPanStart: (_) => windowManager.startDragging(),
       child: Container(
-        height: 32,
+        height: 48,
         color: BAColors.surfaceOf(context),
         child: Row(
           children: [
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             // Logo
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [BAColors.primaryOf(context), BAColors.primaryLight],
-                ),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: Image.asset(
-                  'assets/images/BAMCLaunch_Logo.png',
-                  fit: BoxFit.contain,
-                  width: 20,
-                  height: 12,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'BAMC Launcher',
-              style: TextStyle(
-                color: BAColors.textSecondaryOf(context),
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+            Image.asset(
+              'assets/images/BAMCLaunch_Logo.png',
+              width: 100,
+              height: 32,
+              fit: BoxFit.contain,
             ),
             const Spacer(),
+
+            // 用户信息
+            GestureDetector(
+              onTap: _openAccountSelector,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: BAColors.primary.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: BAColors.primary.withOpacity(0.4), width: 1.5),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [BAColors.primary, BAColors.primaryLight],
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: BAColors.primary.withOpacity(0.3),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(Icons.person, color: Colors.white, size: 16),
+                    ),
+                    const SizedBox(width: 10),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _selectedAccountName ?? '未登录',
+                          style: TextStyle(
+                            color: BAColors.textPrimaryOf(context),
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          _selectedAccountName != null ? '已登录' : '点击登录',
+                          style: TextStyle(
+                            color: _selectedAccountName != null ? BAColors.success : BAColors.primary,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            // 实例数
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: BAColors.success.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: BAColors.success.withOpacity(0.4), width: 1.5),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.folder, color: BAColors.success, size: 16),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${_instances.length}实例',
+                    style: TextStyle(
+                      color: BAColors.textPrimaryOf(context),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            // 下载中
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: BAColors.warning.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: BAColors.warning.withOpacity(0.4), width: 1.5),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.download, color: BAColors.warning, size: 16),
+                  const SizedBox(width: 6),
+                  Text(
+                    '0下载中',
+                    style: TextStyle(
+                      color: BAColors.textPrimaryOf(context),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            // 通知
+            _buildIconButton(Icons.notifications_none, onTap: () {}),
+            const SizedBox(width: 8),
+
+            // 设置
+            _buildIconButton(Icons.settings, onTap: () => setState(() => _currentPage = 3)),
+            const SizedBox(width: 12),
 
             // 窗口控制
             if (Platform.isWindows) ...[
@@ -195,141 +280,17 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
     );
   }
 
-  /// 顶部信息栏
-  Widget _buildTopBar() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: BAColors.borderOf(context)),
-        boxShadow: BATheme.shadowsSmallOf(context),
-      ),
-      child: Row(
-        children: [
-          // 用户信息（可点击）
-          GestureDetector(
-            onTap: _openAccountSelector,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // 头像
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        BAColors.primaryOf(context),
-                        BAColors.primaryLight,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(26),
-                    boxShadow: [
-                      BoxShadow(
-                        color: BAColors.primaryOf(context).withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    _selectedAccountName == null
-                        ? Icons.person_add
-                        : Icons.person,
-                    color: BAColors.textOnPrimary,
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Flexible(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _selectedAccountName ?? '未登录',
-                        style: TextStyle(
-                          color: BAColors.textPrimaryOf(context),
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: BAColors.primary.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          _selectedAccountName == null ? '点击登录' : 'Microsoft账户',
-                          style: const TextStyle(
-                            color: BAColors.primary,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Icon(
-                  Icons.arrow_drop_down,
-                  color: BAColors.textSecondaryOf(context),
-                  size: 20,
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(width: 24),
-          Container(width: 1, height: 50, color: BAColors.borderOf(context)),
-          const SizedBox(width: 24),
-
-          // 统计
-          Flexible(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _StatItem(
-                  icon: Icons.folder,
-                  value: '${_instances.length}',
-                  label: '实例',
-                  color: BAColors.primary,
-                ),
-                const SizedBox(width: 32),
-                _StatItem(
-                  icon: Icons.download,
-                  value: '0', // TODO: 实现真实的下载计数
-                  label: '下载中',
-                  color: BAColors.success,
-                ),
-              ],
-            ),
-          ),
-
-          const Spacer(),
-
-          // 功能按钮
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _ActionButton(icon: Icons.mail_outline, badge: 3, onTap: () {}),
-              const SizedBox(width: 8),
-              _ActionButton(
-                icon: Icons.settings,
-                onTap: () => setState(() => _currentPage = 3),
-              ),
-            ],
-          ),
-        ],
+  Widget _buildIconButton(IconData icon, {required VoidCallback onTap}) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 36,
+          height: 36,
+          alignment: Alignment.center,
+          child: Icon(icon, color: BAColors.textSecondaryOf(context), size: 22),
+        ),
       ),
     );
   }
@@ -352,49 +313,59 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
 
   Widget _buildBottomNav() {
     return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      height: 56,
       decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
-        border: Border(
-          top: BorderSide(color: BAColors.borderOf(context), width: 1),
-        ),
+        color: BAColors.surfaceOf(context).withOpacity(0.85),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: SizedBox(
-        height: 64,
-        child: Row(
-          children: [
-            Expanded(
-              child: _NavItem(
-                icon: Icons.home,
-                label: '主页',
-                isSelected: _currentPage == 0,
-                onTap: () => setState(() => _currentPage = 0),
-              ),
+      child: Row(
+        children: [
+          _buildNavItem(Icons.home, '主页', 0),
+          _buildNavItem(Icons.grid_3x3, '游戏库', 1),
+          _buildNavItem(Icons.archive, '资源中心', 2),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, String label, int index) {
+    bool isSelected = _currentPage == index;
+    return Expanded(
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () => setState(() => _currentPage = index),
+          child: Container(
+            height: 56,
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  color: isSelected ? BAColors.primary : BAColors.textSecondaryOf(context),
+                  size: 22,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: isSelected ? BAColors.primary : BAColors.textSecondaryOf(context),
+                    fontSize: 11,
+                  ),
+                ),
+              ],
             ),
-            Container(
-              width: 1,
-              color: BAColors.borderOf(context).withOpacity(0.4),
-            ),
-            Expanded(
-              child: _NavItem(
-                icon: Icons.games,
-                label: '游戏库',
-                isSelected: _currentPage == 1,
-                onTap: () => setState(() => _currentPage = 1),
-              ),
-            ),
-            Container(
-              width: 1,
-              color: BAColors.borderOf(context).withOpacity(0.4),
-            ),
-            Expanded(
-              child: _NavItem(
-                icon: Icons.download,
-                label: '资源中心',
-                isSelected: _currentPage == 2,
-                onTap: () => setState(() => _currentPage = 2),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -431,7 +402,7 @@ class _WindowButtonState extends State<_WindowButton> {
         onTap: widget.onTap,
         child: Container(
           width: 46,
-          height: 32,
+          height: 48,
           color: _isHovered
               ? (widget.isClose
                     ? BAColors.dangerOf(context)
@@ -442,7 +413,7 @@ class _WindowButtonState extends State<_WindowButton> {
             color: _isHovered && widget.isClose
                 ? BAColors.textOnPrimary
                 : BAColors.textSecondaryOf(context),
-            size: 16,
+            size: 18,
           ),
         ),
       ),

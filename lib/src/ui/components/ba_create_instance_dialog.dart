@@ -799,7 +799,7 @@ class _VersionTileState extends State<_VersionTile> {
       case VersionType.snapshot:
         return BAColors.warning;
       case VersionType.oldBeta:
-        return BAColors.accentPurple;
+        return BAColors.info;
       case VersionType.oldAlpha:
         return BAColors.danger;
     }
