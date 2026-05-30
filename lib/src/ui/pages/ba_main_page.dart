@@ -330,39 +330,39 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
     return Expanded(
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              setState(() => _currentPage = index);
-            },
-            child: Container(
-              height: 56,
-              alignment: Alignment.center,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AnimatedScale(
-                    scale: isSelected ? 1.15 : 1.0,
-                    duration: const Duration(milliseconds: 250),
-                    curve: Curves.easeOut,
-                    child: Icon(
-                      icon,
-                      color: isSelected ? BAColors.primary : BAColors.textSecondaryOf(context),
-                      size: 22,
-                    ),
+        child: GestureDetector(
+          onTap: () {
+            setState(() => _currentPage = index);
+          },
+          child: Container(
+            height: 56,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(28),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedScale(
+                  scale: isSelected ? 1.15 : 1.0,
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOut,
+                  child: Icon(
+                    icon,
+                    color: isSelected ? BAColors.primary : BAColors.textSecondaryOf(context),
+                    size: 22,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      color: isSelected ? BAColors.primary : BAColors.textSecondaryOf(context),
-                      fontSize: 11,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                    ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: isSelected ? BAColors.primary : BAColors.textSecondaryOf(context),
+                    fontSize: 11,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

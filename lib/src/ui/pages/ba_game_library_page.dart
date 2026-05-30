@@ -382,7 +382,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'ゲームライブラリ',
+                  '游戏库',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -391,15 +391,6 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                   ),
                 ),
               ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Text(
-            '游戏库',
-            style: TextStyle(
-              color: BAColors.textPrimaryOf(context),
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
             ),
           ),
           const Spacer(),
@@ -864,7 +855,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
         ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
           // 创建实例按钮
           InkWell(
@@ -881,29 +872,25 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                 vertical: 14,
               ),
               decoration: BoxDecoration(
-                gradient: BAColors.primaryGradient,
+                color: BAColors.surfaceOf(context).withOpacity(0.8),
                 borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: BAColors.primary.withOpacity(0.4),
-                    blurRadius: 12,
-                    offset: Offset(0, 4),
-                  ),
-                ],
+                border: Border.all(
+                  color: BAColors.borderOf(context).withOpacity(0.6),
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.add,
-                    color: Colors.white,
+                    color: BAColors.primary,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '新建实例',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: BAColors.primary,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -948,31 +935,6 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                     ),
                   ),
                 ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-
-          // 刷新按钮
-          InkWell(
-            onTap: _loadInstances,
-            borderRadius: BorderRadius.circular(14),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 14,
-              ),
-              decoration: BoxDecoration(
-                color: BAColors.surfaceOf(context).withOpacity(0.8),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: BAColors.borderOf(context).withOpacity(0.6),
-                ),
-              ),
-              child: Icon(
-                Icons.refresh,
-                color: BAColors.textSecondaryOf(context),
-                size: 20,
               ),
             ),
           ),
