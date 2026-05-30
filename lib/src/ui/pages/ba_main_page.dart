@@ -120,127 +120,66 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
     return GestureDetector(
       onPanStart: (_) => windowManager.startDragging(),
       child: Container(
-        height: 48,
-        color: BAColors.surfaceOf(context),
+        height: 40,
+        decoration: BoxDecoration(
+          color: BAColors.surfaceOf(context),
+          border: Border(
+            bottom: BorderSide(
+              color: BAColors.borderOf(context).withOpacity(0.3),
+            ),
+          ),
+        ),
         child: Row(
           children: [
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             // Logo
             Image.asset(
               'assets/images/BAMCLaunch_Logo.png',
-              width: 100,
-              height: 32,
+              width: 80,
+              height: 24,
               fit: BoxFit.contain,
             ),
-            const Spacer(),
+            const SizedBox(width: 20),
 
             // 用户信息
             GestureDetector(
               onTap: _openAccountSelector,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: BAColors.primary.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: BAColors.primary.withOpacity(0.4), width: 1.5),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 child: Row(
                   children: [
                     Container(
-                      width: 28,
-                      height: 28,
+                      width: 24,
+                      height: 24,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [BAColors.primary, BAColors.primaryLight],
-                        ),
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow: [
-                          BoxShadow(
-                            color: BAColors.primary.withOpacity(0.3),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                        color: BAColors.primary,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.person, color: Colors.white, size: 16),
+                      child: const Icon(Icons.person, color: Colors.white, size: 14),
                     ),
-                    const SizedBox(width: 10),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _selectedAccountName ?? '未登录',
-                          style: TextStyle(
-                            color: BAColors.textPrimaryOf(context),
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          _selectedAccountName != null ? '已登录' : '点击登录',
-                          style: TextStyle(
-                            color: _selectedAccountName != null ? BAColors.success : BAColors.primary,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
+                    const SizedBox(width: 8),
+                    Text(
+                      _selectedAccountName ?? '未登录',
+                      style: TextStyle(
+                        color: BAColors.textPrimaryOf(context),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+
+            const Spacer(),
 
             // 实例数
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: BAColors.success.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: BAColors.success.withOpacity(0.4), width: 1.5),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.folder, color: BAColors.success, size: 16),
-                  const SizedBox(width: 6),
-                  Text(
-                    '${_instances.length}实例',
-                    style: TextStyle(
-                      color: BAColors.textPrimaryOf(context),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
+            _buildStatusItem(Icons.folder, '${_instances.length}', BAColors.primary),
+            const SizedBox(width: 16),
 
             // 下载中
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: BAColors.warning.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: BAColors.warning.withOpacity(0.4), width: 1.5),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.download, color: BAColors.warning, size: 16),
-                  const SizedBox(width: 6),
-                  Text(
-                    '0下载中',
-                    style: TextStyle(
-                      color: BAColors.textPrimaryOf(context),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
+            _buildStatusItem(Icons.download, '0', BAColors.warning),
+            const SizedBox(width: 16),
 
             // 通知
             _buildIconButton(Icons.notifications_none, onTap: () {}),
@@ -248,7 +187,7 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
 
             // 设置
             _buildIconButton(Icons.settings, onTap: () => setState(() => _currentPage = 3)),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
 
             // 窗口控制
             if (Platform.isWindows) ...[
@@ -280,16 +219,36 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
     );
   }
 
+  Widget _buildStatusItem(IconData icon, String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 14),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: TextStyle(
+              color: BAColors.textSecondaryOf(context),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildIconButton(IconData icon, {required VoidCallback onTap}) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          width: 36,
-          height: 36,
+          width: 32,
+          height: 32,
           alignment: Alignment.center,
-          child: Icon(icon, color: BAColors.textSecondaryOf(context), size: 22),
+          child: Icon(icon, color: BAColors.textSecondaryOf(context), size: 18),
         ),
       ),
     );
@@ -402,7 +361,7 @@ class _WindowButtonState extends State<_WindowButton> {
         onTap: widget.onTap,
         child: Container(
           width: 46,
-          height: 48,
+          height: 40,
           color: _isHovered
               ? (widget.isClose
                     ? BAColors.dangerOf(context)
@@ -413,7 +372,7 @@ class _WindowButtonState extends State<_WindowButton> {
             color: _isHovered && widget.isClose
                 ? BAColors.textOnPrimary
                 : BAColors.textSecondaryOf(context),
-            size: 18,
+            size: 16,
           ),
         ),
       ),
