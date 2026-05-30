@@ -256,17 +256,46 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
 
   /// 内容区
   Widget _buildContent() {
-    switch (_currentPage) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 250),
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.05, 0),
+              end: Offset.zero,
+            ).animate(animation),
+            child: child,
+          ),
+        );
+      },
+      child: _buildPageContent(_currentPage),
+    );
+  }
+
+  Widget _buildPageContent(int pageIndex) {
+    switch (pageIndex) {
       case 0:
-        return _HomeContent(mainContext: context, instances: _instances);
+        return _HomeContent(
+          key: const ValueKey(0),
+          mainContext: context,
+          instances: _instances,
+          accountName: _selectedAccountName,
+        );
       case 1:
-        return const BAGameLibraryPage();
+        return const BAGameLibraryPage(key: ValueKey(1));
       case 2:
-        return const BAResourceCenterPage();
+        return const BAResourceCenterPage(key: ValueKey(2));
       case 3:
-        return const BASettingsPage();
+        return const BASettingsPage(key: ValueKey(3));
       default:
-        return _HomeContent(mainContext: context, instances: _instances);
+        return _HomeContent(
+          key: const ValueKey(0),
+          mainContext: context,
+          instances: _instances,
+          accountName: _selectedAccountName,
+        );
     }
   }
 
@@ -301,28 +330,39 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
     return Expanded(
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          onTap: () => setState(() => _currentPage = index),
-          child: Container(
-            height: 56,
-            alignment: Alignment.center,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  color: isSelected ? BAColors.primary : BAColors.textSecondaryOf(context),
-                  size: 22,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: isSelected ? BAColors.primary : BAColors.textSecondaryOf(context),
-                    fontSize: 11,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              setState(() => _currentPage = index);
+            },
+            child: Container(
+              height: 56,
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AnimatedScale(
+                    scale: isSelected ? 1.15 : 1.0,
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeOut,
+                    child: Icon(
+                      icon,
+                      color: isSelected ? BAColors.primary : BAColors.textSecondaryOf(context),
+                      size: 22,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: isSelected ? BAColors.primary : BAColors.textSecondaryOf(context),
+                      fontSize: 11,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -662,10 +702,17 @@ class _NavItemState extends State<_NavItem>
 
 /// 主页内容
 class _HomeContent extends StatelessWidget {
+  final Key? key;
   final BuildContext mainContext;
   final List<GameInstance> instances;
+  final String? accountName;
 
-  const _HomeContent({required this.mainContext, required this.instances});
+  const _HomeContent({
+    this.key,
+    required this.mainContext,
+    required this.instances,
+    this.accountName,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -704,7 +751,7 @@ class _HomeContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '欢迎回来，老师',
+            '欢迎回来，${accountName ?? '玩家'}',
             style: TextStyle(
               color: BAColors.textOnPrimary,
               fontSize: 24,

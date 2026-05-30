@@ -267,9 +267,10 @@ class _BALoginDialogState extends State<BALoginDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 80),
       child: Container(
-        width: 480,
-        constraints: const BoxConstraints(maxHeight: 600),
+        width: 800,
+        height: 480,
         decoration: BoxDecoration(
           color: BAColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(24),
@@ -277,43 +278,182 @@ class _BALoginDialogState extends State<BALoginDialog> {
           border: Border.all(color: BAColors.borderOf(context)),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
             _buildHeader(),
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildAccountList(),
-                    if (_accounts.isNotEmpty) const SizedBox(height: 24),
-                    
-                    if (_loginState == LoginState.initial) ...[
-                      _buildMicrosoftLogin(),
-                      const SizedBox(height: 16),
-                      _buildOfflineLogin(),
-                      const SizedBox(height: 16),
-                      _buildAuthlibLogin(),
-                    ] else if (_loginState == LoginState.gettingDeviceCode) ...[
-                      _buildLoadingState('正在获取设备代码...'),
-                    ] else if (_loginState == LoginState.waitingForUser) ...[
-                      _buildDeviceCodeWaitingState(),
-                    ] else if (_loginState == LoginState.authenticating) ...[
-                      _buildLoadingState('正在完成认证...'),
-                    ] else if (_loginState == LoginState.success) ...[
-                      _buildSuccessState(),
-                    ] else if (_loginState == LoginState.error) ...[
-                      _buildErrorState(),
-                    ],
-                  ],
-                ),
+            Expanded(
+              child: Row(
+                children: [
+                  // 左侧：已登录账户列表
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          right: BorderSide(color: BAColors.borderOf(context)),
+                        ),
+                      ),
+                      child: _buildAccountPanel(),
+                    ),
+                  ),
+                  // 右侧：登录新账户
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      child: _buildLoginPanel(),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildAccountPanel() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '已有账户',
+          style: TextStyle(
+            color: BAColors.textPrimaryOf(context),
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Expanded(
+          child: _accounts.isEmpty
+              ? Center(
+                  child: Text(
+                    '暂无账户',
+                    style: TextStyle(
+                      color: BAColors.textSecondaryOf(context),
+                      fontSize: 14,
+                    ),
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: _accounts.length,
+                  itemBuilder: (context, index) {
+                    final account = _accounts[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _AccountTile(
+                        account: account,
+                        onTap: () => _selectAccount(account),
+                        onLogout: account.type == AccountType.microsoft
+                            ? () => _logoutAccount(account)
+                            : null,
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoginPanel() {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            '登录新账户',
+            style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 20),
+          
+          if (_loginState == LoginState.initial) ...[
+            _buildMicrosoftLogin(),
+            const SizedBox(height: 16),
+            _buildOfflineLogin(),
+            const SizedBox(height: 16),
+            _buildAuthlibLogin(),
+          ] else if (_loginState == LoginState.gettingDeviceCode) ...[
+            _buildLoadingState('正在获取设备代码...'),
+          ] else if (_loginState == LoginState.waitingForUser) ...[
+            _buildDeviceCodeWaitingState(),
+          ] else if (_loginState == LoginState.authenticating) ...[
+            _buildLoadingState('正在完成认证...'),
+          ] else if (_loginState == LoginState.success) ...[
+            _buildSuccessState(),
+          ] else if (_loginState == LoginState.error) ...[
+            _buildErrorState(),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// 登出账户
+  Future<void> _logoutAccount(Account account) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => Dialog(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '登出账户',
+                style: TextStyle(
+                  color: BAColors.textPrimaryOf(context),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '确定要登出账户 "${account.username}" 吗？',
+                style: TextStyle(
+                  color: BAColors.textSecondaryOf(context),
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('取消'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text(
+                      '登出',
+                      style: TextStyle(color: BAColors.danger),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await _authManager.clearCredentials();
+      if (mounted) {
+        await _loadAccounts();
+      }
+    } catch (e) {
+      Logger.instance.error('登出失败', e);
+    }
   }
 
   /// 构建头部
@@ -788,10 +928,12 @@ class _BALoginDialogState extends State<BALoginDialog> {
 class _AccountTile extends StatelessWidget {
   final Account account;
   final VoidCallback onTap;
+  final VoidCallback? onLogout;
 
   const _AccountTile({
     required this.account,
     required this.onTap,
+    this.onLogout,
   });
 
   @override
@@ -847,6 +989,13 @@ class _AccountTile extends StatelessWidget {
                 ],
               ),
             ),
+            if (onLogout != null) ...[
+              IconButton(
+                onPressed: onLogout,
+                icon: Icon(Icons.logout, color: BAColors.danger, size: 18),
+                padding: const EdgeInsets.all(4),
+              ),
+            ],
             Icon(Icons.arrow_forward_ios, color: BAColors.textSecondaryOf(context), size: 14),
           ],
         ),

@@ -39,8 +39,8 @@ void main() {
       expect(VersionType.values.length, equals(4));
       expect(VersionType.release.name, equals('release'));
       expect(VersionType.snapshot.name, equals('snapshot'));
-      expect(VersionType.oldBeta.name, equals('old_beta'));
-      expect(VersionType.oldAlpha.name, equals('old_alpha'));
+      expect(VersionType.oldBeta.name, equals('oldBeta'));
+      expect(VersionType.oldAlpha.name, equals('oldAlpha'));
     });
   });
 

@@ -7,24 +7,25 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 
 import 'package:bamclaunch/main.dart';
+import 'package:bamclaunch/src/ui/theme/theme_manager.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('App initializes with ThemeManager', (WidgetTester tester) async {
+    // Create a mock ThemeManager for testing
+    final themeManager = ThemeManager();
+    
+    // Build our app with proper Provider context
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: themeManager,
+        child: const MyApp(),
+      ),
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify the app starts correctly
+    expect(find.byType(MaterialApp), findsOneWidget);
   });
 }
