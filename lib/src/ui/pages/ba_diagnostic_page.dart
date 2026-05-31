@@ -428,6 +428,13 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
             width: 1,
           ),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: BAThemeColors.primary.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -437,13 +444,31 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
             onPressed: () => Navigator.of(context).pop(),
           ),
           const SizedBox(width: 8),
-          const Icon(Icons.build_rounded, color: BAThemeColors.primary, size: 22),
-          const SizedBox(width: 10),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [BAThemeColors.primary, BAThemeColors.primaryLight],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: BAThemeColors.primary.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.build_rounded, color: Colors.white, size: 22),
+          ),
+          const SizedBox(width: 12),
           const Text(
-            '自动诊断',
+            '系统诊断',
             style: TextStyle(
               color: BAThemeColors.textPrimary,
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -562,20 +587,27 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
             curve: Curves.easeInOut,
             decoration: BoxDecoration(
               color: BAThemeColors.surface,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: _getBorderColor(item.status),
-                width: item.status == DiagnosticStatus.running ? 1.5 : 1,
+                color: _getBorderColor(item.status).withOpacity(0.6),
+                width: item.status == DiagnosticStatus.running ? 2 : 1,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: _getBorderColor(item.status).withOpacity(0.1),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(18),
                   child: Row(
                     children: [
                       _buildStatusIcon(item.status),
-                      const SizedBox(width: 14),
+                      const SizedBox(width: 16),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -584,11 +616,11 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                               item.title,
                               style: const TextStyle(
                                 color: BAThemeColors.textPrimary,
-                                fontSize: 15,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            const SizedBox(height: 3),
+                            const SizedBox(height: 4),
                             Text(
                               item.status == DiagnosticStatus.running
                                   ? '正在检查...'
@@ -597,7 +629,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                                 color: item.status == DiagnosticStatus.running
                                     ? BAThemeColors.info
                                     : BAThemeColors.textSecondary,
-                                fontSize: 12,
+                                fontSize: 13,
                               ),
                             ),
                           ],

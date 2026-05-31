@@ -291,31 +291,56 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
         color: BAThemeColors.surface,
         border: Border(
           bottom: BorderSide(color: BAThemeColors.border.withOpacity(0.4)),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: BAThemeColors.primary.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          Icon(Icons.terminal, color: BAThemeColors.primary, size: 22),
-          const SizedBox(width: 10),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [BAThemeColors.primary, BAThemeColors.primaryLight],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: BAThemeColors.primary.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.terminal, color: Colors.white, size: 22),
+          ),
+          const SizedBox(width: 12),
           Text(
             '游戏日志',
             style: TextStyle(
               color: BAThemeColors.textPrimary,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: _statusColor(_status).withOpacity(0.15),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: _statusColor(_status).withOpacity(0.4),
               ),
@@ -324,7 +349,7 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
               _statusLabel(_status),
               style: TextStyle(
                 color: _statusColor(_status),
-                fontSize: 12,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
             ),

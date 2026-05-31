@@ -148,27 +148,75 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
   Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
-        Text(
-          '模组管理',
-          style: TextStyle(
-            color: BAColors.textPrimaryOf(context),
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          decoration: BoxDecoration(
+            gradient: BAColors.secondaryGradient,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: BAColors.secondary.withOpacity(0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.extension,
+                color: Colors.white,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '模组管理',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(width: 16),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: BAColors.surfaceVariantOf(context),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            '${_mods.length} 个模组',
-            style: TextStyle(
-              color: BAColors.textSecondaryOf(context),
-              fontSize: 13,
+            color: BAColors.surfaceVariantOf(context).withOpacity(0.8),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: BAColors.borderOf(context).withOpacity(0.5),
             ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.extension,
+                color: BAColors.secondary,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${_mods.length}',
+                style: TextStyle(
+                  color: BAColors.textPrimaryOf(context),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                ' 个模组',
+                style: TextStyle(
+                  color: BAColors.textSecondaryOf(context),
+                  fontSize: 14,
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -183,11 +231,18 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
           ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 150, maxWidth: 300),
             child: Container(
-              height: 40,
+              height: 44,
               decoration: BoxDecoration(
-                color: BAColors.surfaceOf(context).withValues(alpha: 0.7),
+                color: BAColors.surfaceOf(context).withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: BAColors.borderOf(context).withValues(alpha: 0.5)),
+                border: Border.all(color: BAColors.borderOf(context).withValues(alpha: 0.6)),
+                boxShadow: [
+                  BoxShadow(
+                    color: BAColors.primary.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: TextField(
                 onChanged: (value) {
