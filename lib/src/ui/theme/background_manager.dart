@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../config/config_manager.dart';
 import '../../config/config_keys.dart';
@@ -58,6 +59,25 @@ class BackgroundManager extends ChangeNotifier {
     );
   }
   
+  Widget buildBackgroundWithBlur({required Widget child}) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      decoration: _getDecoration(),
+      child: Stack(
+        children: [
+          child,
+          if (_currentConfig.type == BackgroundType.image)
+            BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(
+                color: Colors.black.withOpacity(0.05),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+  
   BoxDecoration _getDecoration() {
     switch (_currentConfig.type) {
       case BackgroundType.solid:
@@ -81,11 +101,11 @@ class BackgroundManager extends ChangeNotifier {
         
       case BackgroundType.image:
         return BoxDecoration(
-          color: Color(0xFFF8F9FF).withOpacity(_currentConfig.opacity),
           image: _currentConfig.imagePath != null
               ? DecorationImage(
                   image: FileImage(File(_currentConfig.imagePath!)),
                   fit: BoxFit.cover,
+                  opacity: _currentConfig.opacity,
                 )
               : null,
         );

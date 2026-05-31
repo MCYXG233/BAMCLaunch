@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import '../../account/account_manager.dart';
@@ -123,15 +124,8 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
       body: _backgroundManager.buildBackground(
         child: Column(
           children: [
-            // 标题栏
             _buildTitleBar(),
-
-            // 主界面
-            Expanded(
-              child: _buildContent(),
-            ),
-
-            // 底部导航
+            Expanded(child: _buildContent()),
             _buildBottomNav(),
           ],
         ),
@@ -146,10 +140,10 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
       child: Container(
         height: 40,
         decoration: BoxDecoration(
-          color: BAColors.surfaceOf(context),
+          color: BAColors.surfaceOf(context).withOpacity(0.3),
           border: Border(
             bottom: BorderSide(
-              color: BAColors.borderOf(context).withOpacity(0.3),
+              color: BAColors.borderOf(context).withOpacity(0.2),
             ),
           ),
         ),
@@ -328,12 +322,12 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       height: 56,
       decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context).withOpacity(0.85),
+        color: BAColors.surfaceOf(context).withOpacity(0.7),
         borderRadius: BorderRadius.circular(28),
         border: Border.all(color: BAColors.borderOf(context).withOpacity(0.3)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withOpacity(0.15),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -757,15 +751,18 @@ class _HomeContent extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [BAColors.primary, BAColors.primaryLight],
+        gradient: LinearGradient(
+          colors: [
+            BAColors.primary.withOpacity(0.7),
+            BAColors.primaryLight.withOpacity(0.7),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: BAColors.primary.withOpacity(0.3),
+            color: BAColors.primary.withOpacity(0.2),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -826,9 +823,9 @@ class _HomeContent extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: BAColors.surfaceOf(mainContext),
+        color: BAColors.surfaceOf(mainContext).withOpacity(0.3),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: BAColors.borderOf(mainContext)),
+        border: Border.all(color: BAColors.borderOf(mainContext).withOpacity(0.2)),
         boxShadow: BATheme.shadowsSmallOf(mainContext),
       ),
       child: Column(
@@ -1013,13 +1010,13 @@ class _GameRecordItemState extends State<_GameRecordItem> {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: _isHovered
-              ? BAColors.primaryOf(context)
-              : BAColors.surfaceVariantOf(widget.cardContext),
+              ? BAColors.primaryOf(context).withOpacity(0.6)
+              : BAColors.surfaceVariantOf(widget.cardContext).withOpacity(0.3),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: _isHovered
-                ? BAColors.primaryOf(context).withOpacity(0.4)
-                : BAColors.borderOf(widget.cardContext),
+                ? BAColors.primaryOf(context).withOpacity(0.3)
+                : BAColors.borderOf(widget.cardContext).withOpacity(0.2),
           ),
         ),
         child: Row(

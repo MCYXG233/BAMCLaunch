@@ -182,26 +182,21 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
   Widget build(BuildContext context) {
     NotificationManager().init(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: BAColors.backgroundGradientOf(context),
-      ),
-      child: Column(
-        children: [
-          // 顶部标题栏
-          _buildHeader(context),
-          const SizedBox(height: 20),
+    return Column(
+      children: [
+        // 顶部标题栏
+        _buildHeader(context),
+        const SizedBox(height: 20),
 
-          // 搜索和分类区域
-          _buildSearchAndCategories(context),
-          const SizedBox(height: 20),
+        // 搜索和分类区域
+        _buildSearchAndCategories(context),
+        const SizedBox(height: 20),
 
-          // 资源列表
-          Expanded(
-            child: _buildResourceList(context),
-          ),
-        ],
-      ),
+        // 资源列表
+        Expanded(
+          child: _buildResourceList(context),
+        ),
+      ],
     );
   }
 
@@ -246,25 +241,16 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
               ],
             ),
           ),
-          const SizedBox(width: 16),
-          Text(
-            '资源中心',
-            style: TextStyle(
-              color: BAColors.textPrimaryOf(context),
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
           const Spacer(),
 
           // 统计信息
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: BAColors.surfaceOf(context).withOpacity(0.8),
+              color: BAColors.surfaceOf(context).withOpacity(0.3),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: BAColors.borderOf(context).withOpacity(0.5),
+                color: BAColors.borderOf(context).withOpacity(0.2),
               ),
             ),
             child: Row(

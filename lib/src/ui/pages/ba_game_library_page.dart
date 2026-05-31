@@ -360,29 +360,24 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
   Widget build(BuildContext context) {
     NotificationManager().init(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: BAColors.backgroundGradientOf(context),
-      ),
-      child: Column(
-        children: [
-          // 顶部状态栏
-          _buildHeader(context),
-          const SizedBox(height: 20),
+    return Column(
+      children: [
+        // 顶部状态栏
+        _buildHeader(context),
+        const SizedBox(height: 20),
 
-          // 搜索和筛选区域
-          _buildSearchAndFilter(context),
-          const SizedBox(height: 20),
+        // 搜索和筛选区域
+        _buildSearchAndFilter(context),
+        const SizedBox(height: 20),
 
-          // 实例列表
-          Expanded(
-            child: _buildInstanceGrid(context),
-          ),
+        // 实例列表
+        Expanded(
+          child: _buildInstanceGrid(context),
+        ),
 
-          // 底部操作区
-          _buildBottomActions(context),
-        ],
-      ),
+        // 底部操作区
+        _buildBottomActions(context),
+      ],
     );
   }
 
@@ -443,15 +438,15 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
               const Spacer(),
 
               // 统计信息
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: BAColors.surfaceOf(context).withOpacity(0.8),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: BAColors.borderOf(context).withOpacity(0.5),
-                  ),
-                ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: BAColors.surfaceOf(context).withOpacity(0.3),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: BAColors.borderOf(context).withOpacity(0.2),
+              ),
+            ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -522,10 +517,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: BAColors.surfaceOf(context).withOpacity(0.8),
+          color: BAColors.surfaceOf(context).withOpacity(0.3),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: BAColors.borderOf(context).withOpacity(0.5),
+            color: BAColors.borderOf(context).withOpacity(0.2),
           ),
         ),
         child: Row(
@@ -1013,10 +1008,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: BAColors.glassOf(context),
+        color: Colors.transparent,
         border: Border(
           top: BorderSide(
-            color: BAColors.borderOf(context).withOpacity(0.5),
+            color: BAColors.borderOf(context).withOpacity(0.1),
           ),
         ),
       ),
@@ -1038,10 +1033,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                 vertical: 14,
               ),
               decoration: BoxDecoration(
-                color: BAColors.surfaceOf(context).withOpacity(0.8),
+                color: BAColors.surfaceOf(context).withOpacity(0.3),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: BAColors.borderOf(context).withOpacity(0.6),
+                  color: BAColors.borderOf(context).withOpacity(0.2),
                 ),
               ),
               child: Row(
@@ -1077,10 +1072,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                 vertical: 14,
               ),
               decoration: BoxDecoration(
-                color: BAColors.surfaceOf(context).withOpacity(0.8),
+                color: BAColors.surfaceOf(context).withOpacity(0.3),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: BAColors.borderOf(context).withOpacity(0.6),
+                  color: BAColors.borderOf(context).withOpacity(0.2),
                 ),
               ),
               child: Row(
