@@ -84,4 +84,40 @@ class ConfigKeys {
   static const String launcherVisibility = 'launcherVisibility';
   static const String fileValidatePolicy = 'fileValidatePolicy';
   static const String gcStrategy = 'gcStrategy';
+
+  /// 新增的配置键
+  static const String launcherConfig = 'launcherConfig';
+  static const String extraJavaPaths = 'extraJavaPaths';
+  static const String localGameDirectories = 'localGameDirectories';
+  static const String processPriority = 'processPriority';
+  static const String versionIsolation = 'versionIsolation';
+  static const String displayGameLog = 'displayGameLog';
+  static const String customTitle = 'customTitle';
+  static const String discoverPage = 'discoverPage';
+  static const String autoDownloadJava = 'autoDownloadJava';
+  static const String resourceTranslation = 'resourceTranslation';
+  static const String translatedFilenamePrefix = 'translatedFilenamePrefix';
+  static const String skipFirstScreenOptions = 'skipFirstScreenOptions';
+  static const String autoPurgeLauncherLogs = 'autoPurgeLauncherLogs';
+  static const String mcpServerEnabled = 'mcpServerEnabled';
+  static const String mcpServerPort = 'mcpServerPort';
+  static const String extensionsEnabled = 'extensionsEnabled';
+  static const String homeWidgetState = 'homeWidgetState';
+  static const String suppressedDialogs = 'suppressedDialogs';
+  static const String runCount = 'runCount';
+  static const String lastRunExitedNormally = 'lastRunExitedNormally';
+  static const String enableSpeedLimit = 'enableSpeedLimit';
+  static const String speedLimitValue = 'speedLimitValue';
+  static const String cacheDirectory = 'cacheDirectory';
+  static const String primaryColor = 'primaryColor';
+  static const String useLiquidGlassDesign = 'useLiquidGlassDesign';
+  static const String headNavStyle = 'headNavStyle';
+  static const String fontSize = 'fontSize';
+  static const String backgroundChoice = 'backgroundChoice';
+  static const String randomCustomBackground = 'randomCustomBackground';
+  static const String autoDarkenBackground = 'autoDarkenBackground';
+  static const String invertColors = 'invertColors';
+  static const String enhanceContrast = 'enhanceContrast';
+  static const String instancesNavType = 'instancesNavType';
+  static const String launchPageQuickSwitch = 'launchPageQuickSwitch';
 }

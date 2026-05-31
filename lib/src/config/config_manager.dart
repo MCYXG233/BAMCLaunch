@@ -1,4 +1,5 @@
 import 'config_manager_impl.dart';
+import 'config_models.dart';
 
 /// 配置管理器统一接口
 /// 定义了配置读写、加密存储、持久化和变更监听的抽象
@@ -65,6 +66,45 @@ abstract class IConfigManager {
 
   /// 设置布尔配置值的便捷方法
   Future<void> setBool(String key, bool value) => set(key, value);
+
+  /// 获取完整的启动器配置
+  LauncherConfig getLauncherConfig();
+
+  /// 保存完整的启动器配置
+  Future<void> setLauncherConfig(LauncherConfig config);
+
+  /// 批量更新配置
+  Future<void> updateConfig(Map<String, dynamic> updates);
+
+  /// 增加运行计数
+  Future<int> incrementRunCount();
+
+  /// 获取额外的 Java 路径列表
+  List<String> getExtraJavaPaths();
+
+  /// 添加额外的 Java 路径
+  Future<void> addExtraJavaPath(String path);
+
+  /// 移除额外的 Java 路径
+  Future<void> removeExtraJavaPath(String path);
+
+  /// 获取被抑制的对话框列表
+  List<String> getSuppressedDialogs();
+
+  /// 抑制对话框
+  Future<void> suppressDialog(String dialogId);
+
+  /// 检查对话框是否被抑制
+  bool isDialogSuppressed(String dialogId);
+
+  /// 获取本地游戏目录列表
+  List<GameDirectory> getLocalGameDirectories();
+
+  /// 添加本地游戏目录
+  Future<void> addLocalGameDirectory(GameDirectory dir);
+
+  /// 移除本地游戏目录
+  Future<void> removeLocalGameDirectory(String dirPath);
 }
 
 /// 配置管理器（单例）
@@ -143,4 +183,47 @@ class ConfigManager implements IConfigManager {
 
   @override
   Future<void> setBool(String key, bool value) => _impl.setBool(key, value);
+
+  @override
+  LauncherConfig getLauncherConfig() => _impl.getLauncherConfig();
+
+  @override
+  Future<void> setLauncherConfig(LauncherConfig config) =>
+      _impl.setLauncherConfig(config);
+
+  @override
+  Future<void> updateConfig(Map<String, dynamic> updates) =>
+      _impl.updateConfig(updates);
+
+  @override
+  Future<int> incrementRunCount() => _impl.incrementRunCount();
+
+  @override
+  List<String> getExtraJavaPaths() => _impl.getExtraJavaPaths();
+
+  @override
+  Future<void> addExtraJavaPath(String path) => _impl.addExtraJavaPath(path);
+
+  @override
+  Future<void> removeExtraJavaPath(String path) => _impl.removeExtraJavaPath(path);
+
+  @override
+  List<String> getSuppressedDialogs() => _impl.getSuppressedDialogs();
+
+  @override
+  Future<void> suppressDialog(String dialogId) => _impl.suppressDialog(dialogId);
+
+  @override
+  bool isDialogSuppressed(String dialogId) => _impl.isDialogSuppressed(dialogId);
+
+  @override
+  List<GameDirectory> getLocalGameDirectories() => _impl.getLocalGameDirectories();
+
+  @override
+  Future<void> addLocalGameDirectory(GameDirectory dir) =>
+      _impl.addLocalGameDirectory(dir);
+
+  @override
+  Future<void> removeLocalGameDirectory(String dirPath) =>
+      _impl.removeLocalGameDirectory(dirPath);
 }

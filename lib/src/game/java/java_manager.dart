@@ -86,7 +86,15 @@ class JavaManager implements IJavaManager {
       final javaPaths = await _platformAdapter.findJavaInstallations();
       final List<JavaInstallation> installations = [];
 
-      for (final javaPath in javaPaths) {
+      // 添加用户配置的额外 Java 路径
+      final extraPaths = _configManager.getExtraJavaPaths();
+      final allPaths = [...javaPaths, ...extraPaths];
+
+      for (final javaPath in allPaths) {
+        // 跳过重复的路径
+        if (installations.any((i) => i.path == javaPath)) {
+          continue;
+        }
         final javaInfo = await getJavaInfo(javaPath);
         if (javaInfo != null) {
           installations.add(javaInfo);

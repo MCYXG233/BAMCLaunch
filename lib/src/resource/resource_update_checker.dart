@@ -1,0 +1,257 @@
+import 'dart:io';
+import 'dart:async';
+import 'dart:convert';
+import 'package:path/path.dart' as path;
+import '../core/logger.dart';
+
+/// Mod信息
+class ModInfo {
+  final String name;
+  final String version;
+  final String? modId;
+  final String? fileName;
+  final String? filePath;
+  final DateTime? installedAt;
+
+  ModInfo({
+    required this.name,
+    required this.version,
+    this.modId,
+    this.fileName,
+    this.filePath,
+    this.installedAt,
+  });
+}
+
+/// Mod版本信息（来自API）
+class ModVersionInfo {
+  final String version;
+  final String downloadUrl;
+  final DateTime releaseDate;
+  final String? changelog;
+  final List<String>? gameVersions;
+
+  ModVersionInfo({
+    required this.version,
+    required this.downloadUrl,
+    required this.releaseDate,
+    this.changelog,
+    this.gameVersions,
+  });
+}
+
+/// 更新状态
+enum UpdateStatus {
+  /// 无需更新
+  upToDate,
+
+  /// 有更新可用
+  updateAvailable,
+
+  /// 检查中
+  checking,
+
+  /// 检查失败
+  error,
+}
+
+/// 更新检查结果
+class UpdateCheckResult {
+  final ModInfo modInfo;
+  final UpdateStatus status;
+  final ModVersionInfo? latestVersion;
+  final String? errorMessage;
+
+  UpdateCheckResult({
+    required this.modInfo,
+    required this.status,
+    this.latestVersion,
+    this.errorMessage,
+  });
+}
+
+/// Mod更新检查器
+class ModUpdateChecker {
+  static ModUpdateChecker? _instance;
+
+  final Logger _logger = Logger('ModUpdateChecker');
+
+  /// 检查缓存（避免频繁检查）
+  final Map<String, (DateTime, UpdateCheckResult)> _checkCache = {};
+
+  /// 缓存有效期（1小时）
+  static const Duration _cacheDuration = Duration(hours: 1);
+
+  ModUpdateChecker._internal();
+
+  /// 获取单例实例
+  static ModUpdateChecker get instance {
+    _instance ??= ModUpdateChecker._internal();
+    return _instance!;
+  }
+
+  /// 工厂构造函数
+  factory ModUpdateChecker() => instance;
+
+  /// 扫描实例目录，获取所有Mod信息
+  Future<List<ModInfo>> scanForMods(String instancePath) async {
+    final modsDir = Directory(path.join(instancePath, 'mods'));
+    final modInfos = <ModInfo>[];
+
+    if (!await modsDir.exists()) {
+      return modInfos;
+    }
+
+    await for (final file in modsDir.list()) {
+      if (file is File &&
+          (file.path.endsWith('.jar') || file.path.endsWith('.litemod'))) {
+        final modInfo = await _parseModFile(file);
+        if (modInfo != null) {
+          modInfos.add(modInfo);
+        }
+      }
+    }
+
+    return modInfos;
+  }
+
+  /// 解析Mod文件（简化实现）
+  Future<ModInfo?> _parseModFile(File file) async {
+    // 简单实现：从文件名获取信息
+    // 实际应该读取jar包中的mod信息
+    final fileName = path.basename(file.path);
+
+    // 尝试解析文件名中的版本信息
+    // 常见格式：modname-1.0.0.jar
+    final nameParts = fileName.replaceAll('.jar', '').replaceAll('.litemod', '').split('-');
+
+    String name = nameParts.first;
+    String version = 'unknown';
+
+    if (nameParts.length > 1) {
+      // 假设最后一部分是版本号
+      version = nameParts.last;
+
+      // 如果有多个部分，尝试组合名称
+      if (nameParts.length > 2) {
+        name = nameParts.sublist(0, nameParts.length - 1).join('-');
+      }
+    }
+
+    final fileStat = await file.stat();
+
+    return ModInfo(
+      name: name,
+      version: version,
+      fileName: fileName,
+      filePath: file.path,
+      installedAt: fileStat.modified,
+    );
+  }
+
+  /// 检查单个Mod的更新
+  Future<UpdateCheckResult> checkModUpdate(
+    ModInfo modInfo, {
+    bool forceCheck = false,
+  }) async {
+    final cacheKey = modInfo.fileName ?? modInfo.name;
+
+    // 检查缓存
+    if (!forceCheck && _checkCache.containsKey(cacheKey)) {
+      final (cachedTime, cachedResult) = _checkCache[cacheKey]!;
+      if (DateTime.now().difference(cachedTime) < _cacheDuration) {
+        return cachedResult;
+      }
+    }
+
+    try {
+      // 这里应该调用Modrinth或CurseForge的API
+      // 由于没有实际API实现，这里返回模拟结果
+
+      // 模拟检查延迟
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // 为了演示，假设一部分Mod有更新
+      final shouldUpdate = modInfo.name.hashCode % 3 == 0;
+
+      UpdateCheckResult result;
+
+      if (shouldUpdate) {
+        result = UpdateCheckResult(
+          modInfo: modInfo,
+          status: UpdateStatus.updateAvailable,
+          latestVersion: ModVersionInfo(
+            version: '${modInfo.version}.1',
+            downloadUrl: 'https://example.com/download',
+            releaseDate: DateTime.now(),
+            changelog: 'Fix some bugs and add new features',
+            gameVersions: ['1.20.1', '1.20.2'],
+          ),
+        );
+      } else {
+        result = UpdateCheckResult(
+          modInfo: modInfo,
+          status: UpdateStatus.upToDate,
+        );
+      }
+
+      // 更新缓存
+      _checkCache[cacheKey] = (DateTime.now(), result);
+      _logger.info('Checked update for ${modInfo.name}: ${result.status}');
+
+      return result;
+    } catch (e, stackTrace) {
+      _logger.error('Failed to check update for ${modInfo.name}', e, stackTrace);
+
+      final result = UpdateCheckResult(
+        modInfo: modInfo,
+        status: UpdateStatus.error,
+        errorMessage: e.toString(),
+      );
+
+      _checkCache[cacheKey] = (DateTime.now(), result);
+      return result;
+    }
+  }
+
+  /// 批量检查所有Mod更新
+  Future<List<UpdateCheckResult>> checkAllUpdates(
+    List<ModInfo> mods, {
+    bool forceCheck = false,
+    void Function(int current, int total)? onProgress,
+  }) async {
+    final results = <UpdateCheckResult>[];
+
+    for (var i = 0; i < mods.length; i++) {
+      final result = await checkModUpdate(mods[i], forceCheck: forceCheck);
+      results.add(result);
+
+      if (onProgress != null) {
+        onProgress(i + 1, mods.length);
+      }
+    }
+
+    return results;
+  }
+
+  /// 获取有更新的Mod
+  Future<List<UpdateCheckResult>> getAvailableUpdates(
+    List<ModInfo> mods, {
+    bool forceCheck = false,
+  }) async {
+    final results = await checkAllUpdates(mods, forceCheck: forceCheck);
+    return results
+        .where((r) => r.status == UpdateStatus.updateAvailable)
+        .toList();
+  }
+
+  /// 清除缓存
+  void clearCache() {
+    _checkCache.clear();
+  }
+
+  /// 清除特定Mod的缓存
+  void clearModCache(String modKey) {
+    _checkCache.remove(modKey);
+  }
+}

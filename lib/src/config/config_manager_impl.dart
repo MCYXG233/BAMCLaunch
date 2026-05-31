@@ -6,6 +6,7 @@ import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
 import 'config_manager.dart';
 import 'config_keys.dart';
+import 'config_models.dart';
 import 'crypto_util.dart';
 
 /// 配置管理器实现类
@@ -21,6 +22,9 @@ class ConfigManagerImpl implements IConfigManager {
   bool _initialized = false;
   bool _autoSave = true;
   File? _configFile;
+  
+  /// 缓存的完整配置对象
+  LauncherConfig? _cachedConfig;
 
   /// 获取单例实例
   factory ConfigManagerImpl() {
@@ -196,5 +200,129 @@ class ConfigManagerImpl implements IConfigManager {
   /// 关闭资源
   void dispose() {
     _configChangesController.close();
+  }
+
+  /// 获取完整的启动器配置
+  LauncherConfig getLauncherConfig() {
+    if (_cachedConfig != null) {
+      return _cachedConfig!;
+    }
+    try {
+      final configData = _config[ConfigKeys.launcherConfig];
+      if (configData != null && configData is Map<String, dynamic>) {
+        _cachedConfig = LauncherConfig.fromJson(configData);
+        return _cachedConfig!;
+      }
+    } catch (e) {
+      // 如果解析失败，使用默认配置
+    }
+    return LauncherConfig.defaultConfig();
+  }
+
+  /// 保存完整的启动器配置
+  Future<void> setLauncherConfig(LauncherConfig config) async {
+    _cachedConfig = config;
+    await set(ConfigKeys.launcherConfig, config.toJson());
+  }
+
+  /// 批量更新配置
+  Future<void> updateConfig(Map<String, dynamic> updates) async {
+    for (final entry in updates.entries) {
+      _config[entry.key] = entry.value;
+    }
+    for (final key in updates.keys) {
+      _configChangesController.add(key);
+    }
+    if (_autoSave) {
+      await save();
+    }
+  }
+
+  /// 增加运行计数
+  Future<int> incrementRunCount() async {
+    final current = getInt(ConfigKeys.runCount) ?? 0;
+    final newCount = current + 1;
+    await setInt(ConfigKeys.runCount, newCount);
+    return newCount;
+  }
+
+  /// 获取额外的 Java 路径列表
+  List<String> getExtraJavaPaths() {
+    final paths = _config[ConfigKeys.extraJavaPaths];
+    if (paths is List) {
+      return paths.whereType<String>().toList();
+    }
+    return [];
+  }
+
+  /// 添加额外的 Java 路径
+  Future<void> addExtraJavaPath(String path) async {
+    final paths = getExtraJavaPaths();
+    if (!paths.contains(path)) {
+      paths.add(path);
+      await set(ConfigKeys.extraJavaPaths, paths);
+    }
+  }
+
+  /// 移除额外的 Java 路径
+  Future<void> removeExtraJavaPath(String path) async {
+    final paths = getExtraJavaPaths();
+    if (paths.remove(path)) {
+      await set(ConfigKeys.extraJavaPaths, paths);
+    }
+  }
+
+  /// 获取被抑制的对话框列表
+  List<String> getSuppressedDialogs() {
+    final dialogs = _config[ConfigKeys.suppressedDialogs];
+    if (dialogs is List) {
+      return dialogs.whereType<String>().toList();
+    }
+    return [];
+  }
+
+  /// 抑制对话框
+  Future<void> suppressDialog(String dialogId) async {
+    final dialogs = getSuppressedDialogs();
+    if (!dialogs.contains(dialogId)) {
+      dialogs.add(dialogId);
+      await set(ConfigKeys.suppressedDialogs, dialogs);
+    }
+  }
+
+  /// 检查对话框是否被抑制
+  bool isDialogSuppressed(String dialogId) {
+    return getSuppressedDialogs().contains(dialogId);
+  }
+
+  /// 获取本地游戏目录列表
+  List<GameDirectory> getLocalGameDirectories() {
+    final dirs = _config[ConfigKeys.localGameDirectories];
+    if (dirs is List) {
+      return dirs
+          .whereType<Map<String, dynamic>>()
+          .map((e) => GameDirectory.fromJson(e))
+          .toList();
+    }
+    return [];
+  }
+
+  /// 添加本地游戏目录
+  Future<void> addLocalGameDirectory(GameDirectory dir) async {
+    final dirs = getLocalGameDirectories();
+    final existingIndex = dirs.indexWhere((d) => d.dir == dir.dir);
+    if (existingIndex >= 0) {
+      dirs[existingIndex] = dir;
+    } else {
+      dirs.add(dir);
+    }
+    await set(ConfigKeys.localGameDirectories, dirs.map((d) => d.toJson()).toList());
+  }
+
+  /// 移除本地游戏目录
+  Future<void> removeLocalGameDirectory(String dirPath) async {
+    final dirs = getLocalGameDirectories();
+    dirs.removeWhere((d) => d.dir == dirPath);
+    await set(ConfigKeys.localGameDirectories, dirs.map((d) => d.toJson()).toList());
   }
 }
