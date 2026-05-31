@@ -17,6 +17,8 @@ import '../components/ba_context_menu.dart';
 import '../components/ba_buttons.dart';
 import '../components/ba_create_instance_dialog.dart';
 import 'ba_mod_manager_page.dart';
+import '../components/ba_backup_dialog.dart';
+import '../../game/game_statistics.dart';
 
 /// 蔚蓝档案风格游戏库页面
 class BAGameLibraryPage extends StatefulWidget {
@@ -37,6 +39,12 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
   final List<EventSubscription> _subscriptions = [];
   final Set<String> _launchingIds = {};
 
+  // 游戏统计
+  final GameStatisticsManager _statsManager = GameStatisticsManager.instance;
+  Duration _totalPlayTime = Duration.zero;
+  int _totalLaunchCount = 0;
+  Duration _todayPlayTime = Duration.zero;
+
   @override
   void initState() {
     super.initState();
@@ -49,7 +57,12 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
     if (!manager.isInitialized) {
       await manager.initialize();
     }
+    
+    // 初始化游戏统计
+    await _statsManager.initialize();
+    
     _loadInstances();
+    _loadStatistics();
   }
 
   @override
@@ -67,6 +80,15 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
     if (!mounted) return;
     setState(() {
       _instances = List.from(manager.instances);
+    });
+  }
+
+  void _loadStatistics() {
+    if (!mounted) return;
+    setState(() {
+      _totalPlayTime = _statsManager.getTotalPlayTime();
+      _totalLaunchCount = _statsManager.getTotalLaunchCount();
+      _todayPlayTime = _statsManager.getTodayPlayTime();
     });
   }
 
@@ -147,6 +169,15 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
         gameArguments: gameArgs,
       );
 
+      // 开始游戏会话记录
+      _statsManager.startSession(
+        instanceName: instance.name,
+        instanceId: instance.id,
+        gameVersion: instance.version,
+        accountId: account.uuid,
+        username: account.username,
+      );
+
       await GameLauncher().launch(args);
 
       if (!mounted) return;
@@ -155,11 +186,14 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
         message: '正在启动 ${instance.name}...',
       );
     } catch (e) {
+      // 失败时也结束会话
+      await _statsManager.endSession();
       if (!mounted) return;
       NotificationManager().showError('启动失败', message: e.toString());
     } finally {
       if (mounted) {
         setState(() => _launchingIds.remove(instance.id));
+        _loadStatistics(); // 更新统计信息
       }
     }
   }
@@ -352,87 +386,181 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
     );
   }
 
+  String _formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes % 60;
+    if (hours > 0) {
+      return '$hours时$minutes分';
+    } else {
+      return '$minutes分';
+    }
+  }
+
   /// 顶部标题栏
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 标题
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            decoration: BoxDecoration(
-              gradient: BAColors.primaryGradient,
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: [
-                BoxShadow(
-                  color: BAColors.primary.withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: Offset(0, 4),
+          Row(
+            children: [
+              // 标题
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  gradient: BAColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: BAColors.primary.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.gamepad,
-                  color: Colors.white,
-                  size: 24,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.gamepad,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      '游戏库',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  '游戏库',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Spacer(),
-
-          // 统计信息
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: BAColors.surfaceOf(context).withOpacity(0.8),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: BAColors.borderOf(context).withOpacity(0.5),
               ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.folder,
-                  color: BAColors.primary,
-                  size: 18,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '${_instances.length}',
-                  style: TextStyle(
-                    color: BAColors.textPrimaryOf(context),
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+              const Spacer(),
+
+              // 统计信息
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: BAColors.surfaceOf(context).withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: BAColors.borderOf(context).withOpacity(0.5),
                   ),
                 ),
-                Text(
-                  ' 个实例',
-                  style: TextStyle(
-                    color: BAColors.textSecondaryOf(context),
-                    fontSize: 14,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.folder,
+                      color: BAColors.primary,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${_instances.length}',
+                      style: TextStyle(
+                        color: BAColors.textPrimaryOf(context),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      ' 个实例',
+                      style: TextStyle(
+                        color: BAColors.textSecondaryOf(context),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // 游戏统计信息
+          Row(
+            children: [
+              _buildStatCard(
+                context,
+                icon: Icons.access_time,
+                label: '总游戏时长',
+                value: _formatDuration(_totalPlayTime),
+              ),
+              const SizedBox(width: 12),
+              _buildStatCard(
+                context,
+                icon: Icons.casino,
+                label: '总启动次数',
+                value: '$_totalLaunchCount',
+              ),
+              const SizedBox(width: 12),
+              _buildStatCard(
+                context,
+                icon: Icons.calendar_today,
+                label: '今日游戏',
+                value: _formatDuration(_todayPlayTime),
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: BAColors.surfaceOf(context).withOpacity(0.8),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: BAColors.borderOf(context).withOpacity(0.5),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: BAColors.primary,
+              size: 22,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: BAColors.textSecondaryOf(context),
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      color: BAColors.textPrimaryOf(context),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -642,10 +770,18 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
     );
   }
 
+  void _openBackupManager(GameInstance instance) {
+    BABackupDialog.show(
+      context: context,
+      instance: instance,
+    );
+  }
+
   /// 实例卡片
   Widget _buildInstanceCard(BuildContext context, GameInstance instance) {
     final isRunning = instance.status == InstanceStatus.running;
     final isLaunching = _launchingIds.contains(instance.id);
+    final instanceStats = _statsManager.getInstanceStatistics(instance.id);
 
     return BAContextMenu(
       items: [
@@ -663,6 +799,11 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
           icon: Icons.file_upload,
           label: '导出',
           onTap: () => _exportInstance(instance),
+        ),
+        BAContextMenuItem(
+          icon: Icons.backup,
+          label: '备份管理',
+          onTap: () => _openBackupManager(instance),
         ),
         BAContextMenuItem(
           icon: Icons.extension,
@@ -832,6 +973,31 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                           fontSize: 11,
                         ),
                       ),
+                    if (instanceStats != null) ...[
+                      const SizedBox(height: 6),
+                      // 实例统计信息
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            size: 12,
+                            color: BAColors.textSecondaryOf(context),
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              '${_formatDuration(Duration(seconds: instanceStats.totalPlayTimeSeconds))} / ${instanceStats.launchCount}次',
+                              style: TextStyle(
+                                color: BAColors.textSecondaryOf(context),
+                                fontSize: 10,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),

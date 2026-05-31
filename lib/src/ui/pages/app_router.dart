@@ -5,9 +5,12 @@ import 'home_page.dart';
 import 'version_page.dart';
 import 'account_page.dart';
 import 'settings_page.dart';
+import 'ba_settings_page.dart';
 import 'resource_center_page.dart';
+import 'ba_resource_center_page.dart';
 import 'login_page.dart';
 import 'account_selector.dart';
+import 'ba_game_library_page.dart';
 
 /// 应用路由常量定义
 class AppRoutes {
@@ -40,7 +43,7 @@ class AppRouter {
         );
       case AppRoutes.versions:
         return MaterialPageRoute(
-          builder: (_) => const BAMCHomePage(),
+          builder: (_) => const BAGameLibraryPage(),
           settings: settings,
         );
       case AppRoutes.accounts:
@@ -50,12 +53,12 @@ class AppRouter {
         );
       case AppRoutes.settings:
         return MaterialPageRoute(
-          builder: (_) => const BAMCHomePage(),
+          builder: (_) => const BASettingsPage(),
           settings: settings,
         );
       case AppRoutes.resourceCenter:
         return MaterialPageRoute(
-          builder: (_) => const ResourceCenterPage(),
+          builder: (_) => const BAResourceCenterPage(),
           settings: settings,
         );
       case AppRoutes.login:

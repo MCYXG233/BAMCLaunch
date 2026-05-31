@@ -9,6 +9,7 @@ import '../../instance/models.dart';
 import '../components/ba_login_dialog.dart';
 import '../theme/colors.dart';
 import '../theme/app_theme.dart';
+import '../theme/background_manager.dart';
 import 'ba_game_library_page.dart';
 import 'ba_resource_center_page.dart';
 import 'ba_settings_page.dart';
@@ -25,6 +26,7 @@ class BAMCMainPage extends StatefulWidget {
 class _BAMCMainPageState extends State<BAMCMainPage> {
   int _currentPage = 0;
   bool _isMaximized = false;
+  final BackgroundManager _backgroundManager = BackgroundManager();
 
   // 账户相关
   final AccountManager _accountManager = AccountManager();
@@ -39,6 +41,27 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
     _initWindow();
     _loadAccountData();
     _initInstanceManager();
+    _initBackgroundManager();
+  }
+
+  Future<void> _initBackgroundManager() async {
+    await _backgroundManager.initialize();
+    _backgroundManager.addListener(_onBackgroundChanged);
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void _onBackgroundChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    _backgroundManager.removeListener(_onBackgroundChanged);
+    super.dispose();
   }
 
   Future<void> _loadAccountData() async {
@@ -97,20 +120,21 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: BAColors.backgroundOf(context),
-      body: Column(
-        children: [
-          // 标题栏
-          _buildTitleBar(),
+      body: _backgroundManager.buildBackground(
+        child: Column(
+          children: [
+            // 标题栏
+            _buildTitleBar(),
 
-          // 主界面
-          Expanded(
-            child: _buildContent(),
-          ),
+            // 主界面
+            Expanded(
+              child: _buildContent(),
+            ),
 
-          // 底部导航
-          _buildBottomNav(),
-        ],
+            // 底部导航
+            _buildBottomNav(),
+          ],
+        ),
       ),
     );
   }

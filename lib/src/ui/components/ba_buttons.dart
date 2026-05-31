@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/app_theme.dart';
+import '../theme/ba_theme_colors.dart';
 
 /// 蔚蓝档案风格按钮组件
 class BAButton extends StatefulWidget {
@@ -52,16 +53,16 @@ class _BAButtonState extends State<BAButton> {
         onTapUp: (_) => setState(() => _isPressed = false),
         onTapCancel: () => setState(() => _isPressed = false),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: BAAnimation.fast,
           curve: Curves.easeOutCubic,
           height: widget.height ?? 48,
           width: widget.width,
           padding: widget.padding ??
-              const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           decoration: _getDecoration(context, isDisabled),
           child: AnimatedScale(
             scale: _isPressed ? 0.98 : 1.0,
-            duration: const Duration(milliseconds: 100),
+            duration: BAAnimation.micro,
             child: widget.loading
                 ? Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -162,7 +163,7 @@ class _BAButtonState extends State<BAButton> {
 
     return BoxDecoration(
       color: backgroundColor,
-      borderRadius: BATheme.borderRadiusMedium,
+      borderRadius: BorderRadius.circular(BAThemeData.radiusCircle),
       border: Border.all(color: borderColor, width: 1.5),
       boxShadow: shadows,
     );
@@ -386,18 +387,18 @@ class _BAIconButtonState extends State<BAIconButton> {
         child: Tooltip(
           message: widget.tooltip,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
+            duration: BAAnimation.fast,
             curve: Curves.easeOutCubic,
             decoration: BoxDecoration(
               color: widget.backgroundColor ??
                   (_isHovered
                       ? BAColors.surfaceVariantOf(context)
                       : Colors.transparent),
-              borderRadius: BATheme.borderRadiusSmall,
+              borderRadius: BorderRadius.circular(BAThemeData.radius),
             ),
             child: AnimatedScale(
               scale: _isPressed ? 0.92 : 1.0,
-              duration: const Duration(milliseconds: 100),
+              duration: BAAnimation.micro,
               child: IconButton(
                 onPressed: effectiveOnPressed,
                 icon: Icon(widget.icon),

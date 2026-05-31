@@ -221,7 +221,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                 BoxShadow(
                   color: BAColors.secondary.withOpacity(0.3),
                   blurRadius: 12,
-                  offset: Offset(0, 4),
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
@@ -235,7 +235,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'リソースセンター',
+                  '资源中心',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -402,9 +402,9 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                               boxShadow: isSelected
                                   ? [
                                       BoxShadow(
-                                        color: typeColor.withOpacity(0.3),
-                                        blurRadius: 8,
-                                        offset: Offset(0, 2),
+                                        color: typeColor.withOpacity(0.4),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 3),
                                       ),
                                     ]
                                   : null,
@@ -652,9 +652,9 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
           ),
           boxShadow: [
             BoxShadow(
-              color: BAColors.shadowOf(context),
-              blurRadius: 12,
-              offset: Offset(0, 4),
+              color: typeColor.withOpacity(0.15),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
             ),
           ],
         ),

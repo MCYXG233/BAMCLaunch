@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/animations.dart';
+import '../theme/ba_theme_colors.dart';
 
 /// 增强的卡片组件
 class BAAnimatedCard extends StatefulWidget {
@@ -56,7 +57,7 @@ class _BAAnimatedCardState extends State<BAAnimatedCard>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: widget.animationDuration,
+      duration: BAAnimation.normal,
     );
 
     _scaleAnimation = Tween<double>(
@@ -65,7 +66,7 @@ class _BAAnimatedCardState extends State<BAAnimatedCard>
     ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: BAAnimations.smooth,
+        curve: BAAnimation.defaultCurve,
       ),
     );
 
@@ -75,7 +76,7 @@ class _BAAnimatedCardState extends State<BAAnimatedCard>
     ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: BAAnimations.smooth,
+        curve: BAAnimation.defaultCurve,
       ),
     );
   }
@@ -119,39 +120,39 @@ class _BAAnimatedCardState extends State<BAAnimatedCard>
             margin: widget.margin,
             decoration: BoxDecoration(
               color: widget.backgroundColor ?? BAColors.surfaceOf(context),
-              borderRadius: BorderRadius.circular(widget.borderRadius),
+              borderRadius: BorderRadius.circular(BAThemeData.radiusLarge),
               border: Border.all(
                 color: _isHovered
-                    ? (widget.borderColor ?? BAColors.primary.withOpacity(0.5))
-                    : (widget.borderColor ?? BAColors.border),
-                width: _isHovered ? 2 : 1,
+                    ? (widget.borderColor ?? BAColors.primary.withOpacity(0.4))
+                    : (widget.borderColor ?? BAColors.border.withOpacity(0.5)),
+                width: _isHovered ? 1.5 : 1,
               ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(
-                    _isHovered ? 0.1 : 0.05,
+                    _isHovered ? 0.08 : 0.04,
                   ),
-                  blurRadius: _elevationAnimation.value * 2,
+                  blurRadius: _elevationAnimation.value * 3,
                   offset: Offset(0, _elevationAnimation.value),
                 ),
                 if (widget.enableGlowEffect && _isHovered)
                   BoxShadow(
                     color: (widget.glowColor ?? BAColors.primary)
-                        .withOpacity(0.3),
-                    blurRadius: 20,
-                    spreadRadius: 2,
+                        .withOpacity(0.25),
+                    blurRadius: 24,
+                    spreadRadius: 4,
                   ),
               ],
             ),
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                borderRadius: BorderRadius.circular(widget.borderRadius),
+                borderRadius: BorderRadius.circular(BAThemeData.radiusLarge),
                 onTap: widget.onTap,
                 onLongPress: widget.onLongPress,
                 onHighlightChanged: _onPress,
                 child: Padding(
-                  padding: widget.padding ?? const EdgeInsets.all(16),
+                  padding: widget.padding ?? const EdgeInsets.all(BAThemeData.spacingMedium),
                   child: widget.child,
                 ),
               ),

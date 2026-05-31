@@ -15,88 +15,65 @@ class BABottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 70,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      height: 64,
       decoration: BoxDecoration(
-        color: BAThemeColors.surface,
-        border: Border(
-          top: BorderSide(color: BAThemeColors.border, width: 1),
+        color: BAThemeColors.frostedGlassMedium,
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(
+          color: BAThemeColors.border.withOpacity(0.10),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildNavItem(
-            index: 0,
-            icon: Icons.games_outlined,
-            selectedIcon: Icons.games,
-            label: '游戏库',
-          ),
-          _buildNavItem(
-            index: 1,
-            icon: Icons.download_outlined,
-            selectedIcon: Icons.download,
-            label: '资源中心',
-          ),
-          _buildNavItem(
-            index: 2,
-            icon: Icons.settings_outlined,
-            selectedIcon: Icons.settings,
-            label: '设置',
-          ),
+          _buildNavItem(Icons.home, '主页', 0),
+          _buildNavItem(Icons.grid_3x3, '游戏库', 1),
+          _buildNavItem(Icons.archive, '资源中心', 2),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem({
-    required int index,
-    required IconData icon,
-    required IconData selectedIcon,
-    required String label,
-  }) {
-    final isSelected = currentIndex == index;
-    final color = isSelected ? BAThemeColors.primary : BAThemeColors.textSecondary;
-
+  Widget _buildNavItem(IconData icon, String label, int index) {
+    bool isSelected = currentIndex == index;
     return Expanded(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => onTap(index),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () {
+            onTap(index);
+          },
           child: Container(
-            height: 70,
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(
-                  color: isSelected ? BAThemeColors.primary : Colors.transparent,
-                  width: 3,
-                ),
-              ),
-            ),
+            height: 64,
+            alignment: Alignment.center,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: EdgeInsets.all(isSelected ? 10 : 8),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? BAThemeColors.primary.withOpacity(0.1)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                AnimatedScale(
+                  scale: isSelected ? 1.20 : 1.0,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutCubic,
                   child: Icon(
-                    isSelected ? selectedIcon : icon,
-                    color: color,
-                    size: isSelected ? 28 : 24,
+                    icon,
+                    color: isSelected ? BAThemeColors.primary : BAThemeColors.textSecondary,
+                    size: isSelected ? 26 : 22,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  label,
+                AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 250),
+                  child: Text(label),
                   style: TextStyle(
-                    color: color,
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color: isSelected ? BAThemeColors.primary : BAThemeColors.textSecondary,
+                    fontSize: isSelected ? 13 : 12,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   ),
                 ),
               ],

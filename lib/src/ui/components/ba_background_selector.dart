@@ -1,0 +1,308 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import '../theme/ba_theme_colors.dart';
+import '../../config/background_config.dart';
+
+class BABackgroundSelector extends StatefulWidget {
+  final BackgroundConfig currentConfig;
+  final ValueChanged<BackgroundConfig> onConfigChanged;
+  final VoidCallback? onPickImage;
+
+  const BABackgroundSelector({
+    super.key,
+    required this.currentConfig,
+    required this.onConfigChanged,
+    this.onPickImage,
+  });
+
+  @override
+  State<BABackgroundSelector> createState() => _BABackgroundSelectorState();
+}
+
+class _BABackgroundSelectorState extends State<BABackgroundSelector> {
+  late BackgroundConfig _config;
+  final List<BackgroundConfig> _presets = [
+    BackgroundConfig.classic,
+    BackgroundConfig.sakura,
+    BackgroundConfig.night,
+    BackgroundConfig.mint,
+    BackgroundConfig.sunset,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _config = widget.currentConfig;
+  }
+
+  @override
+  void didUpdateWidget(BABackgroundSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentConfig != widget.currentConfig) {
+      _config = widget.currentConfig;
+    }
+  }
+
+  void _selectPreset(BackgroundConfig preset) {
+    setState(() {
+      _config = preset;
+    });
+    widget.onConfigChanged(preset);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '背景设置',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: BAThemeColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        Text(
+          '预设背景',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: BAThemeColors.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: _presets.map((preset) {
+            return _PresetCard(
+              config: preset,
+              isSelected: _config.type == preset.type &&
+                  _config.gradientColors == preset.gradientColors,
+              onTap: () => _selectPreset(preset),
+            );
+          }).toList(),
+        ),
+
+        if (widget.onPickImage != null) ...[
+          const SizedBox(height: 16),
+          Text(
+            '自定义图片',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: BAThemeColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _CustomImageButton(
+            onTap: widget.onPickImage!,
+          ),
+        ],
+
+        const SizedBox(height: 16),
+        Text(
+          '调整选项',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: BAThemeColors.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        _SliderOption(
+          label: '模糊度',
+          value: _config.blur,
+          min: 0,
+          max: 25,
+          onChanged: (value) {
+            setState(() {
+              _config = _config.copyWith(blur: value);
+            });
+            widget.onConfigChanged(_config);
+          },
+        ),
+
+        const SizedBox(height: 12),
+
+        _SliderOption(
+          label: '透明度',
+          value: _config.opacity,
+          min: 0.3,
+          max: 1.0,
+          onChanged: (value) {
+            setState(() {
+              _config = _config.copyWith(opacity: value);
+            });
+            widget.onConfigChanged(_config);
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _PresetCard extends StatelessWidget {
+  final BackgroundConfig config;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _PresetCard({
+    required this.config,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: BAAnimation.fast,
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: config.gradientColors?.map((c) => Color(c)).toList() ??
+                  [BAThemeColors.background, BAThemeColors.backgroundLight],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(BAThemeData.radius),
+            border: Border.all(
+              color: isSelected
+                  ? BAThemeColors.primary
+                  : BAThemeColors.border.withOpacity(0.3),
+              width: isSelected ? 2 : 1,
+            ),
+            boxShadow: isSelected ? BAThemeColors.glowShadow : [],
+          ),
+          child: isSelected
+              ? Center(
+                  child: Icon(
+                    Icons.check_circle,
+                    color: BAThemeColors.primary,
+                    size: 24,
+                  ),
+                )
+              : null,
+        ),
+      ),
+    );
+  }
+}
+
+class _CustomImageButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _CustomImageButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: BAThemeColors.surfaceVariant,
+            borderRadius: BorderRadius.circular(BAThemeData.radius),
+            border: Border.all(
+              color: BAThemeColors.border.withOpacity(0.5),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.add_photo_alternate_outlined,
+                color: BAThemeColors.textSecondary,
+                size: 28,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '上传图片',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: BAThemeColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SliderOption extends StatelessWidget {
+  final String label;
+  final double value;
+  final double min;
+  final double max;
+  final ValueChanged<double> onChanged;
+
+  const _SliderOption({
+    required this.label,
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                color: BAThemeColors.textSecondary,
+              ),
+            ),
+            Text(
+              value.toStringAsFixed(1),
+              style: TextStyle(
+                fontSize: 13,
+                color: BAThemeColors.textPrimary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        SliderTheme(
+          data: SliderThemeData(
+            activeTrackColor: BAThemeColors.primary,
+            inactiveTrackColor: BAThemeColors.border,
+            thumbColor: BAThemeColors.primary,
+            overlayColor: BAThemeColors.primary.withOpacity(0.12),
+            trackHeight: 4,
+            thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8),
+          ),
+          child: Slider(
+            value: value,
+            min: min,
+            max: max,
+            onChanged: onChanged,
+          ),
+        ),
+      ],
+    );
+  }
+}

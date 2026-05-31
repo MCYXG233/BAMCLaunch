@@ -1,19 +1,26 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../theme/colors.dart';
 import '../theme/app_theme.dart';
 import '../../config/config_manager.dart';
 import '../../config/config_keys.dart';
-import '../../game/java/java_manager.dart';
 import '../../updater/update_manager.dart';
 import '../../platform/platform_adapter.dart';
 import '../../platform/platform_adapter_factory.dart';
 import '../theme/theme_manager.dart';
+import '../theme/background_manager.dart';
 import '../components/ba_notification.dart';
+import '../components/ba_background_selector.dart';
+import '../../config/background_config.dart';
 import '../../loader/java_selector_dialog.dart';
+import '../../account/skin_manager.dart';
+import '../../game/backup_manager.dart';
+import '../../game/game_statistics.dart';
+import '../../instance/instance_manager.dart';
+import '../components/ba_backup_dialog.dart';
+import '../components/ba_dialog.dart';
 
 class BASettingsPage extends StatefulWidget {
   const BASettingsPage({super.key});
@@ -25,10 +32,17 @@ class BASettingsPage extends StatefulWidget {
 class _BASettingsPageState extends State<BASettingsPage> {
   final ConfigManager _configManager = ConfigManager();
   final ThemeManager _themeManager = ThemeManager();
+  final BackgroundManager _backgroundManager = BackgroundManager();
+  final SkinManager _skinManager = SkinManager.instance;
+  final BackupManager _backupManager = BackupManager.instance;
+  final GameStatisticsManager _statisticsManager = GameStatisticsManager.instance;
 
   String _selectedCategory = 'general';
   bool _notificationInitialized = false;
   bool _themeManagerInitialized = false;
+  bool _managersInitialized = false;
+
+  BackgroundConfig _backgroundConfig = BackgroundConfig.classic;
 
   String _gameDirectory = '';
   String _javaPath = '';
@@ -68,15 +82,40 @@ class _BASettingsPageState extends State<BASettingsPage> {
     _proxyPortFocusNode.addListener(_onProxyPortFocusChange);
     _jvmArgsFocusNode.addListener(_onJvmArgsFocusChange);
     _gameArgsFocusNode.addListener(_onGameArgsFocusChange);
-    _initThemeManager();
+    _initAllManagers();
     _loadSettings();
+  }
+
+  Future<void> _initAllManagers() async {
+    await _themeManager.initialize();
+    await _backgroundManager.initialize();
+    await _skinManager.initialize();
+    await _backupManager.initialize();
+    await _statisticsManager.initialize();
+    await _loadBackgroundConfig();
+    if (mounted) {
+      setState(() {
+        _themeManagerInitialized = true;
+        _managersInitialized = true;
+      });
+    }
   }
 
   Future<void> _initThemeManager() async {
     await _themeManager.initialize();
+    await _loadBackgroundConfig();
     if (mounted) {
       setState(() {
         _themeManagerInitialized = true;
+      });
+    }
+  }
+
+  Future<void> _loadBackgroundConfig() async {
+    await _backgroundManager.initialize();
+    if (mounted) {
+      setState(() {
+        _backgroundConfig = _backgroundManager.currentConfig;
       });
     }
   }
@@ -139,7 +178,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
       final jvmArguments = _configManager.getString(ConfigKeys.jvmArguments) ?? '';
       final gameArguments = _configManager.getString(ConfigKeys.gameArguments) ?? '';
 
-      // 等待 _themeManager 初始化完成
       await _initThemeManager();
 
       String themeModeStr;
@@ -623,6 +661,10 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
     final categoryNames = {
       'general': '通用',
+      'background': '背景',
+      'skin': '皮肤',
+      'backup': '备份',
+      'statistics': '统计',
       'game': '游戏',
       'download': '下载',
       'about': '关于',
@@ -696,6 +738,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
     switch (category) {
       case 'general':
         return Icons.settings;
+      case 'background':
+        return Icons.wallpaper;
+      case 'skin':
+        return Icons.face;
+      case 'backup':
+        return Icons.backup;
+      case 'statistics':
+        return Icons.bar_chart;
       case 'game':
         return Icons.games;
       case 'download':
@@ -708,9 +758,21 @@ class _BASettingsPageState extends State<BASettingsPage> {
   }
 
   Widget _buildSettingsList() {
+    if (!_managersInitialized) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    
     switch (_selectedCategory) {
       case 'general':
         return _buildGeneralSettings();
+      case 'background':
+        return _buildBackgroundSettings();
+      case 'skin':
+        return _buildSkinSettings();
+      case 'backup':
+        return _buildBackupSettings();
+      case 'statistics':
+        return _buildStatisticsSettings();
       case 'game':
         return _buildGameSettings();
       case 'download':
@@ -824,8 +886,52 @@ class _BASettingsPageState extends State<BASettingsPage> {
     );
   }
 
+  Widget _buildBackgroundSettings() {
+    return ListView(
+      padding: const EdgeInsets.only(right: 8),
+      children: [
+        _buildSettingsCard(
+          title: '背景设置',
+          children: [
+            BABackgroundSelector(
+              currentConfig: _backgroundConfig,
+              onConfigChanged: (config) async {
+                await _backgroundManager.saveBackgroundConfig(config);
+                setState(() {
+                  _backgroundConfig = config;
+                });
+                NotificationManager().showSuccess('背景设置已保存');
+              },
+              onPickImage: () async {
+                final result = await FilePicker.platform.pickFiles(
+                  type: FileType.image,
+                  allowMultiple: false,
+                );
+                if (result != null && result.files.isNotEmpty) {
+                  final file = result.files.first;
+                  if (file.path != null) {
+                    final customConfig = BackgroundConfig(
+                      type: BackgroundType.image,
+                      imagePath: file.path,
+                      blur: _backgroundConfig.blur,
+                      opacity: _backgroundConfig.opacity,
+                    );
+                    await _backgroundManager.saveBackgroundConfig(customConfig);
+                    setState(() {
+                      _backgroundConfig = customConfig;
+                    });
+                    NotificationManager().showSuccess('已选择图片: ${file.name}');
+                  }
+                }
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _buildGeneralSettings() {
-    // 直接使用已初始化的 _themeManager
     if (!_themeManagerInitialized) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -881,7 +987,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
               control: Switch(
                 value: _autoUpdate,
                 onChanged: _saveAutoUpdate,
-                activeColor: BAColors.primaryOf(context),
               ),
             ),
             _buildSettingsItem(
@@ -891,7 +996,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
               control: Switch(
                 value: _launchAtStartup,
                 onChanged: _saveLaunchAtStartup,
-                activeColor: BAColors.primaryOf(context),
               ),
             ),
             _buildSettingsItem(
@@ -901,7 +1005,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
               control: Switch(
                 value: _minimizeToTray,
                 onChanged: _saveMinimizeToTray,
-                activeColor: BAColors.primaryOf(context),
               ),
             ),
             _buildSettingsItem(
@@ -911,7 +1014,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
               control: Switch(
                 value: _closeToTray,
                 onChanged: _saveCloseToTray,
-                activeColor: BAColors.primaryOf(context),
               ),
             ),
           ],
@@ -1005,7 +1107,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   max: 16384,
                   divisions: 15,
                   label: '${_memoryAllocation.toInt()} MB',
-                  activeColor: BAColors.primaryOf(context),
                   onChanged: _saveMemoryAllocation,
                   onChangeEnd: _commitMemoryAllocation,
                 ),
@@ -1120,7 +1221,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
               control: Switch(
                 value: _autoRetryDownload,
                 onChanged: _saveAutoRetryDownload,
-                activeColor: BAColors.primaryOf(context),
               ),
             ),
           ],
@@ -1456,6 +1556,356 @@ class _BASettingsPageState extends State<BASettingsPage> {
           isDense: true,
         ),
       ),
+    );
+  }
+
+  Widget _buildSkinSettings() {
+    return ListView(
+      padding: const EdgeInsets.only(right: 8),
+      children: [
+        _buildSettingsCard(
+          title: '皮肤管理',
+          children: [
+            _buildSettingsItem(
+              icon: Icons.refresh,
+              title: '刷新皮肤缓存',
+              description: '清除过期的皮肤缓存文件',
+              control: ElevatedButton(
+                onPressed: () async {
+                  await _skinManager.cleanExpiredCache();
+                  NotificationManager().showSuccess('缓存已清理');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: BAColors.primaryOf(context),
+                  foregroundColor: BAColors.textOnPrimary,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('清理', style: TextStyle(fontSize: 12)),
+              ),
+            ),
+            _buildSettingsItem(
+              icon: Icons.delete_outline,
+              title: '清除所有皮肤缓存',
+              description: '删除所有已缓存的皮肤文件',
+              control: ElevatedButton(
+                onPressed: () async {
+                  final confirmed = await BAConfirmDialog.show(
+                    context: context,
+                    title: '清除缓存',
+                    content: '确定要清除所有皮肤缓存吗？',
+                    confirmText: '清除',
+                  );
+                  
+                  if (confirmed) {
+                    await _skinManager.clearAllCache();
+                    NotificationManager().showSuccess('缓存已清除');
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: BAColors.primary,
+                  foregroundColor: BAColors.textOnPrimary,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('清除', style: TextStyle(fontSize: 12)),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBackupSettings() {
+    final allBackups = _backupManager.getAllBackups();
+    final instanceManager = InstanceManager();
+
+    return ListView(
+      padding: const EdgeInsets.only(right: 8),
+      children: [
+        _buildSettingsCard(
+          title: '备份管理',
+          children: [
+            _buildSettingsItem(
+              icon: Icons.folder,
+              title: '查看所有备份',
+              description: '${allBackups.length} 个备份',
+              control: ElevatedButton(
+                onPressed: () {
+                  if (instanceManager.instances.isNotEmpty) {
+                    BABackupDialog.show(
+                      context: context,
+                      instance: instanceManager.instances.first,
+                    );
+                  } else {
+                    NotificationManager().showInfo('暂无游戏实例', message: '请先创建一个游戏实例');
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: BAColors.primaryOf(context),
+                  foregroundColor: BAColors.textOnPrimary,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('管理', style: TextStyle(fontSize: 12)),
+              ),
+            ),
+            _buildSettingsItem(
+              icon: Icons.storage,
+              title: '备份存储',
+              description: '管理所有备份文件',
+              control: const SizedBox(),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatisticsSettings() {
+    final totalPlayTime = _statisticsManager.getTotalPlayTime();
+    final totalLaunchCount = _statisticsManager.getTotalLaunchCount();
+    final todayPlayTime = _statisticsManager.getTodayPlayTime();
+    final mostPlayed = _statisticsManager.getMostPlayedInstance();
+
+    String formatDuration(Duration duration) {
+      final hours = duration.inHours;
+      final minutes = duration.inMinutes % 60;
+      if (hours > 0) {
+        return '$hours小时$minutes分钟';
+      } else {
+        return '$minutes分钟';
+      }
+    }
+
+    final children = <Widget>[
+      _buildSettingsCard(
+        title: '总统计',
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: BAColors.primaryOf(context).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.access_time, color: BAColors.primaryOf(context), size: 18),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '总游戏时长',
+                        style: TextStyle(
+                          color: BAColors.textPrimaryOf(context),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        formatDuration(totalPlayTime),
+                        style: TextStyle(
+                          color: BAColors.textSecondaryOf(context),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: BAColors.primaryOf(context).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.casino, color: BAColors.primaryOf(context), size: 18),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '总启动次数',
+                        style: TextStyle(
+                          color: BAColors.textPrimaryOf(context),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '$totalLaunchCount 次',
+                        style: TextStyle(
+                          color: BAColors.textSecondaryOf(context),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: BAColors.primaryOf(context).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.calendar_today, color: BAColors.primaryOf(context), size: 18),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '今日游戏',
+                        style: TextStyle(
+                          color: BAColors.textPrimaryOf(context),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        formatDuration(todayPlayTime),
+                        style: TextStyle(
+                          color: BAColors.textSecondaryOf(context),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 16),
+    ];
+
+    if (mostPlayed != null) {
+      children.add(
+        _buildSettingsCard(
+          title: '最常玩的实例',
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              child: Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: BAColors.primaryOf(context).withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(Icons.star, color: BAColors.primary, size: 18),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          mostPlayed.instanceName,
+                          style: TextStyle(
+                            color: BAColors.textPrimaryOf(context),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${formatDuration(Duration(seconds: mostPlayed.totalPlayTimeSeconds))} / ${mostPlayed.launchCount}次',
+                          style: TextStyle(
+                            color: BAColors.textSecondaryOf(context),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+      children.add(const SizedBox(height: 16));
+    }
+
+    children.add(
+      _buildSettingsCard(
+        title: '数据管理',
+        children: [
+          _buildSettingsItem(
+            icon: Icons.delete_outline,
+            title: '清除统计数据',
+            description: '清除所有游戏统计数据',
+            control: ElevatedButton(
+              onPressed: () async {
+                final confirmed = await BAConfirmDialog.show(
+                  context: context,
+                  title: '清除统计数据',
+                  content: '确定要清除所有统计数据吗？此操作不可撤销',
+                  confirmText: '清除',
+                );
+                
+                if (confirmed) {
+                  await _statisticsManager.clearAllData();
+                  if (mounted) setState(() {});
+                  NotificationManager().showSuccess('统计数据已清除');
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: BAColors.primary,
+                foregroundColor: BAColors.textOnPrimary,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('清除', style: TextStyle(fontSize: 12)),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return ListView(
+      padding: const EdgeInsets.only(right: 8),
+      children: children,
     );
   }
 }
