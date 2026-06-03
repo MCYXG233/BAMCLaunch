@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
-import '../theme/typography.dart';
-import '../theme/app_theme.dart';
-import '../components/index.dart';
 import '../../instance/index.dart';
-import '../../extension/index.dart';
 import 'version_page.dart';
 
 /// 游戏库页面（合并实例管理和版本管理）

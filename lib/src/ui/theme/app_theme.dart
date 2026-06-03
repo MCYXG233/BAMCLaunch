@@ -328,7 +328,6 @@ class BATheme {
       case ThemeMode.dark:
         return darkTheme;
       case ThemeMode.system:
-      default:
         return lightTheme;
     }
   }

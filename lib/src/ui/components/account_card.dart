@@ -139,10 +139,9 @@ class _AccountCardState extends State<AccountCard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    if (widget.onLogout != null &&
-                        widget.account.type == AccountType.microsoft)
+                    if (widget.onLogout != null)
                       BASecondaryButton(
-                        text: '登出',
+                        text: widget.account.type == AccountType.microsoft ? '登出' : '退出登录',
                         onPressed: widget.onLogout,
                         height: 36,
                         trailingIcon: Icon(
@@ -151,8 +150,7 @@ class _AccountCardState extends State<AccountCard> {
                           color: BAColors.secondary,
                         ),
                       ),
-                    if (widget.onLogout != null &&
-                        widget.account.type == AccountType.microsoft)
+                    if (widget.onLogout != null)
                       const SizedBox(width: 8),
                     if (widget.onDelete != null)
                       BADangerButton(

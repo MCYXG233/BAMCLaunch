@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as path;
-import 'package:http/http.dart' as http;
 
 import '../config/config_manager.dart';
 import '../core/logger.dart';
@@ -13,7 +12,6 @@ import '../event/event_bus.dart';
 import '../platform/platform_adapter.dart';
 import '../task/task.dart';
 import '../task/task_context.dart';
-import '../game/launcher/game_file_validator.dart';
 import 'models.dart';
 import 'version_manager.dart';
 

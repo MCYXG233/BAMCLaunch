@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:window_manager/window_manager.dart';
 import '../theme/colors.dart';
-import '../theme/typography.dart';
-import '../theme/app_theme.dart';
 import '../theme/animations.dart';
-import '../components/ba_buttons.dart';
+import '../theme/app_theme.dart';
+import '../theme/typography.dart';
 import '../components/index.dart';
 import '../../config/config_manager_impl.dart';
 import '../../account/account_manager.dart';
@@ -13,9 +11,6 @@ import '../../game/java/java_manager.dart';
 import '../../game/launcher/game_launcher.dart';
 import '../../game/launcher/models.dart';
 import '../../core/logger.dart';
-import '../../instance/index.dart';
-import '../../extension/index.dart';
-import 'version_page.dart';
 import 'account_page.dart';
 import 'settings_page.dart';
 import 'resource_center_page.dart';
@@ -37,7 +32,6 @@ class _BAMCHomePageState extends State<BAMCHomePage>
   String? _selectedAccountName;
   String? _javaStatus;
   bool _sidebarCollapsed = false;
-  bool _isLoading = true;
 
   late AnimationController _animationController;
   late Animation<double> _sidebarAnimation;
@@ -148,13 +142,9 @@ class _BAMCHomePageState extends State<BAMCHomePage>
         _javaStatus = selectedJava != null
             ? 'Java ${selectedJava.majorVersion}'
             : '未检测到Java';
-        _isLoading = false;
       });
     } catch (e) {
       Logger().error('加载初始数据失败', e);
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 

@@ -28,6 +28,7 @@ import '../../features/skin/skin_preview_3d.dart';
 import '../../features/skin/cape_manager.dart';
 import '../dialogs/cape_upload_dialog.dart';
 import '../../download/mirror_manager.dart';
+import '../components/ba_settings_item.dart';
 
 class BASettingsPage extends StatefulWidget {
   const BASettingsPage({super.key});
@@ -46,6 +47,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
   final AccountManager _accountManager = AccountManager();
   
   Account? _selectedAccount;
+  Uint8List? _currentSkinImage;
+  Uint8List? _currentCapeImage;
 
   String _selectedCategory = 'general';
   bool _notificationInitialized = false;
@@ -125,9 +128,30 @@ class _BASettingsPageState extends State<BASettingsPage> {
   
   Future<void> _loadSelectedAccount() async {
     final account = await _accountManager.getSelectedAccount();
+    
+    Uint8List? skinImage;
+    Uint8List? capeImage;
+    
+    if (account != null) {
+      try {
+        final skinData = await _skinManager.getSkin(account);
+        skinImage = skinData?.image;
+        
+        if (account.capeUrl != null) {
+          final capeManager = CapeManager();
+          final capeData = await capeManager.getCape(account);
+          capeImage = capeData?.image;
+        }
+      } catch (e) {
+        // 皮肤加载失败不影响其他功能
+      }
+    }
+    
     if (mounted) {
       setState(() {
         _selectedAccount = account;
+        _currentSkinImage = skinImage;
+        _currentCapeImage = capeImage;
       });
     }
   }
@@ -1041,61 +1065,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
     );
   }
 
-  Widget _buildSettingsItem({
-    required IconData icon,
-    required String title,
-    required String description,
-    required Widget control,
-  }) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final textPrimary = BAColors.textPrimaryOf(context);
-    final textSecondary = BAColors.textSecondaryOf(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: BAColors.primaryOf(context).withOpacity(0.15),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: BAColors.primaryOf(context), size: 18),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: textPrimary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  description,
-                  style: TextStyle(
-                    color: textSecondary,
-                    fontSize: 12,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          control,
-        ],
-      ),
-    );
-  }
-
   Widget _buildBackgroundSettings() {
     return ListView(
       padding: const EdgeInsets.only(right: 8),
@@ -1176,7 +1145,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         _buildSettingsCard(
           title: '外观',
           children: [
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.language,
               title: '语言',
               description: _language,
@@ -1191,7 +1160,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 },
               ),
             ),
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.palette,
               title: '主题',
               description: _themeModeDisplayName(_themeMode),
@@ -1213,7 +1182,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         _buildSettingsCard(
           title: '行为',
           children: [
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.update,
               title: '自动更新',
               description: '启动时检查更新',
@@ -1222,7 +1191,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 onChanged: _saveAutoUpdate,
               ),
             ),
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.power_settings_new,
               title: '开机自启动',
               description: '系统启动时自动运行',
@@ -1231,7 +1200,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 onChanged: _saveLaunchAtStartup,
               ),
             ),
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.minimize,
               title: '最小化到托盘',
               description: '最小化时隐藏到系统托盘',
@@ -1240,7 +1209,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 onChanged: _saveMinimizeToTray,
               ),
             ),
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.close_fullscreen,
               title: '关闭时最小化到托盘',
               description: '关闭窗口时最小化到系统托盘',
@@ -1255,7 +1224,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         _buildSettingsCard(
           title: '更新',
           children: [
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.system_update,
               title: '检查更新',
               description: _isCheckingUpdate ? '正在检查...' : '手动检查新版本',
@@ -1294,7 +1263,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         _buildSettingsCard(
           title: '路径设置',
           children: [
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.folder,
               title: '游戏目录',
               description: _gameDirectory.isEmpty ? '未设置' : _gameDirectory,
@@ -1305,7 +1274,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 onBrowse: _pickGameDirectory,
               ),
             ),
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.developer_mode,
               title: 'Java路径',
               description: _javaPath.isEmpty ? '自动检测' : _javaPath,
@@ -1328,7 +1297,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         _buildSettingsCard(
           title: '性能设置',
           children: [
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.memory,
               title: '最大内存',
               description: '${_memoryAllocation.toInt()} MB',
@@ -1345,7 +1314,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 ),
               ),
             ),
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.aspect_ratio,
               title: '游戏窗口分辨率',
               description: _gameWindowSize,
@@ -1368,7 +1337,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         _buildSettingsCard(
           title: '高级参数',
           children: [
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.code,
               title: 'JVM额外参数',
               description: _jvmArgsController.text.isEmpty ? '无' : _jvmArgsController.text,
@@ -1378,7 +1347,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 placeholder: '例如: -XX:+UseG1GC',
               ),
             ),
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.play_arrow,
               title: '游戏启动参数',
               description: _gameArgsController.text.isEmpty ? '无' : _gameArgsController.text,
@@ -1401,7 +1370,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         _buildSettingsCard(
           title: '下载设置',
           children: [
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.cloud_download,
               title: '下载源',
               description: _downloadSourceDisplayName(_downloadSource),
@@ -1416,7 +1385,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 },
               ),
             ),
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.download,
               title: '下载目录',
               description: _downloadPath.isEmpty ? '未设置' : _downloadPath,
@@ -1427,7 +1396,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 onBrowse: _pickDownloadPath,
               ),
             ),
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.refresh,
               title: '下载失败自动重试',
               description: '下载失败时自动重试',
@@ -1442,7 +1411,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         _buildSettingsCard(
           title: '并发下载设置',
           children: [
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.speed,
               title: '并发下载数',
               description: '$_concurrentDownloads 个线程',
@@ -1465,7 +1434,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 ),
               ),
             ),
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.data_usage,
               title: '限速设置',
               description: _enableSpeedLimit
@@ -1477,7 +1446,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               ),
             ),
             if (_enableSpeedLimit) ...[
-              _buildSettingsItem(
+              BASettingsItem(
                 icon: Icons.speed,
                 title: '限速值',
                 description: '${_speedLimitValue.toInt()} ${_speedLimitUnit == 0 ? "KB/s" : "MB/s"}',
@@ -1500,7 +1469,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   ),
                 ),
               ),
-              _buildSettingsItem(
+              BASettingsItem(
                 icon: Icons.timer,
                 title: '限速单位',
                 description: _speedLimitUnit == 0 ? 'KB/s' : 'MB/s',
@@ -1532,7 +1501,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         _buildSettingsCard(
           title: '镜像源管理',
           children: [
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.auto_fix_high,
               title: '自动选择最快镜像',
               description: '测速所有镜像并自动切换',
@@ -1688,7 +1657,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         _buildSettingsCard(
           title: '网络设置',
           children: [
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.language,
               title: 'HTTP代理地址',
               description: _proxyHost.isEmpty ? '未设置' : _proxyHost,
@@ -1720,7 +1689,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 ),
               ),
             ),
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.numbers,
               title: 'HTTP代理端口',
               description: _proxyPort == 0 ? '未设置' : '$_proxyPort',
@@ -1962,13 +1931,13 @@ class _BASettingsPageState extends State<BASettingsPage> {
         _buildSettingsCard(
           title: '应用信息',
           children: [
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.info_outline,
               title: '应用版本号',
               description: 'BAMC Launcher v1.0.0',
               control: const SizedBox(),
             ),
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.gavel,
               title: '开源许可证',
               description: 'GPL-3.0 License',
@@ -1980,7 +1949,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         _buildSettingsCard(
           title: '链接与反馈',
           children: [
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.code,
               title: 'GitHub链接',
               description: 'GitHub 仓库',
@@ -1997,7 +1966,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 child: const Text('访问', style: TextStyle(fontSize: 12)),
               ),
             ),
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.feedback,
               title: '反馈/问题报告',
               description: '提交反馈',
@@ -2020,7 +1989,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         _buildSettingsCard(
           title: '维护',
           children: [
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.cleaning_services,
               title: '清除缓存',
               description: '清理临时文件释放存储空间',
@@ -2199,7 +2168,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               const SizedBox(height: 16),
               _buildModelSelector(),
               const SizedBox(height: 16),
-              _buildSettingsItem(
+              BASettingsItem(
                 icon: Icons.image,
                 title: '上传自定义皮肤',
                 description: '选择本地PNG皮肤文件',
@@ -2219,7 +2188,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               const SizedBox(height: 8),
               _buildCapeManagement(),
               if (_selectedAccount?.skinUrl != null)
-                _buildSettingsItem(
+                BASettingsItem(
                   icon: Icons.restore,
                   title: '恢复默认皮肤',
                   description: '移除自定义皮肤，使用默认皮肤',
@@ -2243,7 +2212,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         _buildSettingsCard(
           title: '皮肤缓存',
           children: [
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.refresh,
               title: '刷新皮肤缓存',
               description: '清除过期的皮肤缓存文件',
@@ -2263,7 +2232,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 child: const Text('清理', style: TextStyle(fontSize: 12)),
               ),
             ),
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.delete_outline,
               title: '清除所有皮肤缓存',
               description: '删除所有已缓存的皮肤文件',
@@ -2322,6 +2291,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
           const SizedBox(height: 16),
           Center(
             child: SkinPreview3D(
+              skinImage: _currentSkinImage,
+              capeImage: _currentCapeImage,
               skinType: _selectedAccount!.modelType,
               width: 200,
               height: 280,
@@ -2534,77 +2505,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
   }
 
   Future<void> _showCapeUploadDialog() async {
-    if (_selectedAccount == null) return;
+    NotificationManager().showInfo('披风功能开发中');
+  }
 
-    await CapeUploadDialog.show(
-      context: context,
-      accountId: _selectedAccount!.id,
-      accountName: _selectedAccount!.username,
-      onUploadSuccess: (capeImage) {
-        NotificationManager().showSuccess('披风上传成功');
-        setState(() {});
-      },
-      onDeleteSuccess: () {
-        NotificationManager().showSuccess('披风已删除');
-        setState(() {});
-      },
-    );
-  }
-  
-  Widget _buildSkinPreview() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: BAColors.surfaceVariantOf(context),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: BAColors.borderOf(context)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            '当前皮肤',
-            style: TextStyle(
-              color: BAColors.textPrimaryOf(context),
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            width: 128,
-            height: 128,
-            decoration: BoxDecoration(
-              color: BAColors.surfaceOf(context),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: BAColors.borderOf(context)),
-            ),
-            child: _selectedAccount?.skinUrl != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: _buildSkinImage(_selectedAccount!.skinUrl!),
-                  )
-                : Center(
-                    child: Icon(
-                      Icons.person,
-                      size: 64,
-                      color: BAColors.textDisabledOf(context),
-                    ),
-                  ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _selectedAccount?.skinUrl != null ? '使用自定义皮肤' : '使用默认皮肤',
-            style: TextStyle(
-              color: BAColors.textSecondaryOf(context),
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
   Widget _buildSkinImage(String skinUrl) {
     if (skinUrl.startsWith('http')) {
       return Image.network(
@@ -2721,7 +2624,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         _buildSettingsCard(
           title: '备份管理',
           children: [
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.folder,
               title: '查看所有备份',
               description: '${allBackups.length} 个备份',
@@ -2747,7 +2650,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 child: const Text('管理', style: TextStyle(fontSize: 12)),
               ),
             ),
-            _buildSettingsItem(
+            BASettingsItem(
               icon: Icons.storage,
               title: '备份存储',
               description: '管理所有备份文件',
@@ -2959,7 +2862,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
       _buildSettingsCard(
         title: '数据管理',
         children: [
-          _buildSettingsItem(
+          BASettingsItem(
             icon: Icons.delete_outline,
             title: '清除统计数据',
             description: '清除所有游戏统计数据',

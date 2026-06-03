@@ -705,6 +705,13 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
           height: 36,
         ),
         const SizedBox(width: 8),
+        BASecondaryButton(
+          text: account.type == AccountType.microsoft ? '登出' : '退出登录',
+          onPressed: () => _logoutAccount(account),
+          leadingIcon: const Icon(Icons.logout, size: 18),
+          height: 36,
+        ),
+        const SizedBox(width: 8),
         BADangerButton(
           text: '删除',
           onPressed: () => _deleteAccount(account),
@@ -713,6 +720,43 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
         ),
       ],
     );
+  }
+
+  /// 退出登录账户
+  Future<void> _logoutAccount(Account account) async {
+    final confirmed = await BAConfirmDialog.show(
+      context: context,
+      title: account.type == AccountType.microsoft ? '登出账户' : '退出登录',
+      content: account.type == AccountType.microsoft
+          ? '确定要登出账户 "${account.username}" 吗？'
+          : '确定要退出登录账户 "${account.username}" 吗？',
+      confirmText: '确定',
+      cancelText: '取消',
+    );
+
+    if (!confirmed) return;
+
+    try {
+      // 如果是Microsoft账户，清除凭据
+      if (account.type == AccountType.microsoft) {
+        await _authManager.clearCredentials();
+      }
+
+      // 如果是当前选中的账户，取消选中
+      if (_selectedAccountId == account.id) {
+        await _accountManager.selectAccount('');
+      }
+
+      if (mounted) {
+        _showSnackBar(account.type == AccountType.microsoft ? '已登出' : '已退出登录', success: true);
+        await _loadAccounts();
+      }
+    } catch (e, stackTrace) {
+      _logger.error('退出登录失败', e, stackTrace);
+      if (mounted) {
+        _showSnackBar('退出登录失败: $e');
+      }
+    }
   }
 
   /// 获取账户类型名称

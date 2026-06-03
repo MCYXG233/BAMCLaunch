@@ -13,3 +13,4 @@ export 'account_card.dart';
 export 'ba_notification.dart';
 export 'ba_download_indicator.dart';
 export 'ba_create_instance_dialog.dart';
+export 'ba_settings_item.dart';

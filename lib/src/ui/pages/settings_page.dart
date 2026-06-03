@@ -9,7 +9,6 @@ import '../theme/typography.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_manager.dart';
 import '../components/ba_buttons.dart';
-import '../components/ba_inputs.dart';
 import '../../download/download_source.dart';
 import '../../download/download_engine.dart';
 
@@ -50,7 +49,6 @@ class _BAMCSettingsPageState extends State<BAMCSettingsPage> {
       case ThemeMode.dark:
         return 'dark';
       case ThemeMode.system:
-      default:
         return 'system';
     }
   }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../version/version_manager.dart';
-import '../../version/version_widgets.dart';
 import '../../version/models.dart';
 import '../../event/event.dart';
 import '../../event/event_bus.dart';
@@ -11,7 +10,6 @@ import '../theme/app_theme.dart';
 import '../components/ba_buttons.dart';
 import '../components/ba_inputs.dart';
 import '../components/ba_progress.dart';
-import '../components/ba_list_tile.dart';
 
 /// 版本管理页面
 /// 用于管理Minecraft版本的安装、卸载和查看
