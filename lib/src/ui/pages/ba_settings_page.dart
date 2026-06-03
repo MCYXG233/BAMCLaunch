@@ -24,9 +24,9 @@ import '../../game/game_statistics.dart';
 import '../../instance/instance_manager.dart';
 import '../components/ba_backup_dialog.dart';
 import '../components/ba_dialog.dart';
+import 'dart:typed_data';
 import '../../features/skin/skin_preview_3d.dart';
 import '../../features/skin/cape_manager.dart';
-import '../dialogs/cape_upload_dialog.dart';
 import '../../download/mirror_manager.dart';
 import '../components/ba_settings_item.dart';
 
@@ -135,12 +135,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
     if (account != null) {
       try {
         final skinData = await _skinManager.getSkin(account);
-        skinImage = skinData?.image;
+        if (skinData != null) {
+          skinImage = Uint8List.fromList(skinData.imageData);
+        }
         
         if (account.capeUrl != null) {
           final capeManager = CapeManager();
-          final capeData = await capeManager.getCape(account);
-          capeImage = capeData?.image;
+          final capeData = await capeManager.getCape(account.id);
+          capeImage = capeData?.imageData;
         }
       } catch (e) {
         // 皮肤加载失败不影响其他功能

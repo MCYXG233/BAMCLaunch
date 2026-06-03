@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:archive/archive.dart' as archive;
+import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 import '../core/error_codes.dart';
 import '../core/logger.dart';
@@ -107,7 +107,7 @@ class InstanceExporter {
         final metadataName = format == InstanceExportFormat.modrinth
             ? 'modrinth.index.json'
             : 'instance.json';
-        archive.addFile(archive.ArchiveFile(
+        archive.addFile(ArchiveFile(
           metadataName,
           metadataJson.length,
           utf8.encode(metadataJson),
@@ -117,7 +117,7 @@ class InstanceExporter {
       onProgress?.call(0, 1, '正在压缩文件...');
 
       // 编码为ZIP
-      final encodedArchive = archive.ZipEncoder().encode(archive);
+      final encodedArchive = ZipEncoder().encode(archive);
       if (encodedArchive == null) {
         throw AppException.fromCode(
           ErrorCodes.fileNotFound,
@@ -149,12 +149,12 @@ class InstanceExporter {
   }
 
   /// 收集文件到归档
-  static Future<archive.Archive> _collectFiles(
+  static Future<Archive> _collectFiles(
     String instancePath,
     InstanceExportOptions options,
     ExportProgressCallback? onProgress,
   ) async {
-    final zipArchive = archive.Archive();
+    final zipArchive = Archive();
     int collected = 0;
 
     final Map<String, bool> foldersToCollect = {
@@ -175,7 +175,7 @@ class InstanceExporter {
       final optionsFile = File(path.join(instancePath, 'options.txt'));
       if (await optionsFile.exists()) {
         final content = await optionsFile.readAsBytes();
-        zipArchive.addFile(archive.ArchiveFile('instances/options.txt', content.length, content));
+        zipArchive.addFile(ArchiveFile('instances/options.txt', content.length, content));
         collected++;
       }
     }
@@ -193,7 +193,7 @@ class InstanceExporter {
             final relativePath = path.relative(entity.path, from: instancePath);
             final archivePath = 'instances/$relativePath'.replaceAll('\\', '/');
             final content = await entity.readAsBytes();
-            zipArchive.addFile(archive.ArchiveFile(
+            zipArchive.addFile(ArchiveFile(
               archivePath,
               content.length,
               content,

@@ -46,7 +46,7 @@ class LogPanel extends StatefulWidget {
   });
 
   @override
-  State<LogPanel> createState() => LogPanelState();
+  State<LogPanel> createState() => _LogPanelState();
 }
 
 class _LogPanelState extends State<LogPanel> {

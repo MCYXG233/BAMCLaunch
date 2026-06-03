@@ -131,7 +131,7 @@ class InstanceImporter {
       final config = jsonDecode(configJson) as Map<String, dynamic>;
 
       // 生成新ID
-      final id = manager._generateId();
+      final id = manager.generateId();
       final now = DateTime.now();
 
       // 创建新实例
@@ -239,8 +239,7 @@ class InstanceImporter {
       }
 
       // 添加实例
-      manager._instances.add(instance);
-      await manager.save();
+      await manager.addInstance(instance);
 
       _logger.info('Instance imported successfully: ${instance.name}');
 
@@ -306,7 +305,7 @@ class InstanceImporter {
       String directoryId = options.targetDirectoryId ?? manager.selectedDirectoryId ?? manager.directories.first.id;
 
       // 生成实例信息
-      final id = manager._generateId();
+      final id = manager.generateId();
       final now = DateTime.now();
       final name = options.customName ?? indexData['name'] as String? ?? 'Modrinth Modpack';
 
@@ -374,8 +373,7 @@ class InstanceImporter {
       }
 
       // 保存实例
-      manager._instances.add(instance);
-      await manager.save();
+      await manager.addInstance(instance);
 
       _logger.info('Modrinth modpack imported successfully: $name');
 

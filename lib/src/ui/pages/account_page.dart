@@ -25,6 +25,7 @@ class BAMCAccountPage extends StatefulWidget {
 
 class _BAMCAccountPageState extends State<BAMCAccountPage> {
   final AccountManager _accountManager = AccountManager();
+  final AuthManager _authManager = AuthManager();
   final EventBus _eventBus = EventBus();
   final Logger _logger = Logger('BAMCAccountPage');
 

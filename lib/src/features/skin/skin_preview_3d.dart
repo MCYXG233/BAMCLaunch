@@ -8,6 +8,7 @@ import '../../core/logger.dart';
 import '../../platform/platform_adapter.dart';
 import '../../platform/platform_adapter_factory.dart';
 import '../../account/skin_manager.dart';
+import '../../account/account.dart';
 
 /// 3D皮肤预览组件
 /// 使用Flutter CustomPaint实现基础的3D皮肤渲染效果

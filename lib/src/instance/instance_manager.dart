@@ -239,7 +239,7 @@ class InstanceManager {
     required String name,
     required String path,
   }) async {
-    final id = _generateId();
+    final id = generateId();
     final now = DateTime.now();
     final directory = GameDirectory(
       id: id,
@@ -339,7 +339,7 @@ class InstanceManager {
       throw ArgumentError('Directory not found: $directoryId');
     }
 
-    final id = _generateId();
+    final id = generateId();
     final now = DateTime.now();
 
     final instance = GameInstance(
@@ -605,7 +605,7 @@ class InstanceManager {
       orElse: () => throw ArgumentError('Directory not found: ${instance.directoryId}'),
     );
 
-    final id = _generateId();
+    final id = generateId();
     final now = DateTime.now();
 
     final duplicated = instance.copyWith(
@@ -669,7 +669,7 @@ class InstanceManager {
       orElse: () => throw ArgumentError('Directory not found: $targetDirectoryId'),
     );
 
-    final id = _generateId();
+    final id = generateId();
     final now = DateTime.now();
 
     final duplicated = instance.copyWith(
@@ -782,10 +782,19 @@ class InstanceManager {
   }
 
   /// 生成唯一 ID
-  String _generateId() {
+  String generateId() {
     final random = Random.secure();
     final bytes = List<int>.generate(16, (_) => random.nextInt(256));
     return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+  }
+
+  /// 添加实例（用于导入）
+  Future<GameInstance> addInstance(GameInstance instance) async {
+    _instances.add(instance);
+    await ensureInstanceDirectories(instance.id);
+    await save();
+    _logger.info('Added instance: ${instance.name}');
+    return instance;
   }
 
   /// 导出实例为ZIP
@@ -861,7 +870,7 @@ class InstanceManager {
     final config = jsonDecode(configJson) as Map<String, dynamic>;
 
     // 生成新ID
-    final id = _generateId();
+    final id = generateId();
     final now = DateTime.now();
 
     // 创建新实例
@@ -936,7 +945,7 @@ class InstanceManager {
     final indexData = jsonDecode(indexJson) as Map<String, dynamic>;
 
     // 生成新ID
-    final id = _generateId();
+    final id = generateId();
     final now = DateTime.now();
     final name = customName ?? indexData['name'] as String? ?? 'Modrinth Modpack';
 

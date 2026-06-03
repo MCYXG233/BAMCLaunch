@@ -111,7 +111,7 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
         // 有新内容，读取新增的日志
         final raf = _logFile!.openSync(mode: FileMode.read);
         raf.setPositionSync(_lastFileLength);
-        final bytes = raf.read(currentLength - _lastFileLength);
+        final bytes = raf.readSync(currentLength - _lastFileLength);
         raf.closeSync();
         
         final newContent = String.fromCharCodes(bytes);
