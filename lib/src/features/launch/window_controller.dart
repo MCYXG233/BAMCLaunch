@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 import 'package:ffi/ffi.dart';
-import '../../../core/logger.dart';
-import '../../../event/event.dart';
-import '../../../event/event_bus.dart';
+import '../../core/logger.dart';
+import '../../event/event.dart';
+import '../../event/event_bus.dart';
 
 /// 窗口可见性模式
 enum WindowVisibilityMode {

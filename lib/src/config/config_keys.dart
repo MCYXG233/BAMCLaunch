@@ -127,10 +127,19 @@ class ConfigKeys {
   /// 镜像源配置
   static const String customMirrors = 'customMirrors';
   static const String selectedMirror = 'selectedMirror';
+
+  /// 隐私保护配置
+  static const String privacyConfig = 'privacyConfig';
   static const String autoSelectMirror = 'autoSelectMirror';
+
+  /// 主题编辑器配置
+  static const String themeConfig = 'themeConfig';
 
   /// 自动备份配置
   static const String autoBackupConfig = 'autoBackupConfig';
+
+  /// 布局配置
+  static const String layoutConfig = 'layoutConfig';
   static const String autoBackupEnabled = 'autoBackupEnabled';
   static const String autoBackupSchedule = 'autoBackupSchedule';
   static const String autoBackupKeepCount = 'autoBackupKeepCount';

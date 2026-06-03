@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
-import '../../../version/models.dart';
-import '../../../core/logger.dart';
-import '../../../platform/platform_adapter.dart';
-import '../../../platform/platform_adapter_factory.dart';
+import '../../version/models.dart';
+import '../../core/logger.dart';
+import '../../platform/platform_adapter.dart';
+import '../../platform/platform_adapter_factory.dart';
 
 /// 原生库提取模式
 enum NativeExtractionMode {

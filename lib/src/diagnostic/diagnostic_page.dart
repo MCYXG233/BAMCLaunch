@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
-import '../../ui/theme/ba_theme_colors.dart';
+import '../ui/theme/ba_theme_colors.dart';
 import 'network_diagnostic.dart';
 import 'auto_fixer.dart';
 
