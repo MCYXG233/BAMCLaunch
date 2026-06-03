@@ -9,6 +9,7 @@ import '../event/event_bus.dart';
 import '../event/event.dart';
 import '../instance/instance_manager.dart';
 import '../instance/models.dart';
+import '../game/backup_manager.dart';
 import 'backup_tag.dart';
 
 /// 自动备份调度类型

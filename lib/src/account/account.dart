@@ -1,3 +1,5 @@
+import 'skin_manager.dart';
+
 /// 账户类型枚举
 enum AccountType {
   /// 离线账户
@@ -9,8 +11,6 @@ enum AccountType {
   /// Authlib Injector账户
   authlib,
 }
-
-import 'skin_manager.dart';
 
 /// 账户数据模型
 class Account {
