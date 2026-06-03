@@ -1,21 +1,80 @@
+/// 崩溃类型枚举
+///
+/// 定义了 Minecraft 游戏可能出现的各种崩溃类型，
+/// 用于分类和识别不同类型的错误。
 enum CrashType {
+  /// Java 版本不兼容
+  ///
+  /// 当游戏或模组要求的 Java 版本与当前安装的版本不匹配时发生。
+  /// 例如：1.16+ 版本需要 Java 17，1.20.5+ 需要 Java 21。
   javaVersionIncompatible,
+
+  /// 内存不足
+  ///
+  /// 游戏运行时 JVM 内存耗尽，可能是分配的内存不够或模组过多导致。
   outOfMemory,
+
+  /// 模组冲突
+  ///
+  /// 存在功能重复或互相冲突的模组，需要移除冲突模组。
   modConflict,
+
+  /// 缺少模组依赖
+  ///
+  /// 某些模组的前置依赖未安装或版本不正确。
   missingMod,
+
+  /// 文件损坏或缺失
+  ///
+  /// 游戏核心文件或模组文件可能损坏或不完整。
   corruptedFiles,
+
+  /// 账户验证失败
+  ///
+  /// 登录验证出现问题，可能需要重新登录 Microsoft 账户或外置登录服务。
   authError,
+
+  /// 网络连接问题
+  ///
+  /// 游戏无法连接到服务器，可能是网络或服务器问题。
   networkError,
+
+  /// 未知错误
+  ///
+  /// 无法识别的崩溃类型，需要进一步分析日志。
   unknown,
 }
 
+/// 崩溃分析结果
+///
+/// 包含崩溃类型、标题、描述和建议修复方案的详细信息。
+/// 该类用于存储崩溃分析后的诊断结果，供用户界面展示。
 class CrashAnalysis {
+  /// 崩溃类型
   final CrashType type;
+
+  /// 崩溃标题，简短描述问题
   final String title;
+
+  /// 崩溃描述，详细说明问题原因
   final String description;
+
+  /// 修复建议列表，提供用户可操作的解决方案
   final List<String> suggestions;
+
+  /// 是否可以自动修复
+  ///
+  /// 如果为 true，表示启动器可以自动尝试修复此问题。
+  /// 例如：内存不足可以通过自动调整 JVM 内存参数来修复。
   final bool canAutoFix;
 
+  /// 构造函数
+  ///
+  /// [type] 崩溃类型（必填）
+  /// [title] 崩溃标题（必填）
+  /// [description] 崩溃描述（必填）
+  /// [suggestions] 修复建议列表（必填）
+  /// [canAutoFix] 是否可以自动修复，默认为 false
   const CrashAnalysis({
     required this.type,
     required this.title,
@@ -25,10 +84,40 @@ class CrashAnalysis {
   });
 }
 
+/// 崩溃分析器
+///
+/// 用于分析 Minecraft 游戏崩溃日志，识别崩溃原因并提供修复建议。
+/// 通过检查日志中的关键错误信息，匹配已知的崩溃模式。
+///
+/// 使用示例：
+/// ```dart
+/// final analysis = CrashAnalyzer.analyze('1', crashLogs);
+/// print(analysis.title); // 输出崩溃标题
+/// print(analysis.suggestions); // 输出修复建议
+/// ```
 class CrashAnalyzer {
+  /// 分析崩溃日志
+  ///
+  /// 根据退出码和日志内容，识别崩溃类型并返回分析结果。
+  ///
+  /// 参数：
+  /// - [exitCode] 游戏退出码，可能为 null
+  /// - [logs] 游戏日志行列表
+  ///
+  /// 返回：
+  /// - [CrashAnalysis] 包含崩溃类型、描述和修复建议的分析结果
+  ///
+  /// 分析流程：
+  /// 1. 将所有日志合并为小写字符串，便于不区分大小写匹配
+  /// 2. 按优先级依次检查各种已知的崩溃模式
+  /// 3. 如果匹配到已知模式，返回对应的分析结果
+  /// 4. 如果未匹配到任何模式，返回未知错误类型
   static CrashAnalysis analyze(String? exitCode, List<String> logs) {
+    // 将所有日志合并为一行，并转换为小写，便于关键词匹配
     final allText = logs.join('\n').toLowerCase();
 
+    // 检测 Java 版本不兼容问题
+    // 这类错误通常发生在使用错误版本的 Java 运行游戏时
     if (_containsAny(allText, [
       'unsupportedclassversionerror',
       'class file version',
@@ -46,6 +135,9 @@ class CrashAnalyzer {
       );
     }
 
+    // 检测内存不足问题
+    // 这类错误通常发生在 JVM 堆内存耗尽时
+    // canAutoFix 设为 true，启动器可以自动调整内存参数
     if (_containsAny(allText, [
       'outofmemoryerror',
       'java heap space',
@@ -67,6 +159,8 @@ class CrashAnalyzer {
       );
     }
 
+    // 检测缺少模组依赖问题
+    // 这类错误通常发生在模组的前置依赖未安装或版本不正确时
     if (_containsAny(allText, [
       'modresolutionexception',
       'missing or unsupported mandatory dependencies',
@@ -87,6 +181,8 @@ class CrashAnalyzer {
       );
     }
 
+    // 检测模组冲突问题
+    // 这类错误通常发生在存在功能重复或互相冲突的模组时
     if (_containsAny(allText, [
       'duplicatemodsfoundexception',
       'mod conflict',
@@ -106,6 +202,8 @@ class CrashAnalyzer {
       );
     }
 
+    // 检测文件损坏或缺失问题
+    // 这类错误通常发生在游戏核心文件或模组文件损坏时
     if (_containsAny(allText, [
       'corrupted',
       'ioexception',
@@ -130,6 +228,8 @@ class CrashAnalyzer {
       );
     }
 
+    // 检测账户验证失败问题
+    // 这类错误通常发生在登录验证出现问题时
     if (_containsAny(allText, [
       'authentication',
       'auth',
@@ -151,6 +251,8 @@ class CrashAnalyzer {
       );
     }
 
+    // 检测网络连接问题
+    // 这类错误通常发生在游戏无法连接到服务器时
     if (_containsAny(allText, [
       'connection refused',
       'timed out',
@@ -172,6 +274,8 @@ class CrashAnalyzer {
       );
     }
 
+    // 如果未匹配到任何已知模式，返回未知错误
+    // 在标题中包含退出码信息（如果有）
     String exitInfo = '';
     if (exitCode != null && exitCode != '0') {
       exitInfo = '（退出码: $exitCode）';
@@ -190,6 +294,17 @@ class CrashAnalyzer {
     );
   }
 
+  /// 检查文本是否包含关键词列表中的任意一个
+  ///
+  /// 这是一个私有辅助方法，用于快速检查文本中是否包含多个关键词中的任意一个。
+  ///
+  /// 参数：
+  /// - [text] 要检查的文本
+  /// - [keywords] 关键词列表
+  ///
+  /// 返回：
+  /// - 如果文本包含任意一个关键词，返回 true
+  /// - 如果文本不包含任何关键词，返回 false
   static bool _containsAny(String text, List<String> keywords) {
     for (final keyword in keywords) {
       if (text.contains(keyword)) return true;

@@ -2,13 +2,45 @@ import 'package:flutter/material.dart';
 import 'colors.dart';
 import 'typography.dart';
 
-/// 蔚蓝档案 (Blue Archive) UI 主题数据
-/// 完全按照蔚蓝档案的视觉风格设计
+/// 蔚蓝档案（Blue Archive）UI 主题数据
+///
+/// 本类提供完整的 Flutter [ThemeData] 配置，完全按照蔚蓝档案的视觉风格设计。
+/// 蔚蓝档案是一款由 Nexon 发行的学园都市题材 RPG 游戏，其 UI 设计风格特点包括：
+///
+/// - **清新明亮的配色**：以天蓝色为主色调，搭配樱花粉色作为辅助色
+/// - **圆润柔和的形状**：大量使用圆角设计，营造亲和力
+/// - **轻盈的视觉层次**：低对比度配色、柔和阴影、半透明效果
+/// - **青春活力的氛围**：整体设计传达出希望、青春、友谊的主题
+///
+/// 本类提供浅色主题（lightTheme）和深色主题（darkTheme）两种配置，
+/// 可通过 [getTheme] 方法根据主题模式获取相应的主题数据。
+///
+/// 使用示例：
+/// ```dart
+/// MaterialApp(
+///   theme: BATheme.lightTheme,
+///   darkTheme: BATheme.darkTheme,
+///   themeMode: ThemeMode.system,
+/// )
+/// ```
 class BATheme {
   /// 向后兼容：获取默认主题数据（浅色）
+  ///
+  /// 此属性为向后兼容而保留，返回浅色主题数据。
+  /// 建议使用 [lightTheme] 或 [darkTheme] 明确指定主题类型。
   static ThemeData get theme => lightTheme;
 
   /// 获取深色主题数据
+  ///
+  /// 返回配置好的深色主题 [ThemeData]，适用于深色模式环境。
+  /// 深色主题采用较深的背景色和表面色，同时保持蔚蓝档案的核心配色风格。
+  ///
+  /// 深色主题的设计特点：
+  /// - 深色背景配合天蓝色主色调，形成鲜明对比
+  /// - 降低整体亮度，适合夜间或低光环境使用
+  /// - 保持与浅色主题一致的圆角、间距等设计参数
+  ///
+  /// 返回：完整的深色主题 [ThemeData] 对象
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
@@ -165,6 +197,17 @@ class BATheme {
   }
 
   /// 获取浅色主题数据
+  ///
+  /// 返回配置好的浅色主题 [ThemeData]，适用于浅色模式环境。
+  /// 浅色主题是蔚蓝档案的核心视觉风格，采用明亮清新的配色方案。
+  ///
+  /// 浅色主题的设计特点：
+  /// - 浅白色背景配合天蓝色主色调，营造清新明亮的视觉感受
+  /// - 柔和的阴影效果，组件呈现轻盈浮动的视觉层次
+  /// - 大圆角设计，传达亲和友好的交互体验
+  /// - 低对比度配色，确保长时间使用的舒适性
+  ///
+  /// 返回：完整的浅色主题 [ThemeData] 对象
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
@@ -321,6 +364,24 @@ class BATheme {
   }
 
   /// 获取指定主题模式的主题数据
+  ///
+  /// 根据传入的 [ThemeMode] 返回相应的主题数据。
+  /// 方便在应用中根据系统主题模式或用户设置动态切换主题。
+  ///
+  /// 参数：
+  /// - [mode]: 主题模式，可选值为 [ThemeMode.light]、[ThemeMode.dark] 或 [ThemeMode.system]
+  ///
+  /// 返回：
+  /// - [ThemeMode.light] 时返回浅色主题
+  /// - [ThemeMode.dark] 时返回深色主题
+  /// - [ThemeMode.system] 时返回浅色主题（默认）
+  ///
+  /// 使用示例：
+  /// ```dart
+  /// MaterialApp(
+  ///   theme: BATheme.getTheme(ThemeMode.light),
+  /// )
+  /// ```
   static ThemeData getTheme(ThemeMode mode) {
     switch (mode) {
       case ThemeMode.light:
@@ -333,6 +394,15 @@ class BATheme {
   }
 
   /// 深色主题颜色方案
+  ///
+  /// 返回深色主题的 [ColorScheme] 配置。
+  /// 颜色方案定义了应用中所有语义化颜色的映射关系，
+  /// 包括主色调、次色调、表面色、错误色等。
+  ///
+  /// 深色颜色方案的特点：
+  /// - 主色调保持天蓝色，与深色背景形成鲜明对比
+  /// - 表面色采用较深的灰色，降低整体亮度
+  /// - 保持与浅色方案一致的语义化颜色定义
   static ColorScheme get _darkColorScheme {
     return const ColorScheme.dark(
       primary: BAColors.primary,
@@ -360,6 +430,15 @@ class BATheme {
   }
 
   /// 浅色主题颜色方案
+  ///
+  /// 返回浅色主题的 [ColorScheme] 配置。
+  /// 这是蔚蓝档案的核心配色方案，体现了游戏的视觉风格。
+  ///
+  /// 浅色颜色方案的特点：
+  /// - 主色调为天蓝色（primary），代表蔚蓝档案的"蓝"
+  /// - 次色调为樱花粉色（secondary），增添可爱温馨感
+  /// - 背景色采用浅白色，营造清新明亮的视觉感受
+  /// - 错误色采用柔和的红色，避免过于刺激
   static ColorScheme get _lightColorScheme {
     return const ColorScheme.light(
       primary: BAColors.primary,
@@ -387,6 +466,13 @@ class BATheme {
   }
 
   /// 文本主题（通用）
+  ///
+  /// 返回应用通用的 [TextTheme] 配置。
+  /// 文本主题定义了各种文本样式的层级关系，
+  /// 从大标题到小标签，形成完整的文本样式体系。
+  ///
+  /// 文本主题使用 [BATypography] 中定义的样式，
+  /// 确保字体、大小、粗细等参数的一致性。
   static TextTheme get _textTheme {
     return TextTheme(
       displayLarge: BATypography.headlineLarge,
@@ -408,6 +494,14 @@ class BATheme {
   }
 
   /// 深色主题输入框装饰主题
+  ///
+  /// 返回深色主题下输入框的 [InputDecorationTheme] 配置。
+  /// 定义了输入框的填充色、边框样式、提示文本样式等。
+  ///
+  /// 深色输入框的特点：
+  /// - 填充色采用深色表面变体色
+  /// - 边框采用深色边框色，聚焦时显示主色调
+  /// - 提示文本采用深色禁用文本色
   static InputDecorationTheme get _darkInputDecorationTheme {
     return InputDecorationTheme(
       filled: true,
@@ -440,6 +534,14 @@ class BATheme {
   }
 
   /// 浅色主题输入框装饰主题
+  ///
+  /// 返回浅色主题下输入框的 [InputDecorationTheme] 配置。
+  /// 这是蔚蓝档案风格输入框的核心样式定义。
+  ///
+  /// 浅色输入框的特点：
+  /// - 填充色采用浅色表面变体色，营造柔和的背景
+  /// - 边框采用浅色边框色，聚焦时显示天蓝色主色调
+  /// - 圆角设计，符合蔚蓝档案的圆润风格
   static InputDecorationTheme get _lightInputDecorationTheme {
     return InputDecorationTheme(
       filled: true,
@@ -472,16 +574,25 @@ class BATheme {
   }
 
   /// 深色主题图标主题
+  ///
+  /// 返回深色主题下图标的标准样式配置。
+  /// 定义了图标的颜色和默认大小。
   static IconThemeData get _darkIconTheme {
     return const IconThemeData(color: BAColors.darkTextPrimary, size: 24);
   }
 
   /// 浅色主题图标主题
+  ///
+  /// 返回浅色主题下图标的标准样式配置。
+  /// 图标颜色采用主要文本色，确保与整体配色的一致性。
   static IconThemeData get _lightIconTheme {
     return const IconThemeData(color: BAColors.lightTextPrimary, size: 24);
   }
 
   /// 深色主题分割线主题
+  ///
+  /// 返回深色主题下分割线的样式配置。
+  /// 定义了分割线的颜色、粗细和间距。
   static DividerThemeData get _darkDividerTheme {
     return const DividerThemeData(
       color: BAColors.darkBorder,
@@ -491,6 +602,9 @@ class BATheme {
   }
 
   /// 浅色主题分割线主题
+  ///
+  /// 返回浅色主题下分割线的样式配置。
+  /// 分割线采用柔和的边框色，避免视觉干扰。
   static DividerThemeData get _lightDividerTheme {
     return const DividerThemeData(
       color: BAColors.lightBorder,
@@ -500,6 +614,14 @@ class BATheme {
   }
 
   /// 深色主题应用栏主题
+  ///
+  /// 返回深色主题下顶部应用栏（AppBar）的样式配置。
+  /// 定义了应用栏的背景色、标题样式、图标颜色等。
+  ///
+  /// 深色应用栏的特点：
+  /// - 背景色采用深色表面色
+  /// - 无阴影（elevation: 0），保持简洁
+  /// - 标题不居中，采用左对齐布局
   static AppBarTheme get _darkAppBarTheme {
     return AppBarTheme(
       backgroundColor: BAColors.darkSurface,
@@ -513,6 +635,14 @@ class BATheme {
   }
 
   /// 浅色主题应用栏主题
+  ///
+  /// 返回浅色主题下顶部应用栏（AppBar）的样式配置。
+  /// 这是蔚蓝档案风格应用栏的核心样式定义。
+  ///
+  /// 浅色应用栏的特点：
+  /// - 背景色采用浅色表面色，与页面背景协调
+  /// - 无阴影，营造轻盈的视觉感受
+  /// - 标题采用标题栏样式，左对齐布局
   static AppBarTheme get _lightAppBarTheme {
     return AppBarTheme(
       backgroundColor: BAColors.lightSurface,
@@ -526,6 +656,9 @@ class BATheme {
   }
 
   /// 深色主题底部导航栏主题
+  ///
+  /// 返回深色主题下底部导航栏的样式配置。
+  /// 定义了导航栏的背景色、选中/未选中项的颜色等。
   static BottomNavigationBarThemeData get _darkBottomNavBarTheme {
     return const BottomNavigationBarThemeData(
       backgroundColor: BAColors.darkSurface,
@@ -537,6 +670,9 @@ class BATheme {
   }
 
   /// 浅色主题底部导航栏主题
+  ///
+  /// 返回浅色主题下底部导航栏的样式配置。
+  /// 选中项采用天蓝色主色调，未选中项采用次要文本色。
   static BottomNavigationBarThemeData get _lightBottomNavBarTheme {
     return const BottomNavigationBarThemeData(
       backgroundColor: BAColors.lightSurface,
@@ -547,32 +683,58 @@ class BATheme {
     );
   }
 
-  // ========== 圆角半径 ==========
-  
-  /// 标准圆角半径（蔚蓝档案风格）
+  // ==================== 圆角半径 ====================
+
+  /// 标准圆角半径
+  ///
+  /// 返回蔚蓝档案风格的标准圆角 [BorderRadius]（16像素）。
+  /// 这是应用中最常用的圆角值，用于卡片、按钮等大多数组件。
   static BorderRadius get borderRadius => BorderRadius.circular(16);
 
   /// 小圆角半径
+  ///
+  /// 返回较小的圆角 [BorderRadius]（10像素）。
+  /// 用于小型组件如标签、小按钮、输入框等。
   static BorderRadius get borderRadiusSmall => BorderRadius.circular(10);
 
   /// 中圆角半径
+  ///
+  /// 返回中等大小的圆角 [BorderRadius]（14像素）。
+  /// 用于需要介于小圆角和标准圆角之间的组件。
   static BorderRadius get borderRadiusMedium => BorderRadius.circular(14);
 
   /// 大圆角半径
+  ///
+  /// 返回较大的圆角 [BorderRadius]（20像素）。
+  /// 用于大型组件如对话框、大卡片、底部弹窗等。
   static BorderRadius get borderRadiusLarge => BorderRadius.circular(20);
 
   /// 超大圆角半径
+  ///
+  /// 返回超大的圆角 [BorderRadius]（28像素）。
+  /// 用于特殊大型组件或需要更圆润效果的场景。
   static BorderRadius get borderRadiusExtraLarge => BorderRadius.circular(28);
 
-  // ========== 阴影 ==========
+  // ==================== 阴影效果 ====================
 
   /// 向后兼容：获取标准阴影（默认浅色）
+  ///
+  /// 此属性为向后兼容而保留，返回浅色主题的标准阴影。
+  /// 建议使用 [lightShadows] 或 [darkShadows] 明确指定阴影类型，
+  /// 或使用 [shadowsOf] 方法根据当前主题动态获取阴影。
   static List<BoxShadow> get shadows => lightShadows;
 
   /// 向后兼容：获取小阴影（默认浅色）
+  ///
+  /// 此属性为向后兼容而保留，返回浅色主题的小阴影。
+  /// 建议使用 [lightShadowsSmall] 或 [darkShadowsSmall] 明确指定阴影类型。
   static List<BoxShadow> get shadowsSmall => lightShadowsSmall;
 
   /// 获取深色主题标准阴影
+  ///
+  /// 返回深色主题下组件的标准阴影效果。
+  /// 深色阴影采用较深的阴影色，配合较大的模糊半径，
+  /// 在深色背景上呈现明显的浮起效果。
   static List<BoxShadow> get darkShadows => [
         BoxShadow(
           color: BAColors.darkShadow.withOpacity(0.25),
@@ -581,7 +743,13 @@ class BATheme {
         ),
       ];
 
-  /// 获取浅色主题标准阴影（蔚蓝档案风格，更柔和）
+  /// 获取浅色主题标准阴影
+  ///
+  /// 返回浅色主题下组件的标准阴影效果。
+  /// 蔚蓝档案风格的阴影特点：
+  /// - 低透明度（6%），避免视觉干扰
+  /// - 大模糊半径（16像素），营造柔和的浮起效果
+  /// - 向下偏移（4像素），模拟自然光照
   static List<BoxShadow> get lightShadows => [
         BoxShadow(
           color: const Color(0xFF000000).withOpacity(0.06),
@@ -591,6 +759,9 @@ class BATheme {
       ];
 
   /// 获取深色主题小阴影
+  ///
+  /// 返回深色主题下组件的小型阴影效果。
+  /// 用于需要轻微浮起效果的小型组件。
   static List<BoxShadow> get darkShadowsSmall => [
         BoxShadow(
           color: BAColors.darkShadow.withOpacity(0.18),
@@ -599,7 +770,10 @@ class BATheme {
         ),
       ];
 
-  /// 获取浅色主题小阴影（蔚蓝档案风格，更柔和）
+  /// 获取浅色主题小阴影
+  ///
+  /// 返回浅色主题下组件的小型阴影效果。
+  /// 用于小型卡片、按钮等需要轻微浮起效果的组件。
   static List<BoxShadow> get lightShadowsSmall => [
         BoxShadow(
           color: const Color(0xFF000000).withOpacity(0.04),
@@ -609,6 +783,9 @@ class BATheme {
       ];
 
   /// 获取深色主题大阴影
+  ///
+  /// 返回深色主题下组件的大型阴影效果。
+  /// 用于对话框、底部弹窗等需要明显浮起效果的大型组件。
   static List<BoxShadow> get darkShadowsLarge => [
         BoxShadow(
           color: BAColors.darkShadow.withOpacity(0.35),
@@ -617,7 +794,11 @@ class BATheme {
         ),
       ];
 
-  /// 获取浅色主题大阴影（蔚蓝档案风格，更柔和）
+  /// 获取浅色主题大阴影
+  ///
+  /// 返回浅色主题下组件的大型阴影效果。
+  /// 用于对话框、底部弹窗等需要明显浮起效果的大型组件。
+  /// 阴影参数更大，营造更强的层次感。
   static List<BoxShadow> get lightShadowsLarge => [
         BoxShadow(
           color: const Color(0xFF000000).withOpacity(0.08),
@@ -627,28 +808,73 @@ class BATheme {
       ];
 
   /// 根据当前主题获取标准阴影
+  ///
+  /// 根据传入的 [BuildContext] 判断当前主题模式，
+  /// 返回相应的标准阴影效果。
+  ///
+  /// 参数：
+  /// - [context]: Flutter 构建上下文，用于获取当前主题信息
+  ///
+  /// 返回：
+  /// - 浅色主题时返回 [lightShadows]
+  /// - 深色主题时返回 [darkShadows]
+  ///
+  /// 使用示例：
+  /// ```dart
+  /// Container(
+  ///   decoration: BoxDecoration(
+  ///     boxShadow: BATheme.shadowsOf(context),
+  ///   ),
+  /// )
+  /// ```
   static List<BoxShadow> shadowsOf(BuildContext context) {
     final brightness = Theme.of(context).brightness;
     return brightness == Brightness.light ? lightShadows : darkShadows;
   }
 
   /// 根据当前主题获取小阴影
+  ///
+  /// 根据传入的 [BuildContext] 判断当前主题模式，
+  /// 返回相应的小阴影效果。
+  ///
+  /// 参数：
+  /// - [context]: Flutter 构建上下文，用于获取当前主题信息
+  ///
+  /// 返回：
+  /// - 浅色主题时返回 [lightShadowsSmall]
+  /// - 深色主题时返回 [darkShadowsSmall]
   static List<BoxShadow> shadowsSmallOf(BuildContext context) {
     final brightness = Theme.of(context).brightness;
     return brightness == Brightness.light ? lightShadowsSmall : darkShadowsSmall;
   }
 
   /// 根据当前主题获取大阴影
+  ///
+  /// 根据传入的 [BuildContext] 判断当前主题模式，
+  /// 返回相应的大阴影效果。
+  ///
+  /// 参数：
+  /// - [context]: Flutter 构建上下文，用于获取当前主题信息
+  ///
+  /// 返回：
+  /// - 浅色主题时返回 [lightShadowsLarge]
+  /// - 深色主题时返回 [darkShadowsLarge]
   static List<BoxShadow> shadowsLargeOf(BuildContext context) {
     final brightness = Theme.of(context).brightness;
     return brightness == Brightness.light ? lightShadowsLarge : darkShadowsLarge;
   }
 
-  // ========== 毛玻璃效果 ==========
-  
-  /// 毛玻璃效果模糊值
+  // ==================== 毛玻璃效果 ====================
+
+  /// 毛玻璃效果标准模糊值
+  ///
+  /// 用于毛玻璃效果的标准模糊强度（10）。
+  /// 此值用于 [BackdropFilter] 的模糊参数。
   static const double blurSigma = 10;
-  
+
   /// 毛玻璃效果轻量模糊值
+  ///
+  /// 用于毛玻璃效果的轻量模糊强度（5）。
+  /// 用于需要更轻微模糊效果的场景。
   static const double blurSigmaLight = 5;
 }
