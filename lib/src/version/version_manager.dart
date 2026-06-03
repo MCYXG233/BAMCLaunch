@@ -14,7 +14,6 @@ import '../game/launcher/game_file_validator.dart';
 import '../game/launcher/models.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
-import '../task/task.dart';
 import '../task/task_context.dart';
 import 'install_version_task.dart';
 import 'models.dart';

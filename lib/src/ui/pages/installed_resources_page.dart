@@ -3,7 +3,6 @@ import '../../resource_center/models.dart';
 import '../../resource_center/resource_manager.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
-import '../theme/app_theme.dart';
 import '../components/index.dart';
 
 /// 已安装资源管理页面

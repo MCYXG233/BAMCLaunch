@@ -5,7 +5,6 @@ import '../theme/typography.dart';
 import '../../core/logger.dart';
 import '../../config/config_manager_impl.dart';
 import '../../account/account_manager.dart';
-import '../../game/java/java_manager.dart';
 import '../../game/launcher/game_launcher.dart';
 import '../../event/event_bus.dart';
 import 'app_router.dart';
@@ -89,9 +88,6 @@ class _BAMCSplashPageState extends State<BAMCSplashPage>
         eventBus: EventBus(),
       );
       logger.info('账户管理器初始化完成');
-
-      final javaManager = JavaManager();
-      logger.info('Java管理器初始化完成');
 
       final gameLauncher = GameLauncher();
       await gameLauncher.initialize();

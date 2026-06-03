@@ -4,7 +4,6 @@ import '../theme/animations.dart';
 import '../theme/app_theme.dart';
 import '../theme/typography.dart';
 import '../components/index.dart';
-import '../../config/config_manager_impl.dart';
 import '../../account/account_manager.dart';
 import '../../version/version_manager.dart';
 import '../../game/java/java_manager.dart';
@@ -170,7 +169,6 @@ class _BAMCHomePageState extends State<BAMCHomePage>
       final accountManager = AccountManager();
       final javaManager = JavaManager();
       final gameLauncher = GameLauncher();
-      final configManager = ConfigManagerImpl();
 
       final accounts = await accountManager.getAccounts();
       final account = accounts.firstWhere(
@@ -370,7 +368,6 @@ class _BAMCHomePageState extends State<BAMCHomePage>
 
   Widget _buildNavItem(BASidebarItem item) {
     final isSelected = item.id == _selectedNavItem;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
       color: Colors.transparent,

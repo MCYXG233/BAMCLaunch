@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bamclaunch/src/download/models.dart';
 import 'package:bamclaunch/src/download/download_source.dart';

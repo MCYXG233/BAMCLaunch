@@ -4,6 +4,7 @@ import 'package:bamclaunch/src/account/account.dart';
 import 'package:bamclaunch/src/account/account_manager.dart';
 import 'package:bamclaunch/src/config/config_manager.dart';
 import 'package:bamclaunch/src/config/config_keys.dart';
+import 'package:bamclaunch/src/config/config_models.dart';
 import 'package:bamclaunch/src/event/event_bus.dart';
 
 /// 测试用的配置管理器
@@ -88,6 +89,59 @@ class MockConfigManager implements IConfigManager {
 
   @override
   Stream<String> get configChanges => _configChangesController.stream;
+
+  @override
+  LauncherConfig getLauncherConfig() {
+    return LauncherConfig.defaultConfig();
+  }
+
+  @override
+  Future<void> setLauncherConfig(LauncherConfig config) async {}
+
+  @override
+  Future<void> updateConfig(Map<String, dynamic> updates) async {
+    _config.addAll(updates);
+  }
+
+  @override
+  Future<int> incrementRunCount() async {
+    return 1;
+  }
+
+  @override
+  List<String> getExtraJavaPaths() {
+    return [];
+  }
+
+  @override
+  Future<void> addExtraJavaPath(String path) async {}
+
+  @override
+  Future<void> removeExtraJavaPath(String path) async {}
+
+  @override
+  List<String> getSuppressedDialogs() {
+    return [];
+  }
+
+  @override
+  Future<void> suppressDialog(String dialogId) async {}
+
+  @override
+  bool isDialogSuppressed(String dialogId) {
+    return false;
+  }
+
+  @override
+  List<GameDirectory> getLocalGameDirectories() {
+    return [];
+  }
+
+  @override
+  Future<void> addLocalGameDirectory(GameDirectory dir) async {}
+
+  @override
+  Future<void> removeLocalGameDirectory(String dirPath) async {}
 }
 
 void main() {

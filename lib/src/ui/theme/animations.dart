@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/animation.dart';
 
 /// 动画缓动曲线集合（学习 PCL2）
 class BAAnimations {
