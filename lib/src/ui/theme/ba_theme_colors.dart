@@ -612,4 +612,66 @@ class BAInputStyle {
   static InputDecoration searchDecoration({required String hintText}) {
     return InputDecoration(
       hintText: hintText,
-      hintStyle: TextStyle(color: BAThemeColors.
+      hintStyle: TextStyle(color: BAThemeColors.textDisabled),
+      filled: true,
+      fillColor: BAThemeColors.surface.withOpacity(0.7),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(BAThemeData.radius),
+        borderSide: BorderSide(
+          color: BAThemeColors.border.withOpacity(0.4),
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(BAThemeData.radius),
+        borderSide: BorderSide(
+          color: BAThemeColors.primary.withOpacity(0.4),
+          width: 1.5,
+        ),
+      ),
+    );
+  }
+}
+
+/// 蔚蓝档案风格动画配置
+///
+/// 提供动画相关的时长和曲线配置。
+/// 蔚蓝档案风格的动画特点是柔和、自然、不突兀。
+class BAAnimation {
+  /// 极短动画时长
+  ///
+  /// 用于微小交互反馈（100毫秒）。
+  static const Duration micro = Duration(milliseconds: 100);
+
+  /// 快速动画时长
+  ///
+  /// 用于快速过渡效果（200毫秒）。
+  static const Duration fast = Duration(milliseconds: 200);
+
+  /// 标准动画时长
+  ///
+  /// 用于大多数动画效果（350毫秒）。
+  static const Duration normal = Duration(milliseconds: 350);
+
+  /// 慢速动画时长
+  ///
+  /// 用于大型动画或需要强调的效果（500毫秒）。
+  static const Duration slow = Duration(milliseconds: 500);
+
+  /// 默认动画曲线
+  ///
+  /// 使用 easeOutCubic 曲线，开始快结束慢，过渡自然。
+  static const Curve defaultCurve = Curves.easeOutCubic;
+
+  /// 弹性动画曲线
+  ///
+  /// 使用 elasticOut 曲线，带有弹性回弹效果。
+  /// 用于需要活泼感的动画，如弹出效果。
+  static const Curve bounceCurve = Curves.elasticOut;
+
+  /// 平滑动画曲线
+  ///
+  /// 使用 easeInOutCubic 曲线，开始和结束都慢，中间快。
+  /// 用于需要平滑过渡的动画。
+  static const Curve smoothCurve = Curves.easeInOutCubic;
+}
