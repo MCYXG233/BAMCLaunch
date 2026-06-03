@@ -4,6 +4,7 @@ enum BackgroundType {
   solid,
   gradient,
   image,
+  video,
   blur,
 }
 
@@ -12,6 +13,7 @@ class BackgroundConfig {
   final int? solidColor;
   final List<int>? gradientColors;
   final String? imagePath;
+  final String? videoPath;
   final double blur;
   final double opacity;
   final int? alignment;
@@ -21,6 +23,7 @@ class BackgroundConfig {
     this.solidColor,
     this.gradientColors,
     this.imagePath,
+    this.videoPath,
     this.blur = 0.0,
     this.opacity = 1.0,
     this.alignment,
@@ -32,6 +35,7 @@ class BackgroundConfig {
       'solidColor': solidColor,
       'gradientColors': gradientColors,
       'imagePath': imagePath,
+      'videoPath': videoPath,
       'blur': blur,
       'opacity': opacity,
       'alignment': alignment,
@@ -49,6 +53,7 @@ class BackgroundConfig {
           ?.map((e) => e as int)
           .toList(),
       imagePath: json['imagePath'] as String?,
+      videoPath: json['videoPath'] as String?,
       blur: (json['blur'] as num?)?.toDouble() ?? 0.0,
       opacity: (json['opacity'] as num?)?.toDouble() ?? 1.0,
       alignment: json['alignment'] as int?,
@@ -60,6 +65,7 @@ class BackgroundConfig {
     int? solidColor,
     List<int>? gradientColors,
     String? imagePath,
+    String? videoPath,
     double? blur,
     double? opacity,
     int? alignment,
@@ -69,6 +75,7 @@ class BackgroundConfig {
       solidColor: solidColor ?? this.solidColor,
       gradientColors: gradientColors ?? this.gradientColors,
       imagePath: imagePath ?? this.imagePath,
+      videoPath: videoPath ?? this.videoPath,
       blur: blur ?? this.blur,
       opacity: opacity ?? this.opacity,
       alignment: alignment ?? this.alignment,

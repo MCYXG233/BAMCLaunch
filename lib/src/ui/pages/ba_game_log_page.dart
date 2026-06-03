@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import '../theme/ba_theme_colors.dart';
 import '../../game/launcher/game_launcher.dart';
 import '../../game/launcher/models.dart';
+import '../components/log_panel.dart';
 
 class BAGameLogPage extends StatefulWidget {
   final String processId;
@@ -29,6 +30,9 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
   bool _processExists = true;
   Timer? _durationTimer;
   Duration _elapsed = Duration.zero;
+  Timer? _fileWatcherTimer;
+  File? _logFile;
+  int _lastFileLength = 0;
 
   GameProcessInfo? get _processInfo =>
       _launcher.runningProcesses[widget.processId];
@@ -61,6 +65,9 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
       (_) => _updateDuration(),
     );
 
+    // 设置日志文件监控
+    _setupLogFileWatcher();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_logs.isNotEmpty) {
         _scrollToBottom();
@@ -68,11 +75,83 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
     });
   }
 
+  void _setupLogFileWatcher() {
+    final processInfo = _processInfo;
+    if (processInfo == null) return;
+
+    final logDir = Directory('${processInfo.arguments.gameDirectory}/logs');
+    if (!logDir.existsSync()) return;
+
+    // 查找最新的日志文件
+    try {
+      final files = logDir.listSync()
+        ..sort((a, b) => b.statSync().modified.compareTo(a.statSync().modified));
+      
+      if (files.isNotEmpty && files.first is File) {
+        _logFile = files.first as File;
+        _lastFileLength = _logFile!.lengthSync();
+      }
+    } catch (e) {
+      // 忽略错误
+    }
+
+    // 每500ms检查日志文件变化
+    _fileWatcherTimer = Timer.periodic(
+      const Duration(milliseconds: 500),
+      (_) => _checkLogFileChanges(),
+    );
+  }
+
+  void _checkLogFileChanges() {
+    if (_logFile == null || !_logFile!.existsSync()) return;
+
+    try {
+      final currentLength = _logFile!.lengthSync();
+      if (currentLength > _lastFileLength) {
+        // 有新内容，读取新增的日志
+        final raf = _logFile!.openSync(mode: FileMode.read);
+        raf.setPositionSync(_lastFileLength);
+        final bytes = raf.read(currentLength - _lastFileLength);
+        raf.closeSync();
+        
+        final newContent = String.fromCharCodes(bytes);
+        final newLines = newContent.split('\n').where((l) => l.trim().isNotEmpty);
+        
+        for (final line in newLines) {
+          final log = GameLog(
+            timestamp: DateTime.now(),
+            level: _parseLogLevel(line),
+            message: line,
+            source: 'file',
+          );
+          _onLogReceived(log);
+        }
+        
+        _lastFileLength = currentLength;
+      }
+    } catch (e) {
+      // 忽略读取错误
+    }
+  }
+
+  GameLogLevel _parseLogLevel(String line) {
+    final lower = line.toLowerCase();
+    if (lower.contains('error') || lower.contains('exception')) {
+      return GameLogLevel.error;
+    } else if (lower.contains('warn') || lower.contains('warning')) {
+      return GameLogLevel.warn;
+    } else if (lower.contains('debug')) {
+      return GameLogLevel.debug;
+    }
+    return GameLogLevel.info;
+  }
+
   @override
   void dispose() {
     _logSubscription?.cancel();
     _statusSubscription?.cancel();
     _durationTimer?.cancel();
+    _fileWatcherTimer?.cancel();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -88,6 +167,9 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
   void _onLogReceived(GameLog log) {
     setState(() {
       _logs.add(log);
+      if (_logs.length > 5000) {
+        _logs.removeRange(0, 1000);
+      }
     });
     if (_autoScroll) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
@@ -143,21 +225,33 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
     );
     if (path == null) return;
 
-    final buffer = StringBuffer();
-    for (final log in _logs) {
-      buffer.writeln(log.format());
-    }
+    final header = 'BAMCLaunch 游戏日志\n'
+        '进程ID: ${widget.processId}\n'
+        '版本: ${_processInfo?.arguments.gameVersion ?? "未知"}\n'
+        '时间: ${DateTime.now().toIso8601String()}\n';
 
-    final file = File(path);
-    await file.writeAsString(buffer.toString());
+    final result = await LogExporter.exportToFile(
+      _logs,
+      savePath: path,
+      header: header,
+    );
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('日志已导出到 $path'),
-          backgroundColor: BAThemeColors.success,
-        ),
-      );
+      if (result != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('日志已导出到 $path'),
+            backgroundColor: BAThemeColors.success,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('导出失败'),
+            backgroundColor: BAThemeColors.danger,
+          ),
+        );
+      }
     }
   }
 
@@ -165,6 +259,121 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
     setState(() {
       _logs.clear();
     });
+  }
+
+  void _showLogDetails(GameLog log) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: BAThemeColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(BAThemeData.radius),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              _getLevelIcon(log.level),
+              color: _levelColor(log.level),
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '日志详情',
+              style: TextStyle(
+                color: BAThemeColors.textPrimary,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+        content: Container(
+          width: 500,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: BAThemeColors.backgroundDark,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildDetailRow('时间', _formatTime(log.timestamp)),
+              _buildDetailRow('级别', _levelLabel(log.level)),
+              _buildDetailRow('来源', log.source),
+              const SizedBox(height: 12),
+              Text(
+                '消息内容:',
+                style: TextStyle(
+                  color: BAThemeColors.textSecondary,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 4),
+              SelectableText(
+                log.message,
+                style: TextStyle(
+                  color: BAThemeColors.textPrimary,
+                  fontSize: 13,
+                  fontFamily: 'Consolas',
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              '关闭',
+              style: TextStyle(color: BAThemeColors.primary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 60,
+            child: Text(
+              '$label:',
+              style: TextStyle(
+                color: BAThemeColors.textSecondary,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                color: BAThemeColors.textPrimary,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getLevelIcon(GameLogLevel level) {
+    switch (level) {
+      case GameLogLevel.info:
+        return Icons.info_outline;
+      case GameLogLevel.warn:
+        return Icons.warning_amber_outlined;
+      case GameLogLevel.error:
+        return Icons.error_outline;
+      case GameLogLevel.debug:
+        return Icons.bug_report_outlined;
+    }
   }
 
   String _formatDuration(Duration d) {
@@ -235,6 +444,10 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
         return '已崩溃';
     }
   }
+
+  int get _infoCount => _logs.where((l) => l.level == GameLogLevel.info).length;
+  int get _warnCount => _logs.where((l) => l.level == GameLogLevel.warn).length;
+  int get _errorCount => _logs.where((l) => l.level == GameLogLevel.error).length;
 
   @override
   Widget build(BuildContext context) {
@@ -345,13 +558,27 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
                 color: _statusColor(_status).withOpacity(0.4),
               ),
             ),
-            child: Text(
-              _statusLabel(_status),
-              style: TextStyle(
-                color: _statusColor(_status),
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: _statusColor(_status),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  _statusLabel(_status),
+                  style: TextStyle(
+                    color: _statusColor(_status),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ),
           const Spacer(),
@@ -425,6 +652,52 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
               _visibleLevels = {GameLogLevel.error};
             });
           }),
+          const Spacer(),
+          Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+                size: 14,
+                color: BAThemeColors.success,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '$_infoCount',
+                style: TextStyle(
+                  color: BAThemeColors.success,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Icon(
+                Icons.warning_amber_outlined,
+                size: 14,
+                color: BAThemeColors.warning,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '$_warnCount',
+                style: TextStyle(
+                  color: BAThemeColors.warning,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Icon(
+                Icons.error_outline,
+                size: 14,
+                color: BAThemeColors.danger,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '$_errorCount',
+                style: TextStyle(
+                  color: BAThemeColors.danger,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -507,32 +780,35 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
     final color = _levelColor(log.level);
     final levelStr = _levelLabel(log.level);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1),
-      child: RichText(
-        text: TextSpan(
-          style: const TextStyle(
-            fontFamily: 'Consolas',
-            fontSize: 13,
-            height: 1.5,
-          ),
-          children: [
-            TextSpan(
-              text: '[${_formatTime(log.timestamp)}] ',
-              style: TextStyle(color: BAThemeColors.textDisabled),
+    return InkWell(
+      onTap: () => _showLogDetails(log),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 1),
+        child: RichText(
+          text: TextSpan(
+            style: const TextStyle(
+              fontFamily: 'Consolas',
+              fontSize: 13,
+              height: 1.5,
             ),
-            TextSpan(
-              text: '[$levelStr] ',
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w600,
+            children: [
+              TextSpan(
+                text: '[${_formatTime(log.timestamp)}] ',
+                style: TextStyle(color: BAThemeColors.textDisabled),
               ),
-            ),
-            TextSpan(
-              text: log.message,
-              style: TextStyle(color: color),
-            ),
-          ],
+              TextSpan(
+                text: '[$levelStr] ',
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              TextSpan(
+                text: log.message,
+                style: TextStyle(color: color),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -458,3 +458,84 @@ class ResourceItem {
   }
 }
 
+/// 复制选项
+class CopyOptions {
+  /// 是否复制版本目录
+  final bool copyVersionDir;
+  /// 排除的目录列表
+  final Set<String> excludeDirs;
+  /// 排除的文件列表
+  final Set<String> excludeFiles;
+  /// 是否覆盖已存在的文件
+  final bool overwriteExisting;
+
+  const CopyOptions({
+    this.copyVersionDir = false,
+    this.excludeDirs = const {},
+    this.excludeFiles = const {},
+    this.overwriteExisting = false,
+  });
+
+  CopyOptions copyWith({
+    bool? copyVersionDir,
+    Set<String>? excludeDirs,
+    Set<String>? excludeFiles,
+    bool? overwriteExisting,
+  }) {
+    return CopyOptions(
+      copyVersionDir: copyVersionDir ?? this.copyVersionDir,
+      excludeDirs: excludeDirs ?? this.excludeDirs,
+      excludeFiles: excludeFiles ?? this.excludeFiles,
+      overwriteExisting: overwriteExisting ?? this.overwriteExisting,
+    );
+  }
+}
+
+/// 实例排序选项
+enum InstanceSortOption {
+  /// 按名称排序
+  name,
+  /// 按最近启动时间排序
+  lastPlayed,
+  /// 按创建时间排序
+  createdAt,
+  /// 按大小排序
+  size,
+}
+
+/// 排序方向
+enum SortDirection {
+  /// 升序
+  ascending,
+  /// 降序
+  descending,
+}
+
+/// 实例列表过滤器
+class InstanceFilter {
+  /// 搜索关键词
+  final String? searchQuery;
+  /// 排序选项
+  final InstanceSortOption sortOption;
+  /// 排序方向
+  final SortDirection sortDirection;
+
+  const InstanceFilter({
+    this.searchQuery,
+    this.sortOption = InstanceSortOption.lastPlayed,
+    this.sortDirection = SortDirection.descending,
+  });
+
+  InstanceFilter copyWith({
+    String? searchQuery,
+    InstanceSortOption? sortOption,
+    SortDirection? sortDirection,
+  }) {
+    return InstanceFilter(
+      searchQuery: searchQuery ?? this.searchQuery,
+      sortOption: sortOption ?? this.sortOption,
+      sortDirection: sortDirection ?? this.sortDirection,
+    );
+  }
+}
+

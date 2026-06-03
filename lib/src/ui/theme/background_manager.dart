@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 import '../../config/config_manager.dart';
 import '../../config/config_keys.dart';
 import '../../config/background_config.dart';
@@ -11,6 +12,8 @@ class BackgroundManager extends ChangeNotifier {
   final ConfigManager _configManager = ConfigManager();
   
   BackgroundConfig _currentConfig = BackgroundConfig.classic;
+  VideoPlayerController? _videoController;
+  bool _isVideoInitialized = false;
   
   BackgroundManager._internal();
   
@@ -33,6 +36,7 @@ class BackgroundManager extends ChangeNotifier {
       if (jsonStr != null && jsonStr.isNotEmpty) {
         final json = jsonDecode(jsonStr) as Map<String, dynamic>;
         _currentConfig = BackgroundConfig.fromJson(json);
+        await _initializeVideoIfNeeded();
       }
     } catch (e) {
       _currentConfig = BackgroundConfig.classic;
@@ -44,75 +48,111 @@ class BackgroundManager extends ChangeNotifier {
     try {
       final jsonStr = jsonEncode(config.toJson());
       await _configManager.setString(ConfigKeys.backgroundChoice, jsonStr);
+      final oldType = _currentConfig.type;
       _currentConfig = config;
+      
+      if (oldType != config.type || oldType == BackgroundType.video) {
+        await _initializeVideoIfNeeded();
+      }
+      
       notifyListeners();
     } catch (e) {
       debugPrint('Failed to save background config: $e');
     }
   }
   
+  Future<void> _initializeVideoIfNeeded() async {
+    await _videoController?.dispose();
+    _videoController = null;
+    _isVideoInitialized = false;
+    
+    if (_currentConfig.type == BackgroundType.video && _currentConfig.videoPath != null) {
+      try {
+        _videoController = VideoPlayerController.file(File(_currentConfig.videoPath!));
+        await _videoController!.initialize();
+        await _videoController!.setLooping(true);
+        await _videoController!.setVolume(0);
+        _isVideoInitialized = true;
+        _videoController!.play();
+      } catch (e) {
+        debugPrint('Failed to load video: $e');
+        _videoController = null;
+        _isVideoInitialized = false;
+      }
+    }
+  }
+  
   Widget buildBackground({required Widget child}) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      decoration: _getDecoration(),
-      child: child,
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        _buildBackgroundLayer(),
+        child,
+      ],
     );
   }
   
-  Widget buildBackgroundWithBlur({required Widget child}) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      decoration: _getDecoration(),
-      child: Stack(
-        children: [
-          child,
-          if (_currentConfig.type == BackgroundType.image)
-            BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(
-                color: Colors.black.withOpacity(0.05),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-  
-  BoxDecoration _getDecoration() {
+  Widget _buildBackgroundLayer() {
     switch (_currentConfig.type) {
       case BackgroundType.solid:
-        return BoxDecoration(
-          color: _currentConfig.solidColor != null
-              ? Color(_currentConfig.solidColor!).withOpacity(_currentConfig.opacity)
-              : Colors.white.withOpacity(_currentConfig.opacity),
+        return Container(
+          decoration: BoxDecoration(
+            color: _currentConfig.solidColor != null
+                ? Color(_currentConfig.solidColor!).withOpacity(_currentConfig.opacity)
+                : Colors.white.withOpacity(_currentConfig.opacity),
+          ),
         );
         
       case BackgroundType.gradient:
         final colors = _currentConfig.gradientColors
             ?.map((c) => Color(c).withOpacity(_currentConfig.opacity))
             .toList() ?? [Colors.white, Colors.grey.shade200];
-        return BoxDecoration(
-          gradient: LinearGradient(
-            colors: colors,
-            begin: _getAlignment(_currentConfig.alignment),
-            end: Alignment.bottomRight,
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: colors,
+              begin: _getAlignment(_currentConfig.alignment),
+              end: Alignment.bottomRight,
+            ),
           ),
         );
         
       case BackgroundType.image:
-        return BoxDecoration(
-          image: _currentConfig.imagePath != null
-              ? DecorationImage(
-                  image: FileImage(File(_currentConfig.imagePath!)),
-                  fit: BoxFit.cover,
-                  opacity: _currentConfig.opacity,
-                )
-              : null,
+        return Container(
+          decoration: BoxDecoration(
+            image: _currentConfig.imagePath != null
+                ? DecorationImage(
+                    image: FileImage(File(_currentConfig.imagePath!)),
+                    fit: BoxFit.cover,
+                    opacity: _currentConfig.opacity,
+                  )
+                : null,
+          ),
         );
         
+      case BackgroundType.video:
+        if (_isVideoInitialized && _videoController != null) {
+          return SizedBox.expand(
+            child: FittedBox(
+              fit: BoxFit.cover,
+              child: SizedBox(
+                width: _videoController!.value.size.width,
+                height: _videoController!.value.size.height,
+                child: Opacity(
+                  opacity: _currentConfig.opacity,
+                  child: VideoPlayer(_videoController!),
+                ),
+              ),
+            ),
+          );
+        }
+        return Container(color: Colors.black);
+        
       case BackgroundType.blur:
-        return BoxDecoration(
-          color: Colors.white.withOpacity(_currentConfig.opacity * 0.5),
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(_currentConfig.opacity * 0.5),
+          ),
         );
     }
   }
@@ -140,5 +180,11 @@ class BackgroundManager extends ChangeNotifier {
       default:
         return Alignment.topLeft;
     }
+  }
+  
+  @override
+  void dispose() {
+    _videoController?.dispose();
+    super.dispose();
   }
 }

@@ -840,12 +840,14 @@ class TransmissionConfig {
   final int concurrentCount;
   final bool enableSpeedLimit;
   final int speedLimitValue;
+  final int speedLimitUnit; // 0: KB/s, 1: MB/s
 
   TransmissionConfig({
     this.autoConcurrent = true,
-    this.concurrentCount = 64,
+    this.concurrentCount = 3,
     this.enableSpeedLimit = false,
     this.speedLimitValue = 1024,
+    this.speedLimitUnit = 0,
   });
 
   Map<String, dynamic> toJson() {
@@ -854,15 +856,17 @@ class TransmissionConfig {
       'concurrentCount': concurrentCount,
       'enableSpeedLimit': enableSpeedLimit,
       'speedLimitValue': speedLimitValue,
+      'speedLimitUnit': speedLimitUnit,
     };
   }
 
   factory TransmissionConfig.fromJson(Map<String, dynamic> json) {
     return TransmissionConfig(
       autoConcurrent: json['autoConcurrent'] as bool? ?? true,
-      concurrentCount: json['concurrentCount'] as int? ?? 64,
+      concurrentCount: json['concurrentCount'] as int? ?? 3,
       enableSpeedLimit: json['enableSpeedLimit'] as bool? ?? false,
       speedLimitValue: json['speedLimitValue'] as int? ?? 1024,
+      speedLimitUnit: json['speedLimitUnit'] as int? ?? 0,
     );
   }
 
@@ -871,12 +875,14 @@ class TransmissionConfig {
     int? concurrentCount,
     bool? enableSpeedLimit,
     int? speedLimitValue,
+    int? speedLimitUnit,
   }) {
     return TransmissionConfig(
       autoConcurrent: autoConcurrent ?? this.autoConcurrent,
       concurrentCount: concurrentCount ?? this.concurrentCount,
       enableSpeedLimit: enableSpeedLimit ?? this.enableSpeedLimit,
       speedLimitValue: speedLimitValue ?? this.speedLimitValue,
+      speedLimitUnit: speedLimitUnit ?? this.speedLimitUnit,
     );
   }
 }

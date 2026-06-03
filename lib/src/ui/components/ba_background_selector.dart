@@ -7,12 +7,14 @@ class BABackgroundSelector extends StatefulWidget {
   final BackgroundConfig currentConfig;
   final ValueChanged<BackgroundConfig> onConfigChanged;
   final VoidCallback? onPickImage;
+  final VoidCallback? onPickVideo;
 
   const BABackgroundSelector({
     super.key,
     required this.currentConfig,
     required this.onConfigChanged,
     this.onPickImage,
+    this.onPickVideo,
   });
 
   @override
@@ -88,21 +90,32 @@ class _BABackgroundSelectorState extends State<BABackgroundSelector> {
           }).toList(),
         ),
 
-        if (widget.onPickImage != null) ...[
-          const SizedBox(height: 16),
-          Text(
-            '自定义图片',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: BAThemeColors.textSecondary,
-            ),
+        const SizedBox(height: 16),
+        Text(
+          '自定义',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: BAThemeColors.textSecondary,
           ),
-          const SizedBox(height: 12),
-          _CustomImageButton(
-            onTap: widget.onPickImage!,
-          ),
-        ],
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            if (widget.onPickImage != null)
+              _CustomImageButton(
+                onTap: widget.onPickImage!,
+                isSelected: _config.type == BackgroundType.image,
+              ),
+            if (widget.onPickVideo != null)
+              _CustomVideoButton(
+                onTap: widget.onPickVideo!,
+                isSelected: _config.type == BackgroundType.video,
+              ),
+          ],
+        ),
 
         const SizedBox(height: 16),
         Text(
@@ -201,8 +214,12 @@ class _PresetCard extends StatelessWidget {
 
 class _CustomImageButton extends StatelessWidget {
   final VoidCallback onTap;
+  final bool isSelected;
 
-  const _CustomImageButton({required this.onTap});
+  const _CustomImageButton({
+    required this.onTap,
+    required this.isSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -217,8 +234,10 @@ class _CustomImageButton extends StatelessWidget {
             color: BAThemeColors.surfaceVariant,
             borderRadius: BorderRadius.circular(BAThemeData.radius),
             border: Border.all(
-              color: BAThemeColors.border.withOpacity(0.5),
-              width: 1,
+              color: isSelected
+                  ? BAThemeColors.primary
+                  : BAThemeColors.border.withOpacity(0.5),
+              width: isSelected ? 2 : 1,
             ),
           ),
           child: Column(
@@ -226,7 +245,7 @@ class _CustomImageButton extends StatelessWidget {
             children: [
               Icon(
                 Icons.add_photo_alternate_outlined,
-                color: BAThemeColors.textSecondary,
+                color: isSelected ? BAThemeColors.primary : BAThemeColors.textSecondary,
                 size: 28,
               ),
               const SizedBox(height: 4),
@@ -234,7 +253,59 @@ class _CustomImageButton extends StatelessWidget {
                 '上传图片',
                 style: TextStyle(
                   fontSize: 11,
-                  color: BAThemeColors.textSecondary,
+                  color: isSelected ? BAThemeColors.primary : BAThemeColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CustomVideoButton extends StatelessWidget {
+  final VoidCallback onTap;
+  final bool isSelected;
+
+  const _CustomVideoButton({
+    required this.onTap,
+    required this.isSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: BAThemeColors.surfaceVariant,
+            borderRadius: BorderRadius.circular(BAThemeData.radius),
+            border: Border.all(
+              color: isSelected
+                  ? BAThemeColors.primary
+                  : BAThemeColors.border.withOpacity(0.5),
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.videocam_outlined,
+                color: isSelected ? BAThemeColors.primary : BAThemeColors.textSecondary,
+                size: 28,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '上传视频',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isSelected ? BAThemeColors.primary : BAThemeColors.textSecondary,
                 ),
               ),
             ],

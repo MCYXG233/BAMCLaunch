@@ -86,11 +86,11 @@ class BAThemeColors {
     end: Alignment.centerRight,
   );
 
-  // 毛玻璃效果分级（更通透）
-  static Color get frostedGlassLight => surface.withOpacity(0.75);
-  static Color get frostedGlassMedium => surface.withOpacity(0.65);
-  static Color get frostedGlassHeavy => surface.withOpacity(0.50);
-  static Color get frostedGlass => surface.withOpacity(0.70);
+  // 毛玻璃效果分级（更通透的亚克力效果）
+  static Color get frostedGlassLight => surface.withOpacity(0.35);
+  static Color get frostedGlassMedium => surface.withOpacity(0.25);
+  static Color get frostedGlassHeavy => surface.withOpacity(0.15);
+  static Color get frostedGlass => surface.withOpacity(0.30);
 
   // 阴影（更柔和）
   static List<BoxShadow> get cardShadow => [
@@ -207,7 +207,7 @@ class BACardStyle {
   static const double listItemSpacing = 12.0;
 
   static BoxDecoration get frostedGlass => BoxDecoration(
-        color: BAThemeColors.surface.withOpacity(0.65),
+        color: BAThemeColors.surface.withOpacity(0.25),
         borderRadius: BorderRadius.circular(BAThemeData.radiusLarge),
         border: Border.all(
           color: BAThemeColors.border.withOpacity(0.15),
@@ -215,7 +215,7 @@ class BACardStyle {
       );
 
   static BoxDecoration cardDecoration({double? opacity}) => BoxDecoration(
-        color: BAThemeColors.surface.withOpacity(opacity ?? 0.85),
+        color: BAThemeColors.surface.withOpacity(opacity ?? 0.35),
         borderRadius: BorderRadius.circular(BAThemeData.radiusLarge),
         border: Border.all(
           color: BAThemeColors.border.withOpacity(0.15),

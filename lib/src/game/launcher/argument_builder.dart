@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:crypto/crypto.dart';
 import '../../account/account.dart';
+import '../../account/skin_manager.dart';
 import '../java/models.dart';
 import '../../version/models.dart';
 import 'models.dart';
+import 'argument_rule.dart';
 
 enum GarbageCollector {
   auto,
@@ -216,6 +218,7 @@ class ArgumentBuilder {
     required GameConfig gameConfig,
     String? quickPlaySingleplayer,
     String? quickPlayMultiplayer,
+    SkinType? skinType,
   }) {
     final args = <String>[];
     final templateMap = buildTemplateMap(args: templateArgs);
@@ -260,6 +263,12 @@ class ArgumentBuilder {
       processedArgs.addAll(['--server', gameConfig.serverAddress, '--port', gameConfig.serverPort.toString()]);
     }
 
+    // 添加皮肤模型参数
+    // Alex模型使用 --slim 参数
+    if (skinType == SkinType.alex) {
+      processedArgs.add('--slim');
+    }
+
     if (gameConfig.minecraftArgument.isNotEmpty) {
       processedArgs.addAll(_splitMinecraftArguments(gameConfig.minecraftArgument));
     }
@@ -273,40 +282,29 @@ class ArgumentBuilder {
       return true;
     }
 
-    bool allowed = false;
-    for (final r in rules) {
-      final ruleMap = r as Map<String, dynamic>;
-      final action = ruleMap['action'] as String?;
-      final os = ruleMap['os'] as Map<String, dynamic>?;
-
-      final matchesOs = _matchesOperatingSystem(os);
-      if (action == 'allow' && matchesOs) {
-        allowed = true;
-      } else if (action == 'disallow' && matchesOs) {
-        allowed = false;
-      }
-    }
-    return allowed;
+    // 使用新的规则引擎
+    final platformInfo = PlatformInfo.current();
+    final ruleEngine = LaunchArgumentRule.fromJsonList(rules);
+    return ruleEngine.matches(platformInfo);
   }
 
-  bool _matchesOperatingSystem(Map<String, dynamic>? os) {
-    if (os == null) {
-      return true;
+  /// 使用新的规则引擎检查参数是否适用于当前平台
+  List<dynamic> filterArgumentsWithRules(List<dynamic> arguments) {
+    final platformInfo = PlatformInfo.current();
+    final result = <dynamic>[];
+
+    for (final arg in arguments) {
+      if (arg is String) {
+        result.add(arg);
+      } else if (arg is Map<String, dynamic>) {
+        final conditionalArg = ConditionalArgument.fromJson(arg);
+        if (conditionalArg.matches(platformInfo)) {
+          result.add(arg);
+        }
+      }
     }
-    final name = os['name'] as String?;
-    if (name == null) {
-      return true;
-    }
-    if (isWindows && name == 'windows') {
-      return true;
-    }
-    if (!isWindows && Platform.isMacOS && name == 'osx') {
-      return true;
-    }
-    if (!isWindows && !Platform.isMacOS && name == 'linux') {
-      return true;
-    }
-    return false;
+
+    return result;
   }
 
   List<String> _splitMinecraftArguments(String args) {
@@ -423,6 +421,7 @@ class ArgumentBuilder {
       gameConfig: gameConfig,
       quickPlaySingleplayer: quickPlaySingleplayer,
       quickPlayMultiplayer: quickPlayMultiplayer,
+      skinType: account.modelType,
     );
 
     final mainClass = versionJson.mainClass ?? 'net.minecraft.client.main.Main';

@@ -140,10 +140,10 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
       child: Container(
         height: 40,
         decoration: BoxDecoration(
-          color: BAColors.surfaceOf(context).withOpacity(0.3),
+          color: BAColors.surfaceOf(context).withOpacity(0.8),
           border: Border(
             bottom: BorderSide(
-              color: BAColors.borderOf(context).withOpacity(0.2),
+              color: BAColors.borderOf(context).withOpacity(0.3),
             ),
           ),
         ),
@@ -322,14 +322,14 @@ class _BAMCMainPageState extends State<BAMCMainPage> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       height: 56,
       decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context).withOpacity(0.7),
+        color: BAColors.surfaceOf(context).withOpacity(0.9),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.3)),
+        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.4)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.18),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
       ),

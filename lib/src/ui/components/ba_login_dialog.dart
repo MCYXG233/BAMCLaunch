@@ -346,9 +346,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
                       child: _AccountTile(
                         account: account,
                         onTap: () => _selectAccount(account),
-                        onLogout: account.type == AccountType.microsoft
-                            ? () => _logoutAccount(account)
-                            : null,
+                        onLogout: () => _logoutAccount(account),
                       ),
                     );
                   },
@@ -400,13 +398,20 @@ class _BALoginDialogState extends State<BALoginDialog> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
         child: Container(
+          width: 400,
           padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: BAColors.surfaceOf(context),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: BAColors.borderOf(context)),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '登出账户',
+                account.type == AccountType.microsoft ? '登出账户' : '删除账户',
                 style: TextStyle(
                   color: BAColors.textPrimaryOf(context),
                   fontSize: 18,
@@ -415,7 +420,9 @@ class _BALoginDialogState extends State<BALoginDialog> {
               ),
               const SizedBox(height: 12),
               Text(
-                '确定要登出账户 "${account.username}" 吗？',
+                account.type == AccountType.microsoft 
+                    ? '确定要登出账户 "${account.username}" 吗？'
+                    : '确定要删除离线账户 "${account.username}" 吗？',
                 style: TextStyle(
                   color: BAColors.textSecondaryOf(context),
                   fontSize: 14,
@@ -432,7 +439,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
                   TextButton(
                     onPressed: () => Navigator.pop(context, true),
                     child: Text(
-                      '登出',
+                      account.type == AccountType.microsoft ? '登出' : '删除',
                       style: TextStyle(color: BAColors.danger),
                     ),
                   ),
@@ -447,12 +454,15 @@ class _BALoginDialogState extends State<BALoginDialog> {
     if (confirmed != true) return;
 
     try {
-      await _authManager.clearCredentials();
+      if (account.type == AccountType.microsoft) {
+        await _authManager.clearCredentials();
+      }
+      await _accountManager.removeAccount(account.id);
       if (mounted) {
         await _loadAccounts();
       }
     } catch (e) {
-      Logger.instance.error('登出失败', e);
+      Logger.instance.error('登出/删除失败', e);
     }
   }
 

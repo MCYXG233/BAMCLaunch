@@ -84,9 +84,9 @@ class BAColors {
   /// 深色主题 - 分割线
   static const Color darkDivider = Color(0xFF2A3555);
   
-  /// 深色主题 - 毛玻璃背景
-  static const Color darkGlass = Color(0xE6141C33);
-  
+  /// 深色主题 - 毛玻璃背景 (更通透的亚克力效果)
+  static const Color darkGlass = Color(0x4D141C33);
+
   /// 深色主题 - 阴影颜色
   static const Color darkShadow = Color(0x80000000);
 
@@ -128,8 +128,8 @@ class BAColors {
   /// 浅色主题 - 分割线
   static const Color lightDivider = Color(0xFFE8EEFF);
   
-  /// 浅色主题 - 毛玻璃背景
-  static const Color lightGlass = Color(0xE6FFFFFF);
+  /// 浅色主题 - 毛玻璃背景 (更通透的亚克力效果)
+  static const Color lightGlass = Color(0x4DFFFFFF);
   
   /// 浅色主题 - 阴影颜色
   static const Color lightShadow = Color(0x1A000000);

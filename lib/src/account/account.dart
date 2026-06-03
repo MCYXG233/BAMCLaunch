@@ -10,6 +10,8 @@ enum AccountType {
   authlib,
 }
 
+import 'skin_manager.dart';
+
 /// 账户数据模型
 class Account {
   /// 账户唯一标识符
@@ -39,6 +41,15 @@ class Account {
   /// 账户最后使用时间
   final DateTime lastUsedAt;
 
+  /// 皮肤类型（Steve或Alex）
+  final SkinType modelType;
+
+  /// 本地皮肤文件路径
+  final String? localSkinPath;
+
+  /// 本地披风文件路径
+  final String? localCapePath;
+
   /// 创建账户实例
   Account({
     required this.id,
@@ -50,6 +61,9 @@ class Account {
     this.accessToken,
     required this.createdAt,
     required this.lastUsedAt,
+    this.modelType = SkinType.steve,
+    this.localSkinPath,
+    this.localCapePath,
   });
 
   /// 将账户对象转换为JSON
@@ -64,6 +78,9 @@ class Account {
       'accessToken': accessToken,
       'createdAt': createdAt.toIso8601String(),
       'lastUsedAt': lastUsedAt.toIso8601String(),
+      'modelType': modelType.name,
+      'localSkinPath': localSkinPath,
+      'localCapePath': localCapePath,
     };
   }
 
@@ -82,6 +99,14 @@ class Account {
       accessToken: json['accessToken'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       lastUsedAt: DateTime.parse(json['lastUsedAt'] as String),
+      modelType: json['modelType'] != null
+          ? SkinType.values.firstWhere(
+              (e) => e.name == json['modelType'],
+              orElse: () => SkinType.steve,
+            )
+          : SkinType.steve,
+      localSkinPath: json['localSkinPath'] as String?,
+      localCapePath: json['localCapePath'] as String?,
     );
   }
 
@@ -113,6 +138,9 @@ class Account {
     String? accessToken,
     DateTime? createdAt,
     DateTime? lastUsedAt,
+    SkinType? modelType,
+    String? localSkinPath,
+    String? localCapePath,
   }) {
     return Account(
       id: id ?? this.id,
@@ -124,6 +152,9 @@ class Account {
       accessToken: accessToken ?? this.accessToken,
       createdAt: createdAt ?? this.createdAt,
       lastUsedAt: lastUsedAt ?? this.lastUsedAt,
+      modelType: modelType ?? this.modelType,
+      localSkinPath: localSkinPath ?? this.localSkinPath,
+      localCapePath: localCapePath ?? this.localCapePath,
     );
   }
 

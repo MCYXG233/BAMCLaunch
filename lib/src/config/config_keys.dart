@@ -120,4 +120,27 @@ class ConfigKeys {
   static const String enhanceContrast = 'enhanceContrast';
   static const String instancesNavType = 'instancesNavType';
   static const String launchPageQuickSwitch = 'launchPageQuickSwitch';
+  static const String instanceSortOption = 'instanceSortOption';
+  static const String instanceSortDirection = 'instanceSortDirection';
+  static const String instanceSearchQuery = 'instanceSearchQuery';
+
+  /// 镜像源配置
+  static const String customMirrors = 'customMirrors';
+  static const String selectedMirror = 'selectedMirror';
+  static const String autoSelectMirror = 'autoSelectMirror';
+
+  /// 自动备份配置
+  static const String autoBackupConfig = 'autoBackupConfig';
+  static const String autoBackupEnabled = 'autoBackupEnabled';
+  static const String autoBackupSchedule = 'autoBackupSchedule';
+  static const String autoBackupKeepCount = 'autoBackupKeepCount';
+  static const String autoBackupCompress = 'autoBackupCompress';
+  static const String lastDailyBackup = 'lastDailyBackup';
+  static const String lastWeeklyBackup = 'lastWeeklyBackup';
+  static const String backupTags = 'backupTags';
+  static const String backupTagsMap = 'backupTagsMap';
+
+  /// 备份压缩配置
+  static const String backupCompressionLevel = 'backupCompressionLevel';
+  static const String backupCompressEnabled = 'backupCompressEnabled';
 }

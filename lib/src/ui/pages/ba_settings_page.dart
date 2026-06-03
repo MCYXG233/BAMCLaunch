@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:path/path.dart' as path;
 import '../theme/colors.dart';
 import '../theme/app_theme.dart';
 import '../../config/config_manager.dart';
@@ -16,11 +17,17 @@ import '../components/ba_background_selector.dart';
 import '../../config/background_config.dart';
 import '../../loader/java_selector_dialog.dart';
 import '../../account/skin_manager.dart';
+import '../../account/account_manager.dart';
+import '../../account/account.dart';
 import '../../game/backup_manager.dart';
 import '../../game/game_statistics.dart';
 import '../../instance/instance_manager.dart';
 import '../components/ba_backup_dialog.dart';
 import '../components/ba_dialog.dart';
+import '../../features/skin/skin_preview_3d.dart';
+import '../../features/skin/cape_manager.dart';
+import '../dialogs/cape_upload_dialog.dart';
+import '../../download/mirror_manager.dart';
 
 class BASettingsPage extends StatefulWidget {
   const BASettingsPage({super.key});
@@ -36,6 +43,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
   final SkinManager _skinManager = SkinManager.instance;
   final BackupManager _backupManager = BackupManager.instance;
   final GameStatisticsManager _statisticsManager = GameStatisticsManager.instance;
+  final AccountManager _accountManager = AccountManager();
+  
+  Account? _selectedAccount;
 
   String _selectedCategory = 'general';
   bool _notificationInitialized = false;
@@ -71,6 +81,17 @@ class _BASettingsPageState extends State<BASettingsPage> {
   final FocusNode _jvmArgsFocusNode = FocusNode();
   final FocusNode _gameArgsFocusNode = FocusNode();
 
+  // 镜像管理相关
+  final MirrorManager _mirrorManager = MirrorManager();
+  List<MirrorSpeedTestResult> _speedTestResults = [];
+  bool _isSpeedTesting = false;
+  bool _autoSelectMirror = true;
+  bool _enableSpeedLimit = false;
+  double _speedLimitValue = 1024;
+  int _speedLimitUnit = 0; // 0: KB/s, 1: MB/s
+  final TextEditingController _customMirrorUrlController = TextEditingController();
+  final TextEditingController _customMirrorNameController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -93,10 +114,20 @@ class _BASettingsPageState extends State<BASettingsPage> {
     await _backupManager.initialize();
     await _statisticsManager.initialize();
     await _loadBackgroundConfig();
+    await _loadSelectedAccount();
     if (mounted) {
       setState(() {
         _themeManagerInitialized = true;
         _managersInitialized = true;
+      });
+    }
+  }
+  
+  Future<void> _loadSelectedAccount() async {
+    final account = await _accountManager.getSelectedAccount();
+    if (mounted) {
+      setState(() {
+        _selectedAccount = account;
       });
     }
   }
@@ -134,6 +165,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
     _gameArgsController.dispose();
     _jvmArgsFocusNode.dispose();
     _gameArgsFocusNode.dispose();
+    _customMirrorUrlController.dispose();
+    _customMirrorNameController.dispose();
     super.dispose();
   }
 
@@ -178,6 +211,16 @@ class _BASettingsPageState extends State<BASettingsPage> {
       final jvmArguments = _configManager.getString(ConfigKeys.jvmArguments) ?? '';
       final gameArguments = _configManager.getString(ConfigKeys.gameArguments) ?? '';
 
+      // 加载镜像和限速配置
+      final autoSelectMirror = _configManager.getBool(ConfigKeys.autoSelectMirror) ?? true;
+      final enableSpeedLimit = _configManager.getBool(ConfigKeys.enableSpeedLimit) ?? false;
+      final speedLimitValue = _configManager.getInt(ConfigKeys.speedLimitValue) ?? 1024;
+      final speedLimitUnit = _configManager.getInt('speedLimitUnit') ?? 0;
+
+      // 加载镜像管理器配置
+      await _mirrorManager.loadConfig();
+      final speedTestResults = _mirrorManager.speedTestResults;
+
       await _initThemeManager();
 
       String themeModeStr;
@@ -214,6 +257,11 @@ class _BASettingsPageState extends State<BASettingsPage> {
           _gameWindowSize = gameWindowSize;
           _jvmArgsController.text = jvmArguments;
           _gameArgsController.text = gameArguments;
+          _autoSelectMirror = autoSelectMirror;
+          _enableSpeedLimit = enableSpeedLimit;
+          _speedLimitValue = speedLimitValue.toDouble();
+          _speedLimitUnit = speedLimitUnit;
+          _speedTestResults = speedTestResults;
         });
       }
     } catch (e) {
@@ -356,6 +404,152 @@ class _BASettingsPageState extends State<BASettingsPage> {
         NotificationManager().showError('保存下载线程失败', message: e.toString());
       }
     }
+  }
+
+  Future<void> _saveAutoSelectMirror(bool value) async {
+    try {
+      await _configManager.setBool(ConfigKeys.autoSelectMirror, value);
+      if (!mounted) return;
+      setState(() {
+        _autoSelectMirror = value;
+      });
+      NotificationManager().showSuccess('自动选择最快镜像已保存');
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('保存设置失败', message: e.toString());
+      }
+    }
+  }
+
+  Future<void> _saveEnableSpeedLimit(bool value) async {
+    try {
+      await _configManager.setBool(ConfigKeys.enableSpeedLimit, value);
+      if (!mounted) return;
+      setState(() {
+        _enableSpeedLimit = value;
+      });
+      NotificationManager().showSuccess('限速设置已保存');
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('保存设置失败', message: e.toString());
+      }
+    }
+  }
+
+  Future<void> _saveSpeedLimitValue(double value, int unit) async {
+    try {
+      await _configManager.setInt(ConfigKeys.speedLimitValue, value.toInt());
+      await _configManager.setInt('speedLimitUnit', unit);
+      if (!mounted) return;
+      setState(() {
+        _speedLimitValue = value;
+        _speedLimitUnit = unit;
+      });
+      NotificationManager().showSuccess('限速值已保存');
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('保存设置失败', message: e.toString());
+      }
+    }
+  }
+
+  Future<void> _speedTestMirrors() async {
+    setState(() {
+      _isSpeedTesting = true;
+    });
+    try {
+      final results = await _mirrorManager.speedTestAllMirrors();
+      if (mounted) {
+        setState(() {
+          _speedTestResults = results;
+          _isSpeedTesting = false;
+        });
+        NotificationManager().showSuccess('测速完成');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isSpeedTesting = false;
+        });
+        NotificationManager().showError('测速失败', message: e.toString());
+      }
+    }
+  }
+
+  Future<void> _autoSelectFastestMirror() async {
+    setState(() {
+      _isSpeedTesting = true;
+    });
+    try {
+      final fastest = await _mirrorManager.autoSelectFastestMirror();
+      if (mounted) {
+        setState(() {
+          _isSpeedTesting = false;
+        });
+        NotificationManager().showSuccess('已自动切换到最快镜像: ${fastest.name}');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isSpeedTesting = false;
+        });
+        NotificationManager().showError('自动选择失败', message: e.toString());
+      }
+    }
+  }
+
+  Future<void> _addCustomMirror() async {
+    final url = _customMirrorUrlController.text.trim();
+    final name = _customMirrorNameController.text.trim();
+
+    if (url.isEmpty) {
+      NotificationManager().showError('请输入镜像地址');
+      return;
+    }
+
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      NotificationManager().showError('镜像地址必须以 http:// 或 https:// 开头');
+      return;
+    }
+
+    try {
+      final mirror = MirrorInfo(
+        id: '',
+        name: name.isEmpty ? Uri.parse(url).host : name,
+        url: url,
+      );
+      await _mirrorManager.addCustomMirror(mirror);
+      _customMirrorUrlController.clear();
+      _customMirrorNameController.clear();
+      await _loadSettings();
+      if (mounted) {
+        NotificationManager().showSuccess('自定义镜像已添加');
+      }
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('添加镜像失败', message: e.toString());
+      }
+    }
+  }
+
+  Future<void> _removeCustomMirror(String mirrorId) async {
+    try {
+      await _mirrorManager.removeCustomMirror(mirrorId);
+      await _loadSettings();
+      if (mounted) {
+        NotificationManager().showSuccess('镜像已移除');
+      }
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('移除镜像失败', message: e.toString());
+      }
+    }
+  }
+
+  void _selectMirror(String mirrorId) {
+    _mirrorManager.setCurrentMirror(mirrorId);
+    setState(() {});
+    NotificationManager().showSuccess('已选择镜像');
   }
 
   Future<void> _saveDownloadPath(String dir) async {
@@ -619,7 +813,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
     final textColor = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
 
     return Container(
-      color: bgColor,
+      color: Colors.transparent,
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
@@ -673,40 +867,50 @@ class _BASettingsPageState extends State<BASettingsPage> {
     return Container(
       width: 200,
       decoration: BoxDecoration(
-        color: cardBg,
+        color: cardBg.withOpacity(0.85),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cardBorder),
-        boxShadow: BATheme.shadowsSmallOf(context),
+        border: Border.all(color: cardBorder.withOpacity(0.4)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: ListView.builder(
-        padding: const EdgeInsets.all(8),
-        itemCount: categoryNames.length,
-        itemBuilder: (context, index) {
-          final categoryId = categoryNames.keys.elementAt(index);
-          final categoryName = categoryNames[categoryId]!;
-          final isSelected = _selectedCategory == categoryId;
+          padding: const EdgeInsets.all(8),
+          itemCount: categoryNames.length,
+          itemBuilder: (context, index) {
+            final categoryId = categoryNames.keys.elementAt(index);
+            final categoryName = categoryNames[categoryId]!;
+            final isSelected = _selectedCategory == categoryId;
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  setState(() {
-                    _selectedCategory = categoryId;
-                  });
-                },
-                borderRadius: BorderRadius.circular(10),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: isSelected ? BAColors.primaryOf(context).withOpacity(0.1) : Colors.transparent,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: isSelected ? BAColors.primaryOf(context) : Colors.transparent,
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _selectedCategory = categoryId;
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(10),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isSelected 
+                          ? BAColors.primaryOf(context).withOpacity(0.15) 
+                          : BAColors.surfaceOf(context).withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isSelected 
+                            ? BAColors.primaryOf(context).withOpacity(0.5) 
+                            : Colors.transparent,
+                      ),
                     ),
-                  ),
                   child: Row(
                     children: [
                       Icon(
@@ -795,10 +999,16 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
     return Container(
       decoration: BoxDecoration(
-        color: cardBg,
+        color: cardBg.withOpacity(0.9),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cardBorder),
-        boxShadow: BATheme.shadowsSmallOf(context),
+        border: Border.all(color: cardBorder.withOpacity(0.4)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -921,6 +1131,29 @@ class _BASettingsPageState extends State<BASettingsPage> {
                       _backgroundConfig = customConfig;
                     });
                     NotificationManager().showSuccess('已选择图片: ${file.name}');
+                  }
+                }
+              },
+              onPickVideo: () async {
+                final result = await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowedExtensions: ['webm', 'mp4', 'avi', 'mov', 'mkv'],
+                  allowMultiple: false,
+                );
+                if (result != null && result.files.isNotEmpty) {
+                  final file = result.files.first;
+                  if (file.path != null) {
+                    final customConfig = BackgroundConfig(
+                      type: BackgroundType.video,
+                      videoPath: file.path,
+                      blur: _backgroundConfig.blur,
+                      opacity: _backgroundConfig.opacity,
+                    );
+                    await _backgroundManager.saveBackgroundConfig(customConfig);
+                    setState(() {
+                      _backgroundConfig = customConfig;
+                    });
+                    NotificationManager().showSuccess('已选择视频: ${file.name}');
                   }
                 }
               },
@@ -1184,26 +1417,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
               ),
             ),
             _buildSettingsItem(
-              icon: Icons.speed,
-              title: '下载线程',
-              description: '$_concurrentDownloads',
-              control: _buildDropdown<int>(
-                value: _concurrentDownloads,
-                items: const [
-                  DropdownMenuItem(value: 1, child: Text('1')),
-                  DropdownMenuItem(value: 2, child: Text('2')),
-                  DropdownMenuItem(value: 3, child: Text('3')),
-                  DropdownMenuItem(value: 4, child: Text('4')),
-                  DropdownMenuItem(value: 5, child: Text('5')),
-                  DropdownMenuItem(value: 6, child: Text('6')),
-                  DropdownMenuItem(value: 8, child: Text('8')),
-                ],
-                onChanged: (value) {
-                  if (value != null) _saveConcurrentDownloads(value);
-                },
-              ),
-            ),
-            _buildSettingsItem(
               icon: Icons.download,
               title: '下载目录',
               description: _downloadPath.isEmpty ? '未设置' : _downloadPath,
@@ -1221,6 +1434,252 @@ class _BASettingsPageState extends State<BASettingsPage> {
               control: Switch(
                 value: _autoRetryDownload,
                 onChanged: _saveAutoRetryDownload,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildSettingsCard(
+          title: '并发下载设置',
+          children: [
+            _buildSettingsItem(
+              icon: Icons.speed,
+              title: '并发下载数',
+              description: '$_concurrentDownloads 个线程',
+              control: SizedBox(
+                width: 200,
+                child: Slider(
+                  value: _concurrentDownloads.toDouble(),
+                  min: 1,
+                  max: 10,
+                  divisions: 9,
+                  label: '$_concurrentDownloads',
+                  onChanged: (value) {
+                    setState(() {
+                      _concurrentDownloads = value.toInt();
+                    });
+                  },
+                  onChangeEnd: (value) {
+                    _saveConcurrentDownloads(value.toInt());
+                  },
+                ),
+              ),
+            ),
+            _buildSettingsItem(
+              icon: Icons.data_usage,
+              title: '限速设置',
+              description: _enableSpeedLimit
+                  ? '${_speedLimitValue.toInt()} ${_speedLimitUnit == 0 ? "KB/s" : "MB/s"}'
+                  : '未启用',
+              control: Switch(
+                value: _enableSpeedLimit,
+                onChanged: _saveEnableSpeedLimit,
+              ),
+            ),
+            if (_enableSpeedLimit) ...[
+              _buildSettingsItem(
+                icon: Icons.speed,
+                title: '限速值',
+                description: '${_speedLimitValue.toInt()} ${_speedLimitUnit == 0 ? "KB/s" : "MB/s"}',
+                control: SizedBox(
+                  width: 200,
+                  child: Slider(
+                    value: _speedLimitValue,
+                    min: 1,
+                    max: _speedLimitUnit == 0 ? 10240 : 10,
+                    divisions: _speedLimitUnit == 0 ? 100 : 9,
+                    label: '${_speedLimitValue.toInt()}',
+                    onChanged: (value) {
+                      setState(() {
+                        _speedLimitValue = value;
+                      });
+                    },
+                    onChangeEnd: (value) {
+                      _saveSpeedLimitValue(value, _speedLimitUnit);
+                    },
+                  ),
+                ),
+              ),
+              _buildSettingsItem(
+                icon: Icons.timer,
+                title: '限速单位',
+                description: _speedLimitUnit == 0 ? 'KB/s' : 'MB/s',
+                control: _buildDropdown<int>(
+                  value: _speedLimitUnit,
+                  items: const [
+                    DropdownMenuItem(value: 0, child: Text('KB/s')),
+                    DropdownMenuItem(value: 1, child: Text('MB/s')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _speedLimitUnit = value;
+                        if (value == 1 && _speedLimitValue > 10) {
+                          _speedLimitValue = 10;
+                        } else if (value == 0 && _speedLimitValue < 1) {
+                          _speedLimitValue = 1024;
+                        }
+                      });
+                      _saveSpeedLimitValue(_speedLimitValue, value);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildSettingsCard(
+          title: '镜像源管理',
+          children: [
+            _buildSettingsItem(
+              icon: Icons.auto_fix_high,
+              title: '自动选择最快镜像',
+              description: '测速所有镜像并自动切换',
+              control: Switch(
+                value: _autoSelectMirror,
+                onChanged: _saveAutoSelectMirror,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _isSpeedTesting ? null : _speedTestMirrors,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: BAColors.primaryOf(context),
+                        foregroundColor: BAColors.textOnPrimary,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      icon: _isSpeedTesting
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.speed, size: 18),
+                      label: Text(_isSpeedTesting ? '测速中...' : '测速所有镜像'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _isSpeedTesting ? null : _autoSelectFastestMirror,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: BAColors.secondary,
+                        foregroundColor: BAColors.textOnPrimary,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      icon: const Icon(Icons.bolt, size: 18),
+                      label: const Text('自动选择最快'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildSettingsCard(
+          title: '镜像列表',
+          children: [
+            ..._buildMirrorList(),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '添加自定义镜像',
+                    style: TextStyle(
+                      color: BAColors.textPrimaryOf(context),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: TextField(
+                          controller: _customMirrorNameController,
+                          style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 13),
+                          decoration: InputDecoration(
+                            hintText: '名称（可选）',
+                            hintStyle: TextStyle(color: BAColors.textDisabledOf(context), fontSize: 13),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            filled: true,
+                            fillColor: BAColors.surfaceVariantOf(context),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: BAColors.borderOf(context)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: BAColors.borderOf(context)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: BAColors.primaryOf(context)),
+                            ),
+                            isDense: true,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        flex: 4,
+                        child: TextField(
+                          controller: _customMirrorUrlController,
+                          style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 13),
+                          decoration: InputDecoration(
+                            hintText: 'https://example.com',
+                            hintStyle: TextStyle(color: BAColors.textDisabledOf(context), fontSize: 13),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            filled: true,
+                            fillColor: BAColors.surfaceVariantOf(context),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: BAColors.borderOf(context)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: BAColors.borderOf(context)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: BAColors.primaryOf(context)),
+                            ),
+                            isDense: true,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: _addCustomMirror,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: BAColors.primaryOf(context),
+                          foregroundColor: BAColors.textOnPrimary,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text('添加'),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
@@ -1298,6 +1757,163 @@ class _BASettingsPageState extends State<BASettingsPage> {
         ),
       ],
     );
+  }
+
+  List<Widget> _buildMirrorList() {
+    final mirrors = _mirrorManager.allMirrors;
+    final currentMirrorId = _mirrorManager.currentMirror.id;
+
+    return mirrors.map((mirror) {
+      final isSelected = mirror.id == currentMirrorId;
+      final speedResult = _speedTestResults.where((r) => r.mirror.id == mirror.id).firstOrNull;
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _selectMirror(mirror.id),
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? BAColors.primaryOf(context).withOpacity(0.15)
+                    : BAColors.surfaceVariantOf(context).withOpacity(0.3),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isSelected
+                      ? BAColors.primaryOf(context).withOpacity(0.5)
+                      : Colors.transparent,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                    color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              mirror.name,
+                              style: TextStyle(
+                                color: BAColors.textPrimaryOf(context),
+                                fontSize: 14,
+                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                              ),
+                            ),
+                            if (mirror.isOfficial) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: BAColors.primary.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  '官方',
+                                  style: TextStyle(
+                                    color: BAColors.primaryOf(context),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            if (mirror.isBuiltIn && !mirror.isOfficial) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: BAColors.secondary.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  '内置',
+                                  style: TextStyle(
+                                    color: BAColors.secondary,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          mirror.url,
+                          style: TextStyle(
+                            color: BAColors.textSecondaryOf(context),
+                            fontSize: 11,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (speedResult != null) ...[
+                    if (speedResult.isAvailable)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '${speedResult.latencyMs}ms',
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          '不可用',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                  ],
+                  if (!mirror.isBuiltIn) ...[
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: Icon(
+                        Icons.delete_outline,
+                        color: BAColors.danger,
+                        size: 20,
+                      ),
+                      onPressed: () => _removeCustomMirror(mirror.id),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }).toList();
   }
 
   Future<void> _launchURL(String url) async {
@@ -1564,7 +2180,68 @@ class _BASettingsPageState extends State<BASettingsPage> {
       padding: const EdgeInsets.only(right: 8),
       children: [
         _buildSettingsCard(
-          title: '皮肤管理',
+          title: '当前账户皮肤',
+          children: [
+            if (_selectedAccount == null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Text(
+                  '请先选择一个账户',
+                  style: TextStyle(
+                    color: BAColors.textSecondaryOf(context),
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              )
+            else ...[
+              _buildSkinPreviewWith3D(),
+              const SizedBox(height: 16),
+              _buildModelSelector(),
+              const SizedBox(height: 16),
+              _buildSettingsItem(
+                icon: Icons.image,
+                title: '上传自定义皮肤',
+                description: '选择本地PNG皮肤文件',
+                control: ElevatedButton(
+                  onPressed: _selectCustomSkin,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: BAColors.primaryOf(context),
+                    foregroundColor: BAColors.textOnPrimary,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('选择文件', style: TextStyle(fontSize: 12)),
+                ),
+              ),
+              const SizedBox(height: 8),
+              _buildCapeManagement(),
+              if (_selectedAccount?.skinUrl != null)
+                _buildSettingsItem(
+                  icon: Icons.restore,
+                  title: '恢复默认皮肤',
+                  description: '移除自定义皮肤，使用默认皮肤',
+                  control: ElevatedButton(
+                    onPressed: _resetToDefaultSkin,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: BAColors.danger,
+                      foregroundColor: BAColors.textOnPrimary,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('恢复', style: TextStyle(fontSize: 12)),
+                  ),
+                ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildSettingsCard(
+          title: '皮肤缓存',
           children: [
             _buildSettingsItem(
               icon: Icons.refresh,
@@ -1619,6 +2296,419 @@ class _BASettingsPageState extends State<BASettingsPage> {
         ),
       ],
     );
+  }
+
+  Widget _buildSkinPreviewWith3D() {
+    if (_selectedAccount == null) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: BAColors.surfaceVariantOf(context),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: BAColors.borderOf(context)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            '3D皮肤预览',
+            style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: SkinPreview3D(
+              skinType: _selectedAccount!.modelType,
+              width: 200,
+              height: 280,
+              backgroundColor: BAColors.surfaceVariantOf(context).withOpacity(0.5),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.touch_app,
+                size: 14,
+                color: BAColors.textSecondaryOf(context),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '拖拽旋转 | 滚轮缩放 | 双击重置',
+                style: TextStyle(
+                  color: BAColors.textSecondaryOf(context),
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '当前模型: ${_selectedAccount!.modelType == SkinType.alex ? "Alex (细臂)" : "Steve (标准)"}',
+            style: TextStyle(
+              color: BAColors.textSecondaryOf(context),
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModelSelector() {
+    if (_selectedAccount == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: BAColors.surfaceVariantOf(context).withOpacity(0.5),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.person_outline,
+            color: BAColors.primaryOf(context),
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '角色模型',
+                  style: TextStyle(
+                    color: BAColors.textPrimaryOf(context),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '选择Steve或Alex模型',
+                  style: TextStyle(
+                    color: BAColors.textSecondaryOf(context),
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          _buildModelToggle(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModelToggle() {
+    final isAlex = _selectedAccount!.modelType == SkinType.alex;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: BAColors.surfaceOf(context),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: BAColors.borderOf(context)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildModelOption(
+            label: 'Steve',
+            isSelected: !isAlex,
+            onTap: () => _setModelType(SkinType.steve),
+          ),
+          _buildModelOption(
+            label: 'Alex',
+            isSelected: isAlex,
+            onTap: () => _setModelType(SkinType.alex),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModelOption({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? BAColors.primaryOf(context) : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected
+                ? BAColors.textOnPrimary
+                : BAColors.textSecondaryOf(context),
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _setModelType(SkinType type) async {
+    if (_selectedAccount == null) return;
+
+    try {
+      final updatedAccount = _selectedAccount!.copyWith(modelType: type);
+      await _accountManager.updateAccount(updatedAccount);
+      await _loadSelectedAccount();
+      NotificationManager().showSuccess('模型已切换为 ${type == SkinType.alex ? "Alex" : "Steve"}');
+    } catch (e) {
+      NotificationManager().showError('切换模型失败', message: e.toString());
+    }
+  }
+
+  Widget _buildCapeManagement() {
+    if (_selectedAccount == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: BAColors.surfaceVariantOf(context).withOpacity(0.5),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.layers,
+            color: BAColors.secondary,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '披风管理',
+                  style: TextStyle(
+                    color: BAColors.textPrimaryOf(context),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '上传自定义披风 (64x32 PNG)',
+                  style: TextStyle(
+                    color: BAColors.textSecondaryOf(context),
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => _showCapeUploadDialog(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: BAColors.secondary,
+              foregroundColor: BAColors.textOnPrimary,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('管理披风', style: TextStyle(fontSize: 12)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showCapeUploadDialog() async {
+    if (_selectedAccount == null) return;
+
+    await CapeUploadDialog.show(
+      context: context,
+      accountId: _selectedAccount!.id,
+      accountName: _selectedAccount!.username,
+      onUploadSuccess: (capeImage) {
+        NotificationManager().showSuccess('披风上传成功');
+        setState(() {});
+      },
+      onDeleteSuccess: () {
+        NotificationManager().showSuccess('披风已删除');
+        setState(() {});
+      },
+    );
+  }
+  
+  Widget _buildSkinPreview() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: BAColors.surfaceVariantOf(context),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: BAColors.borderOf(context)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            '当前皮肤',
+            style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            width: 128,
+            height: 128,
+            decoration: BoxDecoration(
+              color: BAColors.surfaceOf(context),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: BAColors.borderOf(context)),
+            ),
+            child: _selectedAccount?.skinUrl != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: _buildSkinImage(_selectedAccount!.skinUrl!),
+                  )
+                : Center(
+                    child: Icon(
+                      Icons.person,
+                      size: 64,
+                      color: BAColors.textDisabledOf(context),
+                    ),
+                  ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _selectedAccount?.skinUrl != null ? '使用自定义皮肤' : '使用默认皮肤',
+            style: TextStyle(
+              color: BAColors.textSecondaryOf(context),
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildSkinImage(String skinUrl) {
+    if (skinUrl.startsWith('http')) {
+      return Image.network(
+        skinUrl,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          return Center(
+            child: Icon(
+              Icons.error_outline,
+              color: BAColors.danger,
+              size: 48,
+            ),
+          );
+        },
+      );
+    } else if (File(skinUrl).existsSync()) {
+      return Image.file(
+        File(skinUrl),
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          return Center(
+            child: Icon(
+              Icons.error_outline,
+              color: BAColors.danger,
+              size: 48,
+            ),
+          );
+        },
+      );
+    }
+    return Center(
+      child: Icon(
+        Icons.person,
+        size: 64,
+        color: BAColors.textDisabledOf(context),
+      ),
+    );
+  }
+  
+  Future<void> _selectCustomSkin() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowedExtensions: ['png'],
+    );
+    
+    if (result == null || result.files.isEmpty) return;
+    
+    final file = result.files.first;
+    if (file.path == null) return;
+    
+    try {
+      // 复制皮肤文件到应用数据目录
+      final platform = PlatformAdapterFactory.create();
+      final appDir = await platform.getApplicationSupportDirectory();
+      final skinsDir = Directory(path.join(appDir, 'custom_skins'));
+      
+      if (!await skinsDir.exists()) {
+        await skinsDir.create(recursive: true);
+      }
+      
+      final extension = path.extension(file.path!);
+      final newFileName = '${_selectedAccount!.id}_${DateTime.now().millisecondsSinceEpoch}$extension';
+      final newFile = File(path.join(skinsDir.path, newFileName));
+      
+      await File(file.path!).copy(newFile.path);
+      
+      // 更新账户皮肤
+      final updatedAccount = _selectedAccount!.copyWith(
+        skinUrl: newFile.path,
+      );
+      
+      await _accountManager.updateAccount(updatedAccount);
+      await _skinManager.clearAllCache();
+      await _loadSelectedAccount();
+      
+      NotificationManager().showSuccess('皮肤已更新');
+    } catch (e) {
+      NotificationManager().showError('设置皮肤失败', message: e.toString());
+    }
+  }
+  
+  Future<void> _resetToDefaultSkin() async {
+    final confirmed = await BAConfirmDialog.show(
+      context: context,
+      title: '恢复默认皮肤',
+      content: '确定要恢复默认皮肤吗？',
+      confirmText: '恢复',
+    );
+    
+    if (!confirmed) return;
+    
+    try {
+      final updatedAccount = _selectedAccount!.copyWith(
+        skinUrl: null,
+      );
+      
+      await _accountManager.updateAccount(updatedAccount);
+      await _skinManager.clearAllCache();
+      await _loadSelectedAccount();
+      
+      NotificationManager().showSuccess('已恢复默认皮肤');
+    } catch (e) {
+      NotificationManager().showError('恢复失败', message: e.toString());
+    }
   }
 
   Widget _buildBackupSettings() {

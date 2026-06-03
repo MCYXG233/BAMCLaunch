@@ -593,6 +593,7 @@ class InstanceManager {
     String instanceId,
     String newName, {
     bool copyFiles = true,
+    CopyOptions? options,
   }) async {
     final instance = _instances.firstWhere(
       (i) => i.id == instanceId,
@@ -625,8 +626,19 @@ class InstanceManager {
         final targetDir = Directory(path.join(directory.path, 'instances', id));
 
         if (await sourceDir.exists()) {
-          await _copyDirectory(sourceDir, targetDir);
+          await _copyDirectory(sourceDir, targetDir, options: options);
           _logger.info('Copied instance files: ${instance.id} -> $id');
+        }
+
+        // 复制版本目录
+        if (options?.copyVersionDir ?? false) {
+          final sourceVersionDir = Directory(path.join(directory.path, 'versions', instance.version));
+          final targetVersionDir = Directory(path.join(directory.path, 'versions', instance.version));
+
+          if (await sourceVersionDir.exists()) {
+            await _copyDirectory(sourceVersionDir, targetVersionDir, options: options);
+            _logger.info('Copied version directory: ${instance.version}');
+          }
         }
       } catch (e, stackTrace) {
         _logger.error('Failed to copy instance files', e, stackTrace);
@@ -639,20 +651,141 @@ class InstanceManager {
     return duplicated;
   }
 
+  /// 复制实例并指定新目录
+  Future<GameInstance> duplicateInstanceToDirectory(
+    String instanceId,
+    String newName,
+    String targetDirectoryId, {
+    bool copyFiles = true,
+    CopyOptions? options,
+  }) async {
+    final instance = _instances.firstWhere(
+      (i) => i.id == instanceId,
+      orElse: () => throw ArgumentError('Instance not found: $instanceId'),
+    );
+
+    final targetDirectory = _directories.firstWhere(
+      (d) => d.id == targetDirectoryId,
+      orElse: () => throw ArgumentError('Directory not found: $targetDirectoryId'),
+    );
+
+    final id = _generateId();
+    final now = DateTime.now();
+
+    final duplicated = instance.copyWith(
+      id: id,
+      name: newName,
+      directoryId: targetDirectoryId,
+      createdAt: now,
+      updatedAt: now,
+      lastPlayed: null,
+      playTimeSeconds: 0,
+    );
+
+    _instances.add(duplicated);
+
+    // 复制实例文件到目标目录
+    if (copyFiles) {
+      try {
+        final sourceDir = Directory(path.join(
+          _directories.firstWhere((d) => d.id == instance.directoryId).path,
+          'instances',
+          instance.id,
+        ));
+        final targetDir = Directory(path.join(targetDirectory.path, 'instances', id));
+
+        if (await sourceDir.exists()) {
+          await _copyDirectory(sourceDir, targetDir, options: options);
+          _logger.info('Copied instance files to new directory: ${instance.id} -> $id');
+        }
+
+        // 复制版本目录
+        if (options?.copyVersionDir ?? false) {
+          final sourceVersionDir = Directory(path.join(
+            _directories.firstWhere((d) => d.id == instance.directoryId).path,
+            'versions',
+            instance.version,
+          ));
+          final targetVersionDir = Directory(path.join(targetDirectory.path, 'versions', instance.version));
+
+          if (await sourceVersionDir.exists()) {
+            await _copyDirectory(sourceVersionDir, targetVersionDir, options: options);
+          }
+        }
+      } catch (e, stackTrace) {
+        _logger.error('Failed to copy instance files', e, stackTrace);
+      }
+    }
+
+    await save();
+    _logger.info('Duplicated instance: $newName to directory: ${targetDirectory.name}');
+
+    return duplicated;
+  }
+
+  /// 计算实例大小
+  Future<int> getInstanceSize(String instanceId) async {
+    final instance = _instances.firstWhere(
+      (i) => i.id == instanceId,
+      orElse: () => throw ArgumentError('Instance not found: $instanceId'),
+    );
+
+    final directory = _directories.firstWhere(
+      (d) => d.id == instance.directoryId,
+      orElse: () => throw ArgumentError('Directory not found: ${instance.directoryId}'),
+    );
+
+    final instanceDir = Directory(path.join(directory.path, 'instances', instance.id));
+    if (!await instanceDir.exists()) {
+      return 0;
+    }
+
+    int totalSize = 0;
+    await for (final entity in instanceDir.list(recursive: true)) {
+      if (entity is File) {
+        totalSize += await entity.length();
+      }
+    }
+
+    return totalSize;
+  }
+
   /// 复制目录
-  Future<void> _copyDirectory(Directory source, Directory target) async {
+  Future<void> _copyDirectory(
+    Directory source,
+    Directory target, {
+    CopyOptions? options,
+  }) async {
     if (!await target.exists()) {
       await target.create(recursive: true);
     }
 
     await for (final entity in source.list()) {
       final targetPath = path.join(target.path, path.basename(entity.path));
+
+      // 检查是否应该跳过某些目录
       if (entity is Directory) {
-        await _copyDirectory(entity, Directory(targetPath));
+        final dirName = path.basename(entity.path);
+        if (options != null && options.excludeDirs.contains(dirName)) {
+          continue;
+        }
+        await _copyDirectory(entity, Directory(targetPath), options: options);
       } else if (entity is File) {
+        // 检查是否应该跳过某些文件
+        final fileName = path.basename(entity.path);
+        if (options != null && options.excludeFiles.contains(fileName)) {
+          continue;
+        }
         await entity.copy(targetPath);
       }
     }
+  }
+
+  /// 生成唯一 ID
+  String _generateId() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+    return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
   }
 
   /// 导出实例为ZIP
@@ -771,11 +904,122 @@ class InstanceManager {
     return instance;
   }
 
-  /// 生成唯一 ID
-  String _generateId() {
-    final random = Random.secure();
-    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
-    return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+  /// 从Mrpack文件导入实例
+  Future<GameInstance> importFromMrpack(String mrpackPath, String directoryId, {
+    String? customName,
+  }) async {
+    if (!_directories.any((d) => d.id == directoryId)) {
+      throw ArgumentError('Directory not found: $directoryId');
+    }
+
+    final directory = _directories.firstWhere((d) => d.id == directoryId);
+
+    // 读取mrpack文件
+    final bytes = await File(mrpackPath).readAsBytes();
+    final zipArchive = archive.ZipDecoder().decodeBytes(bytes);
+
+    // 查找modrinth.index.json
+    archive.ArchiveFile? indexFile;
+    for (final file in zipArchive.files) {
+      if (file.name == 'modrinth.index.json' && file.isFile) {
+        indexFile = file;
+        break;
+      }
+    }
+
+    if (indexFile == null) {
+      throw ArgumentError('Invalid mrpack file: missing modrinth.index.json');
+    }
+
+    // 解析索引
+    final indexJson = utf8.decode(indexFile.content as List<int>);
+    final indexData = jsonDecode(indexJson) as Map<String, dynamic>;
+
+    // 生成新ID
+    final id = _generateId();
+    final now = DateTime.now();
+    final name = customName ?? indexData['name'] as String? ?? 'Modrinth Modpack';
+
+    // 解析依赖获取Minecraft版本
+    final dependencies = indexData['dependencies'] as Map<String, dynamic>?;
+    final minecraftVersion = dependencies?['minecraft'] as String? ?? '1.20.1';
+
+    // 创建实例
+    final instance = GameInstance(
+      id: id,
+      name: name,
+      directoryId: directoryId,
+      version: minecraftVersion,
+      description: indexData['summary'] as String?,
+      config: InstanceConfig(),
+      resources: InstanceResources(
+        mods: [],
+        resourcePacks: [],
+        shaderPacks: [],
+        worlds: [],
+        screenshots: [],
+      ),
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    _instances.add(instance);
+
+    // 创建实例目录
+    final targetDir = Directory('${directory.path}\\instances\\$id');
+    if (!await targetDir.exists()) {
+      await targetDir.create(recursive: true);
+    }
+
+    // 创建overrides目录并提取文件
+    final overridesDir = Directory(path.join(targetDir.path, 'overrides'));
+    if (!await overridesDir.exists()) {
+      await overridesDir.create(recursive: true);
+    }
+
+    for (final file in zipArchive.files) {
+      if (file.name.startsWith('overrides/') && file.isFile) {
+        final subPath = file.name.substring('overrides/'.length);
+        final destPath = path.join(targetDir.path, subPath.replaceAll('/', path.separator));
+
+        final destDir = Directory(path.dirname(destPath));
+        if (!await destDir.exists()) {
+          await destDir.create(recursive: true);
+        }
+
+        await File(destPath).writeAsBytes(file.content as List<int>);
+      }
+    }
+
+    await save();
+    _logger.info('Imported mrpack instance: $id');
+
+    return instance;
+  }
+
+  /// 从实例数据创建实例（用于导入后重建实例）
+  Future<GameInstance> createInstanceFromData({
+    required String name,
+    required String directoryId,
+    required String version,
+    String? loader,
+    String? loaderVersion,
+    String? icon,
+    String? description,
+    InstanceConfig? config,
+    InstanceResources? resources,
+  }) async {
+    return createInstance(
+      name: name,
+      directoryId: directoryId,
+      version: version,
+      loader: loader,
+      loaderVersion: loaderVersion,
+      icon: icon,
+      description: description,
+      config: config,
+      resources: resources,
+    );
   }
 }
 
