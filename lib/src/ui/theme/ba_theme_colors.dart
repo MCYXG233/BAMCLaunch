@@ -590,4 +590,26 @@ class BACardStyle {
       );
 }
 
-/// 蔚蓝档案风格输入框
+/// 蔚蓝档案风格输入框样式
+///
+/// 提供输入框组件的样式配置，符合蔚蓝档案的圆润、柔和视觉风格。
+class BAInputStyle {
+  /// 搜索框输入装饰
+  ///
+  /// 创建一个蔚蓝档案风格的搜索框输入装饰。
+  ///
+  /// 参数：
+  /// - [hintText]: 占位提示文本
+  ///
+  /// 返回：配置好的 [InputDecoration] 对象
+  ///
+  /// 使用示例：
+  /// ```dart
+  /// TextField(
+  ///   decoration: BAInputStyle.searchDecoration(hintText: '搜索...'),
+  /// )
+  /// ```
+  static InputDecoration searchDecoration({required String hintText}) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: TextStyle(color: BAThemeColors.
