@@ -303,20 +303,23 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: BAColors.backgroundOf(context),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          _buildHeader(context),
-          const SizedBox(height: 16),
-          _buildToolbar(context),
-          const SizedBox(height: 16),
-          if (_isMultiSelectMode) _buildBatchActionBar(context),
-          if (_conflicts.isNotEmpty || _missingDependencies.isNotEmpty)
-            _buildWarningBar(context),
-          Expanded(child: _buildModList(context)),
-        ],
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        color: BAColors.backgroundOf(context),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            _buildHeader(context),
+            const SizedBox(height: 16),
+            _buildToolbar(context),
+            const SizedBox(height: 16),
+            if (_isMultiSelectMode) _buildBatchActionBar(context),
+            if (_conflicts.isNotEmpty || _missingDependencies.isNotEmpty)
+              _buildWarningBar(context),
+            Expanded(child: _buildModList(context)),
+          ],
+        ),
       ),
     );
   }

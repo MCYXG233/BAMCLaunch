@@ -16,17 +16,11 @@ import '../components/ba_notification.dart';
 import '../components/ba_background_selector.dart';
 import '../../config/background_config.dart';
 import '../../loader/java_selector_dialog.dart';
-import '../../account/skin_manager.dart';
-import '../../account/account_manager.dart';
-import '../../account/account.dart';
 import '../../game/backup_manager.dart';
 import '../../game/game_statistics.dart';
 import '../../instance/instance_manager.dart';
 import '../components/ba_backup_dialog.dart';
 import '../components/ba_dialog.dart';
-import 'dart:typed_data';
-import '../../features/skin/skin_preview_3d.dart';
-import '../../features/skin/cape_manager.dart';
 import '../../download/mirror_manager.dart';
 import '../components/ba_settings_item.dart';
 
@@ -41,14 +35,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
   final ConfigManager _configManager = ConfigManager();
   final ThemeManager _themeManager = ThemeManager();
   final BackgroundManager _backgroundManager = BackgroundManager();
-  final SkinManager _skinManager = SkinManager.instance;
   final BackupManager _backupManager = BackupManager.instance;
   final GameStatisticsManager _statisticsManager = GameStatisticsManager.instance;
-  final AccountManager _accountManager = AccountManager();
-  
-  Account? _selectedAccount;
-  Uint8List? _currentSkinImage;
-  Uint8List? _currentCapeImage;
 
   String _selectedCategory = 'general';
   bool _notificationInitialized = false;
@@ -113,47 +101,13 @@ class _BASettingsPageState extends State<BASettingsPage> {
   Future<void> _initAllManagers() async {
     await _themeManager.initialize();
     await _backgroundManager.initialize();
-    await _skinManager.initialize();
     await _backupManager.initialize();
     await _statisticsManager.initialize();
     await _loadBackgroundConfig();
-    await _loadSelectedAccount();
     if (mounted) {
       setState(() {
         _themeManagerInitialized = true;
         _managersInitialized = true;
-      });
-    }
-  }
-  
-  Future<void> _loadSelectedAccount() async {
-    final account = await _accountManager.getSelectedAccount();
-    
-    Uint8List? skinImage;
-    Uint8List? capeImage;
-    
-    if (account != null) {
-      try {
-        final skinData = await _skinManager.getSkin(account);
-        if (skinData != null) {
-          skinImage = Uint8List.fromList(skinData.imageData);
-        }
-        
-        if (account.capeUrl != null) {
-          final capeManager = CapeManager();
-          final capeData = await capeManager.getCape(account.id);
-          capeImage = capeData?.imageData;
-        }
-      } catch (e) {
-        // 皮肤加载失败不影响其他功能
-      }
-    }
-    
-    if (mounted) {
-      setState(() {
-        _selectedAccount = account;
-        _currentSkinImage = skinImage;
-        _currentCapeImage = capeImage;
       });
     }
   }
@@ -882,7 +836,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
     final categoryNames = {
       'general': '通用',
       'background': '背景',
-      'skin': '皮肤',
       'backup': '备份',
       'statistics': '统计',
       'game': '游戏',
@@ -970,8 +923,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
         return Icons.settings;
       case 'background':
         return Icons.wallpaper;
-      case 'skin':
-        return Icons.face;
       case 'backup':
         return Icons.backup;
       case 'statistics':
@@ -997,8 +948,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
         return _buildGeneralSettings();
       case 'background':
         return _buildBackgroundSettings();
-      case 'skin':
-        return _buildSkinSettings();
       case 'backup':
         return _buildBackupSettings();
       case 'statistics':
@@ -2144,476 +2093,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
         ),
       ),
     );
-  }
-
-  Widget _buildSkinSettings() {
-    return ListView(
-      padding: const EdgeInsets.only(right: 8),
-      children: [
-        _buildSettingsCard(
-          title: '当前账户皮肤',
-          children: [
-            if (_selectedAccount == null)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Text(
-                  '请先选择一个账户',
-                  style: TextStyle(
-                    color: BAColors.textSecondaryOf(context),
-                    fontSize: 14,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              )
-            else ...[
-              _buildSkinPreviewWith3D(),
-              const SizedBox(height: 16),
-              _buildModelSelector(),
-              const SizedBox(height: 16),
-              BASettingsItem(
-                icon: Icons.image,
-                title: '上传自定义皮肤',
-                description: '选择本地PNG皮肤文件',
-                control: ElevatedButton(
-                  onPressed: _selectCustomSkin,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: BAColors.primaryOf(context),
-                    foregroundColor: BAColors.textOnPrimary,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text('选择文件', style: TextStyle(fontSize: 12)),
-                ),
-              ),
-              const SizedBox(height: 8),
-              _buildCapeManagement(),
-              if (_selectedAccount?.skinUrl != null)
-                BASettingsItem(
-                  icon: Icons.restore,
-                  title: '恢复默认皮肤',
-                  description: '移除自定义皮肤，使用默认皮肤',
-                  control: ElevatedButton(
-                    onPressed: _resetToDefaultSkin,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: BAColors.danger,
-                      foregroundColor: BAColors.textOnPrimary,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text('恢复', style: TextStyle(fontSize: 12)),
-                  ),
-                ),
-            ],
-          ],
-        ),
-        const SizedBox(height: 16),
-        _buildSettingsCard(
-          title: '皮肤缓存',
-          children: [
-            BASettingsItem(
-              icon: Icons.refresh,
-              title: '刷新皮肤缓存',
-              description: '清除过期的皮肤缓存文件',
-              control: ElevatedButton(
-                onPressed: () async {
-                  await _skinManager.cleanExpiredCache();
-                  NotificationManager().showSuccess('缓存已清理');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: BAColors.primaryOf(context),
-                  foregroundColor: BAColors.textOnPrimary,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text('清理', style: TextStyle(fontSize: 12)),
-              ),
-            ),
-            BASettingsItem(
-              icon: Icons.delete_outline,
-              title: '清除所有皮肤缓存',
-              description: '删除所有已缓存的皮肤文件',
-              control: ElevatedButton(
-                onPressed: () async {
-                  final confirmed = await BAConfirmDialog.show(
-                    context: context,
-                    title: '清除缓存',
-                    content: '确定要清除所有皮肤缓存吗？',
-                    confirmText: '清除',
-                  );
-                  
-                  if (confirmed) {
-                    await _skinManager.clearAllCache();
-                    NotificationManager().showSuccess('缓存已清除');
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: BAColors.primary,
-                  foregroundColor: BAColors.textOnPrimary,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text('清除', style: TextStyle(fontSize: 12)),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSkinPreviewWith3D() {
-    if (_selectedAccount == null) return const SizedBox.shrink();
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: BAColors.surfaceVariantOf(context),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: BAColors.borderOf(context)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            '3D皮肤预览',
-            style: TextStyle(
-              color: BAColors.textPrimaryOf(context),
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: SkinPreview3D(
-              skinImage: _currentSkinImage,
-              capeImage: _currentCapeImage,
-              skinType: _selectedAccount!.modelType,
-              width: 200,
-              height: 280,
-              backgroundColor: BAColors.surfaceVariantOf(context).withOpacity(0.5),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.touch_app,
-                size: 14,
-                color: BAColors.textSecondaryOf(context),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                '拖拽旋转 | 滚轮缩放 | 双击重置',
-                style: TextStyle(
-                  color: BAColors.textSecondaryOf(context),
-                  fontSize: 11,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '当前模型: ${_selectedAccount!.modelType == SkinType.alex ? "Alex (细臂)" : "Steve (标准)"}',
-            style: TextStyle(
-              color: BAColors.textSecondaryOf(context),
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildModelSelector() {
-    if (_selectedAccount == null) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: BAColors.surfaceVariantOf(context).withOpacity(0.5),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.person_outline,
-            color: BAColors.primaryOf(context),
-            size: 20,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '角色模型',
-                  style: TextStyle(
-                    color: BAColors.textPrimaryOf(context),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '选择Steve或Alex模型',
-                  style: TextStyle(
-                    color: BAColors.textSecondaryOf(context),
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          _buildModelToggle(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildModelToggle() {
-    final isAlex = _selectedAccount!.modelType == SkinType.alex;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BAColors.borderOf(context)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildModelOption(
-            label: 'Steve',
-            isSelected: !isAlex,
-            onTap: () => _setModelType(SkinType.steve),
-          ),
-          _buildModelOption(
-            label: 'Alex',
-            isSelected: isAlex,
-            onTap: () => _setModelType(SkinType.alex),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildModelOption({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? BAColors.primaryOf(context) : Colors.transparent,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected
-                ? BAColors.textOnPrimary
-                : BAColors.textSecondaryOf(context),
-            fontSize: 13,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _setModelType(SkinType type) async {
-    if (_selectedAccount == null) return;
-
-    try {
-      final updatedAccount = _selectedAccount!.copyWith(modelType: type);
-      await _accountManager.updateAccount(updatedAccount);
-      await _loadSelectedAccount();
-      NotificationManager().showSuccess('模型已切换为 ${type == SkinType.alex ? "Alex" : "Steve"}');
-    } catch (e) {
-      NotificationManager().showError('切换模型失败', message: e.toString());
-    }
-  }
-
-  Widget _buildCapeManagement() {
-    if (_selectedAccount == null) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: BAColors.surfaceVariantOf(context).withOpacity(0.5),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.layers,
-            color: BAColors.secondary,
-            size: 20,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '披风管理',
-                  style: TextStyle(
-                    color: BAColors.textPrimaryOf(context),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '上传自定义披风 (64x32 PNG)',
-                  style: TextStyle(
-                    color: BAColors.textSecondaryOf(context),
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => _showCapeUploadDialog(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: BAColors.secondary,
-              foregroundColor: BAColors.textOnPrimary,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('管理披风', style: TextStyle(fontSize: 12)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _showCapeUploadDialog() async {
-    NotificationManager().showInfo('披风功能开发中');
-  }
-
-  Widget _buildSkinImage(String skinUrl) {
-    if (skinUrl.startsWith('http')) {
-      return Image.network(
-        skinUrl,
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) {
-          return Center(
-            child: Icon(
-              Icons.error_outline,
-              color: BAColors.danger,
-              size: 48,
-            ),
-          );
-        },
-      );
-    } else if (File(skinUrl).existsSync()) {
-      return Image.file(
-        File(skinUrl),
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) {
-          return Center(
-            child: Icon(
-              Icons.error_outline,
-              color: BAColors.danger,
-              size: 48,
-            ),
-          );
-        },
-      );
-    }
-    return Center(
-      child: Icon(
-        Icons.person,
-        size: 64,
-        color: BAColors.textDisabledOf(context),
-      ),
-    );
-  }
-  
-  Future<void> _selectCustomSkin() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-      allowedExtensions: ['png'],
-    );
-    
-    if (result == null || result.files.isEmpty) return;
-    
-    final file = result.files.first;
-    if (file.path == null) return;
-    
-    try {
-      // 复制皮肤文件到应用数据目录
-      final platform = PlatformAdapterFactory.create();
-      final appDir = await platform.getApplicationSupportDirectory();
-      final skinsDir = Directory(path.join(appDir, 'custom_skins'));
-      
-      if (!await skinsDir.exists()) {
-        await skinsDir.create(recursive: true);
-      }
-      
-      final extension = path.extension(file.path!);
-      final newFileName = '${_selectedAccount!.id}_${DateTime.now().millisecondsSinceEpoch}$extension';
-      final newFile = File(path.join(skinsDir.path, newFileName));
-      
-      await File(file.path!).copy(newFile.path);
-      
-      // 更新账户皮肤
-      final updatedAccount = _selectedAccount!.copyWith(
-        skinUrl: newFile.path,
-      );
-      
-      await _accountManager.updateAccount(updatedAccount);
-      await _skinManager.clearAllCache();
-      await _loadSelectedAccount();
-      
-      NotificationManager().showSuccess('皮肤已更新');
-    } catch (e) {
-      NotificationManager().showError('设置皮肤失败', message: e.toString());
-    }
-  }
-  
-  Future<void> _resetToDefaultSkin() async {
-    final confirmed = await BAConfirmDialog.show(
-      context: context,
-      title: '恢复默认皮肤',
-      content: '确定要恢复默认皮肤吗？',
-      confirmText: '恢复',
-    );
-    
-    if (!confirmed) return;
-    
-    try {
-      final updatedAccount = _selectedAccount!.copyWith(
-        skinUrl: null,
-      );
-      
-      await _accountManager.updateAccount(updatedAccount);
-      await _skinManager.clearAllCache();
-      await _loadSelectedAccount();
-      
-      NotificationManager().showSuccess('已恢复默认皮肤');
-    } catch (e) {
-      NotificationManager().showError('恢复失败', message: e.toString());
-    }
   }
 
   Widget _buildBackupSettings() {

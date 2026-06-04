@@ -1,5 +1,8 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../account/account_manager.dart';
 import '../../account/account_widgets.dart';
 import '../../account/account.dart';
@@ -8,6 +11,9 @@ import '../../event/event_bus.dart';
 import '../../core/logger.dart';
 import '../../auth/auth_manager.dart';
 import '../../auth/microsoft_auth.dart';
+import '../../account/skin_manager.dart';
+import '../../features/skin/skin_preview_3d.dart';
+import '../../features/skin/cape_manager.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/app_theme.dart';
@@ -28,6 +34,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
   final AuthManager _authManager = AuthManager();
   final EventBus _eventBus = EventBus();
   final Logger _logger = Logger('BAMCAccountPage');
+  final SkinManager _skinManager = SkinManager.instance;
 
   /// 账户列表
   List<Account> _accounts = [];
@@ -700,6 +707,13 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         BASecondaryButton(
+          text: '皮肤',
+          onPressed: () => _openSkinManager(account),
+          leadingIcon: const Icon(Icons.image, size: 18),
+          height: 36,
+        ),
+        const SizedBox(width: 8),
+        BASecondaryButton(
           text: '编辑',
           onPressed: () => _editAccount(account),
           leadingIcon: const Icon(Icons.edit, size: 18),
@@ -758,6 +772,15 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
         _showSnackBar('退出登录失败: $e');
       }
     }
+  }
+
+  /// 打开皮肤管理对话框
+  Future<void> _openSkinManager(Account account) async {
+    await showDialog(
+      context: context,
+      builder: (context) => _SkinManagerDialog(account: account),
+    );
+    await _loadAccounts();
   }
 
   /// 获取账户类型名称
@@ -1376,6 +1399,572 @@ class _AuthlibLoginWrapperState extends State<_AuthlibLoginWrapper> {
         content: Text(message),
         backgroundColor: BAColors.danger,
         duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+}
+
+/// 皮肤管理对话框
+class _SkinManagerDialog extends StatefulWidget {
+  final Account account;
+
+  const _SkinManagerDialog({required this.account});
+
+  @override
+  State<_SkinManagerDialog> createState() => _SkinManagerDialogState();
+}
+
+class _SkinManagerDialogState extends State<_SkinManagerDialog> {
+  final SkinManager _skinManager = SkinManager.instance;
+  final CapeManager _capeManager = CapeManager();
+  final AccountManager _accountManager = AccountManager();
+
+  Uint8List? _currentSkinImage;
+  Uint8List? _currentCapeImage;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSkinData();
+  }
+
+  Future<void> _loadSkinData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final skinData = await _skinManager.getSkin(widget.account);
+      if (skinData != null) {
+        _currentSkinImage = Uint8List.fromList(skinData.imageData);
+      }
+
+      if (widget.account.capeUrl != null) {
+        final capeData = await _capeManager.getCape(widget.account.id);
+        _currentCapeImage = capeData?.imageData;
+      }
+    } catch (e) {
+      // 忽略加载失败不影响其他功能
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _selectCustomSkin() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        allowedExtensions: ['png'],
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final file = File(result.files.single.path!);
+        final skinData = await file.readAsBytes();
+        await _skinManager.setCustomSkin(widget.account, skinData);
+        await _loadSkinData();
+        if (mounted) {
+          NotificationManager().showSuccess('皮肤已更新');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('上传失败', message: e.toString());
+      }
+    }
+  }
+
+  Future<void> _resetToDefaultSkin() async {
+    try {
+      await _skinManager.removeCustomSkin(widget.account);
+      await _loadSkinData();
+      if (mounted) {
+        NotificationManager().showSuccess('已恢复默认皮肤');
+      }
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('恢复失败', message: e.toString());
+      }
+    }
+  }
+
+  Future<void> _setModelType(SkinType type) async {
+    try {
+      final updatedAccount = widget.account.copyWith(modelType: type);
+      await _accountManager.updateAccount(updatedAccount);
+      await _loadSkinData();
+      if (mounted) {
+        NotificationManager().showSuccess('模型已切换为 ${type == SkinType.alex ? "Alex" : "Steve"}');
+      }
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('切换失败', message: e.toString());
+      }
+    }
+  }
+
+  Future<void> _showCapeUploadDialog() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowedExtensions: ['png'],
+    );
+
+    if (result != null && result.files.single.path != null) {
+      try {
+        final file = File(result.files.single.path!);
+        final capeData = await file.readAsBytes();
+        await _capeManager.setCustomCape(widget.account.id, capeData);
+        await _loadSkinData();
+        if (mounted) {
+          NotificationManager().showSuccess('披风已更新');
+        }
+      } catch (e) {
+        if (mounted) {
+          NotificationManager().showError('上传失败', message: e.toString());
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final surfaceColor = isLight ? BAColors.lightSurface : BAColors.darkSurface;
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: Container(
+        width: 600,
+        constraints: const BoxConstraints(maxHeight: 600),
+        decoration: BoxDecoration(
+          color: surfaceColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: isLight ? BAColors.lightBorder : BAColors.darkBorder),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildHeader(context),
+            Divider(height: 1, color: isLight ? BAColors.lightBorder : BAColors.darkBorder),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildSkinPreview(),
+                          const SizedBox(height: 16),
+                          _buildModelSelector(),
+                          const SizedBox(height: 16),
+                          _buildSkinActions(),
+                          const SizedBox(height: 16),
+                          _buildCapeManagement(),
+                        ],
+                      ),
+                    ),
+            ),
+            Divider(height: 1, color: isLight ? BAColors.lightBorder : BAColors.darkBorder),
+            _buildFooter(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        children: [
+          Icon(Icons.image, color: BAColors.primary, size: 28),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '皮肤管理',
+                  style: BATypography.headlineSmall.copyWith(
+                    color: BAColors.textPrimaryOf(context),
+                  ),
+                ),
+                Text(
+                  '${widget.account.username} 的皮肤设置',
+                  style: BATypography.bodySmall.copyWith(
+                    color: BAColors.textSecondaryOf(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.close, color: BAColors.textSecondaryOf(context)),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSkinPreview() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: BAColors.surfaceVariantOf(context),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: BAColors.borderOf(context)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            '3D皮肤预览',
+            style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: SkinPreview3D(
+              skinImage: _currentSkinImage,
+              capeImage: _currentCapeImage,
+              skinType: widget.account.modelType,
+              width: 200,
+              height: 280,
+              backgroundColor: BAColors.surfaceVariantOf(context).withOpacity(0.5),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.touch_app,
+                size: 14,
+                color: BAColors.textSecondaryOf(context),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '拖拽旋转 | 滚轮缩放 | 双击重置',
+                style: TextStyle(
+                  color: BAColors.textSecondaryOf(context),
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '当前模型: ${widget.account.modelType == SkinType.alex ? "Alex (细臂)" : "Steve (标准)"}',
+            style: TextStyle(
+              color: BAColors.textSecondaryOf(context),
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModelSelector() {
+    final isAlex = widget.account.modelType == SkinType.alex;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: BAColors.surfaceVariantOf(context).withOpacity(0.5),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.person_outline,
+            color: BAColors.primaryOf(context),
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '角色模型',
+                  style: TextStyle(
+                    color: BAColors.textPrimaryOf(context),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '选择Steve或Alex模型',
+                  style: TextStyle(
+                    color: BAColors.textSecondaryOf(context),
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          _buildModelToggle(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModelToggle() {
+    final isAlex = widget.account.modelType == SkinType.alex;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: BAColors.surfaceOf(context),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: BAColors.borderOf(context)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildModelOption(
+            label: 'Steve',
+            isSelected: !isAlex,
+            onTap: () => _setModelType(SkinType.steve),
+          ),
+          _buildModelOption(
+            label: 'Alex',
+            isSelected: isAlex,
+            onTap: () => _setModelType(SkinType.alex),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModelOption({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? BAColors.primaryOf(context) : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected
+                ? BAColors.textOnPrimary
+                : BAColors.textSecondaryOf(context),
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSkinActions() {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: BAColors.surfaceVariantOf(context).withOpacity(0.5),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.image,
+                color: BAColors.primaryOf(context),
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '上传自定义皮肤',
+                      style: TextStyle(
+                        color: BAColors.textPrimaryOf(context),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '选择本地PNG皮肤文件',
+                      style: TextStyle(
+                        color: BAColors.textSecondaryOf(context),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ElevatedButton(
+                onPressed: _selectCustomSkin,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: BAColors.primaryOf(context),
+                  foregroundColor: BAColors.textOnPrimary,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('选择文件', style: TextStyle(fontSize: 12)),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (widget.account.skinUrl != null)
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: BAColors.dangerOf(context).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: BAColors.dangerOf(context).withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.restore,
+                  color: BAColors.dangerOf(context),
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '恢复默认皮肤',
+                        style: TextStyle(
+                          color: BAColors.textPrimaryOf(context),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '移除自定义皮肤，使用默认皮肤',
+                        style: TextStyle(
+                          color: BAColors.textSecondaryOf(context),
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: _resetToDefaultSkin,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: BAColors.danger,
+                    foregroundColor: BAColors.textOnPrimary,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('恢复', style: TextStyle(fontSize: 12)),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildCapeManagement() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: BAColors.surfaceVariantOf(context).withOpacity(0.5),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.layers,
+            color: BAColors.secondary,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '披风管理',
+                  style: TextStyle(
+                    color: BAColors.textPrimaryOf(context),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '上传自定义披风 (64x32 PNG)',
+                  style: TextStyle(
+                    color: BAColors.textSecondaryOf(context),
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ElevatedButton(
+            onPressed: _showCapeUploadDialog,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: BAColors.secondary,
+              foregroundColor: BAColors.textOnPrimary,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('上传披风', style: TextStyle(fontSize: 12)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFooter() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          BASecondaryButton(
+            text: '关闭',
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
       ),
     );
   }
