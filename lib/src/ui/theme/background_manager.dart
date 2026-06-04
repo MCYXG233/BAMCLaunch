@@ -12,10 +12,10 @@ import '../../config/background_config.dart';
 /// - 纯色背景（solid）
 /// - 渐变背景（gradient）
 /// - 图片背景（image）
-/// - 视频背景（video）
+/// - 视频背景（video）- Windows 平台默认仅支持 MP4 格式，如需支持 WebM 请使用 media_kit 替代
 /// - 模糊背景（blur）
 ///
-/// 使用单例模式确保全局只有一个实例，并通过 [ChangeNotifier]
+/// 使用单例模式确保全局只有一个实例，并通过 ChangeNotifier
 /// 实现响应式更新，当背景配置发生变化时通知监听者。
 ///
 /// 使用示例：
@@ -23,6 +23,11 @@ import '../../config/background_config.dart';
 /// final backgroundManager = BackgroundManager.instance;
 /// await backgroundManager.initialize();
 /// ```
+///
+/// WebM 格式支持：
+/// video_player 插件在 Windows 平台对 WebM 格式的支持有限，
+/// 如需完整支持 WebM 格式，建议使用 media_kit 替代 video_player。
+/// 详见：https://pub.dev/packages/media_kit
 class BackgroundManager extends ChangeNotifier {
   /// 单例实例
   static BackgroundManager? _instance;
@@ -33,13 +38,13 @@ class BackgroundManager extends ChangeNotifier {
   /// 当前背景配置
   BackgroundConfig _currentConfig = BackgroundConfig.classic;
 
-  /// 视频播放控制器，仅在视频背景类型时使用
+  /// 视频播放器控制器
   VideoPlayerController? _videoController;
 
   /// 视频是否已初始化完成的标志
   bool _isVideoInitialized = false;
 
-  /// 私有构造函数，确保只能通过 [instance] 获取实例
+  /// 私有构造函数，确保只能通过 instance 获取实例
   BackgroundManager._internal();
 
   /// 获取单例实例
@@ -75,7 +80,7 @@ class BackgroundManager extends ChangeNotifier {
   /// 从持久化存储加载背景配置
   ///
   /// 从配置管理器中读取背景配置的 JSON 字符串，
-  /// 解析为 [BackgroundConfig] 对象并应用。
+  /// 解析为 BackgroundConfig 对象并应用。
   ///
   /// 如果配置不存在或解析失败，将使用默认的经典背景配置。
   /// 加载完成后会通知所有监听者更新。
@@ -100,11 +105,11 @@ class BackgroundManager extends ChangeNotifier {
 
   /// 保存背景配置到持久化存储
   ///
-  /// 将传入的 [config] 配置对象序列化为 JSON 并保存到配置存储中。
+  /// 将传入的 config 配置对象序列化为 JSON 并保存到配置存储中。
   /// 同时更新内存中的当前配置，并根据需要初始化视频播放器。
   ///
   /// 参数：
-  /// - [config] 要保存的背景配置对象
+  /// - config 要保存的背景配置对象
   ///
   /// 注意：
   /// - 如果背景类型发生变化，或之前是视频背景，会重新初始化视频播放器
@@ -135,7 +140,7 @@ class BackgroundManager extends ChangeNotifier {
   /// 根据需要初始化视频播放器
   ///
   /// 该方法会在以下情况下初始化视频播放器：
-  /// 1. 当前背景类型为视频（[BackgroundType.video]）
+  /// 1. 当前背景类型为视频（BackgroundType.video）
   /// 2. 视频路径已配置且有效
   ///
   /// 初始化过程包括：
@@ -144,7 +149,8 @@ class BackgroundManager extends ChangeNotifier {
   /// - 设置循环播放和静音
   /// - 开始播放视频
   ///
-  /// 注意：Windows 平台仅支持 MP4 格式，webm 等格式可能无法播放
+  /// 注意：Windows 平台 video_player 默认仅支持 MP4 格式，
+  /// WebM 等格式可能无法播放。如需支持 WebM，请考虑使用 media_kit 替代。
   ///
   /// 如果视频加载失败，会将视频控制器置空并标记为未初始化。
   Future<void> _initializeVideoIfNeeded() async {
@@ -171,7 +177,7 @@ class BackgroundManager extends ChangeNotifier {
       } catch (e) {
         debugPrint('Failed to load video: $e');
         debugPrint('Video path: ${_currentConfig.videoPath}');
-        debugPrint('Windows 平台建议使用 MP4 格式，不支持 webm 格式');
+        debugPrint('Windows 平台 video_player 默认仅支持 MP4 格式，如需支持 WebM 请考虑使用 media_kit');
         // 加载失败时清理状态
         _videoController = null;
         _isVideoInitialized = false;
@@ -186,10 +192,10 @@ class BackgroundManager extends ChangeNotifier {
   /// 子组件显示在背景层之上。
   ///
   /// 参数：
-  /// - [child] 要显示在背景之上的子组件
+  /// - child 要显示在背景之上的子组件
   ///
   /// 返回：
-  /// - 包含背景和子组件的 [Stack] Widget
+  /// - 包含背景和子组件的 Stack Widget
   ///
   /// 示例：
   /// ```dart
@@ -214,11 +220,11 @@ class BackgroundManager extends ChangeNotifier {
   /// 根据当前背景配置的类型，构建相应的背景 Widget。
   /// 支持以下背景类型：
   ///
-  /// - [BackgroundType.solid]: 纯色背景，使用配置的颜色和透明度
-  /// - [BackgroundType.gradient]: 渐变背景，使用配置的颜色列表和起始位置
-  /// - [BackgroundType.image]: 图片背景，从文件加载图片并覆盖整个区域
-  /// - [BackgroundType.video]: 视频背景，播放视频文件作为背景
-  /// - [BackgroundType.blur]: 模糊背景，使用半透明白色覆盖
+  /// - BackgroundType.solid: 纯色背景，使用配置的颜色和透明度
+  /// - BackgroundType.gradient: 渐变背景，使用配置的颜色列表和起始位置
+  /// - BackgroundType.image: 图片背景，从文件加载图片并覆盖整个区域
+  /// - BackgroundType.video: 视频背景，播放视频文件作为背景
+  /// - BackgroundType.blur: 模糊背景，使用半透明白色覆盖
   ///
   /// 返回：
   /// - 对应类型的背景 Widget
@@ -267,23 +273,11 @@ class BackgroundManager extends ChangeNotifier {
         );
 
       case BackgroundType.video:
-        // 视频背景：如果视频已初始化，则显示视频播放器
-        // 使用 FittedBox 确保视频覆盖整个区域
+        // 视频背景：如果视频已初始化，则显示视频
         if (_isVideoInitialized && _videoController != null) {
-          return SizedBox.expand(
-            child: FittedBox(
-              fit: BoxFit.cover,
-              child: SizedBox(
-                // 使用视频的原始尺寸
-                width: _videoController!.value.size.width,
-                height: _videoController!.value.size.height,
-                child: Opacity(
-                  // 应用配置的透明度
-                  opacity: _currentConfig.opacity,
-                  child: VideoPlayer(_videoController!),
-                ),
-              ),
-            ),
+          return Opacity(
+            opacity: _currentConfig.opacity,
+            child: VideoPlayer(_videoController!),
           );
         }
         // 视频未初始化时显示黑色背景
@@ -300,7 +294,7 @@ class BackgroundManager extends ChangeNotifier {
     }
   }
 
-  /// 将整数对齐值转换为 [Alignment] 对象
+  /// 将整数对齐值转换为 Alignment 对象
   ///
   /// 用于渐变背景的起始位置配置。
   /// 对齐值与位置的对应关系：
@@ -316,10 +310,10 @@ class BackgroundManager extends ChangeNotifier {
   /// - 其他: 默认左上 (topLeft)
   ///
   /// 参数：
-  /// - [alignment] 整数对齐值（0-8）
+  /// - alignment 整数对齐值（0-8）
   ///
   /// 返回：
-  /// - 对应的 [Alignment] 对象
+  /// - 对应的 Alignment 对象
   Alignment _getAlignment(int? alignment) {
     switch (alignment) {
       case 0:
@@ -347,11 +341,11 @@ class BackgroundManager extends ChangeNotifier {
 
   /// 释放资源
   ///
-  /// 当背景管理器不再使用时，释放视频控制器等资源。
+  /// 当背景管理器不再使用时，释放视频播放器等资源。
   /// 调用此方法后，不应再使用该实例。
   @override
   void dispose() {
-    // 释放视频控制器资源
+    // 释放视频播放器资源
     _videoController?.dispose();
     super.dispose();
   }
