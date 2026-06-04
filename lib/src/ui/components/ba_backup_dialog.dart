@@ -180,8 +180,8 @@ class _BABackupDialogState extends State<BABackupDialog> {
   Widget build(BuildContext context) {
     return BADialog(
       title: '备份管理 - ${widget.instance.name}',
-      width: 600,
-      height: 520,
+      width: 800,
+      height: 560,
       onClose: () => Navigator.of(context).pop(),
       child: _isLoading
           ? const Center(child: CircularProgressIndicator())

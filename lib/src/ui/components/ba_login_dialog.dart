@@ -6,9 +6,10 @@ import '../../auth/microsoft_auth.dart';
 import '../../account/account_manager.dart';
 import '../../account/account.dart';
 import '../../core/logger.dart';
-import '../pages/authlib_login_page.dart';
 import '../theme/colors.dart';
 import '../theme/app_theme.dart';
+import 'ba_dialog.dart';
+import 'ba_authlib_login_dialog.dart';
 
 /// 登录状态枚举
 enum LoginState {
@@ -233,13 +234,12 @@ class _BALoginDialogState extends State<BALoginDialog> {
     }
   }
 
-  /// 打开外置登录页面
-  void _openAuthlibLogin() {
-    Navigator.pop(context);
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AuthlibLoginPage()),
-    );
+  /// 打开外置登录对话框
+  Future<void> _openAuthlibLogin() async {
+    final account = await BAAuthlibLoginDialog.show(context);
+    if (account != null && mounted) {
+      Navigator.pop(context, account);
+    }
   }
 
   /// 选择已有账户
@@ -265,50 +265,35 @@ class _BALoginDialogState extends State<BALoginDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 80),
-      child: Container(
-        width: 800,
-        height: 480,
-        decoration: BoxDecoration(
-          color: BAColors.surfaceOf(context),
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: BATheme.shadowsLargeOf(context),
-          border: Border.all(color: BAColors.borderOf(context)),
-        ),
-        child: Column(
-          children: [
-            _buildHeader(),
-            Expanded(
-              child: Row(
-                children: [
-                  // 左侧：已登录账户列表
-                  Expanded(
-                    flex: 1,
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          right: BorderSide(color: BAColors.borderOf(context)),
-                        ),
-                      ),
-                      child: _buildAccountPanel(),
-                    ),
-                  ),
-                  // 右侧：登录新账户
-                  Expanded(
-                    flex: 1,
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      child: _buildLoginPanel(),
-                    ),
-                  ),
-                ],
+    return BADialog(
+      title: '账户登录',
+      width: 1000,
+      height: 520,
+      onClose: () => Navigator.pop(context),
+      child: Row(
+        children: [
+          // 左侧：已登录账户列表
+          Expanded(
+            flex: 1,
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                border: Border(
+                  right: BorderSide(color: BAColors.borderOf(context)),
+                ),
               ),
+              child: _buildAccountPanel(),
             ),
-          ],
-        ),
+          ),
+          // 右侧：登录新账户
+          Expanded(
+            flex: 1,
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              child: _buildLoginPanel(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -464,57 +449,6 @@ class _BALoginDialogState extends State<BALoginDialog> {
     } catch (e) {
       Logger.instance.error('登出/删除失败', e);
     }
-  }
-
-  /// 构建头部
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: BAColors.surfaceVariantOf(context),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              gradient: BAColors.primaryGradient,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.person, color: BAColors.textOnPrimary, size: 28),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '选择账户',
-                  style: TextStyle(
-                    color: BAColors.textPrimaryOf(context),
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  '登录或选择一个已有账户',
-                  style: TextStyle(
-                    color: BAColors.textSecondaryOf(context),
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: Icon(Icons.close, color: BAColors.textSecondaryOf(context)),
-          ),
-        ],
-      ),
-    );
   }
 
   /// 构建已有账户列表

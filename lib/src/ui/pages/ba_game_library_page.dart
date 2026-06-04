@@ -18,6 +18,7 @@ import '../components/ba_buttons.dart';
 import '../components/ba_create_instance_dialog.dart';
 import 'ba_mod_manager_page.dart';
 import '../components/ba_backup_dialog.dart';
+import '../components/ba_mod_manager_dialog.dart';
 import '../../game/game_statistics.dart';
 
 /// 蔚蓝档案风格游戏库页面
@@ -311,10 +312,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
   }
 
   void _openModManager(GameInstance instance) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => BAModManagerPage(instanceId: instance.id),
-      ),
+    BAModManagerDialog.show(
+      context: context,
+      instanceId: instance.id,
+      instanceName: instance.name,
     );
   }
 

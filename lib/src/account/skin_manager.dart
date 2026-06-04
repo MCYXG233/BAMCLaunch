@@ -6,6 +6,7 @@ import '../core/logger.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
 import 'account.dart';
+import 'account_manager.dart';
 
 /// 皮肤类型枚举
 ///
@@ -140,6 +141,7 @@ class SkinData {
 /// - 支持内存缓存和文件缓存，减少网络请求
 /// - 自动管理缓存有效期（默认 30 天）
 /// - 提供缓存清理功能
+/// - 支持自定义皮肤设置和移除
 ///
 /// 使用示例：
 /// ```dart
@@ -180,6 +182,11 @@ class SkinManager {
   /// 初始化时会在应用支持目录下创建 'skins' 子目录。
   Directory? _cacheDir;
 
+  /// 自定义皮肤目录
+  ///
+  /// 存储自定义皮肤文件的目录路径。
+  Directory? _customSkinDir;
+
   /// 私有构造函数
   ///
   /// 实现单例模式，外部应通过 [instance] 或工厂构造函数获取实例。
@@ -207,7 +214,8 @@ class SkinManager {
   /// 初始化过程：
   /// 1. 获取应用支持目录
   /// 2. 创建 'skins' 子目录（如果不存在）
-  /// 3. 标记初始化完成
+  /// 3. 创建 'custom_skins' 子目录（如果不存在）
+  /// 4. 标记初始化完成
   ///
   /// 即使初始化失败也会标记为已完成，避免重复尝试导致性能问题。
   Future<void> initialize() async {
@@ -225,7 +233,13 @@ class SkinManager {
         await _cacheDir!.create(recursive: true);
       }
 
-      _logger.info('Skin manager initialized, cache dir: ${_cacheDir!.path}');
+      // 创建自定义皮肤目录
+      _customSkinDir = Directory(path.join(supportDir, 'custom_skins'));
+      if (!await _customSkinDir!.exists()) {
+        await _customSkinDir!.create(recursive: true);
+      }
+
+      _logger.info('Skin manager initialized, cache dir: ${_cacheDir!.path}, custom dir: ${_customSkinDir!.path}');
       _initialized = true;
     } catch (e, stackTrace) {
       _logger.error('Failed to initialize skin manager', e, stackTrace);
@@ -696,6 +710,91 @@ class SkinManager {
       return totalSize;
     } catch (e) {
       return 0;
+    }
+  }
+
+  /// 设置自定义皮肤
+  ///
+  /// 为指定账户设置自定义皮肤。
+  ///
+  /// [account] 要设置皮肤的账户
+  /// [skinData] 皮肤图像的字节数据
+  Future<void> setCustomSkin(Account account, List<int> skinData) async {
+    await initialize();
+
+    try {
+      final cacheKey = _getCacheKey(account);
+      
+      // 保存自定义皮肤文件
+      final skinFileName = '${cacheKey}_custom.png';
+      final skinFile = File(path.join(_customSkinDir!.path, skinFileName));
+      await skinFile.writeAsBytes(skinData);
+
+      // 更新账户皮肤URL
+      final accountManager = AccountManager();
+      await accountManager.updateAccount(account.copyWith(skinUrl: skinFile.path));
+
+      // 清除缓存，强制重新加载
+      _skinCache.remove(cacheKey);
+      await clearCacheForAccount(account);
+
+      _logger.info('Custom skin set for account: ${account.username}');
+    } catch (e, stackTrace) {
+      _logger.error('Failed to set custom skin', e, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 移除自定义皮肤
+  ///
+  /// 移除指定账户的自定义皮肤，恢复为默认皮肤。
+  ///
+  /// [account] 要移除皮肤的账户
+  Future<void> removeCustomSkin(Account account) async {
+    await initialize();
+
+    try {
+      final cacheKey = _getCacheKey(account);
+      
+      // 删除自定义皮肤文件
+      final skinFileName = '${cacheKey}_custom.png';
+      final skinFile = File(path.join(_customSkinDir!.path, skinFileName));
+      if (await skinFile.exists()) {
+        await skinFile.delete();
+      }
+
+      // 更新账户皮肤URL
+      final accountManager = AccountManager();
+      await accountManager.updateAccount(account.copyWith(skinUrl: null));
+
+      // 清除缓存
+      _skinCache.remove(cacheKey);
+      await clearCacheForAccount(account);
+
+      _logger.info('Custom skin removed for account: ${account.username}');
+    } catch (e, stackTrace) {
+      _logger.error('Failed to remove custom skin', e, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 清除指定账户的缓存
+  ///
+  /// [account] 要清除缓存的账户
+  Future<void> clearCacheForAccount(Account account) async {
+    await initialize();
+
+    final cacheKey = _getCacheKey(account);
+    
+    // 删除缓存文件
+    try {
+      final metadataFile = File(path.join(_cacheDir!.path, '$cacheKey.json'));
+      final imageFile = File(path.join(_cacheDir!.path, '$cacheKey.png'));
+      
+      if (await metadataFile.exists()) await metadataFile.delete();
+      if (await imageFile.exists()) await imageFile.delete();
+    } catch (e) {
+      _logger.warn('Failed to delete cache files for account: ${account.username}');
     }
   }
 }

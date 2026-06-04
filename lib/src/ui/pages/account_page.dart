@@ -19,6 +19,7 @@ import '../theme/typography.dart';
 import '../theme/app_theme.dart';
 import '../components/ba_buttons.dart';
 import '../components/ba_dialog.dart';
+import '../components/ba_notification.dart';
 
 /// 账户管理页面
 /// 用于管理Minecraft账户的添加、编辑、删除和选择
@@ -1532,90 +1533,27 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final surfaceColor = isLight ? BAColors.lightSurface : BAColors.darkSurface;
-
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: Container(
-        width: 600,
-        constraints: const BoxConstraints(maxHeight: 600),
-        decoration: BoxDecoration(
-          color: surfaceColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isLight ? BAColors.lightBorder : BAColors.darkBorder),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 20,
-              offset: const Offset(0, 4),
+    return BADialog(
+      title: '皮肤管理',
+      width: 600,
+      height: 620,
+      onClose: () => Navigator.pop(context),
+      child: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildSkinPreview(),
+                  const SizedBox(height: 16),
+                  _buildModelSelector(),
+                  const SizedBox(height: 16),
+                  _buildSkinActions(),
+                  const SizedBox(height: 16),
+                  _buildCapeManagement(),
+                ],
+              ),
             ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildHeader(context),
-            Divider(height: 1, color: isLight ? BAColors.lightBorder : BAColors.darkBorder),
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _buildSkinPreview(),
-                          const SizedBox(height: 16),
-                          _buildModelSelector(),
-                          const SizedBox(height: 16),
-                          _buildSkinActions(),
-                          const SizedBox(height: 16),
-                          _buildCapeManagement(),
-                        ],
-                      ),
-                    ),
-            ),
-            Divider(height: 1, color: isLight ? BAColors.lightBorder : BAColors.darkBorder),
-            _buildFooter(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        children: [
-          Icon(Icons.image, color: BAColors.primary, size: 28),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '皮肤管理',
-                  style: BATypography.headlineSmall.copyWith(
-                    color: BAColors.textPrimaryOf(context),
-                  ),
-                ),
-                Text(
-                  '${widget.account.username} 的皮肤设置',
-                  style: BATypography.bodySmall.copyWith(
-                    color: BAColors.textSecondaryOf(context),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: Icon(Icons.close, color: BAColors.textSecondaryOf(context)),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
     );
   }
 
@@ -1948,21 +1886,6 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
               ),
             ),
             child: const Text('上传披风', style: TextStyle(fontSize: 12)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFooter() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          BASecondaryButton(
-            text: '关闭',
-            onPressed: () => Navigator.pop(context),
           ),
         ],
       ),

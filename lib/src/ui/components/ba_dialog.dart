@@ -79,7 +79,10 @@ class BADialog extends StatelessWidget {
           child: Container(
             width: width,
             height: height,
-            constraints: const BoxConstraints(maxWidth: 520, minWidth: 360),
+            constraints: BoxConstraints(
+              maxWidth: width ?? 1200,
+              minWidth: 360,
+            ),
             decoration: BoxDecoration(
               color: BAColors.glassOf(context),
               borderRadius: BorderRadius.circular(20),

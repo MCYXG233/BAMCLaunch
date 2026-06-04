@@ -475,4 +475,14 @@ class CapeManager {
       _logger.info('Cleaned ${invalidAccountIds.length} invalid cape entries');
     }
   }
+
+  /// 设置自定义披风
+  ///
+  /// 为指定账户设置自定义披风。
+  ///
+  /// [accountId] 要设置披风的账户ID
+  /// [capeData] 披风图像的字节数据
+  Future<void> setCustomCape(String accountId, Uint8List capeData) async {
+    await uploadCape(accountId, capeData, 'custom_cape_${DateTime.now().millisecondsSinceEpoch}.png');
+  }
 }

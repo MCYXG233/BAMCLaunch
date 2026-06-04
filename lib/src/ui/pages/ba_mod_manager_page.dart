@@ -306,7 +306,6 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
     return Material(
       color: Colors.transparent,
       child: Container(
-        color: BAColors.backgroundOf(context),
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [

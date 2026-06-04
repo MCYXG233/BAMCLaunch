@@ -4,6 +4,7 @@ import '../theme/typography.dart';
 import '../theme/app_theme.dart';
 import '../../core/error_codes.dart';
 import 'ba_buttons.dart';
+import 'ba_dialog.dart';
 
 /// 错误对话框
 class ErrorDialog extends StatelessWidget {
@@ -60,41 +61,62 @@ class ErrorDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: Container(
-        width: 400,
-        decoration: BoxDecoration(
-          color: BAColors.surfaceOf(context),
-          borderRadius: BATheme.borderRadius,
-          boxShadow: BATheme.shadowsOf(context),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // 标题栏
+    return BADialog(
+      title: title,
+      width: 400,
+      onClose: () {
+        Navigator.of(context).pop();
+        onClose?.call();
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 错误图标和消息
+          Row(
+            children: [
+              Icon(
+                Icons.error_outline,
+                color: BAColors.danger,
+                size: 32,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  message,
+                  style: BATypography.bodyMedium.copyWith(
+                    color: BAColors.textPrimaryOf(context),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // 解决方案
+          if (solution != null) ...[
+            const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: BAColors.danger.withOpacity(0.1),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
+                color: BAColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: BAColors.primary.withOpacity(0.3),
                 ),
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(
-                    Icons.error_outline,
-                    color: BAColors.danger,
-                    size: 32,
+                    Icons.lightbulb_outline,
+                    color: BAColors.primary,
+                    size: 20,
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      title,
-                      style: BATypography.headlineMedium.copyWith(
+                      solution!,
+                      style: BATypography.bodyMedium.copyWith(
                         color: BAColors.textPrimaryOf(context),
                       ),
                     ),
@@ -102,96 +124,28 @@ class ErrorDialog extends StatelessWidget {
                 ],
               ),
             ),
-
-            // 内容
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // 错误消息
-                  Text(
-                    message,
-                    style: BATypography.bodyMedium.copyWith(
-                      color: BAColors.textPrimaryOf(context),
-                    ),
-                  ),
-
-                  // 解决方案
-                  if (solution != null) ...[
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: BAColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: BAColors.primary.withOpacity(0.3),
-                        ),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.lightbulb_outline,
-                            color: BAColors.primary,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              solution!,
-                              style: BATypography.bodyMedium.copyWith(
-                                color: BAColors.textPrimaryOf(context),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-
-            // 按钮栏
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(
-                    color: BAColors.borderOf(context),
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (showRetryButton && onRetry != null) ...[
-                    BAPrimaryButton(
-                      text: '重试',
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        onRetry!();
-                      },
-                      leadingIcon: const Icon(Icons.refresh, color: Colors.white, size: 18),
-                    ),
-                    const SizedBox(width: 12),
-                  ],
-                  BASecondaryButton(
-                    text: '关闭',
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      onClose?.call();
-                    },
-                  ),
-                ],
-              ),
-            ),
           ],
-        ),
+        ],
       ),
+      actions: [
+        if (showRetryButton && onRetry != null)
+          BAPrimaryButton(
+            text: '重试',
+            onPressed: () {
+              Navigator.of(context).pop();
+              onRetry!();
+            },
+            leadingIcon: const Icon(Icons.refresh, color: Colors.white, size: 18),
+          ),
+        if (showRetryButton && onRetry != null) const SizedBox(width: 12),
+        BASecondaryButton(
+          text: '关闭',
+          onPressed: () {
+            Navigator.of(context).pop();
+            onClose?.call();
+          },
+        ),
+      ],
     );
   }
 
