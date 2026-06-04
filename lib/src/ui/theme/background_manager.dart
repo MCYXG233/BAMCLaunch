@@ -144,6 +144,8 @@ class BackgroundManager extends ChangeNotifier {
   /// - 设置循环播放和静音
   /// - 开始播放视频
   ///
+  /// 注意：Windows 平台仅支持 MP4 格式，webm 等格式可能无法播放
+  ///
   /// 如果视频加载失败，会将视频控制器置空并标记为未初始化。
   Future<void> _initializeVideoIfNeeded() async {
     // 先释放之前的视频控制器
@@ -168,6 +170,8 @@ class BackgroundManager extends ChangeNotifier {
         _videoController!.play();
       } catch (e) {
         debugPrint('Failed to load video: $e');
+        debugPrint('Video path: ${_currentConfig.videoPath}');
+        debugPrint('Windows 平台建议使用 MP4 格式，不支持 webm 格式');
         // 加载失败时清理状态
         _videoController = null;
         _isVideoInitialized = false;

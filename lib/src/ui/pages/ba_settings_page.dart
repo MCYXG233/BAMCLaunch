@@ -1057,7 +1057,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               onPickVideo: () async {
                 final result = await FilePicker.platform.pickFiles(
                   type: FileType.custom,
-                  allowedExtensions: ['webm', 'mp4', 'avi', 'mov', 'mkv'],
+                  allowedExtensions: ['mp4', 'avi', 'mov', 'mkv'],
                   allowMultiple: false,
                 );
                 if (result != null && result.files.isNotEmpty) {
