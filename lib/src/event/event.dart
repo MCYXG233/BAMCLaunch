@@ -735,3 +735,10 @@ class LoaderInstallFailedEvent extends LoaderEvent {
     required this.error,
   });
 }
+
+/// 导航到主页事件
+///
+/// 用于从子页面返回主页
+class NavigateHomeEvent extends Event {
+  NavigateHomeEvent();
+}

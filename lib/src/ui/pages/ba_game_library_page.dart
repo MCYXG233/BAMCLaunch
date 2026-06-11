@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
-import '../theme/colors.dart';
 import '../../instance/instance_manager.dart';
 import '../../instance/models.dart';
 import '../../event/event_bus.dart';
@@ -16,12 +15,11 @@ import '../components/ba_notification.dart';
 import '../components/ba_context_menu.dart';
 import '../components/ba_buttons.dart';
 import '../components/ba_create_instance_dialog.dart';
-import 'ba_mod_manager_page.dart';
 import '../components/ba_backup_dialog.dart';
 import '../components/ba_mod_manager_dialog.dart';
 import '../../game/game_statistics.dart';
 
-/// 蔚蓝档案风格游戏库页面
+/// 蔚蓝档案风格游戏库页面 - 模仿蔚蓝档案的"学生"列表风格
 class BAGameLibraryPage extends StatefulWidget {
   const BAGameLibraryPage({super.key});
 
@@ -58,10 +56,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
     if (!manager.isInitialized) {
       await manager.initialize();
     }
-    
+
     // 初始化游戏统计
     await _statsManager.initialize();
-    
+
     _loadInstances();
     _loadStatistics();
   }
@@ -235,19 +233,19 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
         title: '复制实例',
         child: TextField(
           controller: nameController,
-          style: TextStyle(color: BAColors.textPrimaryOf(context)),
+          style: const TextStyle(color: Color(0xFFFFFFFF)),
           decoration: InputDecoration(
             hintText: '请输入新实例名称',
-            hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
+            hintStyle: const TextStyle(color: Color(0xFFA0B0C8)),
             filled: true,
-            fillColor: BAColors.surfaceOf(context),
+            fillColor: const Color(0xFF1E2747),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: BAColors.borderOf(context)),
+              borderSide: const BorderSide(color: Color(0xFF3A4D7A)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: BAColors.primaryOf(context)),
+              borderSide: const BorderSide(color: Color(0xFF8EAAFF)),
             ),
           ),
         ),
@@ -357,28 +355,57 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
     }
   }
 
+  // ===== 视觉/UI 方法（以下可自由修改） =====
+
   @override
   Widget build(BuildContext context) {
     NotificationManager().init(context);
 
-    return Column(
-      children: [
-        // 顶部状态栏
-        _buildHeader(context),
-        const SizedBox(height: 20),
-
-        // 搜索和筛选区域
-        _buildSearchAndFilter(context),
-        const SizedBox(height: 20),
-
-        // 实例列表
-        Expanded(
-          child: _buildInstanceGrid(context),
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFF141C33),
+            Color(0xFF0A0F1E),
+          ],
         ),
+      ),
+      child: Stack(
+        children: [
+          Column(
+            children: [
+              // 顶部自定义标题栏
+              _buildHeader(context),
+              const SizedBox(height: 16),
 
-        // 底部操作区
-        _buildBottomActions(context),
-      ],
+              // 统计卡片区
+              _buildStatsRow(context),
+              const SizedBox(height: 20),
+
+              // 搜索和筛选区域
+              _buildSearchAndFilter(context),
+              const SizedBox(height: 20),
+
+              // 实例列表
+              Expanded(
+                child: _buildInstanceGrid(context),
+              ),
+
+              // 底部操作区
+              _buildBottomActions(context),
+            ],
+          ),
+
+          // 浮动按钮
+          Positioned(
+            right: 32,
+            bottom: 32,
+            child: _buildFloatingButton(context),
+          ),
+        ],
+      ),
     );
   }
 
@@ -392,144 +419,254 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
     }
   }
 
-  /// 顶部标题栏
+  /// 顶部自定义标题栏 - 蔚蓝档案风格
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.fromLTRB(20, 16, 24, 0),
+      child: Row(
         children: [
+          // 左侧返回按钮
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E2747).withOpacity(0.6),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: const Color(0xFF3A4D7A).withOpacity(0.5),
+              ),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  EventBus.instance.publish(NavigateHomeEvent());
+                },
+                borderRadius: BorderRadius.circular(14),
+                child: const Icon(
+                  Icons.arrow_back_ios_rounded,
+                  color: Color(0xFFFFFFFF),
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+
+          // 中间：图标 + 标题 + 副标题
           Row(
             children: [
-              // 标题
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  gradient: BAColors.primaryGradient,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF8EAAFF), Color(0xFF6B8EFF)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: BAColors.primary.withOpacity(0.3),
+                      color: const Color(0xFF6B8EFF).withOpacity(0.4),
                       blurRadius: 12,
-                      offset: Offset(0, 4),
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.gamepad,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      '游戏库',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
+                child: const Icon(
+                  Icons.gamepad,
+                  color: Color(0xFFFFFFFF),
+                  size: 22,
                 ),
               ),
-              const Spacer(),
-
-              // 统计信息
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: BAColors.surfaceOf(context).withOpacity(0.3),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: BAColors.borderOf(context).withOpacity(0.2),
-              ),
-            ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.folder,
-                      color: BAColors.primary,
-                      size: 18,
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '游戏库',
+                    style: TextStyle(
+                      color: Color(0xFFFFFFFF),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${_instances.length}',
-                      style: TextStyle(
-                        color: BAColors.textPrimaryOf(context),
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '管理你的 Minecraft 实例',
+                    style: TextStyle(
+                      color: const Color(0xFFA0B0C8).withOpacity(0.9),
+                      fontSize: 12,
                     ),
-                    Text(
-                      ' 个实例',
-                      style: TextStyle(
-                        color: BAColors.textSecondaryOf(context),
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          // 游戏统计信息
-          Row(
-            children: [
-              _buildStatCard(
-                context,
-                icon: Icons.access_time,
-                label: '总游戏时长',
-                value: _formatDuration(_totalPlayTime),
+          const Spacer(),
+
+          // 右侧：实例总数统计
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E2747).withOpacity(0.5),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: const Color(0xFF3A4D7A).withOpacity(0.5),
               ),
-              const SizedBox(width: 12),
-              _buildStatCard(
-                context,
-                icon: Icons.casino,
-                label: '总启动次数',
-                value: '$_totalLaunchCount',
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF8EAAFF), Color(0xFF6B8EFF)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.folder_open_rounded,
+                    color: Color(0xFFFFFFFF),
+                    size: 16,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  '${_instances.length}',
+                  style: const TextStyle(
+                    color: Color(0xFFFFFFFF),
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '个实例',
+                  style: TextStyle(
+                    color: const Color(0xFFA0B0C8).withOpacity(0.9),
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+
+          // 操作按钮：刷新
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E2747).withOpacity(0.6),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: const Color(0xFF3A4D7A).withOpacity(0.5),
               ),
-              const SizedBox(width: 12),
-              _buildStatCard(
-                context,
-                icon: Icons.calendar_today,
-                label: '今日游戏',
-                value: _formatDuration(_todayPlayTime),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  _loadInstances();
+                  _loadStatistics();
+                },
+                borderRadius: BorderRadius.circular(14),
+                child: const Icon(
+                  Icons.refresh_rounded,
+                  color: Color(0xFF8EAAFF),
+                  size: 20,
+                ),
               ),
-            ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatCard(
-    BuildContext context, {
+  /// 游戏统计卡片行
+  Widget _buildStatsRow(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(
+        children: [
+          _buildStatCard(
+            icon: Icons.access_time,
+            label: '总游戏时长',
+            value: _formatDuration(_totalPlayTime),
+            accent: const Color(0xFF8EAAFF),
+          ),
+          const SizedBox(width: 12),
+          _buildStatCard(
+            icon: Icons.casino,
+            label: '总启动次数',
+            value: '$_totalLaunchCount 次',
+            accent: const Color(0xFF6B8EFF),
+          ),
+          const SizedBox(width: 12),
+          _buildStatCard(
+            icon: Icons.calendar_today,
+            label: '今日游戏',
+            value: _formatDuration(_todayPlayTime),
+            accent: const Color(0xFF3A4D7A),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard({
     required IconData icon,
     required String label,
     required String value,
+    required Color accent,
   }) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: BAColors.surfaceOf(context).withOpacity(0.3),
-          borderRadius: BorderRadius.circular(12),
+          color: const Color(0xFF1E2747).withOpacity(0.5),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: BAColors.borderOf(context).withOpacity(0.2),
+            color: const Color(0xFF3A4D7A).withOpacity(0.5),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: accent.withOpacity(0.08),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              color: BAColors.primary,
-              size: 22,
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [accent.withOpacity(0.3), accent.withOpacity(0.15)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: accent.withOpacity(0.4),
+                ),
+              ),
+              child: Icon(
+                icon,
+                color: const Color(0xFFFFFFFF),
+                size: 18,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -539,16 +676,16 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                   Text(
                     label,
                     style: TextStyle(
-                      color: BAColors.textSecondaryOf(context),
+                      color: const Color(0xFFA0B0C8).withOpacity(0.9),
                       fontSize: 12,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 3),
                   Text(
                     value,
-                    style: TextStyle(
-                      color: BAColors.textPrimaryOf(context),
-                      fontSize: 16,
+                    style: const TextStyle(
+                      color: Color(0xFFFFFFFF),
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -561,23 +698,30 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
     );
   }
 
-  /// 搜索和筛选区域
+  /// 搜索和筛选区域 - 毛玻璃风格
   Widget _buildSearchAndFilter(BuildContext context) {
-    return Container(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
         children: [
-          // 搜索框
+          // 搜索框 - 毛玻璃
           Expanded(
             flex: 2,
             child: Container(
               height: 48,
               decoration: BoxDecoration(
-                color: BAColors.glassOf(context),
+                color: const Color(0xFF1E2747).withOpacity(0.6),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: BAColors.borderOf(context).withOpacity(0.6),
+                  color: const Color(0xFF3A4D7A).withOpacity(0.5),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF0A0F1E).withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: TextField(
                 controller: _searchController,
@@ -586,25 +730,25 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                     _searchQuery = value;
                   });
                 },
-                style: TextStyle(
-                  color: BAColors.textPrimaryOf(context),
+                style: const TextStyle(
+                  color: Color(0xFFFFFFFF),
                   fontSize: 14,
                 ),
                 decoration: InputDecoration(
                   hintText: '搜索实例...',
                   hintStyle: TextStyle(
-                    color: BAColors.textDisabledOf(context),
+                    color: const Color(0xFFA0B0C8).withOpacity(0.7),
                   ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: BAColors.textSecondaryOf(context),
+                  prefixIcon: const Icon(
+                    Icons.search_rounded,
+                    color: Color(0xFFA0B0C8),
                     size: 20,
                   ),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
-                          icon: Icon(
-                            Icons.clear,
-                            color: BAColors.textSecondaryOf(context),
+                          icon: const Icon(
+                            Icons.clear_rounded,
+                            color: Color(0xFFA0B0C8),
                             size: 18,
                           ),
                           onPressed: () {
@@ -624,66 +768,69 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
           ),
           const SizedBox(width: 16),
 
-          // 筛选按钮
+          // 筛选按钮 - 毛玻璃
           Expanded(
             flex: 3,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: List.generate(_filters.length, (index) {
-                  final isSelected = _selectedFilter == index;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          _selectedFilter = index;
-                        });
-                      },
-                      borderRadius: BorderRadius.circular(14),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: isSelected ? BAColors.primaryGradient : null,
+            child: Row(
+              children: List.generate(_filters.length, (index) {
+                final isSelected = _selectedFilter == index;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedFilter = index;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(14),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: isSelected
+                            ? const LinearGradient(
+                                colors: [Color(0xFF8EAAFF), Color(0xFF6B8EFF)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              )
+                            : null,
+                        color: isSelected
+                            ? null
+                            : const Color(0xFF1E2747).withOpacity(0.6),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
                           color: isSelected
-                              ? null
-                              : BAColors.surfaceOf(context).withOpacity(0.8),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: isSelected
-                                ? Colors.transparent
-                                : BAColors.borderOf(context).withOpacity(0.6),
-                          ),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: BAColors.primary.withOpacity(0.3),
-                                    blurRadius: 8,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ]
-                              : null,
+                              ? Colors.transparent
+                              : const Color(0xFF3A4D7A).withOpacity(0.5),
                         ),
-                        child: Text(
-                          _filters[index],
-                          style: TextStyle(
-                            color: isSelected
-                                ? Colors.white
-                                : BAColors.textSecondaryOf(context),
-                            fontSize: 13,
-                            fontWeight:
-                                isSelected ? FontWeight.w600 : FontWeight.normal,
-                          ),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: const Color(0xFF6B8EFF).withOpacity(0.4),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Text(
+                        _filters[index],
+                        style: TextStyle(
+                          color: isSelected
+                              ? const Color(0xFFFFFFFF)
+                              : const Color(0xFFA0B0C8),
+                          fontSize: 13,
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w500,
                         ),
                       ),
                     ),
-                  );
-                }),
-              ),
+                  ),
+                );
+              }),
             ),
           ),
         ],
@@ -700,17 +847,22 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // 圆形卡片包裹图标
             Container(
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                gradient: BAColors.primaryGradient,
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF8EAAFF), Color(0xFF6B8EFF)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: BAColors.primary.withOpacity(0.3),
-                    blurRadius: 24,
-                    offset: Offset(0, 8),
+                    color: const Color(0xFF6B8EFF).withOpacity(0.4),
+                    blurRadius: 28,
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
@@ -718,29 +870,29 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                 _searchQuery.isNotEmpty || _selectedFilter != 0
                     ? Icons.search_off_rounded
                     : Icons.rocket_launch_rounded,
-                size: 56,
-                color: Colors.white,
+                size: 48,
+                color: const Color(0xFFFFFFFF),
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 28),
             Text(
               _searchQuery.isNotEmpty || _selectedFilter != 0
                   ? '没有找到匹配的实例'
                   : '还没有游戏实例',
-              style: TextStyle(
-                color: BAColors.textPrimaryOf(context),
+              style: const TextStyle(
+                color: Color(0xFFFFFFFF),
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Text(
               _searchQuery.isNotEmpty || _selectedFilter != 0
                   ? '尝试修改搜索条件或切换筛选项'
-                  : '还没有游戏实例，点击下方按钮开始创建',
+                  : '点击右下角按钮创建第一个实例',
               style: TextStyle(
-                color: BAColors.textSecondaryOf(context),
-                fontSize: 15,
+                color: const Color(0xFFA0B0C8).withOpacity(0.9),
+                fontSize: 14,
               ),
             ),
           ],
@@ -748,7 +900,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
       );
     }
 
-    return Container(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -818,21 +970,21 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
-            color: BAColors.glassOf(context),
+            color: const Color(0xFF1E2747).withOpacity(0.7),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isRunning
-                  ? BAColors.success.withOpacity(0.6)
-                  : BAColors.borderOf(context).withOpacity(0.5),
-              width: isRunning ? 2 : 1,
+                  ? const Color(0xFF6BFFA7).withOpacity(0.6)
+                  : const Color(0xFF3A4D7A).withOpacity(0.5),
+              width: isRunning ? 1.5 : 1,
             ),
             boxShadow: [
               BoxShadow(
                 color: isRunning
-                    ? BAColors.success.withOpacity(0.2)
-                    : BAColors.shadowOf(context),
-                blurRadius: 12,
-                offset: Offset(0, 4),
+                    ? const Color(0xFF6BFFA7).withOpacity(0.15)
+                    : const Color(0xFF0A0F1E).withOpacity(0.4),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
@@ -853,45 +1005,60 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                       children: [
                         // 状态指示器
                         Container(
-                          width: 12,
-                          height: 12,
+                          width: 10,
+                          height: 10,
                           decoration: BoxDecoration(
                             color: isRunning
-                                ? BAColors.success
+                                ? const Color(0xFF6BFFA7)
                                 : (isLaunching
-                                    ? BAColors.warning
-                                    : BAColors.primary),
+                                    ? const Color(0xFFFFD36B)
+                                    : const Color(0xFF8EAAFF)),
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
                                 color: (isRunning
-                                        ? BAColors.success
-                                        : BAColors.primary)
+                                        ? const Color(0xFF6BFFA7)
+                                        : const Color(0xFF8EAAFF))
                                     .withOpacity(0.5),
-                                blurRadius: 8,
+                                blurRadius: 6,
                               ),
                             ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          isRunning
+                              ? '运行中'
+                              : (isLaunching ? '启动中' : '就绪'),
+                          style: TextStyle(
+                            color: isRunning
+                                ? const Color(0xFF6BFFA7)
+                                : (isLaunching
+                                    ? const Color(0xFFFFD36B)
+                                    : const Color(0xFFA0B0C8)),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         const Spacer(),
                         // 操作按钮
                         if (isLaunching)
-                          SizedBox(
-                            width: 20,
-                            height: 20,
+                          const SizedBox(
+                            width: 18,
+                            height: 18,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                BAColors.warning,
+                                Color(0xFFFFD36B),
                               ),
                             ),
                           )
                         else
                           Icon(
-                            isRunning ? Icons.stop : Icons.play_arrow,
+                            isRunning ? Icons.stop_circle_outlined : Icons.play_circle_fill_rounded,
                             color: isRunning
-                                ? BAColors.success
-                                : BAColors.primary,
+                                ? const Color(0xFF6BFFA7)
+                                : const Color(0xFF8EAAFF),
                             size: 20,
                           ),
                       ],
@@ -903,41 +1070,51 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        gradient: isRunning
-                            ? BAColors.successGradient
-                            : BAColors.primaryGradient,
+                        gradient: LinearGradient(
+                          colors: isRunning
+                              ? [
+                                  const Color(0xFF6BFFA7),
+                                  const Color(0xFF3FB379)
+                                ]
+                              : [
+                                  const Color(0xFF8EAAFF),
+                                  const Color(0xFF6B8EFF)
+                                ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                         borderRadius: BorderRadius.circular(14),
                         boxShadow: [
                           BoxShadow(
                             color: (isRunning
-                                    ? BAColors.success
-                                    : BAColors.primary)
-                                .withOpacity(0.3),
-                            blurRadius: 12,
-                            offset: Offset(0, 4),
+                                    ? const Color(0xFF6BFFA7)
+                                    : const Color(0xFF6B8EFF))
+                                .withOpacity(0.35),
+                            blurRadius: 14,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
-                      child: Icon(
-                        Icons.grass,
-                        color: Colors.white,
-                        size: 32,
+                      child: const Icon(
+                        Icons.sports_esports_rounded,
+                        color: Color(0xFFFFFFFF),
+                        size: 30,
                       ),
                     ),
-                    const Spacer(),
+                    const SizedBox(height: 12),
 
                     // 实例名称
                     Text(
                       instance.name,
-                      style: TextStyle(
-                        color: BAColors.textPrimaryOf(context),
+                      style: const TextStyle(
+                        color: Color(0xFFFFFFFF),
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
 
                     // 版本信息
                     Container(
@@ -946,45 +1123,47 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: BAColors.primary.withOpacity(0.15),
+                        color: const Color(0xFF6B8EFF).withOpacity(0.18),
                         borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: const Color(0xFF6B8EFF).withOpacity(0.3),
+                        ),
                       ),
                       child: Text(
                         instance.version,
-                        style: TextStyle(
-                          color: BAColors.primary,
+                        style: const TextStyle(
+                          color: Color(0xFF8EAAFF),
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
 
                     // 加载器信息
                     if (instance.loader != null)
                       Text(
                         instance.loader!,
                         style: TextStyle(
-                          color: BAColors.textSecondaryOf(context),
+                          color: const Color(0xFFA0B0C8).withOpacity(0.9),
                           fontSize: 11,
                         ),
                       ),
                     if (instanceStats != null) ...[
                       const SizedBox(height: 6),
-                      // 实例统计信息
                       Row(
                         children: [
                           Icon(
                             Icons.access_time,
                             size: 12,
-                            color: BAColors.textSecondaryOf(context),
+                            color: const Color(0xFFA0B0C8).withOpacity(0.8),
                           ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               '${_formatDuration(Duration(seconds: instanceStats.totalPlayTimeSeconds))} / ${instanceStats.launchCount}次',
                               style: TextStyle(
-                                color: BAColors.textSecondaryOf(context),
+                                color: const Color(0xFFA0B0C8).withOpacity(0.8),
                                 fontSize: 10,
                               ),
                               maxLines: 1,
@@ -1004,96 +1183,93 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
     );
   }
 
-  /// 底部操作区
-  Widget _buildBottomActions(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        border: Border(
-          top: BorderSide(
-            color: BAColors.borderOf(context).withOpacity(0.1),
+  /// 蔚蓝档案风格浮动按钮
+  Widget _buildFloatingButton(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (context) => const BACreateInstanceDialog(),
+          );
+        },
+        child: Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF8EAAFF), Color(0xFF6B8EFF)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF6B8EFF).withOpacity(0.5),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: const Color(0xFF8EAAFF).withOpacity(0.2),
+                blurRadius: 48,
+                spreadRadius: -8,
+                offset: const Offset(0, 16),
+              ),
+            ],
+            border: Border.all(
+              color: const Color(0xFFFFFFFF).withOpacity(0.2),
+              width: 1.5,
+            ),
+          ),
+          child: const Icon(
+            Icons.add_rounded,
+            color: Color(0xFFFFFFFF),
+            size: 32,
           ),
         ),
       ),
+    );
+  }
+
+  /// 底部操作区
+  Widget _buildBottomActions(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          // 创建实例按钮
-          InkWell(
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (context) => const BACreateInstanceDialog(),
-              );
-            },
-            borderRadius: BorderRadius.circular(14),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 32,
-                vertical: 14,
-              ),
-              decoration: BoxDecoration(
-                color: BAColors.surfaceOf(context).withOpacity(0.3),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: BAColors.borderOf(context).withOpacity(0.2),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.add,
-                    color: BAColors.primary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '新建实例',
-                    style: TextStyle(
-                      color: BAColors.primary,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-
           // 导入实例按钮
           InkWell(
             onTap: _importInstance,
             borderRadius: BorderRadius.circular(14),
             child: Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 14,
+                horizontal: 20,
+                vertical: 12,
               ),
               decoration: BoxDecoration(
-                color: BAColors.surfaceOf(context).withOpacity(0.3),
+                color: const Color(0xFF1E2747).withOpacity(0.6),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: BAColors.borderOf(context).withOpacity(0.2),
+                  color: const Color(0xFF3A4D7A).withOpacity(0.5),
                 ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.file_upload,
-                    color: BAColors.primary,
-                    size: 20,
+                    Icons.file_upload_rounded,
+                    color: const Color(0xFF8EAAFF).withOpacity(0.9),
+                    size: 18,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '导入实例',
                     style: TextStyle(
-                      color: BAColors.primary,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFFFFFFFF).withOpacity(0.95),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
