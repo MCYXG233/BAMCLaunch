@@ -157,12 +157,12 @@ class _BAMainPageState extends State<BAMainPage> {
           _buildUserInfoCard(),
           const SizedBox(width: 16),
 
-          // 研修/任务入口 (小按钮)
+          // 资源中心/任务入口 (小按钮)
           _buildQuickActionButton(
-            icon: Icons.calendar_today,
-            label: '研修中',
-            subLabel: 'あと27日',
-            onTap: () => setState(() => _currentPage = 3),
+            icon: Icons.download,
+            label: '资源中心',
+            subLabel: '更新中',
+            onTap: () => setState(() => _currentPage = 2),
           ),
           const SizedBox(width: 8),
           _buildQuickActionButton(
@@ -549,7 +549,7 @@ class _BAMainPageState extends State<BAMainPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
                 Text(
-                  '夏休みイベント・ビッグアップデート',
+                  'Minecraft 更新通知',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 12,
@@ -560,7 +560,7 @@ class _BAMainPageState extends State<BAMainPage> {
                 ),
                 SizedBox(height: 2),
                 Text(
-                  '限定キャラクター登場中！',
+                  '新版本 1.21.1 已发布！',
                   style: TextStyle(
                     color: Color(0xFFB8C5E0),
                     fontSize: 10,
@@ -595,7 +595,7 @@ class _BAMainPageState extends State<BAMainPage> {
               ),
             ),
             child: Text(
-              'お帰りなさい、先生！',
+              '欢迎回来！',
               style: TextStyle(
                 color: Colors.white.withOpacity(0.95),
                 fontSize: 14,
@@ -669,7 +669,7 @@ class _BAMainPageState extends State<BAMainPage> {
                     ),
                     SizedBox(height: 2),
                     Text(
-                      'Blue Archive Theme',
+                      'Minecraft Launcher',
                       style: TextStyle(
                         color: Color(0xFFB8C5E0),
                         fontSize: 11,
@@ -704,7 +704,7 @@ class _BAMainPageState extends State<BAMainPage> {
               ),
               height: 44,
               child: const Text(
-                '演習開始！',
+                '启动游戏',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -757,28 +757,23 @@ class _BAMainPageState extends State<BAMainPage> {
   // ==================== 左侧按钮 ====================
 
   Widget _buildLeftSideButtons() {
+    // 左侧按钮 - 只保留与MC启动器相关的功能
     final buttons = [
       _SideButtonData(
-        icon: Icons.campaign_outlined,
-        label: 'お知らせ',
-        onTap: () {},
-      ),
-      _SideButtonData(
-        icon: Icons.mail_outline,
-        label: 'モモトーク',
-        badge: '6',
-        onTap: () {},
-      ),
-      _SideButtonData(
         icon: Icons.assignment_outlined,
-        label: 'ミッション',
+        label: '任务',
         subLabel: '2/8',
         onTap: () => setState(() => _currentPage = 1),
       ),
       _SideButtonData(
-        icon: Icons.shopping_bag_outlined,
-        label: 'ストア',
+        icon: Icons.download,
+        label: '下载',
         onTap: () => setState(() => _currentPage = 2),
+      ),
+      _SideButtonData(
+        icon: Icons.settings,
+        label: '设置',
+        onTap: () => setState(() => _currentPage = 3),
       ),
     ];
 
@@ -928,7 +923,7 @@ class _BAMainPageState extends State<BAMainPage> {
               Icon(Icons.auto_awesome, color: Color(0xFFFFB4C2), size: 16),
               SizedBox(width: 6),
               Text(
-                'ガイドミッション',
+                '新手引导',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 13,
@@ -949,11 +944,10 @@ class _BAMainPageState extends State<BAMainPage> {
             children: const [
               Expanded(
                 child: Text(
-                  '進捗: 2/4',
-                  style: TextStyle(
-                    color: Color(0xFFB8C5E0),
-                    fontSize: 11,
-                  ),
+                '进度: 2/4',
+                style: TextStyle(
+                  color: Color(0xFFB8C5E0),
+                  fontSize: 11,
                 ),
               ),
               Icon(
@@ -1057,7 +1051,7 @@ class _BAMainPageState extends State<BAMainPage> {
               Icon(Icons.star, color: Color(0xFFFFD93D), size: 16),
               SizedBox(width: 6),
               Text(
-                'クイックスタート',
+                '快速开始',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 13,
@@ -1116,10 +1110,10 @@ class _BAMainPageState extends State<BAMainPage> {
 
   Widget _buildBottomNav() {
     final items = [
-      _NavItem(Icons.home, 'ホーム', 0),
-      _NavItem(Icons.inventory_2_outlined, 'カフェ', 1),
-      _NavItem(Icons.grid_view, '生徒', 2),
-      _NavItem(Icons.menu_book, '編成', 3),
+      _NavItem(Icons.home, '首页', 0),
+      _NavItem(Icons.inventory_2_outlined, '游戏库', 1),
+      _NavItem(Icons.grid_view, '资源', 2),
+      _NavItem(Icons.settings, '设置', 3),
     ];
 
     return Container(

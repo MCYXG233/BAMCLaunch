@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../../instance/instance_manager.dart';
 import '../../instance/models.dart';
@@ -31,6 +33,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   int _selectedFilter = 0;
+  bool _isMaximized = false;
 
   final List<String> _filters = ['全部', '游戏中', '已安装', '可更新'];
 
@@ -47,8 +50,20 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
   @override
   void initState() {
     super.initState();
+    _initWindow();
     _initializeAndLoadInstances();
     _subscribeToEvents();
+  }
+
+  Future<void> _initWindow() async {
+    if (Platform.isWindows || Platform.isMacOS) {
+      final isMaximized = await windowManager.isMaximized();
+      if (mounted) {
+        setState(() {
+          _isMaximized = isMaximized;
+        });
+      }
+    }
   }
 
   Future<void> _initializeAndLoadInstances() async {
@@ -587,9 +602,85 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
               ),
             ),
           ),
+          if (Platform.isWindows) ...[
+            const SizedBox(width: 4),
+            _WindowButton(
+              icon: Icons.remove,
+              onTap: () => windowManager.minimize(),
+            ),
+            _WindowButton(
+              icon: _isMaximized ? Icons.filter_none : Icons.crop_square,
+              onTap: () async {
+                if (_isMaximized) {
+                  await windowManager.unmaximize();
+                } else {
+                  await windowManager.maximize();
+                }
+              },
+            ),
+            _WindowButton(
+              icon: Icons.close,
+              onTap: () => windowManager.close(),
+              isClose: true,
+            ),
+          ],
         ],
       ),
     );
+  }
+
+  // 窗口控制按钮组件
+  class _WindowButton extends StatefulWidget {
+    final IconData icon;
+    final VoidCallback onTap;
+    final bool isClose;
+
+    const _WindowButton({
+      required this.icon,
+      required this.onTap,
+      this.isClose = false,
+    });
+
+    @override
+    State<_WindowButton> createState() => _WindowButtonState();
+  }
+
+  class _WindowButtonState extends State<_WindowButton> {
+    bool _isHovered = false;
+
+    @override
+    Widget build(BuildContext context) {
+      return MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: _isHovered
+                  ? (widget.isClose
+                      ? const Color(0xFFE53935)
+                      : const Color(0xFF2A3A5C))
+                  : const Color(0xFF1E2747),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: const Color(0xFF3A4D7A),
+              ),
+            ),
+            child: Icon(
+              widget.icon,
+              color: _isHovered && widget.isClose
+                  ? Colors.white
+                  : const Color(0xFFB8C5E0),
+              size: 16,
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   /// 游戏统计卡片行

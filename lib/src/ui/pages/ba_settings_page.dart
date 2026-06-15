@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:path/path.dart' as path;
+import 'package:window_manager/window_manager.dart';
 import '../theme/colors.dart';
 import '../theme/app_theme.dart';
 import '../../config/config_manager.dart';
@@ -44,6 +45,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
   bool _notificationInitialized = false;
   bool _themeManagerInitialized = false;
   bool _managersInitialized = false;
+  bool _isMaximized = false;
 
   BackgroundConfig _backgroundConfig = BackgroundConfig.classic;
 
@@ -95,8 +97,20 @@ class _BASettingsPageState extends State<BASettingsPage> {
     _proxyPortFocusNode.addListener(_onProxyPortFocusChange);
     _jvmArgsFocusNode.addListener(_onJvmArgsFocusChange);
     _gameArgsFocusNode.addListener(_onGameArgsFocusChange);
+    _initWindow();
     _initAllManagers();
     _loadSettings();
+  }
+
+  Future<void> _initWindow() async {
+    if (Platform.isWindows || Platform.isMacOS) {
+      final isMaximized = await windowManager.isMaximized();
+      if (mounted) {
+        setState(() {
+          _isMaximized = isMaximized;
+        });
+      }
+    }
   }
 
   Future<void> _initAllManagers() async {
@@ -965,10 +979,87 @@ class _BASettingsPageState extends State<BASettingsPage> {
               ],
             ),
           ),
+          if (Platform.isWindows) ...[
+            const SizedBox(width: 4),
+            _WindowButton(
+              icon: Icons.remove,
+              onTap: () => windowManager.minimize(),
+            ),
+            _WindowButton(
+              icon: _isMaximized ? Icons.filter_none : Icons.crop_square,
+              onTap: () async {
+                if (_isMaximized) {
+                  await windowManager.unmaximize();
+                } else {
+                  await windowManager.maximize();
+                }
+              },
+            ),
+            _WindowButton(
+              icon: Icons.close,
+              onTap: () => windowManager.close(),
+              isClose: true,
+            ),
+          ],
         ],
       ),
     );
   }
+
+  // 窗口控制按钮组件
+  static class _WindowButton extends StatefulWidget {
+    final IconData icon;
+    final VoidCallback onTap;
+    final bool isClose;
+
+    const _WindowButton({
+      required this.icon,
+      required this.onTap,
+      this.isClose = false,
+    });
+
+    @override
+    State<_WindowButton> createState() => _WindowButtonState();
+  }
+
+  static class _WindowButtonState extends State<_WindowButton> {
+    bool _isHovered = false;
+
+    @override
+    Widget build(BuildContext context) {
+      return MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: _isHovered
+                  ? (widget.isClose
+                      ? const Color(0xFFE53935)
+                      : const Color(0xFF2A3A5C))
+                  : const Color(0xFF1E2747),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: const Color(0xFF3A4D7A),
+              ),
+            ),
+            child: Icon(
+              widget.icon,
+              color: _isHovered && widget.isClose
+                  ? Colors.white
+                  : const Color(0xFFB8C5E0),
+              size: 16,
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
 
   Widget _buildCategoryList() {
     final categoryNames = {
