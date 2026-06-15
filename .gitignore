@@ -64,3 +64,6 @@ config/local/
 
 # Logs
 logs/
+
+# External tools (skills)
+tools/skills/
