@@ -32,6 +32,7 @@ dependencies:
   flutter:
     sdk: flutter
   provider: ^6.1.2
+  flutter_riverpod: ^2.4.10
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -49,6 +50,11 @@ dependencies:
   file_picker: ^8.3.7
   video_player: ^2.9.2
   fl_chart: ^0.69.2
+  
+  # 动画和交互相关依赖
+  lottie: ^3.1.0
+  simple_animations: ^5.0.0
+  audioplayers: ^5.2.0
 
 dev_dependencies:
   flutter_test:

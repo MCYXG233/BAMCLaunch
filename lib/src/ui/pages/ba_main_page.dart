@@ -5,6 +5,7 @@ import 'package:window_manager/window_manager.dart';
 import '../../account/account_manager.dart';
 import '../../instance/instance_manager.dart';
 import '../components/ba_buttons.dart';
+import '../components/ba_character_display.dart';
 import '../theme/colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/background_manager.dart';
@@ -39,7 +40,7 @@ class _BAMainPageState extends State<BAMainPage> {
   int _activeDownloads = 0;
 
   // 模拟资源数据（蔚蓝档案风格：体力/信用点/青辉石）
-  final int _stamina = 567;
+  final int _stamina = 87;
   final int _maxStamina = 132;
   final int _credits = 35426147;
   final int _pyroxene = 666;
@@ -482,16 +483,17 @@ class _BAMainPageState extends State<BAMainPage> {
 
   Widget _buildMainContent() {
     return Positioned.fill(
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(100, 20, 320, 80),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(100, 20, 320, 80),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 顶部大标题（类似蔚蓝档案的事件横幅）
             _buildEventBanner(),
             const Spacer(),
-            // 角色立绘/信息区
-            _buildCharacterDisplay(),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: _buildCharacterDisplay(),
+            ),
           ],
         ),
       ),
@@ -601,6 +603,9 @@ class _BAMainPageState extends State<BAMainPage> {
               ),
             ),
           ),
+          const SizedBox(height: 12),
+          // 看板娘动画组件
+          const BACharacterDisplay(width: 320, height: 350),
           const SizedBox(height: 12),
           // 信息卡
           _buildInfoCard(),

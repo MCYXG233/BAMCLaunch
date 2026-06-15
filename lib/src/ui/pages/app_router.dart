@@ -38,7 +38,7 @@ class AppRouter {
         );
       case AppRoutes.home:
         return MaterialPageRoute(
-          builder: (_) => const BAMCMainPage(),
+          builder: (_) => const BAMainPage(),
           settings: settings,
         );
       case AppRoutes.versions:

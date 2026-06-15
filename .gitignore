@@ -46,6 +46,21 @@ app.*.map.json
 
 # Trae IDE related
 .trae/
+.trae-skills/
 
 # Design documentation
 docs/
+
+# Additional build artifacts
+**/*.symbols
+**/*.map.json
+*.tmp
+*.temp
+
+# Local configuration
+config/local/
+.env
+.env.local
+
+# Logs
+logs/

@@ -14,3 +14,5 @@ export 'ba_notification.dart';
 export 'ba_download_indicator.dart';
 export 'ba_create_instance_dialog.dart';
 export 'ba_settings_item.dart';
+export 'ba_character_display.dart';
+export 'ba_launch_animation.dart';
