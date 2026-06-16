@@ -3,25 +3,31 @@ import 'package:flutter/material.dart';
 /// 蔚蓝档案风格 MC 启动器 - 完整色彩系统
 /// 基于蔚蓝档案游戏 UI 设计规范
 class BAColors {
-  // ==================== 品牌核心色 ====================
+  // ==================== 品牌核心色（蔚蓝档案风格） ====================
   
-  /// 主色调 - 柔和蔚蓝色 (Primary Blue)
-  static const Color primary = Color(0xFF6B8EFF);
+  /// 主色调 - 天蓝色 #4A90D9 (Primary Blue)
+  static const Color primary = Color(0xFF4A90D9);
   
-  /// 主色深版 (Primary Dark)
-  static const Color primaryDark = Color(0xFF4A69CC);
+  /// 主色深版 (Primary Dark) - #2B5F8A
+  static const Color primaryDark = Color(0xFF2B5F8A);
   
   /// 主色浅版 (Primary Light)
-  static const Color primaryLight = Color(0xFF9AB3FF);
+  static const Color primaryLight = Color(0xFF7AB3F0);
   
-  /// 辅助色 - 活力粉色 (Secondary Pink)
-  static const Color secondary = Color(0xFFFF96B5);
+  /// 辅助色 - 柔白色 #F5F7FA (Text White)
+  static const Color secondary = Color(0xFFF5F7FA);
   
   /// 辅助色深版
-  static const Color secondaryDark = Color(0xFFFF6A92);
+  static const Color secondaryDark = Color(0xFFD0D8E4);
   
   /// 辅助色浅版
-  static const Color secondaryLight = Color(0xFFFFB8CE);
+  static const Color secondaryLight = Color(0xFFFFFFFF);
+  
+  /// 强调粉色 - 蔚蓝档案特色 #FFB4C2
+  static const Color accentPink = Color(0xFFFFB4C2);
+  
+  /// 强调粉色深版
+  static const Color accentPinkDark = Color(0xFFFF96B5);
 
   // ==================== 功能色 ====================
   
@@ -144,18 +150,18 @@ class BAColors {
 
   // ==================== 渐变色系统 ====================
   
-  /// 主色渐变 - 按钮、强调元素
+  /// 主色渐变 - 按钮、强调元素（天蓝渐变）
   static const Gradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF8EAAFF), Color(0xFF6B8EFF)],
+    colors: [Color(0xFF7AB3F0), Color(0xFF4A90D9)],
   );
   
   /// 主色对角渐变
   static const Gradient primaryDiagonalGradient = LinearGradient(
     begin: Alignment(-0.7, -0.7),
     end: Alignment(0.7, 0.7),
-    colors: [Color(0xFF9AB3FF), Color(0xFF6B8EFF), Color(0xFF4A69CC)],
+    colors: [Color(0xFF7AB3F0), Color(0xFF4A90D9), Color(0xFF2B5F8A)],
   );
   
   /// 辅助色渐变 - 粉色
@@ -165,28 +171,28 @@ class BAColors {
     colors: [Color(0xFFFFB8CE), Color(0xFFFF96B5)],
   );
   
-  /// 成功渐变
+  /// 成功渐变 - 清新绿
   static const Gradient successGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [Color(0xFF8AE89A), Color(0xFF6BCB77)],
   );
   
-  /// 警告渐变
+  /// 警告渐变 - 明亮黄
   static const Gradient warningGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [Color(0xFFFFE066), Color(0xFFFFD93D)],
   );
   
-  /// 危险渐变
+  /// 危险渐变 - 活力红
   static const Gradient dangerGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [Color(0xFFFF8A8A), Color(0xFFFF6B6B)],
   );
   
-  /// 深色背景渐变
+  /// 深色背景渐变（深蓝黑）
   static const Gradient darkBackgroundGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -200,25 +206,36 @@ class BAColors {
     colors: [lightSurface, lightBackground],
   );
   
-  /// 卡片高光渐变
+  /// 卡片高光渐变（主蓝色光晕）
   static const Gradient cardHighlightGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0x1A6B8EFF),
-      Color(0x0D6B8EFF),
-      Color(0x056B8EFF),
+      Color(0x1A4A90D9),
+      Color(0x0D4A90D9),
+      Color(0x054A90D9),
       Color(0x00000000),
     ],
   );
   
-  /// 封面渐变
+  /// 封面渐变（主蓝色光晕）
   static const Gradient coverGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: [
-      Color(0x006B8EFF),
-      Color(0x806B8EFF),
+      Color(0x004A90D9),
+      Color(0x804A90D9),
+    ],
+  );
+  
+  /// 毛玻璃渐变背景
+  static const Gradient glassGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0x804A90D9),
+      Color(0x402B5F8A),
+      Color(0x201E2747),
     ],
   );
 

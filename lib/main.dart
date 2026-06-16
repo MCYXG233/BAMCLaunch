@@ -67,11 +67,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ThemeManager>(
       builder: (context, themeManager, child) {
+        final seedColor = themeManager.useDynamicColor ? themeManager.seedColor : null;
         return MaterialApp(
           title: 'BAMC Launcher',
           debugShowCheckedModeBanner: false,
-          theme: BATheme.lightTheme,
-          darkTheme: BATheme.darkTheme,
+          theme: BATheme.buildLightTheme(seedColor: seedColor),
+          darkTheme: BATheme.buildDarkTheme(seedColor: seedColor),
           themeMode: themeManager.themeMode,
           initialRoute: AppRoutes.splash,
           onGenerateRoute: AppRouter.generateRoute,

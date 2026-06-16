@@ -1,25 +1,26 @@
 import 'dart:io';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import '../../account/account_manager.dart';
+import '../../account/account.dart';
 import '../../instance/instance_manager.dart';
-import '../components/ba_buttons.dart';
-import '../components/ba_character_display.dart';
-import '../theme/colors.dart';
-import '../theme/app_theme.dart';
+import '../../instance/models.dart';
+import '../../game/launcher/game_launcher.dart';
+import '../../game/launcher/models.dart';
+import '../../config/config_manager.dart';
+import '../../config/config_keys.dart';
 import '../theme/background_manager.dart';
+import '../theme/colors.dart';
+import '../components/ba_common_widgets.dart';
+import '../components/ba_login_dialog.dart';
 import 'ba_game_library_page.dart';
 import 'ba_resource_center_page.dart';
 import 'ba_settings_page.dart';
 
-/// 蔚蓝档案风格主页
-/// 完全模仿蔚蓝档案游戏主界面的设计
-///  - 顶部: 用户信息(Lv. + 用户名) + 资源栏(体力/信用点/宝石)
-///  - 左侧: 功能入口按钮(公告/邮件/任务/商店)
-///  - 中部: 角色立绘展示区 + 事件横幅
-///  - 右侧: 引导任务卡片
-///  - 底部: 主导航栏
+/// Minecraft 启动器首页
+///  - 顶部: 毛玻璃栏 + 窗口控制按钮
+///  - 中间: 缩放动画页面切换
+///  - 底部: 毛玻璃导航栏
 class BAMainPage extends StatefulWidget {
   const BAMainPage({super.key});
 
@@ -36,14 +37,14 @@ class _BAMainPageState extends State<BAMainPage> {
   final InstanceManager _instanceManager = InstanceManager();
   String? _selectedAccountName;
   bool _isLoading = true;
-  int _instanceCount = 0;
-  int _activeDownloads = 0;
+  List<GameInstance> _instances = [];
+  int _selectedInstanceIndex = 0;
+  bool _isLaunching = false;
 
-  // 模拟资源数据（蔚蓝档案风格：体力/信用点/青辉石）
-  final int _stamina = 87;
-  final int _maxStamina = 132;
-  final int _credits = 35426147;
-  final int _pyroxene = 666;
+  // 游戏统计
+  int _totalPlayTimeMinutes = 0;
+  int _totalLaunchCount = 0;
+  int _instanceCount = 0;
 
   @override
   void initState() {
@@ -75,15 +76,13 @@ class _BAMainPageState extends State<BAMainPage> {
       final selectedAccount = await _accountManager.getSelectedAccount();
       if (mounted) {
         setState(() {
-          _selectedAccountName = selectedAccount?.username ?? 'Sensei';
-          _isLoading = false;
+          _selectedAccountName = selectedAccount?.username ?? '未登录';
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _selectedAccountName = 'Sensei';
-          _isLoading = false;
+          _selectedAccountName = '未登录';
         });
       }
     }
@@ -94,11 +93,17 @@ class _BAMainPageState extends State<BAMainPage> {
       await _instanceManager.initialize();
       if (mounted) {
         setState(() {
-          _instanceCount = _instanceManager.instances.length;
+          _instances = List.from(_instanceManager.instances);
+          _instanceCount = _instances.length;
+          _isLoading = false;
         });
       }
     } catch (e) {
-      // 静默失败
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -113,12 +118,92 @@ class _BAMainPageState extends State<BAMainPage> {
     }
   }
 
+  Future<void> _launchGame() async {
+    if (_instances.isEmpty || _isLaunching) return;
+    final instance = _instances[_selectedInstanceIndex];
+
+    setState(() => _isLaunching = true);
+
+    try {
+      // 获取账号
+      final account = await _accountManager.getSelectedAccount();
+      if (account == null) {
+        if (!mounted) return;
+        _showNotification('请先登录账号', isError: true);
+        return;
+      }
+
+      // 获取游戏目录
+      final manager = InstanceManager();
+      final directory = manager.directories.firstWhere(
+        (d) => d.id == instance.directoryId,
+        orElse: () => throw StateError('游戏目录不存在'),
+      );
+
+      // 获取配置
+      final config = ConfigManager.instance;
+      final javaPath = instance.config.javaPath ??
+          config.get<String>(ConfigKeys.javaPath) ??
+          'java';
+      final memory = instance.config.maxMemory ??
+          config.get<int>(ConfigKeys.memory) ??
+          2048;
+      final jvmArgs = instance.config.jvmArgs ?? [];
+      final gameArgs = instance.config.gameArgs ?? [];
+
+      // 组装启动参数
+      final args = LaunchArguments(
+        javaPath: javaPath,
+        gameVersion: instance.version,
+        account: account,
+        gameDirectory: directory.path,
+        memory: memory,
+        jvmArguments: jvmArgs,
+        gameArguments: gameArgs,
+      );
+
+      // 启动游戏
+      await GameLauncher().launch(args);
+      if (mounted) {
+        _showNotification('启动成功！正在启动 ${instance.name}...');
+      }
+    } catch (e) {
+      if (mounted) {
+        _showNotification('启动失败: $e', isError: true);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLaunching = false);
+      }
+    }
+  }
+
+  void _showNotification(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? BAColors.danger : BAColors.success,
+        duration: const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  String _formatPlayTime(int? seconds) {
+    if (seconds == null || seconds == 0) return '0分钟';
+    final hours = seconds ~/ 3600;
+    final minutes = (seconds % 3600) ~/ 60;
+    if (hours > 0) return '${hours}小时${minutes}分钟';
+    return '${minutes}分钟';
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return '从未';
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (_currentPage == 1) return const BAGameLibraryPage();
-    if (_currentPage == 2) return const BAResourceCenterPage();
-    if (_currentPage == 3) return const BASettingsPage();
-
     return Scaffold(
       body: _backgroundManager.buildBackground(
         child: SafeArea(
@@ -128,12 +213,17 @@ class _BAMainPageState extends State<BAMainPage> {
               children: [
                 _buildTopBar(),
                 Expanded(
-                  child: Stack(
-                    children: [
-                      _buildMainContent(),
-                      _buildLeftSideButtons(),
-                      _buildRightSideContent(),
-                    ],
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    transitionBuilder: (child, animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      );
+                    },
+                    child: _buildCurrentPage(),
                   ),
                 ),
                 _buildBottomNav(),
@@ -145,336 +235,196 @@ class _BAMainPageState extends State<BAMainPage> {
     );
   }
 
+  Widget _buildCurrentPage() {
+    switch (_currentPage) {
+      case 1:
+        return const BAGameLibraryPage(key: ValueKey('library'));
+      case 2:
+        return const BAResourceCenterPage(key: ValueKey('resource'));
+      case 3:
+        return const BASettingsPage(key: ValueKey('settings'));
+      default:
+        return _buildHomePage(key: const ValueKey('home'));
+    }
+  }
+
+  Widget _buildHomePage({Key? key}) {
+    return Container(
+      key: key,
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+      child: Row(
+        children: [
+          // 左侧: 实例列表
+          _buildInstanceList(),
+          const SizedBox(width: 16),
+          // 中间: 实例详情 + 启动按钮
+          Expanded(
+            child: _buildInstanceDetail(),
+          ),
+          const SizedBox(width: 16),
+          // 右侧: 统计 + 快速入口
+          _buildRightPanel(),
+        ],
+      ),
+    );
+  }
+
   // ==================== 顶部栏 ====================
 
   Widget _buildTopBar() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+    return BAGlassContainer(
+      borderRadius: 20,
+      margin: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 用户信息卡 (Lv. + 用户名)
-          _buildUserInfoCard(),
+          // 启动器 Logo
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFFF5F8FF) : const Color(0xFF1A2540)).withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: BAColors.primary.withValues(alpha: 0.4),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.sports_esports, color: BAColors.primary, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'BAMCLaunch',
+                  style: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: BAColors.primary.withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text(
+                    'v1.0',
+                    style: TextStyle(
+                      color: BAColors.primary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(width: 16),
 
-          // 资源中心/任务入口 (小按钮)
-          _buildQuickActionButton(
-            icon: Icons.download,
-            label: '资源中心',
-            subLabel: '更新中',
-            onTap: () => setState(() => _currentPage = 2),
-          ),
-          const SizedBox(width: 8),
-          _buildQuickActionButton(
-            icon: Icons.task_alt,
-            label: '任务',
-            subLabel: '2/8',
-            onTap: () => setState(() => _currentPage = 1),
+          // 当前账号（可点击弹出登录对话框）
+          GestureDetector(
+            onTap: () async {
+              final result = await showDialog<Account>(
+                context: context,
+                barrierColor: Colors.black54,
+                builder: (context) => const BALoginDialog(),
+              );
+              if (result != null) {
+                // 账户已变更，重新加载账户信息
+                await _loadAccountData();
+              }
+            },
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFFF5F8FF) : const Color(0xFF1A2540)).withValues(alpha: 0.85),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A)).withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.person_outline, color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.85), size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      _selectedAccountName ?? '加载中...',
+                      style: TextStyle(
+                        color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.9),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.arrow_forward_ios, color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.5), size: 12),
+                  ],
+                ),
+              ),
+            ),
           ),
 
           const Spacer(),
 
-          // 资源栏 (体力)
-          _buildResourceChip(
-            icon: Icons.bolt,
-            value: _stamina,
-            maxValue: _maxStamina,
-            color: const Color(0xFFF5D76E),
-            backgroundColor: const Color(0xFF1A2540),
-          ),
-          const SizedBox(width: 8),
-
-          // 资源栏 (信用点)
-          _buildResourceChip(
-            icon: Icons.account_balance_wallet,
-            value: _credits,
-            color: const Color(0xFF7BCB9E),
-            backgroundColor: const Color(0xFF1A2540),
-          ),
-          const SizedBox(width: 8),
-
-          // 资源栏 (青辉石/宝石)
-          _buildResourceChip(
-            icon: Icons.diamond,
-            value: _pyroxene,
-            color: const Color(0xFF6B8EFF),
-            backgroundColor: const Color(0xFF1A2540),
-          ),
-          const SizedBox(width: 16),
-
-          // 邮件图标
-          _buildTopIconButton(Icons.mail_outline, hasNotification: true),
-          const SizedBox(width: 4),
-
-          // 设置图标
-          _buildTopIconButton(Icons.settings, onTap: () => setState(() => _currentPage = 3)),
-          const SizedBox(width: 4),
-
-          // 窗口控制
-          if (Platform.isWindows) ...[
-            _WindowButton(
-              icon: Icons.remove,
-              onTap: () => windowManager.minimize(),
-            ),
-            _WindowButton(
-              icon: _isMaximized ? Icons.filter_none : Icons.crop_square,
-              onTap: () async {
-                if (_isMaximized) {
-                  await windowManager.unmaximize();
-                } else {
-                  await windowManager.maximize();
-                }
-              },
-            ),
-            _WindowButton(
-              icon: Icons.close,
-              onTap: () => windowManager.close(),
-              isClose: true,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildUserInfoCard() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A2540).withOpacity(0.85),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: const Color(0xFF3A4D7A).withOpacity(0.6),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 等级徽章
+          // 实例数量指示器
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFD93D),
-              borderRadius: BorderRadius.circular(6),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFFFD93D).withOpacity(0.4),
-                  blurRadius: 6,
+              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFFF5F8FF) : const Color(0xFF1A2540)).withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A)).withValues(alpha: 0.5),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.folder_outlined, color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.85), size: 16),
+                const SizedBox(width: 6),
+                Text(
+                  '$_instanceCount 个实例',
+                  style: TextStyle(
+                    color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.9),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
-            child: const Text(
-              'Lv.',
-              style: TextStyle(
-                color: Color(0xFF1A2540),
-                fontSize: 13,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.5,
-              ),
-            ),
           ),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _selectedAccountName ?? 'Sensei',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.3,
-                ),
-              ),
-              const SizedBox(height: 2),
-              // 经验条
-              Container(
-                width: 120,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2A3A5C),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-                child: FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: 0.72,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF7BCB9E), Color(0xFFB8F5D1)],
-                      ),
-                      borderRadius: BorderRadius.circular(2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF7BCB9E).withOpacity(0.5),
-                          blurRadius: 4,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 8),
-          // 小叶子装饰
-          Icon(
-            Icons.eco,
-            color: Colors.greenAccent.shade100,
-            size: 16,
-          ),
-        ],
-      ),
-    );
-  }
+          const SizedBox(width: 12),
 
-  Widget _buildQuickActionButton({
-    required IconData icon,
-    required String label,
-    required String subLabel,
-    VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A2540).withOpacity(0.85),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: const Color(0xFF3A4D7A).withOpacity(0.6),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+          // 窗口控制按钮
+          Row(
             children: [
-              Icon(icon, color: const Color(0xFFB8C5E0), size: 16),
+              BAWindowButton(
+                icon: Icons.minimize,
+                onTap: () => windowManager.minimize(),
+              ),
               const SizedBox(width: 6),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    subLabel,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
-                      fontSize: 10,
-                    ),
-                  ),
-                ],
+              BAWindowButton(
+                icon: _isMaximized ? Icons.fullscreen_exit : Icons.fullscreen,
+                onTap: () async {
+                  if (_isMaximized) {
+                    await windowManager.unmaximize();
+                  } else {
+                    await windowManager.maximize();
+                  }
+                  setState(() => _isMaximized = !_isMaximized);
+                },
+              ),
+              const SizedBox(width: 6),
+              BAWindowButton(
+                icon: Icons.close,
+                isClose: true,
+                onTap: () => windowManager.close(),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildResourceChip({
-    required IconData icon,
-    required int value,
-    int? maxValue,
-    required Color color,
-    required Color backgroundColor,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: backgroundColor.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: const Color(0xFF3A4D7A).withOpacity(0.5),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
         ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: color, size: 18),
-          const SizedBox(width: 6),
-          Text(
-            maxValue != null ? '$value/$maxValue' : _formatNumber(value),
-            style: TextStyle(
-              color: color,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              fontFamily: 'monospace',
-            ),
-          ),
-          const SizedBox(width: 4),
-          Icon(
-            Icons.add_circle_outline,
-            color: color.withOpacity(0.6),
-            size: 16,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTopIconButton(IconData icon, {bool hasNotification = false, VoidCallback? onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A2540).withOpacity(0.8),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: const Color(0xFF3A4D7A).withOpacity(0.5),
-            ),
-          ),
-          child: Stack(
-            children: [
-              Center(
-                child: Icon(
-                  icon,
-                  color: const Color(0xFFB8C5E0),
-                  size: 18,
-                ),
-              ),
-              if (hasNotification)
-                Positioned(
-                  top: 6,
-                  right: 6,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF6B6B),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFF1A2540), width: 1.5),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -482,539 +432,650 @@ class _BAMainPageState extends State<BAMainPage> {
   // ==================== 主内容区 ====================
 
   Widget _buildMainContent() {
-    return Positioned.fill(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(100, 20, 320, 80),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildEventBanner(),
-            const Spacer(),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: _buildCharacterDisplay(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: BAColors.primary),
+      );
+    }
 
-  Widget _buildEventBanner() {
-    return Container(
-      width: 380,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A2540).withOpacity(0.85),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: const Color(0xFFFFB4C2).withOpacity(0.4),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFFFB4C2).withOpacity(0.15),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFB4C2),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: const Text(
-              'EVENT!',
-              style: TextStyle(
-                color: Color(0xFF1A2540),
-                fontSize: 11,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
+          // 左侧: 实例列表
+          _buildInstanceList(),
+          const SizedBox(width: 16),
+          // 中间: 实例详情 + 启动按钮
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  'Minecraft 更新通知',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 2),
-                Text(
-                  '新版本 1.21.1 已发布！',
-                  style: TextStyle(
-                    color: Color(0xFFB8C5E0),
-                    fontSize: 10,
-                  ),
-                ),
-              ],
-            ),
+            child: _buildInstanceDetail(),
           ),
+          const SizedBox(width: 16),
+          // 右侧: 统计 + 快速入口
+          _buildRightPanel(),
         ],
       ),
     );
   }
 
-  Widget _buildCharacterDisplay() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 欢迎语
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1A2540).withOpacity(0.8),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(14),
-                topRight: Radius.circular(14),
-                bottomRight: Radius.circular(14),
-              ),
-              border: Border.all(
-                color: const Color(0xFF3A4D7A).withOpacity(0.5),
-              ),
-            ),
-            child: Text(
-              '欢迎回来！',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.95),
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          // 看板娘动画组件
-          const BACharacterDisplay(width: 320, height: 350),
-          const SizedBox(height: 12),
-          // 信息卡
-          _buildInfoCard(),
-        ],
-      ),
-    );
-  }
+  // ========== 实例列表 ==========
 
-  Widget _buildInfoCard() {
-    return Container(
-      width: 320,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A2540).withOpacity(0.85),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFF3A4D7A).withOpacity(0.6),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
+  Widget _buildInstanceList() {
+    return BASurfaceCard(
+      borderRadius: 16,
+      padding: const EdgeInsets.all(12),
+      width: 260,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF7BCB9E), Color(0xFFB8F5D1)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+              Icon(Icons.list_alt, color: BAColors.primary, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '游戏实例',
+                  style: TextStyle(
+                    color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
                   ),
-                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
-                  Icons.videogame_asset,
-                  color: Color(0xFF1A2540),
+              ),
+              IconButton(
+                onPressed: () => setState(() => _currentPage = 1),
+                icon: Icon(Icons.open_in_new, color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF5A6A8A) : const Color(0xFFA0B0C8)), size: 16),
+                tooltip: '管理实例',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: _instances.isEmpty
+                ? _buildEmptyInstanceList()
+                : ListView.builder(
+                    itemCount: _instances.length,
+                    itemBuilder: (context, index) {
+                      return _buildInstanceListItem(index);
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyInstanceList() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.inbox_outlined, color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.4), size: 40),
+          const SizedBox(height: 12),
+          Text(
+              '暂无游戏实例',
+              style: TextStyle(
+                color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.6),
+                fontSize: 12,
+              ),
+            ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: () => setState(() => _currentPage = 1),
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: BAColors.primary.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: BAColors.primary.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add, color: BAColors.primary, size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      '新建实例',
+                      style: TextStyle(
+                        color: BAColors.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInstanceListItem(int index) {
+    final instance = _instances[index];
+    final isSelected = _selectedInstanceIndex == index;
+    final isRunning = instance.status == InstanceStatus.running;
+
+    return GestureDetector(
+      onTap: () => setState(() => _selectedInstanceIndex = index),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: AnimatedContainer(
+          duration: BAAnimationDurations.micro,
+          margin: const EdgeInsets.only(bottom: 6),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? BAColors.primary.withValues(alpha: 0.2)
+                : (Theme.of(context).brightness == Brightness.light ? const Color(0xFFE8EDFF) : const Color(0xFF2A3766)).withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? BAColors.primary.withValues(alpha: 0.6)
+                  : (Theme.of(context).brightness == Brightness.light ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A)).withValues(alpha: 0.3),
+              width: isSelected ? 1.5 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              // 实例图标
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: _getVersionColor(instance.version, context).withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: _getVersionColor(instance.version, context).withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Icon(
+                  Icons.sports_esports,
+                  color: _getVersionColor(instance.version, context),
                   size: 20,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
-                      'Minecraft 启动器',
+                      instance.name,
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                        color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.95),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 2),
-                    Text(
-                      'Minecraft Launcher',
-                      style: TextStyle(
-                        color: Color(0xFFB8C5E0),
-                        fontSize: 11,
-                      ),
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        Text(
+                          instance.version,
+                          style: TextStyle(
+                            color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.6),
+                            fontSize: 11,
+                          ),
+                        ),
+                        if (instance.loader != null) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: BAColors.success.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              instance.loader!,
+                              style: TextStyle(
+                                color: BAColors.success,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                        if (isRunning) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: BAColors.accentPink.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              '运行中',
+                              style: TextStyle(
+                                color: BAColors.accentPink,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          // 统计信息
-          Row(
-            children: [
-              _buildStatItem(Icons.folder_outlined, '$_instanceCount', '实例'),
-              const SizedBox(width: 12),
-              _buildStatItem(Icons.download_outlined, '$_activeDownloads', '下载中'),
-              const SizedBox(width: 12),
-              _buildStatItem(Icons.extension_outlined, '12', 'Mod'),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // 开始按钮
-          SizedBox(
-            width: double.infinity,
-            child: BAButton(
-              onPressed: () => setState(() => _currentPage = 1),
-              style: BAButtonStyle.primary,
-              leadingIcon: const Padding(
-                padding: EdgeInsets.only(right: 4),
-                child: Icon(Icons.play_arrow, color: Colors.white, size: 18),
-              ),
-              height: 44,
-              child: const Text(
-                '启动游戏',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatItem(IconData icon, String value, String label) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        decoration: BoxDecoration(
-          color: const Color(0xFF2A3A5C).withOpacity(0.5),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: const Color(0xFF3A4D7A).withOpacity(0.3),
-          ),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: const Color(0xFF7BCB9E), size: 18),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Color(0xFF8A9BB8),
-                fontSize: 10,
-              ),
-            ),
-          ],
         ),
       ),
     );
   }
 
-  // ==================== 左侧按钮 ====================
-
-  Widget _buildLeftSideButtons() {
-    // 左侧按钮 - 只保留与MC启动器相关的功能
-    final buttons = [
-      _SideButtonData(
-        icon: Icons.assignment_outlined,
-        label: '任务',
-        subLabel: '2/8',
-        onTap: () => setState(() => _currentPage = 1),
-      ),
-      _SideButtonData(
-        icon: Icons.download,
-        label: '下载',
-        onTap: () => setState(() => _currentPage = 2),
-      ),
-      _SideButtonData(
-        icon: Icons.settings,
-        label: '设置',
-        onTap: () => setState(() => _currentPage = 3),
-      ),
-    ];
-
-    return Positioned(
-      left: 20,
-      top: 10,
-      bottom: 80,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          for (int i = 0; i < buttons.length; i++) ...[
-            _buildSideButton(buttons[i]),
-            if (i < buttons.length - 1) const SizedBox(height: 10),
-          ],
-        ],
-      ),
-    );
+  Color _getVersionColor(String version, BuildContext context) {
+    if (version.startsWith('1.21')) return BAColors.primary;
+    if (version.startsWith('1.20')) return BAColors.success;
+    if (version.startsWith('1.19')) return BAColors.warning;
+    if (version.startsWith('1.18')) return BAColors.accentPink;
+    return (Theme.of(context).brightness == Brightness.light ? const Color(0xFF5A6A8A) : const Color(0xFFA0B0C8));
   }
 
-  Widget _buildSideButton(_SideButtonData data) {
-    return GestureDetector(
-      onTap: data.onTap,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: Container(
-          width: 70,
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1A2540).withOpacity(0.8),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: const Color(0xFF3A4D7A).withOpacity(0.5),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    data.icon,
-                    color: const Color(0xFFB8C5E0),
-                    size: 22,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    data.label,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  if (data.subLabel != null)
-                    Text(
-                      data.subLabel!,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
-                        fontSize: 9,
-                      ),
-                    ),
-                ],
-              ),
-              if (data.badge != null)
-                Positioned(
-                  top: 4,
-                  right: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF6B6B),
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFFF6B6B).withOpacity(0.4),
-                          blurRadius: 4,
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      data.badge!,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // ========== 实例详情 + 启动按钮 ==========
 
-  // ==================== 右侧内容 ====================
+  Widget _buildInstanceDetail() {
+    if (_instances.isEmpty) {
+      return _buildEmptyInstanceDetail();
+    }
+    final instance = _instances[_selectedInstanceIndex];
+    final isRunning = instance.status == InstanceStatus.running;
 
-  Widget _buildRightSideContent() {
-    return Positioned(
-      right: 20,
-      top: 10,
-      bottom: 80,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          _buildGuideMissionCard(),
-          const SizedBox(height: 12),
-          _buildQuickStartCard(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGuideMissionCard() {
-    return Container(
-      width: 260,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A2540).withOpacity(0.9),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFFFB4C2).withOpacity(0.3),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return BASurfaceCard(
+      borderRadius: 20,
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 标题
+          // 实例标题行
           Row(
-            children: const [
-              Icon(Icons.auto_awesome, color: Color(0xFFFFB4C2), size: 16),
-              SizedBox(width: 6),
-              Text(
-                '新手引导',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 大图标
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: _getVersionColor(instance.version, context).withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: _getVersionColor(instance.version, context).withValues(alpha: 0.5),
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  Icons.sports_esports,
+                  color: _getVersionColor(instance.version, context),
+                  size: 36,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      instance.name,
+                      style: TextStyle(
+                        color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white),
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: [
+                        _buildInfoChip(Icons.tag, 'MC ${instance.version}', BAColors.primary),
+                        if (instance.loader != null)
+                          _buildInfoChip(Icons.extension, instance.loader!, BAColors.success),
+                        if (isRunning)
+                          _buildInfoChip(Icons.play_circle_filled, '运行中', BAColors.accentPink),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          // 任务列表
-          _buildMissionItem('游戏实例创建', '创建你的第一个 MC 实例', true),
-          _buildMissionItem('Mod 管理', '安装并启用 Mod', false),
-          _buildMissionItem('资源下载', '从资源中心下载内容', false),
-          _buildMissionItem('启动游戏', '成功启动一次游戏', true),
-          const SizedBox(height: 10),
-          // 进度
-          Row(
-            children: const [
-              Expanded(
-                child: Text(
-                '进度: 2/4',
-                style: TextStyle(
-                  color: Color(0xFFB8C5E0),
-                  fontSize: 11,
+          const SizedBox(height: 24),
+
+          // 实例描述
+          if (instance.description != null && instance.description!.isNotEmpty) ...[
+            Text(
+              instance.description!,
+              style: TextStyle(
+                color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.75),
+                fontSize: 13,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+
+          // 信息网格
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: _buildDetailCard(
+                    icon: Icons.access_time,
+                    title: '游戏时间',
+                    value: _formatPlayTime(instance.playTimeSeconds),
+                    color: BAColors.success,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildDetailCard(
+                    icon: Icons.calendar_today,
+                    title: '上次启动',
+                    value: _formatDate(instance.lastPlayed),
+                    color: BAColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildDetailCard(
+                    icon: Icons.folder,
+                    title: 'Mod 数量',
+                    value: '${instance.resources.mods.length}',
+                    color: BAColors.warning,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // 大的启动按钮
+          SizedBox(
+            width: double.infinity,
+            height: 64,
+            child: GestureDetector(
+              onTap: _isLaunching ? null : _launchGame,
+              child: MouseRegion(
+                cursor: _isLaunching ? SystemMouseCursors.basic : SystemMouseCursors.click,
+                child: AnimatedContainer(
+                  duration: BAAnimationDurations.micro,
+                  decoration: BoxDecoration(
+                    color: _isLaunching
+                        ? (Theme.of(context).brightness == Brightness.light ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A))
+                        : BAColors.primary.withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: _isLaunching
+                          ? (Theme.of(context).brightness == Brightness.light ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A))
+                          : BAColors.primary.withValues(alpha: 0.7),
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _isLaunching
+                            ? Colors.transparent
+                            : BAColors.primary.withValues(alpha: 0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (_isLaunching)
+                        const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            color: Color(0xFFFFFFFF),
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                      else
+                        const Icon(Icons.play_arrow, color: Color(0xFFFFFFFF), size: 32),
+                      const SizedBox(width: 12),
+                      Text(
+                        _isLaunching ? '正在启动...' : (isRunning ? '再次启动' : '启动游戏'),
+                        style: const TextStyle(
+                          color: Color(0xFFFFFFFF),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              Icon(
-                Icons.chevron_right,
-                color: Color(0xFFB8C5E0),
-                size: 16,
-              ),
-            ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMissionItem(String title, String desc, bool completed) {
+  Widget _buildEmptyInstanceDetail() {
+    return BASurfaceCard(
+      borderRadius: 20,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.sports_esports,
+            color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.3),
+            size: 80,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            '还没有游戏实例',
+            style: TextStyle(
+              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white),
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '创建您的第一个 Minecraft 实例开始游戏',
+            style: TextStyle(
+              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.6),
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(height: 32),
+          GestureDetector(
+            onTap: () => setState(() => _currentPage = 1),
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                decoration: BoxDecoration(
+                  color: BAColors.primary,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: BAColors.primary.withValues(alpha: 0.3),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add, color: const Color(0xFFFFFFFF), size: 22),
+                    SizedBox(width: 8),
+                    Text(
+                      '创建新实例',
+                      style: TextStyle(
+                        color: const Color(0xFFFFFFFF),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(IconData icon, String text, Color color) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: completed
-            ? const Color(0xFF2A5C3F).withOpacity(0.4)
-            : const Color(0xFF2A3A5C).withOpacity(0.4),
-        borderRadius: BorderRadius.circular(10),
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: (completed
-                  ? const Color(0xFF7BCB9E)
-                  : const Color(0xFF3A4D7A))
-              .withOpacity(0.4),
+          color: color.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
+          Icon(icon, color: color, size: 12),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailCard({
+    required IconData icon,
+    required String title,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: color.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 22),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: TextStyle(
+              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.6),
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ========== 右侧面板 ==========
+
+  Widget _buildRightPanel() {
+    return BASurfaceCard(
+      borderRadius: 16,
+      padding: const EdgeInsets.all(12),
+      width: 240,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 快速入口
+          Text(
+            '快速入口',
+            style: TextStyle(
+              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white),
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildQuickEntry(Icons.add_circle_outline, '新建实例', BAColors.primary, () {
+            setState(() => _currentPage = 1);
+          }),
+          _buildQuickEntry(Icons.download_for_offline_outlined, '资源下载', BAColors.success, () {
+            setState(() => _currentPage = 2);
+          }),
+          _buildQuickEntry(Icons.settings_outlined, '启动器设置', BAColors.accentPink, () {
+            setState(() => _currentPage = 3);
+          }),
+          const SizedBox(height: 20),
+
+          // 启动器信息
+          Text(
+            '启动器信息',
+            style: TextStyle(
+              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white),
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildInfoRow('实例数量', '$_instanceCount'),
+          _buildInfoRow('当前账号', _selectedAccountName ?? '未登录'),
+          _buildInfoRow('状态', '就绪'),
+
+          const Spacer(),
+
+          // 底部装饰
           Container(
-            width: 16,
-            height: 16,
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: completed ? const Color(0xFF7BCB9E) : Colors.transparent,
-              borderRadius: BorderRadius.circular(4),
+              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFFE8EDFF) : const Color(0xFF2A3766)).withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: completed ? const Color(0xFF7BCB9E) : const Color(0xFF5A6A8A),
-                width: 1.5,
+                color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A)).withValues(alpha: 0.3),
               ),
             ),
-            child: completed
-                ? const Icon(Icons.check, color: Color(0xFF1A2540), size: 12)
-                : null,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: completed ? const Color(0xFF7BCB9E) : Colors.white,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    decoration: completed ? TextDecoration.lineThrough : null,
-                    decorationColor: const Color(0xFF7BCB9E).withOpacity(0.5),
-                  ),
-                ),
-                Text(
-                  desc,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
-                    fontSize: 9,
+                Icon(Icons.info_outline, color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.6), size: 16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '提示: 在游戏库中可以管理更多实例',
+                    style: TextStyle(
+                      color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.6),
+                      fontSize: 11,
+                      height: 1.4,
+                    ),
                   ),
                 ),
               ],
@@ -1025,83 +1086,65 @@ class _BAMainPageState extends State<BAMainPage> {
     );
   }
 
-  Widget _buildQuickStartCard() {
-    return Container(
-      width: 260,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A2540).withOpacity(0.9),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFF3A4D7A).withOpacity(0.5),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: const [
-              Icon(Icons.star, color: Color(0xFFFFD93D), size: 16),
-              SizedBox(width: 6),
-              Text(
-                '快速开始',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          _buildQuickItem(Icons.add, '新建实例', () => setState(() => _currentPage = 1)),
-          _buildQuickItem(Icons.download, '下载 Mod', () => setState(() => _currentPage = 2)),
-          _buildQuickItem(Icons.settings, '启动器设置', () => setState(() => _currentPage = 3)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickItem(IconData icon, String label, VoidCallback onTap) {
+  Widget _buildQuickEntry(IconData icon, String label, Color color, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: Container(
           margin: const EdgeInsets.only(bottom: 6),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: const Color(0xFF2A3A5C).withOpacity(0.4),
+            color: color.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: const Color(0xFF3A4D7A).withOpacity(0.3),
+              color: color.withValues(alpha: 0.2),
             ),
           ),
           child: Row(
             children: [
-              Icon(icon, color: const Color(0xFF7BCB9E), size: 16),
-              const SizedBox(width: 8),
+              Icon(icon, color: color, size: 18),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   label,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.9),
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Color(0xFF5A6A8A), size: 16),
+              Icon(Icons.chevron_right, color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.4), size: 18),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.55),
+              fontSize: 11,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.9),
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1116,23 +1159,10 @@ class _BAMainPageState extends State<BAMainPage> {
       _NavItem(Icons.settings, '设置', 3),
     ];
 
-    return Container(
+    return BAGlassContainer(
+      borderRadius: 20,
       margin: const EdgeInsets.fromLTRB(24, 0, 24, 16),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A2540).withOpacity(0.92),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFF3A4D7A).withOpacity(0.6),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: items
@@ -1149,16 +1179,16 @@ class _BAMainPageState extends State<BAMainPage> {
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: BAAnimationDurations.micro,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           decoration: BoxDecoration(
             color: isSelected
-                ? const Color(0xFF6B8EFF).withOpacity(0.2)
+                ? BAColors.primary.withValues(alpha: 0.2)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: isSelected
-                  ? const Color(0xFF6B8EFF).withOpacity(0.5)
+                  ? BAColors.primary.withValues(alpha: 0.5)
                   : Colors.transparent,
             ),
           ),
@@ -1167,18 +1197,18 @@ class _BAMainPageState extends State<BAMainPage> {
             children: [
               AnimatedScale(
                 scale: isSelected ? 1.15 : 1.0,
-                duration: const Duration(milliseconds: 200),
+                duration: BAAnimationDurations.micro,
                 child: Icon(
                   icon,
-                  color: isSelected ? const Color(0xFF6B8EFF) : const Color(0xFF8A9BB8),
-                  size: 22,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isSelected ? const Color(0xFF6B8EFF) : const Color(0xFF8A9BB8),
+                  color: isSelected ? BAColors.primary : (Theme.of(context).brightness == Brightness.light ? const Color(0xFF5A6A8A) : const Color(0xFFA0B0C8)),
+              size: 22,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? BAColors.primary : (Theme.of(context).brightness == Brightness.light ? const Color(0xFF5A6A8A) : const Color(0xFFA0B0C8)),
                   fontSize: 11,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 ),
@@ -1189,15 +1219,6 @@ class _BAMainPageState extends State<BAMainPage> {
       ),
     );
   }
-
-  String _formatNumber(int num) {
-    if (num >= 100000000) {
-      return '${(num / 100000000).toStringAsFixed(1)}億';
-    } else if (num >= 10000) {
-      return '${(num / 10000).toStringAsFixed(0)},${(num % 10000).toString().padLeft(4, '0')}';
-    }
-    return num.toString();
-  }
 }
 
 class _NavItem {
@@ -1206,74 +1227,4 @@ class _NavItem {
   final int index;
 
   _NavItem(this.icon, this.label, this.index);
-}
-
-class _SideButtonData {
-  final IconData icon;
-  final String label;
-  final String? subLabel;
-  final String? badge;
-  final VoidCallback? onTap;
-
-  _SideButtonData({
-    required this.icon,
-    required this.label,
-    this.subLabel,
-    this.badge,
-    this.onTap,
-  });
-}
-
-/// 窗口按钮
-class _WindowButton extends StatefulWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool isClose;
-
-  const _WindowButton({
-    required this.icon,
-    required this.onTap,
-    this.isClose = false,
-  });
-
-  @override
-  State<_WindowButton> createState() => _WindowButtonState();
-}
-
-class _WindowButtonState extends State<_WindowButton> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: _isHovered
-                ? (widget.isClose
-                    ? const Color(0xFFE53935)
-                    : const Color(0xFF2A3A5C))
-                : const Color(0xFF1A2540).withOpacity(0.8),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: const Color(0xFF3A4D7A).withOpacity(0.5),
-            ),
-          ),
-          child: Icon(
-            widget.icon,
-            color: _isHovered && widget.isClose
-                ? Colors.white
-                : const Color(0xFFB8C5E0),
-            size: 16,
-          ),
-        ),
-      ),
-    );
-  }
 }

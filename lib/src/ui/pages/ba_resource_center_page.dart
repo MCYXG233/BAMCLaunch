@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import '../theme/colors.dart';
+import '../components/ba_common_widgets.dart';
 import '../../resource_center/search_service.dart';
 import '../../resource_center/models.dart';
 import '../components/ba_notification.dart';
@@ -58,10 +59,10 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
 
   // 资源颜色映射
   static const Map<ResourceType?, Color> _typeColors = {
-    null: Color(0xFF6B8EFF),
-    ResourceType.mod: Color(0xFFFF96B5),
-    ResourceType.resourcePack: Color(0xFF6BCB77),
-    ResourceType.modpack: Color(0xFFFFD93D),
+    null: BAColors.primary,
+    ResourceType.mod: BAColors.accentPink,
+    ResourceType.resourcePack: BAColors.success,
+    ResourceType.modpack: BAColors.warning,
   };
 
   @override
@@ -225,11 +226,11 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
-              gradient: BAColors.secondaryGradient,
+              gradient: BAColors.primaryGradient,
               borderRadius: BorderRadius.circular(14),
               boxShadow: [
                 BoxShadow(
-                  color: BAColors.secondary.withOpacity(0.3),
+                  color: BAColors.primary.withOpacity(0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -238,13 +239,13 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
+                const Icon(
                   Icons.extension,
                   color: Colors.white,
                   size: 24,
                 ),
                 const SizedBox(width: 12),
-                Text(
+                const Text(
                   '资源中心',
                   style: TextStyle(
                     color: Colors.white,
@@ -273,7 +274,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
               children: [
                 Icon(
                   Icons.download,
-                  color: BAColors.secondary,
+                  color: BAColors.primary,
                   size: 18,
                 ),
                 const SizedBox(width: 8),
@@ -295,82 +296,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
               ],
             ),
           ),
-          if (Platform.isWindows) ...[
-            const SizedBox(width: 4),
-            _WindowButton(
-              icon: Icons.remove,
-              onTap: () => windowManager.minimize(),
-            ),
-            _WindowButton(
-              icon: _isMaximized ? Icons.filter_none : Icons.crop_square,
-              onTap: () async {
-                if (_isMaximized) {
-                  await windowManager.unmaximize();
-                } else {
-                  await windowManager.maximize();
-                }
-              },
-            ),
-            _WindowButton(
-              icon: Icons.close,
-              onTap: () => windowManager.close(),
-              isClose: true,
-            ),
-          ],
         ],
-      ),
-    );
-  }
-}
-
-class _WindowButton extends StatefulWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool isClose;
-
-  const _WindowButton({
-    required this.icon,
-    required this.onTap,
-    this.isClose = false,
-  });
-
-  @override
-  State<_WindowButton> createState() => _WindowButtonState();
-}
-
-class _WindowButtonState extends State<_WindowButton> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: _isHovered
-                ? (widget.isClose
-                    ? const Color(0xFFE53935)
-                    : const Color(0xFF2A3A5C))
-                : const Color(0xFF1E2747),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: const Color(0xFF3A4D7A),
-            ),
-          ),
-          child: Icon(
-            widget.icon,
-            color: _isHovered && widget.isClose
-                ? Colors.white
-                : const Color(0xFFB8C5E0),
-            size: 16,
-          ),
-        ),
       ),
     );
   }
@@ -716,143 +642,118 @@ class _WindowButtonState extends State<_WindowButton> {
   Widget _buildResourceCard(BuildContext context, Resource resource) {
     final typeColor = _typeColors[resource.type] ?? BAColors.primary;
 
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: BAColors.glassOf(context),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: BAColors.borderOf(context).withOpacity(0.5),
+    return BASurfaceCard(
+      onTap: () => _onResourceTap(resource),
+      shadowColor: typeColor.withOpacity(0.15),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 顶部类型标签
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: typeColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _typeIcons[resource.type] ?? Icons.apps,
+                      size: 14,
+                      color: typeColor,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      _getTypeName(resource.type),
+                      style: TextStyle(
+                        color: typeColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: typeColor.withOpacity(0.15),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => _onResourceTap(resource),
-            borderRadius: BorderRadius.circular(16),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 顶部类型标签
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: typeColor.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              _typeIcons[resource.type] ?? Icons.apps,
-                              size: 14,
-                              color: typeColor,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              _getTypeName(resource.type),
-                              style: TextStyle(
-                                color: typeColor,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
+          const SizedBox(height: 12),
 
-                  // 资源图标
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            typeColor.withOpacity(0.2),
-                            typeColor.withOpacity(0.1),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          _typeIcons[resource.type] ?? Icons.apps,
-                          size: 48,
-                          color: typeColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // 资源名称
-                  Text(
-                    resource.name,
-                    style: TextStyle(
-                      color: BAColors.textPrimaryOf(context),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-
-                  // 下载量和作者
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.download,
-                        size: 14,
-                        color: BAColors.textSecondaryOf(context),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        _formatDownloads(resource.downloads),
-                        style: TextStyle(
-                          color: BAColors.textSecondaryOf(context),
-                          fontSize: 12,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        resource.authors.isNotEmpty
-                            ? resource.authors.first.name
-                            : '未知作者',
-                        style: TextStyle(
-                          color: BAColors.textSecondaryOf(context),
-                          fontSize: 11,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ],
+          // 资源图标
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    typeColor.withOpacity(0.2),
+                    typeColor.withOpacity(0.1),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Icon(
+                  _typeIcons[resource.type] ?? Icons.apps,
+                  size: 48,
+                  color: typeColor,
+                ),
               ),
             ),
           ),
-        ),
+          const SizedBox(height: 12),
+
+          // 资源名称
+          Text(
+            resource.name,
+            style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 8),
+
+          // 下载量和作者
+          Row(
+            children: [
+              Icon(
+                Icons.download,
+                size: 14,
+                color: BAColors.textSecondaryOf(context),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                _formatDownloads(resource.downloads),
+                style: TextStyle(
+                  color: BAColors.textSecondaryOf(context),
+                  fontSize: 12,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                resource.authors.isNotEmpty
+                    ? resource.authors.first.name
+                    : '未知作者',
+                style: TextStyle(
+                  color: BAColors.textSecondaryOf(context),
+                  fontSize: 11,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

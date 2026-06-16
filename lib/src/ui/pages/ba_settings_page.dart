@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:path/path.dart' as path;
 import 'package:window_manager/window_manager.dart';
+import '../components/ba_common_widgets.dart';
 import '../theme/colors.dart';
 import '../theme/app_theme.dart';
 import '../../config/config_manager.dart';
@@ -35,6 +36,8 @@ class BASettingsPage extends StatefulWidget {
 }
 
 class _BASettingsPageState extends State<BASettingsPage> {
+  Color _color(Color dark, Color light, bool isLight) => isLight ? light : dark;
+
   final ConfigManager _configManager = ConfigManager();
   final ThemeManager _themeManager = ThemeManager();
   final BackgroundManager _backgroundManager = BackgroundManager();
@@ -840,83 +843,46 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Container(
-        decoration: const BoxDecoration(
-        gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Color(0xFF141C33),
-          Color(0xFF0A0F1E),
-        ],
-      ),
-      ),
-        child: SafeArea(
-        child: Column(
+    return SafeArea(
+      child: Column(
         children: [
           _buildTopBar(),
           Expanded(
-          child: Row(
-            children: [
-            _buildCategoryList(),
-            Expanded(
-              child: _buildSettingsList(),
+            child: Row(
+              children: [
+                _buildCategoryList(),
+                Expanded(
+                  child: _buildSettingsList(),
+                ),
+              ],
             ),
-            ],
-          ),
           ),
         ],
-        ),
-      ),
       ),
     );
   }
 
   Widget _buildTopBar() {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final cardBg = _color(const Color(0xFF1E2747), const Color(0xFFFFFFFF), isLight);
+    final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFD0D8EE), isLight);
+    final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+    final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
+    final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
       child: Row(
         children: [
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: () {
-                EventBus.instance.publish(NavigateHomeEvent());
-              },
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E2747),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF3A4D7A), width: 1),
-                ),
-                child: const Icon(
-                  Icons.arrow_back,
-                  color: Color(0xFF8EAAFF),
-                  size: 20,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
           Container(
             width: 44,
             height: 44,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF6B8EFF),
-                  Color(0xFF8EAAFF),
-                ],
-              ),
+              gradient: BAColors.primaryGradient,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF6B8EFF).withOpacity(0.3),
+                  color: BAColors.primary.withOpacity(0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -932,21 +898,21 @@ class _BASettingsPageState extends State<BASettingsPage> {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
                   '设置',
                   style: TextStyle(
-                    color: Color(0xFFFFFFFF),
+                    color: primaryText,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5,
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
                   '启动器参数与偏好设置',
                   style: TextStyle(
-                    color: Color(0xFFA0B0C8),
+                    color: secondaryText,
                     fontSize: 12,
                   ),
                 ),
@@ -956,108 +922,32 @@ class _BASettingsPageState extends State<BASettingsPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E2747),
+              color: cardBg,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFF3A4D7A), width: 1),
+              border: Border.all(color: borderColor, width: 1),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   Icons.info_outline,
-                  color: Color(0xFF8EAAFF),
+                  color: accentBlue,
                   size: 18,
                 ),
-                SizedBox(width: 6),
+                const SizedBox(width: 6),
                 Text(
                   'v1.0.0',
                   style: TextStyle(
-                    color: Color(0xFFA0B0C8),
+                    color: secondaryText,
                     fontSize: 12,
                   ),
                 ),
               ],
             ),
           ),
-          if (Platform.isWindows) ...[
-            const SizedBox(width: 4),
-            _WindowButton(
-              icon: Icons.remove,
-              onTap: () => windowManager.minimize(),
-            ),
-            _WindowButton(
-              icon: _isMaximized ? Icons.filter_none : Icons.crop_square,
-              onTap: () async {
-                if (_isMaximized) {
-                  await windowManager.unmaximize();
-                } else {
-                  await windowManager.maximize();
-                }
-              },
-            ),
-            _WindowButton(
-              icon: Icons.close,
-              onTap: () => windowManager.close(),
-              isClose: true,
-            ),
-          ],
         ],
       ),
     );
-  }
-
-  // 窗口控制按钮组件
-  static class _WindowButton extends StatefulWidget {
-    final IconData icon;
-    final VoidCallback onTap;
-    final bool isClose;
-
-    const _WindowButton({
-      required this.icon,
-      required this.onTap,
-      this.isClose = false,
-    });
-
-    @override
-    State<_WindowButton> createState() => _WindowButtonState();
-  }
-
-  static class _WindowButtonState extends State<_WindowButton> {
-    bool _isHovered = false;
-
-    @override
-    Widget build(BuildContext context) {
-      return MouseRegion(
-        onEnter: (_) => setState(() => _isHovered = true),
-        onExit: (_) => setState(() => _isHovered = false),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: _isHovered
-                  ? (widget.isClose
-                      ? const Color(0xFFE53935)
-                      : const Color(0xFF2A3A5C))
-                  : const Color(0xFF1E2747),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: const Color(0xFF3A4D7A),
-              ),
-            ),
-            child: Icon(
-              widget.icon,
-              color: _isHovered && widget.isClose
-                  ? Colors.white
-                  : const Color(0xFFB8C5E0),
-              size: 16,
-            ),
-          ),
-        ),
-      );
-    }
   }
 
 
@@ -1082,13 +972,23 @@ class _BASettingsPageState extends State<BASettingsPage> {
       'about': Icons.info,
     };
 
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final bgColor = _color(const Color(0xFF1E2747), const Color(0xFFFFFFFF), isLight);
+    final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFD0D8EE), isLight);
+    final selectedBgColor = _color(const Color(0xFF2A3766), const Color(0xFFEEF3FF), isLight);
+    final unselectedText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
+    final unselectedIcon = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
+    final unselectedBgA = _color(const Color(0xFF2A3766), const Color(0xFFDCE4F8), isLight);
+    final unselectedBgB = _color(const Color(0xFF1E2747), const Color(0xFFFFFFFF), isLight);
+    final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+
     return Container(
       width: 210,
       margin: const EdgeInsets.only(left: 20, top: 8, bottom: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E2747),
+        color: bgColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF3A4D7A), width: 1),
+        border: Border.all(color: borderColor, width: 1),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       child: ListView.separated(
@@ -1114,12 +1014,12 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? const Color(0xFF2A3766)
+                      ? selectedBgColor
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: isSelected
-                        ? const Color(0xFF6B8EFF)
+                        ? BAColors.primary
                         : Colors.transparent,
                     width: 1,
                   ),
@@ -1134,20 +1034,20 @@ class _BASettingsPageState extends State<BASettingsPage> {
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: isSelected
-                              ? const [
-                                  Color(0xFF6B8EFF),
-                                  Color(0xFF8EAAFF),
+                              ? [
+                                  BAColors.primary,
+                                  unselectedIcon,
                                 ]
                               : [
-                                  const Color(0xFF2A3766),
-                                  const Color(0xFF1E2747),
+                                  unselectedBgA,
+                                  unselectedBgB,
                                 ],
                         ),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
                         icon,
-                        color: isSelected ? Colors.white : const Color(0xFF8EAAFF),
+                        color: isSelected ? Colors.white : unselectedIcon,
                         size: 16,
                       ),
                     ),
@@ -1156,8 +1056,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
                       categoryName,
                       style: TextStyle(
                         color: isSelected
-                          ? const Color(0xFFFFFFFF)
-                          : const Color(0xFFA0B0C8),
+                          ? primaryText
+                          : unselectedText,
                         fontSize: 14,
                         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                       ),
@@ -1174,7 +1074,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
   Widget _buildSettingsList() {
     if (!_managersInitialized) {
-      return const Center(child: CircularProgressIndicator(color: Color(0xFF6B8EFF)));
+      return const Center(child: CircularProgressIndicator(color: BAColors.primary));
     }
 
     switch (_selectedCategory) {
@@ -1198,19 +1098,26 @@ class _BASettingsPageState extends State<BASettingsPage> {
   }
 
   Widget _buildSettingsCard({
+    required BuildContext context,
     required String title,
     required List<Widget> children,
   }) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final bgColor = _color(const Color(0xFF1E2747), const Color(0xFFFFFFFF), isLight);
+    final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFD0D8EE), isLight);
+    final shadowOpacity = isLight ? 0.08 : 0.2;
+    final titleText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+    final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E2747),
+        color: bgColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF3A4D7A),
-        ),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF000000).withOpacity(0.2),
+            color: const Color(0xFF000000).withOpacity(shadowOpacity),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -1227,12 +1134,12 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   width: 4,
                   height: 16,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Color(0xFF6B8EFF),
-                        Color(0xFF8EAAFF),
+                        BAColors.primary,
+                        accentBlue,
                       ],
                     ),
                     borderRadius: BorderRadius.circular(2),
@@ -1241,8 +1148,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 const SizedBox(width: 10),
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: Color(0xFFFFFFFF),
+                  style: TextStyle(
+                    color: titleText,
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1256,7 +1163,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Container(
                   height: 1,
-                  color: const Color(0xFF3A4D7A),
+                  color: borderColor,
                 ),
               );
             }
@@ -1275,6 +1182,12 @@ class _BASettingsPageState extends State<BASettingsPage> {
     required Widget control,
     Color? iconColor,
   }) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+    final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
+    final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
+    final effectiveIconColor = iconColor ?? accentBlue;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       child: Row(
@@ -1287,15 +1200,15 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  (iconColor ?? const Color(0xFF6B8EFF)).withOpacity(0.25),
-                  (iconColor ?? const Color(0xFF8EAAFF)).withOpacity(0.15),
+                  effectiveIconColor.withOpacity(0.25),
+                  effectiveIconColor.withOpacity(0.15),
                 ],
               ),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
               icon,
-              color: iconColor ?? const Color(0xFF8EAAFF),
+              color: effectiveIconColor,
               size: 18,
             ),
           ),
@@ -1306,8 +1219,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: Color(0xFFFFFFFF),
+                  style: TextStyle(
+                    color: primaryText,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1316,8 +1229,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   const SizedBox(height: 3),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      color: Color(0xFFA0B0C8),
+                    style: TextStyle(
+                      color: secondaryText,
                       fontSize: 12,
                     ),
                     maxLines: 2,
@@ -1335,6 +1248,11 @@ class _BASettingsPageState extends State<BASettingsPage> {
   }
 
   Widget _buildSwitch(bool value, ValueChanged<bool> onChanged) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final accentBlueDyn = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
+    final offBgDyn = _color(const Color(0xFF2A3766), const Color(0xFFDCE4F8), isLight);
+    final offBorderDyn = _color(const Color(0xFF3A4D7A), const Color(0xFFB9C3DE), isLight);
+
     return GestureDetector(
       onTap: () => onChanged(!value),
       child: AnimatedContainer(
@@ -1344,26 +1262,26 @@ class _BASettingsPageState extends State<BASettingsPage> {
         padding: EdgeInsets.all(2),
         decoration: BoxDecoration(
           gradient: value
-              ? const LinearGradient(
+              ? LinearGradient(
                   colors: [
-                    Color(0xFF6B8EFF),
-                    Color(0xFF8EAAFF),
+                    BAColors.primary,
+                    accentBlueDyn,
                   ],
                 )
               : null,
           color: value
               ? null
-              : const Color(0xFF2A3766),
+              : offBgDyn,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: value
                 ? Colors.transparent
-                : const Color(0xFF3A4D7A),
+                : offBorderDyn,
           ),
           boxShadow: value
               ? [
                   BoxShadow(
-                    color: const Color(0xFF6B8EFF).withOpacity(0.4),
+                    color: BAColors.primary.withOpacity(0.4),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -1400,23 +1318,29 @@ class _BASettingsPageState extends State<BASettingsPage> {
   }) {
     final validValues = items.map((item) => item.value).toList();
     final effectiveValue = validValues.contains(value) ? value : items.first.value;
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final fillBg = _color(const Color(0xFF0F1733), const Color(0xFFEEF3FF), isLight);
+    final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFB9C3DE), isLight);
+    final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+    final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
+    final dropdownBg = _color(const Color(0xFF1E2747), const Color(0xFFFFFFFF), isLight);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F1733),
+        color: fillBg,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFF3A4D7A)),
+        border: Border.all(color: borderColor),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<T>(
           value: effectiveValue,
-          icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFFA0B0C8), size: 20),
-          style: const TextStyle(
-            color: Color(0xFFFFFFFF),
+          icon: Icon(Icons.keyboard_arrow_down, color: secondaryText, size: 20),
+          style: TextStyle(
+            color: primaryText,
             fontSize: 13,
           ),
-          dropdownColor: const Color(0xFF1E2747),
+          dropdownColor: dropdownBg,
           items: items,
           onChanged: onChanged,
         ),
@@ -1430,29 +1354,35 @@ class _BASettingsPageState extends State<BASettingsPage> {
     required String placeholder,
     double width = 200,
   }) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final fillBg = _color(const Color(0xFF0F1733), const Color(0xFFEEF3FF), isLight);
+    final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFB9C3DE), isLight);
+    final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+    final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
+
     return SizedBox(
       width: width,
       child: TextField(
         controller: controller,
         focusNode: focusNode,
-        style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 13),
+        style: TextStyle(color: primaryText, fontSize: 13),
         decoration: InputDecoration(
           hintText: placeholder,
-          hintStyle: const TextStyle(color: Color(0xFFA0B0C8), fontSize: 13),
+          hintStyle: TextStyle(color: secondaryText, fontSize: 13),
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           filled: true,
-          fillColor: const Color(0xFF0F1733),
+          fillColor: fillBg,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFF3A4D7A)),
+            borderSide: BorderSide(color: borderColor),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFF3A4D7A)),
+            borderSide: BorderSide(color: borderColor),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFF6B8EFF)),
+            borderSide: const BorderSide(color: BAColors.primary),
           ),
           isDense: true,
         ),
@@ -1466,6 +1396,12 @@ class _BASettingsPageState extends State<BASettingsPage> {
     required String buttonText,
     required VoidCallback onBrowse,
   }) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final fillBg = _color(const Color(0xFF0F1733), const Color(0xFFEEF3FF), isLight);
+    final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFB9C3DE), isLight);
+    final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+    final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -1473,14 +1409,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
           constraints: const BoxConstraints(maxWidth: 220),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: const Color(0xFF0F1733),
+            color: fillBg,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: const Color(0xFF3A4D7A)),
+            border: Border.all(color: borderColor),
           ),
           child: Text(
             path.isEmpty ? placeholder : path,
             style: TextStyle(
-              color: path.isEmpty ? const Color(0xFFA0B0C8) : const Color(0xFFFFFFFF),
+              color: path.isEmpty ? secondaryText : primaryText,
               fontSize: 12,
             ),
             maxLines: 1,
@@ -1502,6 +1438,10 @@ class _BASettingsPageState extends State<BASettingsPage> {
     bool isLoading = false,
     Color? color,
   }) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
+    final effectiveColor = color ?? accentBlue;
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
@@ -1512,14 +1452,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                color ?? const Color(0xFF6B8EFF),
-                color ?? const Color(0xFF8EAAFF),
+                color ?? BAColors.primary,
+                effectiveColor,
               ],
             ),
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: (color ?? const Color(0xFF6B8EFF)).withOpacity(0.3),
+                color: (color ?? BAColors.primary).withOpacity(0.3),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -1552,6 +1492,11 @@ class _BASettingsPageState extends State<BASettingsPage> {
     required VoidCallback onPressed,
     bool isLoading = false,
   }) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final offBg = _color(const Color(0xFF2A3766), const Color(0xFFEEF3FF), isLight);
+    final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFB9C3DE), isLight);
+    final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
@@ -1559,23 +1504,23 @@ class _BASettingsPageState extends State<BASettingsPage> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
           decoration: BoxDecoration(
-            color: const Color(0xFF2A3766),
+            color: offBg,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: const Color(0xFF3A4D7A)),
+            border: Border.all(color: borderColor),
           ),
           child: isLoading
-              ? const SizedBox(
+              ? SizedBox(
                 width: 14,
                 height: 14,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8EAAFF)),
+                  valueColor: AlwaysStoppedAnimation<Color>(accentBlue),
                 ),
               )
               : Text(
                 text,
-                style: const TextStyle(
-                  color: Color(0xFF8EAAFF),
+                style: TextStyle(
+                  color: accentBlue,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1590,6 +1535,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
       children: [
         _buildSettingsCard(
+          context: context,
           title: '背景设置',
           children: [
             Padding(
@@ -1659,13 +1605,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
   Widget _buildGeneralSettings() {
     if (!_themeManagerInitialized) {
       return const Center(
-        child: CircularProgressIndicator(color: Color(0xFF6B8EFF)),
+        child: CircularProgressIndicator(color: BAColors.primary),
       );
     }
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
       children: [
         _buildSettingsCard(
+          context: context,
           title: '外观',
           children: [
             _buildSettingsRow(
@@ -1702,6 +1649,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
           ],
         ),
         _buildSettingsCard(
+          context: context,
           title: '行为',
           children: [
             _buildSettingsRow(
@@ -1731,6 +1679,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
           ],
         ),
         _buildSettingsCard(
+          context: context,
           title: '更新',
           children: [
             _buildSettingsRow(
@@ -1754,6 +1703,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
       children: [
         _buildSettingsCard(
+          context: context,
           title: '路径设置',
           children: [
             _buildSettingsRow(
@@ -1779,77 +1729,88 @@ class _BASettingsPageState extends State<BASettingsPage> {
           ],
         ),
         _buildSettingsCard(
+          context: context,
           title: '性能设置',
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          const Color(0xFF6B8EFF).withOpacity(0.25),
-                          const Color(0xFF8EAAFF).withOpacity(0.15),
-                        ],
+              child: Builder(
+                builder: (context) {
+                  final isLight = Theme.of(context).brightness == Brightness.light;
+                  final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+                  final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
+                  final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
+                  final inactiveTrack = _color(const Color(0xFF2A3766), const Color(0xFFDCE4F8), isLight);
+
+                  return Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              BAColors.primary.withOpacity(0.25),
+                              accentBlue.withOpacity(0.15),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          Icons.memory,
+                          color: accentBlue,
+                          size: 18,
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.memory,
-                      color: Color(0xFF8EAAFF),
-                      size: 18,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          '最大内存',
-                          style: TextStyle(
-                            color: Color(0xFFFFFFFF),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '最大内存',
+                              style: TextStyle(
+                                color: primaryText,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              '${_memoryAllocation.toInt()} MB',
+                              style: TextStyle(
+                                color: secondaryText,
+                                fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            SliderTheme(
+                              data: SliderThemeData(
+                                activeTrackColor: BAColors.primary,
+                                inactiveTrackColor: inactiveTrack,
+                                thumbColor: Colors.white,
+                                trackHeight: 4,
+                                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                                overlayColor: BAColors.primary.withOpacity(0.2),
+                              ),
+                              child: Slider(
+                                value: _memoryAllocation,
+                                min: 1024,
+                                max: 16384,
+                                divisions: 15,
+                                label: '${_memoryAllocation.toInt()} MB',
+                                onChanged: _saveMemoryAllocation,
+                                onChangeEnd: _commitMemoryAllocation,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 3),
-                        Text(
-                          '${_memoryAllocation.toInt()} MB',
-                          style: const TextStyle(
-                            color: Color(0xFFA0B0C8),
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        SliderTheme(
-                          data: SliderThemeData(
-                            activeTrackColor: const Color(0xFF6B8EFF),
-                            inactiveTrackColor: const Color(0xFF2A3766),
-                            thumbColor: Colors.white,
-                            trackHeight: 4,
-                            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                            overlayColor: const Color(0xFF6B8EFF).withOpacity(0.2),
-                          ),
-                          child: Slider(
-                            value: _memoryAllocation,
-                            min: 1024,
-                            max: 16384,
-                            divisions: 15,
-                            label: '${_memoryAllocation.toInt()} MB',
-                            onChanged: _saveMemoryAllocation,
-                            onChangeEnd: _commitMemoryAllocation,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
             _buildSettingsRow(
@@ -1872,6 +1833,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
           ],
         ),
         _buildSettingsCard(
+          context: context,
           title: '高级参数',
           children: [
             _buildSettingsRow(
@@ -1905,6 +1867,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
       children: [
         _buildSettingsCard(
+          context: context,
           title: '下载设置',
           children: [
             _buildSettingsRow(
@@ -1942,83 +1905,94 @@ class _BASettingsPageState extends State<BASettingsPage> {
           ],
         ),
         _buildSettingsCard(
+          context: context,
           title: '并发下载设置',
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-              child: Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          const Color(0xFF6B8EFF).withOpacity(0.25),
-                          const Color(0xFF8EAAFF).withOpacity(0.15),
-                        ],
+              child: Builder(
+                builder: (context) {
+                  final isLight = Theme.of(context).brightness == Brightness.light;
+                  final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+                  final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
+                  final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
+                  final inactiveTrack = _color(const Color(0xFF2A3766), const Color(0xFFDCE4F8), isLight);
+
+                  return Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              BAColors.primary.withOpacity(0.25),
+                              accentBlue.withOpacity(0.15),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          Icons.speed,
+                          color: accentBlue,
+                          size: 18,
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.speed,
-                      color: Color(0xFF8EAAFF),
-                      size: 18,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          '并发下载数',
-                          style: TextStyle(
-                            color: Color(0xFFFFFFFF),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '并发下载数',
+                              style: TextStyle(
+                                color: primaryText,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              '$_concurrentDownloads 个线程',
+                              style: TextStyle(
+                                color: secondaryText,
+                                fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            SliderTheme(
+                              data: SliderThemeData(
+                                activeTrackColor: BAColors.primary,
+                                inactiveTrackColor: inactiveTrack,
+                                thumbColor: Colors.white,
+                                trackHeight: 4,
+                                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                                overlayColor: BAColors.primary.withOpacity(0.2),
+                              ),
+                              child: Slider(
+                                value: _concurrentDownloads.toDouble(),
+                                min: 1,
+                                max: 10,
+                                divisions: 9,
+                                label: '$_concurrentDownloads',
+                                onChanged: (value) {
+                                  setState(() {
+                                    _concurrentDownloads = value.toInt();
+                                  });
+                                },
+                                onChangeEnd: (value) {
+                                  _saveConcurrentDownloads(value.toInt());
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 3),
-                        Text(
-                          '$_concurrentDownloads 个线程',
-                          style: const TextStyle(
-                            color: Color(0xFFA0B0C8),
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        SliderTheme(
-                          data: SliderThemeData(
-                            activeTrackColor: const Color(0xFF6B8EFF),
-                            inactiveTrackColor: const Color(0xFF2A3766),
-                            thumbColor: Colors.white,
-                            trackHeight: 4,
-                            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                            overlayColor: const Color(0xFF6B8EFF).withOpacity(0.2),
-                          ),
-                          child: Slider(
-                            value: _concurrentDownloads.toDouble(),
-                            min: 1,
-                            max: 10,
-                            divisions: 9,
-                            label: '$_concurrentDownloads',
-                            onChanged: (value) {
-                              setState(() {
-                                _concurrentDownloads = value.toInt();
-                              });
-                            },
-                            onChangeEnd: (value) {
-                              _saveConcurrentDownloads(value.toInt());
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
             _buildSettingsRow(
@@ -2032,79 +2006,89 @@ class _BASettingsPageState extends State<BASettingsPage> {
             if (_enableSpeedLimit) ...[
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            const Color(0xFF6B8EFF).withOpacity(0.25),
-                            const Color(0xFF8EAAFF).withOpacity(0.15),
-                          ],
+                child: Builder(
+                  builder: (context) {
+                    final isLight = Theme.of(context).brightness == Brightness.light;
+                    final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+                    final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
+                    final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
+                    final inactiveTrack = _color(const Color(0xFF2A3766), const Color(0xFFDCE4F8), isLight);
+
+                    return Row(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                BAColors.primary.withOpacity(0.25),
+                                accentBlue.withOpacity(0.15),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            Icons.speed,
+                            color: accentBlue,
+                            size: 18,
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.speed,
-                        color: Color(0xFF8EAAFF),
-                        size: 18,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            '限速值',
-                            style: TextStyle(
-                              color: Color(0xFFFFFFFF),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '限速值',
+                                style: TextStyle(
+                                  color: primaryText,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                '${_speedLimitValue.toInt()} ${_speedLimitUnit == 0 ? "KB/s" : "MB/s"}',
+                                style: TextStyle(
+                                  color: secondaryText,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              SliderTheme(
+                                data: SliderThemeData(
+                                  activeTrackColor: BAColors.primary,
+                                  inactiveTrackColor: inactiveTrack,
+                                  thumbColor: Colors.white,
+                                  trackHeight: 4,
+                                  thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                                  overlayColor: BAColors.primary.withOpacity(0.2),
+                                ),
+                                child: Slider(
+                                  value: _speedLimitValue,
+                                  min: 1,
+                                  max: _speedLimitUnit == 0 ? 10240 : 10,
+                                  divisions: _speedLimitUnit == 0 ? 100 : 9,
+                                  label: '${_speedLimitValue.toInt()}',
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _speedLimitValue = value;
+                                    });
+                                  },
+                                  onChangeEnd: (value) {
+                                    _saveSpeedLimitValue(value, _speedLimitUnit);
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 3),
-                          Text(
-                            '${_speedLimitValue.toInt()} ${_speedLimitUnit == 0 ? "KB/s" : "MB/s"}',
-                            style: const TextStyle(
-                              color: Color(0xFFA0B0C8),
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          SliderTheme(
-                            data: SliderThemeData(
-                              activeTrackColor: const Color(0xFF6B8EFF),
-                              inactiveTrackColor: const Color(0xFF2A3766),
-                              thumbColor: Colors.white,
-                              trackHeight: 4,
-                              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                              overlayColor: const Color(0xFF6B8EFF).withOpacity(0.2),
-                            ),
-                            child: Slider(
-                              value: _speedLimitValue,
-                              min: 1,
-                              max: _speedLimitUnit == 0 ? 10240 : 10,
-                              divisions: _speedLimitUnit == 0 ? 100 : 9,
-                              label: '${_speedLimitValue.toInt()}',
-                              onChanged: (value) {
-                                setState(() {
-                                  _speedLimitValue = value;
-                                });
-                              },
-                              onChangeEnd: (value) {
-                                _saveSpeedLimitValue(value, _speedLimitUnit);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
               _buildSettingsRow(
@@ -2136,6 +2120,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
           ],
         ),
         _buildSettingsCard(
+          context: context,
           title: '镜像源管理',
           children: [
             _buildSettingsRow(
@@ -2169,58 +2154,67 @@ class _BASettingsPageState extends State<BASettingsPage> {
           ],
         ),
         _buildSettingsCard(
+          context: context,
           title: '镜像列表',
           children: [
             ..._buildMirrorList(),
             const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '添加自定义镜像',
-                    style: TextStyle(
-                      color: Color(0xFFFFFFFF),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
+              child: Builder(
+                builder: (context) {
+                  final isLight = Theme.of(context).brightness == Brightness.light;
+                  final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        flex: 1,
-                        child: _buildTextField(
-                          controller: _customMirrorNameController,
-                          focusNode: FocusNode(),
-                          placeholder: '名称（可选）',
-                          width: 120,
+                      Text(
+                        '添加自定义镜像',
+                        style: TextStyle(
+                          color: primaryText,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        flex: 3,
-                        child: _buildTextField(
-                          controller: _customMirrorUrlController,
-                          focusNode: FocusNode(),
-                          placeholder: 'https://example.com',
-                          width: 250,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      _buildPrimaryButton(
-                        text: '添加',
-                        onPressed: _addCustomMirror,
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: _buildTextField(
+                              controller: _customMirrorNameController,
+                              focusNode: FocusNode(),
+                              placeholder: '名称（可选）',
+                              width: 120,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            flex: 3,
+                            child: _buildTextField(
+                              controller: _customMirrorUrlController,
+                              focusNode: FocusNode(),
+                              placeholder: 'https://example.com',
+                              width: 250,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          _buildPrimaryButton(
+                            text: '添加',
+                            onPressed: _addCustomMirror,
+                          ),
+                        ],
                       ),
                     ],
-                  ),
-                ],
+                  );
+                },
               ),
             ),
           ],
         ),
         _buildSettingsCard(
+          context: context,
           title: '网络设置',
           children: [
             _buildSettingsRow(
@@ -2262,169 +2256,175 @@ class _BASettingsPageState extends State<BASettingsPage> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
         child: MouseRegion(
           cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            onTap: () => _selectMirror(mirror.id),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? const Color(0xFF2A3766)
-                    : const Color(0xFF141C33),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: isSelected
-                      ? const Color(0xFF6B8EFF)
-                      : const Color(0xFF3A4D7A),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 20,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isSelected
-                            ? const Color(0xFF6B8EFF)
-                            : const Color(0xFFA0B0C8),
-                        width: 2,
-                      ),
-                      color: isSelected ? const Color(0xFF6B8EFF) : Colors.transparent,
+          child: Builder(
+            builder: (context) {
+              final isLight = Theme.of(context).brightness == Brightness.light;
+              final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+              final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
+              final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
+              final selectedBg = _color(const Color(0xFF2A3766), const Color(0xFFEEF3FF), isLight);
+              final defaultBg = _color(const Color(0xFF1E2747), const Color(0xFFFFFFFF), isLight);
+              final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFB9C3DE), isLight);
+
+              return GestureDetector(
+                onTap: () => _selectMirror(mirror.id),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isSelected ? selectedBg : defaultBg,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isSelected ? BAColors.primary : borderColor,
                     ),
-                    child: isSelected
-                        ? const Icon(
-                          Icons.check,
-                          size: 12,
-                          color: Colors.white,
-                        )
-                        : null,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isSelected ? BAColors.primary : secondaryText,
+                            width: 2,
+                          ),
+                          color: isSelected ? BAColors.primary : Colors.transparent,
+                        ),
+                        child: isSelected
+                            ? const Icon(
+                                Icons.check,
+                                size: 12,
+                                color: Colors.white,
+                              )
+                            : null,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Row(
+                              children: [
+                                Text(
+                                  mirror.name,
+                                  style: TextStyle(
+                                    color: primaryText,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                if (mirror.isOfficial) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: BAColors.primary.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      '官方',
+                                      style: TextStyle(
+                                        color: accentBlue,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                if (mirror.isBuiltIn && !mirror.isOfficial) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: BAColors.accentPinkDark.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: const Text(
+                                      '内置',
+                                      style: TextStyle(
+                                        color: BAColors.accentPinkDark,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            const SizedBox(height: 3),
                             Text(
-                              mirror.name,
+                              mirror.url,
+                              style: TextStyle(
+                                color: secondaryText,
+                                fontSize: 11,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (speedResult != null) ...[
+                        if (speedResult.isAvailable)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: BAColors.success.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              '${speedResult.latencyMs}ms',
                               style: const TextStyle(
-                                color: Color(0xFFFFFFFF),
-                                fontSize: 13,
+                                color: BAColors.success,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            if (mirror.isOfficial) ...[
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF6B8EFF).withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: const Text(
-                                  '官方',
-                                  style: TextStyle(
-                                    color: Color(0xFF8EAAFF),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
+                          )
+                        else
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: BAColors.accentPinkDark.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              '不可用',
+                              style: TextStyle(
+                                color: BAColors.accentPinkDark,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
                               ),
-                            ],
-                            if (mirror.isBuiltIn && !mirror.isOfficial) ...[
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFF96B5).withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: const Text(
-                                  '内置',
-                                  style: TextStyle(
-                                    color: Color(0xFFFF96B5),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          mirror.url,
-                          style: const TextStyle(
-                            color: Color(0xFFA0B0C8),
-                            fontSize: 11,
+                            ),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      ],
+                      if (!mirror.isBuiltIn) ...[
+                        const SizedBox(width: 8),
+                        MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: GestureDetector(
+                            onTap: () => _removeCustomMirror(mirror.id),
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: BAColors.accentPinkDark.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Icon(
+                                Icons.delete_outline,
+                                color: BAColors.accentPinkDark,
+                                size: 16,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
-                    ),
+                    ],
                   ),
-                  if (speedResult != null) ...[
-                    if (speedResult.isAvailable)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF6BCB77).withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          '${speedResult.latencyMs}ms',
-                          style: const TextStyle(
-                            color: Color(0xFF6BCB77),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      )
-                    else
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFF96B5).withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Text(
-                          '不可用',
-                          style: TextStyle(
-                            color: Color(0xFFFF96B5),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                  ],
-                  if (!mirror.isBuiltIn) ...[
-                    const SizedBox(width: 8),
-                    MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: GestureDetector(
-                        onTap: () => _removeCustomMirror(mirror.id),
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFF96B5).withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Icon(
-                            Icons.delete_outline,
-                            color: Color(0xFFFF96B5),
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           ),
         ),
       );
@@ -2436,29 +2436,29 @@ class _BASettingsPageState extends State<BASettingsPage> {
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
       children: [
         _buildSettingsCard(
-          title: '应用信息',
+          context: context,
+          title: '关于',
           children: [
             _buildSettingsRow(
               icon: Icons.info_outline,
-              title: '应用版本号',
-              subtitle: 'BAMC Launcher v1.0.0',
-              control: const SizedBox.shrink(),
+              title: '关于 BAMC Launch',
+              subtitle: '查看应用信息和许可证',
+              control: _buildPrimaryButton(
+                text: '查看',
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('关于 BAMC Launch'),
+                    content: const Text('版本 v1.0.0\n© 2024 BAMC Launch Team'),
+                    actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('关闭'))],
+                  ),
+                ),
+              ),
             ),
-            _buildSettingsRow(
-              icon: Icons.gavel,
-              title: '开源许可证',
-              subtitle: 'GPL-3.0 License',
-              control: const SizedBox.shrink(),
-            ),
-          ],
-        ),
-        _buildSettingsCard(
-          title: '链接与反馈',
-          children: [
             _buildSettingsRow(
               icon: Icons.code,
-              title: 'GitHub链接',
-              subtitle: 'GitHub 仓库',
+              title: 'GitHub 仓库',
+              subtitle: '访问源代码',
               control: _buildPrimaryButton(
                 text: '访问',
                 onPressed: () => _launchURL('https://github.com/TSSForsunshine/BAMCLaunch'),
@@ -2466,16 +2466,17 @@ class _BASettingsPageState extends State<BASettingsPage> {
             ),
             _buildSettingsRow(
               icon: Icons.feedback,
-              title: '反馈/问题报告',
-              subtitle: '提交反馈',
+              title: '问题反馈',
+              subtitle: '提交 Bug 或建议',
               control: _buildPrimaryButton(
-                text: '提交',
+                text: '反馈',
                 onPressed: () => _launchURL('https://github.com/TSSForsunshine/BAMCLaunch/issues'),
               ),
             ),
           ],
         ),
         _buildSettingsCard(
+          context: context,
           title: '维护',
           children: [
             _buildSettingsRow(
@@ -2485,7 +2486,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               control: _buildPrimaryButton(
                 text: '清除',
                 onPressed: _clearCache,
-                color: const Color(0xFFFF96B5),
+                color: BAColors.accentPinkDark,
               ),
             ),
           ],
@@ -2502,6 +2503,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
       children: [
         _buildSettingsCard(
+          context: context,
           title: '备份管理',
           children: [
             _buildSettingsRow(
@@ -2552,6 +2554,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
     final children = <Widget>[
       _buildSettingsCard(
+        context: context,
         title: '总统计',
         children: [
           _buildSettingsRow(
@@ -2579,6 +2582,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
     if (mostPlayed != null) {
       children.add(
         _buildSettingsCard(
+          context: context,
           title: '最常玩的实例',
           children: [
             _buildSettingsRow(
@@ -2587,7 +2591,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               subtitle:
                   '${formatDuration(Duration(seconds: mostPlayed.totalPlayTimeSeconds))} / ${mostPlayed.launchCount}次',
               control: const SizedBox.shrink(),
-              iconColor: const Color(0xFFFF96B5),
+              iconColor: BAColors.accentPinkDark,
             ),
           ],
         ),
@@ -2596,6 +2600,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
     children.add(
       _buildSettingsCard(
+        context: context,
         title: '数据管理',
         children: [
           _buildSettingsRow(
@@ -2617,7 +2622,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   NotificationManager().showSuccess('统计数据已清除');
                 }
               },
-              color: const Color(0xFFFF96B5),
+              color: BAColors.accentPinkDark,
             ),
           ),
         ],

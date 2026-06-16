@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'splash_page.dart';
 import 'ba_main_page.dart';
-import 'home_page.dart';
 import 'version_page.dart';
 import 'account_page.dart';
-import 'settings_page.dart';
 import 'ba_settings_page.dart';
-import 'resource_center_page.dart';
 import 'ba_resource_center_page.dart';
 import 'login_page.dart';
 import 'account_selector.dart';
@@ -22,6 +20,38 @@ class AppRoutes {
   static const String resourceCenter = '/resource-center';
   static const String login = '/login';
   static const String accountSelector = '/account-selector';
+}
+
+/// 自定义页面过渡动画 - 滑入效果
+PageRouteBuilder _createSlideRoute(Widget page, RouteSettings settings) {
+  return PageRouteBuilder(
+    settings: settings,
+    pageBuilder: (context, animation, secondaryAnimation) => page,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(1.0, 0.0);
+      const end = Offset.zero;
+      const curve = Curves.easeOutCubic;
+
+      var tween = Tween(begin: begin, end: end).chain(
+        CurveTween(curve: curve),
+      );
+
+      // 添加淡入淡出效果
+      var fadeTween = Tween(begin: 0.0, end: 1.0).chain(
+        CurveTween(curve: curve),
+      );
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: FadeTransition(
+          opacity: animation.drive(fadeTween),
+          child: child,
+        ),
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 300),
+    reverseTransitionDuration: const Duration(milliseconds: 250),
+  );
 }
 
 /// 应用路由管理类
@@ -42,35 +72,17 @@ class AppRouter {
           settings: settings,
         );
       case AppRoutes.versions:
-        return MaterialPageRoute(
-          builder: (_) => const BAGameLibraryPage(),
-          settings: settings,
-        );
+        return _createSlideRoute(const BAGameLibraryPage(), settings);
       case AppRoutes.accounts:
-        return MaterialPageRoute(
-          builder: (_) => const BAMCHomePage(),
-          settings: settings,
-        );
+        return _createSlideRoute(const BAMCAccountPage(), settings);
       case AppRoutes.settings:
-        return MaterialPageRoute(
-          builder: (_) => const BASettingsPage(),
-          settings: settings,
-        );
+        return _createSlideRoute(const BASettingsPage(), settings);
       case AppRoutes.resourceCenter:
-        return MaterialPageRoute(
-          builder: (_) => const BAResourceCenterPage(),
-          settings: settings,
-        );
+        return _createSlideRoute(const BAResourceCenterPage(), settings);
       case AppRoutes.login:
-        return MaterialPageRoute(
-          builder: (_) => const LoginPage(),
-          settings: settings,
-        );
+        return _createSlideRoute(const LoginPage(), settings);
       case AppRoutes.accountSelector:
-        return MaterialPageRoute(
-          builder: (_) => const AccountSelectorPage(),
-          settings: settings,
-        );
+        return _createSlideRoute(const AccountSelectorPage(), settings);
       default:
         return MaterialPageRoute(
           builder: (_) => const BAMCSplashPage(),

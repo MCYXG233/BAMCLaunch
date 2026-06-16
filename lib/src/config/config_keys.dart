@@ -152,4 +152,8 @@ class ConfigKeys {
   /// 备份压缩配置
   static const String backupCompressionLevel = 'backupCompressionLevel';
   static const String backupCompressEnabled = 'backupCompressEnabled';
+
+  /// 动态主题色（莫奈取色）
+  static const String themeColor = 'themeColor';
+  static const String useDynamicColor = 'useDynamicColor';
 }

@@ -1,10 +1,7 @@
 export 'app_router.dart';
 export 'splash_page.dart';
-export 'home_page.dart';
 export 'version_page.dart';
 export 'account_page.dart';
-export 'settings_page.dart';
-export 'resource_center_page.dart';
 export 'resource_detail_page.dart';
 export 'installed_resources_page.dart';
 export 'login_page.dart';
@@ -16,3 +13,6 @@ export 'ba_settings_page.dart';
 export 'ba_game_log_page.dart';
 export 'ba_modpack_export_page.dart';
 export 'ba_mod_manager_page.dart';
+export 'authlib_login_page.dart';
+export 'ba_resource_detail_page.dart';
+export 'ba_diagnostic_page.dart';

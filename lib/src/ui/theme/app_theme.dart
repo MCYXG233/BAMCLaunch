@@ -5,15 +5,12 @@ import 'typography.dart';
 /// 蔚蓝档案（Blue Archive）UI 主题数据
 ///
 /// 本类提供完整的 Flutter [ThemeData] 配置，完全按照蔚蓝档案的视觉风格设计。
-/// 蔚蓝档案是一款由 Nexon 发行的学园都市题材 RPG 游戏，其 UI 设计风格特点包括：
+/// 支持莫奈取色（Monet）动态主题：通过 seedColor 自动生成整套配色方案。
 ///
+/// 设计风格特点：
 /// - **清新明亮的配色**：以天蓝色为主色调，搭配樱花粉色作为辅助色
 /// - **圆润柔和的形状**：大量使用圆角设计，营造亲和力
 /// - **轻盈的视觉层次**：低对比度配色、柔和阴影、半透明效果
-/// - **青春活力的氛围**：整体设计传达出希望、青春、友谊的主题
-///
-/// 本类提供浅色主题（lightTheme）和深色主题（darkTheme）两种配置，
-/// 可通过 [getTheme] 方法根据主题模式获取相应的主题数据。
 ///
 /// 使用示例：
 /// ```dart
@@ -25,34 +22,21 @@ import 'typography.dart';
 /// ```
 class BATheme {
   /// 向后兼容：获取默认主题数据（浅色）
-  ///
-  /// 此属性为向后兼容而保留，返回浅色主题数据。
-  /// 建议使用 [lightTheme] 或 [darkTheme] 明确指定主题类型。
   static ThemeData get theme => lightTheme;
 
-  /// 获取深色主题数据
+  /// 获取深色主题数据（支持莫奈取色动态主题）
   ///
-  /// 返回配置好的深色主题 [ThemeData]，适用于深色模式环境。
-  /// 深色主题采用较深的背景色和表面色，同时保持蔚蓝档案的核心配色风格。
-  ///
-  /// 深色主题的设计特点：
-  /// - 深色背景配合天蓝色主色调，形成鲜明对比
-  /// - 降低整体亮度，适合夜间或低光环境使用
-  /// - 保持与浅色主题一致的圆角、间距等设计参数
-  ///
-  /// 返回：完整的深色主题 [ThemeData] 对象
-  static ThemeData get darkTheme {
+  /// 参数 [seedColor]：可选的动态主题色，传 null 则使用蔚蓝档案默认天蓝色
+  static ThemeData buildDarkTheme({Color? seedColor}) {
+    final Color primary = seedColor ?? BAColors.primary;
     return ThemeData(
       useMaterial3: true,
-      colorScheme: _darkColorScheme,
+      colorScheme: _buildColorScheme(Brightness.dark, primary),
       scaffoldBackgroundColor: BAColors.darkBackground,
       cardColor: BAColors.darkSurface,
       textTheme: _textTheme,
-      inputDecorationTheme: _darkInputDecorationTheme,
       iconTheme: _darkIconTheme,
       dividerTheme: _darkDividerTheme,
-      appBarTheme: _darkAppBarTheme,
-      bottomNavigationBarTheme: _darkBottomNavBarTheme,
       cardTheme: CardThemeData(
         color: BAColors.darkSurface,
         elevation: 0,
@@ -64,26 +48,26 @@ class BATheme {
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return BAColors.primary;
+            return primary;
           }
           return BAColors.darkTextSecondary;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return BAColors.primary.withOpacity(0.3);
+            return primary.withOpacity(0.3);
           }
           return BAColors.darkSurfaceVariant;
         }),
       ),
       sliderTheme: SliderThemeData(
-        activeTrackColor: BAColors.primary,
+        activeTrackColor: primary,
         inactiveTrackColor: BAColors.darkSurfaceVariant,
-        thumbColor: BAColors.primary,
-        overlayColor: BAColors.primary.withOpacity(0.2),
+        thumbColor: primary,
+        overlayColor: primary.withOpacity(0.2),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: BAColors.primary,
+          backgroundColor: primary,
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -98,7 +82,7 @@ class BATheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: BAColors.primary,
+          foregroundColor: primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
@@ -107,8 +91,8 @@ class BATheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: BAColors.primary,
-          side: const BorderSide(color: BAColors.primary, width: 1),
+          foregroundColor: primary,
+          side: BorderSide(color: primary, width: 1),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -132,7 +116,7 @@ class BATheme {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: BAColors.darkSurfaceVariant,
-        selectedColor: BAColors.primary.withOpacity(0.2),
+        selectedColor: primary.withOpacity(0.2),
         labelStyle: const TextStyle(fontSize: 13),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -142,7 +126,7 @@ class BATheme {
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return BAColors.primary;
+            return primary;
           }
           return null;
         }),
@@ -154,7 +138,7 @@ class BATheme {
       radioTheme: RadioThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return BAColors.primary;
+            return primary;
           }
           return null;
         }),
@@ -162,7 +146,7 @@ class BATheme {
       progressIndicatorTheme: ProgressIndicatorThemeData(
         linearTrackColor: BAColors.darkSurfaceVariant,
         circularTrackColor: BAColors.darkSurfaceVariant,
-        color: BAColors.primary,
+        color: primary,
       ),
       popupMenuTheme: PopupMenuThemeData(
         color: BAColors.darkSurface,
@@ -193,33 +177,66 @@ class BATheme {
           borderRadius: BorderRadius.circular(12),
         ),
       ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: BAColors.darkSurface,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: BATypography.titleBar.copyWith(
+          color: BAColors.darkTextPrimary,
+        ),
+        iconTheme: IconThemeData(color: BAColors.darkTextPrimary),
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: BAColors.darkSurface,
+        selectedItemColor: primary,
+        unselectedItemColor: BAColors.darkTextSecondary,
+        elevation: 2,
+        type: BottomNavigationBarType.fixed,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: BAColors.darkSurfaceVariant,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: BAColors.darkBorder, width: 1),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: BAColors.darkBorder, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: primary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: BAColors.danger, width: 2),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: BAColors.danger, width: 2),
+        ),
+        hintStyle: const TextStyle(color: BAColors.darkTextDisabled, fontSize: 14),
+        labelStyle: const TextStyle(color: BAColors.darkTextSecondary, fontSize: 14),
+        errorStyle: const TextStyle(color: BAColors.danger, fontSize: 12),
+      ),
     );
   }
 
-  /// 获取浅色主题数据
+  /// 获取浅色主题数据（支持莫奈取色动态主题）
   ///
-  /// 返回配置好的浅色主题 [ThemeData]，适用于浅色模式环境。
-  /// 浅色主题是蔚蓝档案的核心视觉风格，采用明亮清新的配色方案。
-  ///
-  /// 浅色主题的设计特点：
-  /// - 浅白色背景配合天蓝色主色调，营造清新明亮的视觉感受
-  /// - 柔和的阴影效果，组件呈现轻盈浮动的视觉层次
-  /// - 大圆角设计，传达亲和友好的交互体验
-  /// - 低对比度配色，确保长时间使用的舒适性
-  ///
-  /// 返回：完整的浅色主题 [ThemeData] 对象
-  static ThemeData get lightTheme {
+  /// 参数 [seedColor]：可选的动态主题色，传 null 则使用蔚蓝档案默认天蓝色
+  static ThemeData buildLightTheme({Color? seedColor}) {
+    final Color primary = seedColor ?? BAColors.primary;
     return ThemeData(
       useMaterial3: true,
-      colorScheme: _lightColorScheme,
+      colorScheme: _buildColorScheme(Brightness.light, primary),
       scaffoldBackgroundColor: BAColors.lightBackground,
       cardColor: BAColors.lightSurface,
       textTheme: _textTheme,
-      inputDecorationTheme: _lightInputDecorationTheme,
       iconTheme: _lightIconTheme,
       dividerTheme: _lightDividerTheme,
-      appBarTheme: _lightAppBarTheme,
-      bottomNavigationBarTheme: _lightBottomNavBarTheme,
       cardTheme: CardThemeData(
         color: BAColors.lightSurface,
         elevation: 0,
@@ -231,26 +248,26 @@ class BATheme {
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return BAColors.primary;
+            return primary;
           }
           return BAColors.lightTextSecondary;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return BAColors.primary.withOpacity(0.3);
+            return primary.withOpacity(0.3);
           }
           return BAColors.lightSurfaceVariant;
         }),
       ),
       sliderTheme: SliderThemeData(
-        activeTrackColor: BAColors.primary,
+        activeTrackColor: primary,
         inactiveTrackColor: BAColors.lightSurfaceVariant,
-        thumbColor: BAColors.primary,
-        overlayColor: BAColors.primary.withOpacity(0.2),
+        thumbColor: primary,
+        overlayColor: primary.withOpacity(0.2),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: BAColors.primary,
+          backgroundColor: primary,
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -265,7 +282,7 @@ class BATheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: BAColors.primary,
+          foregroundColor: primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
@@ -274,8 +291,8 @@ class BATheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: BAColors.primary,
-          side: const BorderSide(color: BAColors.primary, width: 1),
+          foregroundColor: primary,
+          side: BorderSide(color: primary, width: 1),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -299,7 +316,7 @@ class BATheme {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: BAColors.lightSurfaceVariant,
-        selectedColor: BAColors.primary.withOpacity(0.2),
+        selectedColor: primary.withOpacity(0.2),
         labelStyle: const TextStyle(fontSize: 13),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -309,7 +326,7 @@ class BATheme {
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return BAColors.primary;
+            return primary;
           }
           return null;
         }),
@@ -321,7 +338,7 @@ class BATheme {
       radioTheme: RadioThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return BAColors.primary;
+            return primary;
           }
           return null;
         }),
@@ -329,7 +346,7 @@ class BATheme {
       progressIndicatorTheme: ProgressIndicatorThemeData(
         linearTrackColor: BAColors.lightSurfaceVariant,
         circularTrackColor: BAColors.lightSurfaceVariant,
-        color: BAColors.primary,
+        color: primary,
       ),
       popupMenuTheme: PopupMenuThemeData(
         color: BAColors.lightSurface,
@@ -360,110 +377,150 @@ class BATheme {
           borderRadius: BorderRadius.circular(12),
         ),
       ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: BAColors.lightSurface,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: BATypography.titleBar.copyWith(
+          color: BAColors.lightTextPrimary,
+        ),
+        iconTheme: IconThemeData(color: BAColors.lightTextPrimary),
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: BAColors.lightSurface,
+        selectedItemColor: primary,
+        unselectedItemColor: BAColors.lightTextSecondary,
+        elevation: 2,
+        type: BottomNavigationBarType.fixed,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: BAColors.lightSurfaceVariant,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: BAColors.lightBorder, width: 1),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: BAColors.lightBorder, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: primary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: BAColors.danger, width: 2),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: BAColors.danger, width: 2),
+        ),
+        hintStyle: const TextStyle(color: BAColors.lightTextDisabled, fontSize: 14),
+        labelStyle: const TextStyle(color: BAColors.lightTextSecondary, fontSize: 14),
+        errorStyle: const TextStyle(color: BAColors.danger, fontSize: 12),
+      ),
     );
   }
 
-  /// 获取指定主题模式的主题数据
-  ///
-  /// 根据传入的 [ThemeMode] 返回相应的主题数据。
-  /// 方便在应用中根据系统主题模式或用户设置动态切换主题。
+  /// 向后兼容：获取默认深色主题
+  static ThemeData get darkTheme => buildDarkTheme();
+
+  /// 向后兼容：获取默认浅色主题
+  static ThemeData get lightTheme => buildLightTheme();
+
+  /// 获取指定主题模式的主题数据（支持莫奈取色动态主题）
   ///
   /// 参数：
-  /// - [mode]: 主题模式，可选值为 [ThemeMode.light]、[ThemeMode.dark] 或 [ThemeMode.system]
-  ///
-  /// 返回：
-  /// - [ThemeMode.light] 时返回浅色主题
-  /// - [ThemeMode.dark] 时返回深色主题
-  /// - [ThemeMode.system] 时返回浅色主题（默认）
-  ///
-  /// 使用示例：
-  /// ```dart
-  /// MaterialApp(
-  ///   theme: BATheme.getTheme(ThemeMode.light),
-  /// )
-  /// ```
-  static ThemeData getTheme(ThemeMode mode) {
+  /// - [mode]: 主题模式（light/dark/system）
+  /// - [seedColor]: 可选的动态主题色，传 null 则使用蔚蓝档案默认天蓝色
+  static ThemeData getTheme(ThemeMode mode, {Color? seedColor}) {
     switch (mode) {
       case ThemeMode.light:
-        return lightTheme;
+        return buildLightTheme(seedColor: seedColor);
       case ThemeMode.dark:
-        return darkTheme;
+        return buildDarkTheme(seedColor: seedColor);
       case ThemeMode.system:
-        return lightTheme;
+        return buildLightTheme(seedColor: seedColor);
     }
   }
 
-  /// 深色主题颜色方案
+  /// 生成颜色方案（支持莫奈取色动态主题）
   ///
-  /// 返回深色主题的 [ColorScheme] 配置。
-  /// 颜色方案定义了应用中所有语义化颜色的映射关系，
-  /// 包括主色调、次色调、表面色、错误色等。
-  ///
-  /// 深色颜色方案的特点：
-  /// - 主色调保持天蓝色，与深色背景形成鲜明对比
-  /// - 表面色采用较深的灰色，降低整体亮度
-  /// - 保持与浅色方案一致的语义化颜色定义
-  static ColorScheme get _darkColorScheme {
-    return const ColorScheme.dark(
-      primary: BAColors.primary,
-      onPrimary: Colors.white,
-      primaryContainer: BAColors.primaryDark,
-      onPrimaryContainer: Colors.white,
-      secondary: BAColors.secondary,
-      onSecondary: Colors.white,
-      secondaryContainer: BAColors.secondaryDark,
-      onSecondaryContainer: Colors.white,
-      error: BAColors.danger,
-      onError: Colors.white,
-      errorContainer: Color(0xFFFFCDD2),
-      onErrorContainer: Color(0xFFB71C1C),
-      surface: BAColors.darkSurface,
-      onSurface: BAColors.darkTextPrimary,
-      surfaceVariant: BAColors.darkSurfaceVariant,
-      onSurfaceVariant: BAColors.darkTextSecondary,
-      outline: BAColors.darkBorder,
-      shadow: BAColors.darkShadow,
-      background: BAColors.darkBackground,
-      onBackground: BAColors.darkTextPrimary,
-      surfaceTint: BAColors.primary,
-    );
+  /// 如果提供 [seedColor]，则使用 Material You 的动态颜色方案生成。
+  /// 否则使用蔚蓝档案的默认固定配色。
+  static ColorScheme _buildColorScheme(Brightness brightness, Color? seedColor) {
+    final basePrimary = seedColor ?? BAColors.primary;
+    final isDark = brightness == Brightness.dark;
+
+    // 生成基于 seed 的柔和配色（莫奈取色风格）
+    final hsl = HSLColor.fromColor(basePrimary);
+    final primary = basePrimary;
+    final primaryLight = hsl.withLightness((hsl.lightness + 0.2).clamp(0.0, 1.0)).toColor();
+    final primaryDark = hsl.withLightness((hsl.lightness - 0.15).clamp(0.0, 1.0)).toColor();
+
+    // 辅助色（粉色系，蔚蓝档案风格）
+    final secondaryHsl = HSLColor.fromColor(const Color(0xFFFFB4C2));
+    final secondary = secondaryHsl.toColor();
+    final secondaryDark = secondaryHsl.withLightness((secondaryHsl.lightness - 0.15).toDouble()).toColor();
+
+    if (isDark) {
+      return ColorScheme.dark(
+        primary: primary,
+        onPrimary: Colors.white,
+        primaryContainer: primaryDark,
+        onPrimaryContainer: Colors.white,
+        secondary: secondary,
+        onSecondary: Colors.white,
+        secondaryContainer: secondaryDark,
+        onSecondaryContainer: Colors.white,
+        error: BAColors.danger,
+        onError: Colors.white,
+        errorContainer: const Color(0xFF4A1F1F),
+        onErrorContainer: const Color(0xFFFFCDD2),
+        surface: BAColors.darkSurface,
+        onSurface: BAColors.darkTextPrimary,
+        surfaceVariant: BAColors.darkSurfaceVariant,
+        onSurfaceVariant: BAColors.darkTextSecondary,
+        outline: BAColors.darkBorder,
+        shadow: BAColors.darkShadow,
+        background: BAColors.darkBackground,
+        onBackground: BAColors.darkTextPrimary,
+        surfaceTint: primary,
+      );
+    } else {
+      return ColorScheme.light(
+        primary: primary,
+        onPrimary: Colors.white,
+        primaryContainer: primaryLight,
+        onPrimaryContainer: const Color(0xFF1A2744),
+        secondary: secondary,
+        onSecondary: Colors.white,
+        secondaryContainer: const Color(0xFFFFD1D8),
+        onSecondaryContainer: const Color(0xFF1A2744),
+        error: BAColors.danger,
+        onError: Colors.white,
+        errorContainer: const Color(0xFFFFCDD2),
+        onErrorContainer: const Color(0xFFB71C1C),
+        surface: BAColors.lightSurface,
+        onSurface: BAColors.lightTextPrimary,
+        surfaceVariant: BAColors.lightSurfaceVariant,
+        onSurfaceVariant: BAColors.lightTextSecondary,
+        outline: BAColors.lightBorder,
+        shadow: BAColors.lightShadow,
+        background: BAColors.lightBackground,
+        onBackground: BAColors.lightTextPrimary,
+        surfaceTint: primary,
+      );
+    }
   }
 
-  /// 浅色主题颜色方案
-  ///
-  /// 返回浅色主题的 [ColorScheme] 配置。
-  /// 这是蔚蓝档案的核心配色方案，体现了游戏的视觉风格。
-  ///
-  /// 浅色颜色方案的特点：
-  /// - 主色调为天蓝色（primary），代表蔚蓝档案的"蓝"
-  /// - 次色调为樱花粉色（secondary），增添可爱温馨感
-  /// - 背景色采用浅白色，营造清新明亮的视觉感受
-  /// - 错误色采用柔和的红色，避免过于刺激
-  static ColorScheme get _lightColorScheme {
-    return const ColorScheme.light(
-      primary: BAColors.primary,
-      onPrimary: Colors.white,
-      primaryContainer: BAColors.primaryLight,
-      onPrimaryContainer: Color(0xFF1A1A2E),
-      secondary: BAColors.secondary,
-      onSecondary: Colors.white,
-      secondaryContainer: BAColors.secondaryLight,
-      onSecondaryContainer: Color(0xFF1A1A2E),
-      error: BAColors.danger,
-      onError: Colors.white,
-      errorContainer: Color(0xFFFFCDD2),
-      onErrorContainer: Color(0xFFB71C1C),
-      surface: BAColors.lightSurface,
-      onSurface: BAColors.lightTextPrimary,
-      surfaceVariant: BAColors.lightSurfaceVariant,
-      onSurfaceVariant: BAColors.lightTextSecondary,
-      outline: BAColors.lightBorder,
-      shadow: BAColors.lightShadow,
-      background: BAColors.lightBackground,
-      onBackground: BAColors.lightTextPrimary,
-      surfaceTint: BAColors.primary,
-    );
-  }
+  /// 深色主题颜色方案（兼容旧代码）
+  static ColorScheme get _darkColorScheme => _buildColorScheme(Brightness.dark, null);
+
+  /// 浅色主题颜色方案（兼容旧代码）
+  static ColorScheme get _lightColorScheme => _buildColorScheme(Brightness.light, null);
 
   /// 文本主题（通用）
   ///

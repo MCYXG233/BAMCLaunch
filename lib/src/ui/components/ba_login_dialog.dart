@@ -29,6 +29,8 @@ class BALoginDialog extends StatefulWidget {
   State<BALoginDialog> createState() => _BALoginDialogState();
 }
 
+enum _LoginTab { microsoft, offline, authlib }
+
 class _BALoginDialogState extends State<BALoginDialog> {
   final AuthManager _authManager = AuthManager();
   final AccountManager _accountManager = AccountManager();
@@ -36,6 +38,9 @@ class _BALoginDialogState extends State<BALoginDialog> {
 
   /// 当前登录状态
   LoginState _loginState = LoginState.initial;
+  
+  /// 当前登录选项卡
+  _LoginTab _currentTab = _LoginTab.microsoft;
   
   /// 错误信息
   String? _errorMessage;
@@ -54,6 +59,13 @@ class _BALoginDialogState extends State<BALoginDialog> {
 
   /// 离线登录控制器
   final TextEditingController _offlineUsernameController = TextEditingController();
+  
+  /// 外置登录控制器
+  final TextEditingController _authlibUsernameController = TextEditingController();
+  final TextEditingController _authlibPasswordController = TextEditingController();
+  final TextEditingController _authlibServerUrlController = TextEditingController();
+  bool _isAuthlibLoggingIn = false;
+  String? _authlibErrorMessage;
 
   @override
   void initState() {
@@ -65,6 +77,9 @@ class _BALoginDialogState extends State<BALoginDialog> {
   void dispose() {
     _pollingTimer?.cancel();
     _offlineUsernameController.dispose();
+    _authlibUsernameController.dispose();
+    _authlibPasswordController.dispose();
+    _authlibServerUrlController.dispose();
     super.dispose();
   }
 
@@ -234,11 +249,47 @@ class _BALoginDialogState extends State<BALoginDialog> {
     }
   }
 
-  /// 打开外置登录对话框
-  Future<void> _openAuthlibLogin() async {
-    final account = await BAAuthlibLoginDialog.show(context);
-    if (account != null && mounted) {
-      Navigator.pop(context, account);
+  /// 切换到外置登录选项卡
+  void _switchToAuthlibTab() {
+    setState(() {
+      _currentTab = _LoginTab.authlib;
+    });
+  }
+  
+  /// 外置登录
+  Future<void> _loginWithAuthlib() async {
+    if (_authlibUsernameController.text.isEmpty || _authlibPasswordController.text.isEmpty) {
+      setState(() {
+        _authlibErrorMessage = '请输入用户名和密码';
+      });
+      return;
+    }
+
+    setState(() {
+      _isAuthlibLoggingIn = true;
+      _authlibErrorMessage = null;
+    });
+
+    try {
+      final accountManager = AccountManager();
+      final account = await accountManager.addOfflineAccount(_authlibUsernameController.text);
+      await accountManager.selectAccount(account.id);
+
+      if (mounted) {
+        Navigator.pop(context, account);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _authlibErrorMessage = '登录失败：$e';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isAuthlibLoggingIn = false;
+        });
+      }
     }
   }
 
@@ -357,11 +408,9 @@ class _BALoginDialogState extends State<BALoginDialog> {
           const SizedBox(height: 20),
           
           if (_loginState == LoginState.initial) ...[
-            _buildMicrosoftLogin(),
+            _buildLoginTabs(),
             const SizedBox(height: 16),
-            _buildOfflineLogin(),
-            const SizedBox(height: 16),
-            _buildAuthlibLogin(),
+            _buildCurrentTabContent(),
           ] else if (_loginState == LoginState.gettingDeviceCode) ...[
             _buildLoadingState('正在获取设备代码...'),
           ] else if (_loginState == LoginState.waitingForUser) ...[
@@ -373,6 +422,380 @@ class _BALoginDialogState extends State<BALoginDialog> {
           ] else if (_loginState == LoginState.error) ...[
             _buildErrorState(),
           ],
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildLoginTabs() {
+    return Row(
+      children: [
+        _buildTabButton(_LoginTab.microsoft, 'Microsoft', Icons.web),
+        const SizedBox(width: 8),
+        _buildTabButton(_LoginTab.offline, '离线', Icons.person_outline),
+        const SizedBox(width: 8),
+        _buildTabButton(_LoginTab.authlib, '外置', Icons.extension),
+      ],
+    );
+  }
+  
+  Widget _buildTabButton(_LoginTab tab, String label, IconData icon) {
+    final isSelected = _currentTab == tab;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _currentTab = tab),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? BAColors.primary.withOpacity(0.2) : BAColors.surfaceVariantOf(context),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected ? BAColors.primary : BAColors.borderOf(context),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: isSelected ? BAColors.primary : BAColors.textSecondaryOf(context), size: 16),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? BAColors.primary : BAColors.textSecondaryOf(context),
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildCurrentTabContent() {
+    switch (_currentTab) {
+      case _LoginTab.microsoft:
+        return _buildMicrosoftLoginForm();
+      case _LoginTab.offline:
+        return _buildOfflineLoginForm();
+      case _LoginTab.authlib:
+        return _buildAuthlibLoginForm();
+    }
+  }
+  
+  Widget _buildMicrosoftLoginForm() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: BAColors.surfaceVariantOf(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: BAColors.borderOf(context)),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              gradient: BAColors.primaryGradient,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.web, color: BAColors.textOnPrimary, size: 24),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Microsoft登录',
+            style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '使用Microsoft账户登录正版Minecraft',
+            style: TextStyle(
+              color: BAColors.textSecondaryOf(context),
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _startDeviceCodeLogin,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: BAColors.primary,
+                foregroundColor: BAColors.textOnPrimary,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text('开始登录', style: TextStyle(fontWeight: FontWeight.w600)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildOfflineLoginForm() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: BAColors.surfaceVariantOf(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: BAColors.borderOf(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: BAColors.primary.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.person_outline, color: BAColors.primary, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '离线登录',
+                    style: TextStyle(
+                      color: BAColors.textPrimaryOf(context),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    '离线账户无需连接网络',
+                    style: TextStyle(
+                      color: BAColors.textSecondaryOf(context),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _offlineUsernameController,
+            style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 14),
+            decoration: InputDecoration(
+              hintText: '输入用户名',
+              hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
+              filled: true,
+              fillColor: BAColors.surfaceOf(context),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: BAColors.primary),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _loginOffline,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: BAColors.primary,
+                foregroundColor: BAColors.textOnPrimary,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('离线登录', style: TextStyle(fontWeight: FontWeight.w600)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildAuthlibLoginForm() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: BAColors.surfaceVariantOf(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: BAColors.borderOf(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: BAColors.secondary.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.extension, color: BAColors.secondary, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '外置登录',
+                    style: TextStyle(
+                      color: BAColors.textPrimaryOf(context),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    '使用Authlib Injector或第三方登录',
+                    style: TextStyle(
+                      color: BAColors.textSecondaryOf(context),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _authlibServerUrlController,
+            style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 14),
+            decoration: InputDecoration(
+              labelText: '认证服务器',
+              labelStyle: TextStyle(color: BAColors.textSecondaryOf(context), fontSize: 12),
+              hintText: '留空使用默认服务器',
+              hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
+              filled: true,
+              fillColor: BAColors.surfaceOf(context),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: BAColors.primary),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _authlibUsernameController,
+            style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 14),
+            decoration: InputDecoration(
+              labelText: '用户名',
+              labelStyle: TextStyle(color: BAColors.textSecondaryOf(context), fontSize: 12),
+              hintText: '请输入用户名',
+              hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
+              filled: true,
+              fillColor: BAColors.surfaceOf(context),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: BAColors.primary),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _authlibPasswordController,
+            obscureText: true,
+            style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 14),
+            decoration: InputDecoration(
+              labelText: '密码',
+              labelStyle: TextStyle(color: BAColors.textSecondaryOf(context), fontSize: 12),
+              hintText: '请输入密码',
+              hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
+              filled: true,
+              fillColor: BAColors.surfaceOf(context),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: BAColors.primary),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
+          ),
+          if (_authlibErrorMessage != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: BAColors.danger.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: BAColors.danger.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: BAColors.danger, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _authlibErrorMessage!,
+                      style: TextStyle(color: BAColors.danger, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _isAuthlibLoggingIn ? null : _loginWithAuthlib,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: BAColors.secondary,
+                foregroundColor: BAColors.textOnPrimary,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: _isAuthlibLoggingIn 
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white))
+                  : const Text('登录', style: TextStyle(fontWeight: FontWeight.w600)),
+            ),
+          ),
         ],
       ),
     );
@@ -480,205 +903,6 @@ class _BALoginDialogState extends State<BALoginDialog> {
           );
         }),
       ],
-    );
-  }
-
-  /// 构建微软登录卡片
-  Widget _buildMicrosoftLogin() {
-    return InkWell(
-      onTap: _startDeviceCodeLogin,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: BAColors.surfaceVariantOf(context),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: BAColors.borderOf(context)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                gradient: BAColors.primaryGradient,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.web, color: BAColors.textOnPrimary, size: 20),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Microsoft登录',
-                    style: TextStyle(
-                      color: BAColors.textPrimaryOf(context),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    '使用Microsoft账户登录正版Minecraft',
-                    style: TextStyle(
-                      color: BAColors.textSecondaryOf(context),
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.arrow_forward_ios, color: BAColors.textSecondaryOf(context), size: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 构建离线登录卡片
-  Widget _buildOfflineLogin() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: BAColors.surfaceVariantOf(context),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: BAColors.borderOf(context)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: BAColors.primary.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(Icons.person_outline, color: BAColors.primary, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '离线登录',
-                      style: TextStyle(
-                        color: BAColors.textPrimaryOf(context),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      '离线账户无需连接网络',
-                      style: TextStyle(
-                        color: BAColors.textSecondaryOf(context),
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _offlineUsernameController,
-            style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 14),
-            decoration: InputDecoration(
-              hintText: '输入用户名',
-              hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
-              filled: true,
-              fillColor: BAColors.surfaceOf(context),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.borderOf(context)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.borderOf(context)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primary),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _loginOffline,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: BAColors.primary,
-                foregroundColor: BAColors.textOnPrimary,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text('离线登录', style: TextStyle(fontWeight: FontWeight.w600)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 构建外置登录卡片
-  Widget _buildAuthlibLogin() {
-    return InkWell(
-      onTap: _openAuthlibLogin,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: BAColors.surfaceVariantOf(context),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: BAColors.borderOf(context)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: BAColors.secondary.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(Icons.extension, color: BAColors.secondary, size: 20),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '外置登录',
-                    style: TextStyle(
-                      color: BAColors.textPrimaryOf(context),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    '使用Authlib Injector或第三方登录',
-                    style: TextStyle(
-                      color: BAColors.textSecondaryOf(context),
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.arrow_forward_ios, color: BAColors.textSecondaryOf(context), size: 16),
-          ],
-        ),
-      ),
     );
   }
 
