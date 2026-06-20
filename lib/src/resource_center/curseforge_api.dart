@@ -147,11 +147,7 @@ class CurseForgeApi implements ResourceApi {
         [];
 
     final categories = (mod['categories'] as List<dynamic>?)
-            ?.map((c) => Category(
-                  id: c['id'].toString(),
-                  name: c['name'] as String,
-                  iconUrl: c['iconUrl'] as String?,
-                ))
+            ?.map((c) => c['name'] as String)
             .toList() ??
         [];
 
@@ -196,14 +192,16 @@ class CurseForgeApi implements ResourceApi {
       authors: authors,
       categories: categories,
       iconUrl: mod['logo']?['url'] as String?,
+      summary: mod['summary'] as String?,
+      slug: slug,
       screenshotUrls: screenshots,
       supportedGameVersions: supportedGameVersions.toList(),
       supportedLoaders: loaders,
       downloads: mod['downloadCount'] as int,
       likes: mod['thumbsUpCount'] as int? ?? 0,
       pageUrl: 'https://www.curseforge.com/minecraft/mc-mods/${mod['slug']}',
-      publishedDate: DateTime.parse(mod['dateCreated'] as String),
-      updatedDate: DateTime.parse(mod['dateModified'] as String),
+      publishedDate: DateTime.tryParse(mod['dateCreated'] as String? ?? ''),
+      updatedDate: DateTime.tryParse(mod['dateModified'] as String? ?? ''),
       license: mod['license']?['name'] as String?,
     );
   }
@@ -213,25 +211,24 @@ class CurseForgeApi implements ResourceApi {
     String resourceId,
   ) async {
     final hashes = file['hashes'] as List<dynamic>?;
-    String? sha1;
-    String? sha256;
+    final fileHashes = <String, String>{};
 
     if (hashes != null) {
       for (final hash in hashes) {
         final algo = hash['algo'] as int;
         final value = hash['value'] as String;
-        if (algo == 1) sha1 = value;
-        if (algo == 2) sha256 = value;
+        if (algo == 1) {
+          fileHashes['sha1'] = value;
+        }
+        if (algo == 2) {
+          fileHashes['sha256'] = value;
+        }
       }
     }
 
-    final download = VersionDownload(
-      url: file['downloadUrl'] as String,
-      fileName: file['fileName'] as String,
-      fileSize: file['fileLength'] as int,
-      sha1: sha1,
-      sha256: sha256,
-    );
+    final downloadUrl = file['downloadUrl'] as String?;
+    final fileName = file['fileName'] as String?;
+    final fileSize = file['fileLength'] as int? ?? 0;
 
     final gameVersions = (file['gameVersions'] as List<dynamic>?)
             ?.map((v) => v as String)
@@ -256,12 +253,20 @@ class CurseForgeApi implements ResourceApi {
 
     return ResourceVersion(
       id: file['id'].toString(),
-      versionNumber: file['displayName'] as String,
-      name: file['displayName'] as String,
-      releaseDate: DateTime.parse(file['fileDate'] as String),
+      projectId: resourceId,
+      source: source,
+      versionNumber: file['displayName'] as String? ?? file['id'].toString(),
+      name: file['displayName'] as String? ?? file['id'].toString(),
+      publishedDate: DateTime.tryParse(file['fileDate'] as String? ?? ''),
       gameVersions: gameVersions,
       loaders: loaders,
-      download: download,
+      downloadUrl: downloadUrl,
+      fileName: fileName,
+      fileSize: fileSize,
+      fileHashes: fileHashes,
+      downloads: 0,
+      releaseType: 'release',
+      isFeatured: false,
       changelog: null,
     );
   }
@@ -274,6 +279,10 @@ class CurseForgeApi implements ResourceApi {
         return resourcePackCategoryId;
       case ResourceType.modpack:
         return modpackCategoryId;
+      case ResourceType.shader:
+        return modCategoryId;
+      case ResourceType.dataPack:
+        return modCategoryId;
     }
   }
 

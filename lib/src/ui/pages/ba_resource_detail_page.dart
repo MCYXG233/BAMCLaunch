@@ -1,68 +1,76 @@
 import 'package:flutter/material.dart';
-import '../../resource_center/models.dart';
-import '../../resource_center/search_service.dart';
-import '../../resource_center/download_service.dart';
-import '../../resource_center/resource_manager.dart';
-import '../../instance/instance_manager.dart';
-import '../../instance/models.dart' show GameInstance, GameDirectory;
+import 'package:window_manager/window_manager.dart';
 import '../theme/colors.dart';
-import '../theme/typography.dart';
-import '../theme/app_theme.dart';
-import '../components/index.dart';
+import '../components/ba_common_widgets.dart';
+import '../components/ba_notification.dart';
+import '../components/ba_instance_select_dialog.dart';
+import '../resource_center/models.dart';
+import '../resource_center/favorite_manager.dart';
+import '../resource_center/modrinth_client.dart';
+import '../resource_center/download_manager.dart';
 
-class BAResourceDetailPage extends StatefulWidget {
+/// 资源详情页
+///
+/// 显示资源完整信息，包含：
+/// - 基础信息（名称、作者、描述）
+/// - 版本兼容性（游戏版本、Mod加载器）
+/// - 下载统计、发布时间
+/// - 收藏、下载/安装功能
+class ResourceDetailPage extends StatefulWidget {
   final Resource resource;
-  final SearchSource source;
+  final bool isFavorite;
+  final VoidCallback onFavoriteToggle;
 
-  const BAResourceDetailPage({
+  const ResourceDetailPage({
     super.key,
     required this.resource,
-    required this.source,
+    required this.isFavorite,
+    required this.onFavoriteToggle,
   });
 
   @override
-  State<BAResourceDetailPage> createState() => _BAResourceDetailPageState();
+  State<ResourceDetailPage> createState() => _ResourceDetailPageState();
 }
 
-class _BAResourceDetailPageState extends State<BAResourceDetailPage> {
-  final SearchService _searchService = SearchService();
-  final DownloadService _downloadService = DownloadService();
-  final ResourceManager _resourceManager = ResourceManager();
-  final InstanceManager _instanceManager = InstanceManager();
-
-  List<ResourceVersion> _versions = [];
+class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowListener {
+  bool _isMaximized = false;
+  bool _isFavorite = false;
   bool _isLoadingVersions = false;
-  String _versionError = '';
-  bool _isDescriptionExpanded = false;
   bool _isDownloading = false;
-  String? _downloadingVersionId;
+  List<ResourceVersion> _versions = [];
+
+  final ModrinthClient _modrinth = ModrinthClient();
+  final DownloadManager _downloadManager = DownloadManager.instance;
 
   @override
   void initState() {
     super.initState();
+    windowManager.addListener(this);
+    _isFavorite = widget.isFavorite;
     _loadVersions();
-    _initManagers();
   }
 
-  Future<void> _initManagers() async {
-    await _resourceManager.initialize();
-    await _instanceManager.initialize();
-    if (mounted) {
-      setState(() {});
-    }
+  @override
+  void dispose() {
+    windowManager.removeListener(this);
+    super.dispose();
+  }
+
+  @override
+  void onWindowMaximize() {
+    setState(() => _isMaximized = true);
+  }
+
+  @override
+  void onWindowUnmaximize() {
+    setState(() => _isMaximized = false);
   }
 
   Future<void> _loadVersions() async {
-    setState(() {
-      _isLoadingVersions = true;
-      _versionError = '';
-    });
+    setState(() => _isLoadingVersions = true);
 
     try {
-      final versions = await _searchService.getVersions(
-        widget.resource.id,
-        widget.source,
-      );
+      final versions = await _modrinth.getVersions(widget.resource.id);
       if (mounted) {
         setState(() {
           _versions = versions;
@@ -71,249 +79,305 @@ class _BAResourceDetailPageState extends State<BAResourceDetailPage> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _versionError = '加载版本失败: $e';
-          _isLoadingVersions = false;
-        });
+        setState(() => _isLoadingVersions = false);
+        NotificationManager().showError('加载版本失败', message: e.toString());
       }
     }
   }
 
-  String _formatNumber(int number) {
-    if (number >= 1000000) {
-      return '${(number / 1000000).toStringAsFixed(1)}M';
-    } else if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(1)}K';
-    }
-    return '$number';
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  }
-
-  String _formatFileSize(int bytes) {
-    if (bytes >= 1073741824) {
-      return '${(bytes / 1073741824).toStringAsFixed(2)} GB';
-    } else if (bytes >= 1048576) {
-      return '${(bytes / 1048576).toStringAsFixed(2)} MB';
-    } else if (bytes >= 1024) {
-      return '${(bytes / 1024).toStringAsFixed(2)} KB';
-    }
-    return '$bytes B';
-  }
-
-  Future<void> _onDownloadPressed(ResourceVersion version) async {
-    final instances = _instanceManager.instances;
-    if (instances.isEmpty) {
-      NotificationManager().showWarning('暂无可用实例', message: '请先创建一个游戏实例');
+  Future<void> _onDownload() async {
+    if (_versions.isEmpty) {
+      NotificationManager().showWarning('没有可用版本');
       return;
     }
 
-    final selectedInstance = await _showInstanceSelectionDialog(instances);
-    if (selectedInstance == null) return;
+    final result = await InstanceSelectDialog.show(
+      context,
+      resource: widget.resource,
+      versions: _versions,
+      instances: ['默认实例', '生存 1.20.4', '创造测试'],
+    );
 
-    setState(() {
-      _isDownloading = true;
-      _downloadingVersionId = version.id;
-    });
+    if (result != null) {
+      setState(() => _isDownloading = true);
 
-    try {
-      await _downloadService.downloadAndInstallToInstance(
-        widget.resource,
-        version,
-        selectedInstance.id,
-      );
-      if (mounted) {
-        NotificationManager().showSuccess(
-          '安装成功',
-          message: '${widget.resource.name} ${version.versionNumber} 已安装到 ${selectedInstance.name}',
+      try {
+        await _downloadManager.download(
+          resource: widget.resource,
+          version: result.version,
+          targetInstance: result.instance,
+          targetGameVersion: result.gameVersion,
+          autoInstall: result.autoInstall,
+          resolveDependencies: result.resolveDependencies,
         );
-      }
-    } catch (e) {
-      if (mounted) {
-        NotificationManager().showError('安装失败', message: '$e');
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isDownloading = false;
-          _downloadingVersionId = null;
-        });
+
+        if (mounted) {
+          NotificationManager().showSuccess(
+            '下载任务已添加',
+            message: '${widget.resource.name} 正在下载',
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          NotificationManager().showError('创建下载任务失败', message: e.toString());
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isDownloading = false);
+        }
       }
     }
   }
 
-  Future<GameInstance?> _showInstanceSelectionDialog(List<GameInstance> instances) async {
-    return BAFrostedDialog.show<GameInstance>(
-      context: context,
-      title: '选择安装实例',
-      width: 420,
-      child: SizedBox(
-        height: 300,
-        child: ListView.separated(
-          itemCount: instances.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 8),
-          itemBuilder: (context, index) {
-            final instance = instances[index];
-            final directory = _instanceManager.directories.firstWhere(
-              (d) => d.id == instance.directoryId,
-              orElse: () => _instanceManager.directories.first,
-            );
-            return _buildInstanceItem(instance, directory);
-          },
-        ),
-      ),
-      actions: [
-        BASecondaryButton(
-          text: '取消',
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ],
-    );
-  }
+  Future<void> _toggleFavorite() async {
+    if (!FavoriteManager.instance.isInitialized) {
+      await FavoriteManager.instance.initialize();
+    }
 
-  Widget _buildInstanceItem(GameInstance instance, GameDirectory directory) {
-    return GestureDetector(
-      onTap: () => Navigator.of(context).pop(instance),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: BAColors.surfaceVariantOf(context),
-          borderRadius: BATheme.borderRadiusSmall,
-          border: Border.all(color: BAColors.borderOf(context)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: BAColors.primary.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.games, color: BAColors.primary, size: 20),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    instance.name,
-                    style: BATypography.bodyLarge.copyWith(
-                      color: BAColors.textPrimaryOf(context),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${instance.version}${instance.loader != null ? ' · ${instance.loader}' : ''}',
-                    style: BATypography.bodySmall.copyWith(
-                      color: BAColors.textSecondaryOf(context),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 14,
-              color: BAColors.textSecondaryOf(context),
-            ),
-          ],
-        ),
-      ),
-    );
+    setState(() {
+      _isFavorite = !_isFavorite;
+    });
+
+    if (_isFavorite) {
+      await FavoriteManager.instance.addFavorite(
+        widget.resource.id,
+        resourceName: widget.resource.name,
+      );
+    } else {
+      await FavoriteManager.instance.removeFavorite(widget.resource.id);
+    }
+
+    widget.onFavoriteToggle();
   }
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = BAColors.backgroundOf(context);
-    final textPrimary = BAColors.textPrimaryOf(context);
-    final textSecondary = BAColors.textSecondaryOf(context);
+    final isLight = Theme.of(context).brightness == Brightness.light;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: AppBar(
-        backgroundColor: BAColors.surfaceOf(context),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          widget.resource.name,
-          style: BATypography.titleLarge.copyWith(color: textPrimary),
-        ),
+      body: Column(
+        children: [
+          // 顶部栏
+          _buildHeader(context, isLight),
+
+          // 内容区域
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 基本信息卡片
+                  _buildInfoCard(context, isLight),
+                  const SizedBox(height: 20),
+
+                  // 描述
+                  if (widget.resource.description.isNotEmpty)
+                    _buildDescriptionCard(context, isLight),
+                  const SizedBox(height: 20),
+
+                  // 版本列表
+                  _buildVersionsCard(context, isLight),
+                  const SizedBox(height: 20),
+
+                  // 版本兼容性
+                  _buildCompatibilityCard(context, isLight),
+                  const SizedBox(height: 20),
+
+                  // 统计数据
+                  _buildStatsCard(context, isLight),
+                ],
+              ),
+            ),
+          ),
+
+          // 底部操作栏
+          _buildBottomBar(context, isLight),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, bool isLight) {
+    return BAGlassContainer(
+      blur: 20,
+      opacity: 0.85,
+      borderRadius: 0,
+      child: Container(
+        height: 56,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
           children: [
-            _buildHeader(context, textPrimary, textSecondary),
-            const SizedBox(height: 20),
-            _buildTags(context, textPrimary, textSecondary),
-            const SizedBox(height: 20),
-            _buildDescription(context, textPrimary, textSecondary),
-            if (widget.resource.screenshotUrls.isNotEmpty) ...[
-              const SizedBox(height: 20),
-              _buildScreenshots(context),
-            ],
-            const SizedBox(height: 20),
-            _buildVersionList(context, textPrimary, textSecondary),
-            const SizedBox(height: 32),
+            // 返回按钮
+            BAIconButton(
+              icon: Icons.arrow_back,
+              onTap: () => Navigator.pop(context),
+              size: 36,
+              iconSize: 18,
+            ),
+            const SizedBox(width: 12),
+
+            // 标题
+            Expanded(
+              child: Text(
+                widget.resource.name,
+                style: TextStyle(
+                  color: isLight ? const Color(0xFF1A2744) : Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
+
+            // 收藏按钮
+            BAIconButton(
+              icon: _isFavorite ? Icons.favorite : Icons.favorite_border,
+              onTap: _toggleFavorite,
+              size: 36,
+              iconSize: 18,
+              iconColor: _isFavorite ? Colors.red : null,
+            ),
+            const SizedBox(width: 8),
+
+            // 窗口控制
+            Row(
+              children: [
+                BAIconButton(
+                  icon: Icons.remove,
+                  onTap: () => windowManager.minimize(),
+                  size: 32,
+                  iconSize: 16,
+                ),
+                const SizedBox(width: 6),
+                BAIconButton(
+                  icon: _isMaximized ? Icons.filter_none : Icons.crop_square,
+                  onTap: () async {
+                    if (_isMaximized) {
+                      await windowManager.unmaximize();
+                    } else {
+                      await windowManager.maximize();
+                    }
+                  },
+                  size: 32,
+                  iconSize: 16,
+                ),
+                const SizedBox(width: 6),
+                BAIconButton(
+                  icon: Icons.close,
+                  onTap: () => windowManager.close(),
+                  isClose: true,
+                  size: 32,
+                  iconSize: 16,
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader(
-    BuildContext context,
-    Color textPrimary,
-    Color textSecondary,
-  ) {
-    return Container(
+  Widget _buildInfoCard(BuildContext context, bool isLight) {
+    return BASurfaceCard(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
-        borderRadius: BATheme.borderRadius,
-        border: Border.all(color: BAColors.borderOf(context)),
-      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildResourceIcon(context),
-          const SizedBox(width: 16),
+          // 资源图标
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  _getTypeColor(widget.resource.type),
+                  _getTypeColor(widget.resource.type).withValues(alpha: 0.6),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: _getTypeColor(widget.resource.type).withValues(alpha: 0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Icon(
+              _getTypeIcon(widget.resource.type),
+              color: Colors.white,
+              size: 38,
+            ),
+          ),
+          const SizedBox(width: 20),
+
+          // 资源信息
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // 类型标签
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _getTypeColor(widget.resource.type).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    _getTypeName(widget.resource.type),
+                    style: TextStyle(
+                      color: _getTypeColor(widget.resource.type),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // 名称
                 Text(
                   widget.resource.name,
-                  style: BATypography.headlineSmall.copyWith(color: textPrimary),
+                  style: TextStyle(
+                    color: isLight ? const Color(0xFF1A2744) : Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
-                if (widget.resource.authors.isNotEmpty)
-                  Text(
-                    widget.resource.authors.map((a) => a.name).join(', '),
-                    style: BATypography.bodyMedium.copyWith(color: textSecondary),
-                  ),
-                const SizedBox(height: 12),
+
+                // 作者
                 Row(
                   children: [
-                    _buildStatBadge(
-                      Icons.download_rounded,
-                      _formatNumber(widget.resource.downloads),
-                      textSecondary,
+                    Icon(Icons.person_outline, size: 16,
+                        color: isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8)),
+                    const SizedBox(width: 6),
+                    Text(
+                      widget.resource.authors.isNotEmpty
+                          ? widget.resource.authors.map((a) => a.name).join(', ')
+                          : '未知作者',
+                      style: TextStyle(
+                        color: isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
+                        fontSize: 13,
+                      ),
                     ),
-                    const SizedBox(width: 16),
-                    _buildStatBadge(
-                      Icons.favorite_rounded,
-                      _formatNumber(widget.resource.likes),
-                      textSecondary,
+                  ],
+                ),
+
+                // 支持的游戏版本和加载器
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    ...widget.resource.supportedGameVersions.take(4).map(
+                      (v) => _buildChip(v, BacolorsPrimary),
+                    ),
+                    ...widget.resource.supportedLoaders.take(3).map(
+                      (l) => _buildChip(l, BacolorsAccentPink),
                     ),
                   ],
                 ),
@@ -325,443 +389,117 @@ class _BAResourceDetailPageState extends State<BAResourceDetailPage> {
     );
   }
 
-  Widget _buildResourceIcon(BuildContext context) {
-    final surfaceVariant = BAColors.surfaceVariantOf(context);
-
-    final IconData iconData;
-    switch (widget.resource.type) {
-      case ResourceType.mod:
-        iconData = Icons.extension;
-        break;
-      case ResourceType.resourcePack:
-        iconData = Icons.palette;
-        break;
-      case ResourceType.modpack:
-        iconData = Icons.folder_zip;
-        break;
-    }
-
+  Widget _buildChip(String label, Color color) {
     return Container(
-      width: 88,
-      height: 88,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: surfaceVariant,
-        borderRadius: BATheme.borderRadius,
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
-      child: ClipRRect(
-        borderRadius: BATheme.borderRadius,
-        child: widget.resource.iconUrl != null
-            ? Image.network(
-                widget.resource.iconUrl!,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Icon(
-                  iconData,
-                  color: BAColors.primary,
-                  size: 40,
-                ),
-              )
-            : Icon(iconData, color: BAColors.primary, size: 40),
-      ),
-    );
-  }
-
-  Widget _buildStatBadge(IconData icon, String value, Color color) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 16, color: color),
-        const SizedBox(width: 4),
-        Text(
-          value,
-          style: BATypography.bodySmall.copyWith(color: color),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
         ),
-      ],
-    );
-  }
-
-  Widget _buildTags(
-    BuildContext context,
-    Color textPrimary,
-    Color textSecondary,
-  ) {
-    final hasCategories = widget.resource.categories.isNotEmpty;
-    final hasGameVersions = widget.resource.supportedGameVersions.isNotEmpty;
-    final hasLoaders = widget.resource.supportedLoaders.isNotEmpty;
-
-    if (!hasCategories && !hasGameVersions && !hasLoaders) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
-        borderRadius: BATheme.borderRadius,
-        border: Border.all(color: BAColors.borderOf(context)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (hasCategories) ...[
-            Text(
-              '分类',
-              style: BATypography.bodyMedium.copyWith(
-                color: textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: widget.resource.categories.map((cat) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: BAColors.primary.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: BAColors.primary.withOpacity(0.3)),
-                  ),
-                  child: Text(
-                    cat.name,
-                    style: BATypography.label.copyWith(color: BAColors.primary),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-          if (hasGameVersions) ...[
-            if (hasCategories) const SizedBox(height: 12),
-            Text(
-              '游戏版本',
-              style: BATypography.bodyMedium.copyWith(
-                color: textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: widget.resource.supportedGameVersions.map((v) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: BAColors.surfaceVariantOf(context),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    v,
-                    style: BATypography.label.copyWith(color: textSecondary),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-          if (hasLoaders) ...[
-            if (hasCategories || hasGameVersions) const SizedBox(height: 12),
-            Text(
-              '加载器',
-              style: BATypography.bodyMedium.copyWith(
-                color: textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: widget.resource.supportedLoaders.map((l) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: BAColors.secondary.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: BAColors.secondary.withOpacity(0.3)),
-                  ),
-                  child: Text(
-                    l,
-                    style: BATypography.label.copyWith(color: BAColors.secondary),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-        ],
       ),
     );
   }
 
-  Widget _buildDescription(
-    BuildContext context,
-    Color textPrimary,
-    Color textSecondary,
-  ) {
-    final description = widget.resource.description;
-    final isLong = description.length > 150;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
-        borderRadius: BATheme.borderRadius,
-        border: Border.all(color: BAColors.borderOf(context)),
-      ),
+  Widget _buildDescriptionCard(BuildContext context, bool isLight) {
+    return BASurfaceCard(
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '简介',
-            style: BATypography.titleSmall.copyWith(color: textPrimary),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            description,
-            style: BATypography.bodyMedium.copyWith(
-              color: textSecondary,
-              height: 1.6,
-            ),
-            maxLines: _isDescriptionExpanded ? null : 3,
-            overflow: _isDescriptionExpanded ? null : TextOverflow.ellipsis,
-          ),
-          if (isLong) ...[
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isDescriptionExpanded = !_isDescriptionExpanded;
-                });
-              },
-              child: Text(
-                _isDescriptionExpanded ? '收起' : '展开更多',
-                style: BATypography.bodyMedium.copyWith(
-                  color: BAColors.primary,
+          Row(
+            children: [
+              Icon(Icons.description_outlined, size: 18, color: BacolorsPrimary),
+              const SizedBox(width: 8),
+              Text(
+                '简介',
+                style: TextStyle(
+                  color: isLight ? const Color(0xFF1A2744) : Colors.white,
+                  fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
               ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            widget.resource.description,
+            style: TextStyle(
+              color: isLight ? const Color(0xFF1A2744) : const Color(0xFFE0E8F5),
+              fontSize: 14,
+              height: 1.6,
             ),
-          ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildScreenshots(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '截图',
-          style: BATypography.titleSmall.copyWith(
-            color: BAColors.textPrimaryOf(context),
-          ),
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 180,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: widget.resource.screenshotUrls.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final url = widget.resource.screenshotUrls[index];
-              return GestureDetector(
-                onTap: () => _showFullScreenshot(url),
-                child: ClipRRect(
-                  borderRadius: BATheme.borderRadius,
-                  child: Container(
-                    width: 280,
-                    decoration: BoxDecoration(
-                      color: BAColors.surfaceVariantOf(context),
-                      borderRadius: BATheme.borderRadius,
-                    ),
-                    child: Image.network(
-                      url,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                                : null,
-                            strokeWidth: 2,
-                            color: BAColors.primary,
-                          ),
-                        );
-                      },
-                      errorBuilder: (_, __, ___) => const Center(
-                        child: Icon(
-                          Icons.broken_image_outlined,
-                          color: BAColors.textDisabled,
-                          size: 32,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showFullScreenshot(String url) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black87,
-      builder: (context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.all(24),
-          child: GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: InteractiveViewer(
-              child: ClipRRect(
-                borderRadius: BATheme.borderRadius,
-                child: Image.network(
-                  url,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => Container(
-                    padding: const EdgeInsets.all(32),
-                    child: const Icon(
-                      Icons.broken_image_outlined,
-                      color: Colors.white54,
-                      size: 64,
-                    ),
-                  ),
+  Widget _buildVersionsCard(BuildContext context, bool isLight) {
+    return BASurfaceCard(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.history, size: 18, color: BacolorsPrimary),
+              const SizedBox(width: 8),
+              Text(
+                '可用版本 (${_versions.length})',
+                style: TextStyle(
+                  color: isLight ? const Color(0xFF1A2744) : Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-            ),
+            ],
           ),
-        );
-      },
+          const SizedBox(height: 12),
+          if (_isLoadingVersions)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+            )
+          else if (_versions.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                '暂无版本信息',
+                style: TextStyle(
+                  color: isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
+                  fontSize: 13,
+                ),
+              ),
+            )
+          else
+            ..._versions.take(5).map((version) => _buildVersionTile(version, isLight)),
+        ],
+      ),
     );
   }
 
-  Widget _buildVersionList(
-    BuildContext context,
-    Color textPrimary,
-    Color textSecondary,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '版本列表',
-          style: BATypography.titleSmall.copyWith(color: textPrimary),
-        ),
-        const SizedBox(height: 12),
-        _buildVersionContent(context, textPrimary, textSecondary),
-      ],
-    );
-  }
-
-  Widget _buildVersionContent(
-    BuildContext context,
-    Color textPrimary,
-    Color textSecondary,
-  ) {
-    if (_isLoadingVersions) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: BAColors.surfaceOf(context),
-          borderRadius: BATheme.borderRadius,
-          border: Border.all(color: BAColors.borderOf(context)),
-        ),
-        child: const Column(
-          children: [
-            CircularProgressIndicator(color: BAColors.primary),
-            SizedBox(height: 12),
-            Text('加载版本列表中...'),
-          ],
-        ),
-      );
-    }
-
-    if (_versionError.isNotEmpty) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: BAColors.surfaceOf(context),
-          borderRadius: BATheme.borderRadius,
-          border: Border.all(color: BAColors.borderOf(context)),
-        ),
-        child: Column(
-          children: [
-            const Icon(Icons.error_outline, color: BAColors.danger, size: 40),
-            const SizedBox(height: 12),
-            Text(
-              _versionError,
-              style: BATypography.bodyMedium.copyWith(color: textSecondary),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            BAPrimaryButton(
-              text: '重试',
-              onPressed: _loadVersions,
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (_versions.isEmpty) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: BAColors.surfaceOf(context),
-          borderRadius: BATheme.borderRadius,
-          border: Border.all(color: BAColors.borderOf(context)),
-        ),
-        child: Text(
-          '暂无可用版本',
-          style: BATypography.bodyMedium.copyWith(color: textSecondary),
-          textAlign: TextAlign.center,
-        ),
-      );
-    }
-
+  Widget _buildVersionTile(ResourceVersion version, bool isLight) {
     return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
-        borderRadius: BATheme.borderRadius,
-        border: Border.all(color: BAColors.borderOf(context)),
+        color: isLight ? const Color(0xFFF5F8FF) : const Color(0xFF2A3A5A),
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: _versions.length,
-        separatorBuilder: (_, __) => Divider(
-          height: 1,
-          color: BAColors.borderOf(context),
-        ),
-        itemBuilder: (context, index) {
-          final version = _versions[index];
-          return _buildVersionCard(context, version, textPrimary, textSecondary);
-        },
-      ),
-    );
-  }
-
-  Widget _buildVersionCard(
-    BuildContext context,
-    ResourceVersion version,
-    Color textPrimary,
-    Color textSecondary,
-  ) {
-    final isThisDownloading = _isDownloading && _downloadingVersionId == version.id;
-
-    return Padding(
-      padding: const EdgeInsets.all(16),
       child: Row(
         children: [
           Expanded(
@@ -769,69 +507,293 @@ class _BAResourceDetailPageState extends State<BAResourceDetailPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  version.name.isNotEmpty ? version.name : version.versionNumber,
-                  style: BATypography.bodyLarge.copyWith(
-                    color: textPrimary,
+                  'v${version.versionNumber}',
+                  style: TextStyle(
+                    color: isLight ? const Color(0xFF1A2744) : Colors.white,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Row(
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
                   children: [
-                    Text(
-                      'v${version.versionNumber}',
-                      style: BATypography.bodySmall.copyWith(color: BAColors.primary),
+                    ...version.gameVersions.take(2).map(
+                      (v) => Text(
+                        v,
+                        style: TextStyle(
+                          color: isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
+                          fontSize: 11,
+                        ),
+                      ),
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      _formatDate(version.releaseDate),
-                      style: BATypography.bodySmall.copyWith(color: textSecondary),
+                    ...version.loaders.take(2).map(
+                      (l) => Text(
+                        l,
+                        style: TextStyle(
+                          color: BacolorsAccentPink,
+                          fontSize: 11,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-                if (version.gameVersions.isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 4,
-                    children: version.gameVersions.take(4).map((v) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: BAColors.surfaceVariantOf(context),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          v,
-                          style: BATypography.labelSmall.copyWith(color: textSecondary),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
-                if (version.download.fileSize > 0) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    _formatFileSize(version.download.fileSize),
-                    style: BATypography.bodySmall.copyWith(color: textSecondary),
-                  ),
-                ],
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          BAPrimaryButton(
-            text: '下载',
-            height: 36,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            loading: isThisDownloading,
-            onPressed: _isDownloading ? null : () => _onDownloadPressed(version),
-            leadingIcon: _isDownloading
-                ? null
-                : const Icon(Icons.download, color: Colors.white, size: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: BacolorsPrimary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              version.releaseType,
+              style: TextStyle(
+                color: BacolorsPrimary,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildCompatibilityCard(BuildContext context, bool isLight) {
+    return BASurfaceCard(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.system_update_alt, size: 18, color: BacolorsAccentPink),
+              const SizedBox(width: 8),
+              Text(
+                '兼容性',
+                style: TextStyle(
+                  color: isLight ? const Color(0xFF1A2744) : Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatBlock(
+                  context,
+                  '游戏版本',
+                  widget.resource.supportedGameVersions.take(3).join(', '),
+                  BacolorsPrimary,
+                ),
+              ),
+              Container(width: 1, height: 40, color: const Color(0xFF3A4D7A)),
+              Expanded(
+                child: _buildStatBlock(
+                  context,
+                  'Mod加载器',
+                  widget.resource.supportedLoaders.join(', '),
+                  BacolorsAccentPink,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatsCard(BuildContext context, bool isLight) {
+    return BASurfaceCard(
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildStatBlock(
+              context,
+              '总下载量',
+              _formatNumber(widget.resource.downloads),
+              BacolorsPrimary,
+            ),
+          ),
+          Container(
+            width: 1,
+            height: 40,
+            color: isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A),
+          ),
+          Expanded(
+            child: _buildStatBlock(
+              context,
+              '收藏数',
+              _formatNumber(widget.resource.likes),
+              Colors.red,
+            ),
+          ),
+          Container(
+            width: 1,
+            height: 40,
+            color: isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A),
+          ),
+          Expanded(
+            child: _buildStatBlock(
+              context,
+              '发布日期',
+              widget.resource.publishedDate != null
+                  ? '${widget.resource.publishedDate!.year}/${widget.resource.publishedDate!.month.toString().padLeft(2, '0')}'
+                  : '未知',
+              BacolorsSuccess,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatBlock(BuildContext context, String label, String value, Color color) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            color: color,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            color: isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
+            fontSize: 12,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBottomBar(BuildContext context, bool isLight) {
+    return BAGlassContainer(
+      blur: 20,
+      opacity: 0.9,
+      borderRadius: 0,
+      child: Container(
+        height: 72,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        child: Row(
+          children: [
+            // 收藏按钮
+            OutlinedButton.icon(
+              onPressed: _toggleFavorite,
+              icon: Icon(
+                _isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: _isFavorite ? Colors.red : null,
+              ),
+              label: Text(_isFavorite ? '已收藏' : '收藏'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: isLight ? const Color(0xFF1A2744) : Colors.white,
+                side: BorderSide(
+                  color: _isFavorite ? Colors.red : (isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A)),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+
+            // 下载按钮
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: _isDownloading ? null : _onDownload,
+                icon: _isDownloading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Icon(Icons.download, size: 20),
+                label: Text(_isDownloading ? '下载中...' : '下载并安装'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: BacolorsPrimary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  IconData _getTypeIcon(ResourceType type) {
+    switch (type) {
+      case ResourceType.mod:
+        return Icons.extension;
+      case ResourceType.resourcePack:
+        return Icons.palette;
+      case ResourceType.shader:
+        return Icons.lightbulb;
+      case ResourceType.modpack:
+        return Icons.inventory_2;
+      case ResourceType.dataPack:
+        return Icons.folder;
+    }
+  }
+
+  Color _getTypeColor(ResourceType type) {
+    switch (type) {
+      case ResourceType.mod:
+        return BacolorsAccentPink;
+      case ResourceType.resourcePack:
+        return BacolorsSuccess;
+      case ResourceType.shader:
+        return BacolorsWarning;
+      case ResourceType.modpack:
+        return BacolorsPrimary;
+      case ResourceType.dataPack:
+        return const Color(0xFF8B7DD9);
+    }
+  }
+
+  String _getTypeName(ResourceType type) {
+    switch (type) {
+      case ResourceType.mod:
+        return '模组 (Mod)';
+      case ResourceType.resourcePack:
+        return '资源包';
+      case ResourceType.shader:
+        return '光影包';
+      case ResourceType.modpack:
+        return '整合包';
+      case ResourceType.dataPack:
+        return '数据包';
+    }
+  }
+
+  String _formatNumber(int number) {
+    if (number >= 1000000) return '${(number / 1000000).toStringAsFixed(1)}M';
+    if (number >= 1000) return '${(number / 1000).toStringAsFixed(1)}K';
+    return number.toString();
   }
 }

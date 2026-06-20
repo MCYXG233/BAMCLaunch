@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import '../core/network_client.dart';
 import 'models.dart';
@@ -154,7 +153,7 @@ class ModrinthApi implements ResourceApi {
 
   Resource _parseSearchHit(Map<String, dynamic> hit) {
     final categories = (hit['categories'] as List<dynamic>?)
-            ?.map((c) => Category(id: c as String, name: c as String))
+            ?.map((c) => c as String)
             .toList() ??
         [];
 
@@ -184,14 +183,16 @@ class ModrinthApi implements ResourceApi {
       authors: authors,
       categories: categories,
       iconUrl: hit['icon_url'] as String?,
+      summary: hit['description'] as String?,
+      slug: hit['slug'] as String?,
       screenshotUrls: [],
       supportedGameVersions: gameVersions,
       supportedLoaders: loaders,
       downloads: hit['downloads'] as int,
       likes: hit['follows'] as int,
       pageUrl: 'https://modrinth.com/${_projectTypeToString(type)}/${hit['slug']}',
-      publishedDate: DateTime.parse(hit['date_created'] as String),
-      updatedDate: DateTime.parse(hit['date_modified'] as String),
+      publishedDate: DateTime.tryParse(hit['date_created'] as String? ?? ''),
+      updatedDate: DateTime.tryParse(hit['date_modified'] as String? ?? ''),
       license: hit['license'] as String?,
     );
   }
@@ -204,7 +205,7 @@ class ModrinthApi implements ResourceApi {
     }
 
     final categories = (project['categories'] as List<dynamic>?)
-            ?.map((c) => Category(id: c as String, name: c as String))
+            ?.map((c) => c as String)
             .toList() ??
         [];
 
@@ -235,14 +236,16 @@ class ModrinthApi implements ResourceApi {
       authors: authors,
       categories: categories,
       iconUrl: project['icon_url'] as String?,
+      summary: project['description'] as String?,
+      slug: project['slug'] as String?,
       screenshotUrls: gallery,
       supportedGameVersions: gameVersions,
       supportedLoaders: loaders,
       downloads: project['downloads'] as int,
       likes: project['followers'] as int,
       pageUrl: 'https://modrinth.com/${_projectTypeToString(type)}/${project['slug']}',
-      publishedDate: DateTime.parse(project['published'] as String),
-      updatedDate: DateTime.parse(project['updated'] as String),
+      publishedDate: DateTime.tryParse(project['published'] as String? ?? ''),
+      updatedDate: DateTime.tryParse(project['updated'] as String? ?? ''),
       license: project['license']?['name'] as String?,
     );
   }
@@ -255,14 +258,12 @@ class ModrinthApi implements ResourceApi {
     );
 
     final hashes = primaryFile['hashes'] as Map<String, dynamic>?;
-
-    final download = VersionDownload(
-      url: primaryFile['url'] as String,
-      fileName: primaryFile['filename'] as String,
-      fileSize: primaryFile['size'] as int,
-      sha1: hashes?['sha1'] as String?,
-      sha256: hashes?['sha512'] as String?,
-    );
+    final fileHashes = <String, String>{};
+    if (hashes != null) {
+      hashes.forEach((key, value) {
+        fileHashes[key] = value as String;
+      });
+    }
 
     final loaders = (version['loaders'] as List<dynamic>?)
             ?.map((l) => l as String)
@@ -274,14 +275,35 @@ class ModrinthApi implements ResourceApi {
             .toList() ??
         [];
 
+    final dependencies = <VersionDependency>[];
+    final depsList = version['dependencies'] as List<dynamic>?;
+    if (depsList != null) {
+      for (final dep in depsList) {
+        dependencies.add(VersionDependency(
+          projectId: dep['project_id'] as String?,
+          versionId: dep['version_id'] as String?,
+          dependencyType: dep['dependency_type'] as String? ?? 'required',
+        ));
+      }
+    }
+
     return ResourceVersion(
       id: version['id'] as String,
-      versionNumber: version['version_number'] as String,
-      name: version['name'] as String,
-      releaseDate: DateTime.parse(version['date_published'] as String),
+      projectId: version['project_id'] as String? ?? '',
+      source: source,
+      versionNumber: version['version_number'] as String? ?? '',
+      name: version['name'] as String? ?? '',
+      publishedDate: DateTime.tryParse(version['date_published'] as String? ?? ''),
       gameVersions: gameVersions,
       loaders: loaders,
-      download: download,
+      dependencies: dependencies,
+      downloadUrl: primaryFile['url'] as String?,
+      fileName: primaryFile['filename'] as String?,
+      fileSize: primaryFile['size'] as int? ?? 0,
+      fileHashes: fileHashes,
+      downloads: 0,
+      releaseType: version['version_type'] as String? ?? 'release',
+      isFeatured: version['featured'] as bool? ?? false,
       changelog: version['changelog'] as String?,
     );
   }
@@ -294,6 +316,10 @@ class ModrinthApi implements ResourceApi {
         return 'resourcepack';
       case ResourceType.modpack:
         return 'modpack';
+      case ResourceType.shader:
+        return 'shader';
+      case ResourceType.dataPack:
+        return 'datapack';
     }
   }
 

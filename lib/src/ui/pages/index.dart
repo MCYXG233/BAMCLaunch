@@ -2,7 +2,6 @@ export 'app_router.dart';
 export 'splash_page.dart';
 export 'version_page.dart';
 export 'account_page.dart';
-export 'resource_detail_page.dart';
 export 'installed_resources_page.dart';
 export 'login_page.dart';
 export 'account_selector.dart';

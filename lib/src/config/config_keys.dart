@@ -156,4 +156,7 @@ class ConfigKeys {
   /// 动态主题色（莫奈取色）
   static const String themeColor = 'themeColor';
   static const String useDynamicColor = 'useDynamicColor';
+
+  /// 资源中心 - 收藏与下载
+  static const String favoriteResources = 'favoriteResources';
 }

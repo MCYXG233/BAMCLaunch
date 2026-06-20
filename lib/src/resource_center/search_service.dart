@@ -1,24 +1,6 @@
 import 'dart:async';
-import '../core/logger.dart';
-import '../event/event.dart';
-import '../event/event_bus.dart';
-import 'api_interface.dart';
-import 'curseforge_api.dart';
-import 'modrinth_api.dart';
+import 'dart:math';
 import 'models.dart';
-import 'cache_manager.dart';
-
-/// 搜索来源枚举
-enum SearchSource {
-  /// Modrinth,
-  modrinth,
-
-  /// CurseForge,
-  curseforge,
-
-  /// 所有来源
-  all,
-}
 
 /// 搜索服务
 class SearchService {
@@ -36,227 +18,141 @@ class SearchService {
     _instance = null;
   }
 
-  final Logger _logger = Logger();
-  final EventBus _eventBus = EventBus.instance;
-  final CacheManager _cacheManager = CacheManager();
-
-  final Map<SearchSource, ResourceApi> _apis = {};
-
-  bool _initialized = false;
-
-  /// 当前搜索来源
-  SearchSource currentSource = SearchSource.modrinth;
-
-  /// 初始化搜索服务
-  Future<void> initialize() async {
-    if (_initialized) return;
-
-    _apis[SearchSource.modrinth] = ModrinthApi();
-    _apis[SearchSource.curseforge] = CurseForgeApi(apiKey: '');
-
-    _initialized = true;
-    _logger.info('SearchService initialized');
-  }
-
-  /// 获取指定来源的API
-  ResourceApi? _getApi(SearchSource source) {
-    return _apis[source];
-  }
+  // 模拟数据
+  final List<Map<String, dynamic>> _mockData = _generateMockData();
 
   /// 搜索资源
-  Future<SearchResult> search(
-    SearchParams params, {
-    SearchSource? source,
-    bool useCache = true,
-  }) async {
-    await initialize();
+  Future<SearchResult> search(SearchParams params) async {
+    // 模拟网络延迟
+    await Future.delayed(const Duration(milliseconds: 500));
 
-    final searchSource = source ?? currentSource;
-    _eventBus.publish(SearchResourcesEvent(params: params));
-
-    try {
-      if (searchSource == SearchSource.all) {
-        return await _searchAll(params);
-      } else {
-        return await _searchSingle(searchSource, params, useCache);
+    var results = _mockData.where((item) {
+      // 搜索词过滤
+      if (params.query.isNotEmpty) {
+        final name = item['name'] as String;
+        if (!name.toLowerCase().contains(params.query.toLowerCase())) {
+          return false;
+        }
       }
-    } catch (e, stackTrace) {
-      _logger.error('Search failed', e, stackTrace);
-      _eventBus.publish(SearchFailedEvent(error: e));
-      rethrow;
-    }
-  }
 
-  /// 从单个来源搜索
-  Future<SearchResult> _searchSingle(
-    SearchSource source,
-    SearchParams params,
-    bool useCache,
-  ) async {
-    final api = _getApi(source);
-    if (api == null) {
-      throw Exception('API not found for source: $source');
-    }
-
-    final cacheKey = _generateCacheKey(source, params);
-
-    if (useCache) {
-      final cached = await _cacheManager.getSearchResult(cacheKey);
-      if (cached != null) {
-        _logger.info('Returning cached search results');
-        _eventBus.publish(SearchCompletedEvent(result: cached));
-        return cached;
+      // 类型过滤
+      if (params.type != null) {
+        final type = item['type'] as ResourceType;
+        if (type != params.type) {
+          return false;
+        }
       }
+
+      return true;
+    }).toList();
+
+    // 排序
+    switch (params.sortBy) {
+      case 'downloads':
+        results.sort((a, b) => (b['downloads'] as int).compareTo(a['downloads'] as int));
+        break;
+      case 'newest':
+        results.sort((a, b) => (b['publishedDate'] as DateTime).compareTo(a['publishedDate'] as DateTime));
+        break;
+      case 'updated':
+        results.sort((a, b) => (b['updatedDate'] as DateTime).compareTo(a['updatedDate'] as DateTime));
+        break;
+      case 'name':
+        results.sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
+        break;
     }
 
-    final result = await api.search(params);
+    // 分页
+    final startIndex = (params.page - 1) * params.pageSize;
+    final pageResults = results.skip(startIndex).take(params.pageSize).toList();
 
-    _cacheManager.setSearchResult(cacheKey, result);
+    final resources = pageResults.map((item) => _createResource(item)).toList();
 
-    _eventBus.publish(SearchCompletedEvent(result: result));
-    return result;
-  }
-
-  /// 从所有来源搜索
-  Future<SearchResult> _searchAll(SearchParams params) async {
-    final futures = <Future<SearchResult>>[];
-
-    for (final source in [SearchSource.modrinth, SearchSource.curseforge]) {
-      futures.add(_searchSingle(source, params, true));
-    }
-
-    final results = await Future.wait(futures);
-
-    final allResources = <Resource>[];
-    int totalResults = 0;
-
-    for (final result in results) {
-      allResources.addAll(result.resources);
-      totalResults += result.totalResults;
-    }
-
-    allResources.sort((a, b) => b.downloads.compareTo(a.downloads));
-
-    final combined = SearchResult(
-      resources: allResources,
-      totalResults: totalResults,
+    return SearchResult(
+      resources: resources,
+      totalResults: results.length,
       page: params.page,
       pageSize: params.pageSize,
     );
-
-    _eventBus.publish(SearchCompletedEvent(result: combined));
-    return combined;
   }
 
-  /// 获取资源详情
-  Future<Resource> getResource(
-    String resourceId,
-    SearchSource source, {
-    bool useCache = true,
-  }) async {
-    await initialize();
-
-    _eventBus.publish(GetResourceEvent(resourceId: resourceId, source: source.name));
-
-    final api = _getApi(source);
-    if (api == null) {
-      throw Exception('API not found for source: $source');
-    }
-
-    if (useCache) {
-      final cached = _cacheManager.getResource(source.name, resourceId);
-      if (cached != null) {
-        _logger.info('Returning cached resource details');
-        _eventBus.publish(ResourceRetrievedEvent(resource: cached));
-        return cached;
-      }
-    }
-
-    final resource = await api.getResource(resourceId);
-
-    _cacheManager.setResource(resource);
-
-    _eventBus.publish(ResourceRetrievedEvent(resource: resource));
-    return resource;
+  Resource _createResource(Map<String, dynamic> item) {
+    return Resource(
+      id: item['id'] as String,
+      type: item['type'] as ResourceType,
+      source: 'modrinth',
+      name: item['name'] as String,
+      description: item['description'] as String,
+      authors: [
+        Author(
+          id: 'author-1',
+          name: item['author'] as String,
+        ),
+      ],
+      categories: [],
+      downloads: item['downloads'] as int,
+      likes: (item['downloads'] as int) ~/ 100,
+      pageUrl: 'https://modrinth.com/mod/${item['id']}',
+      publishedDate: item['publishedDate'] as DateTime,
+      updatedDate: item['updatedDate'] as DateTime,
+      supportedGameVersions: ['1.20.4', '1.20.2', '1.19.4'],
+      supportedLoaders: ['fabric', 'forge'],
+    );
   }
 
-  /// 获取资源版本列表
-  Future<List<ResourceVersion>> getVersions(
-    String resourceId,
-    SearchSource source, {
-    bool useCache = true,
-  }) async {
-    await initialize();
+  static List<Map<String, dynamic>> _generateMockData() {
+    final random = Random(42);
+    final mods = [
+      {'name': 'Sodium', 'description': '高性能渲染引擎，大幅提升帧率', 'type': ResourceType.mod, 'author': 'CaffeineMC', 'downloads': 15000000},
+      {'name': 'Iris', 'description': 'Fabric光影兼容核心', 'type': ResourceType.mod, 'author': 'CoderPuppy', 'downloads': 8500000},
+      {'name': 'Fabric API', 'description': 'Fabric模组加载器核心API', 'type': ResourceType.mod, 'author': 'Fabric Team', 'downloads': 22000000},
+      {'name': 'OptiFine', 'description': 'Minecraft画质与性能优化模组', 'type': ResourceType.mod, 'author': 'sp614x', 'downloads': 35000000},
+      {'name': 'JEI', 'description': '物品合成表与浏览', 'type': ResourceType.mod, 'author': 'mezz', 'downloads': 18000000},
+      {'name': 'REI', 'description': 'Roughly Enough Items合成表', 'type': ResourceType.mod, 'author': 'shedaniel', 'downloads': 12000000},
+      {'name': 'EMI', 'description': '新版合成表与导航', 'type': ResourceType.mod, 'author': 'emilyy', 'downloads': 3500000},
+      {'name': 'JourneyMap', 'description': '实时迷你地图', 'type': ResourceType.mod, 'author': 'techbrew', 'downloads': 9500000},
+      {'name': 'Xaeros World Map', 'description': '全屏高清地图', 'type': ResourceType.mod, 'author': 'xaero96', 'downloads': 6800000},
+      {'name': 'WTHIT', 'description': '游戏内信息HUD', 'type': ResourceType.mod, 'author': 'ldtteam', 'downloads': 4200000},
+      {'name': '月光资源包', 'description': '精美的像素风格资源包', 'type': ResourceType.resourcePack, 'author': 'Moonlight Team', 'downloads': 5200000},
+      {'name': 'Faithful材质', 'description': '16x高清材质', 'type': ResourceType.resourcePack, 'author': 'Faithful Team', 'downloads': 8900000},
+      {'name': 'Sildur光影', 'description': '经典光影包', 'type': ResourceType.resourcePack, 'author': 'Sildur', 'downloads': 12000000},
+      {'name': ' Complementary Reimagined', 'description': '现代风格光影', 'type': ResourceType.resourcePack, 'author': ' Complementary Team', 'downloads': 7800000},
+      {'name': 'All the Mods 9', 'description': '大型科技魔法整合包', 'type': ResourceType.modpack, 'author': 'ATM Team', 'downloads': 450000},
+      {'name': 'Enigmatica 2 Expertskyblock', 'description': '经典科技整合包', 'type': ResourceType.modpack, 'author': 'E2E Team', 'downloads': 680000},
+      {'name': 'RLCraft', 'description': '硬核生存整合包', 'type': ResourceType.modpack, 'author': 'Swiamp', 'downloads': 1200000},
+      {'name': 'Better MC', 'description': '优化整合包', 'type': ResourceType.modpack, 'author': 'BMC Team', 'downloads': 890000},
+      {'name': '小麦娘整合包', 'description': '日系风格整合包', 'type': ResourceType.modpack, 'author': 'Kengami', 'downloads': 320000},
+      {'name': "Kitchen's Faithful", 'description': '家具高清材质', 'type': ResourceType.resourcePack, 'author': 'Kitchen', 'downloads': 2100000},
+      {'name': 'Continuity', 'description': '连接材质支持', 'type': ResourceType.mod, 'author': 'Pepper', 'downloads': 2800000},
+      {'name': 'Indium', 'description': 'Sodium渲染修复', 'type': ResourceType.mod, 'author': 'FlashyReese', 'downloads': 6500000},
+      {'name': 'Lithium', 'description': '游戏性能优化', 'type': ResourceType.mod, 'author': 'FlashyReese', 'downloads': 9800000},
+      {'name': 'FerriteCore', 'description': '内存优化', 'type': ResourceType.mod, 'author': 'MrMelon54', 'downloads': 4200000},
+      {'name': 'AI Importer', 'description': '智能导入工具', 'type': ResourceType.mod, 'author': 'Giselbaer', 'downloads': 1800000},
+      {'name': 'BetterF3', 'description': '改进调试信息', 'type': ResourceType.mod, 'author': 'cominixo', 'downloads': 3500000},
+      {'name': 'No Chat Reports', 'description': '聊天安全增强', 'type': ResourceType.mod, 'author': 'Aizistral', 'downloads': 5100000},
+      {'name': 'C2ME', 'description': '区块加载优化', 'type': ResourceType.mod, 'author': 'rickyzhou', 'downloads': 2900000},
+      {'name': 'ModernFix', 'description': '现代化修复优化', 'type': ResourceType.mod, 'author': 'embeddedt', 'downloads': 4100000},
+      {'name': 'EntityCulling', 'description': '实体渲染优化', 'type': ResourceType.mod, 'author': 'tr9zw', 'downloads': 5600000},
+    ];
 
-    _eventBus.publish(GetVersionsEvent(resourceId: resourceId, source: source.name));
+    final now = DateTime.now();
+    return mods.asMap().entries.map((entry) {
+      final index = entry.key;
+      final mod = entry.value;
+      final daysAgo = random.nextInt(365) + 30;
+      final publishedDate = now.subtract(Duration(days: daysAgo + random.nextInt(180)));
+      final updatedDate = publishedDate.add(Duration(days: random.nextInt(daysAgo ~/ 2)));
 
-    final api = _getApi(source);
-    if (api == null) {
-      throw Exception('API not found for source: $source');
-    }
-
-    if (useCache) {
-      final cached = _cacheManager.getVersions(source.name, resourceId);
-      if (cached != null) {
-        _logger.info('Returning cached versions');
-        _eventBus.publish(VersionsRetrievedEvent(versions: cached));
-        return cached;
-      }
-    }
-
-    final versions = await api.getVersions(resourceId);
-
-    _cacheManager.setVersions(source.name, resourceId, versions);
-
-    _eventBus.publish(VersionsRetrievedEvent(versions: versions));
-    return versions;
-  }
-
-  /// 获取资源的单个版本
-  Future<ResourceVersion> getVersion(
-    String resourceId,
-    String versionId,
-    SearchSource source,
-  ) async {
-    await initialize();
-
-    final api = _getApi(source);
-    if (api == null) {
-      throw Exception('API not found for source: $source');
-    }
-
-    return await api.getVersion(resourceId, versionId);
-  }
-
-  /// 获取分类列表
-  Future<List<Category>> getCategories(
-    ResourceType type,
-    SearchSource source,
-  ) async {
-    await initialize();
-
-    final api = _getApi(source);
-    if (api == null) {
-      throw Exception('API not found for source: $source');
-    }
-
-    return await api.getCategories(type);
-  }
-
-  /// 生成缓存键
-  String _generateCacheKey(SearchSource source, SearchParams params) {
-    final buffer = StringBuffer('search_${source.name}_');
-    buffer.write('q${params.query}_');
-    buffer.write('t${params.type?.name ?? 'all'}_');
-    buffer.write('p${params.page}_');
-    buffer.write('s${params.pageSize}_');
-    buffer.write('o${params.sortBy}');
-    return buffer.toString();
-  }
-
-  /// 清除缓存
-  Future<void> clearCache() async {
-    _cacheManager.clear();
-    _logger.info('Search cache cleared');
+      return {
+        'id': 'mod-${index + 1}',
+        'name': mod['name'] as String,
+        'description': mod['description'] as String,
+        'type': mod['type'] as ResourceType,
+        'author': mod['author'] as String,
+        'downloads': mod['downloads'] as int,
+        'publishedDate': publishedDate,
+        'updatedDate': updatedDate,
+      };
+    }).toList();
   }
 }

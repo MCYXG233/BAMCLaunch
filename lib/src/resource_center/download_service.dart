@@ -167,15 +167,16 @@ class DownloadService {
 
     try {
       final saveDir = await _resourceManager.getResourceDirectory(resource.type);
-      final fileName = version.download.fileName;
+      final fileName = version.fileName ?? '${version.id}.jar';
       final savePath = path.join(saveDir.path, fileName);
 
       task.savePath = savePath;
 
+      final downloadUrl = version.downloadUrl ?? '';
       await _downloadEngine.download(
-        version.download.url,
+        downloadUrl,
         savePath,
-        hash: version.download.sha1,
+        hash: version.fileHashes['sha1'],
         hashType: HashType.sha1,
       );
 
@@ -194,7 +195,7 @@ class DownloadService {
         installedVersion: version.versionNumber,
         versionId: version.id,
         filePath: savePath,
-        fileSize: version.download.fileSize,
+        fileSize: version.fileSize,
         installedAt: DateTime.now(),
         iconUrl: resource.iconUrl,
       );
@@ -245,10 +246,12 @@ class DownloadService {
 
   /// 获取下载任务
   ResourceDownloadTask? getTask(String taskId) {
-    return _activeTasks[taskId] ?? _completedTasks.firstWhere(
-      (t) => t.taskId == taskId,
-      orElse: () => null as ResourceDownloadTask,
-    );
+    final active = _activeTasks[taskId];
+    if (active != null) return active;
+    for (final t in _completedTasks) {
+      if (t.taskId == taskId) return t;
+    }
+    return null;
   }
 
   /// 检查资源是否正在下载
@@ -304,6 +307,9 @@ class DownloadService {
         break;
       case ResourceType.modpack:
         await _installModpackToInstance(resource, versionId: '', instanceId: instanceId);
+        break;
+      case ResourceType.shader:
+      case ResourceType.dataPack:
         break;
     }
   }
@@ -370,15 +376,16 @@ class DownloadService {
 
     try {
       final saveDir = await _resourceManager.getResourceDirectory(ResourceType.modpack);
-      final fileName = version.download.fileName;
+      final fileName = version.fileName ?? '${modpack.id}.zip';
       final savePath = path.join(saveDir.path, fileName);
 
       task.savePath = savePath;
 
+      final downloadUrl = version.downloadUrl ?? '';
       await _downloadEngine.download(
-        version.download.url,
+        downloadUrl,
         savePath,
-        hash: version.download.sha1,
+        hash: version.fileHashes['sha1'],
         hashType: HashType.sha1,
       );
 
@@ -420,10 +427,11 @@ class DownloadService {
       orElse: () => throw ArgumentError('Instance not found'),
     );
 
-    final modpackPath = filePath ?? path.join(
+    final modpackFile = filePath ?? path.join(
       (await _resourceManager.getResourceDirectory(ResourceType.modpack)).path,
       '${modpack.id}.zip',
     );
+    _logger.info('Extracting modpack: $modpackFile');
 
     final instanceDir = Directory(path.join(
       _instanceManager.selectedDirectory?.path ?? '',

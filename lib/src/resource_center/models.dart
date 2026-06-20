@@ -6,8 +6,14 @@ enum ResourceType {
   /// 资源包
   resourcePack,
 
-  /// 模组包
+  /// 整合包
   modpack,
+
+  /// 光影包
+  shader,
+
+  /// 数据包
+  dataPack,
 }
 
 /// 作者信息
@@ -138,6 +144,12 @@ class ResourceVersion {
   /// 版本ID
   final String id;
 
+  /// 所属项目ID
+  final String projectId;
+
+  /// 资源来源
+  final String source;
+
   /// 版本号
   final String versionNumber;
 
@@ -145,7 +157,10 @@ class ResourceVersion {
   final String name;
 
   /// 发布时间
-  final DateTime releaseDate;
+  final DateTime? publishedDate;
+
+  /// 版本说明
+  final String? changelog;
 
   /// 支持的游戏版本
   final List<String> gameVersions;
@@ -153,41 +168,84 @@ class ResourceVersion {
   /// 加载器类型
   final List<String> loaders;
 
-  /// 下载信息
-  final VersionDownload download;
+  /// 依赖列表
+  final List<VersionDependency> dependencies;
 
-  /// 版本说明
-  final String? changelog;
+  /// 下载URL
+  final String? downloadUrl;
+
+  /// 文件名
+  final String? fileName;
+
+  /// 文件大小（字节）
+  final int fileSize;
+
+  /// 文件哈希
+  final Map<String, String> fileHashes;
+
+  /// 下载次数
+  final int downloads;
+
+  /// 发布类型（release/beta/alpha）
+  final String releaseType;
+
+  /// 是否为精选版本
+  final bool isFeatured;
 
   /// 创建资源版本
   ResourceVersion({
     required this.id,
+    required this.projectId,
+    this.source = 'modrinth',
     required this.versionNumber,
     required this.name,
-    required this.releaseDate,
-    required this.gameVersions,
-    required this.loaders,
-    required this.download,
+    this.publishedDate,
     this.changelog,
+    this.gameVersions = const [],
+    this.loaders = const [],
+    this.dependencies = const [],
+    this.downloadUrl,
+    this.fileName,
+    this.fileSize = 0,
+    this.fileHashes = const {},
+    this.downloads = 0,
+    this.releaseType = 'release',
+    this.isFeatured = false,
   });
 
   /// 从JSON创建
   factory ResourceVersion.fromJson(Map<String, dynamic> json) {
     return ResourceVersion(
       id: json['id'] as String,
-      versionNumber: json['versionNumber'] as String,
-      name: json['name'] as String,
-      releaseDate: DateTime.parse(json['releaseDate'] as String),
-      gameVersions: (json['gameVersions'] as List<dynamic>)
-          .map((v) => v as String)
-          .toList(),
-      loaders: (json['loaders'] as List<dynamic>)
-          .map((l) => l as String)
-          .toList(),
-      download: VersionDownload.fromJson(
-        json['download'] as Map<String, dynamic>,
-      ),
+      projectId: json['projectId'] as String? ?? '',
+      source: json['source'] as String? ?? 'modrinth',
+      versionNumber: json['versionNumber'] as String? ?? '1.0.0',
+      name: json['name'] as String? ?? 'Unknown',
+      publishedDate: json['publishedDate'] != null
+          ? DateTime.tryParse(json['publishedDate'] as String)
+          : null,
       changelog: json['changelog'] as String?,
+      gameVersions: (json['gameVersions'] as List<dynamic>?)
+              ?.map((v) => v as String)
+              .toList() ??
+          [],
+      loaders: (json['loaders'] as List<dynamic>?)
+              ?.map((l) => l as String)
+              .toList() ??
+          [],
+      dependencies: (json['dependencies'] as List<dynamic>?)
+              ?.map((d) => VersionDependency.fromJson(d as Map<String, dynamic>))
+              .toList() ??
+          [],
+      downloadUrl: json['downloadUrl'] as String?,
+      fileName: json['fileName'] as String?,
+      fileSize: json['fileSize'] as int? ?? 0,
+      fileHashes: (json['fileHashes'] as Map<String, dynamic>?)
+              ?.map((key, value) => MapEntry(key, value as String)) ??
+          {},
+      downloads: json['downloads'] as int? ?? 0,
+      releaseType: json['releaseType'] as String? ?? 'release',
+      isFeatured: json['isFeatured'] as bool? ?? false,
     );
   }
 
@@ -195,13 +253,22 @@ class ResourceVersion {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'projectId': projectId,
+      'source': source,
       'versionNumber': versionNumber,
       'name': name,
-      'releaseDate': releaseDate.toIso8601String(),
+      'publishedDate': publishedDate?.toIso8601String(),
+      'changelog': changelog,
       'gameVersions': gameVersions,
       'loaders': loaders,
-      'download': download.toJson(),
-      'changelog': changelog,
+      'dependencies': dependencies.map((d) => d.toJson()).toList(),
+      'downloadUrl': downloadUrl,
+      'fileName': fileName,
+      'fileSize': fileSize,
+      'fileHashes': fileHashes,
+      'downloads': downloads,
+      'releaseType': releaseType,
+      'isFeatured': isFeatured,
     };
   }
 }
@@ -229,11 +296,17 @@ class Resource {
   /// 作者列表
   final List<Author> authors;
 
-  /// 分类/标签列表
-  final List<Category> categories;
+  /// 分类/标签列表（字符串标签，如 "fabric", "library"）
+  final List<String> categories;
 
   /// 图标URL
   final String? iconUrl;
+
+  /// 简短描述/摘要
+  final String? summary;
+
+  /// slug（Modrinth 使用）
+  final String? slug;
 
   /// 截图URL列表
   final List<String> screenshotUrls;
@@ -254,10 +327,10 @@ class Resource {
   final String pageUrl;
 
   /// 发布时间
-  final DateTime publishedDate;
+  final DateTime? publishedDate;
 
   /// 更新时间
-  final DateTime updatedDate;
+  final DateTime? updatedDate;
 
   /// 许可证
   final String? license;
@@ -276,14 +349,16 @@ class Resource {
     required this.authors,
     required this.categories,
     this.iconUrl,
+    this.summary,
+    this.slug,
     this.screenshotUrls = const [],
     required this.supportedGameVersions,
     required this.supportedLoaders,
     required this.downloads,
     required this.likes,
     required this.pageUrl,
-    required this.publishedDate,
-    required this.updatedDate,
+    this.publishedDate,
+    this.updatedDate,
     this.license,
     this.latestVersion,
   });
@@ -295,30 +370,40 @@ class Resource {
       type: _parseResourceType(json['type'] as String),
       source: json['source'] as String,
       name: json['name'] as String,
-      description: json['description'] as String,
+      description: json['description'] as String? ?? '',
       body: json['body'] as String?,
-      authors: (json['authors'] as List<dynamic>)
-          .map((a) => Author.fromJson(a as Map<String, dynamic>))
-          .toList(),
-      categories: (json['categories'] as List<dynamic>)
-          .map((c) => Category.fromJson(c as Map<String, dynamic>))
-          .toList(),
+      summary: json['summary'] as String?,
+      slug: json['slug'] as String?,
+      authors: (json['authors'] as List<dynamic>?)
+              ?.map((a) => Author.fromJson(a as Map<String, dynamic>))
+              .toList() ??
+          [],
+      categories: (json['categories'] as List<dynamic>?)
+              ?.map((c) => c as String)
+              .toList() ??
+          [],
       iconUrl: json['iconUrl'] as String?,
       screenshotUrls: (json['screenshotUrls'] as List<dynamic>?)
               ?.map((s) => s as String)
               .toList() ??
           [],
-      supportedGameVersions: (json['supportedGameVersions'] as List<dynamic>)
-          .map((v) => v as String)
-          .toList(),
-      supportedLoaders: (json['supportedLoaders'] as List<dynamic>)
-          .map((l) => l as String)
-          .toList(),
-      downloads: json['downloads'] as int,
-      likes: json['likes'] as int,
-      pageUrl: json['pageUrl'] as String,
-      publishedDate: DateTime.parse(json['publishedDate'] as String),
-      updatedDate: DateTime.parse(json['updatedDate'] as String),
+      supportedGameVersions: (json['supportedGameVersions'] as List<dynamic>?)
+              ?.map((v) => v as String)
+              .toList() ??
+          [],
+      supportedLoaders: (json['supportedLoaders'] as List<dynamic>?)
+              ?.map((l) => l as String)
+              .toList() ??
+          [],
+      downloads: json['downloads'] as int? ?? 0,
+      likes: json['likes'] as int? ?? 0,
+      pageUrl: json['pageUrl'] as String? ?? '',
+      publishedDate: json['publishedDate'] != null
+          ? DateTime.tryParse(json['publishedDate'] as String)
+          : null,
+      updatedDate: json['updatedDate'] != null
+          ? DateTime.tryParse(json['updatedDate'] as String)
+          : null,
       license: json['license'] as String?,
       latestVersion: json['latestVersion'] != null
           ? ResourceVersion.fromJson(
@@ -337,8 +422,10 @@ class Resource {
       'name': name,
       'description': description,
       'body': body,
+      'summary': summary,
+      'slug': slug,
       'authors': authors.map((a) => a.toJson()).toList(),
-      'categories': categories.map((c) => c.toJson()).toList(),
+      'categories': categories,
       'iconUrl': iconUrl,
       'screenshotUrls': screenshotUrls,
       'supportedGameVersions': supportedGameVersions,
@@ -346,8 +433,8 @@ class Resource {
       'downloads': downloads,
       'likes': likes,
       'pageUrl': pageUrl,
-      'publishedDate': publishedDate.toIso8601String(),
-      'updatedDate': updatedDate.toIso8601String(),
+      'publishedDate': publishedDate?.toIso8601String(),
+      'updatedDate': updatedDate?.toIso8601String(),
       'license': license,
       'latestVersion': latestVersion?.toJson(),
     };
@@ -448,7 +535,7 @@ class SearchParams {
     this.categories,
     this.page = 1,
     this.pageSize = 20,
-    this.sortBy = 'relevance',
+    this.sortBy = 'downloads',
   });
 
   /// 复制并更新参数
@@ -615,3 +702,62 @@ class InstalledResource {
     );
   }
 }
+
+/// 版本依赖关系
+///
+/// 描述一个 Mod 依赖的其他 Mod。
+///
+/// ## 依赖类型
+///
+/// - required: 必须安装
+/// - optional: 可选
+/// - incompatible: 不兼容
+/// - embedded: 已内置
+class VersionDependency {
+  /// 依赖的项目ID
+  final String? projectId;
+
+  /// 依赖的版本ID
+  final String? versionId;
+
+  /// 依赖类型
+  final String dependencyType;
+
+  /// 创建版本依赖
+  VersionDependency({
+    this.projectId,
+    this.versionId,
+    required this.dependencyType,
+  });
+
+  /// 从JSON创建
+  factory VersionDependency.fromJson(Map<String, dynamic> json) {
+    return VersionDependency(
+      projectId: json['projectId'] as String?,
+      versionId: json['versionId'] as String?,
+      dependencyType: json['dependencyType'] as String? ?? 'required',
+    );
+  }
+
+  /// 转换为JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'projectId': projectId,
+      'versionId': versionId,
+      'dependencyType': dependencyType,
+    };
+  }
+
+  /// 是否为必需依赖
+  bool get isRequired => dependencyType == 'required';
+
+  /// 是否为可选依赖
+  bool get isOptional => dependencyType == 'optional';
+
+  /// 是否为不兼容的 Mod
+  bool get isIncompatible => dependencyType == 'incompatible';
+
+  @override
+  String toString() => 'VersionDependency($projectId, $dependencyType)';
+}
+

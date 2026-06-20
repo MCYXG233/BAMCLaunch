@@ -80,6 +80,12 @@ class ResourceManager {
       case ResourceType.resourcePack:
         typeDir = 'resourcepacks';
         break;
+      case ResourceType.shader:
+        typeDir = 'shaderpacks';
+        break;
+      case ResourceType.dataPack:
+        typeDir = 'datapacks';
+        break;
       case ResourceType.modpack:
         typeDir = 'modpacks';
         break;
