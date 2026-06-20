@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:window_manager/window_manager.dart';
 import '../theme/colors.dart';
 import '../components/ba_common_widgets.dart';
 import '../../resource_center/search_service.dart';
@@ -7,12 +6,6 @@ import '../../resource_center/models.dart';
 import '../components/ba_notification.dart';
 import 'ba_resource_detail_page.dart';
 
-/// 资源中心页面 - 左筛右列布局
-/// 
-/// 布局结构:
-/// - 顶部: 毛玻璃标题栏 (返回 + 标题 + 搜索框)
-/// - 左侧: 筛选面板 (源选择/类型/版本/加载器/收藏)
-/// - 右侧: 资源列表/网格
 class BAResourceCenterPage extends StatefulWidget {
   const BAResourceCenterPage({super.key});
 
@@ -24,40 +17,35 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final SearchService _searchService = SearchService();
-  bool _isMaximized = false;
 
-  // 资源数据
   List<Resource> _resources = [];
   bool _isLoading = false;
   bool _isLoadingMore = false;
   bool _hasMore = true;
   String? _errorMessage;
-  
-  // 筛选条件
+
   String _searchQuery = '';
   ResourceType? _selectedType;
   String _sortBy = 'downloads';
   int _currentPage = 1;
-  
-  // 游戏版本和加载器筛选
+
   String? _selectedGameVersion;
-  String? _selectedLoader; // fabric / forge / quilt
-  
-  // 收藏筛选
+  String? _selectedLoader;
+
   bool _showOnlyFavorites = false;
   Set<String> _favoriteIds = {};
 
-  static const int _pageSize = 24;
+  static const int _pageSize = 20;
 
-  // 资源类型
   static const _typeOptions = <MapEntry<String, ResourceType?>>[
     MapEntry('全部', null),
     MapEntry('模组', ResourceType.mod),
     MapEntry('资源包', ResourceType.resourcePack),
     MapEntry('整合包', ResourceType.modpack),
+    MapEntry('光影包', ResourceType.shader),
+    MapEntry('数据包', ResourceType.dataPack),
   ];
 
-  // 排序选项
   static const _sortOptions = <MapEntry<String, String>>[
     MapEntry('downloads', '最多下载'),
     MapEntry('newest', '最新发布'),
@@ -65,37 +53,29 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
     MapEntry('name', '按名称'),
   ];
 
-  // 资源类型图标
   static const Map<ResourceType?, IconData> _typeIcons = {
     null: Icons.apps,
     ResourceType.mod: Icons.extension,
     ResourceType.resourcePack: Icons.palette,
     ResourceType.modpack: Icons.inventory_2,
+    ResourceType.shader: Icons.lightbulb,
+    ResourceType.dataPack: Icons.folder_copy,
   };
 
-  // 资源类型颜色
   static const Map<ResourceType?, Color> _typeColors = {
     null: BAColors.primary,
     ResourceType.mod: BAColors.accentPink,
     ResourceType.resourcePack: BAColors.success,
     ResourceType.modpack: BAColors.warning,
+    ResourceType.shader: Color(0xFFE6C46A),
+    ResourceType.dataPack: Color(0xFF7AA5D6),
   };
 
   @override
   void initState() {
     super.initState();
-    _initWindow();
     _scrollController.addListener(_onScroll);
     _performSearch();
-  }
-
-  Future<void> _initWindow() async {
-    final isMaximized = await windowManager.isMaximized();
-    if (mounted) {
-      setState(() {
-        _isMaximized = isMaximized;
-      });
-    }
   }
 
   @override
@@ -236,7 +216,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => BAResourceDetailPage(
+        builder: (context) => ResourceDetailPage(
           resource: resource,
           isFavorite: _favoriteIds.contains(resource.id),
           onFavoriteToggle: () => _toggleFavorite(resource.id),
@@ -245,33 +225,166 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
     );
   }
 
-  void _goBack() {
-    Navigator.pop(context);
-  }
-
   @override
   Widget build(BuildContext context) {
     NotificationManager().init(context);
 
-    return Scaffold(
-      body: Column(
+    return Column(
+      children: [
+        // 顶部自定义标题栏
+        _buildHeader(context),
+        const SizedBox(height: 12),
+
+        // 主体内容
+        Expanded(
+          child: Row(
+            children: [
+              // 左侧筛选面板
+              _buildFilterPanel(context),
+              const SizedBox(width: 12),
+
+              // 右侧资源列表
+              Expanded(child: _buildResourceList(context)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 顶部自定义标题栏 - 蔚蓝档案风格
+  Widget _buildHeader(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 12, 24, 0),
+      child: Row(
         children: [
-          // 顶部标题栏
-          _buildHeader(context),
-          
-          // 主体内容：左筛右列
+          // 图标 + 标题 + 副标题
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [BAColors.primaryLight, BAColors.primary],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: BAColors.primary.withOpacity(0.4),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.extension,
+                  color: Color(0xFFFFFFFF),
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '资源中心',
+                    style: TextStyle(
+                      color: isLight ? const Color(0xFF1A2744) : Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '浏览和下载Mod、资源包、整合包',
+                    style: TextStyle(
+                      color: (isLight ? const Color(0xFF1A2744) : Colors.white)
+                          .withValues(alpha: 0.65),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          const SizedBox(width: 16),
+
+          // 搜索框
           Expanded(
+            child: Container(
+              height: 40,
+              constraints: const BoxConstraints(maxWidth: 360),
+              child: TextField(
+                controller: _searchController,
+                onSubmitted: _onSearch,
+                style: TextStyle(
+                  color: BAColors.textPrimaryOf(context),
+                  fontSize: 12,
+                ),
+                decoration: InputDecoration(
+                  hintText: '搜索模组、资源包...',
+                  hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
+                  prefixIcon: Icon(Icons.search,
+                      color: BAColors.textSecondaryOf(context), size: 18),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(Icons.clear,
+                              color: BAColors.textSecondaryOf(context), size: 16),
+                          onPressed: () {
+                            _searchController.clear();
+                            _onSearch('');
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: BAColors.surfaceVariantOf(context),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          // 资源数量指示器
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: (isLight ? const Color(0xFFEEF1FA) : const Color(0xFF2A3558))
+                  .withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: (isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A))
+                    .withValues(alpha: 0.5),
+              ),
+            ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // 左侧筛选面板
-                _buildFilterPanel(context),
-                
-                // 分隔线
-                Container(width: 1, color: BAColors.borderOf(context).withValues(alpha: 0.3)),
-                
-                // 右侧资源列表
-                Expanded(
-                  child: _buildResourceList(context),
+                Icon(Icons.inventory_2,
+                    color: (isLight ? const Color(0xFF1A2744) : Colors.white)
+                        .withValues(alpha: 0.85),
+                    size: 14),
+                const SizedBox(width: 6),
+                Text(
+                  '${_resources.length}${_hasMore ? '+' : ''} 个资源',
+                  style: TextStyle(
+                    color: (isLight ? const Color(0xFF1A2744) : Colors.white)
+                        .withValues(alpha: 0.9),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
@@ -281,197 +394,61 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
     );
   }
 
-  /// 顶部标题栏
-  Widget _buildHeader(BuildContext context) {
-    return BAGlassContainer(
-      blur: 20,
-      opacity: 0.85,
-      borderRadius: 0,
-      child: Container(
-        height: 60,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            // 返回按钮
-            BAIconButton(
-              icon: Icons.arrow_back,
-              onTap: _goBack,
-              size: 36,
-              iconSize: 18,
-            ),
-            const SizedBox(width: 12),
-            
-            // 标题
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                gradient: BAColors.primaryGradient,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.extension, color: Colors.white, size: 18),
-                  SizedBox(width: 8),
-                  Text(
-                    '资源中心',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 20),
-            
-            // 搜索框
-            Expanded(
-              child: Container(
-                height: 40,
-                constraints: const BoxConstraints(maxWidth: 400),
-                child: TextField(
-                  controller: _searchController,
-                  onSubmitted: _onSearch,
-                  style: TextStyle(
-                    color: BAColors.textPrimaryOf(context),
-                    fontSize: 14,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: '搜索模组、资源包...',
-                    hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
-                    prefixIcon: Icon(Icons.search, color: BAColors.textSecondaryOf(context), size: 20),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: Icon(Icons.clear, color: BAColors.textSecondaryOf(context), size: 18),
-                            onPressed: () {
-                              _searchController.clear();
-                              _onSearch('');
-                            },
-                          )
-                        : null,
-                    filled: true,
-                    fillColor: BAColors.surfaceVariantOf(context),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                  ),
-                ),
-              ),
-            ),
-            
-            const Spacer(),
-            
-            // 资源数量
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: BAColors.surfaceVariantOf(context),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.folder, color: BAColors.primary, size: 16),
-                  const SizedBox(width: 6),
-                  Text(
-                    '${_resources.length}${_hasMore ? '+' : ''} 个资源',
-                    style: TextStyle(
-                      color: BAColors.textPrimaryOf(context),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            
-            // 窗口控制按钮
-            Row(
-              children: [
-                BAWindowButton(
-                  icon: Icons.remove,
-                  onTap: () => windowManager.minimize(),
-                  size: 32,
-                ),
-                const SizedBox(width: 6),
-                BAWindowButton(
-                  icon: _isMaximized ? Icons.filter_none : Icons.crop_square,
-                  onTap: () async {
-                    if (_isMaximized) {
-                      await windowManager.unmaximize();
-                    } else {
-                      await windowManager.maximize();
-                    }
-                    final isMaximized = await windowManager.isMaximized();
-                    if (mounted) setState(() => _isMaximized = isMaximized);
-                  },
-                  size: 32,
-                ),
-                const SizedBox(width: 6),
-                BAWindowButton(
-                  icon: Icons.close,
-                  onTap: () => windowManager.close(),
-                  isClose: true,
-                  size: 32,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 左侧筛选面板
   Widget _buildFilterPanel(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final bgColor = isLight ? const Color(0xFFF8FAFF) : const Color(0xFF0D1321);
-    final cardBg = isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A2540);
-    final borderColor = isLight ? const Color(0xFFE0E8F0) : const Color(0xFF2A3A5A);
+    final bgColor =
+        (isLight ? const Color(0xFFEEF1FA) : const Color(0xFF1A2544))
+            .withValues(alpha: 0.85);
+    final borderColor =
+        (isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A))
+            .withValues(alpha: 0.5);
+    final textColor = isLight ? const Color(0xFF1A2744) : Colors.white;
 
     return Container(
-      width: 220,
-      color: bgColor,
+      width: 210,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+      ),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 资源类型
             _buildFilterSection(
               context,
               title: '类型',
               icon: Icons.category,
+              textColor: textColor,
               child: Column(
                 children: _typeOptions.map((type) {
                   final isSelected = _selectedType == type.value;
                   final typeColor = _typeColors[type.value] ?? BAColors.primary;
                   final typeIcon = _typeIcons[type.value] ?? Icons.apps;
-                  return _buildChip(
+                  return _buildFilterChip(
                     label: type.key,
                     icon: typeIcon,
                     isSelected: isSelected,
                     color: typeColor,
+                    textColor: textColor,
                     onTap: () => _onTypeChanged(type.value),
                   );
                 }).toList(),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
 
-            // 游戏版本
             _buildFilterSection(
               context,
               title: '游戏版本',
               icon: Icons.history,
+              textColor: textColor,
               child: _buildDropdown(
                 context,
                 value: _selectedGameVersion,
                 hint: '选择版本',
+                textColor: textColor,
                 items: const [
                   '1.21.x',
                   '1.20.x',
@@ -483,118 +460,137 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                 onChanged: _onGameVersionChanged,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
 
-            // Mod加载器
             _buildFilterSection(
               context,
               title: 'Mod加载器',
               icon: Icons.extension,
+              textColor: textColor,
               child: Column(
                 children: [
-                  _buildChip(
+                  _buildFilterChip(
                     label: 'Fabric',
                     icon: Icons.widgets,
                     isSelected: _selectedLoader == 'fabric',
                     color: const Color(0xFF6D8A88),
-                    onTap: () => _onLoaderChanged(_selectedLoader == 'fabric' ? null : 'fabric'),
+                    textColor: textColor,
+                    onTap: () =>
+                        _onLoaderChanged(_selectedLoader == 'fabric' ? null : 'fabric'),
                   ),
-                  const SizedBox(height: 6),
-                  _buildChip(
+                  const SizedBox(height: 4),
+                  _buildFilterChip(
                     label: 'Forge',
                     icon: Icons.construction,
                     isSelected: _selectedLoader == 'forge',
                     color: const Color(0xFFE87A1B),
-                    onTap: () => _onLoaderChanged(_selectedLoader == 'forge' ? null : 'forge'),
+                    textColor: textColor,
+                    onTap: () =>
+                        _onLoaderChanged(_selectedLoader == 'forge' ? null : 'forge'),
                   ),
-                  const SizedBox(height: 6),
-                  _buildChip(
+                  const SizedBox(height: 4),
+                  _buildFilterChip(
                     label: 'Quilt',
                     icon: Icons.grid_view,
                     isSelected: _selectedLoader == 'quilt',
                     color: const Color(0xFF9D65C9),
-                    onTap: () => _onLoaderChanged(_selectedLoader == 'quilt' ? null : 'quilt'),
+                    textColor: textColor,
+                    onTap: () =>
+                        _onLoaderChanged(_selectedLoader == 'quilt' ? null : 'quilt'),
                   ),
-                  const SizedBox(height: 6),
-                  _buildChip(
+                  const SizedBox(height: 4),
+                  _buildFilterChip(
                     label: 'NeoForge',
                     icon: Icons.architecture,
                     isSelected: _selectedLoader == 'neoforge',
                     color: const Color(0xFF6CC47F),
-                    onTap: () => _onLoaderChanged(_selectedLoader == 'neoforge' ? null : 'neoforge'),
+                    textColor: textColor,
+                    onTap: () => _onLoaderChanged(
+                        _selectedLoader == 'neoforge' ? null : 'neoforge'),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
 
-            // 排序
             _buildFilterSection(
               context,
               title: '排序',
               icon: Icons.sort,
+              textColor: textColor,
               child: Column(
                 children: _sortOptions.map((option) {
                   final isSelected = _sortBy == option.key;
                   return _buildSortOption(
                     label: option.value,
                     isSelected: isSelected,
+                    textColor: textColor,
                     onTap: () => _onSortChanged(option.key),
                   );
                 }).toList(),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
 
-            // 收藏筛选
             _buildFilterSection(
               context,
               title: '我的收藏',
               icon: Icons.favorite,
-              child: BASurfaceCard(
+              textColor: textColor,
+              child: GestureDetector(
                 onTap: () => setState(() => _showOnlyFavorites = !_showOnlyFavorites),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                showBorder: true,
-                child: Row(
-                  children: [
-                    Icon(
-                      _showOnlyFavorites ? Icons.favorite : Icons.favorite_border,
-                      color: _showOnlyFavorites ? Colors.red : BAColors.textSecondaryOf(context),
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '只看收藏',
-                      style: TextStyle(
-                        color: BAColors.textPrimaryOf(context),
-                        fontSize: 13,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: _showOnlyFavorites
+                        ? BAColors.primary.withValues(alpha: 0.12)
+                        : (Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFFFFFFFF)
+                            : const Color(0xFF2A3558)),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: borderColor),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _showOnlyFavorites ? Icons.favorite : Icons.favorite_border,
+                        color: _showOnlyFavorites ? Colors.red : textColor.withValues(alpha: 0.7),
+                        size: 14,
                       ),
-                    ),
-                    const Spacer(),
-                    if (_favoriteIds.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: BAColors.primary.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(10),
+                      const SizedBox(width: 6),
+                      Text(
+                        '只看收藏',
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 11,
                         ),
-                        child: Text(
-                          '${_favoriteIds.length}',
-                          style: TextStyle(
-                            color: BAColors.primary,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
+                      ),
+                      const Spacer(),
+                      if (_favoriteIds.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: BAColors.primary.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '${_favoriteIds.length}',
+                            style: const TextStyle(
+                              color: BAColors.primary,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-            
-            const SizedBox(height: 20),
-            
-            // 清除筛选按钮
+
+            const SizedBox(height: 18),
+
+            // 重置筛选按钮
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
@@ -608,12 +604,15 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                   });
                   _performSearch();
                 },
-                icon: const Icon(Icons.refresh, size: 16),
+                icon: const Icon(Icons.refresh, size: 14),
                 label: const Text('重置筛选'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: BAColors.textSecondaryOf(context),
-                  side: BorderSide(color: BAColors.borderOf(context)),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  foregroundColor: textColor.withValues(alpha: 0.8),
+                  side: BorderSide(color: borderColor),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             ),
@@ -627,6 +626,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
     BuildContext context, {
     required String title,
     required IconData icon,
+    required Color textColor,
     required Widget child,
   }) {
     return Column(
@@ -634,49 +634,64 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
       children: [
         Row(
           children: [
-            Icon(icon, color: BAColors.primary, size: 16),
-            const SizedBox(width: 6),
+            Icon(icon, color: BAColors.primary, size: 12),
+            const SizedBox(width: 4),
             Text(
               title,
               style: TextStyle(
-                color: BAColors.textPrimaryOf(context),
-                fontSize: 13,
+                color: textColor,
+                fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         child,
       ],
     );
   }
 
-  Widget _buildChip({
+  Widget _buildFilterChip({
     required String label,
     required IconData icon,
     required bool isSelected,
     required Color color,
+    required Color textColor,
     required VoidCallback onTap,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: BASurfaceCard(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: GestureDetector(
         onTap: onTap,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        child: Row(
-          children: [
-            Icon(icon, color: isSelected ? Colors.white : color, size: 16),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.white : BAColors.textPrimaryOf(context),
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? color.withValues(alpha: 0.18)
+                : (Theme.of(context).brightness == Brightness.light
+                    ? const Color(0xFFFFFFFF)
+                    : const Color(0xFF2A3558)),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected ? color.withValues(alpha: 0.5) : Colors.transparent,
             ),
-          ],
+          ),
+          child: Row(
+            children: [
+              Icon(icon,
+                  color: isSelected ? color : textColor.withValues(alpha: 0.7), size: 13),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? color : textColor,
+                  fontSize: 11,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -685,34 +700,36 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
   Widget _buildSortOption({
     required String label,
     required bool isSelected,
+    required Color textColor,
     required VoidCallback onTap,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: 3),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           decoration: BoxDecoration(
-            color: isSelected ? BAColors.primary.withValues(alpha: 0.15) : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
+            color:
+                isSelected ? BAColors.primary.withValues(alpha: 0.12) : Colors.transparent,
+            borderRadius: BorderRadius.circular(6),
           ),
           child: Row(
             children: [
               Container(
-                width: 4,
-                height: 4,
+                width: 3,
+                height: 3,
                 decoration: BoxDecoration(
-                  color: isSelected ? BAColors.primary : BAColors.textSecondaryOf(context),
+                  color: isSelected ? BAColors.primary : textColor.withValues(alpha: 0.5),
                   shape: BoxShape.circle,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? BAColors.primary : BAColors.textSecondaryOf(context),
-                  fontSize: 12,
+                  color: isSelected ? BAColors.primary : textColor.withValues(alpha: 0.7),
+                  fontSize: 11,
                 ),
               ),
             ],
@@ -726,15 +743,18 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
     BuildContext context, {
     String? value,
     required String hint,
+    required Color textColor,
     required List<String> items,
     required ValueChanged<String?> onChanged,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: BAColors.surfaceVariantOf(context),
+        color: Theme.of(context).brightness == Brightness.light
+            ? const Color(0xFFFFFFFF)
+            : const Color(0xFF2A3558),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BAColors.borderOf(context)),
+        border: Border.all(color: textColor.withValues(alpha: 0.2)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -743,15 +763,18 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
           hint: Text(
             hint,
             style: TextStyle(
-              color: BAColors.textDisabledOf(context),
-              fontSize: 12,
+              color: textColor.withValues(alpha: 0.5),
+              fontSize: 11,
             ),
           ),
-          icon: Icon(Icons.keyboard_arrow_down, color: BAColors.textSecondaryOf(context), size: 18),
-          dropdownColor: BAColors.surfaceOf(context),
+          icon: Icon(Icons.keyboard_arrow_down,
+              color: textColor.withValues(alpha: 0.6), size: 16),
+          dropdownColor: Theme.of(context).brightness == Brightness.light
+              ? const Color(0xFFFFFFFF)
+              : const Color(0xFF1A2544),
           style: TextStyle(
-            color: BAColors.textPrimaryOf(context),
-            fontSize: 12,
+            color: textColor,
+            fontSize: 11,
           ),
           items: items.map((item) {
             return DropdownMenuItem<String>(
@@ -765,7 +788,6 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
     );
   }
 
-  /// 右侧资源列表
   Widget _buildResourceList(BuildContext context) {
     if (_isLoading) {
       return Center(
@@ -773,19 +795,19 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(
-              width: 60,
-              height: 60,
+              width: 40,
+              height: 40,
               child: CircularProgressIndicator(
                 color: BAColors.primary,
-                strokeWidth: 3,
+                strokeWidth: 2,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Text(
               '正在加载资源...',
               style: TextStyle(
                 color: BAColors.textSecondaryOf(context),
-                fontSize: 14,
+                fontSize: 12,
               ),
             ),
           ],
@@ -798,30 +820,34 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, color: BAColors.danger, size: 48),
-            const SizedBox(height: 16),
+            Icon(Icons.error_outline, color: BAColors.danger, size: 36),
+            const SizedBox(height: 12),
             Text(
               '加载失败',
               style: TextStyle(
                 color: BAColors.textPrimaryOf(context),
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(
               _errorMessage!,
               style: TextStyle(
                 color: BAColors.textSecondaryOf(context),
-                fontSize: 13,
+                fontSize: 11,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             ElevatedButton.icon(
               onPressed: _performSearch,
-              icon: const Icon(Icons.refresh, size: 16),
+              icon: const Icon(Icons.refresh, size: 14),
               label: const Text('重试'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: BAColors.primary,
+                foregroundColor: Colors.white,
+              ),
             ),
           ],
         ),
@@ -837,22 +863,23 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.search_off, color: BAColors.textSecondaryOf(context), size: 56),
-            const SizedBox(height: 16),
+            Icon(Icons.search_off,
+                color: BAColors.textSecondaryOf(context).withValues(alpha: 0.5), size: 48),
+            const SizedBox(height: 12),
             Text(
               _showOnlyFavorites ? '还没有收藏任何资源' : '没有找到相关资源',
               style: TextStyle(
                 color: BAColors.textPrimaryOf(context),
-                fontSize: 18,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Text(
               _showOnlyFavorites ? '去浏览并收藏感兴趣的模组吧' : '尝试调整筛选条件',
               style: TextStyle(
                 color: BAColors.textSecondaryOf(context),
-                fontSize: 14,
+                fontSize: 11,
               ),
             ),
           ],
@@ -860,155 +887,267 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
       );
     }
 
+    final isLight = Theme.of(context).brightness == Brightness.light;
+
     return Container(
-      color: BAColors.backgroundOf(context),
-      child: GridView.builder(
-        controller: _scrollController,
-        padding: const EdgeInsets.all(16),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          childAspectRatio: 0.78,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
+      decoration: BoxDecoration(
+        color: (isLight ? const Color(0xFFEEF1FA) : const Color(0xFF1A2544))
+            .withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: (isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A))
+              .withValues(alpha: 0.5),
         ),
+      ),
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(12),
         itemCount: displayResources.length + (_isLoadingMore ? 1 : 0),
         itemBuilder: (context, index) {
           if (index >= displayResources.length) {
             return Center(
-              child: SizedBox(
-                width: 32,
-                height: 32,
-                child: CircularProgressIndicator(
-                  color: BAColors.primary,
-                  strokeWidth: 2,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    color: BAColors.primary,
+                    strokeWidth: 2,
+                  ),
                 ),
               ),
             );
           }
           final resource = displayResources[index];
-          return _buildResourceCard(context, resource);
+          return _buildResourceCard(context, resource, isLight);
         },
       ),
     );
   }
 
-  /// 资源卡片
-  Widget _buildResourceCard(BuildContext context, Resource resource) {
+  Widget _buildResourceCard(BuildContext context, Resource resource, bool isLight) {
     final typeColor = _typeColors[resource.type] ?? BAColors.primary;
     final isFavorite = _favoriteIds.contains(resource.id);
+    final cardBg = isLight ? const Color(0xFFFFFFFF) : const Color(0xFF2A3558);
+    final cardBorder = (isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A))
+        .withValues(alpha: 0.35);
+    final textPrimary = isLight ? const Color(0xFF1A2744) : Colors.white;
+    final textSecondary =
+        (isLight ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.65);
 
-    return BASurfaceCard(
-      onTap: () => _onResourceTap(resource),
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 顶部操作栏
-          Row(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: GestureDetector(
+        onTap: () => _onResourceTap(resource),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: cardBorder),
+          ),
+          child: Row(
             children: [
-              // 类型标签
+              // 图标
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                width: 56,
+                height: 56,
                 decoration: BoxDecoration(
-                  color: typeColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
+                  color: typeColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: resource.iconUrl != null
+                      ? Image.network(
+                          resource.iconUrl!,
+                          width: 56,
+                          height: 56,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Center(
+                            child: Icon(
+                              _typeIcons[resource.type] ?? Icons.apps,
+                              size: 28,
+                              color: typeColor.withValues(alpha: 0.7),
+                            ),
+                          ),
+                          loadingBuilder: (_, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  color: typeColor,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      : Center(
+                          child: Icon(
+                            _typeIcons[resource.type] ?? Icons.apps,
+                            size: 28,
+                            color: typeColor.withValues(alpha: 0.7),
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // 中间信息
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(_typeIcons[resource.type], size: 12, color: typeColor),
-                    const SizedBox(width: 4),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: typeColor.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            _getTypeName(resource.type),
+                            style: TextStyle(
+                              color: typeColor,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            resource.name,
+                            style: TextStyle(
+                              color: textPrimary,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
                     Text(
-                      _getTypeName(resource.type),
+                      resource.description.isNotEmpty
+                          ? resource.description
+                          : resource.summary ?? '',
                       style: TextStyle(
-                        color: typeColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
+                        color: textSecondary,
+                        fontSize: 11,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        if (resource.categories.isNotEmpty)
+                          ...resource.categories.take(3).map(
+                            (category) => Padding(
+                              padding: const EdgeInsets.only(right: 4),
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: isLight
+                                      ? const Color(0xFFEEF1FA)
+                                      : const Color(0xFF1A2544),
+                                  borderRadius: BorderRadius.circular(3),
+                                ),
+                                child: Text(
+                                  category,
+                                  style: TextStyle(
+                                    color: textSecondary,
+                                    fontSize: 9,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        const Spacer(),
+                        if (resource.supportedGameVersions.isNotEmpty)
+                          Text(
+                            resource.supportedGameVersions.first,
+                            style: TextStyle(
+                              color: textSecondary,
+                              fontSize: 10,
+                            ),
+                          ),
+                        const SizedBox(width: 8),
+                        if (resource.source.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: BAColors.primary.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                            child: Text(
+                              resource.source.toUpperCase(),
+                              style: const TextStyle(
+                                color: BAColors.primary,
+                                fontSize: 8,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              const Spacer(),
-              // 收藏按钮
-              GestureDetector(
-                onTap: () => _toggleFavorite(resource.id),
-                child: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: isFavorite ? Colors.red : BAColors.textSecondaryOf(context),
-                  size: 20,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
 
-          // 资源图标区域
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    typeColor.withValues(alpha: 0.15),
-                    typeColor.withValues(alpha: 0.05),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Center(
-                child: Icon(
-                  _typeIcons[resource.type] ?? Icons.apps,
-                  size: 40,
-                  color: typeColor.withValues(alpha: 0.8),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
+              const SizedBox(width: 12),
 
-          // 资源名称
-          Text(
-            resource.name,
-            style: TextStyle(
-              color: BAColors.textPrimaryOf(context),
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 6),
-
-          // 下载量和作者
-          Row(
-            children: [
-              Icon(Icons.download, size: 12, color: BAColors.textSecondaryOf(context)),
-              const SizedBox(width: 4),
-              Text(
-                _formatDownloads(resource.downloads),
-                style: TextStyle(
-                  color: BAColors.textSecondaryOf(context),
-                  fontSize: 11,
-                ),
-              ),
-              const Spacer(),
-              Expanded(
-                child: Text(
-                  resource.authors.isNotEmpty ? resource.authors.first.name : '未知',
-                  style: TextStyle(
-                    color: BAColors.textSecondaryOf(context),
-                    fontSize: 10,
+              // 右侧：下载量 + 作者 + 收藏
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.download, size: 11, color: textSecondary),
+                      const SizedBox(width: 2),
+                      Text(
+                        _formatDownloads(resource.downloads),
+                        style: TextStyle(
+                          color: textSecondary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.right,
-                ),
+                  const SizedBox(height: 4),
+                  Text(
+                    resource.authors.isNotEmpty ? resource.authors.first.name : '未知',
+                    style: TextStyle(
+                      color: textSecondary,
+                      fontSize: 9,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  GestureDetector(
+                    onTap: () => _toggleFavorite(resource.id),
+                    child: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? Colors.red : textSecondary,
+                      size: 16,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -1021,6 +1160,10 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
         return '资源包';
       case ResourceType.modpack:
         return '整合包';
+      case ResourceType.shader:
+        return '光影包';
+      case ResourceType.dataPack:
+        return '数据包';
       default:
         return '其他';
     }

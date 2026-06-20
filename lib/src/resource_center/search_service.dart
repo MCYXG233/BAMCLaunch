@@ -97,6 +97,7 @@ class SearchService {
       updatedDate: item['updatedDate'] as DateTime,
       supportedGameVersions: ['1.20.4', '1.20.2', '1.19.4'],
       supportedLoaders: ['fabric', 'forge'],
+      iconUrl: item['iconUrl'] as String?,
     );
   }
 
@@ -152,7 +153,24 @@ class SearchService {
         'downloads': mod['downloads'] as int,
         'publishedDate': publishedDate,
         'updatedDate': updatedDate,
+        'iconUrl': _getIconUrlForName(mod['name'] as String),
       };
     }).toList();
+  }
+
+  static String? _getIconUrlForName(String name) {
+    const slugMap = <String, String>{
+      'Sodium': 'AANobbMI',
+      'Iris': 'ssVbK79L',
+      'Fabric API': 'P7dR8mSH',
+      'OptiFine': 'OptiFine',
+      'JEI': 'u6dRKWWv',
+      'REI': 'nfn13YXA',
+      'JourneyMap': 'lHFcaTgW',
+      'Lithium': 'gvQ3B7qL',
+    };
+    final slug = slugMap[name];
+    if (slug == null) return null;
+    return 'https://cdn.modrinth.com/data/$slug/images/icon.png';
   }
 }

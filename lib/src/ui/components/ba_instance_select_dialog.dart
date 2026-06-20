@@ -1,21 +1,14 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
-import '../components/ba_common_widgets.dart';
-import '../resource_center/models.dart';
-import '../resource_center/download_manager.dart';
+import '../../resource_center/models.dart';
+import '../../resource_center/download_manager.dart';
 
 /// 实例选择对话框
 ///
 /// 用户下载资源时弹出，让用户选择要安装到哪个实例。
-/// 也可以选择版本和是否自动安装。
 class InstanceSelectDialog extends StatefulWidget {
-  /// 要下载的资源
   final Resource resource;
-
-  /// 可用版本
   final List<ResourceVersion> versions;
-
-  /// 可用实例列表（名称）
   final List<String> instances;
 
   const InstanceSelectDialog({
@@ -28,7 +21,6 @@ class InstanceSelectDialog extends StatefulWidget {
   @override
   State<InstanceSelectDialog> createState() => _InstanceSelectDialogState();
 
-  /// 便捷方法：显示对话框
   static Future<InstanceSelectResult?> show(
     BuildContext context, {
     required Resource resource,
@@ -47,21 +39,11 @@ class InstanceSelectDialog extends StatefulWidget {
   }
 }
 
-/// 实例选择结果
 class InstanceSelectResult {
-  /// 选择的版本
   final ResourceVersion version;
-
-  /// 选择的实例名称
   final String instance;
-
-  /// 游戏版本（目标实例的游戏版本）
   final String gameVersion;
-
-  /// 是否自动安装
   final bool autoInstall;
-
-  /// 是否解析依赖
   final bool resolveDependencies;
 
   InstanceSelectResult({
@@ -76,7 +58,7 @@ class InstanceSelectResult {
 class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
   int? _selectedVersionIndex;
   String? _selectedInstance;
-  String _gameVersion = '1.20.4';
+  final String _gameVersion = '1.20.4';
   bool _autoInstall = true;
   bool _resolveDependencies = true;
 
@@ -107,7 +89,6 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 标题
             Row(
               children: [
                 Container(
@@ -117,8 +98,8 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        BacolorsPrimary,
-                        BacolorsAccentPink,
+                        BAColors.primary,
+                        BAColors.accentPink,
                       ],
                     ),
                     borderRadius: BorderRadius.circular(12),
@@ -146,7 +127,8 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
                       Text(
                         '选择版本和目标实例',
                         style: TextStyle(
-                          color: isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
+                          color:
+                              isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
                           fontSize: 12,
                         ),
                       ),
@@ -166,8 +148,6 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
               ],
             ),
             const SizedBox(height: 20),
-
-            // 选择版本
             Text(
               '选择版本',
               style: TextStyle(
@@ -205,15 +185,13 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
                   items: widget.versions.asMap().entries.map((entry) {
                     final index = entry.key;
                     final version = entry.value;
-                    final gameVersions = version.gameVersions.take(2).join(', ');
-                    final loaders = version.loaders.take(2).join(', ');
                     return DropdownMenuItem<int>(
                       value: index,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'v${version.versionNumber} · ${version.releaseType}',
+                            'v${version.versionNumber}',
                             style: TextStyle(
                               color: isLight ? const Color(0xFF1A2744) : Colors.white,
                               fontWeight: FontWeight.w600,
@@ -221,7 +199,7 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '$loaders · $gameVersions${version.downloads > 0 ? ' · ${_formatNumber(version.downloads)} 下载' : ''}',
+                            '${version.gameVersions.take(2).join(', ')} · ${version.releaseType}',
                             style: TextStyle(
                               color: isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
                               fontSize: 11,
@@ -240,8 +218,6 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // 选择实例
             Text(
               '目标实例',
               style: TextStyle(
@@ -284,8 +260,6 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // 选项
             _buildOptionSwitch(
               context,
               title: '下载后自动安装到实例',
@@ -302,8 +276,6 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
               onChanged: (v) => setState(() => _resolveDependencies = v),
             ),
             const SizedBox(height: 24),
-
-            // 操作按钮
             Row(
               children: [
                 Expanded(
@@ -341,15 +313,14 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
                     icon: const Icon(Icons.download, size: 18),
                     label: const Text('开始下载'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: BacolorsPrimary,
+                      backgroundColor: BAColors.primary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      disabledBackgroundColor: isLight
-                          ? const Color(0xFFD0D8EE)
-                          : const Color(0xFF3A4D7A),
+                      disabledBackgroundColor:
+                          isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A),
                       disabledForegroundColor:
                           isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
                     ),
@@ -405,17 +376,11 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
             child: Switch(
               value: value,
               onChanged: onChanged,
-              activeColor: BacolorsPrimary,
+              activeColor: BAColors.primary,
             ),
           ),
         ],
       ),
     );
-  }
-
-  String _formatNumber(int number) {
-    if (number >= 1000000) return '${(number / 1000000).toStringAsFixed(1)}M';
-    if (number >= 1000) return '${(number / 1000).toStringAsFixed(1)}K';
-    return number.toString();
   }
 }

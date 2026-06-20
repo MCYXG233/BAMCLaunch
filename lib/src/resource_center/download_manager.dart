@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -202,6 +203,7 @@ class DownloadManager {
   /// [targetGameVersion] 目标游戏版本
   /// [autoInstall] 是否自动安装（下载完成后自动移动到对应目录）
   /// [resolveDependencies] 是否自动解析并下载依赖
+  /// [visited] 用于循环依赖检测的已访问资源集合（内部使用）
   ///
   /// 返回创建的任务
   Future<DownloadTask> download({
@@ -211,6 +213,7 @@ class DownloadManager {
     required String targetGameVersion,
     bool autoInstall = true,
     bool resolveDependencies = true,
+    Set<String>? visited,
   }) async {
     final task = DownloadTask(
       id: DownloadTask.generateId(resource.id, targetInstance),
@@ -228,7 +231,12 @@ class DownloadManager {
     _logger.info('[Download] 创建任务: ${task.id} (${resource.name} v${version.versionNumber})');
 
     // 异步执行下载
-    _processTask(task, autoInstall: autoInstall, resolveDependencies: resolveDependencies);
+    _processTask(
+      task,
+      autoInstall: autoInstall,
+      resolveDependencies: resolveDependencies,
+      visited: visited,
+    );
 
     return task;
   }
@@ -291,11 +299,22 @@ class DownloadManager {
     return packsDir.path;
   }
 
+  /// 获取实例的根目录（modpack 解压到此处）
+  Future<String> getInstanceRootDirectory(String instanceName) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final rootDir = Directory(
+      path.join(dir.path, 'BAMCLaunch', 'instances', instanceName),
+    );
+    await rootDir.create(recursive: true);
+    return rootDir.path;
+  }
+
   /// 处理下载任务
   Future<void> _processTask(
     DownloadTask task, {
     required bool autoInstall,
     required bool resolveDependencies,
+    Set<String>? visited,
   }) async {
     // 等待并发槽位
     while (_activeTasks.where((t) => t.status == DownloadTaskStatus.downloading).length >=
@@ -305,7 +324,12 @@ class DownloadManager {
     }
 
     // 等待前面的任务
-    await _executeTask(task, autoInstall: autoInstall, resolveDependencies: resolveDependencies);
+    await _executeTask(
+      task,
+      autoInstall: autoInstall,
+      resolveDependencies: resolveDependencies,
+      visited: visited,
+    );
   }
 
   /// 执行实际下载
@@ -313,6 +337,7 @@ class DownloadManager {
     DownloadTask task, {
     required bool autoInstall,
     required bool resolveDependencies,
+    Set<String>? visited,
   }) async {
     if (task.status == DownloadTaskStatus.cancelled) return;
 
@@ -373,7 +398,7 @@ class DownloadManager {
 
         // 依赖解析
         if (resolveDependencies && task.status == DownloadTaskStatus.completed) {
-          await _resolveDependencies(task);
+          await _resolveDependencies(task, visited: visited);
         }
         return;
       } catch (e) {
@@ -446,12 +471,30 @@ class DownloadManager {
 
   /// 根据资源类型安装文件到目标实例
   Future<String> _installFile(DownloadTask task, File sourceFile) async {
+    // modpack 需要解压到实例根目录
+    if (task.resource.type == ResourceType.modpack) {
+      final instanceRoot = await getInstanceRootDirectory(task.targetInstance);
+      _logger.info('[Download] 检测到整合包 (modpack)，开始解压: ${task.resource.name}');
+      try {
+        final installDir = await _extractModpack(sourceFile, instanceRoot);
+        _logger.info('[Download] 整合包解压完成: $installDir');
+        return installDir;
+      } catch (e) {
+        _logger.warning('[Download] 整合包解压失败，回退到复制文件: $e');
+        final modsDir = await getModsDirectory(task.targetInstance);
+        final fileName = task.version.fileName ?? path.basename(sourceFile.path);
+        final destFile = File(path.join(modsDir, fileName));
+        await sourceFile.copy(destFile.path);
+        _logger.info('[Download] 整合包复制到: ${destFile.path}');
+        return destFile.path;
+      }
+    }
+
     final String targetDir;
 
     switch (task.resource.type) {
       case ResourceType.mod:
       case ResourceType.dataPack:
-      case ResourceType.modpack:
         targetDir = await getModsDirectory(task.targetInstance);
         break;
       case ResourceType.resourcePack:
@@ -459,6 +502,9 @@ class DownloadManager {
         break;
       case ResourceType.shader:
         targetDir = await getShaderPacksDirectory(task.targetInstance);
+        break;
+      case ResourceType.modpack:
+        targetDir = await getModsDirectory(task.targetInstance);
         break;
     }
 
@@ -473,37 +519,84 @@ class DownloadManager {
     return destFile.path;
   }
 
+  /// 解压 modpack（zip/jar）到目标目录
+  ///
+  /// 如果解压失败，会抛出异常，由调用方回退到文件复制。
+  Future<String> _extractModpack(File sourceFile, String targetDir) async {
+    final bytes = await sourceFile.readAsBytes();
+    final Archive archive;
+
+    try {
+      archive = ZipDecoder().decodeBytes(bytes);
+    } catch (e) {
+      throw Exception('无法解析为 zip/jar 归档: $e');
+    }
+
+    for (final file in archive) {
+      final String filePath;
+      if (file.isFile) {
+        filePath = path.join(targetDir, file.name);
+        final destFile = File(filePath);
+        await destFile.parent.create(recursive: true);
+        await destFile.writeAsBytes(file.content as List<int>);
+      } else {
+        filePath = path.join(targetDir, file.name);
+        await Directory(filePath).create(recursive: true);
+      }
+    }
+
+    return targetDir;
+  }
+
   /// 解析并下载依赖
-  Future<void> _resolveDependencies(DownloadTask task) async {
+  ///
+  /// [visited] 用于循环依赖检测，记录当前解析链上已访问的资源ID。
+  Future<void> _resolveDependencies(DownloadTask task, {Set<String>? visited}) async {
     final dependencies = task.version.dependencies
         .where((d) => d.isRequired && d.projectId != null)
         .toList();
 
     if (dependencies.isEmpty) return;
 
-    _logger.info('[Download] 开始解析 ${dependencies.length} 个依赖');
+    // 初始化或复用访问集合
+    final currentVisited = visited ?? <String>{};
+    currentVisited.add(task.resource.id);
+
+    _logger.info('[Download] 开始解析 ${dependencies.length} 个依赖 (来自 ${task.resource.name})');
 
     for (final dep in dependencies) {
+      final depId = dep.projectId!;
+
+      // 循环依赖检测
+      if (currentVisited.contains(depId)) {
+        _logger.warning('[Download] 检测到循环依赖，跳过: $depId (链: ${currentVisited.join(' -> ')})');
+        continue;
+      }
+
       try {
-        final depResource = await _modrinth.getProject(dep.projectId!);
+        final depResource = await _modrinth.getProject(depId);
         final depVersions = await _modrinth.getVersions(
-          dep.projectId!,
+          depId,
           gameVersions: [task.targetGameVersion],
         );
 
         if (depVersions.isNotEmpty) {
           final depVersion = depVersions.first;
+          // 为每个分支创建独立副本，避免平行链互相污染
+          final branchVisited = Set<String>.of(currentVisited);
           await download(
             resource: depResource,
             version: depVersion,
             targetInstance: task.targetInstance,
             targetGameVersion: task.targetGameVersion,
             autoInstall: true,
-            resolveDependencies: false,
+            resolveDependencies: true,
+            visited: branchVisited,
           );
+          _logger.info('[Download] 已排队下载依赖: ${depResource.name} ($depId)');
         }
       } catch (e) {
-        _logger.warning('[Download] 依赖下载失败 (${dep.projectId}): $e');
+        _logger.warning('[Download] 依赖下载失败 ($depId): $e');
       }
     }
   }

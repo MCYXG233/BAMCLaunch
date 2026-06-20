@@ -116,6 +116,12 @@ class ResourceCard extends StatelessWidget {
       case ResourceType.modpack:
         iconData = Icons.folder;
         break;
+      case ResourceType.shader:
+        iconData = Icons.lightbulb;
+        break;
+      case ResourceType.dataPack:
+        iconData = Icons.folder_zip;
+        break;
     }
     
     return Icon(
@@ -393,6 +399,12 @@ class InstalledResourceCard extends StatelessWidget {
         break;
       case ResourceType.modpack:
         iconData = Icons.folder;
+        break;
+      case ResourceType.shader:
+        iconData = Icons.lightbulb;
+        break;
+      case ResourceType.dataPack:
+        iconData = Icons.folder_zip;
         break;
     }
 

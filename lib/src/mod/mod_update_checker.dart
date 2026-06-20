@@ -59,7 +59,7 @@ class ModUpdateChecker {
         currentVersion: currentVersion,
         latestVersion: latestVersion.versionNumber,
         latestVersionId: latestVersion.id,
-        downloadUrl: latestVersion.download.url,
+        downloadUrl: latestVersion.downloadUrl ?? '',
         hasUpdate: hasUpdate,
         changelog: latestVersion.changelog,
       );
@@ -105,7 +105,7 @@ class ModUpdateChecker {
       if (data.isEmpty) {
         return _getLatestVersionSimple(projectId);
       }
-      return _parseVersion(data.first as Map<String, dynamic>);
+      return _parseVersion(data.first as Map<String, dynamic>, projectId);
     }
 
     return _getLatestVersionSimple(projectId);
@@ -120,14 +120,14 @@ class ModUpdateChecker {
     if (response.statusCode == 200) {
       final data = json.decode(response.body) as List<dynamic>;
       if (data.isNotEmpty) {
-        return _parseVersion(data.first as Map<String, dynamic>);
+        return _parseVersion(data.first as Map<String, dynamic>, projectId);
       }
     }
 
     return null;
   }
 
-  ResourceVersion _parseVersion(Map<String, dynamic> version) {
+  ResourceVersion _parseVersion(Map<String, dynamic> version, String projectId) {
     final files = version['files'] as List<dynamic>;
     final primaryFile = files.firstWhere(
       (f) => f['primary'] as bool? ?? false,
@@ -156,12 +156,13 @@ class ModUpdateChecker {
 
     return ResourceVersion(
       id: version['id'] as String,
+      projectId: projectId,
       versionNumber: version['version_number'] as String,
       name: version['name'] as String,
-      releaseDate: DateTime.parse(version['date_published'] as String),
+      publishedDate: DateTime.parse(version['date_published'] as String),
       gameVersions: gameVersions,
       loaders: loaders,
-      download: download,
+      downloadUrl: download.url,
       changelog: version['changelog'] as String?,
     );
   }

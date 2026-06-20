@@ -449,6 +449,13 @@ class Resource {
         return ResourceType.resourcePack;
       case 'modpack':
         return ResourceType.modpack;
+      case 'shader':
+      case 'shaderpack':
+        return ResourceType.shader;
+      case 'dataPack':
+      case 'data_pack':
+      case 'datapack':
+        return ResourceType.dataPack;
       default:
         return ResourceType.mod;
     }
