@@ -16,6 +16,12 @@ import '../components/ba_login_dialog.dart';
 import 'ba_game_library_page.dart';
 import 'ba_resource_center_page.dart';
 import 'ba_settings_page.dart';
+import 'ba_account_page.dart';
+import 'ba_more_page.dart';
+import 'ba_discover_page.dart';
+import '../components/ba_status_bar.dart';
+import '../components/ba_settings_panel.dart';
+import '../components/ba_immersive_home.dart';
 
 /// Minecraft 启动器首页
 ///  - 顶部: 毛玻璃栏 + 窗口控制按钮
@@ -237,35 +243,31 @@ class _BAMainPageState extends State<BAMainPage> {
 
   Widget _buildCurrentPage() {
     switch (_currentPage) {
+      case 0:
+        return _buildHomePage(key: const ValueKey('home'));
       case 1:
         return const BAGameLibraryPage(key: ValueKey('library'));
       case 2:
         return const BAResourceCenterPage(key: ValueKey('resource'));
       case 3:
-        return const BASettingsPage(key: ValueKey('settings'));
+        return const BAAccountPage(key: ValueKey('account'));
+      case 4:
+        return const BAMorePage(key: ValueKey('more'));
       default:
         return _buildHomePage(key: const ValueKey('home'));
     }
   }
 
   Widget _buildHomePage({Key? key}) {
-    return Container(
+    return ImmersiveHomePage(
       key: key,
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-      child: Row(
-        children: [
-          // 左侧: 实例列表
-          _buildInstanceList(),
-          const SizedBox(width: 16),
-          // 中间: 实例详情 + 启动按钮
-          Expanded(
-            child: _buildInstanceDetail(),
-          ),
-          const SizedBox(width: 16),
-          // 右侧: 统计 + 快速入口
-          _buildRightPanel(),
-        ],
-      ),
+      instances: _instances,
+      selectedInstanceIndex: _selectedInstanceIndex,
+      onInstanceChanged: (index) {
+        setState(() => _selectedInstanceIndex = index);
+      },
+      isLaunching: _isLaunching,
+      onLaunch: _launchGame,
     );
   }
 
@@ -396,6 +398,17 @@ class _BAMainPageState extends State<BAMainPage> {
             ),
           ),
           const SizedBox(width: 12),
+
+          // 设置按钮
+          IconButton(
+            onPressed: () => SettingsPanel.show(context),
+            tooltip: '设置',
+            icon: Icon(
+              Icons.settings,
+              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.7),
+              size: 18,
+            ),
+          ),
 
           // 窗口控制按钮
           Row(
@@ -1154,9 +1167,10 @@ class _BAMainPageState extends State<BAMainPage> {
   Widget _buildBottomNav() {
     final items = [
       _NavItem(Icons.home, '首页', 0),
-      _NavItem(Icons.inventory_2_outlined, '游戏库', 1),
-      _NavItem(Icons.grid_view, '资源', 2),
-      _NavItem(Icons.settings, '设置', 3),
+      _NavItem(Icons.inventory_2_outlined, '游戏', 1),
+      _NavItem(Icons.explore, '发现', 2),
+      _NavItem(Icons.person, '账户', 3),
+      _NavItem(Icons.more_horiz, '更多', 4),
     ];
 
     return BAGlassContainer(

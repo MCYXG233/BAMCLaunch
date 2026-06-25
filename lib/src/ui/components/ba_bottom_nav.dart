@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../theme/ba_theme_colors.dart';
 
-/// 蔚蓝档案风格底部导航栏
+/// 底部导航栏
+///
+/// 5个导航入口：主页 / 游戏库 / 资源中心 / 账户 / 更多
 class BABottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -36,6 +38,8 @@ class BABottomNav extends StatelessWidget {
           _buildNavItem(Icons.home, '主页', 0),
           _buildNavItem(Icons.grid_3x3, '游戏库', 1),
           _buildNavItem(Icons.archive, '资源中心', 2),
+          _buildNavItem(Icons.person, '账户', 3),
+          _buildNavItem(Icons.more_horiz, '更多', 4),
         ],
       ),
     );

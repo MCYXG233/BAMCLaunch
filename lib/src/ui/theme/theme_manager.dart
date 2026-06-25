@@ -1,168 +1,235 @@
 import 'package:flutter/material.dart';
-import '../../config/config_manager.dart';
-import '../../config/config_keys.dart';
-import 'app_theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'ba_theme_colors.dart';
 
-/// 主题管理器，用于管理应用主题状态
+/// 主题管理器
+/// 支持蔚蓝档案风格和Minecraft风格双主题
 class ThemeManager extends ChangeNotifier {
-  static ThemeManager? _instance;
+  static const String _themeKey = 'app_theme';
+  static const String _blueArchiveKey = 'blue_archive';
+  static const String _minecraftKey = 'minecraft';
 
-  ThemeMode _themeMode = ThemeMode.dark;
-  Color _seedColor = const Color(0xFF4A90D9);
-  bool _useDynamicColor = true;
-  bool _initialized = false;
-
-  ThemeManager._internal();
-
-  factory ThemeManager() {
-    _instance ??= ThemeManager._internal();
-    return _instance!;
-  }
+  ThemeMode _themeMode = ThemeMode.system;
+  String _currentTheme = _blueArchiveKey;
 
   ThemeMode get themeMode => _themeMode;
-  Color get seedColor => _seedColor;
-  bool get useDynamicColor => _useDynamicColor;
+  String get currentTheme => _currentTheme;
 
-  /// 获取当前主题的背景色（透明度基准）
-  Color get backgroundColor {
-    return _themeMode == ThemeMode.light
-        ? const Color(0xFFF5F8FF)
-        : const Color(0xFF0A0F1E);
-  }
-
-  /// 获取当前主题的表面色（透明度基准）
-  Color get surfaceColor {
-    return _themeMode == ThemeMode.light
-        ? const Color(0xFFFFFFFF)
-        : const Color(0xFF1E2747);
-  }
-
-  /// 获取当前主题的边框色
-  Color get borderColor {
-    return _themeMode == ThemeMode.light
-        ? const Color(0xFFD0D8EE)
-        : const Color(0xFF3A4D7A);
-  }
-
-  /// 获取当前主题的文本主色
-  Color get textPrimaryColor {
-    return _themeMode == ThemeMode.light
-        ? const Color(0xFF1A2744)
-        : const Color(0xFFFFFFFF);
-  }
-
-  /// 获取当前主题的文本次色
-  Color get textSecondaryColor {
-    return _themeMode == ThemeMode.light
-        ? const Color(0xFF5A6A8A)
-        : const Color(0xFFA0B0C8);
-  }
-
-  /// 获取当前有效的主色（考虑莫奈取色）
-  Color get currentPrimary {
-    return _useDynamicColor ? _seedColor : const Color(0xFF4A90D9);
-  }
-
-  /// 根据主色生成毛玻璃背景色
-  Color glassColor(double opacity) {
-    final base = _themeMode == ThemeMode.light
-        ? const Color(0xFFFFFFFF)
-        : const Color(0xFF1A2540);
-    return base.withValues(alpha: opacity);
-  }
-
+  /// 初始化主题管理器
   Future<void> initialize() async {
-    if (_initialized) return;
-    await _loadTheme();
-    _initialized = true;
-  }
+    final prefs = await SharedPreferences.getInstance();
+    final savedTheme = prefs.getString(_themeKey) ?? _blueArchiveKey;
+    _currentTheme = savedTheme;
 
-  Future<void> _loadTheme() async {
-    final config = ConfigManager();
-    await config.initialize();
-    final savedTheme = config.getString(ConfigKeys.themeMode);
-    final savedColor = config.getInt(ConfigKeys.themeColor);
-    final savedUseDynamic = config.getBool(ConfigKeys.useDynamicColor);
+    final savedMode = prefs.getString('theme_mode');
+    if (savedMode == 'light') {
+      _themeMode = ThemeMode.light;
+    } else if (savedMode == 'dark') {
+      _themeMode = ThemeMode.dark;
+    } else {
+      _themeMode = ThemeMode.system;
+    }
 
-    if (savedTheme != null) {
-      _themeMode = _stringToThemeMode(savedTheme);
-    }
-    if (savedColor != null) {
-      _seedColor = Color(savedColor);
-    }
-    if (savedUseDynamic != null) {
-      _useDynamicColor = savedUseDynamic;
-    }
     notifyListeners();
   }
 
+  /// 获取当前主题的 ThemeData
+  ThemeData getTheme(Brightness brightness) {
+    if (_currentTheme == _minecraftKey) {
+      return _getMinecraftTheme(brightness);
+    } else {
+      return _getBlueArchiveTheme(brightness);
+    }
+  }
+
+  /// 蔚蓝档案主题
+  ThemeData _getBlueArchiveTheme(Brightness brightness) {
+    final isLight = brightness == Brightness.light;
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      colorScheme: ColorScheme(
+        brightness: brightness,
+        primary: BAThemeColors.primary,
+        secondary: BAThemeColors.accent,
+        surface: isLight ? Colors.white : const Color(0xFF1A1A2E),
+        error: BAThemeColors.danger,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+        onSurface: isLight ? BAThemeColors.textPrimary : BAThemeColors.textPrimary,
+        onError: Colors.white,
+      ),
+      scaffoldBackgroundColor: Colors.transparent,
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        titleTextStyle: TextStyle(
+          color: isLight ? BAThemeColors.textPrimary : BAThemeColors.textPrimary,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: isLight
+            ? Colors.white.withValues(alpha: 0.8)
+            : const Color(0xFF1A1A2E).withValues(alpha: 0.8),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: BAThemeColors.primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: isLight
+            ? Colors.grey.withValues(alpha: 0.1)
+            : Colors.white.withValues(alpha: 0.05),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: isLight
+                ? Colors.grey.withValues(alpha: 0.3)
+                : Colors.white.withValues(alpha: 0.1),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: BAThemeColors.primary),
+        ),
+      ),
+    );
+  }
+
+  /// Minecraft主题
+  ThemeData _getMinecraftTheme(Brightness brightness) {
+    final isLight = brightness == Brightness.light;
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      colorScheme: ColorScheme(
+        brightness: brightness,
+        primary: const Color(0xFF4A752C), // 草方块绿色
+        secondary: const Color(0xFF8B4513), // 泥土棕色
+        surface: isLight ? const Color(0xFFD7C9A8) : const Color(0xFF2D2D2D),
+        error: const Color(0xFFB22222),
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+        onSurface: isLight ? const Color(0xFF3D3D3D) : const Color(0xFFE0E0E0),
+        onError: Colors.white,
+      ),
+      scaffoldBackgroundColor: Colors.transparent,
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        titleTextStyle: TextStyle(
+          color: isLight ? const Color(0xFF3D3D3D) : const Color(0xFFE0E0E0),
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Minecraft',
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: isLight
+            ? const Color(0xFFD7C9A8).withValues(alpha: 0.9)
+            : const Color(0xFF2D2D2D).withValues(alpha: 0.9),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4), // Minecraft风格方角
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF4A752C),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: isLight
+            ? const Color(0xFFC4B896).withValues(alpha: 0.5)
+            : const Color(0xFF3D3D3D).withValues(alpha: 0.5),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4),
+          borderSide: const BorderSide(
+            color: Color(0xFF8B7355),
+            width: 2,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4),
+          borderSide: const BorderSide(
+            color: Color(0xFF4A752C),
+            width: 2,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 切换主题
+  Future<void> setTheme(String theme) async {
+    if (_currentTheme == theme) return;
+
+    _currentTheme = theme;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_themeKey, theme);
+    notifyListeners();
+  }
+
+  /// 切换到蔚蓝档案主题
+  Future<void> setBlueArchiveTheme() async {
+    await setTheme(_blueArchiveKey);
+  }
+
+  /// 切换到Minecraft主题
+  Future<void> setMinecraftTheme() async {
+    await setTheme(_minecraftKey);
+  }
+
+  /// 切换主题模式
   Future<void> setThemeMode(ThemeMode mode) async {
-    if (_themeMode == mode) return;
-
     _themeMode = mode;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('theme_mode', mode.name);
     notifyListeners();
-
-    final config = ConfigManager();
-    await config.initialize();
-    await config.setString(ConfigKeys.themeMode, _themeModeToString(mode));
   }
 
-  Future<void> setSeedColor(Color color) async {
-    if (_seedColor.value == color.value) return;
-
-    _seedColor = color;
-    _useDynamicColor = true;
-    notifyListeners();
-
-    final config = ConfigManager();
-    await config.initialize();
-    await config.setInt(ConfigKeys.themeColor, color.value);
-    await config.setBool(ConfigKeys.useDynamicColor, true);
+  /// 切换亮色/暗色模式
+  Future<void> toggleBrightness() async {
+    final newMode = _themeMode == ThemeMode.light
+        ? ThemeMode.dark
+        : ThemeMode.light;
+    await setThemeMode(newMode);
   }
 
-  Future<void> setUseDynamicColor(bool value) async {
-    if (_useDynamicColor == value) return;
+  /// 是否是蔚蓝档案主题
+  bool get isBlueArchive => _currentTheme == _blueArchiveKey;
 
-    _useDynamicColor = value;
-    notifyListeners();
-
-    final config = ConfigManager();
-    await config.initialize();
-    await config.setBool(ConfigKeys.useDynamicColor, value);
-  }
-
-  ThemeData get currentTheme => BATheme.getTheme(_themeMode, seedColor: _useDynamicColor ? _seedColor : null);
-
-  ThemeData get lightTheme => BATheme.lightTheme;
-
-  ThemeData get darkTheme => BATheme.darkTheme;
-
-  /// 获取当前模式的主题（考虑动态颜色）
-  ThemeData get themeByMode {
-    return BATheme.getTheme(_themeMode, seedColor: _useDynamicColor ? _seedColor : null);
-  }
-
-  static ThemeMode _stringToThemeMode(String value) {
-    switch (value) {
-      case 'light':
-        return ThemeMode.light;
-      case 'dark':
-        return ThemeMode.dark;
-      case 'system':
-        return ThemeMode.system;
-      default:
-        return ThemeMode.dark;
-    }
-  }
-
-  static String _themeModeToString(ThemeMode mode) {
-    switch (mode) {
-      case ThemeMode.light:
-        return 'light';
-      case ThemeMode.dark:
-        return 'dark';
-      case ThemeMode.system:
-        return 'system';
-    }
-  }
+  /// 是否是Minecraft主题
+  bool get isMinecraft => _currentTheme == _minecraftKey;
 }
