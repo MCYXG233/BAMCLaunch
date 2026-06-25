@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import '../theme/colors.dart';
+import '../theme/ba_theme_colors.dart';
 import '../theme/mc_theme_colors.dart';
 import '../../config/config_manager.dart';
 import '../../config/config_keys.dart';
@@ -15,7 +15,6 @@ import '../components/ba_dialog.dart';
 
 /// 设置面板分类
 enum SettingsCategory {
-  account('账户', Icons.person),
   appearance('外观', Icons.palette),
   game('游戏', Icons.games),
   download('下载', Icons.download),
@@ -53,7 +52,7 @@ class _SettingsPanelState extends State<SettingsPanel>
   final ThemeManager _themeManager = ThemeManager();
   final BackgroundManager _backgroundManager = BackgroundManager();
 
-  SettingsCategory _selectedCategory = SettingsCategory.account;
+  SettingsCategory _selectedCategory = SettingsCategory.appearance;
   bool _managersInitialized = false;
 
   // 设置项状态
@@ -297,60 +296,63 @@ class _SettingsPanelState extends State<SettingsPanel>
           position: _slideAnimation,
           child: Align(
             alignment: Alignment.centerRight,
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.6,
-              constraints: const BoxConstraints(maxWidth: 900, minWidth: 700),
-              height: double.infinity,
-              decoration: BoxDecoration(
-                color: surfaceColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  bottomLeft: Radius.circular(20),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 30,
-                    offset: const Offset(-5, 0),
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.6,
+                constraints: const BoxConstraints(maxWidth: 900, minWidth: 700),
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  color: surfaceColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    bottomLeft: Radius.circular(20),
                   ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  // 顶部栏
-                  _buildHeader(textColor, textSecondary),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 30,
+                      offset: const Offset(-5, 0),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    // 顶部栏
+                    _buildHeader(textColor, textSecondary),
 
-                  // 内容区域
-                  Expanded(
-                    child: Row(
-                      children: [
-                        // 左侧分类导航
-                        _buildCategoryNav(
-                          textColor,
-                          textSecondary,
-                          borderColor,
-                          surfaceColor,
-                        ),
-
-                        // 分隔线
-                        Container(width: 1, color: borderColor),
-
-                        // 右侧设置内容
-                        Expanded(
-                          child: _buildSettingsContent(
+                    // 内容区域
+                    Expanded(
+                      child: Row(
+                        children: [
+                          // 左侧分类导航
+                          _buildCategoryNav(
                             textColor,
                             textSecondary,
                             borderColor,
                             surfaceColor,
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
 
-                  // 底部按钮
-                  _buildFooter(textColor, textSecondary, borderColor),
-                ],
+                          // 分隔线
+                          Container(width: 1, color: borderColor),
+
+                          // 右侧设置内容
+                          Expanded(
+                            child: _buildSettingsContent(
+                              textColor,
+                              textSecondary,
+                              borderColor,
+                              surfaceColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // 底部按钮
+                    _buildFooter(textColor, textSecondary, borderColor),
+                  ],
+                ),
               ),
             ),
           ),
@@ -364,9 +366,9 @@ class _SettingsPanelState extends State<SettingsPanel>
       height: 64,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
+        color: BAThemeColors.surfaceOf(context),
         border: Border(
-          bottom: BorderSide(color: BAColors.borderOf(context)),
+          bottom: BorderSide(color: BAThemeColors.borderOf(context)),
         ),
       ),
       child: Row(
@@ -421,11 +423,6 @@ class _SettingsPanelState extends State<SettingsPanel>
         padding: const EdgeInsets.symmetric(vertical: 12),
         children: [
           _buildCategoryItem(
-            SettingsCategory.account,
-            textColor,
-            textSecondary,
-          ),
-          _buildCategoryItem(
             SettingsCategory.appearance,
             textColor,
             textSecondary,
@@ -462,7 +459,7 @@ class _SettingsPanelState extends State<SettingsPanel>
   ) {
     final isSelected = _selectedCategory.index >= 0 &&
         _getCategoryFromIndex(_selectedCategory.index) == category;
-    final primaryColor = BAColors.primary;
+    final primaryColor = BAThemeColors.primary;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -511,7 +508,7 @@ class _SettingsPanelState extends State<SettingsPanel>
 
   SettingsCategory _getCategoryFromIndex(int index) {
     if (index < 0 || index >= SettingsCategory.values.length) {
-      return SettingsCategory.account;
+      return SettingsCategory.appearance;
     }
     return SettingsCategory.values[index];
   }
@@ -523,8 +520,6 @@ class _SettingsPanelState extends State<SettingsPanel>
     Color surfaceColor,
   ) {
     switch (_selectedCategory) {
-      case SettingsCategory.account:
-        return _buildAccountSettings(textColor, textSecondary, borderColor, surfaceColor);
       case SettingsCategory.appearance:
         return _buildAppearanceSettings(textColor, textSecondary, borderColor, surfaceColor);
       case SettingsCategory.game:
@@ -536,63 +531,6 @@ class _SettingsPanelState extends State<SettingsPanel>
       case SettingsCategory.about:
         return _buildAboutSettings(textColor, textSecondary, borderColor, surfaceColor);
     }
-  }
-
-  Widget _buildAccountSettings(
-    Color textColor,
-    Color textSecondary,
-    Color borderColor,
-    Color surfaceColor,
-  ) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSectionTitle('账户', textColor),
-          const SizedBox(height: 16),
-          _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
-            children: [
-              _buildSettingRow(
-                icon: Icons.person_add,
-                iconColor: BAColors.primary,
-                title: 'Microsoft 账户',
-                subtitle: '登录 Microsoft 账户以启动游戏',
-                textColor: textColor,
-                textSecondary: textSecondary,
-                trailing: OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: BAColors.primary),
-                    foregroundColor: BAColors.primary,
-                  ),
-                  child: const Text('登录'),
-                ),
-              ),
-              const Divider(height: 1),
-              _buildSettingRow(
-                icon: Icons.person_outline,
-                iconColor: BAColors.secondary,
-                title: '离线账户',
-                subtitle: '管理离线登录账户',
-                textColor: textColor,
-                textSecondary: textSecondary,
-                trailing: OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: BAColors.secondary),
-                    foregroundColor: BAColors.secondary,
-                  ),
-                  child: const Text('管理'),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildAppearanceSettings(
@@ -781,7 +719,7 @@ class _SettingsPanelState extends State<SettingsPanel>
                         Text(
                           '${_memoryAllocation.toInt()} MB',
                           style: TextStyle(
-                            color: BAColors.primary,
+                            color: BAThemeColors.primary,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
@@ -791,10 +729,10 @@ class _SettingsPanelState extends State<SettingsPanel>
                     const SizedBox(height: 12),
                     SliderTheme(
                       data: SliderThemeData(
-                        activeTrackColor: BAColors.primary,
-                        inactiveTrackColor: BAColors.primary.withValues(alpha: 0.2),
-                        thumbColor: BAColors.primary,
-                        overlayColor: BAColors.primary.withValues(alpha: 0.1),
+                        activeTrackColor: BAThemeColors.primary,
+                        inactiveTrackColor: BAThemeColors.primary.withValues(alpha: 0.2),
+                        thumbColor: BAThemeColors.primary,
+                        overlayColor: BAThemeColors.primary.withValues(alpha: 0.1),
                       ),
                       child: Slider(
                         value: _memoryAllocation,
@@ -882,7 +820,7 @@ class _SettingsPanelState extends State<SettingsPanel>
             children: [
               _buildSettingRow(
                 icon: Icons.cloud_download,
-                iconColor: BAColors.primary,
+                iconColor: BAThemeColors.primary,
                 title: '下载源',
                 subtitle: '选择游戏文件下载来源',
                 textColor: textColor,
@@ -1174,9 +1112,9 @@ class _SettingsPanelState extends State<SettingsPanel>
       height: 64,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
+        color: BAThemeColors.surfaceOf(context),
         border: Border(
-          top: BorderSide(color: BAColors.borderOf(context)),
+          top: BorderSide(color: BAThemeColors.borderOf(context)),
         ),
       ),
       child: Row(
@@ -1220,7 +1158,7 @@ class _SettingsPanelState extends State<SettingsPanel>
             icon: const Icon(Icons.check, size: 16),
             label: const Text('完成'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: BAColors.primary,
+              backgroundColor: BAThemeColors.primary,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
@@ -1362,7 +1300,7 @@ class _SettingsPanelState extends State<SettingsPanel>
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: BAColors.primary,
+            activeColor: BAThemeColors.primary,
           ),
         ],
       ),

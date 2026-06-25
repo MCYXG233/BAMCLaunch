@@ -324,6 +324,18 @@ class BAThemeColors {
           offset: const Offset(0, 4),
         ),
       ];
+
+  static Color surfaceOf(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.light
+        ? const Color(0xFFFFFFFF)
+        : const Color(0xFF1A1B1E);
+  }
+
+  static Color borderOf(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.light
+        ? const Color(0xFFE2E8F0)
+        : const Color(0xFF373A40);
+  }
 }
 
 /// 蔚蓝档案风格主题数据配置
