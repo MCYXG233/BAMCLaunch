@@ -248,36 +248,29 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
       final newName = await BAFrostedDialog.show<String>(
         context: context,
         title: '复制实例',
-        child: TextField(
-          controller: nameController,
-          style: TextStyle(
-            color: (Theme.of(context).brightness == Brightness.light
-                ? const Color(0xFF1A2744)
-                : Colors.white),
-          ),
-          decoration: InputDecoration(
-            hintText: '请输入新实例名称',
-            hintStyle: TextStyle(
-              color: (Theme.of(context).brightness == Brightness.light
-                      ? const Color(0xFF5A6A8A)
-                      : const Color(0xFFA0B0C8))
-                  .withOpacity(0.9),
+        child: Builder(
+          builder: (context) => TextField(
+            controller: nameController,
+            style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
             ),
-            filled: true,
-            fillColor: (Theme.of(context).brightness == Brightness.light
-                ? const Color(0xFFFFFFFF)
-                : const Color(0xFF1E2747)),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: (Theme.of(context).brightness == Brightness.light
-                    ? const Color(0xFFD0D8EE)
-                    : const Color(0xFF3A4D7A)),
+            decoration: InputDecoration(
+              hintText: '请输入新实例名称',
+              hintStyle: TextStyle(
+                color: BAColors.textSecondaryOf(context).withOpacity(0.9),
               ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: BAColors.primaryLight),
+              filled: true,
+              fillColor: BAColors.surfaceOf(context),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: BAColors.borderOf(context),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: BAColors.primaryLightOf(context)),
+              ),
             ),
           ),
         ),
@@ -452,15 +445,15 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [BAColors.primaryLight, BAColors.primary],
+                  gradient: LinearGradient(
+                    colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: BAColors.primary.withOpacity(0.4),
+                      color: BAColors.primaryOf(context).withOpacity(0.4),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -479,9 +472,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                   Text(
                     '游戏库',
                     style: TextStyle(
-                      color: (Theme.of(context).brightness == Brightness.light
-                          ? const Color(0xFF1A2744)
-                          : Colors.white),
+                      color: BAColors.textPrimaryOf(context),
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.5,
@@ -491,10 +482,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                   Text(
                     '管理你的 Minecraft 实例',
                     style: TextStyle(
-                      color: (Theme.of(context).brightness == Brightness.light
-                              ? const Color(0xFF5A6A8A)
-                              : const Color(0xFFA0B0C8))
-                          .withOpacity(0.9),
+                      color: BAColors.textSecondaryOf(context).withOpacity(0.9),
                       fontSize: 12,
                     ),
                   ),
@@ -509,16 +497,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: (Theme.of(context).brightness == Brightness.light
-                      ? const Color(0xFFFFFFFF)
-                      : const Color(0xFF1E2747))
-                  .withOpacity(0.5),
+              color: BAColors.surfaceOf(context).withOpacity(0.5),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: (Theme.of(context).brightness == Brightness.light
-                        ? const Color(0xFFD0D8EE)
-                        : const Color(0xFF3A4D7A))
-                    .withOpacity(0.5),
+                color: BAColors.borderOf(context).withOpacity(0.5),
               ),
             ),
             child: Row(
@@ -528,8 +510,8 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                   width: 28,
                   height: 28,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [BAColors.primaryLight, BAColors.primary],
+                    gradient: LinearGradient(
+                      colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -545,9 +527,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                 Text(
                   '${_instances.length}',
                   style: TextStyle(
-                    color: (Theme.of(context).brightness == Brightness.light
-                        ? const Color(0xFF1A2744)
-                        : Colors.white),
+                    color: BAColors.textPrimaryOf(context),
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -556,10 +536,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                 Text(
                   '个实例',
                   style: TextStyle(
-                    color: (Theme.of(context).brightness == Brightness.light
-                            ? const Color(0xFF5A6A8A)
-                            : const Color(0xFFA0B0C8))
-                        .withOpacity(0.9),
+                    color: BAColors.textSecondaryOf(context).withOpacity(0.9),
                     fontSize: 13,
                   ),
                 ),
@@ -573,16 +550,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: (Theme.of(context).brightness == Brightness.light
-                      ? const Color(0xFFFFFFFF)
-                      : const Color(0xFF1E2747))
-                  .withOpacity(0.6),
+              color: BAColors.surfaceOf(context).withOpacity(0.6),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: (Theme.of(context).brightness == Brightness.light
-                        ? const Color(0xFFD0D8EE)
-                        : const Color(0xFF3A4D7A))
-                    .withOpacity(0.5),
+                color: BAColors.borderOf(context).withOpacity(0.5),
               ),
             ),
             child: Material(
@@ -593,9 +564,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                   _loadStatistics();
                 },
                 borderRadius: BorderRadius.circular(14),
-                child: const Icon(
+                child: Icon(
                   Icons.refresh_rounded,
-                  color: BAColors.primaryLight,
+                  color: BAColors.primaryLightOf(context),
                   size: 20,
                 ),
               ),
@@ -613,33 +584,35 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
       child: Row(
         children: [
           _buildStatCard(
+            context,
             icon: Icons.access_time,
             label: '总游戏时长',
             value: _formatDuration(_totalPlayTime),
-            accent: BAColors.primaryLight,
+            accent: BAColors.primaryLightOf(context),
           ),
           const SizedBox(width: 12),
           _buildStatCard(
+            context,
             icon: Icons.casino,
             label: '总启动次数',
             value: '$_totalLaunchCount 次',
-            accent: BAColors.primary,
+            accent: BAColors.primaryOf(context),
           ),
           const SizedBox(width: 12),
           _buildStatCard(
+            context,
             icon: Icons.calendar_today,
             label: '今日游戏',
             value: _formatDuration(_todayPlayTime),
-            accent: (Theme.of(context).brightness == Brightness.light
-                ? const Color(0xFFD0D8EE)
-                : const Color(0xFF3A4D7A)),
+            accent: BAColors.borderOf(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatCard({
+  Widget _buildStatCard(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required String value,
@@ -649,16 +622,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: (Theme.of(context).brightness == Brightness.light
-                  ? const Color(0xFFFFFFFF)
-                  : const Color(0xFF1E2747))
-              .withOpacity(0.5),
+          color: BAColors.surfaceOf(context).withOpacity(0.5),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: (Theme.of(context).brightness == Brightness.light
-                    ? const Color(0xFFD0D8EE)
-                    : const Color(0xFF3A4D7A))
-                .withOpacity(0.5),
+            color: BAColors.borderOf(context).withOpacity(0.5),
           ),
           boxShadow: [
             BoxShadow(
@@ -686,9 +653,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
               ),
               child: Icon(
                 icon,
-                color: (Theme.of(context).brightness == Brightness.light
-                    ? const Color(0xFF1A2744)
-                    : Colors.white),
+                color: BAColors.textPrimaryOf(context),
                 size: 18,
               ),
             ),
@@ -700,10 +665,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                   Text(
                     label,
                     style: TextStyle(
-                      color: (Theme.of(context).brightness == Brightness.light
-                              ? const Color(0xFF5A6A8A)
-                              : const Color(0xFFA0B0C8))
-                          .withOpacity(0.9),
+                      color: BAColors.textSecondaryOf(context).withOpacity(0.9),
                       fontSize: 12,
                     ),
                   ),
@@ -711,9 +673,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                   Text(
                     value,
                     style: TextStyle(
-                      color: (Theme.of(context).brightness == Brightness.light
-                          ? const Color(0xFF1A2744)
-                          : Colors.white),
+                      color: BAColors.textPrimaryOf(context),
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                     ),
@@ -739,23 +699,14 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
             child: Container(
               height: 48,
               decoration: BoxDecoration(
-                color: (Theme.of(context).brightness == Brightness.light
-                        ? const Color(0xFFFFFFFF)
-                        : const Color(0xFF1E2747))
-                    .withOpacity(0.6),
+                color: BAColors.surfaceOf(context).withOpacity(0.6),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: (Theme.of(context).brightness == Brightness.light
-                          ? const Color(0xFFD0D8EE)
-                          : const Color(0xFF3A4D7A))
-                      .withOpacity(0.5),
+                  color: BAColors.borderOf(context).withOpacity(0.5),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: (Theme.of(context).brightness == Brightness.light
-                            ? const Color(0xFFE8EDFF)
-                            : const Color(0xFF0A0F1E))
-                        .withOpacity(0.3),
+                    color: BAColors.shadowOf(context).withOpacity(0.3),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -769,34 +720,24 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                   });
                 },
                 style: TextStyle(
-                  color: (Theme.of(context).brightness == Brightness.light
-                      ? const Color(0xFF1A2744)
-                      : Colors.white),
+                  color: BAColors.textPrimaryOf(context),
                   fontSize: 14,
                 ),
                 decoration: InputDecoration(
                   hintText: '搜索实例...',
                   hintStyle: TextStyle(
-                    color: (Theme.of(context).brightness == Brightness.light
-                            ? const Color(0xFF5A6A8A)
-                            : const Color(0xFFA0B0C8))
-                        .withOpacity(0.7),
+                    color: BAColors.textSecondaryOf(context).withOpacity(0.7),
                   ),
                   prefixIcon: Icon(
                     Icons.search_rounded,
-                    color: (Theme.of(context).brightness == Brightness.light
-                        ? const Color(0xFF5A6A8A)
-                        : const Color(0xFFA0B0C8)),
+                    color: BAColors.textSecondaryOf(context),
                     size: 20,
                   ),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
                           icon: Icon(
                             Icons.clear_rounded,
-                            color: (Theme.of(context).brightness ==
-                                    Brightness.light
-                                ? const Color(0xFF5A6A8A)
-                                : const Color(0xFFA0B0C8)),
+                            color: BAColors.textSecondaryOf(context),
                             size: 18,
                           ),
                           onPressed: () {
@@ -839,31 +780,25 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                       ),
                       decoration: BoxDecoration(
                         gradient: isSelected
-                            ? const LinearGradient(
-                                colors: [BAColors.primaryLight, BAColors.primary],
+                            ? LinearGradient(
+                                colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               )
                             : null,
                         color: isSelected
                             ? null
-                            : (Theme.of(context).brightness == Brightness.light
-                                    ? const Color(0xFFFFFFFF)
-                                    : const Color(0xFF1E2747))
-                                .withOpacity(0.6),
+                            : BAColors.surfaceOf(context).withOpacity(0.6),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
                           color: isSelected
                               ? Colors.transparent
-                              : (Theme.of(context).brightness == Brightness.light
-                                      ? const Color(0xFFD0D8EE)
-                                      : const Color(0xFF3A4D7A))
-                                  .withOpacity(0.5),
+                              : BAColors.borderOf(context).withOpacity(0.5),
                         ),
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                  color: BAColors.primary.withOpacity(0.4),
+                                  color: BAColors.primaryOf(context).withOpacity(0.4),
                                   blurRadius: 10,
                                   offset: const Offset(0, 3),
                                 ),
@@ -875,9 +810,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                         style: TextStyle(
                           color: isSelected
                               ? const Color(0xFFFFFFFF)
-                              : (Theme.of(context).brightness == Brightness.light
-                                  ? const Color(0xFF5A6A8A)
-                                  : const Color(0xFFA0B0C8)),
+                              : BAColors.textSecondaryOf(context),
                           fontSize: 13,
                           fontWeight:
                               isSelected ? FontWeight.w600 : FontWeight.w500,
@@ -908,15 +841,15 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [BAColors.primaryLight, BAColors.primary],
+                gradient: LinearGradient(
+                  colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: BAColors.primary.withOpacity(0.4),
+                    color: BAColors.primaryOf(context).withOpacity(0.4),
                     blurRadius: 28,
                     offset: const Offset(0, 8),
                   ),
@@ -936,9 +869,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                   ? '没有找到匹配的实例'
                   : '还没有游戏实例',
               style: TextStyle(
-                color: (Theme.of(context).brightness == Brightness.light
-                    ? const Color(0xFF1A2744)
-                    : Colors.white),
+                color: BAColors.textPrimaryOf(context),
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
@@ -949,10 +880,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                   ? '尝试修改搜索条件或切换筛选项'
                   : '点击右下角按钮创建第一个实例',
               style: TextStyle(
-                color: (Theme.of(context).brightness == Brightness.light
-                        ? const Color(0xFF5A6A8A)
-                        : const Color(0xFFA0B0C8))
-                    .withOpacity(0.9),
+                color: BAColors.textSecondaryOf(context).withOpacity(0.9),
                 fontSize: 14,
               ),
             ),
@@ -1031,28 +959,19 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
-            color: (Theme.of(context).brightness == Brightness.light
-                    ? const Color(0xFFFFFFFF)
-                    : const Color(0xFF1E2747))
-                .withOpacity(0.7),
+            color: BAColors.surfaceOf(context).withOpacity(0.7),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isRunning
-                  ? BAColors.success.withOpacity(0.6)
-                  : (Theme.of(context).brightness == Brightness.light
-                          ? const Color(0xFFD0D8EE)
-                          : const Color(0xFF3A4D7A))
-                      .withOpacity(0.5),
+                  ? BAColors.successOf(context).withOpacity(0.6)
+                  : BAColors.borderOf(context).withOpacity(0.5),
               width: isRunning ? 1.5 : 1,
             ),
             boxShadow: [
               BoxShadow(
                 color: isRunning
-                    ? BAColors.success.withOpacity(0.15)
-                    : (Theme.of(context).brightness == Brightness.light
-                            ? const Color(0xFFE8EDFF)
-                            : const Color(0xFF0A0F1E))
-                        .withOpacity(0.4),
+                    ? BAColors.successOf(context).withOpacity(0.15)
+                    : BAColors.shadowOf(context).withOpacity(0.4),
                 blurRadius: 16,
                 offset: const Offset(0, 6),
               ),
@@ -1079,16 +998,16 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                           height: 10,
                           decoration: BoxDecoration(
                             color: isRunning
-                                ? BAColors.success
+                                ? BAColors.successOf(context)
                                 : (isLaunching
-                                    ? BAColors.warning
-                                    : BAColors.primaryLight),
+                                    ? BAColors.warningOf(context)
+                                    : BAColors.primaryLightOf(context)),
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
                                 color: (isRunning
-                                        ? BAColors.success
-                                        : BAColors.primaryLight)
+                                        ? BAColors.successOf(context)
+                                        : BAColors.primaryLightOf(context))
                                     .withOpacity(0.5),
                                 blurRadius: 6,
                               ),
@@ -1102,13 +1021,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                               : (isLaunching ? '启动中' : '就绪'),
                           style: TextStyle(
                             color: isRunning
-                                ? BAColors.success
+                                ? BAColors.successOf(context)
                                 : (isLaunching
-                                    ? BAColors.warning
-                                    : (Theme.of(context).brightness ==
-                                            Brightness.light
-                                        ? const Color(0xFF5A6A8A)
-                                        : const Color(0xFFA0B0C8))),
+                                    ? BAColors.warningOf(context)
+                                    : BAColors.textSecondaryOf(context)),
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
                           ),
@@ -1116,13 +1032,13 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                         const Spacer(),
                         // 操作按钮
                         if (isLaunching)
-                          const SizedBox(
+                          SizedBox(
                             width: 18,
                             height: 18,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                BAColors.warning,
+                                BAColors.warningOf(context),
                               ),
                             ),
                           )
@@ -1130,8 +1046,8 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                           Icon(
                             isRunning ? Icons.stop_circle_outlined : Icons.play_circle_fill_rounded,
                             color: isRunning
-                                ? BAColors.success
-                                : BAColors.primaryLight,
+                                ? BAColors.successOf(context)
+                                : BAColors.primaryLightOf(context),
                             size: 20,
                           ),
                       ],
@@ -1146,12 +1062,12 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                         gradient: LinearGradient(
                           colors: isRunning
                               ? [
-                                  BAColors.success,
+                                  BAColors.successOf(context),
                                   BAColors.successDark
                                 ]
                               : [
-                                  BAColors.primaryLight,
-                                  BAColors.primary
+                                  BAColors.primaryLightOf(context),
+                                  BAColors.primaryOf(context)
                                 ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -1160,8 +1076,8 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                         boxShadow: [
                           BoxShadow(
                             color: (isRunning
-                                    ? BAColors.success
-                                    : BAColors.primary)
+                                    ? BAColors.successOf(context)
+                                    : BAColors.primaryOf(context))
                                 .withOpacity(0.35),
                             blurRadius: 14,
                             offset: const Offset(0, 4),
@@ -1180,10 +1096,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                     Text(
                       instance.name,
                       style: TextStyle(
-                        color: (Theme.of(context).brightness ==
-                                Brightness.light
-                            ? const Color(0xFF1A2744)
-                            : Colors.white),
+                        color: BAColors.textPrimaryOf(context),
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1199,16 +1112,16 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: BAColors.primary.withOpacity(0.18),
+                        color: BAColors.primaryOf(context).withOpacity(0.18),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: BAColors.primary.withOpacity(0.3),
+                          color: BAColors.primaryOf(context).withOpacity(0.3),
                         ),
                       ),
                       child: Text(
                         instance.version,
-                        style: const TextStyle(
-                          color: BAColors.primaryLight,
+                        style: TextStyle(
+                          color: BAColors.primaryLightOf(context),
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
                         ),
@@ -1221,10 +1134,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                       Text(
                         instance.loader!,
                         style: TextStyle(
-                          color: (Theme.of(context).brightness ==
-                                  Brightness.light
-                              ? const Color(0xFF5A6A8A)
-                              : const Color(0xFFA0B0C8)).withOpacity(0.9),
+                          color: BAColors.textSecondaryOf(context).withOpacity(0.9),
                           fontSize: 11,
                         ),
                       ),
@@ -1235,20 +1145,14 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                           Icon(
                             Icons.access_time,
                             size: 12,
-                            color: (Theme.of(context).brightness ==
-                                    Brightness.light
-                                ? const Color(0xFF5A6A8A)
-                                : const Color(0xFFA0B0C8)).withOpacity(0.8),
+                            color: BAColors.textSecondaryOf(context).withOpacity(0.8),
                           ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               '${_formatDuration(Duration(seconds: instanceStats.totalPlayTimeSeconds))} / ${instanceStats.launchCount}次',
                               style: TextStyle(
-                                color: (Theme.of(context).brightness ==
-                                        Brightness.light
-                                    ? const Color(0xFF5A6A8A)
-                                    : const Color(0xFFA0B0C8)).withOpacity(0.8),
+                                color: BAColors.textSecondaryOf(context).withOpacity(0.8),
                                 fontSize: 10,
                               ),
                               maxLines: 1,
@@ -1283,20 +1187,20 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
           width: 64,
           height: 64,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [BAColors.primaryLight, BAColors.primary],
+            gradient: LinearGradient(
+              colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: BAColors.primary.withOpacity(0.5),
+                color: BAColors.primaryOf(context).withOpacity(0.5),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
               BoxShadow(
-                color: BAColors.primaryLight.withOpacity(0.2),
+                color: BAColors.primaryLightOf(context).withOpacity(0.2),
                 blurRadius: 48,
                 spreadRadius: -8,
                 offset: const Offset(0, 16),
@@ -1336,16 +1240,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                 vertical: 12,
               ),
               decoration: BoxDecoration(
-                color: (Theme.of(context).brightness == Brightness.light
-                        ? const Color(0xFFFFFFFF)
-                        : const Color(0xFF1E2747))
-                    .withOpacity(0.6),
+                color: BAColors.surfaceOf(context).withOpacity(0.6),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: (Theme.of(context).brightness == Brightness.light
-                          ? const Color(0xFFD0D8EE)
-                          : const Color(0xFF3A4D7A))
-                      .withOpacity(0.5),
+                  color: BAColors.borderOf(context).withOpacity(0.5),
                 ),
               ),
               child: Row(
@@ -1353,17 +1251,14 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                 children: [
                   Icon(
                     Icons.file_upload_rounded,
-                    color: BAColors.primaryLight.withOpacity(0.9),
+                    color: BAColors.primaryLightOf(context).withOpacity(0.9),
                     size: 18,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '导入实例',
                     style: TextStyle(
-                      color: (Theme.of(context).brightness == Brightness.light
-                              ? const Color(0xFF1A2744)
-                              : Colors.white)
-                          .withOpacity(0.95),
+                      color: BAColors.textPrimaryOf(context).withOpacity(0.95),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),

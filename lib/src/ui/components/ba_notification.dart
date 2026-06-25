@@ -25,16 +25,16 @@ class BANotification extends StatelessWidget {
     this.onClose,
   });
 
-  Color get _accentColor {
+  Color _accentColor(BuildContext context) {
     switch (type) {
       case BANotificationType.success:
-        return BAColors.success;
+        return BAColors.successOf(context);
       case BANotificationType.error:
-        return BAColors.danger;
+        return BAColors.dangerOf(context);
       case BANotificationType.warning:
-        return BAColors.warning;
+        return BAColors.warningOf(context);
       case BANotificationType.info:
-        return BAColors.primary;
+        return BAColors.primaryOf(context);
     }
   }
 
@@ -53,6 +53,7 @@ class BANotification extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accentColor = _accentColor(context);
     return Container(
       width: 360,
       decoration: BoxDecoration(
@@ -68,9 +69,9 @@ class BANotification extends StatelessWidget {
           ),
           child: Container(
             decoration: BoxDecoration(
-              color: BAColors.glass,
+              color: BAColors.glassOf(context),
               borderRadius: BATheme.borderRadius,
-              border: Border.all(color: BAColors.border, width: 1),
+              border: Border.all(color: BAColors.borderOf(context), width: 1),
             ),
             child: Stack(
               children: [
@@ -80,7 +81,7 @@ class BANotification extends StatelessWidget {
                   bottom: 0,
                   child: Container(
                     width: 4,
-                    color: _accentColor,
+                    color: accentColor,
                   ),
                 ),
                 Padding(
@@ -91,7 +92,7 @@ class BANotification extends StatelessWidget {
                         padding: const EdgeInsets.all(12),
                         child: Icon(
                           _icon,
-                          color: _accentColor,
+                          color: accentColor,
                           size: 24,
                         ),
                       ),
@@ -105,7 +106,7 @@ class BANotification extends StatelessWidget {
                               Text(
                                 title,
                                 style: BATypography.bodyMedium.copyWith(
-                                  color: BAColors.textPrimary,
+                                  color: BAColors.textPrimaryOf(context),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -114,7 +115,7 @@ class BANotification extends StatelessWidget {
                                 Text(
                                   message!,
                                   style: BATypography.bodySmall.copyWith(
-                                    color: BAColors.textSecondary,
+                                    color: BAColors.textSecondaryOf(context),
                                   ),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -131,12 +132,12 @@ class BANotification extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: BAColors.darkSurfaceVariant.withOpacity(0.5),
+                              color: BAColors.surfaceVariantOf(context).withOpacity(0.5),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Icon(
                               Icons.close,
-                              color: BAColors.textSecondary,
+                              color: BAColors.textSecondaryOf(context),
                               size: 16,
                             ),
                           ),

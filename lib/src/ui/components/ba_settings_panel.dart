@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../theme/ba_theme_colors.dart';
-import '../theme/mc_theme_colors.dart';
+import '../theme/colors.dart';
 import '../../config/config_manager.dart';
 import '../../config/config_keys.dart';
 import '../theme/theme_manager.dart';
@@ -294,24 +293,6 @@ class _SettingsPanelState extends State<SettingsPanel>
   Widget build(BuildContext context) {
     NotificationManager().init(context);
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark
-        ? const Color(0xFF1A1B1E)
-        : const Color(0xFFFAFBFD);
-    final surfaceColor = isDark
-        ? const Color(0xFF2D2E32)
-        : const Color(0xFFFFFFFF);
-    final textColor = isDark
-        ? const Color(0xFFF5F5F5)
-        : const Color(0xFF2D3748);
-    // 深色模式下用更亮的颜色，提高对比度
-    final textSecondary = isDark
-        ? const Color(0xFFCAD3DE)
-        : const Color(0xFF718096);
-    final borderColor = isDark
-        ? const Color(0xFF454952)
-        : const Color(0xFFE2E8F0);
-
     return Stack(
       children: [
         // 点击背景关闭
@@ -332,7 +313,7 @@ class _SettingsPanelState extends State<SettingsPanel>
                 constraints: const BoxConstraints(maxWidth: 900, minWidth: 700),
                 height: double.infinity,
                 decoration: BoxDecoration(
-                  color: surfaceColor,
+                  color: BAColors.surfaceOf(context),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     bottomLeft: Radius.circular(20),
@@ -348,38 +329,28 @@ class _SettingsPanelState extends State<SettingsPanel>
                 child: Column(
                   children: [
                     // 顶部栏
-                    _buildHeader(textColor, textSecondary),
+                    _buildHeader(),
 
                     // 内容区域
                     Expanded(
                       child: Row(
                         children: [
                           // 左侧分类导航
-                          _buildCategoryNav(
-                            textColor,
-                            textSecondary,
-                            borderColor,
-                            surfaceColor,
-                          ),
+                          _buildCategoryNav(),
 
                           // 分隔线
-                          Container(width: 1, color: borderColor),
+                          Container(width: 1, color: BAColors.borderOf(context)),
 
                           // 右侧设置内容
                           Expanded(
-                            child: _buildSettingsContent(
-                              textColor,
-                              textSecondary,
-                              borderColor,
-                              surfaceColor,
-                            ),
+                            child: _buildSettingsContent(),
                           ),
                         ],
                       ),
                     ),
 
                     // 底部按钮
-                    _buildFooter(textColor, textSecondary, borderColor),
+                    _buildFooter(),
                   ],
                 ),
               ),
@@ -390,14 +361,14 @@ class _SettingsPanelState extends State<SettingsPanel>
     );
   }
 
-  Widget _buildHeader(Color textColor, Color textSecondary) {
+  Widget _buildHeader() {
     return Container(
       height: 64,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: BAThemeColors.surfaceOf(context),
+        color: BAColors.surfaceOf(context),
         border: Border(
-          bottom: BorderSide(color: BAThemeColors.borderOf(context)),
+          bottom: BorderSide(color: BAColors.borderOf(context)),
         ),
       ),
       child: Row(
@@ -409,16 +380,16 @@ class _SettingsPanelState extends State<SettingsPanel>
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  gradient: MCThemeColors.primaryGradient,
+                  gradient: BAColors.primaryGradient,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.settings, color: Colors.white, size: 18),
+                child: Icon(Icons.settings, color: BAColors.textPrimaryOf(context), size: 18),
               ),
               const SizedBox(width: 12),
               Text(
                 '设置',
                 style: TextStyle(
-                  color: textColor,
+                  color: BAColors.textPrimaryOf(context),
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -431,7 +402,7 @@ class _SettingsPanelState extends State<SettingsPanel>
           // 关闭按钮
           IconButton(
             onPressed: _close,
-            icon: Icon(Icons.close, color: textSecondary),
+            icon: Icon(Icons.close, color: BAColors.textSecondaryOf(context)),
             tooltip: '关闭',
           ),
         ],
@@ -439,42 +410,27 @@ class _SettingsPanelState extends State<SettingsPanel>
     );
   }
 
-  Widget _buildCategoryNav(
-    Color textColor,
-    Color textSecondary,
-    Color borderColor,
-    Color surfaceColor,
-  ) {
+  Widget _buildCategoryNav() {
     return Container(
       width: 180,
-      color: surfaceColor.withValues(alpha: 0.5),
+      color: BAColors.surfaceOf(context).withValues(alpha: 0.5),
       child: ListView(
         padding: const EdgeInsets.symmetric(vertical: 12),
         children: [
           _buildCategoryItem(
             SettingsCategory.appearance,
-            textColor,
-            textSecondary,
           ),
           _buildCategoryItem(
             SettingsCategory.game,
-            textColor,
-            textSecondary,
           ),
           _buildCategoryItem(
             SettingsCategory.download,
-            textColor,
-            textSecondary,
           ),
           _buildCategoryItem(
             SettingsCategory.advanced,
-            textColor,
-            textSecondary,
           ),
           _buildCategoryItem(
             SettingsCategory.about,
-            textColor,
-            textSecondary,
           ),
         ],
       ),
@@ -483,12 +439,10 @@ class _SettingsPanelState extends State<SettingsPanel>
 
   Widget _buildCategoryItem(
     SettingsCategory category,
-    Color textColor,
-    Color textSecondary,
   ) {
     final isSelected = _selectedCategory.index >= 0 &&
         _getCategoryFromIndex(_selectedCategory.index) == category;
-    final primaryColor = BAThemeColors.primary;
+    final primaryColor = BAColors.primaryOf(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -515,14 +469,14 @@ class _SettingsPanelState extends State<SettingsPanel>
               children: [
                 Icon(
                   category.icon,
-                  color: isSelected ? primaryColor : textSecondary,
+                  color: isSelected ? primaryColor : BAColors.textSecondaryOf(context),
                   size: 18,
                 ),
                 const SizedBox(width: 10),
                 Text(
                   category.label,
                   style: TextStyle(
-                    color: isSelected ? primaryColor : textColor,
+                    color: isSelected ? primaryColor : BAColors.textPrimaryOf(context),
                     fontSize: 13,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
@@ -542,58 +496,44 @@ class _SettingsPanelState extends State<SettingsPanel>
     return SettingsCategory.values[index];
   }
 
-  Widget _buildSettingsContent(
-    Color textColor,
-    Color textSecondary,
-    Color borderColor,
-    Color surfaceColor,
-  ) {
+  Widget _buildSettingsContent() {
     switch (_selectedCategory) {
       case SettingsCategory.appearance:
-        return _buildAppearanceSettings(textColor, textSecondary, borderColor, surfaceColor);
+        return _buildAppearanceSettings();
       case SettingsCategory.game:
-        return _buildGameSettings(textColor, textSecondary, borderColor, surfaceColor);
+        return _buildGameSettings();
       case SettingsCategory.download:
-        return _buildDownloadSettings(textColor, textSecondary, borderColor, surfaceColor);
+        return _buildDownloadSettings();
       case SettingsCategory.advanced:
-        return _buildAdvancedSettings(textColor, textSecondary, borderColor, surfaceColor);
+        return _buildAdvancedSettings();
       case SettingsCategory.about:
-        return _buildAboutSettings(textColor, textSecondary, borderColor, surfaceColor);
+        return _buildAboutSettings();
     }
   }
 
-  Widget _buildAppearanceSettings(
-    Color textColor,
-    Color textSecondary,
-    Color borderColor,
-    Color surfaceColor,
-  ) {
+  Widget _buildAppearanceSettings() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle('外观', textColor),
+          _buildSectionTitle('外观'),
           const SizedBox(height: 16),
 
           // 配色方案
           _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
             children: [
               _buildSettingRow(
                 icon: Icons.palette,
-                iconColor: BAThemeColors.primary,
+                iconColor: BAColors.primaryOf(context),
                 title: '配色方案',
                 subtitle: _colorScheme == 'blue_archive' ? '蔚蓝档案风格' : 'Minecraft 风格',
-                textColor: textColor,
-                textSecondary: textSecondary,
                 trailing: DropdownButton<String>(
                   value: _colorScheme,
                   underline: const SizedBox(),
-                  dropdownColor: surfaceColor,
-                  iconEnabledColor: textColor,
-                  style: TextStyle(color: textColor, fontSize: 13),
+                  dropdownColor: BAColors.surfaceOf(context),
+                  iconEnabledColor: BAColors.textPrimaryOf(context),
+                  style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 13),
                   items: const [
                     DropdownMenuItem(value: 'blue_archive', child: Text('蔚蓝档案')),
                     DropdownMenuItem(value: 'minecraft', child: Text('Minecraft')),
@@ -610,22 +550,18 @@ class _SettingsPanelState extends State<SettingsPanel>
 
           // 主题模式
           _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
             children: [
               _buildSettingRow(
                 icon: Icons.dark_mode,
-                iconColor: MCThemeColors.primary,
+                iconColor: BAColors.primaryOf(context),
                 title: '主题模式',
                 subtitle: '选择应用的外观主题',
-                textColor: textColor,
-                textSecondary: textSecondary,
                 trailing: DropdownButton<String>(
                   value: _themeMode,
                   underline: const SizedBox(),
-                  dropdownColor: surfaceColor,
-                  iconEnabledColor: textColor,
-                  style: TextStyle(color: textColor, fontSize: 13),
+                  dropdownColor: BAColors.surfaceOf(context),
+                  iconEnabledColor: BAColors.textPrimaryOf(context),
+                  style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 13),
                   items: const [
                     DropdownMenuItem(value: 'dark', child: Text('深色')),
                     DropdownMenuItem(value: 'light', child: Text('浅色')),
@@ -643,19 +579,15 @@ class _SettingsPanelState extends State<SettingsPanel>
 
           // 背景设置
           _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
             children: [
               _buildSettingRow(
                 icon: Icons.image,
-                iconColor: MCThemeColors.accent,
+                iconColor: BAColors.accentPinkOf(context),
                 title: '背景设置',
                 subtitle: '自定义应用背景',
-                textColor: textColor,
-                textSecondary: textSecondary,
                 trailing: TextButton(
                   onPressed: () => _showBackgroundSelector(),
-                  style: TextButton.styleFrom(foregroundColor: textColor),
+                  style: TextButton.styleFrom(foregroundColor: BAColors.textPrimaryOf(context)),
                   child: const Text('选择'),
                 ),
               ),
@@ -666,16 +598,12 @@ class _SettingsPanelState extends State<SettingsPanel>
 
           // 动画效果
           _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
             children: [
               _buildSwitchRow(
                 icon: Icons.animation,
-                iconColor: MCThemeColors.secondary,
+                iconColor: BAColors.secondaryOf(context),
                 title: '动画效果',
                 subtitle: '启用界面动画过渡',
-                textColor: textColor,
-                textSecondary: textSecondary,
                 value: _enableAnimation,
                 onChanged: (value) async {
                   await _configManager.setBool(ConfigKeys.enableSplashAnimation, value);
@@ -690,32 +618,23 @@ class _SettingsPanelState extends State<SettingsPanel>
     );
   }
 
-  Widget _buildGameSettings(
-    Color textColor,
-    Color textSecondary,
-    Color borderColor,
-    Color surfaceColor,
-  ) {
+  Widget _buildGameSettings() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle('游戏', textColor),
+          _buildSectionTitle('游戏'),
           const SizedBox(height: 16),
 
           // 游戏目录
           _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
             children: [
               _buildSettingRow(
                 icon: Icons.folder,
-                iconColor: MCThemeColors.accent,
+                iconColor: BAColors.accentPinkOf(context),
                 title: '游戏目录',
                 subtitle: _gameDirectory.isEmpty ? '未设置' : _gameDirectory,
-                textColor: textColor,
-                textSecondary: textSecondary,
                 trailing: OutlinedButton(
                   onPressed: () async {
                     final result = await FilePicker.platform.getDirectoryPath();
@@ -733,16 +652,12 @@ class _SettingsPanelState extends State<SettingsPanel>
 
           // Java 路径
           _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
             children: [
               _buildSettingRow(
                 icon: Icons.coffee,
-                iconColor: MCThemeColors.secondary,
+                iconColor: BAColors.secondaryOf(context),
                 title: 'Java 路径',
                 subtitle: _javaPath.isEmpty ? '自动检测' : _javaPath,
-                textColor: textColor,
-                textSecondary: textSecondary,
                 trailing: OutlinedButton(
                   onPressed: () async {
                     final result = await JavaSelectorDialog.show(context);
@@ -760,8 +675,6 @@ class _SettingsPanelState extends State<SettingsPanel>
 
           // 内存分配
           _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
             children: [
               Padding(
                 padding: const EdgeInsets.all(16),
@@ -770,12 +683,12 @@ class _SettingsPanelState extends State<SettingsPanel>
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.memory, color: MCThemeColors.primary, size: 20),
+                        Icon(Icons.memory, color: BAColors.primaryOf(context), size: 20),
                         const SizedBox(width: 12),
                         Text(
                           '内存分配',
                           style: TextStyle(
-                            color: textColor,
+                            color: BAColors.textPrimaryOf(context),
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
@@ -784,7 +697,7 @@ class _SettingsPanelState extends State<SettingsPanel>
                         Text(
                           '${_memoryAllocation.toInt()} MB',
                           style: TextStyle(
-                            color: BAThemeColors.primary,
+                            color: BAColors.primaryOf(context),
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
@@ -794,10 +707,10 @@ class _SettingsPanelState extends State<SettingsPanel>
                     const SizedBox(height: 12),
                     SliderTheme(
                       data: SliderThemeData(
-                        activeTrackColor: BAThemeColors.primary,
-                        inactiveTrackColor: BAThemeColors.primary.withValues(alpha: 0.2),
-                        thumbColor: BAThemeColors.primary,
-                        overlayColor: BAThemeColors.primary.withValues(alpha: 0.1),
+                        activeTrackColor: BAColors.primaryOf(context),
+                        inactiveTrackColor: BAColors.primaryOf(context).withValues(alpha: 0.2),
+                        thumbColor: BAColors.primaryOf(context),
+                        overlayColor: BAColors.primaryOf(context).withValues(alpha: 0.1),
                       ),
                       child: Slider(
                         value: _memoryAllocation,
@@ -815,8 +728,8 @@ class _SettingsPanelState extends State<SettingsPanel>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('512 MB', style: TextStyle(color: textSecondary, fontSize: 11)),
-                        Text('16 GB', style: TextStyle(color: textSecondary, fontSize: 11)),
+                        Text('512 MB', style: TextStyle(color: BAColors.textSecondaryOf(context), fontSize: 11)),
+                        Text('16 GB', style: TextStyle(color: BAColors.textSecondaryOf(context), fontSize: 11)),
                       ],
                     ),
                   ],
@@ -829,20 +742,16 @@ class _SettingsPanelState extends State<SettingsPanel>
 
           // 游戏窗口大小
           _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
             children: [
               _buildSettingRow(
                 icon: Icons.aspect_ratio,
-                iconColor: MCThemeColors.diamond,
+                iconColor: BAColors.infoOf(context),
                 title: '游戏窗口大小',
                 subtitle: '启动游戏时的默认窗口分辨率',
-                textColor: textColor,
-                textSecondary: textSecondary,
                 trailing: DropdownButton<String>(
                   value: _gameWindowSize,
                   underline: const SizedBox(),
-                  dropdownColor: surfaceColor,
+                  dropdownColor: BAColors.surfaceOf(context),
                   items: const [
                     DropdownMenuItem(value: '1280x720', child: Text('1280x720')),
                     DropdownMenuItem(value: '1920x1080', child: Text('1920x1080')),
@@ -864,36 +773,27 @@ class _SettingsPanelState extends State<SettingsPanel>
     );
   }
 
-  Widget _buildDownloadSettings(
-    Color textColor,
-    Color textSecondary,
-    Color borderColor,
-    Color surfaceColor,
-  ) {
+  Widget _buildDownloadSettings() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle('下载', textColor),
+          _buildSectionTitle('下载'),
           const SizedBox(height: 16),
 
           // 下载源
           _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
             children: [
               _buildSettingRow(
                 icon: Icons.cloud_download,
-                iconColor: BAThemeColors.primary,
+                iconColor: BAColors.primaryOf(context),
                 title: '下载源',
                 subtitle: '选择游戏文件下载来源',
-                textColor: textColor,
-                textSecondary: textSecondary,
                 trailing: DropdownButton<String>(
                   value: _downloadSource,
                   underline: const SizedBox(),
-                  dropdownColor: surfaceColor,
+                  dropdownColor: BAColors.surfaceOf(context),
                   items: const [
                     DropdownMenuItem(value: 'official', child: Text('官方')),
                     DropdownMenuItem(value: 'bmclapi', child: Text('BMCLAPI')),
@@ -910,20 +810,16 @@ class _SettingsPanelState extends State<SettingsPanel>
 
           // 并发下载数
           _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
             children: [
               _buildSettingRow(
                 icon: Icons.speed,
-                iconColor: MCThemeColors.secondary,
+                iconColor: BAColors.secondaryOf(context),
                 title: '并发下载数',
                 subtitle: '同时下载的文件数量',
-                textColor: textColor,
-                textSecondary: textSecondary,
                 trailing: DropdownButton<int>(
                   value: _concurrentDownloads,
                   underline: const SizedBox(),
-                  dropdownColor: surfaceColor,
+                  dropdownColor: BAColors.surfaceOf(context),
                   items: [1, 2, 3, 4, 5].map((v) {
                     return DropdownMenuItem(value: v, child: Text('$v'));
                   }).toList(),
@@ -939,16 +835,12 @@ class _SettingsPanelState extends State<SettingsPanel>
 
           // 下载路径
           _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
             children: [
               _buildSettingRow(
                 icon: Icons.save,
-                iconColor: MCThemeColors.accent,
+                iconColor: BAColors.accentPinkOf(context),
                 title: '下载保存路径',
                 subtitle: _downloadPath.isEmpty ? '默认路径' : _downloadPath,
-                textColor: textColor,
-                textSecondary: textSecondary,
                 trailing: OutlinedButton(
                   onPressed: () async {
                     final result = await FilePicker.platform.getDirectoryPath();
@@ -967,32 +859,23 @@ class _SettingsPanelState extends State<SettingsPanel>
     );
   }
 
-  Widget _buildAdvancedSettings(
-    Color textColor,
-    Color textSecondary,
-    Color borderColor,
-    Color surfaceColor,
-  ) {
+  Widget _buildAdvancedSettings() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle('高级', textColor),
+          _buildSectionTitle('高级'),
           const SizedBox(height: 16),
 
           // 开机自启
           _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
             children: [
               _buildSwitchRow(
                 icon: Icons.power_settings_new,
-                iconColor: MCThemeColors.warning,
+                iconColor: BAColors.warningOf(context),
                 title: '开机自启',
                 subtitle: '系统启动时自动运行',
-                textColor: textColor,
-                textSecondary: textSecondary,
                 value: _launchAtStartup,
                 onChanged: (value) async {
                   await _configManager.setBool(ConfigKeys.launchAtStartup, value);
@@ -1006,16 +889,12 @@ class _SettingsPanelState extends State<SettingsPanel>
 
           // 最小化到托盘
           _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
             children: [
               _buildSwitchRow(
                 icon: Icons.minimize,
-                iconColor: MCThemeColors.primary,
+                iconColor: BAColors.primaryOf(context),
                 title: '最小化到托盘',
                 subtitle: '最小化时隐藏到系统托盘',
-                textColor: textColor,
-                textSecondary: textSecondary,
                 value: _minimizeToTray,
                 onChanged: (value) async {
                   await _configManager.setBool(ConfigKeys.minimizeToTray, value);
@@ -1029,16 +908,12 @@ class _SettingsPanelState extends State<SettingsPanel>
 
           // 关闭到托盘
           _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
             children: [
               _buildSwitchRow(
                 icon: Icons.close,
-                iconColor: MCThemeColors.danger,
+                iconColor: BAColors.dangerOf(context),
                 title: '关闭到托盘',
                 subtitle: '关闭窗口时最小化到托盘而非退出',
-                textColor: textColor,
-                textSecondary: textSecondary,
                 value: _closeToTray,
                 onChanged: (value) async {
                   await _configManager.setBool(ConfigKeys.closeToTray, value);
@@ -1052,16 +927,12 @@ class _SettingsPanelState extends State<SettingsPanel>
 
           // 自动更新
           _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
             children: [
               _buildSwitchRow(
                 icon: Icons.system_update,
-                iconColor: MCThemeColors.success,
+                iconColor: BAColors.successOf(context),
                 title: '自动更新',
                 subtitle: '自动检查并下载更新',
-                textColor: textColor,
-                textSecondary: textSecondary,
                 value: _autoUpdate,
                 onChanged: (value) async {
                   await _configManager.setBool(ConfigKeys.autoUpdate, value);
@@ -1075,24 +946,17 @@ class _SettingsPanelState extends State<SettingsPanel>
     );
   }
 
-  Widget _buildAboutSettings(
-    Color textColor,
-    Color textSecondary,
-    Color borderColor,
-    Color surfaceColor,
-  ) {
+  Widget _buildAboutSettings() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle('关于', textColor),
+          _buildSectionTitle('关于'),
           const SizedBox(height: 16),
 
           // 应用信息卡片
           _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
             children: [
               Padding(
                 padding: const EdgeInsets.all(20),
@@ -1103,13 +967,19 @@ class _SettingsPanelState extends State<SettingsPanel>
                       width: 80,
                       height: 80,
                       decoration: BoxDecoration(
-                        gradient: MCThemeColors.primaryGradient,
+                        gradient: BAColors.primaryGradient,
                         borderRadius: BorderRadius.circular(20),
-                        boxShadow: MCThemeColors.glowShadow,
+                        boxShadow: [
+                          BoxShadow(
+                            color: BAColors.primary.withValues(alpha: 0.25),
+                            blurRadius: 20,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.games,
-                        color: Colors.white,
+                        color: BAColors.textPrimaryOf(context),
                         size: 40,
                       ),
                     ),
@@ -1117,7 +987,7 @@ class _SettingsPanelState extends State<SettingsPanel>
                     Text(
                       'BAMCLaunch',
                       style: TextStyle(
-                        color: textColor,
+                        color: BAColors.textPrimaryOf(context),
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1126,7 +996,7 @@ class _SettingsPanelState extends State<SettingsPanel>
                     Text(
                       '版本 1.0.0',
                       style: TextStyle(
-                        color: textSecondary,
+                        color: BAColors.textSecondaryOf(context),
                         fontSize: 13,
                       ),
                     ),
@@ -1134,7 +1004,7 @@ class _SettingsPanelState extends State<SettingsPanel>
                     Text(
                       '一个简洁优雅的 Minecraft 启动器',
                       style: TextStyle(
-                        color: textSecondary,
+                        color: BAColors.textSecondaryOf(context),
                         fontSize: 12,
                       ),
                       textAlign: TextAlign.center,
@@ -1149,16 +1019,12 @@ class _SettingsPanelState extends State<SettingsPanel>
 
           // 致谢
           _buildSettingCard(
-            surfaceColor: surfaceColor,
-            borderColor: borderColor,
             children: [
               _buildSettingRow(
                 icon: Icons.favorite,
-                iconColor: MCThemeColors.woolPink,
+                iconColor: BAColors.accentPinkOf(context),
                 title: '开源组件',
                 subtitle: '感谢所有开源项目的贡献者',
-                textColor: textColor,
-                textSecondary: textSecondary,
                 trailing: IconButton(
                   icon: const Icon(Icons.chevron_right, size: 20),
                   onPressed: () => _showOpenSourceDialog(),
@@ -1171,18 +1037,14 @@ class _SettingsPanelState extends State<SettingsPanel>
     );
   }
 
-  Widget _buildFooter(
-    Color textColor,
-    Color textSecondary,
-    Color borderColor,
-  ) {
+  Widget _buildFooter() {
     return Container(
       height: 64,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: BAThemeColors.surfaceOf(context),
+        color: BAColors.surfaceOf(context),
         border: Border(
-          top: BorderSide(color: BAThemeColors.borderOf(context)),
+          top: BorderSide(color: BAColors.borderOf(context)),
         ),
       ),
       child: Row(
@@ -1192,8 +1054,8 @@ class _SettingsPanelState extends State<SettingsPanel>
             icon: const Icon(Icons.restore, size: 16),
             label: const Text('恢复默认'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: textSecondary,
-              side: BorderSide(color: borderColor),
+              foregroundColor: BAColors.textSecondaryOf(context),
+              side: BorderSide(color: BAColors.borderOf(context)),
             ),
           ),
 
@@ -1204,8 +1066,8 @@ class _SettingsPanelState extends State<SettingsPanel>
             icon: const Icon(Icons.check, size: 16),
             label: const Text('完成'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: textColor,
-              foregroundColor: BAThemeColors.surfaceOf(context),
+              backgroundColor: BAColors.textPrimaryOf(context),
+              foregroundColor: BAColors.surfaceOf(context),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
           ),
@@ -1214,11 +1076,11 @@ class _SettingsPanelState extends State<SettingsPanel>
     );
   }
 
-  Widget _buildSectionTitle(String title, Color textColor) {
+  Widget _buildSectionTitle(String title) {
     return Text(
       title,
       style: TextStyle(
-        color: textColor,
+        color: BAColors.textPrimaryOf(context),
         fontSize: 16,
         fontWeight: FontWeight.w600,
       ),
@@ -1226,15 +1088,13 @@ class _SettingsPanelState extends State<SettingsPanel>
   }
 
   Widget _buildSettingCard({
-    required Color surfaceColor,
-    required Color borderColor,
     required List<Widget> children,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: surfaceColor,
+        color: BAColors.surfaceVariantOf(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor),
+        border: Border.all(color: BAColors.borderOf(context)),
       ),
       child: Column(
         children: children,
@@ -1247,8 +1107,6 @@ class _SettingsPanelState extends State<SettingsPanel>
     required Color iconColor,
     required String title,
     required String subtitle,
-    required Color textColor,
-    required Color textSecondary,
     required Widget trailing,
   }) {
     return Padding(
@@ -1272,7 +1130,7 @@ class _SettingsPanelState extends State<SettingsPanel>
                 Text(
                   title,
                   style: TextStyle(
-                    color: textColor,
+                    color: BAColors.textPrimaryOf(context),
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -1281,7 +1139,7 @@ class _SettingsPanelState extends State<SettingsPanel>
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: textSecondary,
+                    color: BAColors.textSecondaryOf(context),
                     fontSize: 12,
                   ),
                   maxLines: 1,
@@ -1301,8 +1159,6 @@ class _SettingsPanelState extends State<SettingsPanel>
     required Color iconColor,
     required String title,
     required String subtitle,
-    required Color textColor,
-    required Color textSecondary,
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
@@ -1327,7 +1183,7 @@ class _SettingsPanelState extends State<SettingsPanel>
                 Text(
                   title,
                   style: TextStyle(
-                    color: textColor,
+                    color: BAColors.textPrimaryOf(context),
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -1336,7 +1192,7 @@ class _SettingsPanelState extends State<SettingsPanel>
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: textSecondary,
+                    color: BAColors.textSecondaryOf(context),
                     fontSize: 12,
                   ),
                 ),
@@ -1346,7 +1202,7 @@ class _SettingsPanelState extends State<SettingsPanel>
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: BAThemeColors.primary,
+            activeColor: BAColors.primaryOf(context),
           ),
         ],
       ),
@@ -1433,11 +1289,11 @@ class _SettingsPanelState extends State<SettingsPanel>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.favorite, color: MCThemeColors.woolPink, size: 20),
-            SizedBox(width: 8),
-            Text('开源组件'),
+            Icon(Icons.favorite, color: BAColors.accentPinkOf(context), size: 20),
+            const SizedBox(width: 8),
+            const Text('开源组件'),
           ],
         ),
         content: SizedBox(
@@ -1448,7 +1304,7 @@ class _SettingsPanelState extends State<SettingsPanel>
             itemBuilder: (context, index) {
               final project = openSourceProjects[index];
               return ListTile(
-                leading: Icon(Icons.code, color: BAThemeColors.primary),
+                leading: Icon(Icons.code, color: BAColors.primaryOf(context)),
                 title: Text(project['name'] as String),
                 subtitle: Text('License: ${project['license'] as String}'),
                 trailing: IconButton(
@@ -1492,8 +1348,8 @@ class _SettingsPanelState extends State<SettingsPanel>
               await _resetAllSettings();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: MCThemeColors.danger,
-              foregroundColor: Colors.white,
+              backgroundColor: BAColors.dangerOf(context),
+              foregroundColor: BAColors.textPrimaryOf(context),
             ),
             child: const Text('确定'),
           ),

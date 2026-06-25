@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import '../theme/ba_theme_colors.dart';
+import '../theme/colors.dart';
 import '../theme/mc_theme_colors.dart';
 import '../../instance/instance_manager.dart';
 import '../../instance/models.dart';
@@ -116,28 +116,28 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
         Positioned(
           left: 24,
           top: 16,
-          child: _buildPlayerInfoCard(isLight),
+          child: _buildPlayerInfoCard(context, isLight),
         ),
 
         // 右上角：版本切换按钮
         Positioned(
           right: 24,
           top: 16,
-          child: _buildVersionSwitcher(isLight),
+          child: _buildVersionSwitcher(context, isLight),
         ),
 
         // 左下角：游戏名称和信息
         Positioned(
           left: 24,
           bottom: 20,
-          child: _buildGameInfo(isLight, instance),
+          child: _buildGameInfo(context, isLight, instance),
         ),
 
         // 右下角：超大启动按钮（与底部导航栏融合，向上突出）
         Positioned(
           right: 24,
           bottom: 8,
-          child: _buildGiantLaunchButton(isLight, instance),
+          child: _buildGiantLaunchButton(context, isLight, instance),
         ),
       ],
     );
@@ -145,7 +145,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
 
   // ==================== 左上角：玩家信息卡片 ====================
 
-  Widget _buildPlayerInfoCard(bool isLight) {
+  Widget _buildPlayerInfoCard(BuildContext context, bool isLight) {
     return BAGlassContainer(
       padding: const EdgeInsets.all(16),
       borderRadius: 20,
@@ -154,7 +154,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
         mainAxisSize: MainAxisSize.min,
         children: [
           // 头像
-          _buildAvatar(52),
+          _buildAvatar(context, 52),
           const SizedBox(width: 14),
 
           // 玩家信息
@@ -166,7 +166,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                     ? '加载中...'
                     : (_currentAccount?.username ?? '未登录'),
                 style: TextStyle(
-                  color: isLight ? const Color(0xFF1A2744) : Colors.white,
+                  color: BAColors.textPrimaryOf(context),
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                 ),
@@ -175,15 +175,15 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: BAThemeColors.primary.withOpacity(0.2),
+                  color: BAColors.primaryOf(context).withOpacity(0.2),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   _currentAccount?.type == AccountType.microsoft
                       ? 'Microsoft 账户'
                       : '离线账户',
-                  style: const TextStyle(
-                    color: BAThemeColors.primary,
+                  style: TextStyle(
+                    color: BAColors.primaryOf(context),
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                   ),
@@ -195,17 +195,13 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                   Icon(
                     Icons.play_circle_outline,
                     size: 12,
-                    color: isLight
-                        ? const Color(0xFF1A2744).withOpacity(0.6)
-                        : Colors.white.withOpacity(0.6),
+                    color: BAColors.textPrimaryOf(context).withOpacity(0.6),
                   ),
                   const SizedBox(width: 4),
                   Text(
                     '${widget.instances.length} 个实例',
                     style: TextStyle(
-                      color: isLight
-                          ? const Color(0xFF1A2744).withOpacity(0.6)
-                          : Colors.white.withOpacity(0.6),
+                      color: BAColors.textPrimaryOf(context).withOpacity(0.6),
                       fontSize: 11,
                     ),
                   ),
@@ -218,19 +214,19 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
     );
   }
 
-  Widget _buildAvatar(double size) {
+  Widget _buildAvatar(BuildContext context, double size) {
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: BAThemeColors.primary.withOpacity(0.4),
+          color: BAColors.primaryOf(context).withOpacity(0.4),
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: BAThemeColors.primary.withOpacity(0.3),
+            color: BAColors.primaryOf(context).withOpacity(0.3),
             blurRadius: 12,
             offset: const Offset(0, 3),
           ),
@@ -239,36 +235,36 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
       child: ClipRRect(
         borderRadius: BorderRadius.circular(14),
         child: _currentSkin != null
-            ? _buildSkinPreview(_currentSkin!, size)
-            : _buildDefaultAvatar(),
+            ? _buildSkinPreview(context, _currentSkin!, size)
+            : _buildDefaultAvatar(context),
       ),
     );
   }
 
-  Widget _buildSkinPreview(SkinData skin, double size) {
+  Widget _buildSkinPreview(BuildContext context, SkinData skin, double size) {
     return Image.memory(
       Uint8List.fromList(skin.imageData),
       width: size,
       height: size,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => _buildDefaultAvatar(),
+      errorBuilder: (_, __, ___) => _buildDefaultAvatar(context),
     );
   }
 
-  Widget _buildDefaultAvatar() {
+  Widget _buildDefaultAvatar(BuildContext context) {
     return Container(
-      color: BAThemeColors.primary.withOpacity(0.15),
-      child: const Icon(
+      color: BAColors.primaryOf(context).withOpacity(0.15),
+      child: Icon(
         Icons.person,
         size: 28,
-        color: BAThemeColors.primary,
+        color: BAColors.primaryOf(context),
       ),
     );
   }
 
   // ==================== 左下角：游戏信息 ====================
 
-  Widget _buildGameInfo(bool isLight, GameInstance? instance) {
+  Widget _buildGameInfo(BuildContext context, bool isLight, GameInstance? instance) {
     if (instance == null) return const SizedBox.shrink();
 
     return BAGlassContainer(
@@ -282,7 +278,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
           Text(
             instance.name,
             style: TextStyle(
-              color: isLight ? const Color(0xFF1A2744) : Colors.white,
+              color: BAColors.textPrimaryOf(context),
               fontSize: 20,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.5,
@@ -298,22 +294,19 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
               _buildInfoChip(
                 Icons.tag,
                 'MC ${instance.version}',
-                _getVersionColor(instance.version),
-                isLight,
+                _getVersionColor(context, instance.version),
               ),
               if (instance.loader != null)
                 _buildInfoChip(
                   Icons.extension,
                   instance.loader!,
-                  MCThemeColors.secondary,
-                  isLight,
+                  BAColors.secondaryOf(context),
                 ),
               if (instance.status == InstanceStatus.running)
                 _buildInfoChip(
                   Icons.play_circle_filled,
                   '运行中',
-                  MCThemeColors.woolPink,
-                  isLight,
+                  BAColors.accentPinkOf(context),
                 ),
             ],
           ),
@@ -323,24 +316,24 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
           Row(
             children: [
               _buildQuickActionButton(
+                context,
                 Icons.settings,
                 '游戏设置',
-                BAThemeColors.primary,
-                isLight,
+                BAColors.primaryOf(context),
               ),
               const SizedBox(width: 8),
               _buildQuickActionButton(
+                context,
                 Icons.extension,
                 'Mod 管理',
-                MCThemeColors.secondary,
-                isLight,
+                BAColors.secondaryOf(context),
               ),
               const SizedBox(width: 8),
               _buildQuickActionButton(
+                context,
                 Icons.folder,
                 '.minecraft',
                 MCThemeColors.accent,
-                isLight,
               ),
             ],
           ),
@@ -353,7 +346,6 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
     IconData icon,
     String label,
     Color color,
-    bool isLight,
   ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -381,10 +373,10 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
   }
 
   Widget _buildQuickActionButton(
+    BuildContext context,
     IconData icon,
     String label,
     Color color,
-    bool isLight,
   ) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -403,7 +395,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
             Text(
               label,
               style: TextStyle(
-                color: isLight ? BAThemeColors.textPrimary : BAThemeColors.textPrimary,
+                color: BAColors.textPrimaryOf(context),
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
@@ -416,13 +408,13 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
 
   // ==================== 右上角：版本切换 ====================
 
-  Widget _buildVersionSwitcher(bool isLight) {
+  Widget _buildVersionSwitcher(BuildContext context, bool isLight) {
     final instance = _selectedInstance;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
-        onTap: () => _showInstanceSelector(isLight),
+        onTap: () => _showInstanceSelector(context, isLight),
         child: BAGlassContainer(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           borderRadius: 14,
@@ -434,16 +426,16 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: instance != null
-                      ? _getVersionColor(instance.version).withOpacity(0.2)
-                      : BAThemeColors.primary.withOpacity(0.2),
+                      ? _getVersionColor(context, instance.version).withOpacity(0.2)
+                      : BAColors.primaryOf(context).withOpacity(0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   Icons.sports_esports,
                   size: 16,
                   color: instance != null
-                      ? _getVersionColor(instance.version)
-                      : BAThemeColors.primary,
+                      ? _getVersionColor(context, instance.version)
+                      : BAColors.primaryOf(context),
                 ),
               ),
               const SizedBox(width: 10),
@@ -453,7 +445,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                   Text(
                     instance?.name ?? '选择版本',
                     style: TextStyle(
-                      color: isLight ? BAThemeColors.textPrimary : BAThemeColors.textPrimary,
+                      color: BAColors.textPrimaryOf(context),
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                     ),
@@ -464,7 +456,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                         ? 'MC ${instance.version}'
                         : '${widget.instances.length} 个实例',
                     style: TextStyle(
-                      color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+                      color: BAColors.textSecondaryOf(context),
                       fontSize: 10,
                     ),
                   ),
@@ -474,7 +466,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
               Icon(
                 Icons.arrow_drop_down,
                 size: 18,
-                color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
               ),
             ],
           ),
@@ -483,7 +475,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
     );
   }
 
-  void _showInstanceSelector(bool isLight) {
+  void _showInstanceSelector(BuildContext context, bool isLight) {
     showDialog(
       context: context,
       barrierColor: Colors.black54,
@@ -494,9 +486,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
           content: Container(
             width: 400,
             decoration: BoxDecoration(
-              color: isLight
-                  ? const Color(0xFFFFFFFF)
-                  : const Color(0xFF2D2E32),
+              color: BAColors.surfaceOf(context),
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
@@ -517,17 +507,13 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: isLight
-                          ? const Color(0xFF2D3748)
-                          : const Color(0xFFF5F5F5),
+                      color: BAColors.textPrimaryOf(context),
                     ),
                   ),
                 ),
                 Container(
                   height: 1,
-                  color: isLight
-                      ? const Color(0xFFE2E8F0)
-                      : const Color(0xFF373A40),
+                  color: BAColors.dividerOf(context),
                 ),
                 const SizedBox(height: 8),
                 ...List.generate(widget.instances.length, (index) {
@@ -542,12 +528,12 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: _getVersionColor(inst.version).withOpacity(0.15),
+                        color: _getVersionColor(context, inst.version).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
                         Icons.sports_esports,
-                        color: _getVersionColor(inst.version),
+                        color: _getVersionColor(context, inst.version),
                         size: 20,
                       ),
                     ),
@@ -555,9 +541,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                       inst.name,
                       style: TextStyle(
                         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                        color: isLight
-                            ? const Color(0xFF2D3748)
-                            : const Color(0xFFF5F5F5),
+                        color: BAColors.textPrimaryOf(context),
                       ),
                     ),
                     subtitle: Text(
@@ -565,14 +549,12 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                       '${inst.loader != null ? ' · ${inst.loader}' : ''}',
                       style: TextStyle(
                         fontSize: 12,
-                        color: isLight
-                            ? const Color(0xFF718096)
-                            : const Color(0xFFB0B0B0),
+                        color: BAColors.textSecondaryOf(context),
                       ),
                     ),
                     trailing: isSelected
-                        ? const Icon(Icons.check_circle,
-                            color: BAThemeColors.primary, size: 22)
+                        ? Icon(Icons.check_circle,
+                            color: BAColors.primaryOf(context), size: 22)
                         : null,
                   );
                 }),
@@ -587,7 +569,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
 
   // ==================== 右下角：超大启动按钮 ====================
 
-  Widget _buildGiantLaunchButton(bool isLight, GameInstance? instance) {
+  Widget _buildGiantLaunchButton(BuildContext context, bool isLight, GameInstance? instance) {
     final isDisabled = widget.isLaunching || instance == null;
 
     return MouseRegion(
@@ -607,8 +589,8 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                  BAThemeColors.primaryLight,
-                  BAThemeColors.primary,
+                  BAColors.primaryLightOf(context),
+                  BAColors.primaryOf(context),
                 ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -617,7 +599,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                   boxShadow: [
                     if (!isDisabled)
                       BoxShadow(
-                        color: BAThemeColors.primary.withOpacity(
+                        color: BAColors.primaryOf(context).withOpacity(
                           0.4 + (_pulseAnimation.value * 0.25),
                         ),
                         blurRadius: 20 + (_pulseAnimation.value * 12),
@@ -625,14 +607,14 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                         offset: const Offset(0, 6),
                       ),
                     BoxShadow(
-                      color: Colors.white.withOpacity(0.25),
+                      color: BAColors.surfaceOf(context).withOpacity(0.25),
                       blurRadius: 0,
                       offset: const Offset(0, -2),
                       spreadRadius: -1,
                     ),
                   ],
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.35),
+                    color: BAColors.surfaceOf(context).withOpacity(0.35),
                     width: 1.5,
                   ),
                 ),
@@ -648,7 +630,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               colors: [
-                                Colors.white.withOpacity(
+                                BAColors.surfaceOf(context).withOpacity(
                                     _isHoveringLaunch ? 0.3 : 0.18),
                                 Colors.transparent,
                                 Colors.black.withOpacity(0.12),
@@ -663,11 +645,11 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (widget.isLaunching)
-                            const SizedBox(
+                            SizedBox(
                               width: 24,
                               height: 24,
                               child: CircularProgressIndicator(
-                                color: Colors.white,
+                                color: BAColors.surfaceOf(context),
                                 strokeWidth: 2.5,
                               ),
                             )
@@ -676,9 +658,9 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                               duration: const Duration(milliseconds: 200),
                               transform: Matrix4.identity()
                                 ..scale(_isHoveringLaunch ? 1.2 : 1.0),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.play_arrow,
-                                color: Colors.white,
+                                color: BAColors.surfaceOf(context),
                                 size: 32,
                               ),
                             ),
@@ -686,7 +668,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                           AnimatedDefaultTextStyle(
                             duration: const Duration(milliseconds: 200),
                             style: TextStyle(
-                              color: Colors.white,
+                              color: BAColors.surfaceOf(context),
                               fontSize: _isHoveringLaunch ? 17 : 15,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 1,
@@ -708,11 +690,11 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
     );
   }
 
-  Color _getVersionColor(String version) {
-    if (version.startsWith('1.21')) return BAThemeColors.primary;
-    if (version.startsWith('1.20')) return MCThemeColors.secondary;
+  Color _getVersionColor(BuildContext context, String version) {
+    if (version.startsWith('1.21')) return BAColors.primaryOf(context);
+    if (version.startsWith('1.20')) return BAColors.secondaryOf(context);
     if (version.startsWith('1.19')) return MCThemeColors.accent;
-    if (version.startsWith('1.18')) return MCThemeColors.woolPink;
-    return BAThemeColors.textSecondary;
+    if (version.startsWith('1.18')) return BAColors.accentPinkOf(context);
+    return BAColors.textSecondaryOf(context);
   }
 }

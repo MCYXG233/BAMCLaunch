@@ -96,8 +96,8 @@ class _BAExperienceProgressBarState extends State<BAExperienceProgressBar>
 
   @override
   Widget build(BuildContext context) {
-    final progressColor = widget.color ?? BAColors.success;
-    final bgColor = widget.backgroundColor ?? BAColors.surfaceVariant;
+    final progressColor = widget.color ?? BAColors.successOf(context);
+    final bgColor = widget.backgroundColor ?? BAColors.surfaceVariantOf(context);
     final clampedValue = _currentValue.clamp(0.0, 1.0);
 
     return Column(
@@ -108,10 +108,10 @@ class _BAExperienceProgressBarState extends State<BAExperienceProgressBar>
           height: widget.height,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: BAColors.border, width: 2),
+            border: Border.all(color: BAColors.borderOf(context), width: 2),
             boxShadow: [
               BoxShadow(
-                color: BAColors.shadow.withOpacity(0.3),
+                color: BAColors.shadowOf(context).withOpacity(0.3),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -139,7 +139,7 @@ class _BAExperienceProgressBarState extends State<BAExperienceProgressBar>
                     style:
                         widget.percentageStyle ??
                         BATypography.bodySmall.copyWith(
-                          color: BAColors.textPrimary,
+                          color: BAColors.textPrimaryOf(context),
                           fontWeight: FontWeight.bold,
                           shadows: [
                             const Shadow(
@@ -239,8 +239,8 @@ class BAProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progressColor = color ?? BAColors.primary;
-    final bgColor = backgroundColor ?? BAColors.surfaceVariant;
+    final progressColor = color ?? BAColors.primaryOf(context);
+    final bgColor = backgroundColor ?? BAColors.surfaceVariantOf(context);
     final clampedValue = value.clamp(0.0, 1.0);
 
     return Column(
@@ -252,7 +252,7 @@ class BAProgressBar extends StatelessWidget {
           decoration: BoxDecoration(
             color: bgColor,
             borderRadius: BATheme.borderRadiusSmall,
-            border: Border.all(color: BAColors.border, width: 1),
+            border: Border.all(color: BAColors.borderOf(context), width: 1),
             boxShadow: BATheme.shadowsSmall,
           ),
           child: Stack(
@@ -273,7 +273,7 @@ class BAProgressBar extends StatelessWidget {
                     style:
                         percentageStyle ??
                         BATypography.bodySmall.copyWith(
-                          color: BAColors.textPrimary,
+                          color: BAColors.textPrimaryOf(context),
                           fontWeight: FontWeight.bold,
                         ),
                   ),

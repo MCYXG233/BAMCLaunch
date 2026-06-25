@@ -62,13 +62,13 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
     ResourceType.dataPack: Icons.folder_copy,
   };
 
-  static const Map<ResourceType?, Color> _typeColors = {
-    null: BAColors.primary,
-    ResourceType.mod: BAColors.accentPink,
-    ResourceType.resourcePack: BAColors.success,
-    ResourceType.modpack: BAColors.warning,
-    ResourceType.shader: Color(0xFFE6C46A),
-    ResourceType.dataPack: Color(0xFF7AA5D6),
+  static Map<ResourceType?, Color> _typeColorsOf(BuildContext context) => {
+    null: BAColors.primaryOf(context),
+    ResourceType.mod: BAColors.accentPinkOf(context),
+    ResourceType.resourcePack: BAColors.successOf(context),
+    ResourceType.modpack: BAColors.warningOf(context),
+    ResourceType.shader: const Color(0xFFE6C46A),
+    ResourceType.dataPack: const Color(0xFF7AA5D6),
   };
 
   @override
@@ -254,8 +254,6 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
 
   /// 顶部自定义标题栏 - 蔚蓝档案风格
   Widget _buildHeader(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 24, 0),
       child: Row(
@@ -267,15 +265,15 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [BAColors.primaryLight, BAColors.primary],
+                  gradient: LinearGradient(
+                    colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: BAColors.primary.withOpacity(0.4),
+                      color: BAColors.primaryOf(context).withOpacity(0.4),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -294,7 +292,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                   Text(
                     '资源中心',
                     style: TextStyle(
-                      color: isLight ? const Color(0xFF1A2744) : Colors.white,
+                      color: BAColors.textPrimaryOf(context),
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -303,8 +301,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                   Text(
                     '浏览和下载Mod、资源包、整合包',
                     style: TextStyle(
-                      color: (isLight ? const Color(0xFF1A2744) : Colors.white)
-                          .withValues(alpha: 0.65),
+                      color: BAColors.textSecondaryOf(context),
                       fontSize: 11,
                       fontWeight: FontWeight.w400,
                     ),
@@ -361,27 +358,23 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
-              color: (isLight ? const Color(0xFFEEF1FA) : const Color(0xFF2A3558))
-                  .withValues(alpha: 0.85),
+              color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: (isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A))
-                    .withValues(alpha: 0.5),
+                color: BAColors.borderOf(context).withValues(alpha: 0.5),
               ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.inventory_2,
-                    color: (isLight ? const Color(0xFF1A2744) : Colors.white)
-                        .withValues(alpha: 0.85),
+                    color: BAColors.textPrimaryOf(context).withValues(alpha: 0.85),
                     size: 14),
                 const SizedBox(width: 6),
                 Text(
                   '${_resources.length}${_hasMore ? '+' : ''} 个资源',
                   style: TextStyle(
-                    color: (isLight ? const Color(0xFF1A2744) : Colors.white)
-                        .withValues(alpha: 0.9),
+                    color: BAColors.textPrimaryOf(context).withValues(alpha: 0.9),
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),
@@ -395,14 +388,10 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
   }
 
   Widget _buildFilterPanel(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final bgColor =
-        (isLight ? const Color(0xFFEEF1FA) : const Color(0xFF1A2544))
-            .withValues(alpha: 0.85);
-    final borderColor =
-        (isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A))
-            .withValues(alpha: 0.5);
-    final textColor = isLight ? const Color(0xFF1A2744) : Colors.white;
+    final bgColor = BAColors.backgroundSecondaryOf(context).withValues(alpha: 0.85);
+    final borderColor = BAColors.borderOf(context).withValues(alpha: 0.5);
+    final textColor = BAColors.textPrimaryOf(context);
+    final typeColors = _typeColorsOf(context);
 
     return Container(
       width: 210,
@@ -424,7 +413,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
               child: Column(
                 children: _typeOptions.map((type) {
                   final isSelected = _selectedType == type.value;
-                  final typeColor = _typeColors[type.value] ?? BAColors.primary;
+                  final typeColor = typeColors[type.value] ?? BAColors.primaryOf(context);
                   final typeIcon = _typeIcons[type.value] ?? Icons.apps;
                   return _buildFilterChip(
                     label: type.key,
@@ -543,10 +532,8 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   decoration: BoxDecoration(
                     color: _showOnlyFavorites
-                        ? BAColors.primary.withValues(alpha: 0.12)
-                        : (Theme.of(context).brightness == Brightness.light
-                            ? const Color(0xFFFFFFFF)
-                            : const Color(0xFF2A3558)),
+                        ? BAColors.primaryOf(context).withValues(alpha: 0.12)
+                        : BAColors.surfaceOf(context),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: borderColor),
                   ),
@@ -554,7 +541,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                     children: [
                       Icon(
                         _showOnlyFavorites ? Icons.favorite : Icons.favorite_border,
-                        color: _showOnlyFavorites ? Colors.red : textColor.withValues(alpha: 0.7),
+                        color: _showOnlyFavorites ? BAColors.dangerOf(context) : textColor.withValues(alpha: 0.7),
                         size: 14,
                       ),
                       const SizedBox(width: 6),
@@ -570,13 +557,13 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                           decoration: BoxDecoration(
-                            color: BAColors.primary.withValues(alpha: 0.2),
+                            color: BAColors.primaryOf(context).withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
                             '${_favoriteIds.length}',
-                            style: const TextStyle(
-                              color: BAColors.primary,
+                            style: TextStyle(
+                              color: BAColors.primaryOf(context),
                               fontSize: 9,
                               fontWeight: FontWeight.w600,
                             ),
@@ -634,7 +621,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
       children: [
         Row(
           children: [
-            Icon(icon, color: BAColors.primary, size: 12),
+            Icon(icon, color: BAColors.primaryOf(context), size: 12),
             const SizedBox(width: 4),
             Text(
               title,
@@ -669,9 +656,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
           decoration: BoxDecoration(
             color: isSelected
                 ? color.withValues(alpha: 0.18)
-                : (Theme.of(context).brightness == Brightness.light
-                    ? const Color(0xFFFFFFFF)
-                    : const Color(0xFF2A3558)),
+                : BAColors.surfaceOf(context),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: isSelected ? color.withValues(alpha: 0.5) : Colors.transparent,
@@ -711,7 +696,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           decoration: BoxDecoration(
             color:
-                isSelected ? BAColors.primary.withValues(alpha: 0.12) : Colors.transparent,
+                isSelected ? BAColors.primaryOf(context).withValues(alpha: 0.12) : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
           ),
           child: Row(
@@ -720,7 +705,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                 width: 3,
                 height: 3,
                 decoration: BoxDecoration(
-                  color: isSelected ? BAColors.primary : textColor.withValues(alpha: 0.5),
+                  color: isSelected ? BAColors.primaryOf(context) : textColor.withValues(alpha: 0.5),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -728,7 +713,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? BAColors.primary : textColor.withValues(alpha: 0.7),
+                  color: isSelected ? BAColors.primaryOf(context) : textColor.withValues(alpha: 0.7),
                   fontSize: 11,
                 ),
               ),
@@ -750,9 +735,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: Theme.of(context).brightness == Brightness.light
-            ? const Color(0xFFFFFFFF)
-            : const Color(0xFF2A3558),
+        color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: textColor.withValues(alpha: 0.2)),
       ),
@@ -769,9 +752,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
           ),
           icon: Icon(Icons.keyboard_arrow_down,
               color: textColor.withValues(alpha: 0.6), size: 16),
-          dropdownColor: Theme.of(context).brightness == Brightness.light
-              ? const Color(0xFFFFFFFF)
-              : const Color(0xFF1A2544),
+          dropdownColor: BAColors.backgroundSecondaryOf(context),
           style: TextStyle(
             color: textColor,
             fontSize: 11,
@@ -798,7 +779,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
               width: 40,
               height: 40,
               child: CircularProgressIndicator(
-                color: BAColors.primary,
+                color: BAColors.primaryOf(context),
                 strokeWidth: 2,
               ),
             ),
@@ -820,7 +801,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, color: BAColors.danger, size: 36),
+            Icon(Icons.error_outline, color: BAColors.dangerOf(context), size: 36),
             const SizedBox(height: 12),
             Text(
               '加载失败',
@@ -845,8 +826,8 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
               icon: const Icon(Icons.refresh, size: 14),
               label: const Text('重试'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: BAColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: BAColors.primaryOf(context),
+                foregroundColor: BAColors.textOnPrimary,
               ),
             ),
           ],
@@ -887,16 +868,12 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
       );
     }
 
-    final isLight = Theme.of(context).brightness == Brightness.light;
-
     return Container(
       decoration: BoxDecoration(
-        color: (isLight ? const Color(0xFFEEF1FA) : const Color(0xFF1A2544))
-            .withValues(alpha: 0.85),
+        color: BAColors.backgroundSecondaryOf(context).withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: (isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A))
-              .withValues(alpha: 0.5),
+          color: BAColors.borderOf(context).withValues(alpha: 0.5),
         ),
       ),
       child: ListView.builder(
@@ -912,7 +889,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
-                    color: BAColors.primary,
+                    color: BAColors.primaryOf(context),
                     strokeWidth: 2,
                   ),
                 ),
@@ -920,21 +897,20 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
             );
           }
           final resource = displayResources[index];
-          return _buildResourceCard(context, resource, isLight);
+          return _buildResourceCard(context, resource);
         },
       ),
     );
   }
 
-  Widget _buildResourceCard(BuildContext context, Resource resource, bool isLight) {
-    final typeColor = _typeColors[resource.type] ?? BAColors.primary;
+  Widget _buildResourceCard(BuildContext context, Resource resource) {
+    final typeColors = _typeColorsOf(context);
+    final typeColor = typeColors[resource.type] ?? BAColors.primaryOf(context);
     final isFavorite = _favoriteIds.contains(resource.id);
-    final cardBg = isLight ? const Color(0xFFFFFFFF) : const Color(0xFF2A3558);
-    final cardBorder = (isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A))
-        .withValues(alpha: 0.35);
-    final textPrimary = isLight ? const Color(0xFF1A2744) : Colors.white;
-    final textSecondary =
-        (isLight ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.65);
+    final cardBg = BAColors.surfaceOf(context);
+    final cardBorder = BAColors.borderOf(context).withValues(alpha: 0.35);
+    final textPrimary = BAColors.textPrimaryOf(context);
+    final textSecondary = BAColors.textSecondaryOf(context);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
@@ -1057,9 +1033,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                                 decoration: BoxDecoration(
-                                  color: isLight
-                                      ? const Color(0xFFEEF1FA)
-                                      : const Color(0xFF1A2544),
+                                  color: BAColors.backgroundSecondaryOf(context),
                                   borderRadius: BorderRadius.circular(3),
                                 ),
                                 child: Text(
@@ -1086,13 +1060,13 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                             decoration: BoxDecoration(
-                              color: BAColors.primary.withValues(alpha: 0.12),
+                              color: BAColors.primaryOf(context).withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(3),
                             ),
                             child: Text(
                               resource.source.toUpperCase(),
-                              style: const TextStyle(
-                                color: BAColors.primary,
+                              style: TextStyle(
+                                color: BAColors.primaryOf(context),
                                 fontSize: 8,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -1139,7 +1113,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                     onTap: () => _toggleFavorite(resource.id),
                     child: Icon(
                       isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? Colors.red : textSecondary,
+                      color: isFavorite ? BAColors.dangerOf(context) : textSecondary,
                       size: 16,
                     ),
                   ),

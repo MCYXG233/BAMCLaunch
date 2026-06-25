@@ -188,7 +188,7 @@ class _BAMainPageState extends State<BAMainPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? BAColors.danger : BAColors.success,
+        backgroundColor: isError ? BAColors.dangerOf(context) : BAColors.successOf(context),
         duration: const Duration(seconds: 3),
         behavior: SnackBarBehavior.floating,
       ),
@@ -284,21 +284,21 @@ class _BAMainPageState extends State<BAMainPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFFF5F8FF) : const Color(0xFF1A2540)).withValues(alpha: 0.85),
+              color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: BAColors.primary.withValues(alpha: 0.4),
+                color: BAColors.primaryOf(context).withValues(alpha: 0.4),
               ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.sports_esports, color: BAColors.primary, size: 20),
+                Icon(Icons.sports_esports, color: BAColors.primaryOf(context), size: 20),
                 const SizedBox(width: 8),
                 Text(
                   'BAMCLaunch',
                   style: TextStyle(
-                    color: Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white,
+                    color: BAColors.textPrimaryOf(context),
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),
@@ -307,13 +307,13 @@ class _BAMainPageState extends State<BAMainPage> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: BAColors.primary.withValues(alpha: 0.25),
+                    color: BAColors.primaryOf(context).withValues(alpha: 0.25),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Text(
+                  child: Text(
                     'v1.0',
                     style: TextStyle(
-                      color: BAColors.primary,
+                      color: BAColors.primaryOf(context),
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                     ),
@@ -342,27 +342,27 @@ class _BAMainPageState extends State<BAMainPage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFFF5F8FF) : const Color(0xFF1A2540)).withValues(alpha: 0.85),
+                  color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A)).withValues(alpha: 0.5),
+                    color: BAColors.borderOf(context).withValues(alpha: 0.5),
                   ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.person_outline, color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.85), size: 16),
+                    Icon(Icons.person_outline, color: BAColors.textPrimaryOf(context).withValues(alpha: 0.85), size: 16),
                     const SizedBox(width: 6),
                     Text(
                       _selectedAccountName ?? '加载中...',
                       style: TextStyle(
-                        color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.9),
+                        color: BAColors.textPrimaryOf(context).withValues(alpha: 0.9),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(width: 4),
-                    Icon(Icons.arrow_forward_ios, color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.5), size: 12),
+                    Icon(Icons.arrow_forward_ios, color: BAColors.textPrimaryOf(context).withValues(alpha: 0.5), size: 12),
                   ],
                 ),
               ),
@@ -375,21 +375,21 @@ class _BAMainPageState extends State<BAMainPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFFF5F8FF) : const Color(0xFF1A2540)).withValues(alpha: 0.85),
+              color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A)).withValues(alpha: 0.5),
+                color: BAColors.borderOf(context).withValues(alpha: 0.5),
               ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.folder_outlined, color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.85), size: 16),
+                Icon(Icons.folder_outlined, color: BAColors.textPrimaryOf(context).withValues(alpha: 0.85), size: 16),
                 const SizedBox(width: 6),
                 Text(
                   '$_instanceCount 个实例',
                   style: TextStyle(
-                    color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.9),
+                    color: BAColors.textPrimaryOf(context).withValues(alpha: 0.9),
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -405,7 +405,7 @@ class _BAMainPageState extends State<BAMainPage> {
             tooltip: '设置',
             icon: Icon(
               Icons.settings,
-              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.7),
+              color: BAColors.textPrimaryOf(context).withValues(alpha: 0.7),
               size: 18,
             ),
           ),
@@ -446,8 +446,8 @@ class _BAMainPageState extends State<BAMainPage> {
 
   Widget _buildMainContent() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: BAColors.primary),
+      return Center(
+        child: CircularProgressIndicator(color: BAColors.primaryOf(context)),
       );
     }
 
@@ -482,13 +482,13 @@ class _BAMainPageState extends State<BAMainPage> {
         children: [
           Row(
             children: [
-              Icon(Icons.list_alt, color: BAColors.primary, size: 18),
+              Icon(Icons.list_alt, color: BAColors.primaryOf(context), size: 18),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   '游戏实例',
                   style: TextStyle(
-                    color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white),
+                    color: BAColors.textPrimaryOf(context),
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                   ),
@@ -496,7 +496,7 @@ class _BAMainPageState extends State<BAMainPage> {
               ),
               IconButton(
                 onPressed: () => setState(() => _currentPage = 1),
-                icon: Icon(Icons.open_in_new, color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF5A6A8A) : const Color(0xFFA0B0C8)), size: 16),
+                icon: Icon(Icons.open_in_new, color: BAColors.textSecondaryOf(context), size: 16),
                 tooltip: '管理实例',
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
@@ -524,12 +524,12 @@ class _BAMainPageState extends State<BAMainPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inbox_outlined, color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.4), size: 40),
+          Icon(Icons.inbox_outlined, color: BAColors.textPrimaryOf(context).withValues(alpha: 0.4), size: 40),
           const SizedBox(height: 12),
           Text(
               '暂无游戏实例',
               style: TextStyle(
-                color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.6),
+                color: BAColors.textPrimaryOf(context).withValues(alpha: 0.6),
                 fontSize: 12,
               ),
             ),
@@ -541,21 +541,21 @@ class _BAMainPageState extends State<BAMainPage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: BAColors.primary.withValues(alpha: 0.2),
+                  color: BAColors.primaryOf(context).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: BAColors.primary.withValues(alpha: 0.5),
+                    color: BAColors.primaryOf(context).withValues(alpha: 0.5),
                   ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.add, color: BAColors.primary, size: 16),
+                    Icon(Icons.add, color: BAColors.primaryOf(context), size: 16),
                     const SizedBox(width: 6),
                     Text(
                       '新建实例',
                       style: TextStyle(
-                        color: BAColors.primary,
+                        color: BAColors.primaryOf(context),
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -585,13 +585,13 @@ class _BAMainPageState extends State<BAMainPage> {
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: isSelected
-                ? BAColors.primary.withValues(alpha: 0.2)
-                : (Theme.of(context).brightness == Brightness.light ? const Color(0xFFE8EDFF) : const Color(0xFF2A3766)).withValues(alpha: 0.3),
+                ? BAColors.primaryOf(context).withValues(alpha: 0.2)
+                : BAColors.surfaceTertiaryOf(context).withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isSelected
-                  ? BAColors.primary.withValues(alpha: 0.6)
-                  : (Theme.of(context).brightness == Brightness.light ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A)).withValues(alpha: 0.3),
+                  ? BAColors.primaryOf(context).withValues(alpha: 0.6)
+                  : BAColors.borderOf(context).withValues(alpha: 0.3),
               width: isSelected ? 1.5 : 1,
             ),
           ),
@@ -622,7 +622,7 @@ class _BAMainPageState extends State<BAMainPage> {
                     Text(
                       instance.name,
                       style: TextStyle(
-                        color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.95),
+                        color: BAColors.textPrimaryOf(context).withValues(alpha: 0.95),
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -635,7 +635,7 @@ class _BAMainPageState extends State<BAMainPage> {
                         Text(
                           instance.version,
                           style: TextStyle(
-                            color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.6),
+                            color: BAColors.textPrimaryOf(context).withValues(alpha: 0.6),
                             fontSize: 11,
                           ),
                         ),
@@ -644,13 +644,13 @@ class _BAMainPageState extends State<BAMainPage> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                             decoration: BoxDecoration(
-                              color: BAColors.success.withValues(alpha: 0.2),
+                              color: BAColors.successOf(context).withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               instance.loader!,
                               style: TextStyle(
-                                color: BAColors.success,
+                                color: BAColors.successOf(context),
                                 fontSize: 9,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -662,13 +662,13 @@ class _BAMainPageState extends State<BAMainPage> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                             decoration: BoxDecoration(
-                              color: BAColors.accentPink.withValues(alpha: 0.2),
+                              color: BAColors.accentPinkOf(context).withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               '运行中',
                               style: TextStyle(
-                                color: BAColors.accentPink,
+                                color: BAColors.accentPinkOf(context),
                                 fontSize: 9,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -688,11 +688,11 @@ class _BAMainPageState extends State<BAMainPage> {
   }
 
   Color _getVersionColor(String version, BuildContext context) {
-    if (version.startsWith('1.21')) return BAColors.primary;
-    if (version.startsWith('1.20')) return BAColors.success;
-    if (version.startsWith('1.19')) return BAColors.warning;
-    if (version.startsWith('1.18')) return BAColors.accentPink;
-    return (Theme.of(context).brightness == Brightness.light ? const Color(0xFF5A6A8A) : const Color(0xFFA0B0C8));
+    if (version.startsWith('1.21')) return BAColors.primaryOf(context);
+    if (version.startsWith('1.20')) return BAColors.successOf(context);
+    if (version.startsWith('1.19')) return BAColors.warningOf(context);
+    if (version.startsWith('1.18')) return BAColors.accentPinkOf(context);
+    return BAColors.textSecondaryOf(context);
   }
 
   // ========== 实例详情 + 启动按钮 ==========
@@ -740,7 +740,7 @@ class _BAMainPageState extends State<BAMainPage> {
                     Text(
                       instance.name,
                       style: TextStyle(
-                        color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white),
+                        color: BAColors.textPrimaryOf(context),
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
                       ),
@@ -750,11 +750,11 @@ class _BAMainPageState extends State<BAMainPage> {
                       spacing: 8,
                       runSpacing: 6,
                       children: [
-                        _buildInfoChip(Icons.tag, 'MC ${instance.version}', BAColors.primary),
+                        _buildInfoChip(Icons.tag, 'MC ${instance.version}', BAColors.primaryOf(context)),
                         if (instance.loader != null)
-                          _buildInfoChip(Icons.extension, instance.loader!, BAColors.success),
+                          _buildInfoChip(Icons.extension, instance.loader!, BAColors.successOf(context)),
                         if (isRunning)
-                          _buildInfoChip(Icons.play_circle_filled, '运行中', BAColors.accentPink),
+                          _buildInfoChip(Icons.play_circle_filled, '运行中', BAColors.accentPinkOf(context)),
                       ],
                     ),
                   ],
@@ -769,7 +769,7 @@ class _BAMainPageState extends State<BAMainPage> {
             Text(
               instance.description!,
               style: TextStyle(
-                color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.75),
+                color: BAColors.textPrimaryOf(context).withValues(alpha: 0.75),
                 fontSize: 13,
                 height: 1.5,
               ),
@@ -787,7 +787,7 @@ class _BAMainPageState extends State<BAMainPage> {
                     icon: Icons.access_time,
                     title: '游戏时间',
                     value: _formatPlayTime(instance.playTimeSeconds),
-                    color: BAColors.success,
+                    color: BAColors.successOf(context),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -796,7 +796,7 @@ class _BAMainPageState extends State<BAMainPage> {
                     icon: Icons.calendar_today,
                     title: '上次启动',
                     value: _formatDate(instance.lastPlayed),
-                    color: BAColors.primary,
+                    color: BAColors.primaryOf(context),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -805,7 +805,7 @@ class _BAMainPageState extends State<BAMainPage> {
                     icon: Icons.folder,
                     title: 'Mod 数量',
                     value: '${instance.resources.mods.length}',
-                    color: BAColors.warning,
+                    color: BAColors.warningOf(context),
                   ),
                 ),
               ],
@@ -825,20 +825,20 @@ class _BAMainPageState extends State<BAMainPage> {
                   duration: BAAnimationDurations.micro,
                   decoration: BoxDecoration(
                     color: _isLaunching
-                        ? (Theme.of(context).brightness == Brightness.light ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A))
-                        : BAColors.primary.withValues(alpha: 0.9),
+                        ? BAColors.borderOf(context)
+                        : BAColors.primaryOf(context).withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: _isLaunching
-                          ? (Theme.of(context).brightness == Brightness.light ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A))
-                          : BAColors.primary.withValues(alpha: 0.7),
+                          ? BAColors.borderOf(context)
+                          : BAColors.primaryOf(context).withValues(alpha: 0.7),
                       width: 2,
                     ),
                     boxShadow: [
                       BoxShadow(
                         color: _isLaunching
                             ? Colors.transparent
-                            : BAColors.primary.withValues(alpha: 0.3),
+                            : BAColors.primaryOf(context).withValues(alpha: 0.3),
                         blurRadius: 20,
                         offset: const Offset(0, 4),
                       ),
@@ -888,14 +888,14 @@ class _BAMainPageState extends State<BAMainPage> {
         children: [
           Icon(
             Icons.sports_esports,
-            color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.3),
+            color: BAColors.textPrimaryOf(context).withValues(alpha: 0.3),
             size: 80,
           ),
           const SizedBox(height: 20),
           Text(
             '还没有游戏实例',
             style: TextStyle(
-              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white),
+              color: BAColors.textPrimaryOf(context),
               fontSize: 20,
               fontWeight: FontWeight.w700,
             ),
@@ -904,7 +904,7 @@ class _BAMainPageState extends State<BAMainPage> {
           Text(
             '创建您的第一个 Minecraft 实例开始游戏',
             style: TextStyle(
-              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.6),
+              color: BAColors.textPrimaryOf(context).withValues(alpha: 0.6),
               fontSize: 13,
             ),
           ),
@@ -916,11 +916,11 @@ class _BAMainPageState extends State<BAMainPage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 decoration: BoxDecoration(
-                  color: BAColors.primary,
+                  color: BAColors.primaryOf(context),
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: BAColors.primary.withValues(alpha: 0.3),
+                      color: BAColors.primaryOf(context).withValues(alpha: 0.3),
                       blurRadius: 16,
                       offset: const Offset(0, 4),
                     ),
@@ -1001,7 +1001,7 @@ class _BAMainPageState extends State<BAMainPage> {
           Text(
             title,
             style: TextStyle(
-              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.6),
+              color: BAColors.textPrimaryOf(context).withValues(alpha: 0.6),
               fontSize: 11,
               fontWeight: FontWeight.w500,
             ),
@@ -1034,19 +1034,19 @@ class _BAMainPageState extends State<BAMainPage> {
           Text(
             '快速入口',
             style: TextStyle(
-              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white),
+              color: BAColors.textPrimaryOf(context),
               fontSize: 13,
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 12),
-          _buildQuickEntry(Icons.add_circle_outline, '新建实例', BAColors.primary, () {
+          _buildQuickEntry(Icons.add_circle_outline, '新建实例', BAColors.primaryOf(context), () {
             setState(() => _currentPage = 1);
           }),
-          _buildQuickEntry(Icons.download_for_offline_outlined, '资源下载', BAColors.success, () {
+          _buildQuickEntry(Icons.download_for_offline_outlined, '资源下载', BAColors.successOf(context), () {
             setState(() => _currentPage = 2);
           }),
-          _buildQuickEntry(Icons.settings_outlined, '启动器设置', BAColors.accentPink, () {
+          _buildQuickEntry(Icons.settings_outlined, '启动器设置', BAColors.accentPinkOf(context), () {
             setState(() => _currentPage = 3);
           }),
           const SizedBox(height: 20),
@@ -1055,7 +1055,7 @@ class _BAMainPageState extends State<BAMainPage> {
           Text(
             '启动器信息',
             style: TextStyle(
-              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white),
+              color: BAColors.textPrimaryOf(context),
               fontSize: 13,
               fontWeight: FontWeight.w700,
             ),
@@ -1071,21 +1071,21 @@ class _BAMainPageState extends State<BAMainPage> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFFE8EDFF) : const Color(0xFF2A3766)).withValues(alpha: 0.4),
+              color: BAColors.surfaceTertiaryOf(context).withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A)).withValues(alpha: 0.3),
+                color: BAColors.borderOf(context).withValues(alpha: 0.3),
               ),
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline, color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.6), size: 16),
+                Icon(Icons.info_outline, color: BAColors.textPrimaryOf(context).withValues(alpha: 0.6), size: 16),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     '提示: 在游戏库中可以管理更多实例',
                     style: TextStyle(
-                      color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.6),
+                      color: BAColors.textPrimaryOf(context).withValues(alpha: 0.6),
                       fontSize: 11,
                       height: 1.4,
                     ),
@@ -1122,13 +1122,13 @@ class _BAMainPageState extends State<BAMainPage> {
                 child: Text(
                   label,
                   style: TextStyle(
-                    color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.9),
+                    color: BAColors.textPrimaryOf(context).withValues(alpha: 0.9),
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-              Icon(Icons.chevron_right, color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.4), size: 18),
+              Icon(Icons.chevron_right, color: BAColors.textPrimaryOf(context).withValues(alpha: 0.4), size: 18),
             ],
           ),
         ),
@@ -1145,14 +1145,14 @@ class _BAMainPageState extends State<BAMainPage> {
           Text(
             label,
             style: TextStyle(
-              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.55),
+              color: BAColors.textPrimaryOf(context).withValues(alpha: 0.55),
               fontSize: 11,
             ),
           ),
           Text(
             value,
             style: TextStyle(
-              color: (Theme.of(context).brightness == Brightness.light ? const Color(0xFF1A2744) : Colors.white).withValues(alpha: 0.9),
+              color: BAColors.textPrimaryOf(context).withValues(alpha: 0.9),
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),
@@ -1201,12 +1201,12 @@ class _BAMainPageState extends State<BAMainPage> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           decoration: BoxDecoration(
             color: isSelected
-                ? BAColors.primary.withValues(alpha: 0.2)
+                ? BAColors.primaryOf(context).withValues(alpha: 0.2)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: isSelected
-                  ? BAColors.primary.withValues(alpha: 0.5)
+                  ? BAColors.primaryOf(context).withValues(alpha: 0.5)
                   : Colors.transparent,
             ),
           ),
@@ -1218,7 +1218,7 @@ class _BAMainPageState extends State<BAMainPage> {
                 duration: BAAnimationDurations.micro,
                 child: Icon(
                   icon,
-                  color: isSelected ? BAColors.primary : (Theme.of(context).brightness == Brightness.light ? const Color(0xFF5A6A8A) : const Color(0xFFA0B0C8)),
+                  color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
               size: 22,
             ),
           ),
@@ -1226,7 +1226,7 @@ class _BAMainPageState extends State<BAMainPage> {
           Text(
             label,
             style: TextStyle(
-              color: isSelected ? BAColors.primary : (Theme.of(context).brightness == Brightness.light ? const Color(0xFF5A6A8A) : const Color(0xFFA0B0C8)),
+              color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
                   fontSize: 11,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 ),

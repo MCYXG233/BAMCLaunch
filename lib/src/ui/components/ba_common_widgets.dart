@@ -86,9 +86,8 @@ class BAGlassContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final baseColor = isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A2540);
-    final borderColor = isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A);
+    final baseColor = BAColors.surfaceOf(context);
+    final borderColor = BAColors.borderOf(context);
 
     Widget content = ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),
@@ -183,11 +182,9 @@ class _BASurfaceCardState extends State<BASurfaceCard> {
   @override
   Widget build(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    // 主题感知的默认颜色 - 深色模式使用更深的背景以提高可读性
-    final defaultBg = isLight ? const Color(0xFFFFFFFF) : const Color(0xFF151D32);
-    final defaultBorder = isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A);
-    final defaultShadow = isLight ? const Color(0xFF000000) : const Color(0xFF000000);
-    // 根据主题调整透明度 - 深色模式需要更高的不透明度以提高可读性
+    final defaultBg = BAColors.surfaceOf(context);
+    final defaultBorder = BAColors.borderOf(context);
+    const defaultShadow = Color(0xFF000000);
     final baseOpacity = isLight ? 0.92 : 0.96;
     final hoverOpacity = isLight ? 0.96 : 0.98;
 
@@ -275,8 +272,8 @@ class _BAWindowButtonState extends State<BAWindowButton> {
   @override
   Widget build(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final bgBase = isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A2540);
-    final borderColor = isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A);
+    final bgBase = BAColors.surfaceOf(context);
+    final borderColor = BAColors.borderOf(context);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -291,8 +288,8 @@ class _BAWindowButtonState extends State<BAWindowButton> {
           decoration: BoxDecoration(
             color: _isHovered
                 ? (widget.isClose
-                    ? const Color(0xFFE53935)
-                    : (isLight ? const Color(0xFFE8EDFF) : const Color(0xFF3A4D7A)))
+                    ? BAColors.dangerOf(context)
+                    : BAColors.surfaceHoverOf(context))
                 : bgBase.withValues(alpha: 0.85),
             borderRadius: BorderRadius.circular(widget.size / 3),
             border: Border.all(
@@ -303,7 +300,7 @@ class _BAWindowButtonState extends State<BAWindowButton> {
             widget.icon,
             color: _isHovered
                 ? Colors.white
-                : (isLight ? const Color(0xFF1A2744).withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.75)),
+                : BAColors.textPrimaryOf(context).withValues(alpha: isLight ? 0.8 : 0.75),
             size: widget.size * 0.45,
           ),
         ),
@@ -436,8 +433,8 @@ class _BAIconButtonState extends State<BAIconButton> {
   @override
   Widget build(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final defaultBg = isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A2540);
-    final borderColor = isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A);
+    final defaultBg = BAColors.surfaceOf(context);
+    final borderColor = BAColors.borderOf(context);
     final effectiveOnTap = widget.enabled ? widget.onTap : null;
 
     Widget button = MouseRegion(
@@ -466,9 +463,7 @@ class _BAIconButtonState extends State<BAIconButton> {
             child: Icon(
               widget.icon,
               color: widget.iconColor ??
-                  (isLight
-                      ? (widget.enabled ? const Color(0xFF1A2744) : const Color(0xFF1A2744).withValues(alpha: 0.4))
-                      : Colors.white.withValues(alpha: widget.enabled ? 0.9 : 0.4)),
+                  BAColors.textPrimaryOf(context).withValues(alpha: widget.enabled ? 1.0 : 0.4),
               size: widget.iconSize,
             ),
           ),
@@ -587,7 +582,7 @@ class _BAChipState extends State<BAChip> {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = widget.color ?? BAColors.primary;
+    final effectiveColor = widget.color ?? BAColors.primaryOf(context);
     
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),

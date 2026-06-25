@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import '../theme/ba_theme_colors.dart';
+import '../theme/colors.dart';
 import '../../instance/instance_manager.dart';
 import '../../instance/models.dart';
 import '../../modpack/modpack_exporter.dart';
@@ -195,38 +195,38 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Container(
-        color: BAThemeColors.background,
-        child: const Center(
+        color: BAColors.backgroundOf(context),
+        child: Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(BAThemeColors.primary),
+            valueColor: AlwaysStoppedAnimation<Color>(BAColors.primaryOf(context)),
           ),
         ),
       );
     }
 
     return Container(
-      color: BAThemeColors.background,
+      color: BAColors.backgroundOf(context),
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(),
+          _buildHeader(context),
           const SizedBox(height: 24),
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildBasicInfoSection(),
+                  _buildBasicInfoSection(context),
                   const SizedBox(height: 16),
-                  _buildFormatSection(),
+                  _buildFormatSection(context),
                   const SizedBox(height: 16),
-                  _buildContentSection(),
+                  _buildContentSection(context),
                   const SizedBox(height: 24),
-                  _buildExportButton(),
+                  _buildExportButton(context),
                   if (_isExporting) ...[
                     const SizedBox(height: 16),
-                    _buildProgressSection(),
+                    _buildProgressSection(context),
                   ],
                 ],
               ),
@@ -237,7 +237,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
         MouseRegion(
@@ -248,23 +248,23 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: BAThemeColors.surface,
+                color: BAColors.surfaceOf(context),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: BAThemeColors.border),
+                border: Border.all(color: BAColors.borderOf(context)),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back,
-                color: BAThemeColors.textPrimary,
+                color: BAColors.textPrimaryOf(context),
                 size: 20,
               ),
             ),
           ),
         ),
         const SizedBox(width: 16),
-        const Text(
+        Text(
           '导出整合包',
           style: TextStyle(
-            color: BAThemeColors.textPrimary,
+            color: BAColors.textPrimaryOf(context),
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -274,15 +274,16 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
   }
 
   Widget _buildSectionCard({
+    required BuildContext context,
     required String title,
     required IconData icon,
     required List<Widget> children,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: BAThemeColors.surface,
+        color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: BAThemeColors.border),
+        border: Border.all(color: BAColors.borderOf(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.2),
@@ -302,16 +303,16 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: BAThemeColors.primary.withOpacity(0.15),
+                    color: BAColors.primaryOf(context).withOpacity(0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: BAThemeColors.primary, size: 18),
+                  child: Icon(icon, color: BAColors.primaryOf(context), size: 18),
                 ),
                 const SizedBox(width: 10),
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: BAThemeColors.primary,
+                  style: TextStyle(
+                    color: BAColors.primaryOf(context),
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -320,7 +321,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
             ),
           ),
           Divider(
-            color: BAThemeColors.border.withOpacity(0.5),
+            color: BAColors.borderOf(context).withOpacity(0.5),
             height: 1,
             indent: 20,
             endIndent: 20,
@@ -337,18 +338,21 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
     );
   }
 
-  Widget _buildBasicInfoSection() {
+  Widget _buildBasicInfoSection(BuildContext context) {
     return _buildSectionCard(
+      context: context,
       title: '基本信息',
       icon: Icons.info_outline,
       children: [
         _buildTextField(
+          context: context,
           label: '整合包名称',
           controller: _nameController,
           placeholder: '输入整合包名称',
         ),
         const SizedBox(height: 16),
         _buildTextField(
+          context: context,
           label: '描述',
           controller: _descriptionController,
           placeholder: '输入整合包描述（可选）',
@@ -359,6 +363,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
           children: [
             Expanded(
               child: _buildTextField(
+                context: context,
                 label: '版本号',
                 controller: _versionController,
                 placeholder: '1.0.0',
@@ -367,6 +372,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
             const SizedBox(width: 16),
             Expanded(
               child: _buildTextField(
+                context: context,
                 label: '作者',
                 controller: _authorController,
                 placeholder: '输入作者名（可选）',
@@ -378,12 +384,14 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
     );
   }
 
-  Widget _buildFormatSection() {
+  Widget _buildFormatSection(BuildContext context) {
     return _buildSectionCard(
+      context: context,
       title: '导出格式',
       icon: Icons.folder_zip,
       children: [
         _buildFormatOption(
+          context: context,
           format: ModpackExportFormat.bamc,
           title: 'BAMC 格式',
           subtitle: 'BAMC Launcher 原生格式，ZIP + instance.json',
@@ -391,6 +399,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
         ),
         const SizedBox(height: 8),
         _buildFormatOption(
+          context: context,
           format: ModpackExportFormat.curseforge,
           title: 'CurseForge 格式',
           subtitle: '兼容 CurseForge，使用 manifest.json',
@@ -398,6 +407,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
         ),
         const SizedBox(height: 8),
         _buildFormatOption(
+          context: context,
           format: ModpackExportFormat.modrinth,
           title: 'Modrinth 格式',
           subtitle: '兼容 Modrinth，使用 modrinth.index.json',
@@ -408,6 +418,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
   }
 
   Widget _buildFormatOption({
+    required BuildContext context,
     required ModpackExportFormat format,
     required String title,
     required String subtitle,
@@ -428,11 +439,13 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: isSelected
-                ? BAThemeColors.primary.withOpacity(0.1)
+                ? BAColors.primaryOf(context).withOpacity(0.1)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isSelected ? BAThemeColors.primary : BAThemeColors.border,
+              color: isSelected
+                  ? BAColors.primaryOf(context)
+                  : BAColors.borderOf(context),
               width: isSelected ? 1.5 : 1,
             ),
           ),
@@ -448,22 +461,22 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
                     });
                   }
                 },
-                activeColor: BAThemeColors.primary,
+                activeColor: BAColors.primaryOf(context),
               ),
               Container(
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? BAThemeColors.primary.withOpacity(0.2)
-                      : BAThemeColors.surfaceVariant,
+                      ? BAColors.primaryOf(context).withOpacity(0.2)
+                      : BAColors.surfaceVariantOf(context),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   icon,
                   color: isSelected
-                      ? BAThemeColors.primary
-                      : BAThemeColors.textSecondary,
+                      ? BAColors.primaryOf(context)
+                      : BAColors.textSecondaryOf(context),
                   size: 20,
                 ),
               ),
@@ -476,8 +489,8 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
                       title,
                       style: TextStyle(
                         color: isSelected
-                            ? BAThemeColors.textPrimary
-                            : BAThemeColors.textSecondary,
+                            ? BAColors.textPrimaryOf(context)
+                            : BAColors.textSecondaryOf(context),
                         fontSize: 14,
                         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                       ),
@@ -485,8 +498,8 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(
-                        color: BAThemeColors.textDisabled,
+                      style: TextStyle(
+                        color: BAColors.textDisabledOf(context),
                         fontSize: 12,
                       ),
                     ),
@@ -500,67 +513,74 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
     );
   }
 
-  Widget _buildContentSection() {
+  Widget _buildContentSection(BuildContext context) {
     return _buildSectionCard(
+      context: context,
       title: '包含内容',
       icon: Icons.checklist,
       children: [
         _buildSwitchItem(
+          context: context,
           icon: Icons.extension,
           title: '模组',
           value: _includeMods,
           onChanged: (value) => setState(() => _includeMods = value),
         ),
         Divider(
-          color: BAThemeColors.border.withOpacity(0.3),
+          color: BAColors.borderOf(context).withOpacity(0.3),
           height: 1,
           indent: 48,
         ),
         _buildSwitchItem(
+          context: context,
           icon: Icons.settings,
           title: '配置文件',
           value: _includeConfig,
           onChanged: (value) => setState(() => _includeConfig = value),
         ),
         Divider(
-          color: BAThemeColors.border.withOpacity(0.3),
+          color: BAColors.borderOf(context).withOpacity(0.3),
           height: 1,
           indent: 48,
         ),
         _buildSwitchItem(
+          context: context,
           icon: Icons.map,
           title: '存档',
           value: _includeSaves,
           onChanged: (value) => setState(() => _includeSaves = value),
         ),
         Divider(
-          color: BAThemeColors.border.withOpacity(0.3),
+          color: BAColors.borderOf(context).withOpacity(0.3),
           height: 1,
           indent: 48,
         ),
         _buildSwitchItem(
+          context: context,
           icon: Icons.palette,
           title: '资源包',
           value: _includeResourcePacks,
           onChanged: (value) => setState(() => _includeResourcePacks = value),
         ),
         Divider(
-          color: BAThemeColors.border.withOpacity(0.3),
+          color: BAColors.borderOf(context).withOpacity(0.3),
           height: 1,
           indent: 48,
         ),
         _buildSwitchItem(
+          context: context,
           icon: Icons.brightness_7,
           title: '光影包',
           value: _includeShaderPacks,
           onChanged: (value) => setState(() => _includeShaderPacks = value),
         ),
         Divider(
-          color: BAThemeColors.border.withOpacity(0.3),
+          color: BAColors.borderOf(context).withOpacity(0.3),
           height: 1,
           indent: 48,
         ),
         _buildSwitchItem(
+          context: context,
           icon: Icons.photo_camera,
           title: '截图',
           value: _includeScreenshots,
@@ -570,7 +590,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
     );
   }
 
-  Widget _buildExportButton() {
+  Widget _buildExportButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       height: 48,
@@ -583,17 +603,17 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
               gradient: _isExporting
                   ? LinearGradient(
                       colors: [
-                        BAThemeColors.textDisabled,
-                        BAThemeColors.textDisabled,
+                        BAColors.textDisabledOf(context),
+                        BAColors.textDisabledOf(context),
                       ],
                     )
-                  : BAThemeColors.primaryGradient,
+                  : BAColors.primaryGradient,
               borderRadius: BorderRadius.circular(12),
               boxShadow: _isExporting
                   ? []
                   : [
                       BoxShadow(
-                        color: BAThemeColors.primary.withOpacity(0.3),
+                        color: BAColors.primaryOf(context).withOpacity(0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -631,29 +651,29 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
     );
   }
 
-  Widget _buildProgressSection() {
+  Widget _buildProgressSection(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: BAThemeColors.surface,
+        color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: BAThemeColors.border),
+        border: Border.all(color: BAColors.borderOf(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.downloading,
-                color: BAThemeColors.primary,
+                color: BAColors.primaryOf(context),
                 size: 18,
               ),
               const SizedBox(width: 8),
               Text(
                 _exportStatus ?? '正在导出...',
-                style: const TextStyle(
-                  color: BAThemeColors.textPrimary,
+                style: TextStyle(
+                  color: BAColors.textPrimaryOf(context),
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -665,8 +685,8 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: _exportProgress,
-              backgroundColor: BAThemeColors.surfaceVariant,
-              valueColor: const AlwaysStoppedAnimation<Color>(BAThemeColors.primary),
+              backgroundColor: BAColors.surfaceVariantOf(context),
+              valueColor: AlwaysStoppedAnimation<Color>(BAColors.primaryOf(context)),
               minHeight: 6,
             ),
           ),
@@ -675,8 +695,8 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
             alignment: Alignment.centerRight,
             child: Text(
               '${(_exportProgress * 100).toInt()}%',
-              style: const TextStyle(
-                color: BAThemeColors.textSecondary,
+              style: TextStyle(
+                color: BAColors.textSecondaryOf(context),
                 fontSize: 12,
               ),
             ),
@@ -687,6 +707,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
   }
 
   Widget _buildTextField({
+    required BuildContext context,
     required String label,
     required TextEditingController controller,
     required String placeholder,
@@ -697,8 +718,8 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: BAThemeColors.textSecondary,
+          style: TextStyle(
+            color: BAColors.textSecondaryOf(context),
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -707,35 +728,35 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
         TextField(
           controller: controller,
           maxLines: maxLines,
-          style: const TextStyle(
-            color: BAThemeColors.textPrimary,
+          style: TextStyle(
+            color: BAColors.textPrimaryOf(context),
             fontSize: 14,
           ),
           decoration: InputDecoration(
             hintText: placeholder,
-            hintStyle: const TextStyle(
-              color: BAThemeColors.textDisabled,
+            hintStyle: TextStyle(
+              color: BAColors.textDisabledOf(context),
               fontSize: 14,
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             filled: true,
-            fillColor: BAThemeColors.surfaceVariant.withOpacity(0.7),
+            fillColor: BAColors.surfaceVariantOf(context).withOpacity(0.7),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(
-                color: BAThemeColors.border.withOpacity(0.5),
+                color: BAColors.borderOf(context).withOpacity(0.5),
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(
-                color: BAThemeColors.border.withOpacity(0.5),
+                color: BAColors.borderOf(context).withOpacity(0.5),
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(
-                color: BAThemeColors.primary,
+              borderSide: BorderSide(
+                color: BAColors.primaryOf(context),
                 width: 1.5,
               ),
             ),
@@ -746,6 +767,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
   }
 
   Widget _buildSwitchItem({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required bool value,
@@ -760,13 +782,15 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
             height: 32,
             decoration: BoxDecoration(
               color: value
-                  ? BAThemeColors.primary.withOpacity(0.15)
-                  : BAThemeColors.surfaceVariant,
+                  ? BAColors.primaryOf(context).withOpacity(0.15)
+                  : BAColors.surfaceVariantOf(context),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               icon,
-              color: value ? BAThemeColors.primary : BAThemeColors.textDisabled,
+              color: value
+                  ? BAColors.primaryOf(context)
+                  : BAColors.textDisabledOf(context),
               size: 18,
             ),
           ),
@@ -776,8 +800,8 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
               title,
               style: TextStyle(
                 color: value
-                    ? BAThemeColors.textPrimary
-                    : BAThemeColors.textSecondary,
+                    ? BAColors.textPrimaryOf(context)
+                    : BAColors.textSecondaryOf(context),
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -786,7 +810,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: BAThemeColors.primary,
+            activeColor: BAColors.primaryOf(context),
           ),
         ],
       ),

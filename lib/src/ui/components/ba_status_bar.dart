@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/ba_theme_colors.dart';
+import '../theme/colors.dart';
 
 /// 底部状态栏组件
 /// 显示游戏版本、Java状态、内存使用、联机状态
@@ -46,6 +46,7 @@ class BAStatusBar extends StatelessWidget {
         children: [
           // 游戏版本
           _buildStatusItem(
+            context: context,
             icon: Icons.gamepad,
             text: gameVersion,
             isLight: isLight,
@@ -54,19 +55,22 @@ class BAStatusBar extends StatelessWidget {
 
           // Java状态
           _buildStatusItem(
+            context: context,
             icon: javaAvailable ? Icons.check_circle : Icons.error,
             text: 'Java ${javaVersion.split('.').first}',
-            color: javaAvailable ? BAThemeColors.success : BAThemeColors.danger,
+            color: javaAvailable
+                ? BAColors.successOf(context)
+                : BAColors.dangerOf(context),
             isLight: isLight,
           ),
           const SizedBox(width: 16),
 
           // 内存使用
-          _buildMemoryIndicator(isLight),
+          _buildMemoryIndicator(context, isLight),
           const SizedBox(width: 16),
 
           // 联机状态
-          _buildOnlineStatus(isLight),
+          _buildOnlineStatus(context, isLight),
 
           const Spacer(),
 
@@ -75,7 +79,7 @@ class BAStatusBar extends StatelessWidget {
             'BAMCLauncher v1.0.0',
             style: TextStyle(
               fontSize: 11,
-              color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+              color: BAColors.textSecondaryOf(context),
             ),
           ),
         ],
@@ -84,6 +88,7 @@ class BAStatusBar extends StatelessWidget {
   }
 
   Widget _buildStatusItem({
+    required BuildContext context,
     required IconData icon,
     required String text,
     Color? color,
@@ -95,21 +100,21 @@ class BAStatusBar extends StatelessWidget {
         Icon(
           icon,
           size: 14,
-          color: color ?? (isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary),
+          color: color ?? BAColors.textSecondaryOf(context),
         ),
         const SizedBox(width: 4),
         Text(
           text,
           style: TextStyle(
             fontSize: 11,
-            color: color ?? (isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary),
+            color: color ?? BAColors.textSecondaryOf(context),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildMemoryIndicator(bool isLight) {
+  Widget _buildMemoryIndicator(BuildContext context, bool isLight) {
     final usagePercent = memoryTotalMB > 0 ? (memoryUsedMB / memoryTotalMB * 100).round() : 0;
     final isHighUsage = usagePercent > 80;
 
@@ -119,14 +124,18 @@ class BAStatusBar extends StatelessWidget {
         Icon(
           Icons.memory,
           size: 14,
-          color: isHighUsage ? BAThemeColors.warning : (isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary),
+          color: isHighUsage
+              ? BAColors.warningOf(context)
+              : BAColors.textSecondaryOf(context),
         ),
         const SizedBox(width: 4),
         Text(
           '${memoryUsedMB ~/ 1024}GB/${memoryTotalMB ~/ 1024}GB',
           style: TextStyle(
             fontSize: 11,
-            color: isHighUsage ? BAThemeColors.warning : (isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary),
+            color: isHighUsage
+                ? BAColors.warningOf(context)
+                : BAColors.textSecondaryOf(context),
           ),
         ),
         const SizedBox(width: 4),
@@ -138,7 +147,9 @@ class BAStatusBar extends StatelessWidget {
             value: memoryTotalMB > 0 ? memoryUsedMB / memoryTotalMB : 0,
             backgroundColor: isLight ? Colors.grey[300] : Colors.grey[700],
             valueColor: AlwaysStoppedAnimation<Color>(
-              isHighUsage ? BAThemeColors.warning : BAThemeColors.primary,
+              isHighUsage
+                  ? BAColors.warningOf(context)
+                  : BAColors.primaryOf(context),
             ),
           ),
         ),
@@ -146,21 +157,25 @@ class BAStatusBar extends StatelessWidget {
     );
   }
 
-  Widget _buildOnlineStatus(bool isLight) {
+  Widget _buildOnlineStatus(BuildContext context, bool isLight) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
           isOnline ? Icons.wifi : Icons.wifi_off,
           size: 14,
-          color: isOnline ? BAThemeColors.success : (isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary),
+          color: isOnline
+              ? BAColors.successOf(context)
+              : BAColors.textSecondaryOf(context),
         ),
         const SizedBox(width: 4),
         Text(
           isOnline ? (onlineStatus ?? '在线') : '离线',
           style: TextStyle(
             fontSize: 11,
-            color: isOnline ? BAThemeColors.success : (isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary),
+            color: isOnline
+                ? BAColors.successOf(context)
+                : BAColors.textSecondaryOf(context),
           ),
         ),
       ],

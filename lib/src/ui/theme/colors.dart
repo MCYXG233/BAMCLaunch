@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
 
+import 'mc_theme_colors.dart';
+
 /// 蔚蓝档案风格 MC 启动器 - 完整色彩系统
 /// 基于蔚蓝档案游戏 UI 设计规范
 class BAColors {
+  static const String schemeBlueArchive = 'blue_archive';
+  static const String schemeMinecraft = 'minecraft';
+
+  static String _currentColorScheme = schemeBlueArchive;
+
+  static void setScheme(String scheme) {
+    _currentColorScheme = scheme;
+  }
+
+  static String get currentScheme => _currentColorScheme;
   // ==================== 品牌核心色（蔚蓝档案风格） ====================
   
   /// 主色调 - 天蓝色 #4A90D9 (Primary Blue)
@@ -240,134 +252,283 @@ class BAColors {
   );
 
   // ==================== 主题感知方法 ====================
-  
+
+  static bool _isLight(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.light;
+  }
+
+  static bool _isMC() {
+    return _currentColorScheme == schemeMinecraft;
+  }
+
   /// 获取背景色
   static Color backgroundOf(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light 
-        ? lightBackground 
-        : darkBackground;
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.background
+          : MCThemeColorsDark.background;
+    }
+    return _isLight(context) ? lightBackground : darkBackground;
   }
-  
+
   /// 获取次背景色
   static Color backgroundSecondaryOf(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light 
-        ? lightBackgroundSecondary 
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.backgroundDark
+          : MCThemeColorsDark.backgroundVariant;
+    }
+    return _isLight(context)
+        ? lightBackgroundSecondary
         : darkBackgroundSecondary;
   }
-  
+
   /// 获取表面色
   static Color surfaceOf(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light 
-        ? lightSurface 
-        : darkSurface;
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.surface
+          : MCThemeColorsDark.surface;
+    }
+    return _isLight(context) ? lightSurface : darkSurface;
   }
-  
+
   /// 获取表面色变体
   static Color surfaceVariantOf(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light 
-        ? lightSurfaceVariant 
-        : darkSurfaceVariant;
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.surfaceVariant
+          : MCThemeColorsDark.surfaceVariant;
+    }
+    return _isLight(context) ? lightSurfaceVariant : darkSurfaceVariant;
   }
-  
+
   /// 获取表面色第三变体
   static Color surfaceTertiaryOf(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light 
-        ? lightSurfaceTertiary 
-        : darkSurfaceTertiary;
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.surfaceVariant
+          : MCThemeColorsDark.surfaceHover;
+    }
+    return _isLight(context) ? lightSurfaceTertiary : darkSurfaceTertiary;
   }
-  
+
   /// 获取悬停状态色
   static Color surfaceHoverOf(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light 
-        ? lightSurfaceHover 
-        : darkSurfaceHover;
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.surfaceHover
+          : MCThemeColorsDark.surfaceHover;
+    }
+    return _isLight(context) ? lightSurfaceHover : darkSurfaceHover;
   }
-  
+
   /// 获取主文本色
   static Color textPrimaryOf(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light 
-        ? lightTextPrimary 
-        : darkTextPrimary;
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.textPrimary
+          : MCThemeColorsDark.textPrimary;
+    }
+    return _isLight(context) ? lightTextPrimary : darkTextPrimary;
   }
-  
+
   /// 获取次文本色
   static Color textSecondaryOf(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light 
-        ? lightTextSecondary 
-        : darkTextSecondary;
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.textSecondary
+          : MCThemeColorsDark.textSecondary;
+    }
+    return _isLight(context) ? lightTextSecondary : darkTextSecondary;
   }
-  
+
   /// 获取禁用文本色
   static Color textDisabledOf(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light 
-        ? lightTextDisabled 
-        : darkTextDisabled;
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.textDisabled
+          : MCThemeColorsDark.textDisabled;
+    }
+    return _isLight(context) ? lightTextDisabled : darkTextDisabled;
   }
-  
+
   /// 获取边框色
   static Color borderOf(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light 
-        ? lightBorder 
-        : darkBorder;
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.border
+          : MCThemeColorsDark.border;
+    }
+    return _isLight(context) ? lightBorder : darkBorder;
   }
-  
+
   /// 获取边框亮色
   static Color borderLightOf(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light 
-        ? lightBorderLight 
-        : darkBorderLight;
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.borderLight
+          : MCThemeColorsDark.borderLight;
+    }
+    return _isLight(context) ? lightBorderLight : darkBorderLight;
   }
-  
+
   /// 获取分割线色
   static Color dividerOf(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light 
-        ? lightDivider 
-        : darkDivider;
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.borderLight
+          : MCThemeColorsDark.border;
+    }
+    return _isLight(context) ? lightDivider : darkDivider;
   }
-  
+
   /// 获取阴影色
   static Color shadowOf(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light 
-        ? lightShadow 
-        : darkShadow;
+    if (_isMC()) {
+      return _isLight(context)
+          ? const Color(0x1A000000)
+          : const Color(0x80000000);
+    }
+    return _isLight(context) ? lightShadow : darkShadow;
   }
-  
+
   /// 获取毛玻璃背景色
   static Color glassOf(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light 
-        ? lightGlass 
-        : darkGlass;
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.frostedGlass
+          : MCThemeColorsDark.frostedGlass;
+    }
+    return _isLight(context) ? lightGlass : darkGlass;
   }
-  
+
   /// 获取背景渐变
   static Gradient backgroundGradientOf(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light 
-        ? lightBackgroundGradient 
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.backgroundGradient
+          : LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                MCThemeColorsDark.backgroundVariant,
+                MCThemeColorsDark.background,
+              ],
+            );
+    }
+    return _isLight(context)
+        ? lightBackgroundGradient
         : darkBackgroundGradient;
   }
-  
+
   /// 获取主色
   static Color primaryOf(BuildContext context) {
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.primary
+          : MCThemeColorsDark.primary;
+    }
     return primary;
   }
-  
+
+  /// 获取主色浅色
+  static Color primaryLightOf(BuildContext context) {
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.primaryLight
+          : MCThemeColorsDark.primaryLight;
+    }
+    return primaryLight;
+  }
+
+  /// 获取主色深色
+  static Color primaryDarkOf(BuildContext context) {
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.primaryDark
+          : MCThemeColorsDark.primaryDark;
+    }
+    return primaryDark;
+  }
+
+  /// 获取辅助色
+  static Color secondaryOf(BuildContext context) {
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.secondary
+          : MCThemeColorsDark.secondary;
+    }
+    return secondary;
+  }
+
+  /// 获取辅助色浅色
+  static Color secondaryLightOf(BuildContext context) {
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.secondaryLight
+          : MCThemeColorsDark.secondaryLight;
+    }
+    return secondaryLight;
+  }
+
+  /// 获取辅助色深色
+  static Color secondaryDarkOf(BuildContext context) {
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.secondaryDark
+          : MCThemeColorsDark.secondaryDark;
+    }
+    return secondaryDark;
+  }
+
+  /// 获取强调粉色
+  static Color accentPinkOf(BuildContext context) {
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.woolPink
+          : MCThemeColors.woolPink;
+    }
+    return accentPink;
+  }
+
   /// 获取成功色
   static Color successOf(BuildContext context) {
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.success
+          : MCThemeColorsDark.success;
+    }
     return success;
   }
-  
+
   /// 获取警告色
   static Color warningOf(BuildContext context) {
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.warning
+          : MCThemeColorsDark.warning;
+    }
     return warning;
   }
-  
+
   /// 获取危险色
   static Color dangerOf(BuildContext context) {
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.danger
+          : MCThemeColorsDark.danger;
+    }
     return danger;
   }
-  
+
   /// 获取信息色
   static Color infoOf(BuildContext context) {
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.info
+          : MCThemeColorsDark.info;
+    }
     return info;
   }
 

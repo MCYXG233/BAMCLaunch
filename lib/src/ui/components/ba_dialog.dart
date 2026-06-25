@@ -110,8 +110,8 @@ class BADialog extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        BAColors.primary.withOpacity(0.2),
-                        BAColors.primary.withOpacity(0.05),
+                        BAColors.primaryOf(context).withOpacity(0.2),
+                        BAColors.primaryOf(context).withOpacity(0.05),
                       ],
                     ),
                     border: Border(

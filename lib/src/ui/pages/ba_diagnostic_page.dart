@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../theme/ba_theme_colors.dart';
+import '../theme/colors.dart';
 import '../../diagnostic/java_checker.dart';
 import '../../diagnostic/crash_analyzer.dart';
 import '../../diagnostic/log_analyzer.dart';
@@ -405,32 +405,32 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: BAThemeColors.background,
+      backgroundColor: BAColors.backgroundOf(context),
       body: Column(
         children: [
-          _buildHeader(),
+          _buildHeader(context),
           Expanded(
-            child: _buildBody(),
+            child: _buildBody(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
-        color: BAThemeColors.surface,
+        color: BAColors.surfaceOf(context),
         border: Border(
           bottom: BorderSide(
-            color: BAThemeColors.border.withOpacity(0.5),
+            color: BAColors.borderOf(context).withOpacity(0.5),
             width: 1,
           ),
         ),
         boxShadow: [
           BoxShadow(
-            color: BAThemeColors.primary.withOpacity(0.05),
+            color: BAColors.primaryOf(context).withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -439,23 +439,23 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: BAThemeColors.textSecondary, size: 18),
+            icon: Icon(Icons.arrow_back_ios_new_rounded,
+                color: BAColors.textSecondaryOf(context), size: 18),
             onPressed: () => Navigator.of(context).pop(),
           ),
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [BAThemeColors.primary, BAThemeColors.primaryLight],
+              gradient: LinearGradient(
+                colors: [BAColors.primaryOf(context), BAColors.primaryLightOf(context)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: BAThemeColors.primary.withOpacity(0.3),
+                  color: BAColors.primaryOf(context).withOpacity(0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -464,10 +464,10 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
             child: const Icon(Icons.build_rounded, color: Colors.white, size: 22),
           ),
           const SizedBox(width: 12),
-          const Text(
+          Text(
             '系统诊断',
             style: TextStyle(
-              color: BAThemeColors.textPrimary,
+              color: BAColors.textPrimaryOf(context),
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -477,26 +477,26 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: BAThemeColors.primary.withOpacity(0.15),
+                color: BAColors.primaryOf(context).withOpacity(0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 '进程 ${widget.processId}',
-                style: const TextStyle(
-                  color: BAThemeColors.primary,
+                style: TextStyle(
+                  color: BAColors.primaryOf(context),
                   fontSize: 11,
                 ),
               ),
             ),
           ],
           const Spacer(),
-          _buildStartButton(),
+          _buildStartButton(context),
         ],
       ),
     );
   }
 
-  Widget _buildStartButton() {
+  Widget _buildStartButton(BuildContext context) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
@@ -506,16 +506,16 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
           decoration: BoxDecoration(
             gradient: _isRunning
                 ? null
-                : const LinearGradient(
-                    colors: [BAThemeColors.primary, BAThemeColors.primaryLight],
+                : LinearGradient(
+                    colors: [BAColors.primaryOf(context), BAColors.primaryLightOf(context)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-            color: _isRunning ? BAThemeColors.surfaceVariant : null,
+            color: _isRunning ? BAColors.surfaceVariantOf(context) : null,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: _isRunning
-                  ? BAThemeColors.border
+                  ? BAColors.borderOf(context)
                   : Colors.transparent,
             ),
           ),
@@ -523,12 +523,12 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
             mainAxisSize: MainAxisSize.min,
             children: [
               if (_isRunning)
-                const SizedBox(
+                SizedBox(
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: BAThemeColors.primary,
+                    color: BAColors.primaryOf(context),
                   ),
                 )
               else
@@ -538,7 +538,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                 _isRunning ? '诊断中...' : '开始诊断',
                 style: TextStyle(
                   color: _isRunning
-                      ? BAThemeColors.textSecondary
+                      ? BAColors.textSecondaryOf(context)
                       : Colors.white,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -551,16 +551,16 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ...List.generate(_items.length, (index) => _buildDiagnosticCard(index)),
+          ...List.generate(_items.length, (index) => _buildDiagnosticCard(context, index)),
           if (_isDone) ...[
             const SizedBox(height: 24),
-            _buildSummary(),
+            _buildSummary(context),
           ],
           const SizedBox(height: 24),
         ],
@@ -568,7 +568,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
     );
   }
 
-  Widget _buildDiagnosticCard(int index) {
+  Widget _buildDiagnosticCard(BuildContext context, int index) {
     final item = _items[index];
     final isExpanded = _expanded[index] == true;
 
@@ -586,15 +586,15 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
             duration: const Duration(milliseconds: 250),
             curve: Curves.easeInOut,
             decoration: BoxDecoration(
-              color: BAThemeColors.surface,
+              color: BAColors.surfaceOf(context),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: _getBorderColor(item.status).withOpacity(0.6),
+                color: _getBorderColor(context, item.status).withOpacity(0.6),
                 width: item.status == DiagnosticStatus.running ? 2 : 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: _getBorderColor(item.status).withOpacity(0.1),
+                  color: _getBorderColor(context, item.status).withOpacity(0.1),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -606,7 +606,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                   padding: const EdgeInsets.all(18),
                   child: Row(
                     children: [
-                      _buildStatusIcon(item.status),
+                      _buildStatusIcon(context, item.status),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Column(
@@ -614,8 +614,8 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                           children: [
                             Text(
                               item.title,
-                              style: const TextStyle(
-                                color: BAThemeColors.textPrimary,
+                              style: TextStyle(
+                                color: BAColors.textPrimaryOf(context),
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -627,8 +627,8 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                                   : item.description,
                               style: TextStyle(
                                 color: item.status == DiagnosticStatus.running
-                                    ? BAThemeColors.info
-                                    : BAThemeColors.textSecondary,
+                                    ? BAColors.infoOf(context)
+                                    : BAColors.textSecondaryOf(context),
                                 fontSize: 13,
                               ),
                             ),
@@ -636,12 +636,12 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                         ),
                       ),
                       if (item.status == DiagnosticStatus.running)
-                        const SizedBox(
+                        SizedBox(
                           width: 18,
                           height: 18,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: BAThemeColors.info,
+                            color: BAColors.infoOf(context),
                           ),
                         )
                       else if (item.status != DiagnosticStatus.pending &&
@@ -649,9 +649,9 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                         AnimatedRotation(
                           turns: isExpanded ? 0.5 : 0,
                           duration: const Duration(milliseconds: 250),
-                          child: const Icon(
+                          child: Icon(
                             Icons.expand_more_rounded,
-                            color: BAThemeColors.textSecondary,
+                            color: BAColors.textSecondaryOf(context),
                             size: 22,
                           ),
                         ),
@@ -662,7 +662,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
                   child: isExpanded && item.detail != null
-                      ? _buildExpandedContent(item)
+                      ? _buildExpandedContent(context, item)
                       : const SizedBox.shrink(),
                 ),
               ],
@@ -673,29 +673,29 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
     );
   }
 
-  Widget _buildExpandedContent(_DiagnosticItem item) {
+  Widget _buildExpandedContent(BuildContext context, _DiagnosticItem item) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Divider(color: BAThemeColors.border.withOpacity(0.5), height: 1),
+          Divider(color: BAColors.borderOf(context).withOpacity(0.5), height: 1),
           const SizedBox(height: 12),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: BAThemeColors.backgroundLight,
+              color: BAColors.surfaceVariantOf(context),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: BAThemeColors.border.withOpacity(0.4),
+                color: BAColors.borderOf(context).withOpacity(0.4),
               ),
             ),
             child: Text(
               item.detail!,
-              style: const TextStyle(
-                color: BAThemeColors.textSecondary,
+              style: TextStyle(
+                color: BAColors.textSecondaryOf(context),
                 fontSize: 13,
                 height: 1.5,
                 fontFamily: 'monospace',
@@ -704,10 +704,10 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
           ),
           if (item.suggestions.isNotEmpty) ...[
             const SizedBox(height: 12),
-            const Text(
+            Text(
               '修复建议:',
               style: TextStyle(
-                color: BAThemeColors.textPrimary,
+                color: BAColors.textPrimaryOf(context),
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -718,20 +718,20 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.only(top: 5),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5),
                         child: Icon(
                           Icons.circle,
                           size: 5,
-                          color: BAThemeColors.primary,
+                          color: BAColors.primaryOf(context),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           s,
-                          style: const TextStyle(
-                            color: BAThemeColors.textSecondary,
+                          style: TextStyle(
+                            color: BAColors.textSecondaryOf(context),
                             fontSize: 13,
                             height: 1.4,
                           ),
@@ -746,19 +746,19 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
     );
   }
 
-  Widget _buildStatusIcon(DiagnosticStatus status) {
+  Widget _buildStatusIcon(BuildContext context, DiagnosticStatus status) {
     switch (status) {
       case DiagnosticStatus.pending:
         return Container(
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: BAThemeColors.surfaceVariant,
+            color: BAColors.surfaceVariantOf(context),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: const Icon(
+          child: Icon(
             Icons.hourglass_empty_rounded,
-            color: BAThemeColors.textDisabled,
+            color: BAColors.textDisabledOf(context),
             size: 20,
           ),
         );
@@ -767,16 +767,16 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: BAThemeColors.info.withOpacity(0.12),
+            color: BAColors.infoOf(context).withOpacity(0.12),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: const SizedBox(
+          child: SizedBox(
             width: 20,
             height: 20,
             child: Center(
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: BAThemeColors.info,
+                color: BAColors.infoOf(context),
               ),
             ),
           ),
@@ -786,12 +786,12 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: BAThemeColors.success.withOpacity(0.12),
+            color: BAColors.successOf(context).withOpacity(0.12),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: const Icon(
+          child: Icon(
             Icons.check_circle_rounded,
-            color: BAThemeColors.success,
+            color: BAColors.successOf(context),
             size: 20,
           ),
         );
@@ -800,12 +800,12 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: BAThemeColors.warning.withOpacity(0.12),
+            color: BAColors.warningOf(context).withOpacity(0.12),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: const Icon(
+          child: Icon(
             Icons.warning_amber_rounded,
-            color: BAThemeColors.warning,
+            color: BAColors.warningOf(context),
             size: 20,
           ),
         );
@@ -814,30 +814,30 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: BAThemeColors.danger.withOpacity(0.12),
+            color: BAColors.dangerOf(context).withOpacity(0.12),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: const Icon(
+          child: Icon(
             Icons.error_rounded,
-            color: BAThemeColors.danger,
+            color: BAColors.dangerOf(context),
             size: 20,
           ),
         );
     }
   }
 
-  Color _getBorderColor(DiagnosticStatus status) {
+  Color _getBorderColor(BuildContext context, DiagnosticStatus status) {
     switch (status) {
       case DiagnosticStatus.pending:
-        return BAThemeColors.border.withOpacity(0.5);
+        return BAColors.borderOf(context).withOpacity(0.5);
       case DiagnosticStatus.running:
-        return BAThemeColors.info.withOpacity(0.6);
+        return BAColors.infoOf(context).withOpacity(0.6);
       case DiagnosticStatus.passed:
-        return BAThemeColors.success.withOpacity(0.3);
+        return BAColors.successOf(context).withOpacity(0.3);
       case DiagnosticStatus.warning:
-        return BAThemeColors.warning.withOpacity(0.3);
+        return BAColors.warningOf(context).withOpacity(0.3);
       case DiagnosticStatus.failed:
-        return BAThemeColors.danger.withOpacity(0.3);
+        return BAColors.dangerOf(context).withOpacity(0.3);
     }
   }
 

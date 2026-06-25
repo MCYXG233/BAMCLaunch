@@ -125,10 +125,10 @@ class _BATextFieldState extends State<BATextField> {
   @override
   Widget build(BuildContext context) {
     final borderColor = widget.errorText != null
-        ? BAColors.danger
+        ? BAColors.dangerOf(context)
         : (_isFocused
-              ? BAColors.primary
-              : (_isHovered ? BAColors.border : BAColors.border));
+              ? BAColors.primaryOf(context)
+              : (_isHovered ? BAColors.borderOf(context) : BAColors.borderOf(context)));
 
     final shadowOpacity = _isFocused ? 0.4 : 0.2;
 
@@ -140,7 +140,7 @@ class _BATextFieldState extends State<BATextField> {
           Text(
             widget.labelText!,
             style: BATypography.bodyMedium.copyWith(
-              color: BAColors.textSecondary,
+              color: BAColors.textSecondaryOf(context),
             ),
           ),
           const SizedBox(height: 8),
@@ -153,14 +153,14 @@ class _BATextFieldState extends State<BATextField> {
             height: widget.height,
             decoration: BoxDecoration(
               color: widget.enabled
-                  ? BAColors.surface
-                  : BAColors.surfaceVariant,
+                  ? BAColors.surfaceOf(context)
+                  : BAColors.surfaceVariantOf(context),
               borderRadius: BATheme.borderRadius,
               border: Border.all(color: borderColor, width: _isFocused ? 2 : 1),
               boxShadow: widget.enabled
                   ? [
                       BoxShadow(
-                        color: BAColors.shadow.withOpacity(shadowOpacity),
+                        color: BAColors.shadowOf(context).withOpacity(shadowOpacity),
                         blurRadius: _isFocused ? 12 : 6,
                         offset: Offset(0, _isFocused ? 4 : 2),
                       ),
@@ -184,13 +184,13 @@ class _BATextFieldState extends State<BATextField> {
               textAlign: widget.textAlign,
               style: BATypography.bodyMedium.copyWith(
                 color: widget.enabled
-                    ? BAColors.textPrimary
-                    : BAColors.textDisabled,
+                    ? BAColors.textPrimaryOf(context)
+                    : BAColors.textDisabledOf(context),
               ),
               decoration: InputDecoration(
                 hintText: widget.hintText,
                 hintStyle: BATypography.bodyMedium.copyWith(
-                  color: BAColors.textDisabled,
+                  color: BAColors.textDisabledOf(context),
                 ),
                 prefixIcon: widget.prefixIcon,
                 suffixIcon: widget.obscureText
@@ -199,7 +199,7 @@ class _BATextFieldState extends State<BATextField> {
                           _obscureText
                               ? Icons.visibility_off
                               : Icons.visibility,
-                          color: BAColors.textSecondary,
+                          color: BAColors.textSecondaryOf(context),
                         ),
                         onPressed: () {
                           setState(() {
@@ -226,7 +226,7 @@ class _BATextFieldState extends State<BATextField> {
           const SizedBox(height: 6),
           Text(
             widget.errorText!,
-            style: BATypography.bodySmall.copyWith(color: BAColors.danger),
+            style: BATypography.bodySmall.copyWith(color: BAColors.dangerOf(context)),
           ),
         ],
       ],
@@ -266,12 +266,12 @@ class _BASwitchState extends State<BASwitch> {
   @override
   Widget build(BuildContext context) {
     final trackColor = widget.value
-        ? (widget.disabled ? BAColors.primaryDark : BAColors.primary)
-        : (widget.disabled ? BAColors.surfaceVariant : BAColors.surface);
+        ? (widget.disabled ? BAColors.primaryDarkOf(context) : BAColors.primaryOf(context))
+        : (widget.disabled ? BAColors.surfaceVariantOf(context) : BAColors.surfaceOf(context));
 
     final thumbColor = widget.value
         ? Colors.white
-        : (widget.disabled ? BAColors.textDisabled : BAColors.textSecondary);
+        : (widget.disabled ? BAColors.textDisabledOf(context) : BAColors.textSecondaryOf(context));
 
     final shadowOpacity = widget.value && !widget.disabled ? 0.4 : 0.2;
 
@@ -286,8 +286,8 @@ class _BASwitchState extends State<BASwitch> {
               widget.label!,
               style: BATypography.bodyMedium.copyWith(
                 color: widget.disabled
-                    ? BAColors.textDisabled
-                    : BAColors.textPrimary,
+                    ? BAColors.textDisabledOf(context)
+                    : BAColors.textPrimaryOf(context),
               ),
             ),
             const SizedBox(width: 12),
@@ -307,15 +307,15 @@ class _BASwitchState extends State<BASwitch> {
                   color: widget.value
                       ? Colors.transparent
                       : (widget.disabled
-                            ? BAColors.textDisabled
-                            : BAColors.border),
+                            ? BAColors.textDisabledOf(context)
+                            : BAColors.borderOf(context)),
                   width: 2,
                 ),
                 boxShadow: widget.disabled
                     ? null
                     : [
                         BoxShadow(
-                          color: BAColors.shadow.withOpacity(shadowOpacity),
+                          color: BAColors.shadowOf(context).withOpacity(shadowOpacity),
                           blurRadius: 6,
                           offset: const Offset(0, 2),
                         ),
@@ -339,7 +339,7 @@ class _BASwitchState extends State<BASwitch> {
                             ? null
                             : [
                                 BoxShadow(
-                                  color: BAColors.shadow.withOpacity(0.3),
+                                  color: BAColors.shadowOf(context).withOpacity(0.3),
                                   blurRadius: 4,
                                   offset: const Offset(0, 1),
                                 ),
@@ -410,11 +410,11 @@ class _BASliderState extends State<BASlider> {
   @override
   Widget build(BuildContext context) {
     final activeColor = widget.disabled
-        ? BAColors.textDisabled
-        : BAColors.primary;
+        ? BAColors.textDisabledOf(context)
+        : BAColors.primaryOf(context);
     final inactiveColor = widget.disabled
-        ? BAColors.textDisabled
-        : BAColors.surfaceVariant;
+        ? BAColors.textDisabledOf(context)
+        : BAColors.surfaceVariantOf(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -425,8 +425,8 @@ class _BASliderState extends State<BASlider> {
             widget.label!,
             style: BATypography.bodyMedium.copyWith(
               color: widget.disabled
-                  ? BAColors.textDisabled
-                  : BAColors.textPrimary,
+                  ? BAColors.textDisabledOf(context)
+                  : BAColors.textPrimaryOf(context),
             ),
           ),
           const SizedBox(height: 8),
@@ -445,9 +445,10 @@ class _BASliderState extends State<BASlider> {
               thumbShape: _BAThumbShape(
                 isHovered: _isHovered || _isDragging,
                 isDisabled: widget.disabled,
+                shadowColor: BAColors.shadowOf(context),
               ),
               trackShape: const RoundedRectSliderTrackShape(),
-              valueIndicatorColor: BAColors.primary,
+              valueIndicatorColor: BAColors.primaryOf(context),
               valueIndicatorTextStyle: BATypography.bodyMedium.copyWith(
                 color: Colors.white,
               ),
@@ -486,8 +487,13 @@ class _BASliderState extends State<BASlider> {
 class _BAThumbShape extends SliderComponentShape {
   final bool isHovered;
   final bool isDisabled;
+  final Color shadowColor;
 
-  const _BAThumbShape({required this.isHovered, required this.isDisabled});
+  const _BAThumbShape({
+    required this.isHovered,
+    required this.isDisabled,
+    required this.shadowColor,
+  });
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
@@ -517,7 +523,7 @@ class _BAThumbShape extends SliderComponentShape {
     // 阴影
     if (!isDisabled) {
       final shadowPaint = Paint()
-        ..color = BAColors.shadow.withOpacity(0.3)
+        ..color = shadowColor.withOpacity(0.3)
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, shadowRadius);
       canvas.drawCircle(center.translate(0, 2), radius, shadowPaint);
     }

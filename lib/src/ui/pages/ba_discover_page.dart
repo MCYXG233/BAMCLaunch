@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/ba_theme_colors.dart';
+import '../theme/colors.dart';
 import '../components/ba_common_widgets.dart';
 
 /// 发现页面
@@ -32,23 +32,21 @@ class _BADiscoverPageState extends State<BADiscoverPage>
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 标题和搜索
-          _buildHeader(isLight),
+          _buildHeader(context),
           const SizedBox(height: 16),
 
           // 搜索框
-          _buildSearchBar(isLight),
+          _buildSearchBar(context),
           const SizedBox(height: 16),
 
           // 标签页
-          _buildTabBar(isLight),
+          _buildTabBar(context),
           const SizedBox(height: 16),
 
           // 内容区
@@ -60,12 +58,12 @@ class _BADiscoverPageState extends State<BADiscoverPage>
     );
   }
 
-  Widget _buildHeader(bool isLight) {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
         Icon(
           Icons.explore,
-          color: BAThemeColors.primary,
+          color: BAColors.primaryOf(context),
           size: 28,
         ),
         const SizedBox(width: 12),
@@ -74,14 +72,14 @@ class _BADiscoverPageState extends State<BADiscoverPage>
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: isLight ? BAThemeColors.textPrimary : BAThemeColors.textPrimary,
+            color: BAColors.textPrimaryOf(context),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSearchBar(bool isLight) {
+  Widget _buildSearchBar(BuildContext context) {
     return BAGlassContainer(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: TextField(
@@ -94,17 +92,17 @@ class _BADiscoverPageState extends State<BADiscoverPage>
         decoration: InputDecoration(
           hintText: '搜索模组、资源包、光影...',
           hintStyle: TextStyle(
-            color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+            color: BAColors.textSecondaryOf(context),
           ),
           prefixIcon: Icon(
             Icons.search,
-            color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+            color: BAColors.textSecondaryOf(context),
           ),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
                   icon: Icon(
                     Icons.clear,
-                    color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+                    color: BAColors.textSecondaryOf(context),
                   ),
                   onPressed: () {
                     _searchController.clear();
@@ -121,15 +119,15 @@ class _BADiscoverPageState extends State<BADiscoverPage>
     );
   }
 
-  Widget _buildTabBar(bool isLight) {
+  Widget _buildTabBar(BuildContext context) {
     return BAGlassContainer(
       padding: const EdgeInsets.all(4),
       child: TabBar(
         controller: _tabController,
-        labelColor: Colors.white,
-        unselectedLabelColor: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+        labelColor: BAColors.textOnPrimary,
+        unselectedLabelColor: BAColors.textSecondaryOf(context),
         indicator: BoxDecoration(
-          color: BAThemeColors.primary,
+          color: BAColors.primaryOf(context),
           borderRadius: BorderRadius.circular(12),
         ),
         indicatorSize: TabBarIndicatorSize.tab,
@@ -226,14 +224,14 @@ class _BADiscoverPageState extends State<BADiscoverPage>
           Icon(
             Icons.download_done,
             size: 64,
-            color: Colors.grey.withValues(alpha: 0.5),
+            color: BAColors.textSecondaryOf(context).withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
             '暂无下载记录',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey.withValues(alpha: 0.7),
+              color: BAColors.textSecondaryOf(context).withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -247,8 +245,6 @@ class _BADiscoverPageState extends State<BADiscoverPage>
     required IconData icon,
     required String downloads,
   }) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-
     return BAGlassContainer(
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -256,7 +252,7 @@ class _BADiscoverPageState extends State<BADiscoverPage>
         children: [
           Row(
             children: [
-              Icon(icon, color: BAThemeColors.primary, size: 20),
+              Icon(icon, color: BAColors.primaryOf(context), size: 20),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -264,7 +260,7 @@ class _BADiscoverPageState extends State<BADiscoverPage>
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: isLight ? BAThemeColors.textPrimary : BAThemeColors.textPrimary,
+                    color: BAColors.textPrimaryOf(context),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -277,7 +273,7 @@ class _BADiscoverPageState extends State<BADiscoverPage>
             subtitle,
             style: TextStyle(
               fontSize: 12,
-              color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+              color: BAColors.textSecondaryOf(context),
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -288,14 +284,14 @@ class _BADiscoverPageState extends State<BADiscoverPage>
               Icon(
                 Icons.download,
                 size: 14,
-                color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
               ),
               const SizedBox(width: 4),
               Text(
                 downloads,
                 style: TextStyle(
                   fontSize: 11,
-                  color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+                  color: BAColors.textSecondaryOf(context),
                 ),
               ),
             ],
@@ -310,8 +306,6 @@ class _BADiscoverPageState extends State<BADiscoverPage>
     required String summary,
     required String time,
   }) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: BAGlassContainer(
@@ -323,12 +317,12 @@ class _BADiscoverPageState extends State<BADiscoverPage>
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: BAThemeColors.primary.withOpacity(0.2),
+                color: BAColors.primaryOf(context).withOpacity(0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 Icons.article,
-                color: BAThemeColors.primary,
+                color: BAColors.primaryOf(context),
                 size: 28,
               ),
             ),
@@ -342,7 +336,7 @@ class _BADiscoverPageState extends State<BADiscoverPage>
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: isLight ? BAThemeColors.textPrimary : BAThemeColors.textPrimary,
+                      color: BAColors.textPrimaryOf(context),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -352,7 +346,7 @@ class _BADiscoverPageState extends State<BADiscoverPage>
                     summary,
                     style: TextStyle(
                       fontSize: 12,
-                      color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+                      color: BAColors.textSecondaryOf(context),
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -362,7 +356,7 @@ class _BADiscoverPageState extends State<BADiscoverPage>
                     time,
                     style: TextStyle(
                       fontSize: 11,
-                      color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+                      color: BAColors.textSecondaryOf(context),
                     ),
                   ),
                 ],
@@ -379,21 +373,19 @@ class _BADiscoverPageState extends State<BADiscoverPage>
     required IconData icon,
     required String count,
   }) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-
     return BAGlassContainer(
       padding: const EdgeInsets.all(12),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: BAThemeColors.primary, size: 28),
+          Icon(icon, color: BAColors.primaryOf(context), size: 28),
           const SizedBox(height: 8),
           Text(
             name,
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: isLight ? BAThemeColors.textPrimary : BAThemeColors.textPrimary,
+              color: BAColors.textPrimaryOf(context),
             ),
           ),
           const SizedBox(height: 2),
@@ -401,7 +393,7 @@ class _BADiscoverPageState extends State<BADiscoverPage>
             count,
             style: TextStyle(
               fontSize: 11,
-              color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+              color: BAColors.textSecondaryOf(context),
             ),
           ),
         ],

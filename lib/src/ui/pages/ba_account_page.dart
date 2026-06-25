@@ -128,7 +128,7 @@ class _BAAccountPageState extends State<BAAccountPage> {
               children: [
                 Icon(
                   isSelected ? Icons.check_circle : Icons.circle_outlined,
-                  color: isSelected ? BAColors.primary : Colors.grey,
+                  color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
                 ),
                 const SizedBox(width: 12),
                 Text(account.username),
@@ -136,7 +136,7 @@ class _BAAccountPageState extends State<BAAccountPage> {
                 Text(
                   _getAccountTypeLabel(account.type),
                   style: TextStyle(
-                    color: Colors.grey[600],
+                    color: BAColors.textSecondaryOf(context),
                     fontSize: 12,
                   ),
                 ),
@@ -161,38 +161,36 @@ class _BAAccountPageState extends State<BAAccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 标题
-          _buildHeader(isLight),
+          _buildHeader(context),
           const SizedBox(height: 20),
 
           // 当前账户卡片
           if (_currentAccount != null) ...[
-            _buildCurrentAccountCard(isLight),
+            _buildCurrentAccountCard(context),
             const SizedBox(height: 20),
           ],
 
           // 账户列表
           Expanded(
-            child: _buildAccountList(isLight),
+            child: _buildAccountList(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildHeader(bool isLight) {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
         Icon(
           Icons.person,
-          color: BAColors.primary,
+          color: BAColors.primaryOf(context),
           size: 28,
         ),
         const SizedBox(width: 12),
@@ -201,7 +199,7 @@ class _BAAccountPageState extends State<BAAccountPage> {
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: isLight ? BAColors.textPrimary : BAColors.darkTextPrimary,
+            color: BAColors.textPrimaryOf(context),
           ),
         ),
         const Spacer(),
@@ -211,8 +209,8 @@ class _BAAccountPageState extends State<BAAccountPage> {
           icon: const Icon(Icons.add, size: 16),
           label: const Text('添加账户'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: BAColors.primary,
-            foregroundColor: Colors.white,
+            backgroundColor: BAColors.primaryOf(context),
+            foregroundColor: BAColors.textOnPrimary,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           ),
         ),
@@ -220,14 +218,14 @@ class _BAAccountPageState extends State<BAAccountPage> {
     );
   }
 
-  Widget _buildCurrentAccountCard(bool isLight) {
+  Widget _buildCurrentAccountCard(BuildContext context) {
     return BASurfaceCard(
       borderRadius: 16,
       padding: const EdgeInsets.all(20),
       child: Row(
         children: [
           // 头像/皮肤预览
-          _buildAvatar(80),
+          _buildAvatar(context, 80),
           const SizedBox(width: 20),
 
           // 账户信息
@@ -240,7 +238,7 @@ class _BAAccountPageState extends State<BAAccountPage> {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: isLight ? BAColors.textPrimary : BAColors.darkTextPrimary,
+                    color: BAColors.textPrimaryOf(context),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -249,21 +247,21 @@ class _BAAccountPageState extends State<BAAccountPage> {
                     'UUID: ${_currentAccount!.uuid}',
                     style: TextStyle(
                       fontSize: 12,
-                      color: isLight ? BAColors.textSecondary : BAColors.darkTextSecondary,
+                      color: BAColors.textSecondaryOf(context),
                     ),
                   ),
                 const SizedBox(height: 4),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: BAColors.primary.withValues(alpha: 0.2),
+                    color: BAColors.primaryOf(context).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     _getAccountTypeLabel(_currentAccount!.type),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
-                      color: BAColors.primary,
+                      color: BAColors.primaryOf(context),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -297,8 +295,8 @@ class _BAAccountPageState extends State<BAAccountPage> {
                   icon: const Icon(Icons.palette, size: 14),
                   label: const Text('更换皮肤'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: BAColors.primary,
-                    side: const BorderSide(color: BAColors.primary),
+                    foregroundColor: BAColors.primaryOf(context),
+                    side: BorderSide(color: BAColors.primaryOf(context)),
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   ),
                 ),
@@ -309,10 +307,10 @@ class _BAAccountPageState extends State<BAAccountPage> {
     );
   }
 
-  Widget _buildAvatar(double size) {
+  Widget _buildAvatar(BuildContext context, double size) {
     final skinTypeColor = _currentSkin?.type == SkinType.alex
-        ? BAColors.secondary
-        : BAColors.primary;
+        ? BAColors.secondaryOf(context)
+        : BAColors.primaryOf(context);
 
     return Container(
       width: size,
@@ -337,25 +335,25 @@ class _BAAccountPageState extends State<BAAccountPage> {
             ? Image.memory(
                 _currentSkin!.imageData.asUint8List(),
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _buildDefaultAvatar(),
+                errorBuilder: (_, __, ___) => _buildDefaultAvatar(context),
               )
-            : _buildDefaultAvatar(),
+            : _buildDefaultAvatar(context),
       ),
     );
   }
 
-  Widget _buildDefaultAvatar() {
+  Widget _buildDefaultAvatar(BuildContext context) {
     return Container(
-      color: BAColors.primary.withValues(alpha: 0.1),
+      color: BAColors.primaryOf(context).withValues(alpha: 0.1),
       child: Icon(
         Icons.person,
         size: 40,
-        color: BAColors.primary,
+        color: BAColors.primaryOf(context),
       ),
     );
   }
 
-  Widget _buildAccountList(bool isLight) {
+  Widget _buildAccountList(BuildContext context) {
     if (_accounts.length <= 1) {
       return Center(
         child: Column(
@@ -364,13 +362,13 @@ class _BAAccountPageState extends State<BAAccountPage> {
             Icon(
               Icons.person_outline,
               size: 48,
-              color: isLight ? BAColors.textSecondary : BAColors.darkTextSecondary,
+              color: BAColors.textSecondaryOf(context),
             ),
             const SizedBox(height: 12),
             Text(
               '暂无其他账户',
               style: TextStyle(
-                color: isLight ? BAColors.textSecondary : BAColors.darkTextSecondary,
+                color: BAColors.textSecondaryOf(context),
               ),
             ),
           ],
@@ -389,7 +387,7 @@ class _BAAccountPageState extends State<BAAccountPage> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: isLight ? BAColors.textPrimary : BAColors.darkTextPrimary,
+              color: BAColors.textPrimaryOf(context),
             ),
           ),
           const SizedBox(height: 12),
@@ -399,7 +397,7 @@ class _BAAccountPageState extends State<BAAccountPage> {
               itemBuilder: (context, index) {
                 final account = _accounts[index];
                 final isSelected = account.uuid == _currentAccount?.uuid;
-                return _buildAccountTile(account, isSelected, isLight);
+                return _buildAccountTile(context, account, isSelected);
               },
             ),
           ),
@@ -408,27 +406,27 @@ class _BAAccountPageState extends State<BAAccountPage> {
     );
   }
 
-  Widget _buildAccountTile(Account account, bool isSelected, bool isLight) {
+  Widget _buildAccountTile(BuildContext context, Account account, bool isSelected) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: isSelected
-            ? BAColors.primary.withValues(alpha: 0.1)
+            ? BAColors.primaryOf(context).withValues(alpha: 0.1)
             : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isSelected
-              ? BAColors.primary.withValues(alpha: 0.3)
+              ? BAColors.primaryOf(context).withValues(alpha: 0.3)
               : Colors.transparent,
         ),
       ),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: BAColors.primary.withValues(alpha: 0.1),
+          backgroundColor: BAColors.primaryOf(context).withValues(alpha: 0.1),
           child: Text(
             account.username.isNotEmpty ? account.username[0].toUpperCase() : '?',
-            style: const TextStyle(
-              color: BAColors.primary,
+            style: TextStyle(
+              color: BAColors.primaryOf(context),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -437,18 +435,18 @@ class _BAAccountPageState extends State<BAAccountPage> {
           account.username,
           style: TextStyle(
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            color: isLight ? BAColors.textPrimary : BAColors.darkTextPrimary,
+            color: BAColors.textPrimaryOf(context),
           ),
         ),
         subtitle: Text(
           _getAccountTypeLabel(account.type),
           style: TextStyle(
             fontSize: 12,
-            color: isLight ? BAColors.textSecondary : BAColors.darkTextSecondary,
+            color: BAColors.textSecondaryOf(context),
           ),
         ),
         trailing: isSelected
-            ? const Icon(Icons.check_circle, color: BAColors.primary, size: 20)
+            ? Icon(Icons.check_circle, color: BAColors.primaryOf(context), size: 20)
             : null,
         onTap: () async {
           await _accountManager.selectAccount(account.id);
@@ -476,33 +474,33 @@ class _BAAccountPageState extends State<BAAccountPage> {
     final shouldOpen = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.info_outline, color: BAColors.primary),
-            SizedBox(width: 8),
-            Text('更换皮肤'),
+            Icon(Icons.info_outline, color: BAColors.primaryOf(context)),
+            const SizedBox(width: 8),
+            const Text('更换皮肤'),
           ],
         ),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               '微软官方皮肤更换步骤：',
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
-            SizedBox(height: 12),
-            Text('1. 点击"前往官网"按钮打开 Minecraft 官网'),
-            SizedBox(height: 4),
-            Text('2. 使用 Microsoft 账户登录'),
-            SizedBox(height: 4),
-            Text('3. 在"个人资料"中上传自定义皮肤'),
-            SizedBox(height: 4),
-            Text('4. 返回启动器并刷新皮肤'),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
+            const Text('1. 点击"前往官网"按钮打开 Minecraft 官网'),
+            const SizedBox(height: 4),
+            const Text('2. 使用 Microsoft 账户登录'),
+            const SizedBox(height: 4),
+            const Text('3. 在"个人资料"中上传自定义皮肤'),
+            const SizedBox(height: 4),
+            const Text('4. 返回启动器并刷新皮肤'),
+            const SizedBox(height: 12),
             Text(
               '注意：皮肤更换可能需要几分钟生效。',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(fontSize: 12, color: BAColors.textSecondaryOf(context)),
             ),
           ],
         ),
@@ -516,8 +514,8 @@ class _BAAccountPageState extends State<BAAccountPage> {
             icon: const Icon(Icons.open_in_browser, size: 16),
             label: const Text('前往官网'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: BAColors.primary,
-              foregroundColor: Colors.white,
+              backgroundColor: BAColors.primaryOf(context),
+              foregroundColor: BAColors.textOnPrimary,
             ),
           ),
         ],

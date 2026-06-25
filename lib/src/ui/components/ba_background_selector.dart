@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../theme/ba_theme_colors.dart';
+import '../theme/colors.dart';
 import '../../config/background_config.dart';
 
 class BABackgroundSelector extends StatefulWidget {
@@ -62,7 +62,7 @@ class _BABackgroundSelectorState extends State<BABackgroundSelector> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: BAThemeColors.textPrimary,
+            color: BAColors.textPrimaryOf(context),
           ),
         ),
         const SizedBox(height: 16),
@@ -72,7 +72,7 @@ class _BABackgroundSelectorState extends State<BABackgroundSelector> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: BAThemeColors.textSecondary,
+            color: BAColors.textSecondaryOf(context),
           ),
         ),
         const SizedBox(height: 12),
@@ -96,7 +96,7 @@ class _BABackgroundSelectorState extends State<BABackgroundSelector> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: BAThemeColors.textSecondary,
+            color: BAColors.textSecondaryOf(context),
           ),
         ),
         const SizedBox(height: 12),
@@ -123,7 +123,7 @@ class _BABackgroundSelectorState extends State<BABackgroundSelector> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: BAThemeColors.textSecondary,
+            color: BAColors.textSecondaryOf(context),
           ),
         ),
         const SizedBox(height: 12),
@@ -184,15 +184,15 @@ class _PresetCard extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: config.gradientColors?.map((c) => Color(c)).toList() ??
-                  [BAThemeColors.background, BAThemeColors.backgroundLight],
+                  [BAColors.backgroundOf(context), BAColors.backgroundSecondaryOf(context)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(BAThemeData.radius),
             border: Border.all(
               color: isSelected
-                  ? BAThemeColors.primary
-                  : BAThemeColors.border.withOpacity(0.3),
+                  ? BAColors.primaryOf(context)
+                  : BAColors.borderOf(context).withOpacity(0.3),
               width: isSelected ? 2 : 1,
             ),
             boxShadow: isSelected ? BAThemeColors.glowShadow : [],
@@ -201,7 +201,7 @@ class _PresetCard extends StatelessWidget {
               ? Center(
                   child: Icon(
                     Icons.check_circle,
-                    color: BAThemeColors.primary,
+                    color: BAColors.primaryOf(context),
                     size: 24,
                   ),
                 )
@@ -231,12 +231,12 @@ class _CustomImageButton extends StatelessWidget {
           width: 80,
           height: 80,
           decoration: BoxDecoration(
-            color: BAThemeColors.surfaceVariant,
+            color: BAColors.surfaceVariantOf(context),
             borderRadius: BorderRadius.circular(BAThemeData.radius),
             border: Border.all(
               color: isSelected
-                  ? BAThemeColors.primary
-                  : BAThemeColors.border.withOpacity(0.5),
+                  ? BAColors.primaryOf(context)
+                  : BAColors.borderOf(context).withOpacity(0.5),
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -245,7 +245,7 @@ class _CustomImageButton extends StatelessWidget {
             children: [
               Icon(
                 Icons.add_photo_alternate_outlined,
-                color: isSelected ? BAThemeColors.primary : BAThemeColors.textSecondary,
+                color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
                 size: 28,
               ),
               const SizedBox(height: 4),
@@ -253,7 +253,7 @@ class _CustomImageButton extends StatelessWidget {
                 '上传图片',
                 style: TextStyle(
                   fontSize: 11,
-                  color: isSelected ? BAThemeColors.primary : BAThemeColors.textSecondary,
+                  color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
                 ),
               ),
             ],
@@ -285,12 +285,12 @@ class _CustomVideoButton extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: BAThemeColors.surfaceVariant,
+              color: BAColors.surfaceVariantOf(context),
               borderRadius: BorderRadius.circular(BAThemeData.radius),
               border: Border.all(
                 color: isSelected
-                    ? BAThemeColors.primary
-                    : BAThemeColors.border.withOpacity(0.5),
+                    ? BAColors.primaryOf(context)
+                    : BAColors.borderOf(context).withOpacity(0.5),
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -299,7 +299,7 @@ class _CustomVideoButton extends StatelessWidget {
               children: [
                 Icon(
                   Icons.videocam_outlined,
-                  color: isSelected ? BAThemeColors.primary : BAThemeColors.textSecondary,
+                  color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
                   size: 28,
                 ),
                 const SizedBox(height: 4),
@@ -307,7 +307,7 @@ class _CustomVideoButton extends StatelessWidget {
                   '上传视频',
                   style: TextStyle(
                     fontSize: 11,
-                    color: isSelected ? BAThemeColors.primary : BAThemeColors.textSecondary,
+                    color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
                   ),
                 ),
               ],
@@ -346,14 +346,14 @@ class _SliderOption extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 13,
-                color: BAThemeColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
               ),
             ),
             Text(
               value.toStringAsFixed(1),
               style: TextStyle(
                 fontSize: 13,
-                color: BAThemeColors.textPrimary,
+                color: BAColors.textPrimaryOf(context),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -362,10 +362,10 @@ class _SliderOption extends StatelessWidget {
         const SizedBox(height: 8),
         SliderTheme(
           data: SliderThemeData(
-            activeTrackColor: BAThemeColors.primary,
-            inactiveTrackColor: BAThemeColors.border,
-            thumbColor: BAThemeColors.primary,
-            overlayColor: BAThemeColors.primary.withOpacity(0.12),
+            activeTrackColor: BAColors.primaryOf(context),
+            inactiveTrackColor: BAColors.borderOf(context),
+            thumbColor: BAColors.primaryOf(context),
+            overlayColor: BAColors.primaryOf(context).withOpacity(0.12),
             trackHeight: 4,
             thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8),
           ),

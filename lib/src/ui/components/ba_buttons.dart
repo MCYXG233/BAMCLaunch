@@ -113,8 +113,8 @@ class _BAButtonState extends State<BAButton> {
     switch (widget.style) {
       case BAButtonStyle.primary:
         backgroundColor = isDisabled
-            ? BAColors.primary.withOpacity(0.4)
-            : (_isHovered ? BAColors.primaryDark : BAColors.primary);
+            ? BAColors.primaryOf(context).withOpacity(0.4)
+            : (_isHovered ? BAColors.primaryDarkOf(context) : BAColors.primaryOf(context));
         borderColor = Colors.transparent;
         shadows = isDisabled ? [] : BATheme.shadowsSmallOf(context);
         break;
@@ -125,7 +125,7 @@ class _BAButtonState extends State<BAButton> {
         borderColor = isDisabled
             ? BAColors.borderOf(context)
             : (_isHovered
-                ? BAColors.primary.withOpacity(0.5)
+                ? BAColors.primaryOf(context).withOpacity(0.5)
                 : BAColors.borderOf(context));
         shadows = isDisabled ? [] : BATheme.shadowsSmallOf(context);
         break;
@@ -138,24 +138,24 @@ class _BAButtonState extends State<BAButton> {
         backgroundColor = Colors.transparent;
         borderColor = isDisabled
             ? BAColors.borderOf(context)
-            : (_isHovered ? BAColors.primary : BAColors.borderOf(context));
+            : (_isHovered ? BAColors.primaryOf(context) : BAColors.borderOf(context));
         shadows = [];
         break;
       case BAButtonStyle.danger:
         backgroundColor = isDisabled
-            ? BAColors.danger.withOpacity(0.4)
+            ? BAColors.dangerOf(context).withOpacity(0.4)
             : (_isHovered
-                ? BAColors.danger.withOpacity(0.8)
-                : BAColors.danger);
+                ? BAColors.dangerOf(context).withOpacity(0.8)
+                : BAColors.dangerOf(context));
         borderColor = Colors.transparent;
         shadows = isDisabled ? [] : BATheme.shadowsSmallOf(context);
         break;
       case BAButtonStyle.success:
         backgroundColor = isDisabled
-            ? BAColors.success.withOpacity(0.4)
+            ? BAColors.successOf(context).withOpacity(0.4)
             : (_isHovered
-                ? BAColors.success.withOpacity(0.8)
-                : BAColors.success);
+                ? BAColors.successOf(context).withOpacity(0.8)
+                : BAColors.successOf(context));
         borderColor = Colors.transparent;
         shadows = isDisabled ? [] : BATheme.shadowsSmallOf(context);
         break;
@@ -190,7 +190,7 @@ class _BAButtonState extends State<BAButton> {
       case BAButtonStyle.outline:
         textColor = isDisabled
             ? BAColors.textDisabledOf(context)
-            : (_isHovered ? BAColors.primary : BAColors.textPrimaryOf(context));
+            : (_isHovered ? BAColors.primaryOf(context) : BAColors.textPrimaryOf(context));
         break;
     }
 
@@ -208,7 +208,7 @@ class _BAButtonState extends State<BAButton> {
       case BAButtonStyle.outline:
         return isDisabled
             ? BAColors.textDisabledOf(context)
-            : BAColors.primary;
+            : BAColors.primaryOf(context);
     }
   }
 }

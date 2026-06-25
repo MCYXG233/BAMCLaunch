@@ -164,12 +164,12 @@ class BATopBar extends StatelessWidget {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: BAColors.secondary.withOpacity(0.2),
+              color: BAColors.secondaryOf(context).withOpacity(0.2),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
               Icons.person_outline,
-              color: BAColors.secondary,
+              color: BAColors.secondaryOf(context),
               size: 16,
             ),
           ),

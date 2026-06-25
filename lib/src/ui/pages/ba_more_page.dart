@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/ba_theme_colors.dart';
-import '../theme/mc_theme_colors.dart';
+import '../theme/colors.dart';
 import '../components/ba_common_widgets.dart';
 import '../components/ba_notification.dart';
 import '../components/ba_settings_panel.dart';
@@ -17,8 +16,6 @@ class BAMorePage extends StatefulWidget {
 class _BAMorePageState extends State<BAMorePage> {
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
       child: SingleChildScrollView(
@@ -26,29 +23,29 @@ class _BAMorePageState extends State<BAMorePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 标题
-            _buildHeader(isLight),
+            _buildHeader(context),
             const SizedBox(height: 20),
 
             // 统计卡片
-            _buildStatsRow(isLight),
+            _buildStatsRow(context),
             const SizedBox(height: 24),
 
             // 游戏管理
-            _buildSectionTitle('游戏管理', Icons.sports_esports, isLight),
+            _buildSectionTitle('游戏管理', Icons.sports_esports, context),
             const SizedBox(height: 12),
-            _buildGameManagementRow(isLight),
+            _buildGameManagementRow(context),
             const SizedBox(height: 24),
 
             // 资源管理
-            _buildSectionTitle('资源管理', Icons.inventory_2, isLight),
+            _buildSectionTitle('资源管理', Icons.inventory_2, context),
             const SizedBox(height: 12),
-            _buildResourceManagementGrid(isLight),
+            _buildResourceManagementGrid(context),
             const SizedBox(height: 24),
 
             // 工具与设置
-            _buildSectionTitle('工具与设置', Icons.build, isLight),
+            _buildSectionTitle('工具与设置', Icons.build, context),
             const SizedBox(height: 12),
-            _buildToolsAndSettingsRow(isLight),
+            _buildToolsAndSettingsRow(context),
             const SizedBox(height: 20),
           ],
         ),
@@ -58,18 +55,18 @@ class _BAMorePageState extends State<BAMorePage> {
 
   // ==================== 标题 ====================
 
-  Widget _buildHeader(bool isLight) {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: BAThemeColors.primary.withOpacity(0.15),
+            color: BAColors.primaryOf(context).withOpacity(0.15),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
             Icons.more_horiz,
-            color: BAThemeColors.primary,
+            color: BAColors.primaryOf(context),
             size: 24,
           ),
         ),
@@ -79,7 +76,7 @@ class _BAMorePageState extends State<BAMorePage> {
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: isLight ? BAThemeColors.textPrimary : BAThemeColors.textPrimary,
+            color: BAColors.textPrimaryOf(context),
           ),
         ),
         const Spacer(),
@@ -94,14 +91,14 @@ class _BAMorePageState extends State<BAMorePage> {
               Icon(
                 Icons.search,
                 size: 16,
-                color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
               ),
               const SizedBox(width: 6),
               Text(
                 '搜索功能',
                 style: TextStyle(
                   fontSize: 12,
-                  color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+                  color: BAColors.textSecondaryOf(context),
                 ),
               ),
             ],
@@ -113,12 +110,12 @@ class _BAMorePageState extends State<BAMorePage> {
 
   // ==================== 统计卡片 ====================
 
-  Widget _buildStatsRow(bool isLight) {
+  Widget _buildStatsRow(BuildContext context) {
     final stats = [
-      {'icon': Icons.folder, 'label': '游戏实例', 'value': '9', 'color': BAThemeColors.primary},
-      {'icon': Icons.extension, 'label': '已装 Mod', 'value': '24', 'color': MCThemeColors.secondary},
-      {'icon': Icons.palette, 'label': '资源包', 'value': '6', 'color': MCThemeColors.accent},
-      {'icon': Icons.save, 'label': '游戏存档', 'value': '12', 'color': MCThemeColors.woolPink},
+      {'icon': Icons.folder, 'label': '游戏实例', 'value': '9', 'color': BAColors.primaryOf(context)},
+      {'icon': Icons.extension, 'label': '已装 Mod', 'value': '24', 'color': BAColors.secondaryOf(context)},
+      {'icon': Icons.palette, 'label': '资源包', 'value': '6', 'color': BAColors.accentPinkOf(context)},
+      {'icon': Icons.save, 'label': '游戏存档', 'value': '12', 'color': BAColors.accentPinkOf(context)},
     ];
 
     return Row(
@@ -130,7 +127,7 @@ class _BAMorePageState extends State<BAMorePage> {
               stats[i]['label'] as String,
               stats[i]['value'] as String,
               stats[i]['color'] as Color,
-              isLight,
+              context,
             ),
           ),
           if (i < stats.length - 1) const SizedBox(width: 12),
@@ -144,7 +141,7 @@ class _BAMorePageState extends State<BAMorePage> {
     String label,
     String value,
     Color color,
-    bool isLight,
+    BuildContext context,
   ) {
     return BAGlassContainer(
       padding: const EdgeInsets.all(16),
@@ -170,7 +167,7 @@ class _BAMorePageState extends State<BAMorePage> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
-                  color: isLight ? BAThemeColors.textPrimary : BAThemeColors.textPrimary,
+                  color: BAColors.textPrimaryOf(context),
                 ),
               ),
               const SizedBox(height: 2),
@@ -178,7 +175,7 @@ class _BAMorePageState extends State<BAMorePage> {
                 label,
                 style: TextStyle(
                   fontSize: 11,
-                  color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+                  color: BAColors.textSecondaryOf(context),
                 ),
               ),
             ],
@@ -190,13 +187,13 @@ class _BAMorePageState extends State<BAMorePage> {
 
   // ==================== 分组标题 ====================
 
-  Widget _buildSectionTitle(String title, IconData icon, bool isLight) {
+  Widget _buildSectionTitle(String title, IconData icon, BuildContext context) {
     return Row(
       children: [
         Icon(
           icon,
           size: 18,
-          color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+          color: BAColors.textSecondaryOf(context),
         ),
         const SizedBox(width: 8),
         Text(
@@ -204,7 +201,7 @@ class _BAMorePageState extends State<BAMorePage> {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
-            color: isLight ? BAThemeColors.textPrimary : BAThemeColors.textPrimary,
+            color: BAColors.textPrimaryOf(context),
           ),
         ),
       ],
@@ -213,12 +210,12 @@ class _BAMorePageState extends State<BAMorePage> {
 
   // ==================== 游戏管理 ====================
 
-  Widget _buildGameManagementRow(bool isLight) {
+  Widget _buildGameManagementRow(BuildContext context) {
     final items = [
-      {'icon': Icons.save, 'title': '存档管理', 'subtitle': '导入导出备份', 'color': BAThemeColors.primary},
-      {'icon': Icons.upload_file, 'title': '版本隔离', 'subtitle': '独立版本目录', 'color': MCThemeColors.secondary},
+      {'icon': Icons.save, 'title': '存档管理', 'subtitle': '导入导出备份', 'color': BAColors.primaryOf(context)},
+      {'icon': Icons.upload_file, 'title': '版本隔离', 'subtitle': '独立版本目录', 'color': BAColors.successOf(context)},
       {'icon': Icons.wifi, 'title': '联机大厅', 'subtitle': '与朋友联机', 'color': const Color(0xFF7AA5D6)},
-      {'icon': Icons.smart_display, 'title': '直播模式', 'subtitle': '直播优化设置', 'color': MCThemeColors.woolPink},
+      {'icon': Icons.smart_display, 'title': '直播模式', 'subtitle': '直播优化设置', 'color': BAColors.accentPinkOf(context)},
     ];
 
     return Row(
@@ -230,7 +227,7 @@ class _BAMorePageState extends State<BAMorePage> {
               items[i]['title'] as String,
               items[i]['subtitle'] as String,
               items[i]['color'] as Color,
-              isLight,
+              context,
               () => _showComingSoon(items[i]['title'] as String),
             ),
           ),
@@ -245,7 +242,7 @@ class _BAMorePageState extends State<BAMorePage> {
     String title,
     String subtitle,
     Color color,
-    bool isLight,
+    BuildContext context,
     VoidCallback onTap,
   ) {
     return MouseRegion(
@@ -273,7 +270,7 @@ class _BAMorePageState extends State<BAMorePage> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: isLight ? BAThemeColors.textPrimary : BAThemeColors.textPrimary,
+                  color: BAColors.textPrimaryOf(context),
                 ),
               ),
               const SizedBox(height: 4),
@@ -281,7 +278,7 @@ class _BAMorePageState extends State<BAMorePage> {
                 subtitle,
                 style: TextStyle(
                   fontSize: 11,
-                  color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+                  color: BAColors.textSecondaryOf(context),
                 ),
               ),
               const SizedBox(height: 12),
@@ -312,13 +309,13 @@ class _BAMorePageState extends State<BAMorePage> {
 
   // ==================== 资源管理 ====================
 
-  Widget _buildResourceManagementGrid(bool isLight) {
+  Widget _buildResourceManagementGrid(BuildContext context) {
     final items = [
-      {'icon': Icons.extension, 'title': 'Mod 管理', 'subtitle': '安装启用禁用', 'color': MCThemeColors.secondary},
-      {'icon': Icons.palette, 'title': '资源包', 'subtitle': '材质包管理', 'color': MCThemeColors.accent},
+      {'icon': Icons.extension, 'title': 'Mod 管理', 'subtitle': '安装启用禁用', 'color': BAColors.secondaryOf(context)},
+      {'icon': Icons.palette, 'title': '资源包', 'subtitle': '材质包管理', 'color': BAColors.accentPinkOf(context)},
       {'icon': Icons.lightbulb, 'title': '光影包', 'subtitle': '光影效果', 'color': const Color(0xFFE6C46A)},
-      {'icon': Icons.inventory_2, 'title': '整合包', 'subtitle': '一键安装', 'color': BAThemeColors.primary},
-      {'icon': Icons.map, 'title': '地图', 'subtitle': '地图存档', 'color': MCThemeColors.woolPink},
+      {'icon': Icons.inventory_2, 'title': '整合包', 'subtitle': '一键安装', 'color': BAColors.primaryOf(context)},
+      {'icon': Icons.map, 'title': '地图', 'subtitle': '地图存档', 'color': BAColors.accentPinkOf(context)},
       {'icon': Icons.dataset, 'title': '数据包', 'subtitle': '数据包管理', 'color': const Color(0xFF7AA5D6)},
     ];
 
@@ -338,7 +335,7 @@ class _BAMorePageState extends State<BAMorePage> {
           items[index]['title'] as String,
           items[index]['subtitle'] as String,
           items[index]['color'] as Color,
-          isLight,
+          context,
           () => _showComingSoon(items[index]['title'] as String),
         );
       },
@@ -350,7 +347,7 @@ class _BAMorePageState extends State<BAMorePage> {
     String title,
     String subtitle,
     Color color,
-    bool isLight,
+    BuildContext context,
     VoidCallback onTap,
   ) {
     return MouseRegion(
@@ -379,7 +376,7 @@ class _BAMorePageState extends State<BAMorePage> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: isLight ? BAThemeColors.textPrimary : BAThemeColors.textPrimary,
+                  color: BAColors.textPrimaryOf(context),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -388,7 +385,7 @@ class _BAMorePageState extends State<BAMorePage> {
                 subtitle,
                 style: TextStyle(
                   fontSize: 10,
-                  color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+                  color: BAColors.textSecondaryOf(context),
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 1,
@@ -403,13 +400,13 @@ class _BAMorePageState extends State<BAMorePage> {
 
   // ==================== 工具与设置 ====================
 
-  Widget _buildToolsAndSettingsRow(bool isLight) {
+  Widget _buildToolsAndSettingsRow(BuildContext context) {
     final items = [
-      {'icon': Icons.terminal, 'title': '游戏日志', 'subtitle': '查看启动日志', 'color': BAThemeColors.textSecondary},
-      {'icon': Icons.build, 'title': '诊断工具', 'subtitle': '问题排查', 'color': BAThemeColors.warning},
-      {'icon': Icons.folder_open, 'title': '游戏目录', 'subtitle': '打开 .minecraft', 'color': MCThemeColors.secondary},
-      {'icon': Icons.info_outline, 'title': '关于启动器', 'subtitle': '版本信息', 'color': BAThemeColors.primary},
-      {'icon': Icons.settings, 'title': '设置', 'subtitle': '应用设置', 'color': BAThemeColors.textSecondary},
+      {'icon': Icons.terminal, 'title': '游戏日志', 'subtitle': '查看启动日志', 'color': BAColors.textSecondaryOf(context)},
+      {'icon': Icons.build, 'title': '诊断工具', 'subtitle': '问题排查', 'color': BAColors.warningOf(context)},
+      {'icon': Icons.folder_open, 'title': '游戏目录', 'subtitle': '打开 .minecraft', 'color': BAColors.successOf(context)},
+      {'icon': Icons.info_outline, 'title': '关于启动器', 'subtitle': '版本信息', 'color': BAColors.primaryOf(context)},
+      {'icon': Icons.settings, 'title': '设置', 'subtitle': '应用设置', 'color': BAColors.textSecondaryOf(context)},
     ];
 
     return Row(
@@ -421,7 +418,7 @@ class _BAMorePageState extends State<BAMorePage> {
               items[i]['title'] as String,
               items[i]['subtitle'] as String,
               items[i]['color'] as Color,
-              isLight,
+              context,
               items[i]['title'] == '设置' ? _openSettings : () => _showComingSoon(items[i]['title'] as String),
             ),
           ),
@@ -436,7 +433,7 @@ class _BAMorePageState extends State<BAMorePage> {
     String title,
     String subtitle,
     Color color,
-    bool isLight,
+    BuildContext context,
     VoidCallback onTap,
   ) {
     return MouseRegion(
@@ -468,7 +465,7 @@ class _BAMorePageState extends State<BAMorePage> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: isLight ? BAThemeColors.textPrimary : BAThemeColors.textPrimary,
+                        color: BAColors.textPrimaryOf(context),
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -476,7 +473,7 @@ class _BAMorePageState extends State<BAMorePage> {
                       subtitle,
                       style: TextStyle(
                         fontSize: 10,
-                        color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+                        color: BAColors.textSecondaryOf(context),
                       ),
                     ),
                   ],
@@ -485,7 +482,7 @@ class _BAMorePageState extends State<BAMorePage> {
               Icon(
                 Icons.arrow_forward_ios,
                 size: 12,
-                color: isLight ? BAThemeColors.textSecondary : BAThemeColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
               ),
             ],
           ),

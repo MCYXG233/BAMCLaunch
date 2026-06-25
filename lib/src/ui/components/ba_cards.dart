@@ -123,8 +123,8 @@ class _BAAnimatedCardState extends State<BAAnimatedCard>
               borderRadius: BorderRadius.circular(BAThemeData.radiusLarge),
               border: Border.all(
                 color: _isHovered
-                    ? (widget.borderColor ?? BAColors.primary.withOpacity(0.4))
-                    : (widget.borderColor ?? BAColors.border.withOpacity(0.5)),
+                    ? (widget.borderColor ?? BAColors.primaryOf(context).withOpacity(0.4))
+                    : (widget.borderColor ?? BAColors.borderOf(context).withOpacity(0.5)),
                 width: _isHovered ? 1.5 : 1,
               ),
               boxShadow: [
@@ -137,7 +137,7 @@ class _BAAnimatedCardState extends State<BAAnimatedCard>
                 ),
                 if (widget.enableGlowEffect && _isHovered)
                   BoxShadow(
-                    color: (widget.glowColor ?? BAColors.primary)
+                    color: (widget.glowColor ?? BAColors.primaryOf(context))
                         .withOpacity(0.25),
                     blurRadius: 24,
                     spreadRadius: 4,
@@ -265,7 +265,7 @@ class _BAHoverCardState extends State<BAHoverCard>
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: widget.backgroundColor ??
-                          BAColors.surfaceVariant.withOpacity(0.8),
+                          BAColors.surfaceVariantOf(context).withOpacity(0.8),
                       borderRadius: const BorderRadius.only(
                         bottomLeft: Radius.circular(12),
                         bottomRight: Radius.circular(12),
@@ -373,7 +373,7 @@ class _BAExpandableCardState extends State<BAExpandableCard>
                     turns: _iconTurns,
                     child: Icon(
                       Icons.expand_more,
-                      color: BAColors.textSecondary,
+                      color: BAColors.textSecondaryOf(context),
                     ),
                   ),
                 ],
@@ -396,7 +396,7 @@ class _BAExpandableCardState extends State<BAExpandableCard>
 /// 渐变边框卡片
 class BAGradientBorderCard extends StatefulWidget {
   final Widget child;
-  final List<Color> gradientColors;
+  final List<Color>? gradientColors;
   final double borderWidth;
   final double borderRadius;
   final Duration animationDuration;
@@ -406,7 +406,7 @@ class BAGradientBorderCard extends StatefulWidget {
   const BAGradientBorderCard({
     super.key,
     required this.child,
-    this.gradientColors = const [BAColors.primary, BAColors.secondary],
+    this.gradientColors,
     this.borderWidth = 2.0,
     this.borderRadius = 12.0,
     this.animationDuration = const Duration(seconds: 3),
@@ -446,20 +446,21 @@ class _BAGradientBorderCardState extends State<BAGradientBorderCard>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
+        final defaultColors = [BAColors.primaryOf(context), BAColors.secondaryOf(context)];
         final colors = widget.animateGradient
             ? [
                 Color.lerp(
-                  widget.gradientColors[0],
-                  widget.gradientColors[1],
+                  (widget.gradientColors ?? defaultColors)[0],
+                  (widget.gradientColors ?? defaultColors)[1],
                   _controller.value,
                 )!,
                 Color.lerp(
-                  widget.gradientColors[1],
-                  widget.gradientColors[0],
+                  (widget.gradientColors ?? defaultColors)[1],
+                  (widget.gradientColors ?? defaultColors)[0],
                   _controller.value,
                 )!,
               ]
-            : widget.gradientColors;
+            : (widget.gradientColors ?? defaultColors);
 
         return Container(
           decoration: BoxDecoration(

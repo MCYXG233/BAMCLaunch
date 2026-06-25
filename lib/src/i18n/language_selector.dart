@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../ui/theme/ba_theme_colors.dart';
+import '../ui/theme/colors.dart';
 import 'ba_localization.dart';
 
 class BALanguageSelector extends StatefulWidget {
@@ -55,9 +55,9 @@ class _BALanguageSelectorState extends State<BALanguageSelector> {
         offset: const Offset(0, 40),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
-          side: const BorderSide(color: BAThemeColors.border),
+          side: BorderSide(color: BAColors.borderOf(context)),
         ),
-        color: BAThemeColors.surface,
+        color: BAColors.surfaceOf(context),
         itemBuilder: (_) => _languages
             .map(
               (option) => PopupMenuItem<_LanguageOption>(
@@ -71,8 +71,8 @@ class _BALanguageSelectorState extends State<BALanguageSelector> {
                       style: TextStyle(
                         color: option.locale.languageCode ==
                                 current.locale.languageCode
-                            ? BAThemeColors.primary
-                            : BAThemeColors.textPrimary,
+                            ? BAColors.primaryOf(context)
+                            : BAColors.textPrimaryOf(context),
                         fontSize: 13,
                         fontWeight: option.locale.languageCode ==
                                 current.locale.languageCode
@@ -83,9 +83,9 @@ class _BALanguageSelectorState extends State<BALanguageSelector> {
                     if (option.locale.languageCode ==
                         current.locale.languageCode) ...[
                       const Spacer(),
-                      const Icon(
+                      Icon(
                         Icons.check,
-                        color: BAThemeColors.primary,
+                        color: BAColors.primaryOf(context),
                         size: 16,
                       ),
                     ],
@@ -99,13 +99,13 @@ class _BALanguageSelectorState extends State<BALanguageSelector> {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
             color: _isHovered
-                ? BAThemeColors.surfaceHover
-                : BAThemeColors.surfaceVariant,
+                ? BAColors.surfaceHoverOf(context)
+                : BAColors.surfaceVariantOf(context),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: _isHovered
-                  ? BAThemeColors.primary.withValues(alpha: 0.5)
-                  : BAThemeColors.border,
+                  ? BAColors.primaryOf(context).withValues(alpha: 0.5)
+                  : BAColors.borderOf(context),
             ),
           ),
           child: Row(
@@ -115,8 +115,8 @@ class _BALanguageSelectorState extends State<BALanguageSelector> {
               const SizedBox(width: 6),
               Text(
                 current.label,
-                style: const TextStyle(
-                  color: BAThemeColors.textPrimary,
+                style: TextStyle(
+                  color: BAColors.textPrimaryOf(context),
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -124,7 +124,7 @@ class _BALanguageSelectorState extends State<BALanguageSelector> {
               const SizedBox(width: 4),
               Icon(
                 Icons.keyboard_arrow_down,
-                color: BAThemeColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
                 size: 16,
               ),
             ],

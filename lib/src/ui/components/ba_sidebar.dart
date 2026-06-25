@@ -183,11 +183,11 @@ class _BASidebarState extends State<BASidebar>
               ),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? BAColors.primary.withOpacity(0.1)
+                    ? BAColors.primaryOf(context).withOpacity(0.1)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 border: isSelected
-                    ? Border.all(color: BAColors.primary.withOpacity(0.3))
+                    ? Border.all(color: BAColors.primaryOf(context).withOpacity(0.3))
                     : null,
               ),
               child: Row(
@@ -197,8 +197,8 @@ class _BASidebarState extends State<BASidebar>
                         ? (item.selectedIcon ?? item.icon)
                         : item.icon,
                     color: isSelected
-                        ? BAColors.primary
-                        : BAColors.textSecondary,
+                        ? BAColors.primaryOf(context)
+                        : BAColors.textSecondaryOf(context),
                     size: 24,
                   ),
                   if (_isExpanded) ...[
@@ -215,8 +215,8 @@ class _BASidebarState extends State<BASidebar>
                             item.label,
                             style: BATypography.bodyMedium.copyWith(
                               color: isSelected
-                                  ? BAColors.primary
-                                  : BAColors.textPrimary,
+                                  ? BAColors.primaryOf(context)
+                                  : BAColors.textPrimaryOf(context),
                               fontWeight: isSelected
                                   ? FontWeight.w600
                                   : FontWeight.normal,
@@ -236,7 +236,7 @@ class _BASidebarState extends State<BASidebar>
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: BAColors.danger,
+                            color: BAColors.dangerOf(context),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
@@ -271,7 +271,7 @@ class _BASidebarState extends State<BASidebar>
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: BAColors.surfaceVariant,
+              color: BAColors.surfaceVariantOf(context),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -279,7 +279,7 @@ class _BASidebarState extends State<BASidebar>
               children: [
                 Icon(
                   _isExpanded ? Icons.chevron_left : Icons.chevron_right,
-                  color: BAColors.textSecondary,
+                  color: BAColors.textSecondaryOf(context),
                   size: 24,
                 ),
                 if (_isExpanded) ...[
@@ -289,7 +289,7 @@ class _BASidebarState extends State<BASidebar>
                     child: Text(
                       '收起',
                       style: BATypography.bodySmall.copyWith(
-                        color: BAColors.textSecondary,
+                        color: BAColors.textSecondaryOf(context),
                       ),
                     ),
                   ),
@@ -487,11 +487,11 @@ class _BAAnimatedSidebarState extends State<BAAnimatedSidebar>
               ),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? BAColors.primary.withOpacity(0.1)
+                    ? BAColors.primaryOf(context).withOpacity(0.1)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 border: isSelected
-                    ? Border.all(color: BAColors.primary.withOpacity(0.3))
+                    ? Border.all(color: BAColors.primaryOf(context).withOpacity(0.3))
                     : null,
               ),
               child: Row(
@@ -501,8 +501,8 @@ class _BAAnimatedSidebarState extends State<BAAnimatedSidebar>
                         ? (item.selectedIcon ?? item.icon)
                         : item.icon,
                     color: isSelected
-                        ? BAColors.primary
-                        : BAColors.textSecondary,
+                        ? BAColors.primaryOf(context)
+                        : BAColors.textSecondaryOf(context),
                     size: 24,
                   ),
                   if (_isExpanded) ...[
@@ -519,8 +519,8 @@ class _BAAnimatedSidebarState extends State<BAAnimatedSidebar>
                             item.label,
                             style: BATypography.bodyMedium.copyWith(
                               color: isSelected
-                                  ? BAColors.primary
-                                  : BAColors.textPrimary,
+                                  ? BAColors.primaryOf(context)
+                                  : BAColors.textPrimaryOf(context),
                               fontWeight: isSelected
                                   ? FontWeight.w600
                                   : FontWeight.normal,
@@ -540,7 +540,7 @@ class _BAAnimatedSidebarState extends State<BAAnimatedSidebar>
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: BAColors.danger,
+                            color: BAColors.dangerOf(context),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
@@ -575,7 +575,7 @@ class _BAAnimatedSidebarState extends State<BAAnimatedSidebar>
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: BAColors.surfaceVariant,
+              color: BAColors.surfaceVariantOf(context),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -585,7 +585,7 @@ class _BAAnimatedSidebarState extends State<BAAnimatedSidebar>
                   turns: _rotateAnimation,
                   child: Icon(
                     Icons.chevron_right,
-                    color: BAColors.textSecondary,
+                    color: BAColors.textSecondaryOf(context),
                     size: 24,
                   ),
                 ),
@@ -596,7 +596,7 @@ class _BAAnimatedSidebarState extends State<BAAnimatedSidebar>
                     child: Text(
                       '收起',
                       style: BATypography.bodySmall.copyWith(
-                        color: BAColors.textSecondary,
+                        color: BAColors.textSecondaryOf(context),
                       ),
                     ),
                   ),

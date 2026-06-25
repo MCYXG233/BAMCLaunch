@@ -90,22 +90,22 @@ class _BAListTileState extends State<BAListTile> {
           decoration: BoxDecoration(
             color: widget.selected
                 ? (enabled
-                      ? BAColors.primary.withOpacity(0.15)
-                      : BAColors.surfaceVariant)
-                : (enabled ? BAColors.surface : BAColors.surfaceVariant),
+                      ? BAColors.primaryOf(context).withOpacity(0.15)
+                      : BAColors.surfaceVariantOf(context))
+                : (enabled ? BAColors.surfaceOf(context) : BAColors.surfaceVariantOf(context)),
             borderRadius: BATheme.borderRadius,
             border: Border.all(
               color: widget.selected
-                  ? (enabled ? BAColors.primary : BAColors.border)
+                  ? (enabled ? BAColors.primaryOf(context) : BAColors.borderOf(context))
                   : (_isHovered
-                        ? BAColors.primary.withOpacity(0.5)
-                        : BAColors.border),
+                        ? BAColors.primaryOf(context).withOpacity(0.5)
+                        : BAColors.borderOf(context)),
               width: widget.selected ? 2 : 1,
             ),
             boxShadow: enabled
                 ? [
                     BoxShadow(
-                      color: BAColors.shadow.withOpacity(shadowOpacity),
+                      color: BAColors.shadowOf(context).withOpacity(shadowOpacity),
                       blurRadius: blurRadius,
                       offset: Offset(0, offsetY),
                     ),
@@ -122,9 +122,9 @@ class _BAListTileState extends State<BAListTile> {
                   data: IconThemeData(
                     color: enabled
                         ? (widget.selected
-                              ? BAColors.primary
-                              : BAColors.textSecondary)
-                        : BAColors.textDisabled,
+                              ? BAColors.primaryOf(context)
+                              : BAColors.textSecondaryOf(context))
+                        : BAColors.textDisabledOf(context),
                     size: 24,
                   ),
                   child: widget.leading!,
@@ -141,9 +141,9 @@ class _BAListTileState extends State<BAListTile> {
                       style: BATypography.bodyMedium.copyWith(
                         color: enabled
                             ? (widget.selected
-                                  ? BAColors.primary
-                                  : BAColors.textPrimary)
-                            : BAColors.textDisabled,
+                                  ? BAColors.primaryOf(context)
+                                  : BAColors.textPrimaryOf(context))
+                            : BAColors.textDisabledOf(context),
                         fontWeight: widget.selected
                             ? FontWeight.w600
                             : FontWeight.normal,
@@ -155,8 +155,8 @@ class _BAListTileState extends State<BAListTile> {
                         widget.subtitle!,
                         style: BATypography.bodySmall.copyWith(
                           color: enabled
-                              ? BAColors.textSecondary
-                              : BAColors.textDisabled,
+                              ? BAColors.textSecondaryOf(context)
+                              : BAColors.textDisabledOf(context),
                         ),
                       ),
                     ],
@@ -168,8 +168,8 @@ class _BAListTileState extends State<BAListTile> {
                 IconTheme(
                   data: IconThemeData(
                     color: enabled
-                        ? BAColors.textSecondary
-                        : BAColors.textDisabled,
+                        ? BAColors.textSecondaryOf(context)
+                        : BAColors.textDisabledOf(context),
                     size: 20,
                   ),
                   child: widget.trailing!,
@@ -272,22 +272,22 @@ class _BAProgressListTileState extends State<BAProgressListTile> {
           decoration: BoxDecoration(
             color: widget.selected
                 ? (enabled
-                      ? BAColors.primary.withOpacity(0.15)
-                      : BAColors.surfaceVariant)
-                : (enabled ? BAColors.surface : BAColors.surfaceVariant),
+                      ? BAColors.primaryOf(context).withOpacity(0.15)
+                      : BAColors.surfaceVariantOf(context))
+                : (enabled ? BAColors.surfaceOf(context) : BAColors.surfaceVariantOf(context)),
             borderRadius: BATheme.borderRadius,
             border: Border.all(
               color: widget.selected
-                  ? (enabled ? BAColors.primary : BAColors.border)
+                  ? (enabled ? BAColors.primaryOf(context) : BAColors.borderOf(context))
                   : (_isHovered
-                        ? BAColors.primary.withOpacity(0.5)
-                        : BAColors.border),
+                        ? BAColors.primaryOf(context).withOpacity(0.5)
+                        : BAColors.borderOf(context)),
               width: widget.selected ? 2 : 1,
             ),
             boxShadow: enabled
                 ? [
                     BoxShadow(
-                      color: BAColors.shadow.withOpacity(shadowOpacity),
+                      color: BAColors.shadowOf(context).withOpacity(shadowOpacity),
                       blurRadius: blurRadius,
                       offset: Offset(0, offsetY),
                     ),
@@ -304,9 +304,9 @@ class _BAProgressListTileState extends State<BAProgressListTile> {
                   data: IconThemeData(
                     color: enabled
                         ? (widget.selected
-                              ? BAColors.primary
-                              : BAColors.textSecondary)
-                        : BAColors.textDisabled,
+                              ? BAColors.primaryOf(context)
+                              : BAColors.textSecondaryOf(context))
+                        : BAColors.textDisabledOf(context),
                     size: 24,
                   ),
                   child: widget.leading!,
@@ -323,9 +323,9 @@ class _BAProgressListTileState extends State<BAProgressListTile> {
                       style: BATypography.bodyMedium.copyWith(
                         color: enabled
                             ? (widget.selected
-                                  ? BAColors.primary
-                                  : BAColors.textPrimary)
-                            : BAColors.textDisabled,
+                                  ? BAColors.primaryOf(context)
+                                  : BAColors.textPrimaryOf(context))
+                            : BAColors.textDisabledOf(context),
                         fontWeight: widget.selected
                             ? FontWeight.w600
                             : FontWeight.normal,
@@ -352,8 +352,8 @@ class _BAProgressListTileState extends State<BAProgressListTile> {
                 IconTheme(
                   data: IconThemeData(
                     color: enabled
-                        ? BAColors.textSecondary
-                        : BAColors.textDisabled,
+                        ? BAColors.textSecondaryOf(context)
+                        : BAColors.textDisabledOf(context),
                     size: 20,
                   ),
                   child: widget.trailing!,

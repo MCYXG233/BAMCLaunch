@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../core/logger.dart';
 import '../../game/launcher/models.dart';
-import '../theme/ba_theme_colors.dart';
+import '../theme/colors.dart';
 
 /// 日志面板组件
 ///
@@ -194,16 +194,16 @@ class _LogPanelState extends State<LogPanel> {
     }
   }
 
-  Color _levelColor(GameLogLevel level) {
+  Color _levelColor(BuildContext context, GameLogLevel level) {
     switch (level) {
       case GameLogLevel.info:
-        return BAThemeColors.success;
+        return BAColors.successOf(context);
       case GameLogLevel.warn:
-        return BAThemeColors.warning;
+        return BAColors.warningOf(context);
       case GameLogLevel.error:
-        return BAThemeColors.danger;
+        return BAColors.dangerOf(context);
       case GameLogLevel.debug:
-        return BAThemeColors.textDisabled;
+        return BAColors.textDisabledOf(context);
     }
   }
 
@@ -215,28 +215,28 @@ class _LogPanelState extends State<LogPanel> {
         maxHeight: widget.maxHeight ?? double.infinity,
       ),
       decoration: BoxDecoration(
-        color: BAThemeColors.backgroundDark,
+        color: BAColors.backgroundSecondaryOf(context),
         borderRadius: BorderRadius.circular(BAThemeData.radius),
-        border: Border.all(color: BAThemeColors.border.withOpacity(0.3)),
+        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.3)),
       ),
       child: Column(
         children: [
-          if (widget.showToolbar) _buildToolbar(),
-          if (widget.showToolbar) _buildFilterBar(),
-          Expanded(child: _buildLogArea()),
-          if (widget.showStatusBar) _buildStatusBar(),
+          if (widget.showToolbar) _buildToolbar(context),
+          if (widget.showToolbar) _buildFilterBar(context),
+          Expanded(child: _buildLogArea(context)),
+          if (widget.showStatusBar) _buildStatusBar(context),
         ],
       ),
     );
   }
 
-  Widget _buildToolbar() {
+  Widget _buildToolbar(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: BAThemeColors.surface,
+        color: BAColors.surfaceOf(context),
         border: Border(
-          bottom: BorderSide(color: BAThemeColors.border.withOpacity(0.3)),
+          bottom: BorderSide(color: BAColors.borderOf(context).withOpacity(0.3)),
         ),
       ),
       child: Row(
@@ -244,13 +244,13 @@ class _LogPanelState extends State<LogPanel> {
           Icon(
             Icons.terminal,
             size: 18,
-            color: BAThemeColors.primary,
+            color: BAColors.primaryOf(context),
           ),
           const SizedBox(width: 8),
           Text(
             '日志',
             style: TextStyle(
-              color: BAThemeColors.textPrimary,
+              color: BAColors.textPrimaryOf(context),
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
@@ -260,18 +260,18 @@ class _LogPanelState extends State<LogPanel> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: BAThemeColors.warning.withOpacity(0.15),
+                color: BAColors.warningOf(context).withOpacity(0.15),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.pause, size: 14, color: BAThemeColors.warning),
+                  Icon(Icons.pause, size: 14, color: BAColors.warningOf(context)),
                   const SizedBox(width: 4),
                   Text(
                     '已暂停',
                     style: TextStyle(
-                      color: BAThemeColors.warning,
+                      color: BAColors.warningOf(context),
                       fontSize: 12,
                     ),
                   ),
@@ -280,16 +280,19 @@ class _LogPanelState extends State<LogPanel> {
             ),
           const SizedBox(width: 8),
           _buildToolbarButton(
+            context: context,
             icon: _isPaused ? Icons.play_arrow : Icons.pause,
             tooltip: _isPaused ? '继续' : '暂停',
             onPressed: _togglePause,
           ),
           _buildToolbarButton(
+            context: context,
             icon: Icons.vertical_align_bottom,
             tooltip: '滚动到底部',
             onPressed: _scrollToBottom,
           ),
           _buildToolbarButton(
+            context: context,
             icon: Icons.delete_outline,
             tooltip: '清空日志',
             onPressed: _clearLogs,
@@ -300,6 +303,7 @@ class _LogPanelState extends State<LogPanel> {
   }
 
   Widget _buildToolbarButton({
+    required BuildContext context,
     required IconData icon,
     required String tooltip,
     required VoidCallback onPressed,
@@ -314,20 +318,20 @@ class _LogPanelState extends State<LogPanel> {
           child: Icon(
             icon,
             size: 18,
-            color: BAThemeColors.textSecondary,
+            color: BAColors.textSecondaryOf(context),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildFilterBar() {
+  Widget _buildFilterBar(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: BAThemeColors.surface.withOpacity(0.5),
+        color: BAColors.surfaceOf(context).withOpacity(0.5),
         border: Border(
-          bottom: BorderSide(color: BAThemeColors.border.withOpacity(0.2)),
+          bottom: BorderSide(color: BAColors.borderOf(context).withOpacity(0.2)),
         ),
       ),
       child: Row(
@@ -336,24 +340,24 @@ class _LogPanelState extends State<LogPanel> {
             child: Container(
               height: 32,
               decoration: BoxDecoration(
-                color: BAThemeColors.surfaceVariant,
+                color: BAColors.surfaceVariantOf(context),
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: BAThemeColors.border.withOpacity(0.3)),
+                border: Border.all(color: BAColors.borderOf(context).withOpacity(0.3)),
               ),
               child: TextField(
                 controller: _filterController,
                 onChanged: _onFilterChanged,
                 style: TextStyle(
-                  color: BAThemeColors.textPrimary,
+                  color: BAColors.textPrimaryOf(context),
                   fontSize: 13,
                 ),
                 decoration: InputDecoration(
                   hintText: '过滤日志...',
-                  hintStyle: TextStyle(color: BAThemeColors.textDisabled),
+                  hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
                   prefixIcon: Icon(
                     Icons.search,
                     size: 16,
-                    color: BAThemeColors.textDisabled,
+                    color: BAColors.textDisabledOf(context),
                   ),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 8),
@@ -362,19 +366,19 @@ class _LogPanelState extends State<LogPanel> {
             ),
           ),
           const SizedBox(width: 12),
-          _buildLevelFilterChip('全部', GameLogLevel.values.toSet()),
+          _buildLevelFilterChip(context, '全部', GameLogLevel.values.toSet()),
           const SizedBox(width: 6),
-          _buildLevelFilterChip('INFO', {GameLogLevel.info}),
+          _buildLevelFilterChip(context, 'INFO', {GameLogLevel.info}),
           const SizedBox(width: 6),
-          _buildLevelFilterChip('WARN', {GameLogLevel.warn}),
+          _buildLevelFilterChip(context, 'WARN', {GameLogLevel.warn}),
           const SizedBox(width: 6),
-          _buildLevelFilterChip('ERROR', {GameLogLevel.error}),
+          _buildLevelFilterChip(context, 'ERROR', {GameLogLevel.error}),
         ],
       ),
     );
   }
 
-  Widget _buildLevelFilterChip(String label, Set<GameLogLevel> levels) {
+  Widget _buildLevelFilterChip(BuildContext context, String label, Set<GameLogLevel> levels) {
     final isSelected = _visibleLevels.length == levels.length ||
         (levels.length == 1 && _visibleLevels.contains(levels.first));
 
@@ -394,21 +398,21 @@ class _LogPanelState extends State<LogPanel> {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: isSelected
-              ? BAThemeColors.primary.withOpacity(0.15)
-              : BAThemeColors.surfaceVariant,
+              ? BAColors.primaryOf(context).withOpacity(0.15)
+              : BAColors.surfaceVariantOf(context),
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
             color: isSelected
-                ? BAThemeColors.primary.withOpacity(0.4)
-                : BAThemeColors.border.withOpacity(0.3),
+                ? BAColors.primaryOf(context).withOpacity(0.4)
+                : BAColors.borderOf(context).withOpacity(0.3),
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
             color: isSelected
-                ? BAThemeColors.primaryLight
-                : BAThemeColors.textSecondary,
+                ? BAColors.primaryLightOf(context)
+                : BAColors.textSecondaryOf(context),
             fontSize: 11,
             fontWeight: FontWeight.w500,
           ),
@@ -417,7 +421,7 @@ class _LogPanelState extends State<LogPanel> {
     );
   }
 
-  Widget _buildLogArea() {
+  Widget _buildLogArea(BuildContext context) {
     final filtered = _filteredLogs;
 
     if (filtered.isEmpty) {
@@ -428,13 +432,13 @@ class _LogPanelState extends State<LogPanel> {
             Icon(
               Icons.article_outlined,
               size: 36,
-              color: BAThemeColors.textDisabled,
+              color: BAColors.textDisabledOf(context),
             ),
             const SizedBox(height: 8),
             Text(
               _filterText.isEmpty ? '等待日志输出...' : '没有匹配的日志',
               style: TextStyle(
-                color: BAThemeColors.textDisabled,
+                color: BAColors.textDisabledOf(context),
                 fontSize: 13,
               ),
             ),
@@ -449,13 +453,13 @@ class _LogPanelState extends State<LogPanel> {
       itemCount: filtered.length,
       itemBuilder: (context, index) {
         final log = filtered[index];
-        return _buildLogLine(log);
+        return _buildLogLine(context, log);
       },
     );
   }
 
-  Widget _buildLogLine(GameLog log) {
-    final color = _levelColor(log.level);
+  Widget _buildLogLine(BuildContext context, GameLog log) {
+    final color = _levelColor(context, log.level);
     final levelStr = _levelLabel(log.level);
 
     return Padding(
@@ -470,7 +474,7 @@ class _LogPanelState extends State<LogPanel> {
           children: [
             TextSpan(
               text: '[${_formatTime(log.timestamp)}] ',
-              style: TextStyle(color: BAThemeColors.textDisabled),
+              style: TextStyle(color: BAColors.textDisabledOf(context)),
             ),
             TextSpan(
               text: '[$levelStr] ',
@@ -489,27 +493,27 @@ class _LogPanelState extends State<LogPanel> {
     );
   }
 
-  Widget _buildStatusBar() {
+  Widget _buildStatusBar(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: BAThemeColors.surface,
+        color: BAColors.surfaceOf(context),
         border: Border(
-          top: BorderSide(color: BAThemeColors.border.withOpacity(0.3)),
+          top: BorderSide(color: BAColors.borderOf(context).withOpacity(0.3)),
         ),
       ),
       child: Row(
         children: [
-          _buildStatusItem(Icons.info_outline, 'INFO', _infoCount, BAThemeColors.success),
+          _buildStatusItem(context, Icons.info_outline, 'INFO', _infoCount, BAColors.successOf(context)),
           const SizedBox(width: 16),
-          _buildStatusItem(Icons.warning_amber_outlined, 'WARN', _warnCount, BAThemeColors.warning),
+          _buildStatusItem(context, Icons.warning_amber_outlined, 'WARN', _warnCount, BAColors.warningOf(context)),
           const SizedBox(width: 16),
-          _buildStatusItem(Icons.error_outline, 'ERROR', _errorCount, BAThemeColors.danger),
+          _buildStatusItem(context, Icons.error_outline, 'ERROR', _errorCount, BAColors.dangerOf(context)),
           const Spacer(),
           Text(
             '共 ${_filteredLogs.length} 条日志',
             style: TextStyle(
-              color: BAThemeColors.textSecondary,
+              color: BAColors.textSecondaryOf(context),
               fontSize: 11,
             ),
           ),
@@ -518,13 +522,13 @@ class _LogPanelState extends State<LogPanel> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: BAThemeColors.primary.withOpacity(0.1),
+                color: BAColors.primaryOf(context).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(3),
               ),
               child: Text(
                 '自动滚动',
                 style: TextStyle(
-                  color: BAThemeColors.primary,
+                  color: BAColors.primaryOf(context),
                   fontSize: 10,
                 ),
               ),
@@ -535,7 +539,7 @@ class _LogPanelState extends State<LogPanel> {
     );
   }
 
-  Widget _buildStatusItem(IconData icon, String label, int count, Color color) {
+  Widget _buildStatusItem(BuildContext context, IconData icon, String label, int count, Color color) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
