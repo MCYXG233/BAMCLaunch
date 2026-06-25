@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../theme/colors.dart';
+import '../theme/ba_theme_colors.dart';
 import '../../game/launcher/game_launcher.dart';
 import '../../game/launcher/models.dart';
 import '../components/log_panel.dart';
@@ -780,7 +781,7 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
         padding: const EdgeInsets.symmetric(vertical: 1),
         child: RichText(
           text: TextSpan(
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Consolas',
               fontSize: 13,
               height: 1.5,

@@ -8,7 +8,7 @@ import '../core/logger.dart';
 import '../platform/platform_adapter_factory.dart';
 import 'java_download_service.dart';
 
-/// Java 选择对话框
+/// Java 选择对话�?
 class JavaSelectorDialog extends StatefulWidget {
   final String? currentJavaPath;
   final int? recommendedVersion;
@@ -19,7 +19,7 @@ class JavaSelectorDialog extends StatefulWidget {
     this.recommendedVersion,
   });
 
-  /// 显示 Java 选择对话框
+  /// 显示 Java 选择对话�?
   static Future<String?> show(
     BuildContext context, {
     String? currentJavaPath,
@@ -127,7 +127,7 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
         _downloadStatus = '准备下载...';
       });
 
-      // 使用推荐的 Java 版本，默认 17
+      // 使用推荐�?Java 版本，默�?17
       final targetVersion = widget.recommendedVersion ?? 17;
 
       // 获取 Java 下载服务
@@ -151,7 +151,7 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
         },
       );
 
-      // 验证下载的 Java
+      // 验证下载�?Java
       final info = await _getJavaInfo(javaPath);
 
       setState(() {
@@ -185,7 +185,7 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 标题栏
+            // 标题�?
             _buildHeader(context),
 
             // 内容
@@ -193,7 +193,7 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
               child: _buildContent(context),
             ),
 
-            // 按钮栏
+            // 按钮�?
             _buildActions(context),
           ],
         ),
@@ -205,7 +205,7 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: BAColors.primary.withOpacity(0.1),
+        color: BAColors.primaryOf(context).withOpacity(0.1),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(12),
           topRight: Radius.circular(12),
@@ -213,7 +213,7 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
       ),
       child: Row(
         children: [
-          Icon(Icons.coffee, color: BAColors.primary, size: 28),
+          Icon(Icons.coffee, color: BAColors.primaryOf(context), size: 28),
           const SizedBox(width: 16),
           Text(
             '选择 Java',
@@ -255,7 +255,7 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, color: BAColors.danger, size: 48),
+            Icon(Icons.error_outline, color: BAColors.dangerOf(context), size: 48),
             const SizedBox(height: 16),
             Text(
               _error!,
@@ -336,15 +336,15 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: BAColors.primary.withOpacity(0.1),
+                color: BAColors.primaryOf(context).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: BAColors.primary.withOpacity(0.3),
+                  color: BAColors.primaryOf(context).withOpacity(0.3),
                 ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.lightbulb_outline, color: BAColors.primary, size: 20),
+                  Icon(Icons.lightbulb_outline, color: BAColors.primaryOf(context), size: 20),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -385,7 +385,7 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
           ),
           const SizedBox(height: 16),
           Text(
-            '未找到已安装的 Java',
+            '未找到已安装�?Java',
             style: BATypography.bodyLarge.copyWith(
               color: BAColors.textPrimaryOf(context),
             ),
@@ -411,12 +411,12 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
 
         return Card(
           color: isSelected
-              ? BAColors.primary.withOpacity(0.1)
+              ? BAColors.primaryOf(context).withOpacity(0.1)
               : BAColors.surfaceOf(context),
           child: ListTile(
             leading: Icon(
               isSelected ? Icons.check_circle : Icons.circle_outlined,
-              color: isSelected ? BAColors.primary : BAColors.textSecondaryOf(context),
+              color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
             ),
             title: Text(
               'Java ${java.majorVersion}',
@@ -451,13 +451,13 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: BAColors.success.withOpacity(0.2),
+                      color: BAColors.successOf(context).withOpacity(0.2),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       '64-bit',
                       style: BATypography.labelSmall.copyWith(
-                        color: BAColors.success,
+                        color: BAColors.successOf(context),
                       ),
                     ),
                   ),
@@ -466,13 +466,13 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: BAColors.primary.withOpacity(0.2),
+                      color: BAColors.primaryOf(context).withOpacity(0.2),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       '推荐',
                       style: BATypography.labelSmall.copyWith(
-                        color: BAColors.primary,
+                        color: BAColors.primaryOf(context),
                       ),
                     ),
                   ),

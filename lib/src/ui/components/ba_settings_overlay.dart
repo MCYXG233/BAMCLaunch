@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../pages/ba_settings_page.dart';
 
@@ -178,7 +178,7 @@ class _SettingsPanelState extends State<_SettingsPanel>
         children: [
           Icon(
             Icons.settings,
-            color: BAColors.primary,
+            color: BAColors.primaryOf(context),
             size: 24,
           ),
           const SizedBox(width: 12),
@@ -187,7 +187,7 @@ class _SettingsPanelState extends State<_SettingsPanel>
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: isLight ? BAColors.textPrimary : BAColors.darkTextPrimary,
+              color: isLight ? BAColors.textPrimaryOf(context) : BAColors.textPrimaryOf(context),
             ),
           ),
           const Spacer(),
@@ -195,7 +195,7 @@ class _SettingsPanelState extends State<_SettingsPanel>
           IconButton(
             icon: Icon(
               Icons.close,
-              color: isLight ? BAColors.textSecondary : BAColors.darkTextSecondary,
+              color: isLight ? BAColors.textSecondaryOf(context) : BAColors.textSecondaryOf(context),
             ),
             onPressed: _close,
           ),

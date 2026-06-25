@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../core/logger.dart';
 import '../../game/launcher/models.dart';
 import '../theme/colors.dart';
+import '../theme/ba_theme_colors.dart';
 
 /// 日志面板组件
 ///

@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../../resource_center/models.dart';
@@ -125,7 +125,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
             colors: [
-              BAColors.accentPink,
+              BAColors.accentPinkOf(context),
               const Color(0xFF6A7FD9),
             ],
           ),
@@ -181,7 +181,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
           children: [
             Icon(
               Icons.check_circle,
-              color: BAColors.success,
+              color: BAColors.successOf(context),
               size: 20,
             ),
             const SizedBox(width: 8),
@@ -232,7 +232,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
               Text(
                 '${(overallProgress * 100).toStringAsFixed(0)}%',
                 style: TextStyle(
-                  color: BAColors.accentPink,
+                  color: BAColors.accentPinkOf(context),
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -246,7 +246,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
               value: overallProgress.clamp(0.0, 1.0),
               backgroundColor:
                   isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A),
-              valueColor: AlwaysStoppedAnimation<Color>(BAColors.primary),
+              valueColor: AlwaysStoppedAnimation<Color>(BAColors.primaryOf(context)),
               minHeight: 4,
             ),
           ),
@@ -375,11 +375,11 @@ class _DownloadPanelState extends State<DownloadPanel> {
               ),
               const SizedBox(width: 8),
               if (task.status == DownloadTaskStatus.completed)
-                Icon(Icons.check_circle, color: BAColors.success, size: 20)
+                Icon(Icons.check_circle, color: BAColors.successOf(context), size: 20)
               else if (task.status == DownloadTaskStatus.failed)
                 Tooltip(
                   message: task.errorMessage ?? '下载失败',
-                  child: Icon(Icons.error, color: BAColors.danger, size: 20),
+                  child: Icon(Icons.error, color: BAColors.dangerOf(context), size: 20),
                 )
               else if (task.status == DownloadTaskStatus.cancelled)
                 Icon(Icons.cancel, color: subtitleColor, size: 20)
@@ -388,7 +388,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
                   width: 18,
                   height: 18,
                   child: CircularProgressIndicator(
-                    color: BAColors.primary,
+                    color: BAColors.primaryOf(context),
                     strokeWidth: 2,
                   ),
                 )
@@ -411,7 +411,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
                 value: task.progress.clamp(0.0, 1.0),
                 backgroundColor:
                     isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A),
-                valueColor: AlwaysStoppedAnimation<Color>(BAColors.primary),
+                valueColor: AlwaysStoppedAnimation<Color>(BAColors.primaryOf(context)),
                 minHeight: 4,
               ),
             ),
@@ -429,7 +429,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
                 Text(
                   '${(task.progress * 100).toStringAsFixed(0)}%',
                   style: TextStyle(
-                    color: BAColors.accentPink,
+                    color: BAColors.accentPinkOf(context),
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
@@ -440,7 +440,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
-                color: BAColors.primary,
+                color: BAColors.primaryOf(context),
                 backgroundColor:
                     isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A),
                 minHeight: 4,
@@ -484,13 +484,13 @@ class _DownloadPanelState extends State<DownloadPanel> {
   Color _getTypeColor(ResourceType type) {
     switch (type) {
       case ResourceType.mod:
-        return BAColors.accentPink;
+        return BAColors.accentPinkOf(context);
       case ResourceType.resourcePack:
-        return BAColors.success;
+        return BAColors.successOf(context);
       case ResourceType.shader:
-        return BAColors.warning;
+        return BAColors.warningOf(context);
       case ResourceType.modpack:
-        return BAColors.primary;
+        return BAColors.primaryOf(context);
       case ResourceType.dataPack:
         return const Color(0xFF8B7DD9);
     }

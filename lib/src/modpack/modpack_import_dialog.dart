@@ -12,7 +12,7 @@ import 'modpack_installer.dart';
 class ModpackImportDialog extends StatefulWidget {
   const ModpackImportDialog({super.key});
 
-  /// 显示对话框
+  /// 显示对话�?
   static Future<String?> show(BuildContext context) {
     return showDialog<String>(
       context: context,
@@ -31,7 +31,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
   /// 步骤
   int _step = 0;
 
-  /// 选中的文件路径
+  /// 选中的文件路�?
   String? _zipPath;
 
   /// 解析的整合包信息
@@ -78,7 +78,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
         _zipPath = result.files.single.path;
       });
 
-      // 解析整合包
+      // 解析整合�?
       await _parseModpack();
     } catch (e, stackTrace) {
       _logger.error('Failed to pick file', e, stackTrace);
@@ -88,7 +88,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
     }
   }
 
-  /// 解析整合包
+  /// 解析整合�?
   Future<void> _parseModpack() async {
     if (_zipPath == null) return;
 
@@ -110,19 +110,19 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
       _logger.error('Failed to parse modpack', e, stackTrace);
       setState(() {
         _isInstalling = false;
-        _error = '解析整合包失败: $e';
+        _error = '解析整合包失�? $e';
       });
     }
   }
 
-  /// 安装整合包
+  /// 安装整合�?
   Future<void> _installModpack() async {
     if (_zipPath == null || _modpack == null) return;
 
     final instanceName = _nameController.text.trim();
     if (instanceName.isEmpty) {
       setState(() {
-        _error = '请输入实例名称';
+        _error = '请输入实例名�?;
       });
       return;
     }
@@ -164,7 +164,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
       _logger.error('Failed to install modpack', e, stackTrace);
       setState(() {
         _isInstalling = false;
-        _error = '安装整合包失败: $e';
+        _error = '安装整合包失�? $e';
         _step = 1;
       });
     }
@@ -212,7 +212,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: BAColors.primary.withOpacity(0.1),
+        color: BAColors.primaryOf(context).withOpacity(0.1),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(12),
           topRight: Radius.circular(12),
@@ -220,10 +220,10 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.archive, color: BAColors.primary, size: 28),
+          const Icon(Icons.archive, color: BAColors.primaryOf(context), size: 28),
           const SizedBox(width: 16),
           Text(
-            '导入整合包',
+            '导入整合�?,
             style: BATypography.headlineSmall.copyWith(
               color: BAColors.textPrimaryOf(context),
             ),
@@ -266,14 +266,14 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
           ),
           const SizedBox(height: 24),
           Text(
-            '选择整合包文件',
+            '选择整合包文�?,
             style: BATypography.titleLarge.copyWith(
               color: BAColors.textPrimaryOf(context),
             ),
           ),
           const SizedBox(height: 12),
           Text(
-            '支持 CurseForge 和 Modrinth 格式的整合包',
+            '支持 CurseForge �?Modrinth 格式的整合包',
             style: BATypography.bodyMedium.copyWith(
               color: BAColors.textSecondaryOf(context),
             ),
@@ -290,15 +290,15 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: BAColors.danger.withOpacity(0.1),
+                color: BAColors.dangerOf(context).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: BAColors.danger.withOpacity(0.3),
+                  color: BAColors.dangerOf(context).withOpacity(0.3),
                 ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.error_outline, color: BAColors.danger),
+                  Icon(Icons.error_outline, color: BAColors.dangerOf(context)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -324,14 +324,14 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            '确认整合包信息',
+            '确认整合包信�?,
             style: BATypography.titleLarge.copyWith(
               color: BAColors.textPrimaryOf(context),
             ),
           ),
           const SizedBox(height: 24),
 
-          // 整合包信息
+          // 整合包信�?
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -346,13 +346,13 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
                 _buildInfoRow('版本', _modpack?.version),
                 _buildInfoRow('Minecraft', _modpack?.minecraftVersion),
                 _buildInfoRow(
-                  'Mod 加载器',
+                  'Mod 加载�?,
                   _modpack?.modLoader != null && _modpack?.modLoaderVersion != null
                       ? '${_modpack!.modLoader} ${_modpack!.modLoaderVersion}'
                       : null,
                 ),
                 _buildInfoRow('Mod数量', _modpack?.mods.length.toString()),
-                _buildInfoRow('资源包数量', _modpack?.resourcePacks.length.toString()),
+                _buildInfoRow('资源包数�?, _modpack?.resourcePacks.length.toString()),
               ],
             ),
           ),
@@ -382,7 +382,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primary, width: 2),
+                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -395,15 +395,15 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: BAColors.danger.withOpacity(0.1),
+                color: BAColors.dangerOf(context).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: BAColors.danger.withOpacity(0.3),
+                  color: BAColors.dangerOf(context).withOpacity(0.3),
                 ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.error_outline, color: BAColors.danger),
+                  Icon(Icons.error_outline, color: BAColors.dangerOf(context)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -460,7 +460,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
           Icon(
             Icons.downloading,
             size: 80,
-            color: BAColors.primary,
+            color: BAColors.primaryOf(context),
           ),
           const SizedBox(height: 24),
           Text(
@@ -510,11 +510,11 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
           Icon(
             Icons.check_circle,
             size: 80,
-            color: BAColors.success,
+            color: BAColors.successOf(context),
           ),
           const SizedBox(height: 24),
           Text(
-            '安装完成！',
+            '安装完成�?,
             style: BATypography.titleLarge.copyWith(
               color: BAColors.textPrimaryOf(context),
             ),
@@ -544,7 +544,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
         children: [
           if (_step != 2 && _step != 3)
             BASecondaryButton(
-              text: _step == 0 ? '取消' : '上一步',
+              text: _step == 0 ? '取消' : '上一�?,
               onPressed: _isInstalling
                   ? null
                   : () {

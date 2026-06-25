@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
+import '../theme/ba_theme_colors.dart';
+import '../theme/animations.dart';
 import '../../config/background_config.dart';
 
 class BABackgroundSelector extends StatefulWidget {
@@ -195,7 +197,15 @@ class _PresetCard extends StatelessWidget {
                   : BAColors.borderOf(context).withOpacity(0.3),
               width: isSelected ? 2 : 1,
             ),
-            boxShadow: isSelected ? BAThemeColors.glowShadow : [],
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: BAColors.primaryOf(context).withOpacity(0.25),
+                      blurRadius: 20,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : [],
           ),
           child: isSelected
               ? Center(

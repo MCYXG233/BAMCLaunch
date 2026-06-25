@@ -1,4 +1,4 @@
-import 'dart:io' show Platform;
+﻿import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import '../theme/colors.dart';
@@ -89,7 +89,7 @@ class _CustomTitleBarState extends State<CustomTitleBar> with WindowListener {
     return Container(
       height: widget.height,
       decoration: BoxDecoration(
-        color: BAColors.surface,
+        color: BAColors.surfaceOf(context),
         boxShadow: BATheme.shadowsSmall,
       ),
       child: Stack(
@@ -122,7 +122,7 @@ class _CustomTitleBarState extends State<CustomTitleBar> with WindowListener {
                   child: Text(
                     widget.title,
                     style: BATypography.titleBar.copyWith(
-                      color: BAColors.textPrimary,
+                      color: BAColors.textPrimaryOf(context),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -178,17 +178,17 @@ class _CustomTitleBarState extends State<CustomTitleBar> with WindowListener {
       child: Row(
         children: [
           _MacOSWindowControlButton(
-            color: BAColors.danger,
+            color: BAColors.dangerOf(context),
             onPressed: () => windowManager.close(),
           ),
           const SizedBox(width: 8),
           _MacOSWindowControlButton(
-            color: BAColors.warning,
+            color: BAColors.warningOf(context),
             onPressed: () => windowManager.minimize(),
           ),
           const SizedBox(width: 8),
           _MacOSWindowControlButton(
-            color: BAColors.success,
+            color: BAColors.successOf(context),
             onPressed: () {
               if (_isMaximized) {
                 windowManager.unmaximize();
@@ -255,7 +255,7 @@ class _WindowControlButtonState extends State<_WindowControlButton> {
             ),
             child: Icon(
               widget.icon,
-              color: _isHovered ? Colors.white : BAColors.textSecondary,
+              color: _isHovered ? Colors.white : BAColors.textSecondaryOf(context),
               size: 14,
             ),
           ),
@@ -268,12 +268,12 @@ class _WindowControlButtonState extends State<_WindowControlButton> {
   Color _getBackgroundColor() {
     final brightness = Theme.of(context).brightness;
     final isLight = brightness == Brightness.light;
-    final hoverColor = isLight ? BAColors.lightSurfaceTertiary : BAColors.darkSurfaceTertiary;
+    final hoverColor = isLight ? BAColors.surfaceTertiaryOf(context) : BAColors.surfaceTertiaryOf(context);
     
     if (_isPressed) {
       switch (widget.buttonType) {
         case _WindowButtonType.close:
-          return BAColors.danger;
+          return BAColors.dangerOf(context);
         case _WindowButtonType.maximize:
           return hoverColor;
         case _WindowButtonType.minimize:
@@ -283,7 +283,7 @@ class _WindowControlButtonState extends State<_WindowControlButton> {
     if (_isHovered) {
       switch (widget.buttonType) {
         case _WindowButtonType.close:
-          return BAColors.danger;
+          return BAColors.dangerOf(context);
         case _WindowButtonType.maximize:
           return BAColors.surfaceVariantOf(context);
         case _WindowButtonType.minimize:

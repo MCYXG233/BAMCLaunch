@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../account/account.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
@@ -51,12 +51,12 @@ class _AccountCardState extends State<AccountCard> {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: widget.isSelected
-                ? BAColors.primary.withOpacity(0.1)
+                ? BAColors.primaryOf(context).withOpacity(0.1)
                 : BAColors.surfaceOf(context),
             borderRadius: BATheme.borderRadius,
             border: Border.all(
               color: widget.isSelected
-                  ? BAColors.primary
+                  ? BAColors.primaryOf(context)
                   : (_isHovered
                       ? BAColors.borderOf(context)
                       : BAColors.borderOf(context)),
@@ -103,13 +103,13 @@ class _AccountCardState extends State<AccountCard> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: BAColors.primary.withOpacity(0.2),
+                                  color: BAColors.primaryOf(context).withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
                                   '使用中',
                                   style: BATypography.caption.copyWith(
-                                    color: BAColors.primary,
+                                    color: BAColors.primaryOf(context),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -147,7 +147,7 @@ class _AccountCardState extends State<AccountCard> {
                         trailingIcon: Icon(
                           Icons.logout,
                           size: 16,
-                          color: BAColors.secondary,
+                          color: BAColors.secondaryOf(context),
                         ),
                       ),
                     if (widget.onLogout != null)
@@ -182,7 +182,7 @@ class _AccountCardState extends State<AccountCard> {
         color: BAColors.surfaceVariantOf(context),
         borderRadius: BorderRadius.circular(32),
         border: Border.all(
-          color: widget.isSelected ? BAColors.primary : BAColors.borderOf(context),
+          color: widget.isSelected ? BAColors.primaryOf(context) : BAColors.borderOf(context),
           width: 2,
         ),
       ),
@@ -211,18 +211,18 @@ class _AccountCardState extends State<AccountCard> {
 
     switch (widget.account.type) {
       case AccountType.microsoft:
-        badgeColor = BAColors.primary;
+        badgeColor = BAColors.primaryOf(context);
         label = 'Microsoft';
         icon = Icons.window;
         break;
       case AccountType.authlib:
-        badgeColor = BAColors.secondary;
+        badgeColor = BAColors.secondaryOf(context);
         label = 'Authlib';
         icon = Icons.public;
         break;
       case AccountType.offline:
       default:
-        badgeColor = BAColors.textSecondary;
+        badgeColor = BAColors.textSecondaryOf(context);
         label = '离线';
         icon = Icons.person_outline;
         break;

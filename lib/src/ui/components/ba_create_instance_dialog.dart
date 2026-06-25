@@ -1,4 +1,4 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../instance/instance_manager.dart';
 import '../../version/version_manager.dart';
@@ -231,9 +231,9 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
             width: 520,
             constraints: const BoxConstraints(maxHeight: 600),
             decoration: BoxDecoration(
-              color: BAColors.glass,
+              color: BAColors.glassOf(context),
               borderRadius: BATheme.borderRadius,
-              border: Border.all(color: BAColors.border, width: 1),
+              border: Border.all(color: BAColors.borderOf(context), width: 1),
               boxShadow: BATheme.shadows,
             ),
             child: Column(
@@ -264,7 +264,7 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
                 child: Text(
                   '创建实例',
                   style: BATypography.headlineMedium.copyWith(
-                    color: BAColors.textPrimary,
+                    color: BAColors.textPrimaryOf(context),
                   ),
                 ),
               ),
@@ -285,24 +285,24 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: isCompleted
-                            ? BAColors.primary
+                            ? BAColors.primaryOf(context)
                             : isActive
-                                ? BAColors.primary
-                                : BAColors.surfaceVariant,
+                                ? BAColors.primaryOf(context)
+                                : BAColors.surfaceVariantOf(context),
                         border: Border.all(
                           color: isCompleted || isActive
-                              ? BAColors.primary
-                              : BAColors.border,
+                              ? BAColors.primaryOf(context)
+                              : BAColors.borderOf(context),
                           width: 1.5,
                         ),
                       ),
                       child: Center(
                         child: isCompleted
-                            ? const Icon(Icons.check, size: 14, color: Colors.white)
+                            ? Icon(Icons.check, size: 14, color: Colors.white)
                             : Text(
                                 '${index + 1}',
                                 style: BATypography.labelSmall.copyWith(
-                                  color: isActive ? Colors.white : BAColors.textSecondary,
+                                  color: isActive ? Colors.white : BAColors.textSecondaryOf(context),
                                   fontSize: 11,
                                 ),
                               ),
@@ -314,8 +314,8 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
                         steps[index],
                         style: BATypography.labelSmall.copyWith(
                           color: isActive || isCompleted
-                              ? BAColors.textPrimary
-                              : BAColors.textSecondary,
+                              ? BAColors.textPrimaryOf(context)
+                              : BAColors.textSecondaryOf(context),
                           fontSize: 11,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -326,7 +326,7 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
                         width: 16,
                         height: 1,
                         margin: const EdgeInsets.symmetric(horizontal: 4),
-                        color: isCompleted ? BAColors.primary : BAColors.border,
+                        color: isCompleted ? BAColors.primaryOf(context) : BAColors.borderOf(context),
                       ),
                   ],
                 ),
@@ -334,7 +334,7 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
             }),
           ),
           const SizedBox(height: 16),
-          Divider(color: BAColors.border, height: 1),
+          Divider(color: BAColors.borderOf(context), height: 1),
         ],
       ),
     );
@@ -368,37 +368,37 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
       children: [
         Text(
           '实例名称',
-          style: BATypography.titleSmall.copyWith(color: BAColors.textPrimary),
+          style: BATypography.titleSmall.copyWith(color: BAColors.textPrimaryOf(context)),
         ),
         const SizedBox(height: 8),
         Text(
           '为你的新实例取一个名字',
-          style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+          style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
         ),
         const SizedBox(height: 16),
         TextField(
           controller: _nameController,
-          style: BATypography.bodyMedium.copyWith(color: BAColors.textPrimary),
+          style: BATypography.bodyMedium.copyWith(color: BAColors.textPrimaryOf(context)),
           decoration: InputDecoration(
             hintText: '输入实例名称',
-            hintStyle: BATypography.bodyMedium.copyWith(color: BAColors.textDisabled),
+            hintStyle: BATypography.bodyMedium.copyWith(color: BAColors.textDisabledOf(context)),
             filled: true,
-            fillColor: BAColors.surfaceVariant,
+            fillColor: BAColors.surfaceVariantOf(context),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BATheme.borderRadiusMedium,
-              borderSide: BorderSide(color: BAColors.border),
+              borderSide: BorderSide(color: BAColors.borderOf(context)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BATheme.borderRadiusMedium,
-              borderSide: BorderSide(color: BAColors.border),
+              borderSide: BorderSide(color: BAColors.borderOf(context)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BATheme.borderRadiusMedium,
-              borderSide: const BorderSide(color: BAColors.primary, width: 2),
+              borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
             ),
             errorText: _nameError,
-            prefixIcon: const Icon(Icons.edit, size: 20),
+            prefixIcon: Icon(Icons.edit, size: 20),
           ),
           onChanged: (_) {
             if (_nameError != null) setState(() => _nameError = null);
@@ -427,11 +427,11 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: BAColors.danger),
+            Icon(Icons.error_outline, size: 48, color: BAColors.dangerOf(context)),
             const SizedBox(height: 12),
             Text(
               _versionsError!,
-              style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+              style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
             ),
             const SizedBox(height: 16),
             BAPrimaryButton(
@@ -449,7 +449,7 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
       children: [
         Text(
           '选择游戏版本',
-          style: BATypography.titleSmall.copyWith(color: BAColors.textPrimary),
+          style: BATypography.titleSmall.copyWith(color: BAColors.textPrimaryOf(context)),
         ),
         const SizedBox(height: 8),
         if (_selectedVersion != null)
@@ -457,15 +457,15 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(
               '已选择: ${_selectedVersion!.id}',
-              style: BATypography.bodySmall.copyWith(color: BAColors.primary),
+              style: BATypography.bodySmall.copyWith(color: BAColors.primaryOf(context)),
             ),
           ),
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              color: BAColors.surfaceVariant,
+              color: BAColors.surfaceVariantOf(context),
               borderRadius: BATheme.borderRadiusMedium,
-              border: Border.all(color: BAColors.border),
+              border: Border.all(color: BAColors.borderOf(context)),
             ),
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(vertical: 4),
@@ -492,12 +492,12 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
       children: [
         Text(
           '选择模组加载器',
-          style: BATypography.titleSmall.copyWith(color: BAColors.textPrimary),
+          style: BATypography.titleSmall.copyWith(color: BAColors.textPrimaryOf(context)),
         ),
         const SizedBox(height: 8),
         Text(
           '选择 "Vanilla" 则不使用模组加载器',
-          style: BATypography.bodySmall.copyWith(color: BAColors.textSecondary),
+          style: BATypography.bodySmall.copyWith(color: BAColors.textSecondaryOf(context)),
         ),
         const SizedBox(height: 12),
         ..._ModLoader.values.map((loader) {
@@ -522,11 +522,11 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
         }),
         if (_selectedLoader != _ModLoader.vanilla) ...[
           const SizedBox(height: 12),
-          Divider(color: BAColors.border, height: 1),
+          Divider(color: BAColors.borderOf(context), height: 1),
           const SizedBox(height: 12),
           Text(
             '${_loaderDisplayName(_selectedLoader)} 版本',
-            style: BATypography.titleSmall.copyWith(color: BAColors.textPrimary),
+            style: BATypography.titleSmall.copyWith(color: BAColors.textPrimaryOf(context)),
           ),
           const SizedBox(height: 8),
           Expanded(child: _buildLoaderVersionList()),
@@ -569,11 +569,11 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 36, color: BAColors.danger),
+            Icon(Icons.error_outline, size: 36, color: BAColors.dangerOf(context)),
             const SizedBox(height: 8),
             Text(
               _loaderVersionsError!,
-              style: BATypography.bodySmall.copyWith(color: BAColors.textSecondary),
+              style: BATypography.bodySmall.copyWith(color: BAColors.textSecondaryOf(context)),
             ),
             const SizedBox(height: 12),
             BAPrimaryButton(
@@ -590,16 +590,16 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
       return Center(
         child: Text(
           '暂无可用版本',
-          style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+          style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
         ),
       );
     }
 
     return Container(
       decoration: BoxDecoration(
-        color: BAColors.surfaceVariant,
+        color: BAColors.surfaceVariantOf(context),
         borderRadius: BATheme.borderRadiusMedium,
-        border: Border.all(color: BAColors.border),
+        border: Border.all(color: BAColors.borderOf(context)),
       ),
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 4),
@@ -612,13 +612,13 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
             title: Text(
               version,
               style: BATypography.bodyMedium.copyWith(
-                color: isSelected ? BAColors.primary : BAColors.textPrimary,
+                color: isSelected ? BAColors.primaryOf(context) : BAColors.textPrimaryOf(context),
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
             leading: Icon(
               isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-              color: isSelected ? BAColors.primary : BAColors.textSecondary,
+              color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
               size: 20,
             ),
             onTap: () => setState(() => _selectedLoaderVersion = version),
@@ -638,7 +638,7 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
       children: [
         Text(
           '确认创建信息',
-          style: BATypography.titleSmall.copyWith(color: BAColors.textPrimary),
+          style: BATypography.titleSmall.copyWith(color: BAColors.textPrimaryOf(context)),
         ),
         const SizedBox(height: 16),
         _buildSummaryCard(),
@@ -662,9 +662,9 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: BAColors.surfaceVariant,
+        color: BAColors.surfaceVariantOf(context),
         borderRadius: BATheme.borderRadiusMedium,
-        border: Border.all(color: BAColors.border),
+        border: Border.all(color: BAColors.borderOf(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -686,17 +686,17 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
   Widget _buildSummaryRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: BAColors.primary),
+        Icon(icon, size: 18, color: BAColors.primaryOf(context)),
         const SizedBox(width: 10),
         Text(
           '$label: ',
-          style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+          style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
         ),
         Expanded(
           child: Text(
             value,
             style: BATypography.bodyMedium.copyWith(
-              color: BAColors.textPrimary,
+              color: BAColors.textPrimaryOf(context),
               fontWeight: FontWeight.w600,
             ),
             overflow: TextOverflow.ellipsis,
@@ -760,12 +760,12 @@ class _CloseButtonState extends State<_CloseButton> {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: _isHovered ? BAColors.surfaceVariant : Colors.transparent,
+            color: _isHovered ? BAColors.surfaceVariantOf(context) : Colors.transparent,
             borderRadius: BATheme.borderRadiusSmall,
           ),
           child: Icon(
             Icons.close,
-            color: _isHovered ? BAColors.textPrimary : BAColors.textSecondary,
+            color: _isHovered ? BAColors.textPrimaryOf(context) : BAColors.textSecondaryOf(context),
             size: 20,
           ),
         ),
@@ -795,13 +795,13 @@ class _VersionTileState extends State<_VersionTile> {
   Color _typeColor() {
     switch (widget.version.type) {
       case VersionType.release:
-        return BAColors.success;
+        return BAColors.successOf(context);
       case VersionType.snapshot:
-        return BAColors.warning;
+        return BAColors.warningOf(context);
       case VersionType.oldBeta:
-        return BAColors.info;
+        return BAColors.infoOf(context);
       case VersionType.oldAlpha:
-        return BAColors.danger;
+        return BAColors.dangerOf(context);
     }
   }
 
@@ -830,7 +830,7 @@ class _VersionTileState extends State<_VersionTile> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: widget.isSelected
-                ? BAColors.primary.withOpacity(0.15)
+                ? BAColors.primaryOf(context).withOpacity(0.15)
                 : _isHovered
                     ? BAColors.surfaceTertiaryOf(context).withOpacity(0.5)
                     : Colors.transparent,
@@ -843,8 +843,8 @@ class _VersionTileState extends State<_VersionTile> {
                     ? Icons.radio_button_checked
                     : Icons.radio_button_unchecked,
                 color: widget.isSelected
-                    ? BAColors.primary
-                    : BAColors.textSecondary,
+                    ? BAColors.primaryOf(context)
+                    : BAColors.textSecondaryOf(context),
                 size: 20,
               ),
               const SizedBox(width: 12),
@@ -852,8 +852,8 @@ class _VersionTileState extends State<_VersionTile> {
                 widget.version.id,
                 style: BATypography.bodyMedium.copyWith(
                   color: widget.isSelected
-                      ? BAColors.primary
-                      : BAColors.textPrimary,
+                      ? BAColors.primaryOf(context)
+                      : BAColors.textPrimaryOf(context),
                   fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
               ),
@@ -942,13 +942,13 @@ class _LoaderRadioTileState extends State<_LoaderRadioTile> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: isSelected
-                ? BAColors.primary.withOpacity(0.15)
+                ? BAColors.primaryOf(context).withOpacity(0.15)
                 : _isHovered
                     ? BAColors.surfaceTertiaryOf(context).withOpacity(0.5)
                     : Colors.transparent,
             borderRadius: BATheme.borderRadiusSmall,
             border: Border.all(
-              color: isSelected ? BAColors.primary.withOpacity(0.4) : Colors.transparent,
+              color: isSelected ? BAColors.primaryOf(context).withOpacity(0.4) : Colors.transparent,
               width: 1,
             ),
           ),
@@ -958,16 +958,16 @@ class _LoaderRadioTileState extends State<_LoaderRadioTile> {
                 isSelected
                     ? Icons.radio_button_checked
                     : Icons.radio_button_unchecked,
-                color: isSelected ? BAColors.primary : BAColors.textSecondary,
+                color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
                 size: 20,
               ),
               const SizedBox(width: 10),
-              Icon(_icon(), size: 18, color: isSelected ? BAColors.primary : BAColors.textSecondary),
+              Icon(_icon(), size: 18, color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context)),
               const SizedBox(width: 8),
               Text(
                 _label(),
                 style: BATypography.bodyMedium.copyWith(
-                  color: isSelected ? BAColors.primary : BAColors.textPrimary,
+                  color: isSelected ? BAColors.primaryOf(context) : BAColors.textPrimaryOf(context),
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
               ),

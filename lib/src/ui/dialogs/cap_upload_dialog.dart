@@ -370,12 +370,12 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
                     height: 160,
                     decoration: BoxDecoration(
                       color: _isDragging
-                          ? BAColors.primary.withOpacity(0.1)
+                          ? BAColors.primaryOf(context).withOpacity(0.1)
                           : BAColors.surfaceVariantOf(context).withOpacity(0.5),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: _isDragging
-                            ? BAColors.primary
+                            ? BAColors.primaryOf(context)
                             : BAColors.borderOf(context).withOpacity(0.6),
                         width: _isDragging ? 2 : 1,
                         style: BorderStyle.solid,
@@ -403,7 +403,7 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
                                   Icons.cloud_upload_outlined,
                                   size: 48,
                                   color: _isDragging
-                                      ? BAColors.primary
+                                      ? BAColors.primaryOf(context)
                                       : BAColors.textSecondaryOf(context),
                                 ),
                                 const SizedBox(height: 12),
@@ -413,7 +413,7 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
                                       : '拖拽PNG文件到此处',
                                   style: TextStyle(
                                     color: _isDragging
-                                        ? BAColors.primary
+                                        ? BAColors.primaryOf(context)
                                         : BAColors.textSecondaryOf(context),
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
@@ -504,10 +504,10 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: BAColors.danger.withOpacity(0.1),
+                color: BAColors.dangerOf(context).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: BAColors.danger.withOpacity(0.3),
+                  color: BAColors.dangerOf(context).withOpacity(0.3),
                 ),
               ),
               child: Row(
@@ -515,14 +515,14 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
                   Icon(
                     Icons.error_outline,
                     size: 18,
-                    color: BAColors.danger,
+                    color: BAColors.dangerOf(context),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       _errorMessage!,
                       style: TextStyle(
-                        color: BAColors.danger,
+                        color: BAColors.dangerOf(context),
                         fontSize: 13,
                       ),
                     ),
@@ -538,10 +538,10 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: BAColors.success.withOpacity(0.1),
+                color: BAColors.successOf(context).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: BAColors.success.withOpacity(0.3),
+                  color: BAColors.successOf(context).withOpacity(0.3),
                 ),
               ),
               child: Row(
@@ -549,14 +549,14 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
                   Icon(
                     Icons.check_circle_outline,
                     size: 18,
-                    color: BAColors.success,
+                    color: BAColors.successOf(context),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       _successMessage!,
                       style: TextStyle(
-                        color: BAColors.success,
+                        color: BAColors.successOf(context),
                         fontSize: 13,
                       ),
                     ),
@@ -570,7 +570,7 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
     );
   }
 
-  Widget _buildActions() {
+  Widget _buildActions(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
       decoration: BoxDecoration(

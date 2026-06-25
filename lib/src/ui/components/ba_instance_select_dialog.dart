@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../../resource_center/models.dart';
 import '../../resource_center/download_manager.dart';
@@ -98,8 +98,8 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        BAColors.primary,
-                        BAColors.accentPink,
+                        BAColors.primaryOf(context),
+                        BAColors.accentPinkOf(context),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(12),
@@ -313,7 +313,7 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
                     icon: const Icon(Icons.download, size: 18),
                     label: const Text('开始下载'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: BAColors.primary,
+                      backgroundColor: BAColors.primaryOf(context),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
@@ -376,7 +376,7 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
             child: Switch(
               value: value,
               onChanged: onChanged,
-              activeColor: BAColors.primary,
+              activeColor: BAColors.primaryOf(context),
             ),
           ),
         ],

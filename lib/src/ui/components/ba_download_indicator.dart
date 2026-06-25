@@ -195,7 +195,7 @@ class _BADownloadIndicatorState extends State<BADownloadIndicator>
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: BAColors.surfaceVariant,
+          color: BAColors.surfaceVariantOf(context),
           borderRadius: BATheme.borderRadiusSmall,
         ),
         child: Stack(
@@ -207,22 +207,22 @@ class _BADownloadIndicatorState extends State<BADownloadIndicator>
               child: CircularProgressIndicator(
                 value: avgProgress,
                 strokeWidth: 3,
-                backgroundColor: BAColors.border,
-                valueColor: const AlwaysStoppedAnimation<Color>(BAColors.primary),
+                backgroundColor: BAColors.borderOf(context),
+                valueColor: AlwaysStoppedAnimation<Color>(BAColors.primaryOf(context)),
               ),
             ),
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.download,
-                  color: BAColors.primary,
+                  color: BAColors.primaryOf(context),
                   size: 14,
                 ),
                 Text(
                   '$count',
                   style: BATypography.labelSmall.copyWith(
-                    color: BAColors.primary,
+                    color: BAColors.primaryOf(context),
                     fontSize: 8,
                   ),
                 ),
@@ -239,12 +239,12 @@ class _BADownloadIndicatorState extends State<BADownloadIndicator>
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: BAColors.surfaceVariant,
+        color: BAColors.surfaceVariantOf(context),
         borderRadius: BATheme.borderRadiusSmall,
       ),
-      child: const Icon(
+      child: Icon(
         Icons.download_done,
-        color: BAColors.textSecondary,
+        color: BAColors.textSecondaryOf(context),
         size: 20,
       ),
     );
@@ -271,18 +271,18 @@ class _DownloadListPanel extends StatelessWidget {
         width: 480,
         constraints: const BoxConstraints(maxHeight: 520),
         decoration: BoxDecoration(
-          color: BAColors.surface,
+          color: BAColors.surfaceOf(context),
           borderRadius: BATheme.borderRadiusLarge,
-          border: Border.all(color: BAColors.border, width: 1),
+          border: Border.all(color: BAColors.borderOf(context), width: 1),
           boxShadow: BATheme.darkShadowsLarge,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildHeader(context),
-            const Divider(height: 1, color: BAColors.border),
+            Divider(height: 1, color: BAColors.borderOf(context)),
             Flexible(child: _buildTaskList(context)),
-            const Divider(height: 1, color: BAColors.border),
+            Divider(height: 1, color: BAColors.borderOf(context)),
             _buildFooter(context),
           ],
         ),
@@ -295,12 +295,12 @@ class _DownloadListPanel extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          const Icon(Icons.downloading, color: BAColors.primary, size: 20),
+          Icon(Icons.downloading, color: BAColors.primaryOf(context), size: 20),
           const SizedBox(width: 10),
           Text(
             '下载管理',
             style: BATypography.titleSmall.copyWith(
-              color: BAColors.textPrimary,
+              color: BAColors.textPrimaryOf(context),
             ),
           ),
           const Spacer(),
@@ -312,13 +312,13 @@ class _DownloadListPanel extends StatelessWidget {
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: BAColors.primary.withOpacity(0.15),
+                    color: BAColors.primaryOf(context).withOpacity(0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     '$activeCount 个任务进行中',
                     style: BATypography.labelSmall.copyWith(
-                      color: BAColors.primary,
+                      color: BAColors.primaryOf(context),
                     ),
                   ),
                 );
@@ -333,12 +333,12 @@ class _DownloadListPanel extends StatelessWidget {
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                color: BAColors.surfaceVariant,
+                color: BAColors.surfaceVariantOf(context),
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.close,
-                color: BAColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
                 size: 16,
               ),
             ),
@@ -363,14 +363,14 @@ class _DownloadListPanel extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.cloud_download_outlined,
-                    color: BAColors.textDisabled,
+                    color: BAColors.textDisabledOf(context),
                     size: 48,
                   ),
                   const SizedBox(height: 12),
                   Text(
                     '暂无下载任务',
                     style: BATypography.bodyMedium.copyWith(
-                      color: BAColors.textSecondary,
+                      color: BAColors.textSecondaryOf(context),
                     ),
                   ),
                 ],
@@ -406,7 +406,7 @@ class _DownloadListPanel extends StatelessWidget {
                   context,
                   icon: Icons.cancel_outlined,
                   label: '取消全部',
-                  color: BAColors.danger,
+                  color: BAColors.dangerOf(context),
                   onTap: () {
                     manager.cancelAll();
                   },
@@ -416,7 +416,7 @@ class _DownloadListPanel extends StatelessWidget {
                 context,
                 icon: Icons.cleaning_services_outlined,
                 label: '清除已完成',
-                color: BAColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
                 onTap: () {
                   manager.clearCompleted();
                 },
@@ -425,7 +425,7 @@ class _DownloadListPanel extends StatelessWidget {
               Text(
                 '共 ${manager.tasks.length} 个任务',
                 style: BATypography.bodySmall.copyWith(
-                  color: BAColors.textSecondary,
+                  color: BAColors.textSecondaryOf(context),
                 ),
               ),
             ],
@@ -480,10 +480,10 @@ class _DownloadTaskItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: BAColors.surfaceVariant,
+        color: BAColors.surfaceVariantOf(context),
         borderRadius: BATheme.borderRadiusSmall,
         border: Border.all(
-          color: _getStatusBorderColor(),
+          color: _getStatusBorderColor(context),
           width: 1,
         ),
       ),
@@ -492,7 +492,7 @@ class _DownloadTaskItem extends StatelessWidget {
         children: [
           Row(
             children: [
-              _buildStatusIcon(),
+              _buildStatusIcon(context),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -501,14 +501,14 @@ class _DownloadTaskItem extends StatelessWidget {
                     Text(
                       task.name,
                       style: BATypography.bodyMedium.copyWith(
-                        color: BAColors.textPrimary,
+                        color: BAColors.textPrimaryOf(context),
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
-                    _buildSubtitle(),
+                    _buildSubtitle(context),
                   ],
                 ),
               ),
@@ -521,12 +521,12 @@ class _DownloadTaskItem extends StatelessWidget {
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: BAColors.danger.withOpacity(0.1),
+                      color: BAColors.dangerOf(context).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.close,
-                      color: BAColors.danger,
+                      color: BAColors.dangerOf(context),
                       size: 14,
                     ),
                   ),
@@ -540,12 +540,12 @@ class _DownloadTaskItem extends StatelessWidget {
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: BAColors.textSecondary.withOpacity(0.1),
+                      color: BAColors.textSecondaryOf(context).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.close,
-                      color: BAColors.textSecondary,
+                      color: BAColors.textSecondaryOf(context),
                       size: 14,
                     ),
                   ),
@@ -558,8 +558,8 @@ class _DownloadTaskItem extends StatelessWidget {
               value: task.progress,
               height: 8,
               showPercentage: false,
-              color: BAColors.primary,
-              backgroundColor: BAColors.darkSurfaceTertiary,
+              color: BAColors.primaryOf(context),
+              backgroundColor: BAColors.surfaceTertiaryOf(context),
             ),
             const SizedBox(height: 6),
             Row(
@@ -568,14 +568,14 @@ class _DownloadTaskItem extends StatelessWidget {
                 Text(
                   '${(task.progress * 100).toStringAsFixed(1)}%',
                   style: BATypography.labelSmall.copyWith(
-                    color: BAColors.primary,
+                    color: BAColors.primaryOf(context),
                   ),
                 ),
                 if (task.speed != null)
                   Text(
                     task.speed!,
                     style: BATypography.labelSmall.copyWith(
-                      color: BAColors.textSecondary,
+                      color: BAColors.textSecondaryOf(context),
                     ),
                   ),
               ],
@@ -586,59 +586,59 @@ class _DownloadTaskItem extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusIcon() {
+  Widget _buildStatusIcon(BuildContext context) {
     IconData icon;
     Color color;
 
     switch (task.status) {
       case 'downloading':
         icon = Icons.downloading;
-        color = BAColors.primary;
+        color = BAColors.primaryOf(context);
         break;
       case 'completed':
         icon = Icons.check_circle;
-        color = BAColors.success;
+        color = BAColors.successOf(context);
         break;
       case 'failed':
         icon = Icons.error;
-        color = BAColors.danger;
+        color = BAColors.dangerOf(context);
         break;
       case 'cancelled':
         icon = Icons.cancel;
-        color = BAColors.textSecondary;
+        color = BAColors.textSecondaryOf(context);
         break;
       default:
         icon = Icons.downloading;
-        color = BAColors.textSecondary;
+        color = BAColors.textSecondaryOf(context);
     }
 
     return Icon(icon, color: color, size: 18);
   }
 
-  Widget _buildSubtitle() {
+  Widget _buildSubtitle(BuildContext context) {
     String text;
     Color color;
 
     switch (task.status) {
       case 'downloading':
         text = task.speed != null ? '下载中 - ${task.speed}' : '下载中...';
-        color = BAColors.textSecondary;
+        color = BAColors.textSecondaryOf(context);
         break;
       case 'completed':
         text = '下载完成';
-        color = BAColors.success;
+        color = BAColors.successOf(context);
         break;
       case 'failed':
         text = task.errorMessage ?? '下载失败';
-        color = BAColors.danger;
+        color = BAColors.dangerOf(context);
         break;
       case 'cancelled':
         text = '已取消';
-        color = BAColors.textSecondary;
+        color = BAColors.textSecondaryOf(context);
         break;
       default:
         text = task.status;
-        color = BAColors.textSecondary;
+        color = BAColors.textSecondaryOf(context);
     }
 
     return Text(
@@ -649,16 +649,16 @@ class _DownloadTaskItem extends StatelessWidget {
     );
   }
 
-  Color _getStatusBorderColor() {
+  Color _getStatusBorderColor(BuildContext context) {
     switch (task.status) {
       case 'downloading':
-        return BAColors.primary.withOpacity(0.3);
+        return BAColors.primaryOf(context).withOpacity(0.3);
       case 'completed':
-        return BAColors.success.withOpacity(0.3);
+        return BAColors.successOf(context).withOpacity(0.3);
       case 'failed':
-        return BAColors.danger.withOpacity(0.3);
+        return BAColors.dangerOf(context).withOpacity(0.3);
       default:
-        return BAColors.border;
+        return BAColors.borderOf(context);
     }
   }
 }

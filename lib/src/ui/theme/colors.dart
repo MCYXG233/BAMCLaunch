@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'mc_theme_colors.dart';
 
@@ -492,6 +492,16 @@ class BAColors {
     return accentPink;
   }
 
+  /// 获取强调粉色深色版
+  static Color accentPinkDarkOf(BuildContext context) {
+    if (_isMC()) {
+      return _isLight(context)
+          ? MCThemeColors.woolPink
+          : MCThemeColors.woolPink;
+    }
+    return accentPinkDark;
+  }
+
   /// 获取成功色
   static Color successOf(BuildContext context) {
     if (_isMC()) {
@@ -561,3 +571,4 @@ class BAColors {
   /// 阴影颜色（默认深色）
   static const Color shadow = darkShadow;
 }
+

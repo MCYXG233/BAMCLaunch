@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../../diagnostic/java_checker.dart';
@@ -841,7 +841,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
     }
   }
 
-  Widget _buildSummary() {
+  Widget _buildSummary(BuildContext context) {
     final passed = _items.where((i) => i.status == DiagnosticStatus.passed).length;
     final warnings = _items.where((i) => i.status == DiagnosticStatus.warning).length;
     final failed = _items.where((i) => i.status == DiagnosticStatus.failed).length;
@@ -901,7 +901,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
           const SizedBox(height: 12),
           Text(
             overallText,
-            style: const TextStyle(
+            style: TextStyle(
               color: BAColors.textPrimaryOf(context),
               fontSize: 14,
             ),
@@ -933,8 +933,8 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                 children: [
                   Text(
                     '崩溃分析: ${_crashAnalysis!.title}',
-                    style: const TextStyle(
-                      color: BAColors.dangerOf(context),
+                    style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -942,8 +942,8 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                   const SizedBox(height: 6),
                   Text(
                     _crashAnalysis!.description,
-                    style: const TextStyle(
-                      color: BAColors.textSecondaryOf(context),
+                    style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
                       fontSize: 13,
                       height: 1.4,
                     ),
@@ -990,3 +990,5 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
     );
   }
 }
+
+

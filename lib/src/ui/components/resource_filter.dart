@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../resource_center/models.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
@@ -89,7 +89,7 @@ class _ResourceFilterState extends State<ResourceFilter> {
                 child: Text(
                   '重置',
                   style: BATypography.bodyMedium.copyWith(
-                    color: BAColors.primary,
+                    color: BAColors.primaryOf(context),
                   ),
                 ),
               ),
@@ -146,14 +146,14 @@ class _ResourceFilterState extends State<ResourceFilter> {
                   widget.onFilterChanged(_currentParams);
                 });
               },
-              selectedColor: BAColors.primary.withOpacity(0.2),
-              checkmarkColor: BAColors.primary,
+              selectedColor: BAColors.primaryOf(context).withOpacity(0.2),
+              checkmarkColor: BAColors.primaryOf(context),
               backgroundColor: BAColors.surfaceVariantOf(context),
-              labelStyle: TextStyle(color: isSelected ? BAColors.primary : textSecondary),
+              labelStyle: TextStyle(color: isSelected ? BAColors.primaryOf(context) : textSecondary),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
                 side: BorderSide(
-                  color: isSelected ? BAColors.primary : BAColors.borderOf(context),
+                  color: isSelected ? BAColors.primaryOf(context) : BAColors.borderOf(context),
                 ),
               ),
             );
@@ -203,14 +203,14 @@ class _ResourceFilterState extends State<ResourceFilter> {
                   widget.onFilterChanged(_currentParams);
                 });
               },
-              selectedColor: BAColors.secondary.withOpacity(0.2),
-              checkmarkColor: BAColors.secondary,
+              selectedColor: BAColors.secondaryOf(context).withOpacity(0.2),
+              checkmarkColor: BAColors.secondaryOf(context),
               backgroundColor: BAColors.surfaceVariantOf(context),
-              labelStyle: TextStyle(color: isSelected ? BAColors.secondary : textSecondary),
+              labelStyle: TextStyle(color: isSelected ? BAColors.secondaryOf(context) : textSecondary),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
                 side: BorderSide(
-                  color: isSelected ? BAColors.secondary : BAColors.borderOf(context),
+                  color: isSelected ? BAColors.secondaryOf(context) : BAColors.borderOf(context),
                 ),
               ),
             );

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../components/ba_buttons.dart';
@@ -145,7 +145,7 @@ class _BAAuthlibLoginDialogState extends State<BAAuthlibLoginDialog> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: BAColors.primary, width: 2),
+              borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
@@ -192,7 +192,7 @@ class _BAAuthlibLoginDialogState extends State<BAAuthlibLoginDialog> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: BAColors.primary, width: 2),
+              borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
@@ -240,7 +240,7 @@ class _BAAuthlibLoginDialogState extends State<BAAuthlibLoginDialog> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: BAColors.primary, width: 2),
+              borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
@@ -259,19 +259,19 @@ class _BAAuthlibLoginDialogState extends State<BAAuthlibLoginDialog> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: BAColors.danger.withOpacity(0.1),
+        color: BAColors.dangerOf(context).withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BAColors.danger.withOpacity(0.3)),
+        border: Border.all(color: BAColors.dangerOf(context).withOpacity(0.3)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: BAColors.danger, size: 18),
+          Icon(Icons.error_outline, color: BAColors.dangerOf(context), size: 18),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               _errorMessage!,
               style: TextStyle(
-                color: BAColors.danger,
+                color: BAColors.dangerOf(context),
                 fontSize: 13,
               ),
             ),

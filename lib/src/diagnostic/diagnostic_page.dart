@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
-import '../ui/theme/ba_theme_colors.dart';
+import '../ui/theme/colors.dart';
 import 'network_diagnostic.dart';
 import 'auto_fixer.dart';
 
@@ -108,7 +108,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('没有可自动修复的问题'),
-          backgroundColor: BAThemeColors.warning,
+          backgroundColor: BAColors.warningOf(context),
         ),
       );
       return;
@@ -150,7 +150,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('报告已保存到: $filePath'),
-          backgroundColor: BAThemeColors.success,
+          backgroundColor: BAColors.successOf(context),
         ),
       );
     } catch (e) {
@@ -158,7 +158,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('保存报告失败: $e'),
-          backgroundColor: BAThemeColors.danger,
+          backgroundColor: BAColors.dangerOf(context),
         ),
       );
     }
@@ -167,7 +167,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: BAThemeColors.background,
+      backgroundColor: BAColors.backgroundOf(context),
       body: Column(
         children: [
           _buildHeader(),
@@ -195,16 +195,16 @@ class _DiagnosticPageState extends State<DiagnosticPage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
-        color: BAThemeColors.surface,
+        color: BAColors.surfaceOf(context),
         border: Border(
           bottom: BorderSide(
-            color: BAThemeColors.border.withOpacity(0.5),
+            color: BAColors.borderOf(context).withOpacity(0.5),
             width: 1,
           ),
         ),
         boxShadow: [
           BoxShadow(
-            color: BAThemeColors.primary.withOpacity(0.05),
+            color: BAColors.primaryOf(context).withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -214,7 +214,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: BAThemeColors.textSecondary, size: 18),
+                color: BAColors.textSecondaryOf(context), size: 18),
             onPressed: () => Navigator.of(context).pop(),
           ),
           const SizedBox(width: 8),
@@ -222,14 +222,14 @@ class _DiagnosticPageState extends State<DiagnosticPage>
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [BAThemeColors.primary, BAThemeColors.primaryLight],
+                colors: [BAColors.primaryOf(context), BAColors.primaryLightOf(context)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: BAThemeColors.primary.withOpacity(0.3),
+                  color: BAColors.primaryOf(context).withOpacity(0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -239,9 +239,9 @@ class _DiagnosticPageState extends State<DiagnosticPage>
           ),
           const SizedBox(width: 12),
           const Text(
-            '网络诊断与修复',
+            '网络诊断与修�?,
             style: TextStyle(
-              color: BAThemeColors.textPrimary,
+              color: BAColors.textPrimaryOf(context),
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -272,16 +272,16 @@ class _DiagnosticPageState extends State<DiagnosticPage>
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: BAThemeColors.primary.withOpacity(0.1),
+            color: BAColors.primaryOf(context).withOpacity(0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, color: BAThemeColors.primary, size: 20),
+          child: Icon(icon, color: BAColors.primaryOf(context), size: 20),
         ),
         const SizedBox(width: 12),
         Text(
           title,
           style: const TextStyle(
-            color: BAThemeColors.textPrimary,
+            color: BAColors.textPrimaryOf(context),
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -293,7 +293,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
   Widget _buildNetworkDiagnosticCard() {
     return Container(
       decoration: BoxDecoration(
-        color: BAThemeColors.surface,
+        color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: _getNetworkBorderColor().withOpacity(0.6),
@@ -319,9 +319,9 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      '网络连接检测',
+                      '网络连接检�?,
                       style: TextStyle(
-                        color: BAThemeColors.textPrimary,
+                        color: BAColors.textPrimaryOf(context),
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -329,12 +329,12 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                     const SizedBox(height: 4),
                     Text(
                       _isNetworkRunning
-                          ? '正在检测网络状态...'
+                          ? '正在检测网络状�?..'
                           : _getNetworkStatusText(),
                       style: TextStyle(
                         color: _isNetworkRunning
-                            ? BAThemeColors.info
-                            : BAThemeColors.textSecondary,
+                            ? BAColors.infoOf(context)
+                            : BAColors.textSecondaryOf(context),
                         fontSize: 13,
                       ),
                     ),
@@ -347,7 +347,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                   height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: BAThemeColors.info,
+                    color: BAColors.infoOf(context),
                   ),
                 ),
             ],
@@ -363,7 +363,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                 child: _buildActionButton(
                   onPressed: _isNetworkRunning ? null : _runNetworkDiagnostic,
                   icon: Icons.play_arrow_rounded,
-                  label: '开始检测',
+                  label: '开始检�?,
                   isPrimary: true,
                 ),
               ),
@@ -391,28 +391,28 @@ class _DiagnosticPageState extends State<DiagnosticPage>
     switch (_networkStatus) {
       case NetworkDiagnosticStatus.pending:
         icon = Icons.hourglass_empty_rounded;
-        color = BAThemeColors.textDisabled;
-        bgColor = BAThemeColors.surfaceVariant;
+        color = BAColors.textDisabledOf(context);
+        bgColor = BAColors.surfaceVariantOf(context);
         break;
       case NetworkDiagnosticStatus.running:
         icon = Icons.sync_rounded;
-        color = BAThemeColors.info;
-        bgColor = BAThemeColors.info.withOpacity(0.12);
+        color = BAColors.infoOf(context);
+        bgColor = BAColors.infoOf(context).withOpacity(0.12);
         break;
       case NetworkDiagnosticStatus.passed:
         icon = Icons.check_circle_rounded;
-        color = BAThemeColors.success;
-        bgColor = BAThemeColors.success.withOpacity(0.12);
+        color = BAColors.successOf(context);
+        bgColor = BAColors.successOf(context).withOpacity(0.12);
         break;
       case NetworkDiagnosticStatus.warning:
         icon = Icons.warning_amber_rounded;
-        color = BAThemeColors.warning;
-        bgColor = BAThemeColors.warning.withOpacity(0.12);
+        color = BAColors.warningOf(context);
+        bgColor = BAColors.warningOf(context).withOpacity(0.12);
         break;
       case NetworkDiagnosticStatus.failed:
         icon = Icons.error_rounded;
-        color = BAThemeColors.danger;
-        bgColor = BAThemeColors.danger.withOpacity(0.12);
+        color = BAColors.dangerOf(context);
+        bgColor = BAColors.dangerOf(context).withOpacity(0.12);
         break;
     }
 
@@ -430,26 +430,26 @@ class _DiagnosticPageState extends State<DiagnosticPage>
   Color _getNetworkBorderColor() {
     switch (_networkStatus) {
       case NetworkDiagnosticStatus.pending:
-        return BAThemeColors.border;
+        return BAColors.borderOf(context);
       case NetworkDiagnosticStatus.running:
-        return BAThemeColors.info;
+        return BAColors.infoOf(context);
       case NetworkDiagnosticStatus.passed:
-        return BAThemeColors.success;
+        return BAColors.successOf(context);
       case NetworkDiagnosticStatus.warning:
-        return BAThemeColors.warning;
+        return BAColors.warningOf(context);
       case NetworkDiagnosticStatus.failed:
-        return BAThemeColors.danger;
+        return BAColors.dangerOf(context);
     }
   }
 
   String _getNetworkStatusText() {
     switch (_networkStatus) {
       case NetworkDiagnosticStatus.pending:
-        return '点击开始检测网络状态';
+        return '点击开始检测网络状�?;
       case NetworkDiagnosticStatus.running:
         return '正在检测中...';
       case NetworkDiagnosticStatus.passed:
-        return '所有节点连接正常';
+        return '所有节点连接正�?;
       case NetworkDiagnosticStatus.warning:
         return '部分节点连接异常';
       case NetworkDiagnosticStatus.failed:
@@ -462,11 +462,11 @@ class _DiagnosticPageState extends State<DiagnosticPage>
       title: const Text(
         '查看详细结果',
         style: TextStyle(
-          color: BAThemeColors.textSecondary,
+          color: BAColors.textSecondaryOf(context),
           fontSize: 13,
         ),
       ),
-      iconColor: BAThemeColors.textSecondary,
+      iconColor: BAColors.textSecondaryOf(context),
       children: [
         if (_networkReport != null) ...[
           _buildPingResults(),
@@ -487,9 +487,9 @@ class _DiagnosticPageState extends State<DiagnosticPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Ping 延迟检测',
+            'Ping 延迟检�?,
             style: TextStyle(
-              color: BAThemeColors.textPrimary,
+              color: BAColors.textPrimaryOf(context),
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
@@ -504,13 +504,13 @@ class _DiagnosticPageState extends State<DiagnosticPage>
   Widget _buildPingResultItem(PingResult result) {
     Color latencyColor;
     if (!result.isReachable) {
-      latencyColor = BAThemeColors.danger;
+      latencyColor = BAColors.dangerOf(context);
     } else if (result.latencyMs == null || result.latencyMs! < 100) {
-      latencyColor = BAThemeColors.success;
+      latencyColor = BAColors.successOf(context);
     } else if (result.latencyMs! < 200) {
-      latencyColor = BAThemeColors.warning;
+      latencyColor = BAColors.warningOf(context);
     } else {
-      latencyColor = BAThemeColors.danger;
+      latencyColor = BAColors.dangerOf(context);
     }
 
     return Padding(
@@ -519,7 +519,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
         children: [
           Icon(
             result.isReachable ? Icons.check_circle : Icons.cancel,
-            color: result.isReachable ? BAThemeColors.success : BAThemeColors.danger,
+            color: result.isReachable ? BAColors.successOf(context) : BAColors.dangerOf(context),
             size: 16,
           ),
           const SizedBox(width: 8),
@@ -527,13 +527,13 @@ class _DiagnosticPageState extends State<DiagnosticPage>
             child: Text(
               result.nodeName,
               style: const TextStyle(
-                color: BAThemeColors.textPrimary,
+                color: BAColors.textPrimaryOf(context),
                 fontSize: 13,
               ),
             ),
           ),
           Text(
-            result.isReachable ? '${result.latencyMs} ms' : result.errorMessage ?? '不可达',
+            result.isReachable ? '${result.latencyMs} ms' : result.errorMessage ?? '不可�?,
             style: TextStyle(
               color: latencyColor,
               fontSize: 12,
@@ -553,9 +553,9 @@ class _DiagnosticPageState extends State<DiagnosticPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'DNS 解析检测',
+            'DNS 解析检�?,
             style: TextStyle(
-              color: BAThemeColors.textPrimary,
+              color: BAColors.textPrimaryOf(context),
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
@@ -574,7 +574,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
         children: [
           Icon(
             result.isSuccess ? Icons.check_circle : Icons.cancel,
-            color: result.isSuccess ? BAThemeColors.success : BAThemeColors.danger,
+            color: result.isSuccess ? BAColors.successOf(context) : BAColors.dangerOf(context),
             size: 16,
           ),
           const SizedBox(width: 8),
@@ -585,7 +585,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                 Text(
                   result.hostname,
                   style: const TextStyle(
-                    color: BAThemeColors.textPrimary,
+                    color: BAColors.textPrimaryOf(context),
                     fontSize: 13,
                   ),
                 ),
@@ -593,7 +593,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                   Text(
                     result.ipAddresses.join(', '),
                     style: const TextStyle(
-                      color: BAThemeColors.textSecondary,
+                      color: BAColors.textSecondaryOf(context),
                       fontSize: 11,
                       fontFamily: 'monospace',
                     ),
@@ -605,10 +605,10 @@ class _DiagnosticPageState extends State<DiagnosticPage>
             '${result.resolutionTimeMs} ms',
             style: TextStyle(
               color: result.resolutionTimeMs < 100
-                  ? BAThemeColors.success
+                  ? BAColors.successOf(context)
                   : result.resolutionTimeMs < 500
-                      ? BAThemeColors.warning
-                      : BAThemeColors.danger,
+                      ? BAColors.warningOf(context)
+                      : BAColors.dangerOf(context),
               fontSize: 12,
               fontFamily: 'monospace',
             ),
@@ -628,7 +628,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
           const Text(
             '下载速度测试',
             style: TextStyle(
-              color: BAThemeColors.textPrimary,
+              color: BAColors.textPrimaryOf(context),
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
@@ -647,7 +647,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
         children: [
           Icon(
             result.isSuccess ? Icons.check_circle : Icons.cancel,
-            color: result.isSuccess ? BAThemeColors.success : BAThemeColors.danger,
+            color: result.isSuccess ? BAColors.successOf(context) : BAColors.dangerOf(context),
             size: 16,
           ),
           const SizedBox(width: 8),
@@ -657,7 +657,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                   ? '${result.url.substring(0, 40)}...'
                   : result.url,
               style: const TextStyle(
-                color: BAThemeColors.textPrimary,
+                color: BAColors.textPrimaryOf(context),
                 fontSize: 12,
                 fontFamily: 'monospace',
               ),
@@ -668,11 +668,11 @@ class _DiagnosticPageState extends State<DiagnosticPage>
             style: TextStyle(
               color: result.isSuccess
                   ? (result.speedMbps > 5
-                      ? BAThemeColors.success
+                      ? BAColors.successOf(context)
                       : result.speedMbps > 1
-                          ? BAThemeColors.warning
-                          : BAThemeColors.danger)
-                  : BAThemeColors.danger,
+                          ? BAColors.warningOf(context)
+                          : BAColors.dangerOf(context))
+                  : BAColors.dangerOf(context),
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -688,13 +688,13 @@ class _DiagnosticPageState extends State<DiagnosticPage>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: _networkStatus == NetworkDiagnosticStatus.passed
-            ? BAThemeColors.success.withOpacity(0.08)
-            : BAThemeColors.warning.withOpacity(0.08),
+            ? BAColors.successOf(context).withOpacity(0.08)
+            : BAColors.warningOf(context).withOpacity(0.08),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: _networkStatus == NetworkDiagnosticStatus.passed
-              ? BAThemeColors.success.withOpacity(0.2)
-              : BAThemeColors.warning.withOpacity(0.2),
+              ? BAColors.successOf(context).withOpacity(0.2)
+              : BAColors.warningOf(context).withOpacity(0.2),
         ),
       ),
       child: Column(
@@ -707,19 +707,19 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                     ? Icons.check_circle
                     : Icons.warning_amber,
                 color: _networkStatus == NetworkDiagnosticStatus.passed
-                    ? BAThemeColors.success
-                    : BAThemeColors.warning,
+                    ? BAColors.successOf(context)
+                    : BAColors.warningOf(context),
                 size: 20,
               ),
               const SizedBox(width: 8),
               Text(
                 _networkStatus == NetworkDiagnosticStatus.passed
-                    ? '网络状态良好'
-                    : '网络存在一些问题',
+                    ? '网络状态良�?
+                    : '网络存在一些问�?,
                 style: TextStyle(
                   color: _networkStatus == NetworkDiagnosticStatus.passed
-                      ? BAThemeColors.success
-                      : BAThemeColors.warning,
+                      ? BAColors.successOf(context)
+                      : BAColors.warningOf(context),
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
@@ -729,9 +729,9 @@ class _DiagnosticPageState extends State<DiagnosticPage>
           if (_networkReport != null) ...[
             const SizedBox(height: 8),
             Text(
-              '检测时间: ${_networkReport!.timestamp.toString().substring(0, 19)}',
+              '检测时�? ${_networkReport!.timestamp.toString().substring(0, 19)}',
               style: const TextStyle(
-                color: BAThemeColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
                 fontSize: 12,
               ),
             ),
@@ -745,7 +745,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('一键修复', Icons.auto_fix_high_rounded),
+        _buildSectionTitle('一键修�?, Icons.auto_fix_high_rounded),
         const SizedBox(height: 12),
         _buildAutoFixCard(),
         if (_detectedIssues.isNotEmpty) ...[
@@ -759,14 +759,14 @@ class _DiagnosticPageState extends State<DiagnosticPage>
   Widget _buildAutoFixCard() {
     return Container(
       decoration: BoxDecoration(
-        color: BAThemeColors.surface,
+        color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: BAThemeColors.border.withOpacity(0.6),
+          color: BAColors.borderOf(context).withOpacity(0.6),
         ),
         boxShadow: [
           BoxShadow(
-            color: BAThemeColors.primary.withOpacity(0.05),
+            color: BAColors.primaryOf(context).withOpacity(0.05),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -781,7 +781,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: BAThemeColors.primary.withOpacity(0.12),
+                  color: BAColors.primaryOf(context).withOpacity(0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -790,7 +790,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                       : _autoFixStatus == AutoFixStatus.fixing
                           ? Icons.build_rounded
                           : Icons.auto_fix_high_rounded,
-                  color: BAThemeColors.primary,
+                  color: BAColors.primaryOf(context),
                   size: 24,
                 ),
               ),
@@ -802,7 +802,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                     const Text(
                       '自动修复问题',
                       style: TextStyle(
-                        color: BAThemeColors.textPrimary,
+                        color: BAColors.textPrimaryOf(context),
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -811,7 +811,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                     Text(
                       _getAutoFixStatusText(),
                       style: const TextStyle(
-                        color: BAThemeColors.textSecondary,
+                        color: BAColors.textSecondaryOf(context),
                         fontSize: 13,
                       ),
                     ),
@@ -824,7 +824,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                   height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: BAThemeColors.primary,
+                    color: BAColors.primaryOf(context),
                   ),
                 ),
             ],
@@ -862,10 +862,10 @@ class _DiagnosticPageState extends State<DiagnosticPage>
     switch (_autoFixStatus) {
       case AutoFixStatus.idle:
         return _detectedIssues.isEmpty
-            ? '点击扫描检测潜在问题'
+            ? '点击扫描检测潜在问�?
             : '发现 ${_detectedIssues.length} 个问题，${_detectedIssues.where((i) => i.canAutoFix).length} 个可自动修复';
       case AutoFixStatus.scanning:
-        return '正在扫描系统中...';
+        return '正在扫描系统�?..';
       case AutoFixStatus.fixing:
         return '正在修复问题...';
       case AutoFixStatus.completed:
@@ -876,10 +876,10 @@ class _DiagnosticPageState extends State<DiagnosticPage>
   Widget _buildIssuesList() {
     return Container(
       decoration: BoxDecoration(
-        color: BAThemeColors.surface,
+        color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: BAThemeColors.border.withOpacity(0.6),
+          color: BAColors.borderOf(context).withOpacity(0.6),
         ),
       ),
       child: Column(
@@ -891,13 +891,13 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: BAThemeColors.warning.withOpacity(0.12),
+                    color: BAColors.warningOf(context).withOpacity(0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '${_detectedIssues.length} 个问题',
+                    '${_detectedIssues.length} 个问�?,
                     style: const TextStyle(
-                      color: BAThemeColors.warning,
+                      color: BAColors.warningOf(context),
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -907,7 +907,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                 Text(
                   '${_detectedIssues.where((i) => i.canAutoFix).length} 个可修复',
                   style: const TextStyle(
-                    color: BAThemeColors.textSecondary,
+                    color: BAColors.textSecondaryOf(context),
                     fontSize: 12,
                   ),
                 ),
@@ -928,16 +928,16 @@ class _DiagnosticPageState extends State<DiagnosticPage>
     Color severityColor;
     switch (issue.severity) {
       case FixSeverity.low:
-        severityColor = BAThemeColors.info;
+        severityColor = BAColors.infoOf(context);
         break;
       case FixSeverity.medium:
-        severityColor = BAThemeColors.warning;
+        severityColor = BAColors.warningOf(context);
         break;
       case FixSeverity.high:
-        severityColor = BAThemeColors.danger;
+        severityColor = BAColors.dangerOf(context);
         break;
       case FixSeverity.critical:
-        severityColor = BAThemeColors.danger;
+        severityColor = BAColors.dangerOf(context);
         break;
     }
 
@@ -962,19 +962,19 @@ class _DiagnosticPageState extends State<DiagnosticPage>
       title: Text(
         issue.title,
         style: const TextStyle(
-          color: BAThemeColors.textPrimary,
+          color: BAColors.textPrimaryOf(context),
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
       ),
       subtitle: Text(
-        issue.canAutoFix ? '可自动修复' : '需手动修复',
+        issue.canAutoFix ? '可自动修�? : '需手动修复',
         style: TextStyle(
-          color: issue.canAutoFix ? BAThemeColors.success : BAThemeColors.textSecondary,
+          color: issue.canAutoFix ? BAColors.successOf(context) : BAColors.textSecondaryOf(context),
           fontSize: 12,
         ),
       ),
-      iconColor: BAThemeColors.textSecondary,
+      iconColor: BAColors.textSecondaryOf(context),
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -985,16 +985,16 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: BAThemeColors.backgroundLight,
+                  color: BAColors.backgroundOf(context),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: BAThemeColors.border.withOpacity(0.4),
+                    color: BAColors.borderOf(context).withOpacity(0.4),
                   ),
                 ),
                 child: Text(
                   issue.description,
                   style: const TextStyle(
-                    color: BAThemeColors.textSecondary,
+                    color: BAColors.textSecondaryOf(context),
                     fontSize: 13,
                     height: 1.4,
                   ),
@@ -1006,7 +1006,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                   children: [
                     const Icon(
                       Icons.lightbulb_outline_rounded,
-                      color: BAThemeColors.primary,
+                      color: BAColors.primaryOf(context),
                       size: 16,
                     ),
                     const SizedBox(width: 8),
@@ -1014,7 +1014,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                       child: Text(
                         issue.autoFixDescription!,
                         style: const TextStyle(
-                          color: BAThemeColors.primary,
+                          color: BAColors.primaryOf(context),
                           fontSize: 12,
                         ),
                       ),
@@ -1029,13 +1029,13 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: fixResult.isFixed
-                        ? BAThemeColors.success.withOpacity(0.1)
-                        : BAThemeColors.danger.withOpacity(0.1),
+                        ? BAColors.successOf(context).withOpacity(0.1)
+                        : BAColors.dangerOf(context).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: fixResult.isFixed
-                          ? BAThemeColors.success.withOpacity(0.3)
-                          : BAThemeColors.danger.withOpacity(0.3),
+                          ? BAColors.successOf(context).withOpacity(0.3)
+                          : BAColors.dangerOf(context).withOpacity(0.3),
                     ),
                   ),
                   child: Row(
@@ -1045,18 +1045,18 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                             ? Icons.check_circle_rounded
                             : Icons.error_rounded,
                         color: fixResult.isFixed
-                            ? BAThemeColors.success
-                            : BAThemeColors.danger,
+                            ? BAColors.successOf(context)
+                            : BAColors.dangerOf(context),
                         size: 16,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          fixResult.message ?? (fixResult.isFixed ? '已修复' : '修复失败'),
+                          fixResult.message ?? (fixResult.isFixed ? '已修�? : '修复失败'),
                           style: TextStyle(
                             color: fixResult.isFixed
-                                ? BAThemeColors.success
-                                : BAThemeColors.danger,
+                                ? BAColors.successOf(context)
+                                : BAColors.dangerOf(context),
                             fontSize: 12,
                           ),
                         ),
@@ -1082,10 +1082,10 @@ class _DiagnosticPageState extends State<DiagnosticPage>
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: BAThemeColors.surface,
+            color: BAColors.surfaceOf(context),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: BAThemeColors.border.withOpacity(0.6),
+              color: BAColors.borderOf(context).withOpacity(0.6),
             ),
           ),
           child: Column(
@@ -1096,13 +1096,13 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: BAThemeColors.primary.withOpacity(0.12),
+                      color: BAColors.primaryOf(context).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      '${_autoFixer.fixHistory.length} 条记录',
+                      '${_autoFixer.fixHistory.length} 条记�?,
                       style: const TextStyle(
-                        color: BAThemeColors.primary,
+                        color: BAColors.primaryOf(context),
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1119,7 +1119,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                       child: const Text(
                         '清除日志',
                         style: TextStyle(
-                          color: BAThemeColors.textSecondary,
+                          color: BAColors.textSecondaryOf(context),
                           fontSize: 12,
                         ),
                       ),
@@ -1134,7 +1134,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                     child: Text(
                       '暂无修复记录',
                       style: TextStyle(
-                        color: BAThemeColors.textSecondary,
+                        color: BAColors.textSecondaryOf(context),
                         fontSize: 13,
                       ),
                     ),
@@ -1151,8 +1151,8 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                               ? Icons.check_circle_rounded
                               : Icons.error_rounded,
                           color: op.isSuccess
-                              ? BAThemeColors.success
-                              : BAThemeColors.danger,
+                              ? BAColors.successOf(context)
+                              : BAColors.dangerOf(context),
                           size: 14,
                         ),
                         const SizedBox(width: 8),
@@ -1160,7 +1160,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                           child: Text(
                             op.operationName,
                             style: const TextStyle(
-                              color: BAThemeColors.textPrimary,
+                              color: BAColors.textPrimaryOf(context),
                               fontSize: 13,
                             ),
                           ),
@@ -1168,7 +1168,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                         Text(
                           op.duration?.inMilliseconds.toString() ?? '-',
                           style: const TextStyle(
-                            color: BAThemeColors.textSecondary,
+                            color: BAColors.textSecondaryOf(context),
                             fontSize: 11,
                             fontFamily: 'monospace',
                           ),
@@ -1177,7 +1177,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                         const Text(
                           'ms',
                           style: TextStyle(
-                            color: BAThemeColors.textSecondary,
+                            color: BAColors.textSecondaryOf(context),
                             fontSize: 11,
                           ),
                         ),
@@ -1208,14 +1208,14 @@ class _DiagnosticPageState extends State<DiagnosticPage>
           decoration: BoxDecoration(
             color: isPrimary
                 ? (onPressed == null
-                    ? BAThemeColors.primary.withOpacity(0.4)
-                    : BAThemeColors.primary)
-                : BAThemeColors.surfaceVariant,
+                    ? BAColors.primaryOf(context).withOpacity(0.4)
+                    : BAColors.primaryOf(context))
+                : BAColors.surfaceVariantOf(context),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: isPrimary
                   ? Colors.transparent
-                  : BAThemeColors.border.withOpacity(0.5),
+                  : BAColors.borderOf(context).withOpacity(0.5),
             ),
           ),
           child: Row(
@@ -1226,8 +1226,8 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                 color: isPrimary
                     ? Colors.white
                     : (onPressed == null
-                        ? BAThemeColors.textDisabled
-                        : BAThemeColors.textPrimary),
+                        ? BAColors.textDisabledOf(context)
+                        : BAColors.textPrimaryOf(context)),
                 size: 18,
               ),
               const SizedBox(width: 8),
@@ -1237,8 +1237,8 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                   color: isPrimary
                       ? Colors.white
                       : (onPressed == null
-                          ? BAThemeColors.textDisabled
-                          : BAThemeColors.textPrimary),
+                          ? BAColors.textDisabledOf(context)
+                          : BAColors.textPrimaryOf(context)),
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),

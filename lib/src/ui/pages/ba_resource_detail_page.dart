@@ -222,7 +222,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
               child: Text(
                 widget.resource.name,
                 style: TextStyle(
-                  color: isLight ? const Color(0xFF1A2744) : Colors.white,
+                  color: BAColors.textPrimaryOf(context),
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
@@ -341,7 +341,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
                 Text(
                   widget.resource.name,
                   style: TextStyle(
-                    color: isLight ? const Color(0xFF1A2744) : Colors.white,
+                    color: BAColors.textPrimaryOf(context),
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
@@ -352,14 +352,14 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
                 Row(
                   children: [
                     Icon(Icons.person_outline, size: 16,
-                        color: isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8)),
+                        color: BAColors.textSecondaryOf(context)),
                     const SizedBox(width: 6),
                     Text(
                       widget.resource.authors.isNotEmpty
                           ? widget.resource.authors.map((a) => a.name).join(', ')
                           : '未知作者',
                       style: TextStyle(
-                        color: isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
+                        color: BAColors.textSecondaryOf(context),
                         fontSize: 13,
                       ),
                     ),
@@ -420,7 +420,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
               Text(
                 '简介',
                 style: TextStyle(
-                  color: isLight ? const Color(0xFF1A2744) : Colors.white,
+                  color: BAColors.textPrimaryOf(context),
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
@@ -454,7 +454,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
               Text(
                 '可用版本 (${_versions.length})',
                 style: TextStyle(
-                  color: isLight ? const Color(0xFF1A2744) : Colors.white,
+                  color: BAColors.textPrimaryOf(context),
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
@@ -479,7 +479,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
               child: Text(
                 '暂无版本信息',
                 style: TextStyle(
-                  color: isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
+                  color: BAColors.textSecondaryOf(context),
                   fontSize: 13,
                 ),
               ),
@@ -496,7 +496,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: isLight ? const Color(0xFFF5F8FF) : const Color(0xFF2A3A5A),
+        color: BAColors.surfaceVariantOf(context),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -508,7 +508,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
                 Text(
                   'v${version.versionNumber}',
                   style: TextStyle(
-                    color: isLight ? const Color(0xFF1A2744) : Colors.white,
+                    color: BAColors.textPrimaryOf(context),
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -522,7 +522,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
                       (v) => Text(
                         v,
                         style: TextStyle(
-                          color: isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
+                          color: BAColors.textSecondaryOf(context),
                           fontSize: 11,
                         ),
                       ),
@@ -574,7 +574,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
               Text(
                 '兼容性',
                 style: TextStyle(
-                  color: isLight ? const Color(0xFF1A2744) : Colors.white,
+                  color: BAColors.textPrimaryOf(context),
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
@@ -624,7 +624,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
           Container(
             width: 1,
             height: 40,
-            color: isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A),
+            color: BAColors.borderOf(context),
           ),
           Expanded(
             child: _buildStatBlock(
@@ -637,7 +637,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
           Container(
             width: 1,
             height: 40,
-            color: isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A),
+            color: BAColors.borderOf(context),
           ),
           Expanded(
             child: _buildStatBlock(
@@ -671,7 +671,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
         Text(
           label,
           style: TextStyle(
-            color: isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
+            color: BAColors.textSecondaryOf(context),
             fontSize: 12,
           ),
         ),
@@ -698,9 +698,9 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
               ),
               label: Text(_isFavorite ? '已收藏' : '收藏'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: isLight ? const Color(0xFF1A2744) : Colors.white,
+                foregroundColor: BAColors.textPrimaryOf(context),
                 side: BorderSide(
-                  color: _isFavorite ? Colors.red : (isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A)),
+                  color: _isFavorite ? Colors.red : (BAColors.borderOf(context)),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                 shape: RoundedRectangleBorder(

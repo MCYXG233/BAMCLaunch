@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/app_theme.dart';
@@ -77,7 +77,7 @@ class ErrorDialog extends StatelessWidget {
             children: [
               Icon(
                 Icons.error_outline,
-                color: BAColors.danger,
+                color: BAColors.dangerOf(context),
                 size: 32,
               ),
               const SizedBox(width: 16),
@@ -98,10 +98,10 @@ class ErrorDialog extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: BAColors.primary.withOpacity(0.1),
+                color: BAColors.primaryOf(context).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: BAColors.primary.withOpacity(0.3),
+                  color: BAColors.primaryOf(context).withOpacity(0.3),
                 ),
               ),
               child: Row(
@@ -109,7 +109,7 @@ class ErrorDialog extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.lightbulb_outline,
-                    color: BAColors.primary,
+                    color: BAColors.primaryOf(context),
                     size: 20,
                   ),
                   const SizedBox(width: 12),
@@ -210,7 +210,7 @@ class ErrorSnackBar {
       SnackBar(
         content: Row(
           children: [
-            Icon(Icons.error_outline, color: BAColors.danger),
+            Icon(Icons.error_outline, color: BAColors.dangerOf(context)),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -220,7 +220,7 @@ class ErrorSnackBar {
             ),
           ],
         ),
-        backgroundColor: BAColors.danger,
+        backgroundColor: BAColors.dangerOf(context),
         duration: duration,
         action: onRetry != null
             ? SnackBarAction(

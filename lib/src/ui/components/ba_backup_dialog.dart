@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../game/backup_manager.dart';
 import '../../instance/instance_manager.dart';
 import '../../instance/models.dart';
@@ -232,7 +232,7 @@ class _BABackupDialogState extends State<BABackupDialog> {
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide(
-                              color: BAColors.primary,
+                              color: BAColors.primaryOf(context),
                             ),
                           ),
                           contentPadding: const EdgeInsets.symmetric(
@@ -377,13 +377,13 @@ class _BABackupDialogState extends State<BABackupDialog> {
                                   const SizedBox(width: 8),
                                   IconButton(
                                     icon: const Icon(Icons.restore, size: 18),
-                                    color: BAColors.primary,
+                                    color: BAColors.primaryOf(context),
                                     onPressed: () => _restoreBackup(backup),
                                     tooltip: '恢复备份',
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.delete_outline, size: 18),
-                                    color: BAColors.primary,
+                                    color: BAColors.primaryOf(context),
                                     onPressed: () => _deleteBackup(backup),
                                     tooltip: '删除备份',
                                   ),

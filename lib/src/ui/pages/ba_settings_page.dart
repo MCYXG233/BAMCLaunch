@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -866,7 +866,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
     final isLight = Theme.of(context).brightness == Brightness.light;
     final cardBg = _color(const Color(0xFF1E2747), const Color(0xFFFFFFFF), isLight);
     final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFD0D8EE), isLight);
-    final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+    final primaryText = BAColors.textPrimaryOf(context);
     final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
     final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
 
@@ -980,7 +980,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
     final unselectedIcon = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
     final unselectedBgA = _color(const Color(0xFF2A3766), const Color(0xFFDCE4F8), isLight);
     final unselectedBgB = _color(const Color(0xFF1E2747), const Color(0xFFFFFFFF), isLight);
-    final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+    final primaryText = BAColors.textPrimaryOf(context);
 
     return Container(
       width: 210,
@@ -1106,7 +1106,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
     final bgColor = _color(const Color(0xFF1E2747), const Color(0xFFFFFFFF), isLight);
     final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFD0D8EE), isLight);
     final shadowOpacity = isLight ? 0.08 : 0.2;
-    final titleText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+    final titleText = BAColors.textPrimaryOf(context);
     final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
 
     return Container(
@@ -1183,7 +1183,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
     Color? iconColor,
   }) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+    final primaryText = BAColors.textPrimaryOf(context);
     final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
     final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
     final effectiveIconColor = iconColor ?? accentBlue;
@@ -1321,7 +1321,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
     final isLight = Theme.of(context).brightness == Brightness.light;
     final fillBg = _color(const Color(0xFF0F1733), const Color(0xFFEEF3FF), isLight);
     final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFB9C3DE), isLight);
-    final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+    final primaryText = BAColors.textPrimaryOf(context);
     final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
     final dropdownBg = _color(const Color(0xFF1E2747), const Color(0xFFFFFFFF), isLight);
 
@@ -1357,7 +1357,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
     final isLight = Theme.of(context).brightness == Brightness.light;
     final fillBg = _color(const Color(0xFF0F1733), const Color(0xFFEEF3FF), isLight);
     final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFB9C3DE), isLight);
-    final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+    final primaryText = BAColors.textPrimaryOf(context);
     final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
 
     return SizedBox(
@@ -1399,7 +1399,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
     final isLight = Theme.of(context).brightness == Brightness.light;
     final fillBg = _color(const Color(0xFF0F1733), const Color(0xFFEEF3FF), isLight);
     final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFB9C3DE), isLight);
-    final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+    final primaryText = BAColors.textPrimaryOf(context);
     final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
 
     return Row(
@@ -1604,7 +1604,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
   Widget _buildGeneralSettings() {
     if (!_themeManagerInitialized) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(color: BAColors.primaryOf(context)),
       );
     }
@@ -1737,7 +1737,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               child: Builder(
                 builder: (context) {
                   final isLight = Theme.of(context).brightness == Brightness.light;
-                  final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+                  final primaryText = BAColors.textPrimaryOf(context);
                   final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
                   final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
                   final inactiveTrack = _color(const Color(0xFF2A3766), const Color(0xFFDCE4F8), isLight);
@@ -1913,7 +1913,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               child: Builder(
                 builder: (context) {
                   final isLight = Theme.of(context).brightness == Brightness.light;
-                  final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+                  final primaryText = BAColors.textPrimaryOf(context);
                   final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
                   final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
                   final inactiveTrack = _color(const Color(0xFF2A3766), const Color(0xFFDCE4F8), isLight);
@@ -2009,7 +2009,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 child: Builder(
                   builder: (context) {
                     final isLight = Theme.of(context).brightness == Brightness.light;
-                    final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+                    final primaryText = BAColors.textPrimaryOf(context);
                     final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
                     final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
                     final inactiveTrack = _color(const Color(0xFF2A3766), const Color(0xFFDCE4F8), isLight);
@@ -2164,7 +2164,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               child: Builder(
                 builder: (context) {
                   final isLight = Theme.of(context).brightness == Brightness.light;
-                  final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+                  final primaryText = BAColors.textPrimaryOf(context);
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -2259,7 +2259,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
           child: Builder(
             builder: (context) {
               final isLight = Theme.of(context).brightness == Brightness.light;
-              final primaryText = _color(Colors.white, const Color(0xFF1A2744), isLight);
+              final primaryText = BAColors.textPrimaryOf(context);
               final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
               final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
               final selectedBg = _color(const Color(0xFF2A3766), const Color(0xFFEEF3FF), isLight);
@@ -2337,13 +2337,13 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
-                                      color: BAColors.accentPinkDark.withOpacity(0.2),
+                                      color: BAColors.accentPinkDarkOf(context).withOpacity(0.2),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
-                                    child: const Text(
+                                    child: Text(
                                       '内置',
                                       style: TextStyle(
-                                        color: BAColors.accentPinkDark,
+                                        color: BAColors.accentPinkDarkOf(context),
                                         fontSize: 10,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -2375,7 +2375,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                             ),
                             child: Text(
                               '${speedResult.latencyMs}ms',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: BAColors.successOf(context),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -2386,13 +2386,13 @@ class _BASettingsPageState extends State<BASettingsPage> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: BAColors.accentPinkDark.withOpacity(0.2),
+                              color: BAColors.accentPinkDarkOf(context).withOpacity(0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: const Text(
+                            child: Text(
                               '不可用',
                               style: TextStyle(
-                                color: BAColors.accentPinkDark,
+                                color: BAColors.accentPinkDarkOf(context),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -2408,12 +2408,12 @@ class _BASettingsPageState extends State<BASettingsPage> {
                             child: Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                color: BAColors.accentPinkDark.withOpacity(0.15),
+                                color: BAColors.accentPinkDarkOf(context).withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.delete_outline,
-                                color: BAColors.accentPinkDark,
+                                color: BAColors.accentPinkDarkOf(context),
                                 size: 16,
                               ),
                             ),
@@ -2486,7 +2486,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               control: _buildPrimaryButton(
                 text: '清除',
                 onPressed: _clearCache,
-                color: BAColors.accentPinkDark,
+                color: BAColors.accentPinkDarkOf(context),
               ),
             ),
           ],
@@ -2591,7 +2591,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               subtitle:
                   '${formatDuration(Duration(seconds: mostPlayed.totalPlayTimeSeconds))} / ${mostPlayed.launchCount}次',
               control: const SizedBox.shrink(),
-              iconColor: BAColors.accentPinkDark,
+              iconColor: BAColors.accentPinkDarkOf(context),
             ),
           ],
         ),
@@ -2622,7 +2622,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   NotificationManager().showSuccess('统计数据已清除');
                 }
               },
-              color: BAColors.accentPinkDark,
+              color: BAColors.accentPinkDarkOf(context),
             ),
           ),
         ],
@@ -2635,3 +2635,4 @@ class _BASettingsPageState extends State<BASettingsPage> {
     );
   }
 }
+

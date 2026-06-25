@@ -1014,7 +1014,7 @@ class _ModDetailDialog extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: mod.dependencies.map((dep) => Chip(
-                label: Text(dep, style: const TextStyle(fontSize: 12)),
+                label: Text(dep, style: TextStyle(fontSize: 12)),
                 backgroundColor: BAColors.surfaceVariantOf(context),
               )).toList(),
             ),

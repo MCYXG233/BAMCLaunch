@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../auth/auth_manager.dart';
@@ -766,7 +766,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.error_outline, color: BAColors.dangerOf(context), size: 16),
+                  Icon(Icons.error_outline, color: BAColors.dangerOf(context), size: 16),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -1024,7 +1024,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
             color: BAColors.successOf(context).withOpacity(0.2),
             shape: BoxShape.circle,
           ),
-          child: const Icon(
+          child: Icon(
             Icons.check_circle,
             color: BAColors.successOf(context),
             size: 48,
@@ -1055,7 +1055,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
             color: BAColors.dangerOf(context).withOpacity(0.2),
             shape: BoxShape.circle,
           ),
-          child: const Icon(
+          child: Icon(
             Icons.error_outline,
             color: BAColors.dangerOf(context),
             size: 48,

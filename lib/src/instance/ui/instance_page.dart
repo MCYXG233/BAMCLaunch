@@ -37,7 +37,7 @@ class _InstancePageState extends State<InstancePage> {
     } catch (e, stackTrace) {
       _logger.error('Failed to initialize instance managers', e, stackTrace);
       if (mounted) {
-        _showError('初始化失败: $e');
+        _showError('初始化失�? $e');
       }
       setState(() => _isLoading = false);
     }
@@ -47,7 +47,7 @@ class _InstancePageState extends State<InstancePage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: BAColors.danger,
+        backgroundColor: BAColors.dangerOf(context),
         duration: const Duration(seconds: 3),
       ),
     );
@@ -57,7 +57,7 @@ class _InstancePageState extends State<InstancePage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: BAColors.success,
+        backgroundColor: BAColors.successOf(context),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -92,7 +92,7 @@ class _InstancePageState extends State<InstancePage> {
         children: [
           Text(
             '实例名称',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -100,18 +100,18 @@ class _InstancePageState extends State<InstancePage> {
             decoration: InputDecoration(
               hintText: '我的游戏实例',
               filled: true,
-              fillColor: BAColors.surfaceVariant,
+              fillColor: BAColors.surfaceVariantOf(context),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.border),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primary, width: 2),
+                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
@@ -119,7 +119,7 @@ class _InstancePageState extends State<InstancePage> {
           const SizedBox(height: 16),
           Text(
             '游戏版本',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -127,18 +127,18 @@ class _InstancePageState extends State<InstancePage> {
             decoration: InputDecoration(
               hintText: '例如: 1.20.4',
               filled: true,
-              fillColor: BAColors.surfaceVariant,
+              fillColor: BAColors.surfaceVariantOf(context),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.border),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primary, width: 2),
+                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
@@ -204,26 +204,26 @@ class _InstancePageState extends State<InstancePage> {
         children: [
           Text(
             '目录名称',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
           ),
           const SizedBox(height: 8),
           TextField(
             controller: nameController,
             decoration: InputDecoration(
-              hintText: '主游戏目录',
+              hintText: '主游戏目�?,
               filled: true,
-              fillColor: BAColors.surfaceVariant,
+              fillColor: BAColors.surfaceVariantOf(context),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.border),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primary, width: 2),
+                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
@@ -231,7 +231,7 @@ class _InstancePageState extends State<InstancePage> {
           const SizedBox(height: 16),
           Text(
             '目录路径',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -239,18 +239,18 @@ class _InstancePageState extends State<InstancePage> {
             decoration: InputDecoration(
               hintText: 'C:\\Games\\Minecraft\\Instances',
               filled: true,
-              fillColor: BAColors.surfaceVariant,
+              fillColor: BAColors.surfaceVariantOf(context),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.border),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primary, width: 2),
+                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
@@ -278,7 +278,7 @@ class _InstancePageState extends State<InstancePage> {
     final confirmed = await BAConfirmDialog.show(
       context: context,
       title: '删除实例',
-      content: '确定要删除实例"${instance.name}"吗? 此操作不可撤销。',
+      content: '确定要删除实�?${instance.name}"�? 此操作不可撤销�?,
       confirmText: '删除',
       confirmButtonStyle: BAButtonStyle.danger,
       cancelText: '取消',
@@ -288,7 +288,7 @@ class _InstancePageState extends State<InstancePage> {
       try {
         await _instanceManager.deleteInstance(instance.id);
         setState(() {});
-        _showSuccess('实例已删除!');
+        _showSuccess('实例已删�?');
       } catch (e, stackTrace) {
         _logger.error('Failed to delete instance', e, stackTrace);
         _showError('删除失败: $e');
@@ -315,16 +315,16 @@ class _InstancePageState extends State<InstancePage> {
         duration: const Duration(milliseconds: 200),
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: isSelected ? BAColors.primary.withOpacity(0.1) : BAColors.surface,
+          color: isSelected ? BAColors.primaryOf(context).withOpacity(0.1) : BAColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? BAColors.primary : BAColors.border,
+            color: isSelected ? BAColors.primaryOf(context) : BAColors.borderOf(context),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
             if (isSelected)
               BoxShadow(
-                color: BAColors.primary.withOpacity(0.2),
+                color: BAColors.primaryOf(context).withOpacity(0.2),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -344,13 +344,13 @@ class _InstancePageState extends State<InstancePage> {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      color: BAColors.primary.withOpacity(0.1),
+                      color: BAColors.primaryOf(context).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       Icons.gamepad,
                       size: 32,
-                      color: BAColors.primary,
+                      color: BAColors.primaryOf(context),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -361,14 +361,14 @@ class _InstancePageState extends State<InstancePage> {
                         Text(
                           instance.name,
                           style: BATypography.headlineSmall.copyWith(
-                            color: BAColors.textPrimary,
+                            color: BAColors.textPrimaryOf(context),
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${instance.version}${instance.loader != null ? ' • ${instance.loader}' : ''}',
+                          '${instance.version}${instance.loader != null ? ' �?${instance.loader}' : ''}',
                           style: BATypography.bodyMedium.copyWith(
-                            color: BAColors.textSecondary,
+                            color: BAColors.textSecondaryOf(context),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -377,13 +377,13 @@ class _InstancePageState extends State<InstancePage> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: BAColors.secondary.withOpacity(0.1),
+                                color: BAColors.secondaryOf(context).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
-                                '${instanceResources.length} 个资源',
+                                '${instanceResources.length} 个资�?,
                                 style: BATypography.label.copyWith(
-                                  color: BAColors.secondary,
+                                  color: BAColors.secondaryOf(context),
                                 ),
                               ),
                             ),
@@ -392,7 +392,7 @@ class _InstancePageState extends State<InstancePage> {
                               Text(
                                 '上次游玩: ${_formatDate(instance.lastPlayed!)}',
                                 style: BATypography.bodySmall.copyWith(
-                                  color: BAColors.textSecondary,
+                                  color: BAColors.textSecondaryOf(context),
                                 ),
                               ),
                             ],
@@ -403,7 +403,7 @@ class _InstancePageState extends State<InstancePage> {
                   ),
                   if (!isSelected)
                     IconButton(
-                      icon: Icon(Icons.delete_outline, color: BAColors.danger),
+                      icon: Icon(Icons.delete_outline, color: BAColors.dangerOf(context)),
                       onPressed: () => _deleteInstance(instance),
                     ),
                 ],
@@ -423,8 +423,8 @@ class _InstancePageState extends State<InstancePage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: BAColors.surface,
-        border: Border(bottom: BorderSide(color: BAColors.border)),
+        color: BAColors.surfaceOf(context),
+        border: Border(bottom: BorderSide(color: BAColors.borderOf(context))),
       ),
       child: Row(
         children: [
@@ -445,9 +445,9 @@ class _InstancePageState extends State<InstancePage> {
                       _showError('切换目录失败: $e');
                     }
                   },
-                  selectedColor: BAColors.primary.withOpacity(0.2),
-                  checkmarkColor: BAColors.primary,
-                  backgroundColor: BAColors.surfaceVariant,
+                  selectedColor: BAColors.primaryOf(context).withOpacity(0.2),
+                  checkmarkColor: BAColors.primaryOf(context),
+                  backgroundColor: BAColors.surfaceVariantOf(context),
                 );
               }).toList(),
             ),
@@ -473,19 +473,19 @@ class _InstancePageState extends State<InstancePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.folder_open, size: 64, color: BAColors.textDisabled),
+            Icon(Icons.folder_open, size: 64, color: BAColors.textDisabledOf(context)),
             const SizedBox(height: 16),
             Text(
-              '还没有游戏目录',
+              '还没有游戏目�?,
               style: BATypography.headlineSmall.copyWith(
-                color: BAColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              '创建一个游戏目录来开始使用实例管理',
+              '创建一个游戏目录来开始使用实例管�?,
               style: BATypography.bodyMedium.copyWith(
-                color: BAColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
               ),
             ),
             const SizedBox(height: 24),
@@ -508,19 +508,19 @@ class _InstancePageState extends State<InstancePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.gamepad, size: 64, color: BAColors.textDisabled),
+            Icon(Icons.gamepad, size: 64, color: BAColors.textDisabledOf(context)),
             const SizedBox(height: 16),
             Text(
-              '还没有游戏实例',
+              '还没有游戏实�?,
               style: BATypography.headlineSmall.copyWith(
-                color: BAColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              '创建一个实例来开始游戏',
+              '创建一个实例来开始游�?,
               style: BATypography.bodyMedium.copyWith(
-                color: BAColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
               ),
             ),
             const SizedBox(height: 24),
@@ -546,18 +546,18 @@ class _InstancePageState extends State<InstancePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: BAColors.background,
+      backgroundColor: BAColors.backgroundOf(context),
       body: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: BAColors.surface,
-              border: Border(bottom: BorderSide(color: BAColors.border)),
+              color: BAColors.surfaceOf(context),
+              border: Border(bottom: BorderSide(color: BAColors.borderOf(context))),
             ),
             child: Row(
               children: [
-                Icon(Icons.folder, size: 32, color: BAColors.primary),
+                Icon(Icons.folder, size: 32, color: BAColors.primaryOf(context)),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -566,13 +566,13 @@ class _InstancePageState extends State<InstancePage> {
                       Text(
                         '实例管理',
                         style: BATypography.headlineMedium.copyWith(
-                          color: BAColors.textPrimary,
+                          color: BAColors.textPrimaryOf(context),
                         ),
                       ),
                       Text(
-                        '管理游戏实例和集中资源',
+                        '管理游戏实例和集中资�?,
                         style: BATypography.bodyMedium.copyWith(
-                          color: BAColors.textSecondary,
+                          color: BAColors.textSecondaryOf(context),
                         ),
                       ),
                     ],

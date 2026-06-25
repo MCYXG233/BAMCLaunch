@@ -105,11 +105,11 @@ class _HUDOverlayState extends State<HUDOverlay> {
     Color fpsColor;
     
     if (fps >= 55) {
-      fpsColor = BAColors.success;
+      fpsColor = BAColors.successOf(context);
     } else if (fps >= 30) {
-      fpsColor = BAColors.warning;
+      fpsColor = BAColors.warningOf(context);
     } else {
-      fpsColor = BAColors.danger;
+      fpsColor = BAColors.dangerOf(context);
     }
     
     return _HUDPanel(
@@ -137,11 +137,11 @@ class _HUDOverlayState extends State<HUDOverlay> {
     
     Color memoryColor;
     if (usagePercent < 60) {
-      memoryColor = BAColors.success;
+      memoryColor = BAColors.successOf(context);
     } else if (usagePercent < 85) {
-      memoryColor = BAColors.warning;
+      memoryColor = BAColors.warningOf(context);
     } else {
-      memoryColor = BAColors.danger;
+      memoryColor = BAColors.dangerOf(context);
     }
     
     return Padding(
@@ -174,12 +174,12 @@ class _HUDOverlayState extends State<HUDOverlay> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.location_on, color: BAColors.primary, size: 16),
+            Icon(Icons.location_on, color: BAColors.primaryOf(context), size: 16),
             const SizedBox(width: 8),
             Text(
               'X: ${_gamePosition.dx.toStringAsFixed(1)} Y: ${_gamePosition.dy.toStringAsFixed(1)}',
               style: BATypography.caption.copyWith(
-                color: BAColors.textPrimary,
+                color: BAColors.textPrimaryOf(context),
                 fontWeight: FontWeight.bold,
               ),
             ),

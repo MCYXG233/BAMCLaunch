@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../resource_center/models.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
@@ -103,7 +103,7 @@ class ResourceCard extends StatelessWidget {
   }
 
   Widget _buildPlaceholderIcon(BuildContext context) {
-    final primaryColor = BAColors.primary;
+    final primaryColor = BAColors.primaryOf(context);
     final IconData iconData;
     
     switch (resource.type) {
@@ -152,8 +152,8 @@ class ResourceCard extends StatelessWidget {
   }
 
   Widget _buildSourceBadge(BuildContext context) {
-    final primaryColor = BAColors.primary;
-    final secondaryColor = BAColors.secondary;
+    final primaryColor = BAColors.primaryOf(context);
+    final secondaryColor = BAColors.secondaryOf(context);
 
     Color badgeColor;
     String badgeText;
@@ -245,7 +245,7 @@ class ResourceCard extends StatelessWidget {
   }
 
   Widget _buildInstalledBadge(BuildContext context) {
-    final successColor = BAColors.success;
+    final successColor = BAColors.successOf(context);
     
     return Positioned(
       top: 8,
@@ -306,7 +306,7 @@ class InstalledResourceCard extends StatelessWidget {
     final textPrimary = BAColors.textPrimaryOf(context);
     final textSecondary = BAColors.textSecondaryOf(context);
     final borderColor = BAColors.borderOf(context);
-    final dangerColor = BAColors.danger;
+    final dangerColor = BAColors.dangerOf(context);
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -367,7 +367,7 @@ class InstalledResourceCard extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     resource.enabled ? Icons.visibility : Icons.visibility_off,
-                    color: resource.enabled ? BAColors.success : textSecondary,
+                    color: resource.enabled ? BAColors.successOf(context) : textSecondary,
                   ),
                   onPressed: onToggle,
                   tooltip: resource.enabled ? '禁用' : '启用',
@@ -387,7 +387,7 @@ class InstalledResourceCard extends StatelessWidget {
 
   Widget _buildIcon(BuildContext context) {
     final surfaceVariant = BAColors.surfaceVariantOf(context);
-    final primaryColor = BAColors.primary;
+    final primaryColor = BAColors.primaryOf(context);
     
     final IconData iconData;
     switch (resource.type) {
@@ -441,7 +441,7 @@ class InstalledResourceCard extends StatelessWidget {
   }
 
   Widget _buildStatusBadge(BuildContext context) {
-    final successColor = BAColors.success;
+    final successColor = BAColors.successOf(context);
     final textSecondary = BAColors.textSecondaryOf(context);
     
     final Color badgeColor = resource.enabled ? successColor : textSecondary;
