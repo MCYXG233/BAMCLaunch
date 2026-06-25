@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../theme/ba_theme_colors.dart';
 import '../theme/mc_theme_colors.dart';
 import '../../config/config_manager.dart';
@@ -49,8 +51,9 @@ class _SettingsPanelState extends State<SettingsPanel>
   late Animation<Offset> _slideAnimation;
 
   final ConfigManager _configManager = ConfigManager();
-  final ThemeManager _themeManager = ThemeManager();
   final BackgroundManager _backgroundManager = BackgroundManager();
+  // ThemeManager 必须从 Provider 获取，保证与 MaterialApp 共享同一个实例
+  late final ThemeManager _themeManager;
 
   SettingsCategory _selectedCategory = SettingsCategory.appearance;
   bool _managersInitialized = false;
@@ -60,6 +63,7 @@ class _SettingsPanelState extends State<SettingsPanel>
   String _javaPath = '';
   double _memoryAllocation = 4096;
   String _themeMode = 'dark';
+  String _colorScheme = 'blue_archive'; // blue_archive / minecraft
   bool _autoUpdate = true;
   String _downloadSource = 'official';
   int _concurrentDownloads = 3;
@@ -68,6 +72,7 @@ class _SettingsPanelState extends State<SettingsPanel>
   bool _minimizeToTray = true;
   bool _closeToTray = false;
   bool _autoRetryDownload = true;
+  bool _enableAnimation = true;
   String _proxyHost = '';
   int _proxyPort = 0;
   String _gameWindowSize = '1280x720';
@@ -83,6 +88,9 @@ class _SettingsPanelState extends State<SettingsPanel>
   @override
   void initState() {
     super.initState();
+
+    // 从 Provider 获取共享的 ThemeManager 实例
+    _themeManager = Provider.of<ThemeManager>(context, listen: false);
 
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 350),
@@ -142,6 +150,7 @@ class _SettingsPanelState extends State<SettingsPanel>
       _minimizeToTray = _configManager.getBool(ConfigKeys.minimizeToTray) ?? true;
       _closeToTray = _configManager.getBool(ConfigKeys.closeToTray) ?? false;
       _autoRetryDownload = _configManager.getBool(ConfigKeys.autoRetryDownload) ?? true;
+      _enableAnimation = _configManager.getBool(ConfigKeys.enableSplashAnimation) ?? true;
       _proxyHost = _configManager.getString(ConfigKeys.proxyHost) ?? '';
       _proxyPort = _configManager.getInt(ConfigKeys.proxyPort) ?? 0;
       _gameWindowSize = _configManager.getString(ConfigKeys.gameWindowSize) ?? '1280x720';
@@ -163,6 +172,7 @@ class _SettingsPanelState extends State<SettingsPanel>
       if (mounted) {
         setState(() {
           _themeMode = themeModeStr;
+          _colorScheme = _themeManager.currentTheme;
           _proxyHostController.text = _proxyHost;
           _proxyPortController.text =
               _proxyPort == 0 ? '' : _proxyPort.toString();
@@ -228,6 +238,24 @@ class _SettingsPanelState extends State<SettingsPanel>
     }
   }
 
+  Future<void> _saveColorScheme(String scheme) async {
+    try {
+      await _themeManager.setTheme(scheme);
+      if (mounted) {
+        setState(() {
+          _colorScheme = scheme;
+        });
+      }
+      NotificationManager().showSuccess(
+        scheme == 'blue_archive' ? '已切换到蔚蓝档案配色' : '已切换到 Minecraft 配色',
+      );
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('切换配色方案失败', message: e.toString());
+      }
+    }
+  }
+
   Future<void> _saveDownloadSource(String source) async {
     try {
       await _configManager.setString(ConfigKeys.downloadSource, source);
@@ -276,11 +304,12 @@ class _SettingsPanelState extends State<SettingsPanel>
     final textColor = isDark
         ? const Color(0xFFF5F5F5)
         : const Color(0xFF2D3748);
+    // 深色模式下用更亮的颜色，提高对比度
     final textSecondary = isDark
-        ? const Color(0xFFB0B0B0)
+        ? const Color(0xFFCAD3DE)
         : const Color(0xFF718096);
     final borderColor = isDark
-        ? const Color(0xFF373A40)
+        ? const Color(0xFF454952)
         : const Color(0xFFE2E8F0);
 
     return Stack(
@@ -547,6 +576,38 @@ class _SettingsPanelState extends State<SettingsPanel>
           _buildSectionTitle('外观', textColor),
           const SizedBox(height: 16),
 
+          // 配色方案
+          _buildSettingCard(
+            surfaceColor: surfaceColor,
+            borderColor: borderColor,
+            children: [
+              _buildSettingRow(
+                icon: Icons.palette,
+                iconColor: BAThemeColors.primary,
+                title: '配色方案',
+                subtitle: _colorScheme == 'blue_archive' ? '蔚蓝档案风格' : 'Minecraft 风格',
+                textColor: textColor,
+                textSecondary: textSecondary,
+                trailing: DropdownButton<String>(
+                  value: _colorScheme,
+                  underline: const SizedBox(),
+                  dropdownColor: surfaceColor,
+                  iconEnabledColor: textColor,
+                  style: TextStyle(color: textColor, fontSize: 13),
+                  items: const [
+                    DropdownMenuItem(value: 'blue_archive', child: Text('蔚蓝档案')),
+                    DropdownMenuItem(value: 'minecraft', child: Text('Minecraft')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) _saveColorScheme(value);
+                  },
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
           // 主题模式
           _buildSettingCard(
             surfaceColor: surfaceColor,
@@ -563,6 +624,8 @@ class _SettingsPanelState extends State<SettingsPanel>
                   value: _themeMode,
                   underline: const SizedBox(),
                   dropdownColor: surfaceColor,
+                  iconEnabledColor: textColor,
+                  style: TextStyle(color: textColor, fontSize: 13),
                   items: const [
                     DropdownMenuItem(value: 'dark', child: Text('深色')),
                     DropdownMenuItem(value: 'light', child: Text('浅色')),
@@ -591,10 +654,8 @@ class _SettingsPanelState extends State<SettingsPanel>
                 textColor: textColor,
                 textSecondary: textSecondary,
                 trailing: TextButton(
-                  onPressed: () {
-                    // 背景设置功能待实现
-                    NotificationManager().showInfo('背景设置功能开发中');
-                  },
+                  onPressed: () => _showBackgroundSelector(),
+                  style: TextButton.styleFrom(foregroundColor: textColor),
                   child: const Text('选择'),
                 ),
               ),
@@ -615,8 +676,12 @@ class _SettingsPanelState extends State<SettingsPanel>
                 subtitle: '启用界面动画过渡',
                 textColor: textColor,
                 textSecondary: textSecondary,
-                value: true,
-                onChanged: (value) {},
+                value: _enableAnimation,
+                onChanged: (value) async {
+                  await _configManager.setBool(ConfigKeys.enableSplashAnimation, value);
+                  setState(() => _enableAnimation = value);
+                  NotificationManager().showSuccess('动画设置已保存');
+                },
               ),
             ],
           ),
@@ -1094,7 +1159,10 @@ class _SettingsPanelState extends State<SettingsPanel>
                 subtitle: '感谢所有开源项目的贡献者',
                 textColor: textColor,
                 textSecondary: textSecondary,
-                trailing: const Icon(Icons.chevron_right, size: 20),
+                trailing: IconButton(
+                  icon: const Icon(Icons.chevron_right, size: 20),
+                  onPressed: () => _showOpenSourceDialog(),
+                ),
               ),
             ],
           ),
@@ -1120,29 +1188,7 @@ class _SettingsPanelState extends State<SettingsPanel>
       child: Row(
         children: [
           OutlinedButton.icon(
-            onPressed: () {
-              // 恢复默认设置
-              showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('恢复默认设置'),
-                  content: const Text('确定要恢复所有设置为默认值吗？'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('取消'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(ctx);
-                        // TODO: 实现恢复默认设置
-                      },
-                      child: const Text('确定'),
-                    ),
-                  ],
-                ),
-              );
-            },
+            onPressed: () => _showResetDialog(),
             icon: const Icon(Icons.restore, size: 16),
             label: const Text('恢复默认'),
             style: OutlinedButton.styleFrom(
@@ -1158,8 +1204,8 @@ class _SettingsPanelState extends State<SettingsPanel>
             icon: const Icon(Icons.check, size: 16),
             label: const Text('完成'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: BAThemeColors.primary,
-              foregroundColor: Colors.white,
+              backgroundColor: textColor,
+              foregroundColor: BAThemeColors.surfaceOf(context),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
           ),
@@ -1305,5 +1351,190 @@ class _SettingsPanelState extends State<SettingsPanel>
         ],
       ),
     );
+  }
+
+  // ==================== 辅助方法 ====================
+
+  /// 显示背景选择对话框
+  void _showBackgroundSelector() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('背景设置'),
+        content: SizedBox(
+          width: 400,
+          child: BABackgroundSelector(
+            currentConfig: _backgroundConfig,
+            onConfigChanged: (config) async {
+              await _backgroundManager.saveBackgroundConfig(config);
+              setState(() => _backgroundConfig = config);
+            },
+            onPickImage: () async {
+              final result = await FilePicker.platform.pickFiles(
+                type: FileType.image,
+              );
+              if (result != null && result.files.isNotEmpty) {
+                final path = result.files.single.path;
+                if (path != null) {
+                  final config = BackgroundConfig(
+                    type: BackgroundType.image,
+                    imagePath: path,
+                    opacity: 1.0,
+                  );
+                  await _backgroundManager.saveBackgroundConfig(config);
+                  setState(() => _backgroundConfig = config);
+                  Navigator.pop(context);
+                  NotificationManager().showSuccess('背景已更新');
+                }
+              }
+            },
+            onPickVideo: () async {
+              final result = await FilePicker.platform.pickFiles(
+                type: FileType.video,
+              );
+              if (result != null && result.files.isNotEmpty) {
+                final path = result.files.single.path;
+                if (path != null) {
+                  final config = BackgroundConfig(
+                    type: BackgroundType.video,
+                    videoPath: path,
+                    opacity: 1.0,
+                  );
+                  await _backgroundManager.saveBackgroundConfig(config);
+                  setState(() => _backgroundConfig = config);
+                  Navigator.pop(context);
+                  NotificationManager().showSuccess('背景已更新');
+                }
+              }
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('完成'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 显示开源组件对话框
+  void _showOpenSourceDialog() {
+    final openSourceProjects = [
+      {'name': 'Flutter', 'url': 'https://github.com/flutter/flutter', 'license': 'BSD-3-Clause'},
+      {'name': 'PCL', 'url': 'https://github.com/Meloong-Git/PCL', 'license': 'MIT'},
+      {'name': 'HMCL', 'url': 'https://github.com/HMCL-dev/HMCL', 'license': 'GPL-3.0'},
+      {'name': 'SJMCL', 'url': 'https://github.com/UNIkeEN/SJMCL', 'license': 'MIT'},
+      {'name': 'url_launcher', 'url': 'https://github.com/flutter/packages/tree/main/packages/url_launcher', 'license': 'BSD-3-Clause'},
+      {'name': 'file_picker', 'url': 'https://github.com/miguelpruivo/flutter_file_picker', 'license': 'MIT'},
+    ];
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.favorite, color: MCThemeColors.woolPink, size: 20),
+            SizedBox(width: 8),
+            Text('开源组件'),
+          ],
+        ),
+        content: SizedBox(
+          width: 400,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: openSourceProjects.length,
+            itemBuilder: (context, index) {
+              final project = openSourceProjects[index];
+              return ListTile(
+                leading: Icon(Icons.code, color: BAThemeColors.primary),
+                title: Text(project['name'] as String),
+                subtitle: Text('License: ${project['license'] as String}'),
+                trailing: IconButton(
+                  icon: const Icon(Icons.open_in_new, size: 18),
+                  onPressed: () async {
+                    final uri = Uri.parse(project['url'] as String);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    }
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('关闭'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 显示恢复默认设置对话框
+  void _showResetDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('恢复默认设置'),
+        content: const Text('确定要恢复所有设置为默认值吗？此操作不可撤销。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('取消'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await _resetAllSettings();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: MCThemeColors.danger,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('确定'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 恢复所有设置为默认值
+  Future<void> _resetAllSettings() async {
+    try {
+      // 重置各项设置
+      await _configManager.setString(ConfigKeys.gameDirectory, '');
+      await _configManager.setString(ConfigKeys.javaPath, '');
+      await _configManager.setInt(ConfigKeys.memoryAllocation, 4096);
+      await _configManager.setBool(ConfigKeys.autoUpdate, true);
+      await _configManager.setString(ConfigKeys.downloadSource, 'official');
+      await _configManager.setInt(ConfigKeys.concurrentDownloads, 3);
+      await _configManager.setString(ConfigKeys.downloadPath, '');
+      await _configManager.setBool(ConfigKeys.launchAtStartup, false);
+      await _configManager.setBool(ConfigKeys.minimizeToTray, true);
+      await _configManager.setBool(ConfigKeys.closeToTray, false);
+      await _configManager.setBool(ConfigKeys.autoRetryDownload, true);
+      await _configManager.setBool(ConfigKeys.enableSplashAnimation, true);
+      await _configManager.setString(ConfigKeys.gameWindowSize, '1280x720');
+      await _configManager.setString(ConfigKeys.jvmArguments, '');
+      await _configManager.setString(ConfigKeys.gameArguments, '');
+
+      // 重置主题
+      await _themeManager.setThemeMode(ThemeMode.dark);
+      await _themeManager.setBlueArchiveTheme();
+
+      // 重置背景
+      await _backgroundManager.saveBackgroundConfig(BackgroundConfig.classic);
+
+      // 重新加载设置
+      await _loadSettings();
+
+      NotificationManager().showSuccess('设置已恢复为默认值');
+    } catch (e) {
+      NotificationManager().showError('恢复默认设置失败', message: e.toString());
+    }
   }
 }

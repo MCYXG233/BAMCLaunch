@@ -1189,7 +1189,11 @@ class _BAMainPageState extends State<BAMainPage> {
   Widget _buildNavItem(IconData icon, String label, int index) {
     final isSelected = _currentPage == index;
     return GestureDetector(
-      onTap: () => setState(() => _currentPage = index),
+      onTap: () {
+        // 切换 tab 时主动取消所有 TextField 焦点，避免 IME 残留
+        FocusManager.instance.primaryFocus?.unfocus();
+        setState(() => _currentPage = index);
+      },
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: AnimatedContainer(
