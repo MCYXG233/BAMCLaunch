@@ -45,7 +45,7 @@ class _AuthlibLoginPageState extends State<AuthlibLoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('登录成功：${_usernameController.text}'),
-            backgroundColor: BAColors.success,
+            backgroundColor: BAColors.successOf(context),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
@@ -194,7 +194,7 @@ class _AuthlibLoginPageState extends State<AuthlibLoginPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: BAColors.primary, width: 2),
+              borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -240,7 +240,7 @@ class _AuthlibLoginPageState extends State<AuthlibLoginPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: BAColors.primary, width: 2),
+              borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -259,19 +259,19 @@ class _AuthlibLoginPageState extends State<AuthlibLoginPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: BAColors.danger.withOpacity(0.1),
+        color: BAColors.dangerOf(context).withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BAColors.danger.withOpacity(0.3)),
+        border: Border.all(color: BAColors.dangerOf(context).withOpacity(0.3)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: BAColors.danger),
+          Icon(Icons.error_outline, color: BAColors.dangerOf(context)),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               _errorMessage!,
               style: BATypography.bodyMedium.copyWith(
-                color: BAColors.danger,
+                color: BAColors.dangerOf(context),
               ),
             ),
           ),

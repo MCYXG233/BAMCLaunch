@@ -165,7 +165,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
           Text(
             '选择账户类型',
             style: BATypography.bodyMedium.copyWith(
-              color: BAColors.textSecondary,
+              color: BAColors.textSecondaryOf(context),
             ),
           ),
           const SizedBox(height: 20),
@@ -173,7 +173,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
             icon: Icons.window,
             title: 'Microsoft账户',
             description: '使用Microsoft账号登录Minecraft',
-            color: BAColors.primary,
+            color: BAColors.primaryOf(context),
             onTap: () => Navigator.pop(context, 'microsoft'),
           ),
           const SizedBox(height: 12),
@@ -181,7 +181,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
             icon: Icons.person_outline,
             title: '离线账户',
             description: '不需要网络，仅用于单机游戏',
-            color: BAColors.secondary,
+            color: BAColors.secondaryOf(context),
             onTap: () => Navigator.pop(context, 'offline'),
           ),
           const SizedBox(height: 12),
@@ -189,7 +189,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
             icon: Icons.link,
             title: 'Authlib账户',
             description: '使用第三方皮肤站登录',
-            color: BAColors.success,
+            color: BAColors.successOf(context),
             onTap: () => Navigator.pop(context, 'authlib'),
           ),
         ],
@@ -219,9 +219,9 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: BAColors.surfaceVariant,
+            color: BAColors.surfaceVariantOf(context),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: BAColors.border),
+            border: Border.all(color: BAColors.borderOf(context)),
           ),
           child: Row(
             children: [
@@ -241,7 +241,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
                     Text(
                       title,
                       style: BATypography.bodyLarge.copyWith(
-                        color: BAColors.textPrimary,
+                        color: BAColors.textPrimaryOf(context),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -249,13 +249,13 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
                     Text(
                       description,
                       style: BATypography.bodySmall.copyWith(
-                        color: BAColors.textSecondary,
+                        color: BAColors.textSecondaryOf(context),
                       ),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.arrow_forward_ios, color: BAColors.textSecondary, size: 16),
+              Icon(Icons.arrow_forward_ios, color: BAColors.textSecondaryOf(context), size: 16),
             ],
           ),
         ),
@@ -296,7 +296,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
             Text(
               '输入用户名',
               style: BATypography.bodyMedium.copyWith(
-                color: BAColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
               ),
             ),
             const SizedBox(height: 16),
@@ -305,18 +305,18 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
               decoration: InputDecoration(
                 hintText: 'Player',
                 filled: true,
-                fillColor: BAColors.surfaceVariant,
+                fillColor: BAColors.surfaceVariantOf(context),
                 border: OutlineInputBorder(
                   borderRadius: BATheme.borderRadiusSmall,
                   borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BATheme.borderRadiusSmall,
-                  borderSide: BorderSide(color: BAColors.border),
+                  borderSide: BorderSide(color: BAColors.borderOf(context)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BATheme.borderRadiusSmall,
-                  borderSide: BorderSide(color: BAColors.primary, width: 2),
+                  borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -324,11 +324,11 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
                 ),
                 prefixIcon: Icon(
                   Icons.person_outline,
-                  color: BAColors.textSecondary,
+                  color: BAColors.textSecondaryOf(context),
                 ),
               ),
               style: BATypography.bodyMedium.copyWith(
-                color: BAColors.textPrimary,
+                color: BAColors.textPrimaryOf(context),
               ),
               autofocus: true,
               validator: (value) {
@@ -385,7 +385,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
           Text(
             '编辑用户名',
             style: BATypography.bodyMedium.copyWith(
-              color: BAColors.textSecondary,
+              color: BAColors.textSecondaryOf(context),
             ),
           ),
           const SizedBox(height: 16),
@@ -395,11 +395,11 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
               hintText: '输入用户名',
               border: const OutlineInputBorder(),
               enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: BAColors.border, width: 1),
+                borderSide: BorderSide(color: BAColors.borderOf(context), width: 1),
                 borderRadius: BorderRadius.circular(8),
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: BAColors.primary, width: 2),
+                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
@@ -465,7 +465,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: success ? BAColors.success : BAColors.danger,
+        backgroundColor: success ? BAColors.successOf(context) : BAColors.dangerOf(context),
         duration: const Duration(seconds: 3),
       ),
     );
@@ -474,7 +474,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: BAColors.background,
+      color: BAColors.backgroundOf(context),
       child: Column(
         children: [
           _buildHeader(),
@@ -489,12 +489,12 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: BAColors.surface,
-        border: Border(bottom: BorderSide(color: BAColors.border, width: 1)),
+        color: BAColors.surfaceOf(context),
+        border: Border(bottom: BorderSide(color: BAColors.borderOf(context), width: 1)),
       ),
       child: Row(
         children: [
-          Icon(Icons.people, size: 32, color: BAColors.primary),
+          Icon(Icons.people, size: 32, color: BAColors.primaryOf(context)),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -503,13 +503,13 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
                 Text(
                   '账户管理',
                   style: BATypography.headlineMedium.copyWith(
-                    color: BAColors.textPrimary,
+                    color: BAColors.textPrimaryOf(context),
                   ),
                 ),
                 Text(
                   '管理Minecraft游戏账户',
                   style: BATypography.bodyMedium.copyWith(
-                    color: BAColors.textSecondary,
+                    color: BAColors.textSecondaryOf(context),
                   ),
                 ),
               ],
@@ -537,7 +537,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
             Text(
               '加载中...',
               style: BATypography.bodyMedium.copyWith(
-                color: BAColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
               ),
             ),
           ],
@@ -550,19 +550,19 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.person_off, size: 64, color: BAColors.textDisabled),
+            Icon(Icons.person_off, size: 64, color: BAColors.textDisabledOf(context)),
             const SizedBox(height: 16),
             Text(
               '暂无账户',
               style: BATypography.bodyLarge.copyWith(
-                color: BAColors.textSecondary,
+                color: BAColors.textSecondaryOf(context),
               ),
             ),
             const SizedBox(height: 8),
             Text(
               '点击上方按钮添加一个新账户',
               style: BATypography.bodySmall.copyWith(
-                color: BAColors.textDisabled,
+                color: BAColors.textDisabledOf(context),
               ),
             ),
           ],
@@ -589,10 +589,10 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
   Widget _buildAccountItem(Account account, bool isSelected) {
     return Container(
       decoration: BoxDecoration(
-        color: BAColors.surface,
+        color: BAColors.surfaceOf(context),
         borderRadius: BATheme.borderRadius,
         border: Border.all(
-          color: isSelected ? BAColors.primary : BAColors.border,
+          color: isSelected ? BAColors.primaryOf(context) : BAColors.borderOf(context),
           width: isSelected ? 2 : 1,
         ),
         boxShadow: BATheme.shadowsSmall,
@@ -618,7 +618,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
                           Text(
                             account.username,
                             style: BATypography.headlineSmall.copyWith(
-                              color: BAColors.textPrimary,
+                              color: BAColors.textPrimaryOf(context),
                             ),
                           ),
                           if (isSelected) ...[
@@ -629,16 +629,16 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: BAColors.primary.withOpacity(0.1),
+                                color: BAColors.primaryOf(context).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
-                                  color: BAColors.primary.withOpacity(0.3),
+                                  color: BAColors.primaryOf(context).withOpacity(0.3),
                                 ),
                               ),
                               child: Text(
                                 '默认',
                                 style: BATypography.label.copyWith(
-                                  color: BAColors.primary,
+                                  color: BAColors.primaryOf(context),
                                 ),
                               ),
                             ),
@@ -654,16 +654,16 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: BAColors.secondary.withOpacity(0.1),
+                              color: BAColors.secondaryOf(context).withOpacity(0.1),
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(
-                                color: BAColors.secondary.withOpacity(0.3),
+                                color: BAColors.secondaryOf(context).withOpacity(0.3),
                               ),
                             ),
                             child: Text(
                               _getAccountTypeName(account.type),
                               style: BATypography.label.copyWith(
-                                color: BAColors.secondary,
+                                color: BAColors.secondaryOf(context),
                               ),
                             ),
                           ),
@@ -671,7 +671,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
                           Text(
                             '创建于 ${_formatDate(account.createdAt)}',
                             style: BATypography.bodySmall.copyWith(
-                              color: BAColors.textSecondary,
+                              color: BAColors.textSecondaryOf(context),
                             ),
                           ),
                         ],
@@ -695,10 +695,10 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
       width: 56,
       height: 56,
       decoration: BoxDecoration(
-        color: BAColors.primary.withOpacity(0.15),
+        color: BAColors.primaryOf(context).withOpacity(0.15),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(Icons.person, color: BAColors.primary, size: 32),
+      child: Icon(Icons.person, color: BAColors.primaryOf(context), size: 32),
     );
   }
 
@@ -819,7 +819,7 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: BAColors.background,
+      backgroundColor: BAColors.backgroundOf(context),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(32),
@@ -832,27 +832,27 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
                   width: 120,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: BAColors.primary.withOpacity(0.1),
+                    color: BAColors.primaryOf(context).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(32),
                   ),
                   child: Icon(
                     Icons.window,
                     size: 64,
-                    color: BAColors.primary,
+                    color: BAColors.primaryOf(context),
                   ),
                 ),
                 const SizedBox(height: 24),
                 Text(
                   'Microsoft登录',
                   style: BATypography.headlineMedium.copyWith(
-                    color: BAColors.textPrimary,
+                    color: BAColors.textPrimaryOf(context),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   '使用Microsoft账号登录Minecraft',
                   style: BATypography.bodyMedium.copyWith(
-                    color: BAColors.textSecondary,
+                    color: BAColors.textSecondaryOf(context),
                   ),
                 ),
                 const SizedBox(height: 48),
@@ -862,7 +862,7 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
                   Text(
                     _authProgress ?? '登录中...',
                     style: BATypography.bodyMedium.copyWith(
-                      color: BAColors.textSecondary,
+                      color: BAColors.textSecondaryOf(context),
                     ),
                   ),
                 ] else ...[
@@ -969,7 +969,7 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
           Text(
             '请在浏览器中完成登录后，将浏览器地址栏中的完整URL粘贴到下方：',
             style: BATypography.bodyMedium.copyWith(
-              color: BAColors.textSecondary,
+              color: BAColors.textSecondaryOf(context),
             ),
           ),
           const SizedBox(height: 16),
@@ -978,18 +978,18 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
             decoration: InputDecoration(
               hintText: '粘贴重定向URL...',
               filled: true,
-              fillColor: BAColors.surfaceVariant,
+              fillColor: BAColors.surfaceVariantOf(context),
               border: OutlineInputBorder(
                 borderRadius: BATheme.borderRadiusSmall,
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BATheme.borderRadiusSmall,
-                borderSide: BorderSide(color: BAColors.border),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BATheme.borderRadiusSmall,
-                borderSide: BorderSide(color: BAColors.primary, width: 2),
+                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -997,7 +997,7 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
               ),
             ),
             style: BATypography.bodyMedium.copyWith(
-              color: BAColors.textPrimary,
+              color: BAColors.textPrimaryOf(context),
             ),
             autofocus: true,
           ),
@@ -1028,7 +1028,7 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: BAColors.success,
+        backgroundColor: BAColors.successOf(context),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -1038,7 +1038,7 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: BAColors.danger,
+        backgroundColor: BAColors.dangerOf(context),
         duration: const Duration(seconds: 3),
       ),
     );
@@ -1051,10 +1051,10 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: BAColors.surface,
+        backgroundColor: BAColors.surfaceOf(context),
         title: Text(
           'Microsoft登录',
-          style: BATypography.headlineSmall.copyWith(color: BAColors.textPrimary),
+          style: BATypography.headlineSmall.copyWith(color: BAColors.textPrimaryOf(context)),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1063,36 +1063,36 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
             const SizedBox(height: 16),
             Text(
               '请按照以下步骤完成登录:',
-              style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+              style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
             ),
             const SizedBox(height: 16),
             ListTile(
               leading: const CircleAvatar(child: Text('1')),
               title: Text(
                 '打开浏览器访问:',
-                style: BATypography.bodyMedium.copyWith(color: BAColors.textPrimary),
+                style: BATypography.bodyMedium.copyWith(color: BAColors.textPrimaryOf(context)),
               ),
               subtitle: SelectableText(
                 deviceCode.verificationUri,
-                style: BATypography.bodySmall.copyWith(color: BAColors.primary),
+                style: BATypography.bodySmall.copyWith(color: BAColors.primaryOf(context)),
               ),
             ),
             ListTile(
               leading: const CircleAvatar(child: Text('2')),
               title: Text(
                 '输入代码:',
-                style: BATypography.bodyMedium.copyWith(color: BAColors.textPrimary),
+                style: BATypography.bodyMedium.copyWith(color: BAColors.textPrimaryOf(context)),
               ),
               subtitle: SelectableText(
                 deviceCode.userCode,
-                style: BATypography.bodyLarge.copyWith(color: BAColors.success),
+                style: BATypography.bodyLarge.copyWith(color: BAColors.successOf(context)),
               ),
             ),
             ListTile(
               leading: const CircleAvatar(child: Text('3')),
               title: Text(
                 '完成登录后点击继续',
-                style: BATypography.bodyMedium.copyWith(color: BAColors.textPrimary),
+                style: BATypography.bodyMedium.copyWith(color: BAColors.textPrimaryOf(context)),
               ),
             ),
           ],
@@ -1104,7 +1104,7 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
             },
             child: Text(
               '取消',
-              style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+              style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
             ),
           ),
           ElevatedButton(
@@ -1113,7 +1113,7 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
               Navigator.pop(context, true);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: BAColors.primary,
+              backgroundColor: BAColors.primaryOf(context),
             ),
             child: Text(
               '继续',
@@ -1156,7 +1156,7 @@ class _AuthlibLoginWrapperState extends State<_AuthlibLoginWrapper> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: BAColors.background,
+      backgroundColor: BAColors.backgroundOf(context),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(32),
@@ -1171,27 +1171,27 @@ class _AuthlibLoginWrapperState extends State<_AuthlibLoginWrapper> {
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: BAColors.success.withOpacity(0.1),
+                      color: BAColors.successOf(context).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(32),
                     ),
                     child: Icon(
                       Icons.link,
                       size: 64,
-                      color: BAColors.success,
+                      color: BAColors.successOf(context),
                     ),
                   ),
                   const SizedBox(height: 24),
                   Text(
                     'Authlib登录',
                     style: BATypography.headlineMedium.copyWith(
-                      color: BAColors.textPrimary,
+                      color: BAColors.textPrimaryOf(context),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     '使用第三方皮肤站登录',
                     style: BATypography.bodyMedium.copyWith(
-                      color: BAColors.textSecondary,
+                      color: BAColors.textSecondaryOf(context),
                     ),
                   ),
                   const SizedBox(height: 48),
@@ -1234,27 +1234,27 @@ class _AuthlibLoginWrapperState extends State<_AuthlibLoginWrapper> {
         hintText: 'https://example.com',
         labelText: '皮肤站地址',
         filled: true,
-        fillColor: BAColors.surfaceVariant,
+        fillColor: BAColors.surfaceVariantOf(context),
         border: OutlineInputBorder(
           borderRadius: BATheme.borderRadiusSmall,
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BATheme.borderRadiusSmall,
-          borderSide: BorderSide(color: BAColors.border),
+          borderSide: BorderSide(color: BAColors.borderOf(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BATheme.borderRadiusSmall,
-          borderSide: BorderSide(color: BAColors.primary, width: 2),
+          borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,
         ),
-        prefixIcon: Icon(Icons.public, color: BAColors.textSecondary),
+        prefixIcon: Icon(Icons.public, color: BAColors.textSecondaryOf(context)),
       ),
       style: BATypography.bodyMedium.copyWith(
-        color: BAColors.textPrimary,
+        color: BAColors.textPrimaryOf(context),
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
@@ -1277,27 +1277,27 @@ class _AuthlibLoginWrapperState extends State<_AuthlibLoginWrapper> {
         hintText: 'you@example.com',
         labelText: '邮箱',
         filled: true,
-        fillColor: BAColors.surfaceVariant,
+        fillColor: BAColors.surfaceVariantOf(context),
         border: OutlineInputBorder(
           borderRadius: BATheme.borderRadiusSmall,
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BATheme.borderRadiusSmall,
-          borderSide: BorderSide(color: BAColors.border),
+          borderSide: BorderSide(color: BAColors.borderOf(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BATheme.borderRadiusSmall,
-          borderSide: BorderSide(color: BAColors.primary, width: 2),
+          borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,
         ),
-        prefixIcon: Icon(Icons.email_outlined, color: BAColors.textSecondary),
+        prefixIcon: Icon(Icons.email_outlined, color: BAColors.textSecondaryOf(context)),
       ),
       style: BATypography.bodyMedium.copyWith(
-        color: BAColors.textPrimary,
+        color: BAColors.textPrimaryOf(context),
       ),
       keyboardType: TextInputType.emailAddress,
       validator: (value) {
@@ -1320,28 +1320,28 @@ class _AuthlibLoginWrapperState extends State<_AuthlibLoginWrapper> {
         hintText: '••••••••',
         labelText: '密码',
         filled: true,
-        fillColor: BAColors.surfaceVariant,
+        fillColor: BAColors.surfaceVariantOf(context),
         border: OutlineInputBorder(
           borderRadius: BATheme.borderRadiusSmall,
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BATheme.borderRadiusSmall,
-          borderSide: BorderSide(color: BAColors.border),
+          borderSide: BorderSide(color: BAColors.borderOf(context)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BATheme.borderRadiusSmall,
-          borderSide: BorderSide(color: BAColors.primary, width: 2),
+          borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,
         ),
-        prefixIcon: Icon(Icons.lock_outline, color: BAColors.textSecondary),
+        prefixIcon: Icon(Icons.lock_outline, color: BAColors.textSecondaryOf(context)),
         suffixIcon: IconButton(
           icon: Icon(
             _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-            color: BAColors.textSecondary,
+            color: BAColors.textSecondaryOf(context),
           ),
           onPressed: () {
             setState(() {
@@ -1351,7 +1351,7 @@ class _AuthlibLoginWrapperState extends State<_AuthlibLoginWrapper> {
         ),
       ),
       style: BATypography.bodyMedium.copyWith(
-        color: BAColors.textPrimary,
+        color: BAColors.textPrimaryOf(context),
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
@@ -1398,7 +1398,7 @@ class _AuthlibLoginWrapperState extends State<_AuthlibLoginWrapper> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: BAColors.danger,
+        backgroundColor: BAColors.dangerOf(context),
         duration: const Duration(seconds: 3),
       ),
     );
@@ -1820,7 +1820,7 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
                 ElevatedButton(
                   onPressed: _resetToDefaultSkin,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: BAColors.danger,
+                    backgroundColor: BAColors.dangerOf(context),
                     foregroundColor: BAColors.textOnPrimary,
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     shape: RoundedRectangleBorder(
@@ -1848,7 +1848,7 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
         children: [
           Icon(
             Icons.layers,
-            color: BAColors.secondary,
+            color: BAColors.secondaryOf(context),
             size: 20,
           ),
           const SizedBox(width: 12),
@@ -1878,7 +1878,7 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
           ElevatedButton(
             onPressed: _showCapeUploadDialog,
             style: ElevatedButton.styleFrom(
-              backgroundColor: BAColors.secondary,
+              backgroundColor: BAColors.secondaryOf(context),
               foregroundColor: BAColors.textOnPrimary,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               shape: RoundedRectangleBorder(

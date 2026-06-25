@@ -851,15 +851,15 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
     IconData overallIcon;
 
     if (failed > 0) {
-      overallColor = BAThemeColors.danger;
+      overallColor = BAColors.dangerOf(context);
       overallText = '发现 $failed 个严重问题';
       overallIcon = Icons.error_rounded;
     } else if (warnings > 0) {
-      overallColor = BAThemeColors.warning;
+      overallColor = BAColors.warningOf(context);
       overallText = '发现 $warnings 个需要关注的问题';
       overallIcon = Icons.warning_amber_rounded;
     } else {
-      overallColor = BAThemeColors.success;
+      overallColor = BAColors.successOf(context);
       overallText = '所有检查项目通过';
       overallIcon = Icons.check_circle_rounded;
     }
@@ -902,18 +902,18 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
           Text(
             overallText,
             style: const TextStyle(
-              color: BAThemeColors.textPrimary,
+              color: BAColors.textPrimaryOf(context),
               fontSize: 14,
             ),
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              _buildSummaryBadge('通过', passed, BAThemeColors.success),
+              _buildSummaryBadge('通过', passed, BAColors.successOf(context)),
               const SizedBox(width: 8),
-              _buildSummaryBadge('警告', warnings, BAThemeColors.warning),
+              _buildSummaryBadge('警告', warnings, BAColors.warningOf(context)),
               const SizedBox(width: 8),
-              _buildSummaryBadge('失败', failed, BAThemeColors.danger),
+              _buildSummaryBadge('失败', failed, BAColors.dangerOf(context)),
             ],
           ),
           if (_crashAnalysis != null) ...[
@@ -922,10 +922,10 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: BAThemeColors.surface,
+                color: BAColors.surfaceOf(context),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: BAThemeColors.danger.withOpacity(0.3),
+                  color: BAColors.dangerOf(context).withOpacity(0.3),
                 ),
               ),
               child: Column(
@@ -934,7 +934,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                   Text(
                     '崩溃分析: ${_crashAnalysis!.title}',
                     style: const TextStyle(
-                      color: BAThemeColors.danger,
+                      color: BAColors.dangerOf(context),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -943,7 +943,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                   Text(
                     _crashAnalysis!.description,
                     style: const TextStyle(
-                      color: BAThemeColors.textSecondary,
+                      color: BAColors.textSecondaryOf(context),
                       fontSize: 13,
                       height: 1.4,
                     ),

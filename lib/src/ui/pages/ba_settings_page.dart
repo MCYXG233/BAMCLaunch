@@ -882,7 +882,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               gradient: BAColors.primaryGradient,
               boxShadow: [
                 BoxShadow(
-                  color: BAColors.primary.withOpacity(0.3),
+                  color: BAColors.primaryOf(context).withOpacity(0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -1019,7 +1019,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: isSelected
-                        ? BAColors.primary
+                        ? BAColors.primaryOf(context)
                         : Colors.transparent,
                     width: 1,
                   ),
@@ -1035,7 +1035,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                           end: Alignment.bottomRight,
                           colors: isSelected
                               ? [
-                                  BAColors.primary,
+                                  BAColors.primaryOf(context),
                                   unselectedIcon,
                                 ]
                               : [
@@ -1074,7 +1074,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
   Widget _buildSettingsList() {
     if (!_managersInitialized) {
-      return const Center(child: CircularProgressIndicator(color: BAColors.primary));
+      return Center(child: CircularProgressIndicator(color: BAColors.primaryOf(context)));
     }
 
     switch (_selectedCategory) {
@@ -1138,7 +1138,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        BAColors.primary,
+                        BAColors.primaryOf(context),
                         accentBlue,
                       ],
                     ),
@@ -1264,7 +1264,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
           gradient: value
               ? LinearGradient(
                   colors: [
-                    BAColors.primary,
+                    BAColors.primaryOf(context),
                     accentBlueDyn,
                   ],
                 )
@@ -1281,7 +1281,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
           boxShadow: value
               ? [
                   BoxShadow(
-                    color: BAColors.primary.withOpacity(0.4),
+                    color: BAColors.primaryOf(context).withOpacity(0.4),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -1382,7 +1382,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: BAColors.primary),
+            borderSide: BorderSide(color: BAColors.primaryOf(context)),
           ),
           isDense: true,
         ),
@@ -1452,14 +1452,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                color ?? BAColors.primary,
+                color ?? BAColors.primaryOf(context),
                 effectiveColor,
               ],
             ),
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: (color ?? BAColors.primary).withOpacity(0.3),
+                color: (color ?? BAColors.primaryOf(context)).withOpacity(0.3),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -1605,7 +1605,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
   Widget _buildGeneralSettings() {
     if (!_themeManagerInitialized) {
       return const Center(
-        child: CircularProgressIndicator(color: BAColors.primary),
+        child: CircularProgressIndicator(color: BAColors.primaryOf(context)),
       );
     }
     return ListView(
@@ -1752,7 +1752,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              BAColors.primary.withOpacity(0.25),
+                              BAColors.primaryOf(context).withOpacity(0.25),
                               accentBlue.withOpacity(0.15),
                             ],
                           ),
@@ -1788,12 +1788,12 @@ class _BASettingsPageState extends State<BASettingsPage> {
                             const SizedBox(height: 8),
                             SliderTheme(
                               data: SliderThemeData(
-                                activeTrackColor: BAColors.primary,
+                                activeTrackColor: BAColors.primaryOf(context),
                                 inactiveTrackColor: inactiveTrack,
                                 thumbColor: Colors.white,
                                 trackHeight: 4,
                                 thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                                overlayColor: BAColors.primary.withOpacity(0.2),
+                                overlayColor: BAColors.primaryOf(context).withOpacity(0.2),
                               ),
                               child: Slider(
                                 value: _memoryAllocation,
@@ -1928,7 +1928,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              BAColors.primary.withOpacity(0.25),
+                              BAColors.primaryOf(context).withOpacity(0.25),
                               accentBlue.withOpacity(0.15),
                             ],
                           ),
@@ -1964,12 +1964,12 @@ class _BASettingsPageState extends State<BASettingsPage> {
                             const SizedBox(height: 8),
                             SliderTheme(
                               data: SliderThemeData(
-                                activeTrackColor: BAColors.primary,
+                                activeTrackColor: BAColors.primaryOf(context),
                                 inactiveTrackColor: inactiveTrack,
                                 thumbColor: Colors.white,
                                 trackHeight: 4,
                                 thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                                overlayColor: BAColors.primary.withOpacity(0.2),
+                                overlayColor: BAColors.primaryOf(context).withOpacity(0.2),
                               ),
                               child: Slider(
                                 value: _concurrentDownloads.toDouble(),
@@ -2024,7 +2024,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                BAColors.primary.withOpacity(0.25),
+                                BAColors.primaryOf(context).withOpacity(0.25),
                                 accentBlue.withOpacity(0.15),
                               ],
                             ),
@@ -2060,12 +2060,12 @@ class _BASettingsPageState extends State<BASettingsPage> {
                               const SizedBox(height: 8),
                               SliderTheme(
                                 data: SliderThemeData(
-                                  activeTrackColor: BAColors.primary,
+                                  activeTrackColor: BAColors.primaryOf(context),
                                   inactiveTrackColor: inactiveTrack,
                                   thumbColor: Colors.white,
                                   trackHeight: 4,
                                   thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                                  overlayColor: BAColors.primary.withOpacity(0.2),
+                                  overlayColor: BAColors.primaryOf(context).withOpacity(0.2),
                                 ),
                                 child: Slider(
                                   value: _speedLimitValue,
@@ -2275,7 +2275,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                     color: isSelected ? selectedBg : defaultBg,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: isSelected ? BAColors.primary : borderColor,
+                      color: isSelected ? BAColors.primaryOf(context) : borderColor,
                     ),
                   ),
                   child: Row(
@@ -2286,10 +2286,10 @@ class _BASettingsPageState extends State<BASettingsPage> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: isSelected ? BAColors.primary : secondaryText,
+                            color: isSelected ? BAColors.primaryOf(context) : secondaryText,
                             width: 2,
                           ),
-                          color: isSelected ? BAColors.primary : Colors.transparent,
+                          color: isSelected ? BAColors.primaryOf(context) : Colors.transparent,
                         ),
                         child: isSelected
                             ? const Icon(
@@ -2319,7 +2319,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
-                                      color: BAColors.primary.withOpacity(0.2),
+                                      color: BAColors.primaryOf(context).withOpacity(0.2),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
@@ -2370,13 +2370,13 @@ class _BASettingsPageState extends State<BASettingsPage> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: BAColors.success.withOpacity(0.2),
+                              color: BAColors.successOf(context).withOpacity(0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               '${speedResult.latencyMs}ms',
                               style: const TextStyle(
-                                color: BAColors.success,
+                                color: BAColors.successOf(context),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                               ),

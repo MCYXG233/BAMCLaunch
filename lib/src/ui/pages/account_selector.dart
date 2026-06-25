@@ -143,7 +143,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: BAColors.secondary,
+        backgroundColor: BAColors.secondaryOf(context),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -154,7 +154,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: BAColors.danger,
+        backgroundColor: BAColors.dangerOf(context),
         duration: const Duration(seconds: 3),
       ),
     );
@@ -244,7 +244,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
                 height: 40,
                 leadingIcon: Icon(
                   Icons.add,
-                  color: BAColors.secondary,
+                  color: BAColors.secondaryOf(context),
                 ),
               ),
             ],

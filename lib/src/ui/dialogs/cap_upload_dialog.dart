@@ -230,9 +230,9 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildHeader(),
-                _buildContent(),
-                _buildActions(),
+                _buildHeader(context),
+                _buildContent(context),
+                _buildActions(context),
               ],
             ),
           ),
@@ -241,7 +241,7 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 18, 24, 16),
       decoration: BoxDecoration(
@@ -249,8 +249,8 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            BAColors.primary.withOpacity(0.2),
-            BAColors.primary.withOpacity(0.05),
+            BAColors.primaryOf(context).withOpacity(0.2),
+            BAColors.primaryOf(context).withOpacity(0.05),
           ],
         ),
         border: Border(
@@ -307,7 +307,7 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
       child: Column(
@@ -318,10 +318,10 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: BAColors.primary.withOpacity(0.1),
+              color: BAColors.primaryOf(context).withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: BAColors.primary.withOpacity(0.3),
+                color: BAColors.primaryOf(context).withOpacity(0.3),
               ),
             ),
             child: Row(
@@ -329,7 +329,7 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
                 Icon(
                   Icons.info_outline,
                   size: 18,
-                  color: BAColors.primary,
+                  color: BAColors.primaryOf(context),
                 ),
                 const SizedBox(width: 12),
                 Expanded(

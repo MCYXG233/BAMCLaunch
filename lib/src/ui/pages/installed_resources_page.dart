@@ -87,7 +87,7 @@ class _InstalledResourcesPageState extends State<InstalledResourcesPage>
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
-              foregroundColor: BAColors.danger,
+              foregroundColor: BAColors.dangerOf(context),
             ),
             child: const Text('删除'),
           ),

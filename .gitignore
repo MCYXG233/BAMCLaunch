@@ -68,3 +68,4 @@ logs/
 # External tools (skills)
 tools/skills/
 DEPLOYMENT.md
+replace_colors.py

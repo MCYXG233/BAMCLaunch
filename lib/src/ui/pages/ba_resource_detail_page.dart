@@ -373,10 +373,10 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
                   runSpacing: 6,
                   children: [
                     ...widget.resource.supportedGameVersions.take(4).map(
-                      (v) => _buildChip(v, BAColors.primary),
+                      (v) => _buildChip(v, BAColors.primaryOf(context)),
                     ),
                     ...widget.resource.supportedLoaders.take(3).map(
-                      (l) => _buildChip(l, BAColors.accentPink),
+                      (l) => _buildChip(l, BAColors.accentPinkOf(context)),
                     ),
                   ],
                 ),
@@ -415,7 +415,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
         children: [
           Row(
             children: [
-              Icon(Icons.description_outlined, size: 18, color: BAColors.primary),
+              Icon(Icons.description_outlined, size: 18, color: BAColors.primaryOf(context)),
               const SizedBox(width: 8),
               Text(
                 '简介',
@@ -449,7 +449,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
         children: [
           Row(
             children: [
-              Icon(Icons.history, size: 18, color: BAColors.primary),
+              Icon(Icons.history, size: 18, color: BAColors.primaryOf(context)),
               const SizedBox(width: 8),
               Text(
                 '可用版本 (${_versions.length})',
@@ -531,7 +531,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
                       (l) => Text(
                         l,
                         style: TextStyle(
-                          color: BAColors.accentPink,
+                          color: BAColors.accentPinkOf(context),
                           fontSize: 11,
                         ),
                       ),
@@ -544,13 +544,13 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: BAColors.primary.withValues(alpha: 0.1),
+              color: BAColors.primaryOf(context).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               version.releaseType,
               style: TextStyle(
-                color: BAColors.primary,
+                color: BAColors.primaryOf(context),
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
               ),
@@ -569,7 +569,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
         children: [
           Row(
             children: [
-              Icon(Icons.system_update_alt, size: 18, color: BAColors.accentPink),
+              Icon(Icons.system_update_alt, size: 18, color: BAColors.accentPinkOf(context)),
               const SizedBox(width: 8),
               Text(
                 '兼容性',
@@ -589,7 +589,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
                   context,
                   '游戏版本',
                   widget.resource.supportedGameVersions.take(3).join(', '),
-                  BAColors.primary,
+                  BAColors.primaryOf(context),
                 ),
               ),
               Container(width: 1, height: 40, color: const Color(0xFF3A4D7A)),
@@ -598,7 +598,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
                   context,
                   'Mod加载器',
                   widget.resource.supportedLoaders.join(', '),
-                  BAColors.accentPink,
+                  BAColors.accentPinkOf(context),
                 ),
               ),
             ],
@@ -618,7 +618,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
               context,
               '总下载量',
               _formatNumber(widget.resource.downloads),
-              BAColors.primary,
+              BAColors.primaryOf(context),
             ),
           ),
           Container(
@@ -646,7 +646,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
               widget.resource.publishedDate != null
                   ? '${widget.resource.publishedDate!.year}/${widget.resource.publishedDate!.month.toString().padLeft(2, '0')}'
                   : '未知',
-              BAColors.success,
+              BAColors.successOf(context),
             ),
           ),
         ],
@@ -726,7 +726,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
                     : const Icon(Icons.download, size: 20),
                 label: Text(_isDownloading ? '下载中...' : '下载并安装'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: BAColors.primary,
+                  backgroundColor: BAColors.primaryOf(context),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   textStyle: const TextStyle(
@@ -763,13 +763,13 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
   Color _getTypeColor(ResourceType type) {
     switch (type) {
       case ResourceType.mod:
-        return BAColors.accentPink;
+        return BAColors.accentPinkOf(context);
       case ResourceType.resourcePack:
-        return BAColors.success;
+        return BAColors.successOf(context);
       case ResourceType.shader:
-        return BAColors.warning;
+        return BAColors.warningOf(context);
       case ResourceType.modpack:
-        return BAColors.primary;
+        return BAColors.primaryOf(context);
       case ResourceType.dataPack:
         return const Color(0xFF8B7DD9);
     }

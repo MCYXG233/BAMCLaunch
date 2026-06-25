@@ -333,7 +333,7 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
             borderRadius: BorderRadius.circular(14),
             boxShadow: [
               BoxShadow(
-                color: BAColors.secondary.withOpacity(0.3),
+                color: BAColors.secondaryOf(context).withOpacity(0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -375,7 +375,7 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
             children: [
               Icon(
                 Icons.extension,
-                color: BAColors.secondary,
+                color: BAColors.secondaryOf(context),
                 size: 18,
               ),
               const SizedBox(width: 8),
@@ -483,7 +483,7 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
                 border: Border.all(color: BAColors.borderOf(context).withValues(alpha: 0.6)),
                 boxShadow: [
                   BoxShadow(
-                    color: BAColors.primary.withOpacity(0.05),
+                    color: BAColors.primaryOf(context).withOpacity(0.05),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),

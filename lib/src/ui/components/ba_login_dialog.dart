@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../auth/auth_manager.dart';
@@ -307,7 +307,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
-          backgroundColor: BAColors.danger,
+          backgroundColor: BAColors.dangerOf(context),
           duration: const Duration(seconds: 3),
         ),
       );
@@ -447,21 +447,21 @@ class _BALoginDialogState extends State<BALoginDialog> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? BAColors.primary.withOpacity(0.2) : BAColors.surfaceVariantOf(context),
+            color: isSelected ? BAColors.primaryOf(context).withOpacity(0.2) : BAColors.surfaceVariantOf(context),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: isSelected ? BAColors.primary : BAColors.borderOf(context),
+              color: isSelected ? BAColors.primaryOf(context) : BAColors.borderOf(context),
             ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: isSelected ? BAColors.primary : BAColors.textSecondaryOf(context), size: 16),
+              Icon(icon, color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context), size: 16),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? BAColors.primary : BAColors.textSecondaryOf(context),
+                  color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 ),
@@ -526,7 +526,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
             child: ElevatedButton(
               onPressed: _startDeviceCodeLogin,
               style: ElevatedButton.styleFrom(
-                backgroundColor: BAColors.primary,
+                backgroundColor: BAColors.primaryOf(context),
                 foregroundColor: BAColors.textOnPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
@@ -558,10 +558,10 @@ class _BALoginDialogState extends State<BALoginDialog> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: BAColors.primary.withOpacity(0.15),
+                  color: BAColors.primaryOf(context).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(Icons.person_outline, color: BAColors.primary, size: 20),
+                child: Icon(Icons.person_outline, color: BAColors.primaryOf(context), size: 20),
               ),
               const SizedBox(width: 12),
               Column(
@@ -605,7 +605,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primary),
+                borderSide: BorderSide(color: BAColors.primaryOf(context)),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
@@ -616,7 +616,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
             child: ElevatedButton(
               onPressed: _loginOffline,
               style: ElevatedButton.styleFrom(
-                backgroundColor: BAColors.primary,
+                backgroundColor: BAColors.primaryOf(context),
                 foregroundColor: BAColors.textOnPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
@@ -648,10 +648,10 @@ class _BALoginDialogState extends State<BALoginDialog> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: BAColors.secondary.withOpacity(0.15),
+                  color: BAColors.secondaryOf(context).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(Icons.extension, color: BAColors.secondary, size: 20),
+                child: Icon(Icons.extension, color: BAColors.secondaryOf(context), size: 20),
               ),
               const SizedBox(width: 12),
               Column(
@@ -697,7 +697,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primary),
+                borderSide: BorderSide(color: BAColors.primaryOf(context)),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
@@ -723,7 +723,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primary),
+                borderSide: BorderSide(color: BAColors.primaryOf(context)),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
@@ -750,7 +750,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primary),
+                borderSide: BorderSide(color: BAColors.primaryOf(context)),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
@@ -760,18 +760,18 @@ class _BALoginDialogState extends State<BALoginDialog> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: BAColors.danger.withOpacity(0.1),
+                color: BAColors.dangerOf(context).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: BAColors.danger.withOpacity(0.3)),
+                border: Border.all(color: BAColors.dangerOf(context).withOpacity(0.3)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.error_outline, color: BAColors.danger, size: 16),
+                  const Icon(Icons.error_outline, color: BAColors.dangerOf(context), size: 16),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       _authlibErrorMessage!,
-                      style: TextStyle(color: BAColors.danger, fontSize: 12),
+                      style: TextStyle(color: BAColors.dangerOf(context), fontSize: 12),
                     ),
                   ),
                 ],
@@ -784,7 +784,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
             child: ElevatedButton(
               onPressed: _isAuthlibLoggingIn ? null : _loginWithAuthlib,
               style: ElevatedButton.styleFrom(
-                backgroundColor: BAColors.secondary,
+                backgroundColor: BAColors.secondaryOf(context),
                 foregroundColor: BAColors.textOnPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
@@ -848,7 +848,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
                     onPressed: () => Navigator.pop(context, true),
                     child: Text(
                       account.type == AccountType.microsoft ? '登出' : '删除',
-                      style: TextStyle(color: BAColors.danger),
+                      style: TextStyle(color: BAColors.dangerOf(context)),
                     ),
                   ),
                 ],
@@ -939,9 +939,9 @@ class _BALoginDialogState extends State<BALoginDialog> {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: BAColors.primary.withOpacity(0.1),
+            color: BAColors.primaryOf(context).withOpacity(0.1),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: BAColors.primary),
+            border: Border.all(color: BAColors.primaryOf(context)),
           ),
           child: Column(
             children: [
@@ -956,8 +956,8 @@ class _BALoginDialogState extends State<BALoginDialog> {
               const SizedBox(height: 8),
               Text(
                 _deviceCodeResponse?.verificationUri ?? '',
-                style: const TextStyle(
-                  color: BAColors.primary,
+                style: TextStyle(
+                  color: BAColors.primaryOf(context),
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   decoration: TextDecoration.underline,
@@ -1021,12 +1021,12 @@ class _BALoginDialogState extends State<BALoginDialog> {
           width: 64,
           height: 64,
           decoration: BoxDecoration(
-            color: Colors.green.withOpacity(0.2),
+            color: BAColors.successOf(context).withOpacity(0.2),
             shape: BoxShape.circle,
           ),
           child: const Icon(
             Icons.check_circle,
-            color: Colors.green,
+            color: BAColors.successOf(context),
             size: 48,
           ),
         ),
@@ -1052,12 +1052,12 @@ class _BALoginDialogState extends State<BALoginDialog> {
           width: 64,
           height: 64,
           decoration: BoxDecoration(
-            color: BAColors.danger.withOpacity(0.2),
+            color: BAColors.dangerOf(context).withOpacity(0.2),
             shape: BoxShape.circle,
           ),
           child: const Icon(
             Icons.error_outline,
-            color: BAColors.danger,
+            color: BAColors.dangerOf(context),
             size: 48,
           ),
         ),
@@ -1123,13 +1123,13 @@ class _AccountTile extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: account.type == AccountType.microsoft
-                    ? BAColors.primary.withOpacity(0.15)
-                    : BAColors.secondary.withOpacity(0.15),
+                    ? BAColors.primaryOf(context).withOpacity(0.15)
+                    : BAColors.secondaryOf(context).withOpacity(0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 account.type == AccountType.microsoft ? Icons.account_circle : Icons.person,
-                color: account.type == AccountType.microsoft ? BAColors.primary : BAColors.secondary,
+                color: account.type == AccountType.microsoft ? BAColors.primaryOf(context) : BAColors.secondaryOf(context),
                 size: 22,
               ),
             ),
@@ -1160,7 +1160,7 @@ class _AccountTile extends StatelessWidget {
             if (onLogout != null) ...[
               IconButton(
                 onPressed: onLogout,
-                icon: Icon(Icons.logout, color: BAColors.danger, size: 18),
+                icon: Icon(Icons.logout, color: BAColors.dangerOf(context), size: 18),
                 padding: const EdgeInsets.all(4),
               ),
             ],
