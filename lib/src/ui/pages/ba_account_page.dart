@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../theme/colors.dart';
 import '../components/ba_common_widgets.dart';
 import '../../account/account_manager.dart';
@@ -468,11 +469,11 @@ class _BAAccountPageState extends State<BAAccountPage> {
     // Minecraft 官方皮肤管理页面
     // 用户需要登录微软账户后在官网更换皮肤
     const skinManagerUrl = 'https://www.minecraft.net/profile/skin';
-    
+
     // 显示提示对话框
     if (!mounted) return;
-    
-    showDialog(
+
+    final shouldOpen = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Row(
@@ -507,15 +508,11 @@ class _BAAccountPageState extends State<BAAccountPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(context, false),
             child: const Text('取消'),
           ),
           ElevatedButton.icon(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: 使用 url_launcher 打开链接
-              NotificationManager().showInfo('请在浏览器中打开皮肤管理页面');
-            },
+            onPressed: () => Navigator.pop(context, true),
             icon: const Icon(Icons.open_in_browser, size: 16),
             label: const Text('前往官网'),
             style: ElevatedButton.styleFrom(
@@ -526,6 +523,23 @@ class _BAAccountPageState extends State<BAAccountPage> {
         ],
       ),
     );
+
+    if (shouldOpen == true) {
+      final uri = Uri.parse(skinManagerUrl);
+      try {
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } else {
+          if (mounted) {
+            NotificationManager().showError('无法打开链接', message: '请手动访问 minecraft.net/profile/skin');
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          NotificationManager().showError('打开链接失败', message: e.toString());
+        }
+      }
+    }
   }
 }
 
