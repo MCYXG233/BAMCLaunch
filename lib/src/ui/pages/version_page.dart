@@ -198,7 +198,7 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: BAColors.dangerOf(context)),
+            style: TextButton.styleFrom(foregroundColor: BAColors.danger),
             child: const Text('卸载'),
           ),
         ],
@@ -268,7 +268,7 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: success ? BAColors.successOf(context) : BAColors.dangerOf(context),
+        backgroundColor: success ? BAColors.success : BAColors.danger,
         duration: const Duration(seconds: 3),
       ),
     );
@@ -277,7 +277,7 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: BAColors.backgroundOf(context),
+      color: BAColors.background,
       child: Column(
         children: [
           _buildHeader(),
@@ -308,12 +308,12 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
-        border: Border(bottom: BorderSide(color: BAColors.borderOf(context), width: 1)),
+        color: BAColors.surface,
+        border: Border(bottom: BorderSide(color: BAColors.border, width: 1)),
       ),
       child: Row(
         children: [
-          Icon(Icons.extension, size: 32, color: BAColors.primaryOf(context)),
+          Icon(Icons.extension, size: 32, color: BAColors.primary),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -322,13 +322,13 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
                 Text(
                   '版本管理',
                   style: BATypography.headlineMedium.copyWith(
-                    color: BAColors.textPrimaryOf(context),
+                    color: BAColors.textPrimary,
                   ),
                 ),
                 Text(
                   '管理和安装Minecraft版本',
                   style: BATypography.bodyMedium.copyWith(
-                    color: BAColors.textSecondaryOf(context),
+                    color: BAColors.textSecondary,
                   ),
                 ),
               ],
@@ -347,7 +347,7 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
   /// 构建标签页
   Widget _buildTabBar() {
     return Container(
-      color: BAColors.surfaceOf(context),
+      color: BAColors.surface,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -357,9 +357,9 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
               Tab(text: '已安装'),
               Tab(text: '可下载'),
             ],
-            labelColor: BAColors.primaryOf(context),
-            unselectedLabelColor: BAColors.textSecondaryOf(context),
-            indicatorColor: BAColors.primaryOf(context),
+            labelColor: BAColors.primary,
+            unselectedLabelColor: BAColors.textSecondary,
+            indicatorColor: BAColors.primary,
             indicatorWeight: 3,
           ),
           _buildFilters(),
@@ -373,7 +373,7 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: BAColors.borderOf(context), width: 1)),
+        border: Border(bottom: BorderSide(color: BAColors.border, width: 1)),
       ),
       child: Row(
         children: [
@@ -401,9 +401,9 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: BAColors.surfaceVariantOf(context),
+        color: BAColors.surfaceVariant,
         borderRadius: BATheme.borderRadiusSmall,
-        border: Border.all(color: BAColors.borderOf(context), width: 1),
+        border: Border.all(color: BAColors.border, width: 1),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<VersionType?>(
@@ -411,10 +411,10 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
           hint: Text(
             '全部类型',
             style: BATypography.bodyMedium.copyWith(
-              color: BAColors.textSecondaryOf(context),
+              color: BAColors.textSecondary,
             ),
           ),
-          icon: Icon(Icons.filter_list, color: BAColors.textSecondaryOf(context)),
+          icon: Icon(Icons.filter_list, color: BAColors.textSecondary),
           items: [
             const DropdownMenuItem<VersionType?>(
               value: null,
@@ -485,7 +485,7 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
             Text(
               '加载中...',
               style: BATypography.bodyMedium.copyWith(
-                color: BAColors.textSecondaryOf(context),
+                color: BAColors.textSecondary,
               ),
             ),
           ],
@@ -501,13 +501,13 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
             Icon(
               showInstalledOnly ? Icons.inbox : Icons.cloud_off,
               size: 64,
-              color: BAColors.textDisabledOf(context),
+              color: BAColors.textDisabled,
             ),
             const SizedBox(height: 16),
             Text(
               showInstalledOnly ? '暂无已安装版本' : '没有可下载的版本',
               style: BATypography.bodyLarge.copyWith(
-                color: BAColors.textSecondaryOf(context),
+                color: BAColors.textSecondary,
               ),
             ),
             if (_searchQuery.isNotEmpty || _filterType != null)
@@ -516,7 +516,7 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
                 child: Text(
                   '尝试调整搜索或筛选条件',
                   style: BATypography.bodySmall.copyWith(
-                    color: BAColors.textDisabledOf(context),
+                    color: BAColors.textDisabled,
                   ),
                 ),
               ),
@@ -553,9 +553,9 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
 
     return Container(
       decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
+        color: BAColors.surface,
         borderRadius: BATheme.borderRadius,
-        border: Border.all(color: BAColors.borderOf(context), width: 1),
+        border: Border.all(color: BAColors.border, width: 1),
         boxShadow: BATheme.shadowsSmall,
       ),
       child: Padding(
@@ -582,7 +582,7 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
                       Text(
                         version.id,
                         style: BATypography.headlineSmall.copyWith(
-                          color: BAColors.textPrimaryOf(context),
+                          color: BAColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -615,16 +615,16 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: BAColors.successOf(context).withOpacity(0.1),
+                                color: BAColors.success.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
-                                  color: BAColors.successOf(context).withOpacity(0.3),
+                                  color: BAColors.success.withOpacity(0.3),
                                 ),
                               ),
                               child: Text(
                                 '已安装',
                                 style: BATypography.label.copyWith(
-                                  color: BAColors.successOf(context),
+                                  color: BAColors.success,
                                 ),
                               ),
                             ),
@@ -669,11 +669,11 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
   Widget _buildInstallProgress() {
     return Container(
       decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
-        border: Border(top: BorderSide(color: BAColors.borderOf(context), width: 1)),
+        color: BAColors.surface,
+        border: Border(top: BorderSide(color: BAColors.border, width: 1)),
         boxShadow: [
           BoxShadow(
-            color: BAColors.shadowOf(context).withOpacity(0.2),
+            color: BAColors.shadow.withOpacity(0.2),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
@@ -686,7 +686,7 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
         children: [
           Row(
             children: [
-              Icon(Icons.downloading, color: BAColors.primaryOf(context), size: 24),
+              Icon(Icons.downloading, color: BAColors.primary, size: 24),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -695,14 +695,14 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
                     Text(
                       '正在安装: $_installingVersionId',
                       style: BATypography.bodyLarge.copyWith(
-                        color: BAColors.textPrimaryOf(context),
+                        color: BAColors.textPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     Text(
                       _installStage,
                       style: BATypography.bodySmall.copyWith(
-                        color: BAColors.textSecondaryOf(context),
+                        color: BAColors.textSecondary,
                       ),
                     ),
                   ],

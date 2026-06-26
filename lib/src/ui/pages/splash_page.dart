@@ -170,7 +170,7 @@ class _BAMCSplashPageState extends State<BAMCSplashPage>
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: BAColors.primaryOf(context).withOpacity(0.4),
+            color: BAColors.primary.withOpacity(0.4),
             blurRadius: 30,
             spreadRadius: 5,
           ),
@@ -188,7 +188,7 @@ class _BAMCSplashPageState extends State<BAMCSplashPage>
           ),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: BAColors.primaryOf(context).withOpacity(0.6),
+            color: BAColors.primary.withOpacity(0.6),
             width: 2,
           ),
         ),
@@ -216,13 +216,13 @@ class _BAMCSplashPageState extends State<BAMCSplashPage>
             height: index == _currentDotIndex ? 16 : 10,
             decoration: BoxDecoration(
               color: index == _currentDotIndex
-                  ? BAColors.primaryOf(context)
-                  : BAColors.primaryOf(context).withOpacity(0.3),
+                  ? BAColors.primary
+                  : BAColors.primary.withOpacity(0.3),
               shape: BoxShape.circle,
               boxShadow: index == _currentDotIndex
                   ? [
                       BoxShadow(
-                        color: BAColors.primaryOf(context).withOpacity(0.6),
+                        color: BAColors.primary.withOpacity(0.6),
                         blurRadius: 10,
                       ),
                     ]

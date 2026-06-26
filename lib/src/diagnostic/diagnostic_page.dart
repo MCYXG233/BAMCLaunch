@@ -239,7 +239,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
           ),
           const SizedBox(width: 12),
           const Text(
-            '网络诊断与修�?,
+            '网络诊断与修�?,
             style: TextStyle(
               color: BAColors.textPrimaryOf(context),
               fontSize: 20,
@@ -319,7 +319,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      '网络连接检�?,
+                      '网络连接检�?,
                       style: TextStyle(
                         color: BAColors.textPrimaryOf(context),
                         fontSize: 16,
@@ -329,7 +329,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                     const SizedBox(height: 4),
                     Text(
                       _isNetworkRunning
-                          ? '正在检测网络状�?..'
+                          ? '正在检测网络状�?..'
                           : _getNetworkStatusText(),
                       style: TextStyle(
                         color: _isNetworkRunning
@@ -363,7 +363,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                 child: _buildActionButton(
                   onPressed: _isNetworkRunning ? null : _runNetworkDiagnostic,
                   icon: Icons.play_arrow_rounded,
-                  label: '开始检�?,
+                  label: '开始检�?,
                   isPrimary: true,
                 ),
               ),
@@ -445,11 +445,11 @@ class _DiagnosticPageState extends State<DiagnosticPage>
   String _getNetworkStatusText() {
     switch (_networkStatus) {
       case NetworkDiagnosticStatus.pending:
-        return '点击开始检测网络状�?;
+        return '点击开始检测网络状�?;
       case NetworkDiagnosticStatus.running:
         return '正在检测中...';
       case NetworkDiagnosticStatus.passed:
-        return '所有节点连接正�?;
+        return '所有节点连接正�?;
       case NetworkDiagnosticStatus.warning:
         return '部分节点连接异常';
       case NetworkDiagnosticStatus.failed:
@@ -487,7 +487,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Ping 延迟检�?,
+            'Ping 延迟检�?,
             style: TextStyle(
               color: BAColors.textPrimaryOf(context),
               fontSize: 14,
@@ -533,7 +533,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
             ),
           ),
           Text(
-            result.isReachable ? '${result.latencyMs} ms' : result.errorMessage ?? '不可�?,
+            result.isReachable ? '${result.latencyMs} ms' : result.errorMessage ?? '不可�?,
             style: TextStyle(
               color: latencyColor,
               fontSize: 12,
@@ -553,7 +553,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'DNS 解析检�?,
+            'DNS 解析检�?,
             style: TextStyle(
               color: BAColors.textPrimaryOf(context),
               fontSize: 14,
@@ -714,8 +714,8 @@ class _DiagnosticPageState extends State<DiagnosticPage>
               const SizedBox(width: 8),
               Text(
                 _networkStatus == NetworkDiagnosticStatus.passed
-                    ? '网络状态良�?
-                    : '网络存在一些问�?,
+                    ? '网络状态良�?
+                    : '网络存在一些问�?,
                 style: TextStyle(
                   color: _networkStatus == NetworkDiagnosticStatus.passed
                       ? BAColors.successOf(context)
@@ -729,7 +729,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
           if (_networkReport != null) ...[
             const SizedBox(height: 8),
             Text(
-              '检测时�? ${_networkReport!.timestamp.toString().substring(0, 19)}',
+              '检测时�? ${_networkReport!.timestamp.toString().substring(0, 19)}',
               style: const TextStyle(
                 color: BAColors.textSecondaryOf(context),
                 fontSize: 12,
@@ -745,7 +745,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('一键修�?, Icons.auto_fix_high_rounded),
+        _buildSectionTitle('一键修�?, Icons.auto_fix_high_rounded),
         const SizedBox(height: 12),
         _buildAutoFixCard(),
         if (_detectedIssues.isNotEmpty) ...[
@@ -862,10 +862,10 @@ class _DiagnosticPageState extends State<DiagnosticPage>
     switch (_autoFixStatus) {
       case AutoFixStatus.idle:
         return _detectedIssues.isEmpty
-            ? '点击扫描检测潜在问�?
+            ? '点击扫描检测潜在问�?
             : '发现 ${_detectedIssues.length} 个问题，${_detectedIssues.where((i) => i.canAutoFix).length} 个可自动修复';
       case AutoFixStatus.scanning:
-        return '正在扫描系统�?..';
+        return '正在扫描系统�?..';
       case AutoFixStatus.fixing:
         return '正在修复问题...';
       case AutoFixStatus.completed:
@@ -895,7 +895,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '${_detectedIssues.length} 个问�?,
+                    '${_detectedIssues.length} 个问�?,
                     style: const TextStyle(
                       color: BAColors.warningOf(context),
                       fontSize: 12,
@@ -968,7 +968,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
         ),
       ),
       subtitle: Text(
-        issue.canAutoFix ? '可自动修�? : '需手动修复',
+        issue.canAutoFix ? '可自动修�? : '需手动修复',
         style: TextStyle(
           color: issue.canAutoFix ? BAColors.successOf(context) : BAColors.textSecondaryOf(context),
           fontSize: 12,
@@ -1052,7 +1052,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          fixResult.message ?? (fixResult.isFixed ? '已修�? : '修复失败'),
+                          fixResult.message ?? (fixResult.isFixed ? '已修�? : '修复失败'),
                           style: TextStyle(
                             color: fixResult.isFixed
                                 ? BAColors.successOf(context)
@@ -1100,7 +1100,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      '${_autoFixer.fixHistory.length} 条记�?,
+                      '${_autoFixer.fixHistory.length} 条记�?,
                       style: const TextStyle(
                         color: BAColors.primaryOf(context),
                         fontSize: 12,

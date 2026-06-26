@@ -156,7 +156,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BATheme.borderRadiusSmall,
-                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                borderSide: BorderSide(color: BAColors.primary, width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -289,7 +289,7 @@ class _LoginPageState extends State<LoginPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: BAColors.secondaryOf(context),
+        backgroundColor: BAColors.secondary,
         duration: const Duration(seconds: 2),
       ),
     );
@@ -300,7 +300,7 @@ class _LoginPageState extends State<LoginPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: BAColors.dangerOf(context),
+        backgroundColor: BAColors.danger,
         duration: const Duration(seconds: 3),
       ),
     );
@@ -361,13 +361,13 @@ class _LoginPageState extends State<LoginPage> {
           width: 120,
           height: 120,
           decoration: BoxDecoration(
-            color: BAColors.primaryOf(context).withOpacity(0.1),
+            color: BAColors.primary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(32),
           ),
           child: Icon(
             Icons.sports_esports,
             size: 64,
-            color: BAColors.primaryOf(context),
+            color: BAColors.primary,
           ),
         ),
         const SizedBox(height: 24),
@@ -405,7 +405,7 @@ class _LoginPageState extends State<LoginPage> {
         child: Icon(
             Icons.window,
             size: 18,
-            color: BAColors.primaryOf(context),
+            color: BAColors.primary,
           ),
       ),
     );
@@ -455,7 +455,7 @@ class _LoginPageState extends State<LoginPage> {
       width: double.infinity,
       leadingIcon: Icon(
         Icons.person_outline,
-        color: BAColors.secondaryOf(context),
+        color: BAColors.secondary,
       ),
     );
   }
@@ -489,7 +489,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BATheme.borderRadiusSmall,
-              borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+              borderSide: BorderSide(color: BAColors.primary, width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,

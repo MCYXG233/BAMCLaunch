@@ -17,7 +17,7 @@ class _BALanguageSelectorState extends State<BALanguageSelector> {
   static const List<_LanguageOption> _languages = [
     _LanguageOption(
       locale: Locale('zh', 'CN'),
-      label: '简体中�?,
+      label: '简体中�?,
       flag: '🇨🇳',
     ),
     _LanguageOption(
