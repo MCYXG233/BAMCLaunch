@@ -127,7 +127,7 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: BAColors.successOf(context),
+        backgroundColor: BAColors.success,
         duration: const Duration(seconds: 2),
       ),
     );
@@ -137,7 +137,7 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: BAColors.dangerOf(context),
+        backgroundColor: BAColors.danger,
         duration: const Duration(seconds: 3),
       ),
     );
@@ -162,7 +162,7 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
             const Icon(Icons.error, size: 64, color: Colors.red),
             const SizedBox(height: 16),
             Text(
-              '实例不存�?,
+              '实例不存在',
               style: BATypography.headlineSmall,
             ),
           ],
@@ -171,15 +171,15 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
     }
 
     return Scaffold(
-      backgroundColor: BAColors.backgroundOf(context),
+      backgroundColor: BAColors.background,
       appBar: AppBar(
-        backgroundColor: BAColors.surfaceOf(context),
+        backgroundColor: BAColors.surface,
         title: Text(
           '${_instance!.name} - 配置',
-          style: BATypography.headlineMedium.copyWith(color: BAColors.textPrimaryOf(context)),
+          style: BATypography.headlineMedium.copyWith(color: BAColors.textPrimary),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: BAColors.textPrimaryOf(context)),
+          icon: Icon(Icons.arrow_back, color: BAColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -212,21 +212,21 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
+        color: BAColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: BAColors.borderOf(context)),
+        border: Border.all(color: BAColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Java 设置',
-            style: BATypography.headlineSmall.copyWith(color: BAColors.textPrimaryOf(context)),
+            style: BATypography.headlineSmall.copyWith(color: BAColors.textPrimary),
           ),
           const SizedBox(height: 16),
           Text(
             'Java 路径',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
           ),
           const SizedBox(height: 8),
           Row(
@@ -236,20 +236,20 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
                   controller: _javaPathController,
                   onChanged: (_) => _markChanged(),
                   decoration: InputDecoration(
-                    hintText: 'java.exe 的路径（留空使用系统默认�?,
+                    hintText: 'java.exe 的路径（留空使用系统默认）',
                     filled: true,
-                    fillColor: BAColors.surfaceVariantOf(context),
+                    fillColor: BAColors.surfaceVariant,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide.none,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: BAColors.borderOf(context)),
+                      borderSide: BorderSide(color: BAColors.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                      borderSide: BorderSide(color: BAColors.primary, width: 2),
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),
@@ -271,16 +271,16 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
+        color: BAColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: BAColors.borderOf(context)),
+        border: Border.all(color: BAColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             '内存分配',
-            style: BATypography.headlineSmall.copyWith(color: BAColors.textPrimaryOf(context)),
+            style: BATypography.headlineSmall.copyWith(color: BAColors.textPrimary),
           ),
           const SizedBox(height: 16),
           Row(
@@ -290,8 +290,8 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '最大内�?(MB)',
-                      style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+                      '最大内存 (MB)',
+                      style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
                     ),
                     const SizedBox(height: 8),
                     TextField(
@@ -303,18 +303,18 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
                       decoration: InputDecoration(
                         hintText: '2048',
                         filled: true,
-                        fillColor: BAColors.surfaceVariantOf(context),
+                        fillColor: BAColors.surfaceVariant,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide.none,
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                          borderSide: BorderSide(color: BAColors.border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                          borderSide: BorderSide(color: BAColors.primary, width: 2),
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       ),
@@ -329,8 +329,8 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '最小内�?(MB)',
-                      style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+                      '最小内存 (MB)',
+                      style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
                     ),
                     const SizedBox(height: 8),
                     TextField(
@@ -342,18 +342,18 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
                       decoration: InputDecoration(
                         hintText: '1024',
                         filled: true,
-                        fillColor: BAColors.surfaceVariantOf(context),
+                        fillColor: BAColors.surfaceVariant,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide.none,
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                          borderSide: BorderSide(color: BAColors.border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                          borderSide: BorderSide(color: BAColors.primary, width: 2),
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       ),
@@ -373,21 +373,21 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
+        color: BAColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: BAColors.borderOf(context)),
+        border: Border.all(color: BAColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             '启动参数',
-            style: BATypography.headlineSmall.copyWith(color: BAColors.textPrimaryOf(context)),
+            style: BATypography.headlineSmall.copyWith(color: BAColors.textPrimary),
           ),
           const SizedBox(height: 16),
           Text(
             'JVM 参数',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -396,18 +396,18 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
             decoration: InputDecoration(
               hintText: '-XX:+UseG1GC -XX:+UnlockExperimentalVMOptions',
               filled: true,
-              fillColor: BAColors.surfaceVariantOf(context),
+              fillColor: BAColors.surfaceVariant,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.borderOf(context)),
+                borderSide: BorderSide(color: BAColors.border),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                borderSide: BorderSide(color: BAColors.primary, width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
@@ -415,7 +415,7 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
           const SizedBox(height: 16),
           Text(
             '游戏参数',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -424,18 +424,18 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
             decoration: InputDecoration(
               hintText: '--fullscreen',
               filled: true,
-              fillColor: BAColors.surfaceVariantOf(context),
+              fillColor: BAColors.surfaceVariant,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.borderOf(context)),
+                borderSide: BorderSide(color: BAColors.border),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                borderSide: BorderSide(color: BAColors.primary, width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
@@ -449,16 +449,16 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
+        color: BAColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: BAColors.borderOf(context)),
+        border: Border.all(color: BAColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             '窗口设置',
-            style: BATypography.headlineSmall.copyWith(color: BAColors.textPrimaryOf(context)),
+            style: BATypography.headlineSmall.copyWith(color: BAColors.textPrimary),
           ),
           const SizedBox(height: 16),
           Row(
@@ -469,7 +469,7 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
                   children: [
                     Text(
                       '窗口宽度',
-                      style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+                      style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
                     ),
                     const SizedBox(height: 8),
                     TextField(
@@ -479,18 +479,18 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
                       decoration: InputDecoration(
                         hintText: '1280',
                         filled: true,
-                        fillColor: BAColors.surfaceVariantOf(context),
+                        fillColor: BAColors.surfaceVariant,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide.none,
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                          borderSide: BorderSide(color: BAColors.border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                          borderSide: BorderSide(color: BAColors.primary, width: 2),
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       ),
@@ -505,7 +505,7 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
                   children: [
                     Text(
                       '窗口高度',
-                      style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+                      style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
                     ),
                     const SizedBox(height: 8),
                     TextField(
@@ -515,18 +515,18 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
                       decoration: InputDecoration(
                         hintText: '720',
                         filled: true,
-                        fillColor: BAColors.surfaceVariantOf(context),
+                        fillColor: BAColors.surfaceVariant,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide.none,
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                          borderSide: BorderSide(color: BAColors.border),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                          borderSide: BorderSide(color: BAColors.primary, width: 2),
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       ),
@@ -542,7 +542,7 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
             children: [
               Text(
                 '全屏模式',
-                style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+                style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
               ),
               Switch(
                 value: _fullscreen,
@@ -550,7 +550,7 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
                   setState(() => _fullscreen = value);
                   _markChanged();
                 },
-                activeColor: BAColors.primaryOf(context),
+                activeColor: BAColors.primary,
               ),
             ],
           ),
@@ -563,16 +563,16 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
+        color: BAColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: BAColors.borderOf(context)),
+        border: Border.all(color: BAColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             '其他设置',
-            style: BATypography.headlineSmall.copyWith(color: BAColors.textPrimaryOf(context)),
+            style: BATypography.headlineSmall.copyWith(color: BAColors.textPrimary),
           ),
           const SizedBox(height: 16),
           Row(
@@ -580,7 +580,7 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
             children: [
               Text(
                 '演示模式',
-                style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+                style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
               ),
               Switch(
                 value: _demo,
@@ -588,7 +588,7 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
                   setState(() => _demo = value);
                   _markChanged();
                 },
-                activeColor: BAColors.primaryOf(context),
+                activeColor: BAColors.primary,
               ),
             ],
           ),
