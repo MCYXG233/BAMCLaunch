@@ -51,7 +51,7 @@ class DailyPlayTimeChart extends StatelessWidget {
         barTouchData: BarTouchData(
           enabled: true,
           touchTooltipData: BarTouchTooltipData(
-            getTooltipColor: (_) => BAColors.darkSurface,
+            getTooltipColor: (_) => BAColors.surfaceOf(context),
             tooltipPadding: const EdgeInsets.all(8),
             tooltipMargin: 8,
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
@@ -365,7 +365,7 @@ class TimeRangeSelector extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? BAColors.primary : Colors.transparent,
+          color: isSelected ? BAColors.primaryOf(context) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(

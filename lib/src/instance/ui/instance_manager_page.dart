@@ -183,25 +183,25 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
         children: [
           Text(
             '实例名称',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
           ),
           const SizedBox(height: 8),
           TextField(
             decoration: InputDecoration(
               hintText: '输入实例名称',
               filled: true,
-              fillColor: BAColors.surfaceVariant,
+              fillColor: BAColors.surfaceVariantOf(context),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.border),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primary, width: 2),
+                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
@@ -209,25 +209,25 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
           const SizedBox(height: 16),
           Text(
             '游戏版本',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
           ),
           const SizedBox(height: 8),
           TextField(
             decoration: InputDecoration(
               hintText: '1.20.4',
               filled: true,
-              fillColor: BAColors.surfaceVariant,
+              fillColor: BAColors.surfaceVariantOf(context),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.border),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primary, width: 2),
+                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
@@ -280,25 +280,25 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
         children: [
           Text(
             '目录名称',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
           ),
           const SizedBox(height: 8),
           TextField(
             decoration: InputDecoration(
               hintText: '我的游戏',
               filled: true,
-              fillColor: BAColors.surfaceVariant,
+              fillColor: BAColors.surfaceVariantOf(context),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.border),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primary, width: 2),
+                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
@@ -306,25 +306,25 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
           const SizedBox(height: 16),
           Text(
             '目录路径',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
           ),
           const SizedBox(height: 8),
           TextField(
             decoration: InputDecoration(
               hintText: 'C:/Games/Minecraft',
               filled: true,
-              fillColor: BAColors.surfaceVariant,
+              fillColor: BAColors.surfaceVariantOf(context),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.border),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primary, width: 2),
+                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
@@ -408,25 +408,25 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
         children: [
           Text(
             '新实例名称',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
           ),
           const SizedBox(height: 8),
           TextField(
             decoration: InputDecoration(
               hintText: '${instance.name} (副本)',
               filled: true,
-              fillColor: BAColors.surfaceVariant,
+              fillColor: BAColors.surfaceVariantOf(context),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.border),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primary, width: 2),
+                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
@@ -501,7 +501,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: BAColors.success,
+        backgroundColor: BAColors.successOf(context),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -511,7 +511,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: BAColors.danger,
+        backgroundColor: BAColors.dangerOf(context),
         duration: const Duration(seconds: 3),
       ),
     );
@@ -528,7 +528,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
           child: Row(
             children: [
               if (_sortOption == InstanceSortOption.name)
-                Icon(Icons.check, size: 18, color: BAColors.primary),
+                Icon(Icons.check, size: 18, color: BAColors.primaryOf(context)),
               const SizedBox(width: 8),
               const Text('名称'),
             ],
@@ -539,7 +539,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
           child: Row(
             children: [
               if (_sortOption == InstanceSortOption.lastPlayed)
-                Icon(Icons.check, size: 18, color: BAColors.primary),
+                Icon(Icons.check, size: 18, color: BAColors.primaryOf(context)),
               const SizedBox(width: 8),
               const Text('最近启动'),
             ],
@@ -550,7 +550,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
           child: Row(
             children: [
               if (_sortOption == InstanceSortOption.createdAt)
-                Icon(Icons.check, size: 18, color: BAColors.primary),
+                Icon(Icons.check, size: 18, color: BAColors.primaryOf(context)),
               const SizedBox(width: 8),
               const Text('创建时间'),
             ],
@@ -561,7 +561,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
           child: Row(
             children: [
               if (_sortOption == InstanceSortOption.size)
-                Icon(Icons.check, size: 18, color: BAColors.primary),
+                Icon(Icons.check, size: 18, color: BAColors.primaryOf(context)),
               const SizedBox(width: 8),
               const Text('大小'),
             ],
@@ -613,7 +613,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: BAColors.background,
+      backgroundColor: BAColors.backgroundOf(context),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _buildContent(),
@@ -646,12 +646,12 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: BAColors.surface,
-        border: Border(bottom: BorderSide(color: BAColors.border)),
+        color: BAColors.surfaceOf(context),
+        border: Border(bottom: BorderSide(color: BAColors.borderOf(context))),
       ),
       child: Row(
         children: [
-          Icon(Icons.folder, size: 32, color: BAColors.primary),
+          Icon(Icons.folder, size: 32, color: BAColors.primaryOf(context)),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -659,11 +659,11 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
               children: [
                 Text(
                   '实例管理',
-                  style: BATypography.headlineMedium.copyWith(color: BAColors.textPrimary),
+                  style: BATypography.headlineMedium.copyWith(color: BAColors.textPrimaryOf(context)),
                 ),
                 Text(
                   '管理你的所有游戏实例',
-                  style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+                  style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
                 ),
               ],
             ),
@@ -671,7 +671,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
           IconButton(
             icon: Icon(
               _showGrid ? Icons.grid_view : Icons.view_list,
-              color: BAColors.textSecondary,
+              color: BAColors.textSecondaryOf(context),
             ),
             onPressed: () => setState(() => _showGrid = !_showGrid),
           ),
@@ -696,8 +696,8 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: BoxDecoration(
-        color: BAColors.surfaceVariant,
-        border: Border(bottom: BorderSide(color: BAColors.border)),
+        color: BAColors.surfaceVariantOf(context),
+        border: Border(bottom: BorderSide(color: BAColors.borderOf(context))),
       ),
       child: Row(
         children: [
@@ -721,18 +721,18 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                         )
                       : null,
                   filled: true,
-                  fillColor: BAColors.surface,
+                  fillColor: BAColors.surfaceOf(context),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none,
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: BAColors.border),
+                    borderSide: BorderSide(color: BAColors.borderOf(context)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: BAColors.primary, width: 2),
+                    borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
                   ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                 ),
@@ -747,9 +747,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
           // 排序选项
           Container(
             decoration: BoxDecoration(
-              color: BAColors.surface,
+              color: BAColors.surfaceOf(context),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: BAColors.border),
+              border: Border.all(color: BAColors.borderOf(context)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -759,12 +759,12 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                   icon: const Icon(Icons.sort, size: 18),
                   label: Text(_getSortOptionText()),
                   style: TextButton.styleFrom(
-                    foregroundColor: BAColors.textPrimary,
+                    foregroundColor: BAColors.textPrimaryOf(context),
                   ),
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    border: Border(left: BorderSide(color: BAColors.border)),
+                    border: Border(left: BorderSide(color: BAColors.borderOf(context))),
                   ),
                   child: IconButton(
                     icon: Icon(
@@ -789,8 +789,8 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: BoxDecoration(
-        color: BAColors.surfaceVariant,
-        border: Border(bottom: BorderSide(color: BAColors.border)),
+        color: BAColors.surfaceVariantOf(context),
+        border: Border(bottom: BorderSide(color: BAColors.borderOf(context))),
       ),
       child: Row(
         children: [
@@ -804,12 +804,12 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                   selected: isSelected,
                   label: Text(dir.name),
                   onSelected: (_) => _selectDirectory(dir),
-                  selectedColor: BAColors.primary.withOpacity(0.2),
-                  checkmarkColor: BAColors.primary,
-                  backgroundColor: BAColors.surface,
+                  selectedColor: BAColors.primaryOf(context).withOpacity(0.2),
+                  checkmarkColor: BAColors.primaryOf(context),
+                  backgroundColor: BAColors.surfaceOf(context),
                   deleteIcon: isSelected
                       ? null
-                      : Icon(Icons.close, color: BAColors.textDisabled),
+                      : Icon(Icons.close, color: BAColors.textDisabledOf(context)),
                   onDeleted: isSelected ? null : () => _deleteDirectory(dir),
                 );
               }).toList(),
@@ -856,16 +856,16 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: isSelected ? BAColors.primary.withOpacity(0.1) : BAColors.surface,
+          color: isSelected ? BAColors.primaryOf(context).withOpacity(0.1) : BAColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? BAColors.primary : BAColors.border,
+            color: isSelected ? BAColors.primaryOf(context) : BAColors.borderOf(context),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
             if (isSelected)
               BoxShadow(
-                color: BAColors.primary.withOpacity(0.2),
+                color: BAColors.primaryOf(context).withOpacity(0.2),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -885,14 +885,14 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: BAColors.primary.withOpacity(0.15),
+                        color: BAColors.primaryOf(context).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Center(
                         child: Icon(
                           Icons.gamepad,
                           size: 48,
-                          color: BAColors.primary,
+                          color: BAColors.primaryOf(context),
                         ),
                       ),
                     ),
@@ -900,7 +900,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                   const SizedBox(height: 16),
                   Text(
                     instance.name,
-                    style: BATypography.titleMedium.copyWith(color: BAColors.textPrimary),
+                    style: BATypography.titleMedium.copyWith(color: BAColors.textPrimaryOf(context)),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -910,7 +910,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                       Expanded(
                         child: Text(
                           '${instance.version}${instance.loader != null ? ' • ${instance.loader}' : ''}',
-                          style: BATypography.bodySmall.copyWith(color: BAColors.textSecondary),
+                          style: BATypography.bodySmall.copyWith(color: BAColors.textSecondaryOf(context)),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -918,7 +918,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                       if (size > 0)
                         Text(
                           _formatSize(size),
-                          style: BATypography.bodySmall.copyWith(color: BAColors.textDisabled),
+                          style: BATypography.bodySmall.copyWith(color: BAColors.textDisabledOf(context)),
                         ),
                     ],
                   ),
@@ -935,7 +935,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                       ),
                       const SizedBox(width: 8),
                       PopupMenuButton<String>(
-                        icon: Icon(Icons.more_vert, color: BAColors.textSecondary),
+                        icon: Icon(Icons.more_vert, color: BAColors.textSecondaryOf(context)),
                         onSelected: (value) {
                           switch (value) {
                             case 'edit':
@@ -971,9 +971,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                             value: 'delete',
                             child: Row(
                               children: [
-                                Icon(Icons.delete, size: 18, color: BAColors.danger),
+                                Icon(Icons.delete, size: 18, color: BAColors.dangerOf(context)),
                                 const SizedBox(width: 8),
-                                Text('删除', style: TextStyle(color: BAColors.danger)),
+                                Text('删除', style: TextStyle(color: BAColors.dangerOf(context))),
                               ],
                             ),
                           ),
@@ -1000,10 +1000,10 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
         duration: const Duration(milliseconds: 200),
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: isSelected ? BAColors.primary.withOpacity(0.1) : BAColors.surface,
+          color: isSelected ? BAColors.primaryOf(context).withOpacity(0.1) : BAColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? BAColors.primary : BAColors.border,
+            color: isSelected ? BAColors.primaryOf(context) : BAColors.borderOf(context),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -1021,13 +1021,13 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      color: BAColors.primary.withOpacity(0.15),
+                      color: BAColors.primaryOf(context).withOpacity(0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       Icons.gamepad,
                       size: 32,
-                      color: BAColors.primary,
+                      color: BAColors.primaryOf(context),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -1037,17 +1037,17 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                       children: [
                         Text(
                           instance.name,
-                          style: BATypography.titleMedium.copyWith(color: BAColors.textPrimary),
+                          style: BATypography.titleMedium.copyWith(color: BAColors.textPrimaryOf(context)),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${instance.version}${instance.loader != null ? ' • ${instance.loader}' : ''}',
-                          style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+                          style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
                         ),
                         if (size > 0)
                           Text(
                             _formatSize(size),
-                            style: BATypography.bodySmall.copyWith(color: BAColors.textDisabled),
+                            style: BATypography.bodySmall.copyWith(color: BAColors.textDisabledOf(context)),
                           ),
                       ],
                     ),
@@ -1060,7 +1060,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                   ),
                   const SizedBox(width: 8),
                   PopupMenuButton<String>(
-                    icon: Icon(Icons.more_vert, color: BAColors.textSecondary),
+                    icon: Icon(Icons.more_vert, color: BAColors.textSecondaryOf(context)),
                     onSelected: (value) {
                       switch (value) {
                         case 'edit':
@@ -1096,9 +1096,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete, size: 18, color: BAColors.danger),
+                            Icon(Icons.delete, size: 18, color: BAColors.dangerOf(context)),
                             const SizedBox(width: 8),
-                            Text('删除', style: TextStyle(color: BAColors.danger)),
+                            Text('删除', style: TextStyle(color: BAColors.dangerOf(context))),
                           ],
                         ),
                       ),
@@ -1123,17 +1123,17 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
           Icon(
             hasSearchQuery ? Icons.search_off : Icons.extension,
             size: 80,
-            color: BAColors.textDisabled,
+            color: BAColors.textDisabledOf(context),
           ),
           const SizedBox(height: 24),
           Text(
             hasSearchQuery ? '没有找到匹配的实例' : '还没有游戏实例',
-            style: BATypography.headlineSmall.copyWith(color: BAColors.textSecondary),
+            style: BATypography.headlineSmall.copyWith(color: BAColors.textSecondaryOf(context)),
           ),
           const SizedBox(height: 8),
           Text(
             hasSearchQuery ? '尝试修改搜索关键词' : '创建一个实例来开始游戏',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondary),
+            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
           ),
           const SizedBox(height: 32),
           if (hasSearchQuery)

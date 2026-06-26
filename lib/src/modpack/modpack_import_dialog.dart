@@ -212,7 +212,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: BAColors.primary.withOpacity(0.1),
+        color: BAColors.primaryOf(context).withOpacity(0.1),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(12),
           topRight: Radius.circular(12),
@@ -220,7 +220,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.archive, color: BAColors.primary, size: 28),
+          const Icon(Icons.archive, color: BAColors.primaryOf(context), size: 28),
           const SizedBox(width: 16),
           Text(
             '导入整合包',
@@ -290,15 +290,15 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: BAColors.danger.withOpacity(0.1),
+                color: BAColors.dangerOf(context).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: BAColors.danger.withOpacity(0.3),
+                  color: BAColors.dangerOf(context).withOpacity(0.3),
                 ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.error_outline, color: BAColors.danger),
+                  Icon(Icons.error_outline, color: BAColors.dangerOf(context)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -382,7 +382,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primary, width: 2),
+                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -395,15 +395,15 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: BAColors.danger.withOpacity(0.1),
+                color: BAColors.dangerOf(context).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: BAColors.danger.withOpacity(0.3),
+                  color: BAColors.dangerOf(context).withOpacity(0.3),
                 ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.error_outline, color: BAColors.danger),
+                  Icon(Icons.error_outline, color: BAColors.dangerOf(context)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -460,7 +460,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
           Icon(
             Icons.downloading,
             size: 80,
-            color: BAColors.primary,
+            color: BAColors.primaryOf(context),
           ),
           const SizedBox(height: 24),
           Text(
@@ -510,7 +510,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
           Icon(
             Icons.check_circle,
             size: 80,
-            color: BAColors.success,
+            color: BAColors.successOf(context),
           ),
           const SizedBox(height: 24),
           Text(

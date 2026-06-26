@@ -39,9 +39,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final bgColor = isLight ? BAColors.lightBackground : BAColors.darkBackground;
-    final textColor = isLight ? BAColors.lightTextPrimary : BAColors.darkTextPrimary;
+    final bgColor = BAColors.backgroundOf(context);
+    final textColor = BAColors.textPrimaryOf(context);
 
     return Container(
       color: Colors.transparent,
