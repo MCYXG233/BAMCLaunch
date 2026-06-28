@@ -220,7 +220,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.archive, color: BAColors.primaryOf(context), size: 28),
+          Icon(Icons.archive, color: BAColors.primaryOf(context), size: 28),
           const SizedBox(width: 16),
           Text(
             '导入整合包',

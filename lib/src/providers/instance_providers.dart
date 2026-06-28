@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../instance/instance_manager.dart';
-import '../shared/models/instance.dart';
+import '../instance/models.dart';
 import 'service_locator_provider.dart';
 
 /// InstanceManager Provider

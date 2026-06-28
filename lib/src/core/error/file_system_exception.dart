@@ -1,3 +1,4 @@
+import 'dart:async' as async;
 import 'app_exception.dart';
 
 /// 文件系统错误类型
@@ -103,7 +104,7 @@ final class FileSystemException extends AppException {
 
   /// 工厂方法：从 Dart 原生 FileSystemException 创建
   factory FileSystemException.fromDartException(
-    dart.Exception e,
+    Exception e,
     String path, {
     String? operation,
     StackTrace? stackTrace,

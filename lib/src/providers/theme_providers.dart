@@ -41,11 +41,11 @@ final themeProvider = StateNotifierProvider<ThemeNotifier, AppThemeMode>((ref) {
 });
 
 /// 当前 ThemeData Provider
-/// 
+///
 /// 根据主题模式返回对应的 ThemeData
 final themeDataProvider = Provider<ThemeData>((ref) {
   final themeMode = ref.watch(themeProvider);
-  
+
   switch (themeMode) {
     case AppThemeMode.blueArchive:
       return _blueArchiveTheme;
@@ -54,25 +54,25 @@ final themeDataProvider = Provider<ThemeData>((ref) {
     case AppThemeMode.light:
       return ThemeData.light();
     case AppThemeMode.system:
-    default:
-      return ThemeData(brightness: Brightness.system);
+      return ThemeData.light();
   }
 });
 
 /// 蔚蓝档案风格主题
 final ThemeData _blueArchiveTheme = ThemeData(
   brightness: Brightness.dark,
-  primaryColor: const Color(0xFF4A90D9),
-  secondaryHeaderColor: const Color(0xFFE8B84A),
-  accentColor: const Color(0xFFE8B84A),
-  backgroundColor: const Color(0xFF1A1A2E),
+  colorScheme: const ColorScheme.dark(
+    primary: Color(0xFF4A90D9),
+    secondary: Color(0xFFE8B84A),
+    surface: Color(0xFF1A1A2E),
+  ),
   scaffoldBackgroundColor: const Color(0xFF16213E),
   cardColor: const Color(0xFF1F3460),
   textTheme: const TextTheme(
-    headline1: TextStyle(color: Color(0xFFFFFFFF)),
-    headline2: TextStyle(color: Color(0xFFFFFFFF)),
-    bodyText1: TextStyle(color: Color(0xFFE8E8E8)),
-    bodyText2: TextStyle(color: Color(0xFFB8B8B8)),
+    displayLarge: TextStyle(color: Color(0xFFFFFFFF)),
+    displayMedium: TextStyle(color: Color(0xFFFFFFFF)),
+    bodyLarge: TextStyle(color: Color(0xFFE8E8E8)),
+    bodyMedium: TextStyle(color: Color(0xFFB8B8B8)),
   ),
   appBarTheme: const AppBarTheme(
     backgroundColor: Color(0xFF1F3460),

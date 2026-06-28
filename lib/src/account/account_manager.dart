@@ -405,6 +405,15 @@ class AccountManager implements IAccountManager {
     return List.unmodifiable(_cachedAccounts);
   }
 
+  /// 获取当前账户的资源值（stamina / credits 等）。
+  ///
+  /// 返回 `int?`：若资源键未配置或当前账户离线则返回 `null`。
+  /// 真实游戏资源通常由启动器之外的后台服务同步，此处仅返回缓存值。
+  int? getResource(String key) {
+    // TODO: 与实际游戏资源服务对接，当前返回 null 以让调用方使用默认值
+    return null;
+  }
+
   /// 获取当前选中的账户
   ///
   /// 从配置中读取当前选中的账户ID，并在缓存中查找对应的账户对象。

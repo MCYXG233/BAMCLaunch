@@ -14,7 +14,7 @@
 ///   logger.error(e.debugDescription);
 /// }
 /// ```
-sealed class AppException implements Exception {
+abstract class AppException implements Exception {
   /// 用户友好的错误消息
   /// 
   /// 用于 UI 显示，应简洁、有指导性。
@@ -38,38 +38,29 @@ sealed class AppException implements Exception {
 
   @override
   String toString() => debugDescription;
+
+  /// 异常的严重性等级
+  ///
+  /// 子类可重写以返回特定等级；默认 [FailureSeverity.medium]。
+  FailureSeverity get severity => FailureSeverity.medium;
 }
 
 /// 失败严重性等级
-/// 
+///
 /// 用于决定如何处理异常。
 enum FailureSeverity {
   /// 低：后台任务失败，静默记录日志
   low,
-  
+
   /// 中：用户操作失败，显示 SnackBar
   medium,
-  
+
   /// 高：关键操作失败，弹窗
   high,
-  
+
   /// 致命：不可恢复，应用无法继续
   critical,
-  
+
   /// 认证：令牌过期，需要重新登录
   auth,
-}
-
-/// 扩展方法：获取严重性等级
-extension AppExceptionSeverity on AppException {
-  /// 获取此异常的严重性等级
-  /// 
-  /// 子类应重写此属性以返回正确的等级。
-  FailureSeverity get severity {
-    if (this is AuthException) return FailureSeverity.auth;
-    if (this is GameLaunchException) return FailureSeverity.critical;
-    if (this is FileSystemException) return FailureSeverity.high;
-    if (this is NetworkException) return FailureSeverity.medium;
-    return FailureSeverity.medium;
-  }
 }

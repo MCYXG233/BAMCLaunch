@@ -1,16 +1,12 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:convert';
-import 'package:path/path.dart' as path;
 import '../core/logger.dart';
 import '../config/config_manager.dart';
-import '../config/config_keys.dart';
 import '../event/event_bus.dart';
 import '../event/event.dart';
 import '../instance/instance_manager.dart';
 import '../instance/models.dart';
-import '../game/backup_manager.dart';
-import 'backup_tag.dart';
+import '../game/backup_manager.dart' deferred as backup_manager;
 
 /// 自动备份调度类型
 enum AutoBackupSchedule {
@@ -347,7 +343,7 @@ class AutoBackupService {
         instanceId: instance.id,
         instanceName: instance.name,
         instancePath: directory.path,
-        type: BackupType.full,
+        type: backup_manager.BackupType.full,
         description: 'Auto backup - ${schedule.name}',
         gameVersion: instance.version,
       );
@@ -386,7 +382,8 @@ class AutoBackupService {
   }
 
   Future<dynamic> _importBackupManager() async {
-    return (await import('../game/backup_manager.dart')).BackupManager.instance;
+    await backup_manager.loadLibrary();
+    return backup_manager.BackupManager.instance;
   }
 
   /// 执行保留数量限制

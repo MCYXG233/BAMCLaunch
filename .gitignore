@@ -69,3 +69,10 @@ logs/
 tools/skills/
 DEPLOYMENT.md
 replace_colors.py
+
+# Temporary debugging artifacts (analyze / build output, one-off fix scripts)
+analyze_*.txt
+build_*.txt
+build_windows_*.txt
+fix_*.ps1
+fix_*.sh

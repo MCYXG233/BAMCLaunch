@@ -88,9 +88,9 @@ class WindowController {
   String? _currentProcessId;
   bool _initialized = false;
 
-  StreamSubscription<GameReadyEvent>? _gameReadySubscription;
-  StreamSubscription<GameStoppedEvent>? _gameStoppedSubscription;
-  StreamSubscription<GameCrashedEvent>? _gameCrashedSubscription;
+  EventSubscription? _gameReadySubscription;
+  EventSubscription? _gameStoppedSubscription;
+  EventSubscription? _gameCrashedSubscription;
 
   /// 当前可见性模式
   WindowVisibilityMode get visibilityMode => _visibilityMode;
@@ -556,9 +556,9 @@ class WindowController {
 
   /// 释放资源
   void dispose() {
-    _gameReadySubscription?.cancel();
-    _gameStoppedSubscription?.cancel();
-    _gameCrashedSubscription?.cancel();
+    _gameReadySubscription?.unsubscribe();
+    _gameStoppedSubscription?.unsubscribe();
+    _gameCrashedSubscription?.unsubscribe();
     _initialized = false;
     _logger.info('WindowController disposed');
   }

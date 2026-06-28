@@ -163,7 +163,7 @@ class TerracottaRoom {
       name: json['name'] as String? ?? '',
       host: json['host'] as String? ?? '',
       // 端口号默认为 Minecraft 标准端口 25565
-      gamePort: json['game_port'] as int? ?? 25565,
+      gamePort: json['game_port']?.toString() ?? '25565',
       // 网络类型从字符串名称匹配，如果无法匹配则默认为 lan
       networkType: NetworkType.values.firstWhere(
         (t) => t.name == json['network_type'],
@@ -370,8 +370,10 @@ class TerracottaManager {
   /// }
   /// ```
   Future<void> initialize() async {
-    // 获取应用数据目录
-    final appDir = PlatformAdapter.getDataDirectory();
+    // 获取应用数据目录（使用 dart:io 默认目录，回退到 userDir）
+    final appDir = Platform.environment['APPDATA'] ??
+        Platform.environment['HOME'] ??
+        Directory.current.path;
     // 构建 Terracotta 专用目录路径
     final terracottaDir = Directory(path.join(appDir, 'terracotta'));
 

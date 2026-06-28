@@ -306,8 +306,8 @@ class NativeExtractor {
   /// 获取架构
   String _getArchitecture() {
     // 检测系统架构
-    final arch = Platform.resolvedEnvironment['PROCESSOR_ARCHITECTURE'] ??
-                 Platform.resolvedEnvironment['HOSTTYPE'] ??
+    final arch = Platform.environment['PROCESSOR_ARCHITECTURE'] ??
+                 Platform.environment['HOSTTYPE'] ??
                  'x64';
 
     if (arch.toLowerCase().contains('arm64') || arch.toLowerCase().contains('aarch64')) {

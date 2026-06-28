@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../../account/account_manager.dart';
 import '../../instance/instance_manager.dart';
-import '../../theme/background_manager.dart';
+import '../theme/background_manager.dart';
 
 class BAMainPageViewModel extends ChangeNotifier {
   final AccountManager _accountManager;

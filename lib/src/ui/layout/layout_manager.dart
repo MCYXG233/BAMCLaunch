@@ -419,10 +419,8 @@ class LayoutEditorControls extends StatelessWidget {
               const SizedBox(width: 8),
               TextButton.icon(
                 onPressed: () {
-                  if (mounted) {
-                    final size = MediaQuery.of(context).size;
-                    layoutManager.resetToDefault(size);
-                  }
+                  final size = MediaQuery.of(context).size;
+                  layoutManager.resetToDefault(size);
                 },
                 icon: const Icon(Icons.restore, color: Colors.orange),
                 label: const Text('重置', style: TextStyle(color: Colors.white)),

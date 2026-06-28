@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import '../../core/logger.dart';
@@ -207,7 +208,7 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
             width: 480,
             constraints: const BoxConstraints(maxWidth: 520, minWidth: 360),
@@ -603,16 +604,5 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
   }
 }
 
-/// 图片滤镜（用于Dialog）
-class ImageFilter {
-  static const blur = uiBlur;
-
-  static ImageFilter blur({double sigmaX = 0, double sigmaY = 0}) => uiBlur(sigmaX: sigmaX, sigmaY: sigmaY);
-}
-
-class uiBlur {
-  final double sigmaX;
-  final double sigmaY;
-
-  const uiBlur({required this.sigmaX, required this.sigmaY});
-}
+/// 图片滤镜（已使用 dart:ui 中的 [ui.ImageFilter]，无需额外定义）
+// 此前的占位实现已删除以避免与 dart:ui.ImageFilter 冲突。
