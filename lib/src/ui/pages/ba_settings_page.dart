@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -25,6 +25,8 @@ import '../components/ba_backup_dialog.dart';
 import '../components/ba_dialog.dart';
 import '../../download/mirror_manager.dart';
 import '../components/ba_settings_item.dart';
+import '../animations/ba_animations.dart';
+import '../animations/ba_effects.dart';
 import '../../event/event_bus.dart';
 import '../../event/event.dart';
 
@@ -982,92 +984,149 @@ class _BASettingsPageState extends State<BASettingsPage> {
     final unselectedBgB = _color(const Color(0xFF1E2747), const Color(0xFFFFFFFF), isLight);
     final primaryText = BAColors.textPrimaryOf(context);
 
-    return Container(
-      width: 210,
-      margin: const EdgeInsets.only(left: 20, top: 8, bottom: 16),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor, width: 1),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      child: ListView.separated(
-        padding: EdgeInsets.zero,
-        itemCount: categoryNames.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 4),
-        itemBuilder: (context, index) {
-          final categoryId = categoryNames.keys.elementAt(index);
-          final categoryName = categoryNames[categoryId]!;
-          final icon = categoryIcons[categoryId]!;
-          final isSelected = _selectedCategory == categoryId;
+    return BAAnimations.gradientBorder(
+      isActive: true,
+      duration: const Duration(milliseconds: 4000),
+      gradientColors: [
+        BAColors.primaryOf(context),
+        BAColors.primaryOf(context).withOpacity(0.3),
+        const Color(0xFF8EAAFF).withOpacity(0.2),
+        BAColors.primaryOf(context),
+      ],
+      borderWidth: 1.5,
+      borderRadius: 16,
+      child: Container(
+        width: 210,
+        margin: const EdgeInsets.only(left: 20, top: 8, bottom: 16),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: borderColor, width: 1),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        child: ListView.separated(
+          padding: EdgeInsets.zero,
+          itemCount: categoryNames.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 4),
+          itemBuilder: (context, index) {
+            final categoryId = categoryNames.keys.elementAt(index);
+            final categoryName = categoryNames[categoryId]!;
+            final icon = categoryIcons[categoryId]!;
+            final isSelected = _selectedCategory == categoryId;
 
-          return MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedCategory = categoryId;
-                });
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? selectedBgColor
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
+            return MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedCategory = categoryId;
+                  });
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOutCubic,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
                     color: isSelected
-                        ? BAColors.primaryOf(context)
+                        ? selectedBgColor
                         : Colors.transparent,
-                    width: 1,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isSelected
+                          ? BAColors.primaryOf(context)
+                          : Colors.transparent,
+                      width: 1,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: BAColors.primaryOf(context).withOpacity(0.2),
+                              blurRadius: 12,
+                              spreadRadius: 1,
+                            ),
+                            BoxShadow(
+                              color: BAColors.primaryOf(context).withOpacity(0.1),
+                              blurRadius: 24,
+                              spreadRadius: 2,
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Row(
+                    children: [
+                      isSelected
+                          ? BAEffects.neonGlow(
+                              isActive: true,
+                              glowColor: BAColors.primaryOf(context),
+                              duration: const Duration(milliseconds: 2000),
+                              blurRadius: 10,
+                              spreadRadius: 1,
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      BAColors.primaryOf(context),
+                                      unselectedIcon,
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: BAColors.primaryOf(context).withOpacity(0.5),
+                                      blurRadius: 8,
+                                      spreadRadius: 1,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                   icon,
+                                   color: Colors.white,
+                                   size: 16,
+                                 ),
+                              ),
+                            )
+                          : Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    unselectedBgA,
+                                    unselectedBgB,
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                icon,
+                                color: isSelected ? Colors.white : unselectedIcon,
+                                size: 16,
+                              ),
+                            ),
+                      const SizedBox(width: 12),
+                      Text(
+                        categoryName,
+                        style: TextStyle(
+                          color: isSelected
+                            ? primaryText
+                            : unselectedText,
+                          fontSize: 14,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: isSelected
-                              ? [
-                                  BAColors.primaryOf(context),
-                                  unselectedIcon,
-                                ]
-                              : [
-                                  unselectedBgA,
-                                  unselectedBgB,
-                                ],
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        icon,
-                        color: isSelected ? Colors.white : unselectedIcon,
-                        size: 16,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      categoryName,
-                      style: TextStyle(
-                        color: isSelected
-                          ? primaryText
-                          : unselectedText,
-                        fontSize: 14,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                      ),
-                    ),
-                  ],
-                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -1192,24 +1251,44 @@ class _BASettingsPageState extends State<BASettingsPage> {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       child: Row(
         children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  effectiveIconColor.withOpacity(0.25),
-                  effectiveIconColor.withOpacity(0.15),
+          BAAnimations.breathe(
+            isActive: true,
+            duration: const Duration(milliseconds: 3000),
+            minOpacity: 0.85,
+            maxOpacity: 1.0,
+            glowRadius: 6.0,
+            glowColor: effectiveIconColor,
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    effectiveIconColor.withOpacity(0.3),
+                    effectiveIconColor.withOpacity(0.15),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: effectiveIconColor.withOpacity(0.25),
+                    blurRadius: 8,
+                    spreadRadius: 0.5,
+                  ),
+                  BoxShadow(
+                    color: effectiveIconColor.withOpacity(0.1),
+                    blurRadius: 16,
+                    spreadRadius: 1,
+                  ),
                 ],
               ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              icon,
-              color: effectiveIconColor,
-              size: 18,
+              child: Icon(
+                icon,
+                color: effectiveIconColor,
+                size: 18,
+              ),
             ),
           ),
           const SizedBox(width: 14),
@@ -1744,24 +1823,39 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
                   return Row(
                     children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              BAColors.primaryOf(context).withOpacity(0.25),
-                              accentBlue.withOpacity(0.15),
+                      BAAnimations.breathe(
+                        isActive: true,
+                        duration: const Duration(milliseconds: 3000),
+                        minOpacity: 0.85,
+                        maxOpacity: 1.0,
+                        glowRadius: 6.0,
+                        glowColor: accentBlue,
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                BAColors.primaryOf(context).withOpacity(0.3),
+                                accentBlue.withOpacity(0.15),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: accentBlue.withOpacity(0.25),
+                                blurRadius: 8,
+                                spreadRadius: 0.5,
+                              ),
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(
-                          Icons.memory,
-                          color: accentBlue,
-                          size: 18,
+                          child: Icon(
+                            Icons.memory,
+                            color: accentBlue,
+                            size: 18,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -1920,24 +2014,39 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
                   return Row(
                     children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              BAColors.primaryOf(context).withOpacity(0.25),
-                              accentBlue.withOpacity(0.15),
+                      BAAnimations.breathe(
+                        isActive: true,
+                        duration: const Duration(milliseconds: 3000),
+                        minOpacity: 0.85,
+                        maxOpacity: 1.0,
+                        glowRadius: 6.0,
+                        glowColor: accentBlue,
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                BAColors.primaryOf(context).withOpacity(0.3),
+                                accentBlue.withOpacity(0.15),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: accentBlue.withOpacity(0.25),
+                                blurRadius: 8,
+                                spreadRadius: 0.5,
+                              ),
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(
-                          Icons.speed,
-                          color: accentBlue,
-                          size: 18,
+                          child: Icon(
+                            Icons.speed,
+                            color: accentBlue,
+                            size: 18,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -2016,24 +2125,39 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
                     return Row(
                       children: [
-                        Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                BAColors.primaryOf(context).withOpacity(0.25),
-                                accentBlue.withOpacity(0.15),
+                        BAAnimations.breathe(
+                          isActive: true,
+                          duration: const Duration(milliseconds: 3000),
+                          minOpacity: 0.85,
+                          maxOpacity: 1.0,
+                          glowRadius: 6.0,
+                          glowColor: accentBlue,
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  BAColors.primaryOf(context).withOpacity(0.3),
+                                  accentBlue.withOpacity(0.15),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: accentBlue.withOpacity(0.25),
+                                  blurRadius: 8,
+                                  spreadRadius: 0.5,
+                                ),
                               ],
                             ),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(
-                            Icons.speed,
-                            color: accentBlue,
-                            size: 18,
+                            child: Icon(
+                              Icons.speed,
+                              color: accentBlue,
+                              size: 18,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 14),
