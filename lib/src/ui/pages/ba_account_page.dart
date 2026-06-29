@@ -2,6 +2,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../theme/colors.dart';
+import '../animations/ba_animations.dart';
+import '../animations/ba_effects.dart';
 import '../components/ba_common_widgets.dart';
 import '../../account/account_manager.dart';
 import '../../account/account.dart';
@@ -219,14 +221,32 @@ class _BAAccountPageState extends State<BAAccountPage> {
   }
 
   Widget _buildCurrentAccountCard(BuildContext context) {
-    return BASurfaceCard(
+    return BAAnimations.gradientBorder(
       borderRadius: 16,
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        children: [
-          // 头像/皮肤预览
-          _buildAvatar(context, 80),
-          const SizedBox(width: 20),
+      borderWidth: 2,
+      gradientColors: [
+        BAColors.primaryOf(context),
+        BAColors.secondaryOf(context),
+        BAColors.primaryOf(context).withValues(alpha: 0.5),
+        BAColors.secondaryOf(context).withValues(alpha: 0.5),
+        BAColors.primaryOf(context),
+      ],
+      child: BASurfaceCard(
+        borderRadius: 14,
+        showBorder: false,
+        padding: const EdgeInsets.all(20),
+        shadowColor: BAColors.primaryOf(context).withValues(alpha: 0.15),
+        child: Row(
+          children: [
+            // 头像/皮肤预览（带发光光环）
+            BAAnimations.pulse(
+              scaleBegin: 1.0,
+              scaleEnd: 1.05,
+              glowColor: BAColors.primaryOf(context),
+              glowRadius: 10,
+              child: _buildAvatar(context, 80),
+            ),
+            const SizedBox(width: 20),
 
           // 账户信息
           Expanded(
@@ -304,6 +324,7 @@ class _BAAccountPageState extends State<BAAccountPage> {
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -392,13 +413,13 @@ class _BAAccountPageState extends State<BAAccountPage> {
           ),
           const SizedBox(height: 12),
           Expanded(
-            child: ListView.builder(
-              itemCount: _accounts.length,
-              itemBuilder: (context, index) {
-                final account = _accounts[index];
-                final isSelected = account.uuid == _currentAccount?.uuid;
-                return _buildAccountTile(context, account, isSelected);
-              },
+            child: SingleChildScrollView(
+              child: BAAnimations.staggeredEntry(
+                children: _accounts.map((account) {
+                  final isSelected = account.uuid == _currentAccount?.uuid;
+                  return _buildAccountTile(context, account, isSelected);
+                }).toList(),
+              ),
             ),
           ),
         ],
@@ -407,7 +428,7 @@ class _BAAccountPageState extends State<BAAccountPage> {
   }
 
   Widget _buildAccountTile(BuildContext context, Account account, bool isSelected) {
-    return Container(
+    Widget tile = Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: isSelected
@@ -457,6 +478,17 @@ class _BAAccountPageState extends State<BAAccountPage> {
         },
       ),
     );
+
+    if (isSelected) {
+      tile = BAAnimations.glow(
+        glowColor: BAColors.primaryOf(context),
+        maxBlurRadius: 12,
+        maxSpreadRadius: 2,
+        child: tile,
+      );
+    }
+
+    return tile;
   }
 
   /// 打开微软官方皮肤管理器
