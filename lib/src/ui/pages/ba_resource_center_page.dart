@@ -4,6 +4,8 @@ import '../components/ba_common_widgets.dart';
 import '../../resource_center/search_service.dart';
 import '../../resource_center/models.dart';
 import '../components/ba_notification.dart';
+import '../animations/ba_animations.dart';
+import '../animations/ba_effects.dart';
 import 'ba_resource_detail_page.dart';
 
 class BAResourceCenterPage extends StatefulWidget {
@@ -261,28 +263,36 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
           // 图标 + 标题 + 副标题
           Row(
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: BAColors.primaryOf(context).withOpacity(0.4),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+              BAAnimations.breathe(
+                isActive: true,
+                duration: const Duration(milliseconds: 3000),
+                minOpacity: 0.85,
+                maxOpacity: 1.0,
+                glowRadius: 10.0,
+                glowColor: BAColors.primaryOf(context),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.extension,
-                  color: Color(0xFFFFFFFF),
-                  size: 22,
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: BAColors.primaryOf(context).withValues(alpha: 0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.extension,
+                    color: Color(0xFFFFFFFF),
+                    size: 22,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -772,26 +782,31 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
   Widget _buildResourceList(BuildContext context) {
     if (_isLoading) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 40,
-              height: 40,
-              child: CircularProgressIndicator(
-                color: BAColors.primaryOf(context),
-                strokeWidth: 2,
+        child: BAEffects.shimmer(
+          isActive: true,
+          baseColor: BAColors.surfaceVariantOf(context),
+          highlightColor: BAColors.surfaceOf(context),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: CircularProgressIndicator(
+                  color: BAColors.primaryOf(context),
+                  strokeWidth: 2,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              '正在加载资源...',
-              style: TextStyle(
-                color: BAColors.textSecondaryOf(context),
-                fontSize: 12,
+              const SizedBox(height: 12),
+              Text(
+                '正在加载资源...',
+                style: TextStyle(
+                  color: BAColors.textSecondaryOf(context),
+                  fontSize: 12,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }
@@ -908,30 +923,52 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
     final typeColor = typeColors[resource.type] ?? BAColors.primaryOf(context);
     final isFavorite = _favoriteIds.contains(resource.id);
     final cardBg = BAColors.surfaceOf(context);
-    final cardBorder = BAColors.borderOf(context).withValues(alpha: 0.35);
     final textPrimary = BAColors.textPrimaryOf(context);
     final textSecondary = BAColors.textSecondaryOf(context);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
-      child: GestureDetector(
+      child: _HoverScaleCard(
         onTap: () => _onResourceTap(resource),
+        hoverBorderColor: typeColor,
+        defaultBorderColor: BAColors.borderOf(context).withValues(alpha: 0.35),
         child: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: cardBg,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: cardBorder),
+            border: Border.all(
+              color: BAColors.borderOf(context).withValues(alpha: 0.35),
+            ),
           ),
           child: Row(
             children: [
-              // 图标
+              // 3D 类型图标
               Container(
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: typeColor.withValues(alpha: 0.12),
+                  gradient: LinearGradient(
+                    colors: [
+                      typeColor.withValues(alpha: 0.2),
+                      typeColor.withValues(alpha: 0.08),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: typeColor.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                    BoxShadow(
+                      color: typeColor.withValues(alpha: 0.08),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
@@ -945,7 +982,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                             child: Icon(
                               _typeIcons[resource.type] ?? Icons.apps,
                               size: 28,
-                              color: typeColor.withValues(alpha: 0.7),
+                              color: typeColor,
                             ),
                           ),
                           loadingBuilder: (_, child, loadingProgress) {
@@ -966,7 +1003,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                           child: Icon(
                             _typeIcons[resource.type] ?? Icons.apps,
                             size: 28,
-                            color: typeColor.withValues(alpha: 0.7),
+                            color: typeColor,
                           ),
                         ),
                 ),
@@ -1111,10 +1148,16 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
                   const SizedBox(height: 6),
                   GestureDetector(
                     onTap: () => _toggleFavorite(resource.id),
-                    child: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? BAColors.dangerOf(context) : textSecondary,
-                      size: 16,
+                    child: BAAnimations.pulse(
+                      isActive: isFavorite,
+                      duration: const Duration(milliseconds: 1200),
+                      scaleBegin: 1.0,
+                      scaleEnd: 1.2,
+                      child: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite ? BAColors.dangerOf(context) : textSecondary,
+                        size: 16,
+                      ),
                     ),
                   ),
                 ],
@@ -1150,5 +1193,100 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage> {
       return '${(downloads / 1000).toStringAsFixed(1)}K';
     }
     return downloads.toString();
+  }
+}
+
+/// 悬停缩放卡片 - 鼠标悬停时提供缩放和阴影增强效果
+class _HoverScaleCard extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+  final Color hoverBorderColor;
+  final Color defaultBorderColor;
+
+  const _HoverScaleCard({
+    required this.child,
+    this.onTap,
+    required this.hoverBorderColor,
+    required this.defaultBorderColor,
+  });
+
+  @override
+  State<_HoverScaleCard> createState() => _HoverScaleCardState();
+}
+
+class _HoverScaleCardState extends State<_HoverScaleCard>
+    with SingleTickerProviderStateMixin {
+  bool _isHovered = false;
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _shadowAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.02).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+    _shadowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onHover(bool isHovered) {
+    setState(() => _isHovered = isHovered);
+    if (isHovered) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => _onHover(true),
+      onExit: (_) => _onHover(false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _scaleAnimation.value,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04 + 0.06 * _shadowAnimation.value),
+                      blurRadius: 8 + 12 * _shadowAnimation.value,
+                      offset: Offset(0, 2 + 4 * _shadowAnimation.value),
+                    ),
+                    if (_isHovered)
+                      BoxShadow(
+                        color: widget.hoverBorderColor.withValues(alpha: 0.15),
+                        blurRadius: 16,
+                        spreadRadius: 1,
+                      ),
+                  ],
+                ),
+                child: child,
+              ),
+            );
+          },
+          child: widget.child,
+        ),
+      ),
+    );
   }
 }
