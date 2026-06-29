@@ -21,6 +21,8 @@ import '../components/ba_backup_dialog.dart';
 import '../components/ba_mod_manager_dialog.dart';
 import '../components/ba_common_widgets.dart';
 import '../theme/colors.dart';
+import '../animations/ba_animations.dart';
+import '../animations/ba_effects.dart';
 import '../../game/game_statistics.dart';
 
 /// 蔚蓝档案风格游戏库页面 - 模仿蔚蓝档案的"学生"列表风格
@@ -42,6 +44,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
   List<GameInstance> _instances = [];
   final List<EventSubscription> _subscriptions = [];
   final Set<String> _launchingIds = {};
+  final Set<String> _hoveredInstanceIds = {};
 
   // 游戏统计
   final GameStatisticsManager _statsManager = GameStatisticsManager.instance;
@@ -914,13 +917,19 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
     );
   }
 
-  /// 实例卡片
+  /// 实例卡片 - 带动画悬停效果
   Widget _buildInstanceCard(BuildContext context, GameInstance instance) {
     final isRunning = instance.status == InstanceStatus.running;
     final isLaunching = _launchingIds.contains(instance.id);
     final instanceStats = _statsManager.getInstanceStatistics(instance.id);
 
-    return BAContextMenu(
+    final statusColor = isRunning
+        ? BAColors.successOf(context)
+        : (isLaunching
+            ? BAColors.warningOf(context)
+            : BAColors.primaryLightOf(context));
+
+    Widget card = BAContextMenu(
       items: [
         BAContextMenuItem(
           icon: Icons.play_arrow,
@@ -956,265 +965,313 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
       ],
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
-        child: AnimatedContainer(
+        onEnter: (_) => setState(() => _hoveredInstanceIds.add(instance.id)),
+        onExit: (_) => setState(() => _hoveredInstanceIds.remove(instance.id)),
+        child: AnimatedScale(
+          scale: _hoveredInstanceIds.contains(instance.id) ? 1.04 : 1.0,
           duration: const Duration(milliseconds: 200),
-          decoration: BoxDecoration(
-            color: BAColors.surfaceOf(context).withOpacity(0.7),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isRunning
-                  ? BAColors.successOf(context).withOpacity(0.6)
-                  : BAColors.borderOf(context).withOpacity(0.5),
-              width: isRunning ? 1.5 : 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: isRunning
-                    ? BAColors.successOf(context).withOpacity(0.15)
-                    : BAColors.shadowOf(context).withOpacity(0.4),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: isRunning || isLaunching
-                  ? null
-                  : () => _launchGame(instance),
-              borderRadius: BorderRadius.circular(16),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 顶部状态和图标
-                    Row(
-                      children: [
-                        // 状态指示器
-                        Container(
-                          width: 10,
-                          height: 10,
-                          decoration: BoxDecoration(
-                            color: isRunning
-                                ? BAColors.successOf(context)
-                                : (isLaunching
-                                    ? BAColors.warningOf(context)
-                                    : BAColors.primaryLightOf(context)),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: (isRunning
-                                        ? BAColors.successOf(context)
-                                        : BAColors.primaryLightOf(context))
-                                    .withOpacity(0.5),
-                                blurRadius: 6,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          isRunning
-                              ? '运行中'
-                              : (isLaunching ? '启动中' : '就绪'),
-                          style: TextStyle(
-                            color: isRunning
-                                ? BAColors.successOf(context)
-                                : (isLaunching
-                                    ? BAColors.warningOf(context)
-                                    : BAColors.textSecondaryOf(context)),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const Spacer(),
-                        // 操作按钮
-                        if (isLaunching)
-                          SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                BAColors.warningOf(context),
-                              ),
-                            ),
-                          )
-                        else
-                          Icon(
-                            isRunning ? Icons.stop_circle_outlined : Icons.play_circle_fill_rounded,
-                            color: isRunning
-                                ? BAColors.successOf(context)
-                                : BAColors.primaryLightOf(context),
-                            size: 20,
-                          ),
-                      ],
+          curve: Curves.easeOutCubic,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  color: BAColors.surfaceOf(context).withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isRunning
+                        ? BAColors.successOf(context).withOpacity(0.6)
+                        : BAColors.borderOf(context).withOpacity(0.5),
+                    width: isRunning ? 1.5 : 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isRunning
+                          ? BAColors.successOf(context).withOpacity(0.25)
+                          : BAColors.shadowOf(context).withOpacity(0.4),
+                      blurRadius: _hoveredInstanceIds.contains(instance.id) ? 24 : 16,
+                      offset: Offset(0, _hoveredInstanceIds.contains(instance.id) ? 10 : 6),
                     ),
-                    const SizedBox(height: 12),
-
-                    // 实例图标
-                    Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: isRunning
-                              ? [
-                                  BAColors.successOf(context),
-                                  BAColors.successDark
-                                ]
-                              : [
-                                  BAColors.primaryLightOf(context),
-                                  BAColors.primaryOf(context)
-                                ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow: [
-                          BoxShadow(
-                            color: (isRunning
-                                    ? BAColors.successOf(context)
-                                    : BAColors.primaryOf(context))
-                                .withOpacity(0.35),
-                            blurRadius: 14,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                    if (_hoveredInstanceIds.contains(instance.id))
+                      BoxShadow(
+                        color: BAColors.primaryOf(context).withOpacity(0.12),
+                        blurRadius: 32,
+                        spreadRadius: -4,
+                        offset: const Offset(0, 12),
                       ),
-                      child: const Icon(
-                        Icons.sports_esports_rounded,
-                        color: Color(0xFFFFFFFF),
-                        size: 30,
+                    if (isRunning)
+                      BoxShadow(
+                        color: BAColors.successOf(context).withOpacity(0.15),
+                        blurRadius: 20,
+                        spreadRadius: 2,
                       ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // 实例名称
-                    Text(
-                      instance.name,
-                      style: TextStyle(
-                        color: BAColors.textPrimaryOf(context),
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 6),
-
-                    // 版本信息
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: BAColors.primaryOf(context).withOpacity(0.18),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: BAColors.primaryOf(context).withOpacity(0.3),
-                        ),
-                      ),
-                      child: Text(
-                        instance.version,
-                        style: TextStyle(
-                          color: BAColors.primaryLightOf(context),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-
-                    // 加载器信息
-                    if (instance.loader != null)
-                      Text(
-                        instance.loader!,
-                        style: TextStyle(
-                          color: BAColors.textSecondaryOf(context).withOpacity(0.9),
-                          fontSize: 11,
-                        ),
-                      ),
-                    if (instanceStats != null) ...[
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.access_time,
-                            size: 12,
-                            color: BAColors.textSecondaryOf(context).withOpacity(0.8),
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              '${_formatDuration(Duration(seconds: instanceStats.totalPlayTimeSeconds))} / ${instanceStats.launchCount}次',
-                              style: TextStyle(
-                                color: BAColors.textSecondaryOf(context).withOpacity(0.8),
-                                fontSize: 10,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
                   ],
                 ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: isRunning || isLaunching
+                        ? null
+                        : () => _launchGame(instance),
+                    borderRadius: BorderRadius.circular(16),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 顶部状态和图标
+                          Row(
+                            children: [
+                              // 脉冲状态指示器
+                              BAAnimations.pulse(
+                                isActive: isRunning || isLaunching,
+                                duration: Duration(
+                                  milliseconds: isRunning ? 1000 : 1500,
+                                ),
+                                scaleBegin: 1.0,
+                                scaleEnd: isRunning ? 1.4 : 1.2,
+                                glowColor: statusColor,
+                                glowRadius: isRunning ? 8 : 5,
+                                child: Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: BoxDecoration(
+                                    color: statusColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                isRunning
+                                    ? '运行中'
+                                    : (isLaunching ? '启动中' : '就绪'),
+                                style: TextStyle(
+                                  color: statusColor,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const Spacer(),
+                              // 操作按钮
+                              if (isLaunching)
+                                SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      BAColors.warningOf(context),
+                                    ),
+                                  ),
+                                )
+                              else
+                                Icon(
+                                  isRunning
+                                      ? Icons.stop_circle_outlined
+                                      : Icons.play_circle_fill_rounded,
+                                  color: isRunning
+                                      ? BAColors.successOf(context)
+                                      : BAColors.primaryLightOf(context),
+                                  size: 20,
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+
+                          // 实例图标
+                          Container(
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: isRunning
+                                    ? [
+                                        BAColors.successOf(context),
+                                        BAColors.successDark
+                                      ]
+                                    : [
+                                        BAColors.primaryLightOf(context),
+                                        BAColors.primaryOf(context)
+                                      ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(14),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: (isRunning
+                                          ? BAColors.successOf(context)
+                                          : BAColors.primaryOf(context))
+                                      .withOpacity(0.35),
+                                  blurRadius: _hoveredInstanceIds.contains(instance.id) ? 18 : 14,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.sports_esports_rounded,
+                              color: Color(0xFFFFFFFF),
+                              size: 30,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          // 实例名称
+                          Text(
+                            instance.name,
+                            style: TextStyle(
+                              color: BAColors.textPrimaryOf(context),
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 6),
+
+                          // 版本信息
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  BAColors.primaryOf(context).withOpacity(0.18),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: BAColors.primaryOf(context)
+                                    .withOpacity(0.3),
+                              ),
+                            ),
+                            child: Text(
+                              instance.version,
+                              style: TextStyle(
+                                color: BAColors.primaryLightOf(context),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+
+                          // 加载器信息
+                          if (instance.loader != null)
+                            Text(
+                              instance.loader!,
+                              style: TextStyle(
+                                color: BAColors.textSecondaryOf(context)
+                                    .withOpacity(0.9),
+                                fontSize: 11,
+                              ),
+                            ),
+                          if (instanceStats != null) ...[
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.access_time,
+                                  size: 12,
+                                  color: BAColors.textSecondaryOf(context)
+                                      .withOpacity(0.8),
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    '${_formatDuration(Duration(seconds: instanceStats.totalPlayTimeSeconds))} / ${instanceStats.launchCount}次',
+                                    style: TextStyle(
+                                      color: BAColors.textSecondaryOf(context)
+                                          .withOpacity(0.8),
+                                      fontSize: 10,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),     // AnimatedContainer
+            ),       // AnimatedScale
+          ),         // MouseRegion
+        );           // BAContextMenu
+
+    // 运行中的实例添加渐变边框动画
+    if (isRunning) {
+      card = BAAnimations.gradientBorder(
+        isActive: true,
+        duration: const Duration(milliseconds: 4000),
+        gradientColors: [
+          BAColors.successOf(context),
+          BAColors.primaryLightOf(context),
+          BAColors.successOf(context),
+          BAColors.primaryOf(context),
+          BAColors.successOf(context),
+        ],
+        borderWidth: 1.5,
+        borderRadius: 16,
+        child: card,
+      );
+    }
+
+    return card;
   }
 
-  /// 蔚蓝档案风格浮动按钮
+  /// 蔚蓝档案风格浮动按钮 - 呼吸灯效果
   Widget _buildFloatingButton(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: () {
-          showDialog(
-            context: context,
-            builder: (context) => const BACreateInstanceDialog(),
-          );
-        },
-        child: Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: BAColors.primaryOf(context).withOpacity(0.5),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
+    return BAAnimations.breathe(
+      isActive: true,
+      duration: const Duration(milliseconds: 2500),
+      minOpacity: 0.85,
+      maxOpacity: 1.0,
+      glowRadius: 12.0,
+      glowColor: BAColors.primaryLightOf(context),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (context) => const BACreateInstanceDialog(),
+            );
+          },
+          child: Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              BoxShadow(
-                color: BAColors.primaryLightOf(context).withOpacity(0.2),
-                blurRadius: 48,
-                spreadRadius: -8,
-                offset: const Offset(0, 16),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: BAColors.primaryOf(context).withOpacity(0.5),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+                BoxShadow(
+                  color: BAColors.primaryLightOf(context).withOpacity(0.2),
+                  blurRadius: 48,
+                  spreadRadius: -8,
+                  offset: const Offset(0, 16),
+                ),
+              ],
+              border: Border.all(
+                color: const Color(0xFFFFFFFF).withOpacity(0.2),
+                width: 1.5,
               ),
-            ],
-            border: Border.all(
-              color: const Color(0xFFFFFFFF).withOpacity(0.2),
-              width: 1.5,
             ),
-          ),
-          child: const Icon(
-            Icons.add_rounded,
-            color: Color(0xFFFFFFFF),
-            size: 32,
+            child: const Icon(
+              Icons.add_rounded,
+              color: Color(0xFFFFFFFF),
+              size: 32,
+            ),
           ),
         ),
       ),
