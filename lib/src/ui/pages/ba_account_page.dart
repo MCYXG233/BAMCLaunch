@@ -529,7 +529,10 @@ class _BAAccountPageState extends State<BAAccountPage> {
               : Colors.transparent,
         ),
       ),
-      child: ListTile(
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: ListTile(
         leading: CircleAvatar(
           backgroundColor: BAColors.primaryOf(context).withValues(alpha: 0.1),
           child: Text(
@@ -564,6 +567,7 @@ class _BAAccountPageState extends State<BAAccountPage> {
           ],
         ),
         onTap: () => _openAccountDetail(account),
+      ),
       ),
     );
 
