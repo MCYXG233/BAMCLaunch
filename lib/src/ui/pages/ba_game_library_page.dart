@@ -80,16 +80,22 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
   }
 
   Future<void> _initializeAndLoadInstances() async {
-    final manager = InstanceManager();
-    if (!manager.isInitialized) {
-      await manager.initialize();
+    try {
+      final manager = InstanceManager();
+      if (!manager.isInitialized) {
+        await manager.initialize();
+      }
+
+      // 初始化游戏统计
+      await _statsManager.initialize();
+
+      _loadInstances();
+      _loadStatistics();
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('初始化失败', message: e.toString());
+      }
     }
-
-    // 初始化游戏统计
-    await _statsManager.initialize();
-
-    _loadInstances();
-    _loadStatistics();
   }
 
   @override
@@ -537,11 +543,38 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
   Widget build(BuildContext context) {
     NotificationManager().init(context);
 
-    // 实例详情页
-    if (_selectedInstance != null) {
-      return _buildDetailPage(context, _selectedInstance!);
-    }
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (child, animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.05, 0),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOut,
+            )),
+            child: child,
+          ),
+        );
+      },
+      child: _selectedInstance != null
+          ? RepaintBoundary(
+              key: const ValueKey('detail'),
+              child: _buildDetailPage(context, _selectedInstance!),
+            )
+          : RepaintBoundary(
+              key: const ValueKey('list'),
+              child: _buildListContent(context),
+            ),
+    );
+  }
 
+  Widget _buildListContent(BuildContext context) {
     return Stack(
       children: [
         Column(
@@ -2302,7 +2335,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
       ),
       itemCount: imageFiles.length,
       itemBuilder: (context, index) {
-        final file = imageFiles[index] as File;
+        final entity = imageFiles[index];
+        if (entity is! File) return const SizedBox.shrink();
+        final file = entity;
         final name = file.path.split(Platform.pathSeparator).last;
         return MouseRegion(
           cursor: SystemMouseCursors.click,

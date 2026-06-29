@@ -583,7 +583,7 @@ class _BAChipState extends State<BAChip> {
   @override
   Widget build(BuildContext context) {
     final effectiveColor = widget.color ?? BAColors.primaryOf(context);
-    
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -635,6 +635,228 @@ class _BAChipState extends State<BAChip> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ==================== 加载状态 ====================
+
+/// 加载状态组件
+/// 显示居中的加载指示器和可选的提示文字
+class BALoadingState extends StatelessWidget {
+  /// 提示文字
+  final String? message;
+
+  /// 指示器大小
+  final double size;
+
+  const BALoadingState({
+    super.key,
+    this.message,
+    this.size = 36.0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: size,
+            height: size,
+            child: CircularProgressIndicator(
+              color: BAColors.primaryOf(context),
+              strokeWidth: 3,
+            ),
+          ),
+          if (message != null) ...[
+            const SizedBox(height: 16),
+            Text(
+              message!,
+              style: TextStyle(
+                color: BAColors.textSecondaryOf(context),
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ==================== 空状态 ====================
+
+/// 空状态组件
+/// 显示居中的图标、标题、副标题和可选的操作按钮
+class BAEmptyState extends StatelessWidget {
+  /// 图标
+  final IconData icon;
+
+  /// 标题
+  final String title;
+
+  /// 副标题
+  final String? subtitle;
+
+  /// 操作按钮文字
+  final String? actionLabel;
+
+  /// 操作按钮回调
+  final VoidCallback? onAction;
+
+  const BAEmptyState({
+    super.key,
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 64,
+            color: BAColors.textSecondaryOf(context).withValues(alpha: 0.4),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          if (subtitle != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              subtitle!,
+              style: TextStyle(
+                color: BAColors.textSecondaryOf(context).withValues(alpha: 0.7),
+                fontSize: 13,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+          if (actionLabel != null && onAction != null) ...[
+            const SizedBox(height: 24),
+            GestureDetector(
+              onTap: onAction,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: BAColors.primaryOf(context),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    actionLabel!,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ==================== 错误状态 ====================
+
+/// 错误状态组件
+/// 显示居中的错误图标、标题、错误信息和重试按钮
+class BAErrorState extends StatelessWidget {
+  /// 标题
+  final String title;
+
+  /// 错误信息
+  final String? message;
+
+  /// 重试回调
+  final VoidCallback? onRetry;
+
+  const BAErrorState({
+    super.key,
+    this.title = '加载失败',
+    this.message,
+    this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 64,
+            color: BAColors.dangerOf(context).withValues(alpha: 0.6),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          if (message != null) ...[
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                message!,
+                style: TextStyle(
+                  color: BAColors.textSecondaryOf(context).withValues(alpha: 0.7),
+                  fontSize: 13,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+          if (onRetry != null) ...[
+            const SizedBox(height: 24),
+            GestureDetector(
+              onTap: onRetry,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: BAColors.primaryOf(context),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Text(
+                    '重试',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

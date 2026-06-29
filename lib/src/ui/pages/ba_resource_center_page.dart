@@ -332,9 +332,9 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
           child: TabBarView(
             controller: _tabController,
             children: [
-              _buildModrinthTab(context),
-              _buildCurseForgeTab(context),
-              _buildModpackTab(context),
+              RepaintBoundary(child: _buildModrinthTab(context)),
+              RepaintBoundary(child: _buildCurseForgeTab(context)),
+              RepaintBoundary(child: _buildModpackTab(context)),
             ],
           ),
         ),

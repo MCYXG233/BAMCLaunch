@@ -429,9 +429,10 @@ class _BANeonGlowWidgetState extends State<_BANeonGlowWidget>
               ),
             ],
           ),
-          child: widget.child,
+          child: child,
         );
       },
+      child: widget.child,
     );
   }
 }
@@ -516,9 +517,10 @@ class _BAShimmerWidgetState extends State<_BAShimmerWidget>
               ),
             ).createShader(bounds);
           },
-          child: widget.child,
+          child: child,
         );
       },
+      child: widget.child,
     );
   }
 }
@@ -609,9 +611,10 @@ class _BARippleWidgetState extends State<_BARippleWidget>
             maxRadius: widget.maxRadius,
             strokeWidth: widget.strokeWidth,
           ),
-          child: widget.child,
+          child: child,
         );
       },
+      child: widget.child,
     );
   }
 }

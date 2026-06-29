@@ -250,10 +250,11 @@ class _BAPulseWidgetState extends State<_BAPulseWidget>
               : null,
           child: Transform.scale(
             scale: _scaleAnimation.value,
-            child: widget.child,
+            child: child,
           ),
         );
       },
+      child: widget.child,
     );
   }
 }
@@ -350,12 +351,13 @@ class _BABreatheWidgetState extends State<_BABreatheWidget>
               ),
             ],
           ),
-          child: Opacity(
-            opacity: _opacityAnimation.value,
-            child: widget.child,
+          child: FadeTransition(
+            opacity: _opacityAnimation,
+            child: child,
           ),
         );
       },
+      child: widget.child,
     );
   }
 }
@@ -482,22 +484,17 @@ class _BAStaggeredEntryWidgetState extends State<_BAStaggeredEntryWidget>
   Widget build(BuildContext context) {
     if (widget.children.isEmpty) return const SizedBox.shrink();
 
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(widget.children.length, (index) {
-            return FadeTransition(
-              opacity: _fadeAnimations[index],
-              child: SlideTransition(
-                position: _slideAnimations[index],
-                child: widget.children[index],
-              ),
-            );
-          }),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(widget.children.length, (index) {
+        return FadeTransition(
+          opacity: _fadeAnimations[index],
+          child: SlideTransition(
+            position: _slideAnimations[index],
+            child: widget.children[index],
+          ),
         );
-      },
+      }),
     );
   }
 }
@@ -541,7 +538,7 @@ class _BAElasticScaleWidgetState extends State<_BAElasticScaleWidget>
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _controller,
-      curve: Curves.elasticOut,
+      curve: Curves.easeOut,
     ));
 
     if (widget.isActive) {
@@ -575,9 +572,10 @@ class _BAElasticScaleWidgetState extends State<_BAElasticScaleWidget>
       builder: (context, child) {
         return Transform.scale(
           scale: _scaleAnimation.value,
-          child: widget.child,
+          child: child,
         );
       },
+      child: widget.child,
     );
   }
 }
@@ -662,10 +660,11 @@ class _BAGradientBorderWidgetState extends State<_BAGradientBorderWidget>
               borderRadius:
                   BorderRadius.circular(widget.borderRadius - widget.borderWidth),
             ),
-            child: widget.child,
+            child: child,
           ),
         );
       },
+      child: widget.child,
     );
   }
 }
@@ -795,9 +794,10 @@ class _BAGlowWidgetState extends State<_BAGlowWidget>
               ),
             ],
           ),
-          child: widget.child,
+          child: child,
         );
       },
+      child: widget.child,
     );
   }
 }

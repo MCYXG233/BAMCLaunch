@@ -1719,7 +1719,9 @@ class _SettingsPanelState extends State<SettingsPanel>
 
       NotificationManager().showSuccess('设置已恢复为默认值');
     } catch (e) {
-      NotificationManager().showError('恢复默认设置失败', message: e.toString());
+      if (mounted) {
+        NotificationManager().showError('恢复默认设置失败', message: e.toString());
+      }
     }
   }
 }

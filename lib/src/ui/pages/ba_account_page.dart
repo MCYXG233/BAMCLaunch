@@ -48,7 +48,11 @@ class _BAAccountPageState extends State<BAAccountPage> {
   }
 
   Future<void> _initSkinManager() async {
-    await _skinManager.initialize();
+    try {
+      await _skinManager.initialize();
+    } catch (_) {
+      // 皮肤管理器初始化失败不影响主要功能
+    }
   }
 
   Future<void> _loadAccounts() async {
@@ -87,6 +91,7 @@ class _BAAccountPageState extends State<BAAccountPage> {
   Future<void> _refreshSkin() async {
     if (_selectedAccount != null) {
       // 详情页内刷新皮肤
+      if (!mounted) return;
       setState(() => _isRefreshingSkin = true);
       try {
         final skin = await _skinManager.getSkin(_selectedAccount!, forceRefresh: true);
@@ -103,6 +108,7 @@ class _BAAccountPageState extends State<BAAccountPage> {
       }
     } else if (_currentAccount != null) {
       // 列表页刷新当前账号皮肤
+      if (!mounted) return;
       setState(() => _isRefreshingSkin = true);
       try {
         final skin = await _skinManager.getSkin(_currentAccount!, forceRefresh: true);
@@ -231,12 +237,33 @@ class _BAAccountPageState extends State<BAAccountPage> {
     }
 
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      switchInCurve: Curves.easeOutCubic,
-      switchOutCurve: Curves.easeInCubic,
+      duration: const Duration(milliseconds: 200),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (child, animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.05, 0),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOut,
+            )),
+            child: child,
+          ),
+        );
+      },
       child: _selectedAccount != null
-          ? _buildDetailPage(context)
-          : _buildListPage(context),
+          ? RepaintBoundary(
+              key: const ValueKey('detail'),
+              child: _buildDetailPage(context),
+            )
+          : RepaintBoundary(
+              key: const ValueKey('list'),
+              child: _buildListPage(context),
+            ),
     );
   }
 
@@ -246,7 +273,6 @@ class _BAAccountPageState extends State<BAAccountPage> {
 
   Widget _buildListPage(BuildContext context) {
     return Container(
-      key: const ValueKey('list'),
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -562,7 +588,6 @@ class _BAAccountPageState extends State<BAAccountPage> {
     final isCurrentAccount = account.id == _currentAccount?.id;
 
     return Container(
-      key: const ValueKey('detail'),
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

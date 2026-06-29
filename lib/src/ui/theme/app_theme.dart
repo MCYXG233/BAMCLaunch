@@ -54,7 +54,7 @@ class BATheme {
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return primary.withOpacity(0.3);
+            return primary.withValues(alpha: 0.3);
           }
           return BAColors.darkSurfaceVariant;
         }),
@@ -63,7 +63,7 @@ class BATheme {
         activeTrackColor: primary,
         inactiveTrackColor: BAColors.darkSurfaceVariant,
         thumbColor: primary,
-        overlayColor: primary.withOpacity(0.2),
+        overlayColor: primary.withValues(alpha: 0.2),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -73,7 +73,7 @@ class BATheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           textStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -96,7 +96,7 @@ class BATheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
       ),
       dialogTheme: DialogThemeData(
@@ -116,7 +116,7 @@ class BATheme {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: BAColors.darkSurfaceVariant,
-        selectedColor: primary.withOpacity(0.2),
+        selectedColor: primary.withValues(alpha: 0.2),
         labelStyle: const TextStyle(fontSize: 13),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -196,25 +196,25 @@ class BATheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: BAColors.darkSurfaceVariant,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: BAColors.darkBorder, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: BAColors.darkBorder, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: BAColors.danger, width: 2),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: BAColors.danger, width: 2),
         ),
         hintStyle: const TextStyle(color: BAColors.darkTextDisabled, fontSize: 14),
@@ -254,7 +254,7 @@ class BATheme {
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return primary.withOpacity(0.3);
+            return primary.withValues(alpha: 0.3);
           }
           return BAColors.lightSurfaceVariant;
         }),
@@ -263,7 +263,7 @@ class BATheme {
         activeTrackColor: primary,
         inactiveTrackColor: BAColors.lightSurfaceVariant,
         thumbColor: primary,
-        overlayColor: primary.withOpacity(0.2),
+        overlayColor: primary.withValues(alpha: 0.2),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -273,7 +273,7 @@ class BATheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           textStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -296,7 +296,7 @@ class BATheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
       ),
       dialogTheme: DialogThemeData(
@@ -316,7 +316,7 @@ class BATheme {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: BAColors.lightSurfaceVariant,
-        selectedColor: primary.withOpacity(0.2),
+        selectedColor: primary.withValues(alpha: 0.2),
         labelStyle: const TextStyle(fontSize: 13),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -396,25 +396,25 @@ class BATheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: BAColors.lightSurfaceVariant,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: BAColors.lightBorder, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: BAColors.lightBorder, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: BAColors.danger, width: 2),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: BAColors.danger, width: 2),
         ),
         hintStyle: const TextStyle(color: BAColors.lightTextDisabled, fontSize: 14),
@@ -563,25 +563,25 @@ class BATheme {
     return InputDecorationTheme(
       filled: true,
       fillColor: BAColors.darkSurfaceVariant,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
-        borderRadius: borderRadiusMedium,
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: BAColors.darkBorder, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: borderRadiusMedium,
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: BAColors.darkBorder, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: borderRadiusMedium,
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: BAColors.primary, width: 2),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: borderRadiusMedium,
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: BAColors.danger, width: 2),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: borderRadiusMedium,
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: BAColors.danger, width: 2),
       ),
       hintStyle: const TextStyle(color: BAColors.darkTextDisabled, fontSize: 14),
@@ -603,25 +603,25 @@ class BATheme {
     return InputDecorationTheme(
       filled: true,
       fillColor: BAColors.lightSurfaceVariant,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
-        borderRadius: borderRadiusMedium,
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: BAColors.lightBorder, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: borderRadiusMedium,
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: BAColors.lightBorder, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: borderRadiusMedium,
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: BAColors.primary, width: 2),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: borderRadiusMedium,
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: BAColors.danger, width: 2),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: borderRadiusMedium,
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: BAColors.danger, width: 2),
       ),
       hintStyle: const TextStyle(color: BAColors.lightTextDisabled, fontSize: 14),
@@ -794,7 +794,7 @@ class BATheme {
   /// 在深色背景上呈现明显的浮起效果。
   static List<BoxShadow> get darkShadows => [
         BoxShadow(
-          color: BAColors.darkShadow.withOpacity(0.25),
+          color: BAColors.darkShadow.withValues(alpha: 0.25),
           blurRadius: 16,
           offset: const Offset(0, 6),
         ),
@@ -809,7 +809,7 @@ class BATheme {
   /// - 向下偏移（4像素），模拟自然光照
   static List<BoxShadow> get lightShadows => [
         BoxShadow(
-          color: const Color(0xFF000000).withOpacity(0.06),
+          color: const Color(0xFF000000).withValues(alpha: 0.06),
           blurRadius: 16,
           offset: const Offset(0, 4),
         ),
@@ -821,7 +821,7 @@ class BATheme {
   /// 用于需要轻微浮起效果的小型组件。
   static List<BoxShadow> get darkShadowsSmall => [
         BoxShadow(
-          color: BAColors.darkShadow.withOpacity(0.18),
+          color: BAColors.darkShadow.withValues(alpha: 0.18),
           blurRadius: 8,
           offset: const Offset(0, 2),
         ),
@@ -833,7 +833,7 @@ class BATheme {
   /// 用于小型卡片、按钮等需要轻微浮起效果的组件。
   static List<BoxShadow> get lightShadowsSmall => [
         BoxShadow(
-          color: const Color(0xFF000000).withOpacity(0.04),
+          color: const Color(0xFF000000).withValues(alpha: 0.04),
           blurRadius: 8,
           offset: const Offset(0, 2),
         ),
@@ -845,7 +845,7 @@ class BATheme {
   /// 用于对话框、底部弹窗等需要明显浮起效果的大型组件。
   static List<BoxShadow> get darkShadowsLarge => [
         BoxShadow(
-          color: BAColors.darkShadow.withOpacity(0.35),
+          color: BAColors.darkShadow.withValues(alpha: 0.35),
           blurRadius: 24,
           offset: const Offset(0, 10),
         ),
@@ -858,7 +858,7 @@ class BATheme {
   /// 阴影参数更大，营造更强的层次感。
   static List<BoxShadow> get lightShadowsLarge => [
         BoxShadow(
-          color: const Color(0xFF000000).withOpacity(0.08),
+          color: const Color(0xFF000000).withValues(alpha: 0.08),
           blurRadius: 24,
           offset: const Offset(0, 8),
         ),
