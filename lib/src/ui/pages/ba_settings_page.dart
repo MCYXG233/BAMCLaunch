@@ -90,6 +90,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
   int _speedLimitUnit = 0;
   final TextEditingController _customMirrorUrlController = TextEditingController();
   final TextEditingController _customMirrorNameController = TextEditingController();
+  final FocusNode _customMirrorNameFocusNode = FocusNode();
+  final FocusNode _customMirrorUrlFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -120,7 +122,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
   Future<void> _initAllManagers() async {
     await _themeManager.initialize();
-    await _backgroundManager.initialize();
     await _backupManager.initialize();
     await _statisticsManager.initialize();
     await _loadBackgroundConfig();
@@ -143,7 +144,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
   }
 
   Future<void> _loadBackgroundConfig() async {
-    await _backgroundManager.initialize();
+    // BackgroundManager 已在主页面初始化，直接读取当前配置即可
     if (mounted) {
       setState(() {
         _backgroundConfig = _backgroundManager.currentConfig;
@@ -167,6 +168,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
     _gameArgsFocusNode.dispose();
     _customMirrorUrlController.dispose();
     _customMirrorNameController.dispose();
+    _customMirrorNameFocusNode.dispose();
+    _customMirrorUrlFocusNode.dispose();
     super.dispose();
   }
 
@@ -452,6 +455,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
   }
 
   Future<void> _speedTestMirrors() async {
+    if (!mounted) return;
     setState(() {
       _isSpeedTesting = true;
     });
@@ -475,6 +479,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
   }
 
   Future<void> _autoSelectFastestMirror() async {
+    if (!mounted) return;
     setState(() {
       _isSpeedTesting = true;
     });
@@ -759,6 +764,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
   }
 
   Future<void> _checkForUpdate() async {
+    if (!mounted) return;
     setState(() {
       _isCheckingUpdate = true;
     });
@@ -2308,7 +2314,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                             flex: 1,
                             child: _buildTextField(
                               controller: _customMirrorNameController,
-                              focusNode: FocusNode(),
+                              focusNode: _customMirrorNameFocusNode,
                               placeholder: '名称（可选）',
                               width: 120,
                             ),
@@ -2318,7 +2324,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                             flex: 3,
                             child: _buildTextField(
                               controller: _customMirrorUrlController,
-                              focusNode: FocusNode(),
+                              focusNode: _customMirrorUrlFocusNode,
                               placeholder: 'https://example.com',
                               width: 250,
                             ),

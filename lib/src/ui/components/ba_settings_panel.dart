@@ -12,22 +12,21 @@ import '../components/ba_notification.dart';
 import '../components/ba_background_selector.dart';
 import '../../config/background_config.dart';
 import '../../loader/java_selector_dialog.dart';
-import '../components/ba_dialog.dart';
 
 /// 设置面板分类
-enum SettingsCategory {
-  appearance('外观', Icons.palette),
+enum SettingsTab {
+  general('通用', Icons.tune),
   game('游戏', Icons.games),
-  download('下载', Icons.download),
-  advanced('高级', Icons.settings),
-  about('关于', Icons.info);
+  download('下载', Icons.cloud_download),
+  theme('主题', Icons.palette),
+  advanced('高级', Icons.settings);
 
-  const SettingsCategory(this.label, this.icon);
+  const SettingsTab(this.label, this.icon);
   final String label;
   final IconData icon;
 }
 
-/// 右侧滑出式设置面板
+/// 顶部Tab式设置面板
 class SettingsPanel extends StatefulWidget {
   /// 显示设置面板
   static Future<void> show(BuildContext context) {
@@ -48,13 +47,12 @@ class _SettingsPanelState extends State<SettingsPanel>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
+  late TabController _tabController;
 
   final ConfigManager _configManager = ConfigManager();
   final BackgroundManager _backgroundManager = BackgroundManager();
-  // ThemeManager 必须从 Provider 获取，保证与 MaterialApp 共享同一个实例
   late final ThemeManager _themeManager;
 
-  SettingsCategory _selectedCategory = SettingsCategory.appearance;
   bool _managersInitialized = false;
 
   // 设置项状态
@@ -62,7 +60,7 @@ class _SettingsPanelState extends State<SettingsPanel>
   String _javaPath = '';
   double _memoryAllocation = 4096;
   String _themeMode = 'dark';
-  String _colorScheme = 'blue_archive'; // blue_archive / minecraft
+  String _colorScheme = 'blue_archive';
   bool _autoUpdate = true;
   String _downloadSource = 'official';
   int _concurrentDownloads = 3;
@@ -88,7 +86,6 @@ class _SettingsPanelState extends State<SettingsPanel>
   void initState() {
     super.initState();
 
-    // 从 Provider 获取共享的 ThemeManager 实例
     _themeManager = Provider.of<ThemeManager>(context, listen: false);
 
     _animationController = AnimationController(
@@ -104,6 +101,11 @@ class _SettingsPanelState extends State<SettingsPanel>
       curve: Curves.easeOutCubic,
     ));
 
+    _tabController = TabController(
+      length: SettingsTab.values.length,
+      vsync: this,
+    );
+
     _proxyHostController = TextEditingController();
     _proxyPortController = TextEditingController();
     _jvmArgsController = TextEditingController();
@@ -117,6 +119,7 @@ class _SettingsPanelState extends State<SettingsPanel>
   @override
   void dispose() {
     _animationController.dispose();
+    _tabController.dispose();
     _proxyHostController.dispose();
     _proxyPortController.dispose();
     _jvmArgsController.dispose();
@@ -126,7 +129,6 @@ class _SettingsPanelState extends State<SettingsPanel>
 
   Future<void> _initManagers() async {
     await _themeManager.initialize();
-    await _backgroundManager.initialize();
     if (mounted) {
       setState(() {
         _managersInitialized = true;
@@ -275,19 +277,12 @@ class _SettingsPanelState extends State<SettingsPanel>
     }
   }
 
-  Future<void> _saveBool(String key, bool value) async {
-    try {
-      await _configManager.setBool(key, value);
-      if (mounted) setState(() {});
-    } catch (e) {
-      if (mounted) NotificationManager().showError('保存失败', message: e.toString());
-    }
-  }
-
   Future<void> _close() async {
     await _animationController.reverse();
     if (mounted) Navigator.of(context).pop();
   }
+
+  // ==================== 构建方法 ====================
 
   @override
   Widget build(BuildContext context) {
@@ -320,7 +315,7 @@ class _SettingsPanelState extends State<SettingsPanel>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 30,
                       offset: const Offset(-5, 0),
                     ),
@@ -328,29 +323,9 @@ class _SettingsPanelState extends State<SettingsPanel>
                 ),
                 child: Column(
                   children: [
-                    // 顶部栏
                     _buildHeader(),
-
-                    // 内容区域
-                    Expanded(
-                      child: Row(
-                        children: [
-                          // 左侧分类导航
-                          _buildCategoryNav(),
-
-                          // 分隔线
-                          Container(width: 1, color: BAColors.borderOf(context)),
-
-                          // 右侧设置内容
-                          Expanded(
-                            child: _buildSettingsContent(),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // 底部按钮
-                    _buildFooter(),
+                    _buildTabBar(),
+                    Expanded(child: _buildTabContent()),
                   ],
                 ),
               ),
@@ -361,9 +336,10 @@ class _SettingsPanelState extends State<SettingsPanel>
     );
   }
 
+  /// 顶部标题栏
   Widget _buildHeader() {
     return Container(
-      height: 64,
+      height: 56,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
@@ -373,228 +349,243 @@ class _SettingsPanelState extends State<SettingsPanel>
       ),
       child: Row(
         children: [
-          // 标题
-          Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  gradient: BAColors.primaryGradient,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(Icons.settings, color: BAColors.textPrimaryOf(context), size: 18),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                '设置',
-                style: TextStyle(
-                  color: BAColors.textPrimaryOf(context),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              gradient: BAColors.primaryGradient,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(Icons.settings, color: BAColors.textPrimaryOf(context), size: 16),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            '设置',
+            style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+            ),
           ),
 
           const Spacer(),
 
+          // 恢复默认按钮
+          TextButton.icon(
+            onPressed: _showResetDialog,
+            icon: Icon(Icons.restore, size: 14, color: BAColors.textSecondaryOf(context)),
+            label: Text(
+              '恢复默认',
+              style: TextStyle(
+                color: BAColors.textSecondaryOf(context),
+                fontSize: 12,
+              ),
+            ),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+          ),
+
+          const SizedBox(width: 4),
+
           // 关闭按钮
           IconButton(
             onPressed: _close,
-            icon: Icon(Icons.close, color: BAColors.textSecondaryOf(context)),
+            icon: Icon(Icons.close, color: BAColors.textSecondaryOf(context), size: 20),
             tooltip: '关闭',
+            splashRadius: 18,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCategoryNav() {
+  /// 顶部分类Tab栏
+  Widget _buildTabBar() {
     return Container(
-      width: 180,
-      color: BAColors.surfaceOf(context).withValues(alpha: 0.5),
-      child: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        children: [
-          _buildCategoryItem(
-            SettingsCategory.appearance,
-          ),
-          _buildCategoryItem(
-            SettingsCategory.game,
-          ),
-          _buildCategoryItem(
-            SettingsCategory.download,
-          ),
-          _buildCategoryItem(
-            SettingsCategory.advanced,
-          ),
-          _buildCategoryItem(
-            SettingsCategory.about,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryItem(
-    SettingsCategory category,
-  ) {
-    final isSelected = _selectedCategory.index >= 0 &&
-        _getCategoryFromIndex(_selectedCategory.index) == category;
-    final primaryColor = BAColors.primaryOf(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => setState(() {
-            _selectedCategory = category;
-          }),
-          borderRadius: BorderRadius.circular(10),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? primaryColor.withValues(alpha: 0.12)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(10),
-              border: isSelected
-                  ? Border.all(color: primaryColor.withValues(alpha: 0.3))
-                  : null,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  category.icon,
-                  color: isSelected ? primaryColor : BAColors.textSecondaryOf(context),
-                  size: 18,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  category.label,
-                  style: TextStyle(
-                    color: isSelected ? primaryColor : BAColors.textPrimaryOf(context),
-                    fontSize: 13,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  ),
-                ),
-              ],
-            ),
-          ),
+      height: 48,
+      decoration: BoxDecoration(
+        color: BAColors.surfaceOf(context),
+        border: Border(
+          bottom: BorderSide(color: BAColors.borderOf(context)),
         ),
       ),
+      child: TabBar(
+        controller: _tabController,
+        isScrollable: false,
+        labelColor: Colors.white,
+        unselectedLabelColor: BAColors.textSecondaryOf(context),
+        labelStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.normal,
+        ),
+        indicator: BoxDecoration(
+          gradient: BAColors.primaryGradient,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: BAColors.primaryOf(context).withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        indicatorSize: TabBarIndicatorSize.tab,
+        indicatorPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+        dividerColor: Colors.transparent,
+        overlayColor: WidgetStateProperty.all(
+          BAColors.primaryOf(context).withValues(alpha: 0.06),
+        ),
+        tabs: SettingsTab.values.map((tab) {
+          return Tab(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(tab.icon, size: 15),
+                const SizedBox(width: 5),
+                Text(tab.label),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 
-  SettingsCategory _getCategoryFromIndex(int index) {
-    if (index < 0 || index >= SettingsCategory.values.length) {
-      return SettingsCategory.appearance;
-    }
-    return SettingsCategory.values[index];
+  /// Tab内容区域
+  Widget _buildTabContent() {
+    return TabBarView(
+      controller: _tabController,
+      children: [
+        _buildGeneralSettings(),
+        _buildGameSettings(),
+        _buildDownloadSettings(),
+        _buildThemeSettings(),
+        _buildAdvancedSettings(),
+      ],
+    );
   }
 
-  Widget _buildSettingsContent() {
-    switch (_selectedCategory) {
-      case SettingsCategory.appearance:
-        return _buildAppearanceSettings();
-      case SettingsCategory.game:
-        return _buildGameSettings();
-      case SettingsCategory.download:
-        return _buildDownloadSettings();
-      case SettingsCategory.advanced:
-        return _buildAdvancedSettings();
-      case SettingsCategory.about:
-        return _buildAboutSettings();
-    }
-  }
+  // ==================== 通用设置 ====================
 
-  Widget _buildAppearanceSettings() {
+  Widget _buildGeneralSettings() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle('外观'),
+          _buildSectionTitle('通用设置'),
           const SizedBox(height: 16),
 
-          // 配色方案
+          // 开机自启
           _buildSettingCard(
             children: [
-              _buildSettingRow(
-                icon: Icons.palette,
+              _buildSwitchRow(
+                icon: Icons.power_settings_new,
+                iconColor: BAColors.warningOf(context),
+                title: '开机自启',
+                subtitle: '系统启动时自动运行启动器',
+                value: _launchAtStartup,
+                onChanged: (value) async {
+                  try {
+                    await _configManager.setBool(ConfigKeys.launchAtStartup, value);
+                    if (!mounted) return;
+                    setState(() => _launchAtStartup = value);
+                  } catch (e) {
+                    if (mounted) {
+                      NotificationManager().showError('保存失败', message: e.toString());
+                    }
+                  }
+                },
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // 最小化到托盘
+          _buildSettingCard(
+            children: [
+              _buildSwitchRow(
+                icon: Icons.minimize,
                 iconColor: BAColors.primaryOf(context),
-                title: '配色方案',
-                subtitle: _colorScheme == 'blue_archive' ? '蔚蓝档案风格' : 'Minecraft 风格',
-                trailing: DropdownButton<String>(
-                  value: _colorScheme,
-                  underline: const SizedBox(),
-                  dropdownColor: BAColors.surfaceOf(context),
-                  iconEnabledColor: BAColors.textPrimaryOf(context),
-                  style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 13),
-                  items: const [
-                    DropdownMenuItem(value: 'blue_archive', child: Text('蔚蓝档案')),
-                    DropdownMenuItem(value: 'minecraft', child: Text('Minecraft')),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) _saveColorScheme(value);
-                  },
-                ),
+                title: '最小化到托盘',
+                subtitle: '最小化时隐藏到系统托盘',
+                value: _minimizeToTray,
+                onChanged: (value) async {
+                  try {
+                    await _configManager.setBool(ConfigKeys.minimizeToTray, value);
+                    if (!mounted) return;
+                    setState(() => _minimizeToTray = value);
+                  } catch (e) {
+                    if (mounted) {
+                      NotificationManager().showError('保存失败', message: e.toString());
+                    }
+                  }
+                },
               ),
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
-          // 主题模式
+          // 关闭到托盘
           _buildSettingCard(
             children: [
-              _buildSettingRow(
-                icon: Icons.dark_mode,
-                iconColor: BAColors.primaryOf(context),
-                title: '主题模式',
-                subtitle: '选择应用的外观主题',
-                trailing: DropdownButton<String>(
-                  value: _themeMode,
-                  underline: const SizedBox(),
-                  dropdownColor: BAColors.surfaceOf(context),
-                  iconEnabledColor: BAColors.textPrimaryOf(context),
-                  style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 13),
-                  items: const [
-                    DropdownMenuItem(value: 'dark', child: Text('深色')),
-                    DropdownMenuItem(value: 'light', child: Text('浅色')),
-                    DropdownMenuItem(value: 'system', child: Text('跟随系统')),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) _saveThemeMode(value);
-                  },
-                ),
+              _buildSwitchRow(
+                icon: Icons.close,
+                iconColor: BAColors.dangerOf(context),
+                title: '关闭到托盘',
+                subtitle: '关闭窗口时最小化到托盘而非退出',
+                value: _closeToTray,
+                onChanged: (value) async {
+                  try {
+                    await _configManager.setBool(ConfigKeys.closeToTray, value);
+                    if (!mounted) return;
+                    setState(() => _closeToTray = value);
+                  } catch (e) {
+                    if (mounted) {
+                      NotificationManager().showError('保存失败', message: e.toString());
+                    }
+                  }
+                },
               ),
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
-          // 背景设置
+          // 自动更新
           _buildSettingCard(
             children: [
-              _buildSettingRow(
-                icon: Icons.image,
-                iconColor: BAColors.accentPinkOf(context),
-                title: '背景设置',
-                subtitle: '自定义应用背景',
-                trailing: TextButton(
-                  onPressed: () => _showBackgroundSelector(),
-                  style: TextButton.styleFrom(foregroundColor: BAColors.textPrimaryOf(context)),
-                  child: const Text('选择'),
-                ),
+              _buildSwitchRow(
+                icon: Icons.system_update,
+                iconColor: BAColors.successOf(context),
+                title: '自动更新',
+                subtitle: '自动检查并下载启动器更新',
+                value: _autoUpdate,
+                onChanged: (value) async {
+                  try {
+                    await _configManager.setBool(ConfigKeys.autoUpdate, value);
+                    if (!mounted) return;
+                    setState(() => _autoUpdate = value);
+                  } catch (e) {
+                    if (mounted) {
+                      NotificationManager().showError('保存失败', message: e.toString());
+                    }
+                  }
+                },
               ),
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // 动画效果
           _buildSettingCard(
@@ -606,9 +597,16 @@ class _SettingsPanelState extends State<SettingsPanel>
                 subtitle: '启用界面动画过渡',
                 value: _enableAnimation,
                 onChanged: (value) async {
-                  await _configManager.setBool(ConfigKeys.enableSplashAnimation, value);
-                  setState(() => _enableAnimation = value);
-                  NotificationManager().showSuccess('动画设置已保存');
+                  try {
+                    await _configManager.setBool(ConfigKeys.enableSplashAnimation, value);
+                    if (!mounted) return;
+                    setState(() => _enableAnimation = value);
+                    NotificationManager().showSuccess('动画设置已保存');
+                  } catch (e) {
+                    if (mounted) {
+                      NotificationManager().showError('保存失败', message: e.toString());
+                    }
+                  }
                 },
               ),
             ],
@@ -618,13 +616,15 @@ class _SettingsPanelState extends State<SettingsPanel>
     );
   }
 
+  // ==================== 游戏设置 ====================
+
   Widget _buildGameSettings() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle('游戏'),
+          _buildSectionTitle('游戏设置'),
           const SizedBox(height: 16),
 
           // 游戏目录
@@ -758,12 +758,189 @@ class _SettingsPanelState extends State<SettingsPanel>
                     DropdownMenuItem(value: '1600x900', child: Text('1600x900')),
                     DropdownMenuItem(value: '1366x768', child: Text('1366x768')),
                   ],
-                  onChanged: (value) {
+                  onChanged: (value) async {
                     if (value != null) {
-                      setState(() => _gameWindowSize = value);
-                      _configManager.setString(ConfigKeys.gameWindowSize, value);
+                      try {
+                        await _configManager.setString(ConfigKeys.gameWindowSize, value);
+                        if (!mounted) return;
+                        setState(() => _gameWindowSize = value);
+                      } catch (e) {
+                        if (mounted) {
+                          NotificationManager().showError('保存失败', message: e.toString());
+                        }
+                      }
                     }
                   },
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // JVM 参数
+          _buildSettingCard(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.code, color: BAColors.secondaryOf(context), size: 20),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'JVM 参数',
+                                style: TextStyle(
+                                  color: BAColors.textPrimaryOf(context),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '传递给 Java 虚拟机的额外参数',
+                                style: TextStyle(
+                                  color: BAColors.textSecondaryOf(context),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _jvmArgsController,
+                      style: TextStyle(
+                        color: BAColors.textPrimaryOf(context),
+                        fontSize: 13,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: '例如: -XX:+UseG1GC -XX:MaxGCPauseMillis=50',
+                        hintStyle: TextStyle(
+                          color: BAColors.textDisabledOf(context),
+                          fontSize: 12,
+                        ),
+                        filled: true,
+                        fillColor: BAColors.surfaceOf(context),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: BAColors.primaryOf(context)),
+                        ),
+                      ),
+                      onSubmitted: (value) async {
+                        try {
+                          await _configManager.setString(ConfigKeys.jvmArguments, value);
+                          if (mounted) setState(() => _jvmArguments = value);
+                        } catch (e) {
+                          if (mounted) {
+                            NotificationManager().showError('保存失败', message: e.toString());
+                          }
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // 游戏参数
+          _buildSettingCard(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.gamepad, color: BAColors.accentPinkOf(context), size: 20),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '游戏参数',
+                                style: TextStyle(
+                                  color: BAColors.textPrimaryOf(context),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '传递给 Minecraft 的额外启动参数',
+                                style: TextStyle(
+                                  color: BAColors.textSecondaryOf(context),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _gameArgsController,
+                      style: TextStyle(
+                        color: BAColors.textPrimaryOf(context),
+                        fontSize: 13,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: '例如: --demo',
+                        hintStyle: TextStyle(
+                          color: BAColors.textDisabledOf(context),
+                          fontSize: 12,
+                        ),
+                        filled: true,
+                        fillColor: BAColors.surfaceOf(context),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: BAColors.primaryOf(context)),
+                        ),
+                      ),
+                      onSubmitted: (value) async {
+                        try {
+                          await _configManager.setString(ConfigKeys.gameArguments, value);
+                          if (mounted) setState(() => _gameArguments = value);
+                        } catch (e) {
+                          if (mounted) {
+                            NotificationManager().showError('保存失败', message: e.toString());
+                          }
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -773,13 +950,15 @@ class _SettingsPanelState extends State<SettingsPanel>
     );
   }
 
+  // ==================== 下载设置 ====================
+
   Widget _buildDownloadSettings() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle('下载'),
+          _buildSectionTitle('下载设置'),
           const SizedBox(height: 16),
 
           // 下载源
@@ -845,8 +1024,15 @@ class _SettingsPanelState extends State<SettingsPanel>
                   onPressed: () async {
                     final result = await FilePicker.platform.getDirectoryPath();
                     if (result != null) {
-                      await _configManager.setString(ConfigKeys.downloadPath, result);
-                      setState(() => _downloadPath = result);
+                      try {
+                        await _configManager.setString(ConfigKeys.downloadPath, result);
+                        if (!mounted) return;
+                        setState(() => _downloadPath = result);
+                      } catch (e) {
+                        if (mounted) {
+                          NotificationManager().showError('保存失败', message: e.toString());
+                        }
+                      }
                     }
                   },
                   child: const Text('选择'),
@@ -859,85 +1045,87 @@ class _SettingsPanelState extends State<SettingsPanel>
     );
   }
 
-  Widget _buildAdvancedSettings() {
+  // ==================== 主题设置 ====================
+
+  Widget _buildThemeSettings() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle('高级'),
+          _buildSectionTitle('主题设置'),
           const SizedBox(height: 16),
 
-          // 开机自启
+          // 配色方案
           _buildSettingCard(
             children: [
-              _buildSwitchRow(
-                icon: Icons.power_settings_new,
-                iconColor: BAColors.warningOf(context),
-                title: '开机自启',
-                subtitle: '系统启动时自动运行',
-                value: _launchAtStartup,
-                onChanged: (value) async {
-                  await _configManager.setBool(ConfigKeys.launchAtStartup, value);
-                  setState(() => _launchAtStartup = value);
-                },
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          // 最小化到托盘
-          _buildSettingCard(
-            children: [
-              _buildSwitchRow(
-                icon: Icons.minimize,
+              _buildSettingRow(
+                icon: Icons.palette,
                 iconColor: BAColors.primaryOf(context),
-                title: '最小化到托盘',
-                subtitle: '最小化时隐藏到系统托盘',
-                value: _minimizeToTray,
-                onChanged: (value) async {
-                  await _configManager.setBool(ConfigKeys.minimizeToTray, value);
-                  setState(() => _minimizeToTray = value);
-                },
+                title: '配色方案',
+                subtitle: _colorScheme == 'blue_archive' ? '蔚蓝档案风格' : 'Minecraft 风格',
+                trailing: DropdownButton<String>(
+                  value: _colorScheme,
+                  underline: const SizedBox(),
+                  dropdownColor: BAColors.surfaceOf(context),
+                  iconEnabledColor: BAColors.textPrimaryOf(context),
+                  style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 13),
+                  items: const [
+                    DropdownMenuItem(value: 'blue_archive', child: Text('蔚蓝档案')),
+                    DropdownMenuItem(value: 'minecraft', child: Text('Minecraft')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) _saveColorScheme(value);
+                  },
+                ),
               ),
             ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
-          // 关闭到托盘
+          // 主题模式
           _buildSettingCard(
             children: [
-              _buildSwitchRow(
-                icon: Icons.close,
-                iconColor: BAColors.dangerOf(context),
-                title: '关闭到托盘',
-                subtitle: '关闭窗口时最小化到托盘而非退出',
-                value: _closeToTray,
-                onChanged: (value) async {
-                  await _configManager.setBool(ConfigKeys.closeToTray, value);
-                  setState(() => _closeToTray = value);
-                },
+              _buildSettingRow(
+                icon: Icons.dark_mode,
+                iconColor: BAColors.primaryOf(context),
+                title: '主题模式',
+                subtitle: '选择应用的外观主题',
+                trailing: DropdownButton<String>(
+                  value: _themeMode,
+                  underline: const SizedBox(),
+                  dropdownColor: BAColors.surfaceOf(context),
+                  iconEnabledColor: BAColors.textPrimaryOf(context),
+                  style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 13),
+                  items: const [
+                    DropdownMenuItem(value: 'dark', child: Text('深色')),
+                    DropdownMenuItem(value: 'light', child: Text('浅色')),
+                    DropdownMenuItem(value: 'system', child: Text('跟随系统')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) _saveThemeMode(value);
+                  },
+                ),
               ),
             ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
-          // 自动更新
+          // 背景设置
           _buildSettingCard(
             children: [
-              _buildSwitchRow(
-                icon: Icons.system_update,
-                iconColor: BAColors.successOf(context),
-                title: '自动更新',
-                subtitle: '自动检查并下载更新',
-                value: _autoUpdate,
-                onChanged: (value) async {
-                  await _configManager.setBool(ConfigKeys.autoUpdate, value);
-                  setState(() => _autoUpdate = value);
-                },
+              _buildSettingRow(
+                icon: Icons.image,
+                iconColor: BAColors.accentPinkOf(context),
+                title: '背景设置',
+                subtitle: '自定义应用背景',
+                trailing: TextButton(
+                  onPressed: () => _showBackgroundSelector(),
+                  style: TextButton.styleFrom(foregroundColor: BAColors.textPrimaryOf(context)),
+                  child: const Text('选择'),
+                ),
               ),
             ],
           ),
@@ -946,12 +1134,191 @@ class _SettingsPanelState extends State<SettingsPanel>
     );
   }
 
-  Widget _buildAboutSettings() {
+  // ==================== 高级设置 ====================
+
+  Widget _buildAdvancedSettings() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildSectionTitle('代理设置'),
+          const SizedBox(height: 16),
+
+          // 代理主机
+          _buildSettingCard(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.language, color: BAColors.infoOf(context), size: 20),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '代理主机',
+                                style: TextStyle(
+                                  color: BAColors.textPrimaryOf(context),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'HTTP 代理服务器地址',
+                                style: TextStyle(
+                                  color: BAColors.textSecondaryOf(context),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _proxyHostController,
+                      style: TextStyle(
+                        color: BAColors.textPrimaryOf(context),
+                        fontSize: 13,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: '例如: 127.0.0.1',
+                        hintStyle: TextStyle(
+                          color: BAColors.textDisabledOf(context),
+                          fontSize: 12,
+                        ),
+                        filled: true,
+                        fillColor: BAColors.surfaceOf(context),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: BAColors.primaryOf(context)),
+                        ),
+                      ),
+                      onSubmitted: (value) async {
+                        try {
+                          await _configManager.setString(ConfigKeys.proxyHost, value);
+                          if (mounted) setState(() => _proxyHost = value);
+                          NotificationManager().showSuccess('代理主机已保存');
+                        } catch (e) {
+                          if (mounted) {
+                            NotificationManager().showError('保存失败', message: e.toString());
+                          }
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // 代理端口
+          _buildSettingCard(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.numbers, color: BAColors.infoOf(context), size: 20),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '代理端口',
+                                style: TextStyle(
+                                  color: BAColors.textPrimaryOf(context),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '代理服务器端口号',
+                                style: TextStyle(
+                                  color: BAColors.textSecondaryOf(context),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _proxyPortController,
+                      keyboardType: TextInputType.number,
+                      style: TextStyle(
+                        color: BAColors.textPrimaryOf(context),
+                        fontSize: 13,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: '例如: 1080',
+                        hintStyle: TextStyle(
+                          color: BAColors.textDisabledOf(context),
+                          fontSize: 12,
+                        ),
+                        filled: true,
+                        fillColor: BAColors.surfaceOf(context),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: BAColors.primaryOf(context)),
+                        ),
+                      ),
+                      onSubmitted: (value) async {
+                        try {
+                          final port = int.tryParse(value) ?? 0;
+                          await _configManager.setInt(ConfigKeys.proxyPort, port);
+                          if (mounted) setState(() => _proxyPort = port);
+                          NotificationManager().showSuccess('代理端口已保存');
+                        } catch (e) {
+                          if (mounted) {
+                            NotificationManager().showError('保存失败', message: e.toString());
+                          }
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
           _buildSectionTitle('关于'),
           const SizedBox(height: 16),
 
@@ -962,13 +1329,12 @@ class _SettingsPanelState extends State<SettingsPanel>
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    // Logo
                     Container(
-                      width: 80,
-                      height: 80,
+                      width: 72,
+                      height: 72,
                       decoration: BoxDecoration(
                         gradient: BAColors.primaryGradient,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(18),
                         boxShadow: [
                           BoxShadow(
                             color: BAColors.primary.withValues(alpha: 0.25),
@@ -980,15 +1346,15 @@ class _SettingsPanelState extends State<SettingsPanel>
                       child: Icon(
                         Icons.games,
                         color: BAColors.textPrimaryOf(context),
-                        size: 40,
+                        size: 36,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 14),
                     Text(
                       'BAMCLaunch',
                       style: TextStyle(
                         color: BAColors.textPrimaryOf(context),
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -1000,7 +1366,7 @@ class _SettingsPanelState extends State<SettingsPanel>
                         fontSize: 13,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Text(
                       '一个简洁优雅的 Minecraft 启动器',
                       style: TextStyle(
@@ -1017,7 +1383,7 @@ class _SettingsPanelState extends State<SettingsPanel>
 
           const SizedBox(height: 16),
 
-          // 致谢
+          // 开源组件
           _buildSettingCard(
             children: [
               _buildSettingRow(
@@ -1037,51 +1403,14 @@ class _SettingsPanelState extends State<SettingsPanel>
     );
   }
 
-  Widget _buildFooter() {
-    return Container(
-      height: 64,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context),
-        border: Border(
-          top: BorderSide(color: BAColors.borderOf(context)),
-        ),
-      ),
-      child: Row(
-        children: [
-          OutlinedButton.icon(
-            onPressed: () => _showResetDialog(),
-            icon: const Icon(Icons.restore, size: 16),
-            label: const Text('恢复默认'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: BAColors.textSecondaryOf(context),
-              side: BorderSide(color: BAColors.borderOf(context)),
-            ),
-          ),
-
-          const Spacer(),
-
-          ElevatedButton.icon(
-            onPressed: _close,
-            icon: const Icon(Icons.check, size: 16),
-            label: const Text('完成'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: BAColors.textPrimaryOf(context),
-              foregroundColor: BAColors.surfaceOf(context),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // ==================== 通用UI组件 ====================
 
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
       style: TextStyle(
         color: BAColors.textPrimaryOf(context),
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: FontWeight.w600,
       ),
     );
@@ -1361,7 +1690,6 @@ class _SettingsPanelState extends State<SettingsPanel>
   /// 恢复所有设置为默认值
   Future<void> _resetAllSettings() async {
     try {
-      // 重置各项设置
       await _configManager.setString(ConfigKeys.gameDirectory, '');
       await _configManager.setString(ConfigKeys.javaPath, '');
       await _configManager.setInt(ConfigKeys.memoryAllocation, 4096);
@@ -1377,16 +1705,17 @@ class _SettingsPanelState extends State<SettingsPanel>
       await _configManager.setString(ConfigKeys.gameWindowSize, '1280x720');
       await _configManager.setString(ConfigKeys.jvmArguments, '');
       await _configManager.setString(ConfigKeys.gameArguments, '');
+      await _configManager.setString(ConfigKeys.proxyHost, '');
+      await _configManager.setInt(ConfigKeys.proxyPort, 0);
 
-      // 重置主题
       await _themeManager.setThemeMode(ThemeMode.dark);
       await _themeManager.setBlueArchiveTheme();
-
-      // 重置背景
       await _backgroundManager.saveBackgroundConfig(BackgroundConfig.classic);
 
-      // 重新加载设置
       await _loadSettings();
+
+      if (!mounted) return;
+      _tabController.animateTo(0);
 
       NotificationManager().showSuccess('设置已恢复为默认值');
     } catch (e) {

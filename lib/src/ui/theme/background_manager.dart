@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import '../../config/config_manager.dart';
 import '../../config/config_keys.dart';
 import '../../config/background_config.dart';
@@ -12,7 +13,7 @@ import '../../config/background_config.dart';
 /// - 纯色背景（solid）
 /// - 渐变背景（gradient）
 /// - 图片背景（image）
-/// - 视频背景（video）- Windows 平台默认仅支持 MP4 格式，如需支持 WebM 请使用 media_kit 替代
+/// - 视频背景（video）- 使用 media_kit 实现，支持多种视频格式
 /// - 模糊背景（blur）
 ///
 /// 使用单例模式确保全局只有一个实例，并通过 ChangeNotifier
@@ -23,11 +24,6 @@ import '../../config/background_config.dart';
 /// final backgroundManager = BackgroundManager.instance;
 /// await backgroundManager.initialize();
 /// ```
-///
-/// WebM 格式支持：
-/// video_player 插件在 Windows 平台对 WebM 格式的支持有限，
-/// 如需完整支持 WebM 格式，建议使用 media_kit 替代 video_player。
-/// 详见：https://pub.dev/packages/media_kit
 class BackgroundManager extends ChangeNotifier {
   /// 单例实例
   static BackgroundManager? _instance;
@@ -38,11 +34,17 @@ class BackgroundManager extends ChangeNotifier {
   /// 当前背景配置
   BackgroundConfig _currentConfig = BackgroundConfig.classic;
 
-  /// 视频播放器控制器
-  VideoPlayerController? _videoController;
+  /// media_kit 播放器实例
+  Player? _player;
+
+  /// media_kit 视频控制器
+  VideoController? _videoController;
 
   /// 视频是否已初始化完成的标志
   bool _isVideoInitialized = false;
+
+  /// 是否已完成初始化（幂等守卫，防止重复初始化导致视频播放器被销毁重建）
+  bool _initialized = false;
 
   /// 私有构造函数，确保只能通过 instance 获取实例
   BackgroundManager._internal();
@@ -64,6 +66,12 @@ class BackgroundManager extends ChangeNotifier {
   /// 返回当前应用的背景配置对象，包含背景类型、颜色、路径等信息。
   BackgroundConfig get currentConfig => _currentConfig;
 
+  /// 获取视频控制器（用于外部访问）
+  VideoController? get videoController => _videoController;
+
+  /// 视频是否已初始化
+  bool get isVideoInitialized => _isVideoInitialized;
+
   /// 初始化背景管理器
   ///
   /// 该方法应在应用启动时调用，用于加载持久化的背景配置。
@@ -74,6 +82,10 @@ class BackgroundManager extends ChangeNotifier {
   /// await BackgroundManager.instance.initialize();
   /// ```
   Future<void> initialize() async {
+    if (_initialized) return;
+    _initialized = true;
+    // 初始化 media_kit
+    MediaKit.ensureInitialized();
     await loadBackgroundConfig();
   }
 
@@ -145,43 +157,54 @@ class BackgroundManager extends ChangeNotifier {
   ///
   /// 初始化过程包括：
   /// - 释放之前的视频控制器（如果存在）
-  /// - 创建新的视频控制器并加载视频文件
+  /// - 创建新的播放器和视频控制器
   /// - 设置循环播放和静音
   /// - 开始播放视频
   ///
-  /// 注意：Windows 平台 video_player 默认仅支持 MP4 格式，
-  /// WebM 等格式可能无法播放。如需支持 WebM，请考虑使用 media_kit 替代。
-  ///
   /// 如果视频加载失败，会将视频控制器置空并标记为未初始化。
   Future<void> _initializeVideoIfNeeded() async {
-    // 先释放之前的视频控制器
-    await _videoController?.dispose();
-    _videoController = null;
-    _isVideoInitialized = false;
+    // 先释放之前的资源
+    await _disposeVideo();
 
     // 仅在视频背景类型且有视频路径时初始化
     if (_currentConfig.type == BackgroundType.video && _currentConfig.videoPath != null) {
       try {
-        // 从文件创建视频控制器
-        _videoController = VideoPlayerController.file(File(_currentConfig.videoPath!));
-        // 初始化视频播放器
-        await _videoController!.initialize();
+        // 创建新的播放器实例
+        _player = Player();
+
+        // 创建视频控制器
+        _videoController = VideoController(_player!);
+
+        // 打开视频文件
+        await _player!.open(Media(_currentConfig.videoPath!));
+
         // 设置循环播放
-        await _videoController!.setLooping(true);
+        await _player!.setPlaylistMode(PlaylistMode.loop);
+
         // 设置静音（背景视频通常不需要声音）
-        await _videoController!.setVolume(0);
+        await _player!.setVolume(0);
+
         // 标记初始化完成
         _isVideoInitialized = true;
+
         // 开始播放
-        _videoController!.play();
+        await _player!.play();
       } catch (e) {
         debugPrint('Failed to load video: $e');
         debugPrint('Video path: ${_currentConfig.videoPath}');
-        debugPrint('Windows 平台 video_player 默认仅支持 MP4 格式，如需支持 WebM 请考虑使用 media_kit');
         // 加载失败时清理状态
-        _videoController = null;
-        _isVideoInitialized = false;
+        await _disposeVideo();
       }
+    }
+  }
+
+  /// 释放视频相关资源
+  Future<void> _disposeVideo() async {
+    _isVideoInitialized = false;
+    _videoController = null;
+    if (_player != null) {
+      await _player!.dispose();
+      _player = null;
     }
   }
 
@@ -196,13 +219,6 @@ class BackgroundManager extends ChangeNotifier {
   ///
   /// 返回：
   /// - 包含背景和子组件的 Stack Widget
-  ///
-  /// 示例：
-  /// ```dart
-  /// BackgroundManager.instance.buildBackground(
-  ///   child: YourContentWidget(),
-  /// );
-  /// ```
   Widget buildBackground({required Widget child}) {
     return Stack(
       fit: StackFit.expand,
@@ -277,7 +293,10 @@ class BackgroundManager extends ChangeNotifier {
         if (_isVideoInitialized && _videoController != null) {
           return Opacity(
             opacity: _currentConfig.opacity,
-            child: VideoPlayer(_videoController!),
+            child: Video(
+              controller: _videoController!,
+              controls: NoVideoControls,
+            ),
           );
         }
         // 视频未初始化时显示黑色背景
@@ -346,7 +365,7 @@ class BackgroundManager extends ChangeNotifier {
   @override
   void dispose() {
     // 释放视频播放器资源
-    _videoController?.dispose();
+    _disposeVideo();
     super.dispose();
   }
 }

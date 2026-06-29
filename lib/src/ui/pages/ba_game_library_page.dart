@@ -33,11 +33,19 @@ class BAGameLibraryPage extends StatefulWidget {
   State<BAGameLibraryPage> createState() => _BAGameLibraryPageState();
 }
 
-class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
+class _BAGameLibraryPageState extends State<BAGameLibraryPage>
+    with TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   int _selectedFilter = 0;
   bool _isMaximized = false;
+
+  // 实例详情页状态
+  GameInstance? _selectedInstance;
+  TabController? _detailTabController;
+  static const List<String> _detailTabs = ['概览', '存档', '模组', '资源包', '光影', '截图'];
+  List<FileSystemEntity> _detailFiles = [];
+  bool _isLoadingFiles = false;
 
   final List<String> _filters = ['全部', '游戏中', '已安装', '可更新'];
 
@@ -87,6 +95,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
   @override
   void dispose() {
     _searchController.dispose();
+    _detailTabController?.dispose();
     for (final sub in _subscriptions) {
       sub.unsubscribe();
     }
@@ -97,8 +106,24 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
     final manager = InstanceManager();
     if (!manager.isInitialized) return;
     if (!mounted) return;
+
+    final newInstances = List<GameInstance>.from(manager.instances);
+
+    // 如果正在查看实例详情，检查实例是否还存在
+    if (_selectedInstance != null) {
+      final match = newInstances.where((i) => i.id == _selectedInstance!.id);
+      if (match.isEmpty) {
+        _selectedInstance = null;
+        _detailTabController?.dispose();
+        _detailTabController = null;
+        _detailFiles = [];
+      } else {
+        _selectedInstance = match.first;
+      }
+    }
+
     setState(() {
-      _instances = List.from(manager.instances);
+      _instances = newInstances;
     });
   }
 
@@ -122,6 +147,129 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
     _subscriptions.add(
       bus.on<InstanceUpdatedEvent>((_) => _loadInstances()),
     );
+  }
+
+  // ===== 实例详情页导航 =====
+
+  void _selectInstance(GameInstance instance) {
+    setState(() {
+      _selectedInstance = instance;
+      _detailTabController?.dispose();
+      _detailTabController = TabController(
+        length: _detailTabs.length,
+        vsync: this,
+      );
+      _detailTabController!.addListener(_onDetailTabChanged);
+      _detailFiles = [];
+    });
+    _loadDetailFiles(0);
+  }
+
+  void _backToList() {
+    setState(() {
+      _selectedInstance = null;
+      _detailTabController?.dispose();
+      _detailTabController = null;
+      _detailFiles = [];
+    });
+  }
+
+  void _onDetailTabChanged() {
+    if (_detailTabController != null &&
+        !_detailTabController!.indexIsChanging) {
+      _loadDetailFiles(_detailTabController!.index);
+    }
+  }
+
+  void _loadDetailFiles(int tabIndex) {
+    if (_selectedInstance == null) return;
+
+    // 概览tab不需要文件列表
+    if (tabIndex == 0) {
+      if (mounted) setState(() => _detailFiles = []);
+      return;
+    }
+
+    final manager = InstanceManager();
+    String? dirPath;
+    switch (tabIndex) {
+      case 1:
+        dirPath = manager.getInstanceSavesPath(_selectedInstance!.id);
+        break;
+      case 2:
+        dirPath = manager.getInstanceModsPath(_selectedInstance!.id);
+        break;
+      case 3:
+        dirPath = manager.getInstanceResourcePacksPath(_selectedInstance!.id);
+        break;
+      case 4:
+        dirPath = manager.getInstanceShaderPacksPath(_selectedInstance!.id);
+        break;
+      case 5:
+        dirPath = manager.getInstanceScreenshotsPath(_selectedInstance!.id);
+        break;
+    }
+
+    if (dirPath == null) {
+      if (mounted) {
+        setState(() {
+          _detailFiles = [];
+          _isLoadingFiles = false;
+        });
+      }
+      return;
+    }
+
+    if (mounted) setState(() => _isLoadingFiles = true);
+
+    try {
+      final dir = Directory(dirPath);
+      if (dir.existsSync()) {
+        final files = dir.listSync()
+          ..sort((a, b) {
+            try {
+              return b.statSync().modified.compareTo(a.statSync().modified);
+            } catch (_) {
+              return 0;
+            }
+          });
+        if (mounted) {
+          setState(() {
+            _detailFiles = files;
+            _isLoadingFiles = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _detailFiles = [];
+            _isLoadingFiles = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _detailFiles = [];
+          _isLoadingFiles = false;
+        });
+      }
+    }
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    if (bytes < 1024 * 1024 * 1024) {
+      return '${(bytes / 1024 / 1024).toStringAsFixed(1)} MB';
+    }
+    return '${(bytes / 1024 / 1024 / 1024).toStringAsFixed(1)} GB';
+  }
+
+  String _formatDateTime(DateTime? dateTime) {
+    if (dateTime == null) return '从未';
+    return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} '
+        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   List<GameInstance> _getFilteredInstances() {
@@ -388,6 +536,11 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
   @override
   Widget build(BuildContext context) {
     NotificationManager().init(context);
+
+    // 实例详情页
+    if (_selectedInstance != null) {
+      return _buildDetailPage(context, _selectedInstance!);
+    }
 
     return Stack(
       children: [
@@ -1008,9 +1161,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: isRunning || isLaunching
-                        ? null
-                        : () => _launchGame(instance),
+                    onTap: () => _selectInstance(instance),
                     borderRadius: BorderRadius.circular(16),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
@@ -1327,5 +1478,964 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage> {
         ],
       ),
     );
+  }
+
+  // ===== 实例详情页 UI =====
+
+  /// 详情页主布局
+  Widget _buildDetailPage(BuildContext context, GameInstance instance) {
+    return Column(
+      children: [
+        _buildDetailHeader(context, instance),
+        _buildDetailTabBar(context),
+        Expanded(
+          child: TabBarView(
+            controller: _detailTabController,
+            children: [
+              _buildOverviewTab(context, instance),
+              _buildFileListTab(context, '还没有存档', Icons.folder_rounded),
+              _buildFileListTab(context, '还没有模组', Icons.extension_rounded),
+              _buildFileListTab(context, '还没有资源包', Icons.palette_rounded),
+              _buildFileListTab(context, '还没有光影包', Icons.brightness_7_rounded),
+              _buildScreenshotTab(context),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 详情页顶部栏
+  Widget _buildDetailHeader(BuildContext context, GameInstance instance) {
+    final isRunning = instance.status == InstanceStatus.running;
+    final isLaunching = _launchingIds.contains(instance.id);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 16, 24, 0),
+      child: Row(
+        children: [
+          // 返回按钮
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: _backToList,
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: BAColors.surfaceOf(context).withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: BAColors.borderOf(context).withOpacity(0.5),
+                  ),
+                ),
+                child: Icon(
+                  Icons.arrow_back_rounded,
+                  color: BAColors.primaryLightOf(context),
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+
+          // 实例图标
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: BAColors.primaryOf(context).withValues(alpha: 0.4),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.sports_esports_rounded,
+              color: Color(0xFFFFFFFF),
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+
+          // 实例名称和版本
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  instance.name,
+                  style: TextStyle(
+                    color: BAColors.textPrimaryOf(context),
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${instance.version}${instance.loader != null ? ' · ${instance.loader}' : ''}',
+                  style: TextStyle(
+                    color: BAColors.textSecondaryOf(context).withValues(alpha: 0.9),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // 启动按钮
+          if (isLaunching)
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: BAColors.surfaceOf(context).withOpacity(0.6),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      BAColors.warningOf(context),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          else
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: isRunning ? null : () => _launchGame(instance),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: isRunning
+                          ? [BAColors.successOf(context), BAColors.successDark]
+                          : [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (isRunning
+                                ? BAColors.successOf(context)
+                                : BAColors.primaryOf(context))
+                            .withValues(alpha: 0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    isRunning ? Icons.stop_rounded : Icons.play_arrow_rounded,
+                    color: const Color(0xFFFFFFFF),
+                    size: 22,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// 详情页子Tab栏
+  Widget _buildDetailTabBar(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: BAColors.surfaceOf(context).withOpacity(0.5),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: BAColors.borderOf(context).withOpacity(0.5),
+        ),
+      ),
+      child: TabBar(
+        controller: _detailTabController,
+        isScrollable: true,
+        labelColor: const Color(0xFFFFFFFF),
+        unselectedLabelColor: BAColors.textSecondaryOf(context),
+        labelStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
+        indicator: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: BAColors.primaryOf(context).withValues(alpha: 0.4),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        splashBorderRadius: BorderRadius.circular(10),
+        tabs: _detailTabs.map((tab) => Tab(text: tab)).toList(),
+      ),
+    );
+  }
+
+  /// 概览Tab
+  Widget _buildOverviewTab(BuildContext context, GameInstance instance) {
+    final isRunning = instance.status == InstanceStatus.running;
+    final isLaunching = _launchingIds.contains(instance.id);
+    final instanceStats = _statsManager.getInstanceStatistics(instance.id);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 实例信息卡片
+          _buildOverviewInfoCard(context, instance),
+          const SizedBox(height: 20),
+
+          // 统计信息网格
+          Row(
+            children: [
+              Expanded(
+                child: _buildOverviewStatItem(
+                  context,
+                  icon: Icons.access_time_rounded,
+                  label: '游戏时长',
+                  value: _formatDuration(
+                    Duration(seconds: instanceStats?.totalPlayTimeSeconds ?? (instance.playTimeSeconds ?? 0)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildOverviewStatItem(
+                  context,
+                  icon: Icons.calendar_today_rounded,
+                  label: '上次启动',
+                  value: _formatDateTime(instance.lastPlayed ?? instanceStats?.lastLaunchTime),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildOverviewStatItem(
+                  context,
+                  icon: Icons.extension_rounded,
+                  label: 'Mod数量',
+                  value: '${instance.resources.mods.length}',
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildOverviewStatItem(
+                  context,
+                  icon: Icons.rocket_launch_rounded,
+                  label: '启动次数',
+                  value: '${instanceStats?.launchCount ?? 0} 次',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // 启动按钮
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: (isRunning || isLaunching) ? null : () => _launchGame(instance),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: isRunning
+                          ? [BAColors.successOf(context), BAColors.successDark]
+                          : isLaunching
+                              ? [BAColors.warningOf(context), BAColors.warningDark]
+                              : [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (isRunning
+                                ? BAColors.successOf(context)
+                                : isLaunching
+                                    ? BAColors.warningOf(context)
+                                    : BAColors.primaryOf(context))
+                            .withValues(alpha: 0.4),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: isLaunching
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFFFFFF)),
+                            ),
+                          )
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isRunning ? Icons.stop_rounded : Icons.play_arrow_rounded,
+                                color: const Color(0xFFFFFFFF),
+                                size: 22,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                isRunning ? '游戏运行中' : '启动游戏',
+                                style: const TextStyle(
+                                  color: Color(0xFFFFFFFF),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // 操作按钮行
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _buildOverviewActionButton(
+                context,
+                icon: Icons.copy_rounded,
+                label: '复制',
+                onTap: () => _duplicateInstance(instance),
+              ),
+              _buildOverviewActionButton(
+                context,
+                icon: Icons.file_upload_rounded,
+                label: '导出',
+                onTap: () => _exportInstance(instance),
+              ),
+              _buildOverviewActionButton(
+                context,
+                icon: Icons.backup_rounded,
+                label: '备份',
+                onTap: () => _openBackupManager(instance),
+              ),
+              _buildOverviewActionButton(
+                context,
+                icon: Icons.extension_rounded,
+                label: '模组管理',
+                onTap: () => _openModManager(instance),
+              ),
+              _buildOverviewActionButton(
+                context,
+                icon: Icons.delete_outline_rounded,
+                label: '删除',
+                isDanger: true,
+                onTap: () {
+                  _deleteInstance(instance).then((_) {
+                    if (mounted && _selectedInstance?.id == instance.id) {
+                      // 如果删除成功，_loadInstances 会自动返回列表
+                    }
+                  });
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 概览 - 实例信息卡片
+  Widget _buildOverviewInfoCard(BuildContext context, GameInstance instance) {
+    final isRunning = instance.status == InstanceStatus.running;
+    final isLaunching = _launchingIds.contains(instance.id);
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: BAColors.surfaceOf(context).withOpacity(0.7),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: BAColors.borderOf(context).withOpacity(0.5),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: BAColors.shadowOf(context).withOpacity(0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // 实例大图标
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isRunning
+                    ? [BAColors.successOf(context), BAColors.successDark]
+                    : [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: (isRunning
+                          ? BAColors.successOf(context)
+                          : BAColors.primaryOf(context))
+                      .withValues(alpha: 0.35),
+                  blurRadius: 14,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.sports_esports_rounded,
+              color: Color(0xFFFFFFFF),
+              size: 36,
+            ),
+          ),
+          const SizedBox(width: 20),
+
+          // 实例信息
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  instance.name,
+                  style: TextStyle(
+                    color: BAColors.textPrimaryOf(context),
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _buildInfoRow(context, Icons.update_rounded, '版本', instance.version),
+                if (instance.loader != null) ...[
+                  const SizedBox(height: 4),
+                  _buildInfoRow(context, Icons.layers_rounded, '加载器', instance.loader!),
+                ],
+                if (instance.description != null && instance.description!.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  _buildInfoRow(context, Icons.info_outline_rounded, '描述', instance.description!),
+                ],
+                const SizedBox(height: 4),
+                _buildInfoRow(
+                  context,
+                  Icons.circle,
+                  '状态',
+                  isRunning ? '运行中' : (isLaunching ? '启动中' : '就绪'),
+                  valueColor: isRunning
+                      ? BAColors.successOf(context)
+                      : isLaunching
+                          ? BAColors.warningOf(context)
+                          : BAColors.primaryLightOf(context),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 概览 - 信息行
+  Widget _buildInfoRow(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value, {
+    Color? valueColor,
+  }) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 14,
+          color: BAColors.textSecondaryOf(context).withValues(alpha: 0.7),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          '$label: ',
+          style: TextStyle(
+            color: BAColors.textSecondaryOf(context).withValues(alpha: 0.9),
+            fontSize: 13,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              color: valueColor ?? BAColors.textPrimaryOf(context),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 概览 - 统计项
+  Widget _buildOverviewStatItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: BAColors.surfaceOf(context).withOpacity(0.5),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: BAColors.borderOf(context).withOpacity(0.5),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  BAColors.primaryLightOf(context).withValues(alpha: 0.3),
+                  BAColors.primaryOf(context).withValues(alpha: 0.15),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: BAColors.primaryOf(context).withValues(alpha: 0.3),
+              ),
+            ),
+            child: Icon(
+              icon,
+              color: BAColors.primaryLightOf(context),
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: BAColors.textSecondaryOf(context).withValues(alpha: 0.9),
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  value,
+                  style: TextStyle(
+                    color: BAColors.textPrimaryOf(context),
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 概览 - 操作按钮
+  Widget _buildOverviewActionButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    bool isDanger = false,
+  }) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: BAColors.surfaceOf(context).withOpacity(0.6),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDanger
+                  ? BAColors.dangerOf(context).withValues(alpha: 0.4)
+                  : BAColors.borderOf(context).withOpacity(0.5),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: isDanger
+                    ? BAColors.dangerOf(context)
+                    : BAColors.primaryLightOf(context),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isDanger
+                      ? BAColors.dangerOf(context)
+                      : BAColors.textPrimaryOf(context),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 文件列表Tab（存档/模组/资源包/光影）
+  Widget _buildFileListTab(
+    BuildContext context,
+    String emptyMessage,
+    IconData emptyIcon,
+  ) {
+    if (_isLoadingFiles) {
+      return Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(
+            BAColors.primaryLightOf(context),
+          ),
+        ),
+      );
+    }
+
+    if (_detailFiles.isEmpty) {
+      return _buildEmptyState(
+        context,
+        emptyIcon,
+        emptyMessage,
+        '将文件放入对应文件夹即可在此显示',
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(24),
+      itemCount: _detailFiles.length,
+      itemBuilder: (context, index) {
+        final entity = _detailFiles[index];
+        return _buildFileItem(context, entity);
+      },
+    );
+  }
+
+  /// 文件列表项
+  Widget _buildFileItem(BuildContext context, FileSystemEntity entity) {
+    final isDir = entity is Directory;
+    final name = entity.path.split(Platform.pathSeparator).last;
+
+    int size = 0;
+    DateTime? modified;
+    try {
+      final stat = entity.statSync();
+      size = stat.size;
+      modified = stat.modified;
+    } catch (_) {}
+
+    IconData fileIcon;
+    if (isDir) {
+      fileIcon = Icons.folder_rounded;
+    } else if (name.endsWith('.jar')) {
+      fileIcon = Icons.extension_rounded;
+    } else if (name.endsWith('.zip')) {
+      fileIcon = Icons.archive_rounded;
+    } else if (name.endsWith('.png') || name.endsWith('.jpg')) {
+      fileIcon = Icons.image_rounded;
+    } else {
+      fileIcon = Icons.insert_drive_file_rounded;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: BAColors.surfaceOf(context).withOpacity(0.6),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: BAColors.borderOf(context).withOpacity(0.4),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: BAColors.primaryOf(context).withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              fileIcon,
+              color: isDir
+                  ? BAColors.warningOf(context)
+                  : BAColors.primaryLightOf(context),
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: TextStyle(
+                    color: BAColors.textPrimaryOf(context),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${isDir ? '文件夹' : _formatFileSize(size)}${modified != null ? ' · ${_formatDateTime(modified)}' : ''}',
+                  style: TextStyle(
+                    color: BAColors.textSecondaryOf(context).withValues(alpha: 0.8),
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 截图Tab
+  Widget _buildScreenshotTab(BuildContext context) {
+    if (_isLoadingFiles) {
+      return Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(
+            BAColors.primaryLightOf(context),
+          ),
+        ),
+      );
+    }
+
+    final imageFiles = _detailFiles.where((f) {
+      final name = f.path.toLowerCase();
+      return name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg');
+    }).toList();
+
+    if (imageFiles.isEmpty) {
+      return _buildEmptyState(
+        context,
+        Icons.photo_camera_rounded,
+        '还没有截图',
+        '在游戏中按下 F2 截图后将在此显示',
+      );
+    }
+
+    return GridView.builder(
+      padding: const EdgeInsets.all(24),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 16 / 10,
+      ),
+      itemCount: imageFiles.length,
+      itemBuilder: (context, index) {
+        final file = imageFiles[index] as File;
+        final name = file.path.split(Platform.pathSeparator).last;
+        return MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => _openFile(file.path),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: BAColors.borderOf(context).withOpacity(0.4),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: BAColors.shadowOf(context).withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.file(
+                    file,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => Container(
+                      color: BAColors.surfaceOf(context),
+                      child: Icon(
+                        Icons.broken_image_rounded,
+                        color: BAColors.textSecondaryOf(context),
+                        size: 32,
+                      ),
+                    ),
+                  ),
+                  // 底部渐变遮罩 + 文件名
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(8, 16, 8, 6),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.7),
+                          ],
+                        ),
+                      ),
+                      child: Text(
+                        name,
+                        style: const TextStyle(
+                          color: Color(0xFFFFFFFF),
+                          fontSize: 10,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// 空状态组件
+  Widget _buildEmptyState(
+    BuildContext context,
+    IconData icon,
+    String message,
+    String subMessage,
+  ) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: BAColors.primaryOf(context).withValues(alpha: 0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Icon(
+              icon,
+              size: 36,
+              color: const Color(0xFFFFFFFF),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            message,
+            style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subMessage,
+            style: TextStyle(
+              color: BAColors.textSecondaryOf(context).withValues(alpha: 0.8),
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 打开文件（使用系统默认程序）
+  void _openFile(String filePath) {
+    try {
+      Process.run('explorer', [filePath]);
+    } catch (_) {}
   }
 }
