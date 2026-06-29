@@ -44,7 +44,7 @@ class SettingsPanel extends StatefulWidget {
 }
 
 class _SettingsPanelState extends State<SettingsPanel>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
   late TabController _tabController;
