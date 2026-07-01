@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:crypto/crypto.dart';
 import '../../core/logger.dart';
+import '../../core/network_client.dart';
+import '../../core/error_codes.dart';
 import '../../platform/platform_adapter.dart';
 import '../../platform/platform_adapter_factory.dart';
 import '../../account/skin_manager.dart';
@@ -893,25 +895,21 @@ class SkinPreviewManager {
   /// 返回下载的图像字节数据
   /// 抛出异常如果下载失败
   Future<Uint8List> _downloadSkin(String url) async {
-    final client = HttpClient();
     try {
-      final request = await client.getUrl(Uri.parse(url));
-      // 设置User-Agent头
-      request.headers.set('User-Agent', 'BAMCLaunch/1.0');
-
-      final response = await request.close();
+      final networkClient = NetworkClient();
+      final response = await networkClient.get(
+        url,
+        headers: {'User-Agent': 'BAMCLaunch/1.0'},
+      );
       // 检查HTTP状态码
       if (response.statusCode != 200) {
-        throw Exception('Download failed with ${response.statusCode}');
+        throw NetworkException.fromStatusCode(response.statusCode);
       }
 
       // 读取响应体为字节数组
-      return await response.expand((chunk) => chunk).toList().then(
-        (bytes) => Uint8List.fromList(bytes),
-      );
-    } finally {
-      // 确保关闭HTTP客户端
-      client.close();
+      return Uint8List.fromList(response.bodyBytes);
+    } catch (e) {
+      rethrow;
     }
   }
 

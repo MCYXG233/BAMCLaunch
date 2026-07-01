@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../core/network_client.dart';
+import '../core/error_codes.dart';
 import 'models.dart';
 import 'api_interface.dart';
 import 'package:archive/archive.dart' as archive;
@@ -62,7 +63,7 @@ class ModrinthApi implements ResourceApi {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to search: ${response.statusCode}');
+      throw NetworkException.fromStatusCode(response.statusCode);
     }
 
     // 处理可能的 gzip 压缩响应
@@ -88,7 +89,7 @@ class ModrinthApi implements ResourceApi {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to get resource: ${response.statusCode}');
+      throw NetworkException.fromStatusCode(response.statusCode);
     }
 
     final data = json.decode(response.body);
@@ -104,7 +105,7 @@ class ModrinthApi implements ResourceApi {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to get versions: ${response.statusCode}');
+      throw NetworkException.fromStatusCode(response.statusCode);
     }
 
     final data = json.decode(response.body) as List<dynamic>;
@@ -122,7 +123,7 @@ class ModrinthApi implements ResourceApi {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to get version: ${response.statusCode}');
+      throw NetworkException.fromStatusCode(response.statusCode);
     }
 
     final data = json.decode(response.body);
@@ -138,7 +139,7 @@ class ModrinthApi implements ResourceApi {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to get categories: ${response.statusCode}');
+      throw NetworkException.fromStatusCode(response.statusCode);
     }
 
     final data = json.decode(response.body) as List<dynamic>;
@@ -253,7 +254,10 @@ class ModrinthApi implements ResourceApi {
   ResourceVersion _parseVersion(Map<String, dynamic> version) {
     final files = version['files'] as List<dynamic>? ?? [];
     if (files.isEmpty) {
-      throw Exception('Version has no downloadable files');
+      throw AppException.fromCode(
+        ErrorCodes.networkDownloadFailed,
+        detail: 'Version has no downloadable files',
+      );
     }
 
     final primaryFile = files.firstWhere(
@@ -262,7 +266,10 @@ class ModrinthApi implements ResourceApi {
     );
 
     if (primaryFile is! Map) {
-      throw Exception('Invalid file data in version');
+      throw AppException.fromCode(
+        ErrorCodes.networkJsonParseError,
+        detail: 'Invalid file data in version',
+      );
     }
 
     final hashes = primaryFile['hashes'] as Map<String, dynamic>?;
@@ -393,6 +400,6 @@ class ModrinthApi implements ResourceApi {
       // 直接解析失败
     }
 
-    throw Exception('Failed to parse JSON response');
+    throw AppException.fromCode(ErrorCodes.networkJsonParseError);
   }
 }

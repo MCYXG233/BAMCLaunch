@@ -1,12 +1,13 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import '../core/network_client.dart';
+import '../core/error_codes.dart';
 import 'models.dart';
 import 'api_interface.dart';
 
 /// CurseForge API客户端
 class CurseForgeApi implements ResourceApi {
   final String apiKey;
-  final http.Client _httpClient;
+  final NetworkClient _networkClient = NetworkClient();
 
   static const String baseUrl = 'https://api.curseforge.com/v1';
   static const int minecraftGameId = 432;
@@ -16,8 +17,7 @@ class CurseForgeApi implements ResourceApi {
 
   CurseForgeApi({
     required this.apiKey,
-    http.Client? httpClient,
-  }) : _httpClient = httpClient ?? http.Client();
+  });
 
   @override
   String get source => 'curseforge';
@@ -49,10 +49,13 @@ class CurseForgeApi implements ResourceApi {
     final uri = Uri.parse('$baseUrl/mods/search')
         .replace(queryParameters: queryParams);
 
-    final response = await _httpClient.get(uri, headers: _headers);
+    final response = await _networkClient.get(
+      uri.toString(),
+      headers: _headers,
+    );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to search: ${response.statusCode}');
+      throw NetworkException.fromStatusCode(response.statusCode);
     }
 
     final data = json.decode(response.body);
@@ -72,10 +75,10 @@ class CurseForgeApi implements ResourceApi {
   @override
   Future<Resource> getResource(String id) async {
     final uri = Uri.parse('$baseUrl/mods/$id');
-    final response = await _httpClient.get(uri, headers: _headers);
+    final response = await _networkClient.get(uri.toString(), headers: _headers);
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to get resource: ${response.statusCode}');
+      throw NetworkException.fromStatusCode(response.statusCode);
     }
 
     final data = json.decode(response.body);
@@ -85,10 +88,10 @@ class CurseForgeApi implements ResourceApi {
   @override
   Future<List<ResourceVersion>> getVersions(String id) async {
     final uri = Uri.parse('$baseUrl/mods/$id/files');
-    final response = await _httpClient.get(uri, headers: _headers);
+    final response = await _networkClient.get(uri.toString(), headers: _headers);
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to get versions: ${response.statusCode}');
+      throw NetworkException.fromStatusCode(response.statusCode);
     }
 
     final data = json.decode(response.body);
@@ -102,10 +105,10 @@ class CurseForgeApi implements ResourceApi {
   @override
   Future<ResourceVersion> getVersion(String resourceId, String versionId) async {
     final uri = Uri.parse('$baseUrl/mods/$resourceId/files/$versionId');
-    final response = await _httpClient.get(uri, headers: _headers);
+    final response = await _networkClient.get(uri.toString(), headers: _headers);
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to get version: ${response.statusCode}');
+      throw NetworkException.fromStatusCode(response.statusCode);
     }
 
     final data = json.decode(response.body);
@@ -118,10 +121,10 @@ class CurseForgeApi implements ResourceApi {
     final uri = Uri.parse('$baseUrl/categories')
         .replace(queryParameters: {'classId': classId.toString()});
 
-    final response = await _httpClient.get(uri, headers: _headers);
+    final response = await _networkClient.get(uri.toString(), headers: _headers);
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to get categories: ${response.statusCode}');
+      throw NetworkException.fromStatusCode(response.statusCode);
     }
 
     final data = json.decode(response.body);

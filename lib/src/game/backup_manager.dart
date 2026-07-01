@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:path/path.dart' as path;
 import 'package:archive/archive.dart';
 import '../core/logger.dart';
+import '../core/error_codes.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
 import '../config/config_manager.dart';
@@ -1217,7 +1218,7 @@ class BackupManager {
         // 从目录复制恢复（未压缩的备份）
         final backupSourceDir = Directory(backup.filePath);
         if (!await backupSourceDir.exists()) {
-          throw Exception('Backup source does not exist');
+          throw AppException.fromCode(ErrorCodes.backupSourceNotFound);
         }
 
         int totalFiles = 0;

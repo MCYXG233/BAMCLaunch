@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
+import '../core/error_codes.dart';
 import '../download/download_engine.dart';
 
 class ModLoaderManager {
@@ -38,7 +39,10 @@ class ModLoaderManager {
     try {
       final loaderInfo = await _getLoaderInfo(loaderType, gameVersion);
       if (loaderInfo == null) {
-        throw Exception('无法获取${loaderType.displayName}信息');
+        throw AppException.fromCode(
+          ErrorCodes.loaderFetchFailed,
+          detail: '${loaderType.displayName}信息获取失败',
+        );
       }
 
       _logger.info('Installing ${loaderType.displayName} ${loaderInfo.version} for game $gameVersion');

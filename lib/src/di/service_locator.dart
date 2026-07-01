@@ -1,68 +1,141 @@
-/// 依赖注入容器
+/// 轻量级依赖注入容器
 ///
-/// **重要**：此容器是轻量级占位实现。
-/// 实际服务通过各自类的 `.instance` 单例访问（如 `ConfigManager.instance`）。
-/// 该类保留是为了满足旧代码中 `ServiceLocator` 类型引用的编译需要。
+/// 支持三种注册方式：
+/// - [registerSingleton]：注册已创建的实例
+/// - [registerLazySingleton]：注册懒加载工厂，首次 get 时创建并缓存
+/// - [registerFactory]：每次 get 都创建新实例
+///
+/// ## 使用示例
+/// ```dart
+/// final locator = ServiceLocator.instance;
+/// locator.registerLazySingleton<Logger>(() => Logger._internal());
+/// final logger = locator.get<Logger>();
+/// ```
 class ServiceLocator {
-  /// 创建一个新的 ServiceLocator 实例
-  ServiceLocator();
+  ServiceLocator._();
 
-  /// 存储已注册的服务
-  final Map<Type, Object> _services = <Type, Object>{};
+  static ServiceLocator? _singleton;
+
+  /// 获取全局唯一的 ServiceLocator 实例
+  static ServiceLocator get instance => _singleton ??= ServiceLocator._();
+
+  /// 已注册的单例实例缓存
+  final Map<Type, Object> _singletons = <Type, Object>{};
+
+  /// 懒加载工厂（首次 get 时调用并缓存结果）
+  final Map<Type, Object Function()> _lazyFactories = <Type, Object Function()>{};
+
+  /// 工厂（每次 get 都创建新实例）
+  final Map<Type, Object Function()> _factories = <Type, Object Function()>{};
 
   /// 注册单例服务
+  ///
+  /// 将已创建的实例注册为单例，后续 [get] 始终返回同一实例。
   void registerSingleton<T>(T instance) {
-    _services[T] = instance as Object;
+    _singletons[T] = instance as Object;
+    _lazyFactories.remove(T);
+    _factories.remove(T);
   }
 
-  /// 注册延迟单例服务
-  void register<T>(T Function(ServiceLocator) creator) {
-    _services[T] = creator(this) as Object;
+  /// 注册懒加载单例服务
+  ///
+  /// [factory] 在首次调用 [get] 时执行，结果被缓存为单例。
+  void registerLazySingleton<T>(T Function() factory) {
+    _lazyFactories[T] = () => factory() as Object;
+    _factories.remove(T);
   }
 
   /// 注册工厂服务
-  void registerFactory<T>(T Function(ServiceLocator) creator) {
-    _services[T] = creator(this) as Object;
+  ///
+  /// 每次调用 [get] 都会执行 [factory] 创建新实例。
+  void registerFactory<T>(T Function() factory) {
+    _factories[T] = () => factory() as Object;
+    _lazyFactories.remove(T);
   }
 
   /// 获取服务实例
+  ///
+  /// 按优先级查找：已缓存单例 → 懒加载工厂 → 工厂。
+  /// 未注册时抛出 [StateError]。
   T get<T>() {
-    final value = _services[T];
-    if (value is T) return value;
-    throw StateError('Service of type $T not registered');
+    // 1. 已缓存的单例
+    final cached = _singletons[T];
+    if (cached is T) return cached;
+
+    // 2. 懒加载工厂 → 创建并缓存
+    final lazyFactory = _lazyFactories[T];
+    if (lazyFactory != null) {
+      final instance = lazyFactory() as T;
+      _singletons[T] = instance as Object;
+      return instance;
+    }
+
+    // 3. 工厂 → 每次新建
+    final factory = _factories[T];
+    if (factory != null) {
+      return factory() as T;
+    }
+
+    throw StateError(
+      'Service of type $T is not registered. '
+      'Did you forget to call ServiceRegistry.initialize()?',
+    );
   }
 
-  /// 尝试获取服务实例，不存在则返回 null
+  /// 尝试获取服务实例，未注册时返回 null
   T? tryGet<T>() {
-    final value = _services[T];
-    return value is T ? value : null;
+    final cached = _singletons[T];
+    if (cached is T) return cached;
+
+    final lazyFactory = _lazyFactories[T];
+    if (lazyFactory != null) {
+      final instance = lazyFactory() as T;
+      _singletons[T] = instance as Object;
+      return instance;
+    }
+
+    return null;
   }
 
-  /// 检查服务是否已注册
-  bool isRegistered<T>() => _services.containsKey(T);
+  /// 检查服务是否已注册（包括单例、懒加载、工厂）
+  bool isRegistered<T>() {
+    return _singletons.containsKey(T) ||
+        _lazyFactories.containsKey(T) ||
+        _factories.containsKey(T);
+  }
 
   /// 注销服务
   void unregister<T>() {
-    _services.remove(T);
+    _singletons.remove(T);
+    _lazyFactories.remove(T);
+    _factories.remove(T);
   }
 
-  /// 重置所有服务
+  /// 重置所有注册（主要用于测试）
   void reset() {
-    _services.clear();
+    _singletons.clear();
+    _lazyFactories.clear();
+    _factories.clear();
   }
 
-  /// 获取注册的服务类型列表
-  List<Type> get registeredTypes => _services.keys.toList();
-}
+  /// 获取所有已注册的类型列表
+  List<Type> get registeredTypes {
+    return <Type>{
+      ..._singletons.keys,
+      ..._lazyFactories.keys,
+      ..._factories.keys,
+    }.toList();
+  }
 
-/// 服务未找到异常
-class ServiceNotFoundException implements Exception {
-  final Type type;
+  /// 已实例化的单例数量
+  int get activeSingletonCount => _singletons.length;
 
-  ServiceNotFoundException(this.type);
+  /// 总注册服务数量（包括尚未实例化的懒加载）
+  int get totalRegisteredCount => registeredTypes.length;
 
-  @override
-  String toString() {
-    return 'ServiceNotFoundException: Service of type $type not registered';
+  /// 重置全局单例（仅用于测试）
+  static void resetInstance() {
+    _singleton?.reset();
+    _singleton = null;
   }
 }

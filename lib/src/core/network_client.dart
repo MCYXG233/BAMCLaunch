@@ -732,32 +732,4 @@ class NetworkClient {
   }
 }
 
-/// 网络异常类
-///
-/// 表示网络请求过程中发生的异常。这是一个简单的异常包装类，
-/// 用于提供更清晰的错误信息。
-///
-/// 使用示例：
-/// ```dart
-/// try {
-///   final response = await client.get('https://example.com');
-/// } on NetworkException catch (e) {
-///   print('网络错误: ${e.message}');
-/// }
-/// ```
-class NetworkException implements Exception {
-  /// 异常消息，描述错误详情
-  final String message;
-
-  /// 创建网络异常实例
-  ///
-  /// 参数：
-  /// - [message] 异常消息
-  NetworkException(this.message);
-
-  /// 返回异常的字符串表示
-  ///
-  /// 格式：`NetworkException: {message}`
-  @override
-  String toString() => 'NetworkException: $message';
-}
+// NetworkException 已统一到 error_codes.dart 中

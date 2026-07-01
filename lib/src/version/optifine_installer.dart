@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:archive/archive.dart';
 import '../core/logger.dart';
@@ -160,8 +159,8 @@ class OptiFineInstaller {
   /// 从官方页面解析版本列表
   Future<List<OptiFineVersion>> _getVersionsFromOfficial() async {
     try {
-      final response = await http.post(
-        Uri.parse('$_optiFineBaseUrl/adloadx.php'),
+      final response = await _networkClient.post(
+        '$_optiFineBaseUrl/adloadx.php',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },

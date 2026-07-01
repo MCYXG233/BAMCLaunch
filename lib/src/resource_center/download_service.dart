@@ -144,7 +144,10 @@ class DownloadService {
     final taskId = _generateTaskId(resource.id, version.id);
 
     if (_activeTasks.containsKey(taskId)) {
-      throw Exception('Resource is already downloading');
+      throw AppException.fromCode(
+        ErrorCodes.networkDownloadFailed,
+        detail: 'Resource is already downloading',
+      );
     }
 
     final task = ResourceDownloadTask(
@@ -361,7 +364,10 @@ class DownloadService {
     final taskId = _generateTaskId(modpack.id, version.id);
 
     if (_activeTasks.containsKey(taskId)) {
-      throw Exception('Modpack is already downloading');
+      throw AppException.fromCode(
+        ErrorCodes.networkDownloadFailed,
+        detail: 'Modpack is already downloading',
+      );
     }
 
     final task = ResourceDownloadTask(

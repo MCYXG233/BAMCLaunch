@@ -5,12 +5,13 @@
 //
 // 本程序是为了希望它有用而分发的，但不带任何担保；甚至没有对适销性或特定用途的适用性的暗示担保。更多细节请参阅 GNU 通用公共许可证。
 //
-// 您应该已经收到了 GNU 通用公共许可证的副本连同本程序。如果没有，请参见 <https://www.gnu.org/licenses/>。
+// 您应该已经收到了 GNU 通用公共许可证的副本连同本程序。如果没有，请参见 <https://www.gnu.org/licenses/>.
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 import 'src/core/index.dart';
+import 'src/di/index.dart';
 import 'src/config/index.dart';
 import 'src/platform/index.dart';
 import 'src/ui/theme/index.dart';
@@ -38,6 +39,9 @@ void main() {
       await windowManager.focus();
     });
 
+    // 注册所有管理器到 ServiceRegistry（懒加载，不会立即创建实例）
+    await ServiceRegistry.initialize();
+
     await Logger.instance.initialize();
     Logger.instance.info('Application starting...');
 
@@ -46,6 +50,10 @@ void main() {
 
     PlatformAdapterFactory.instance;
     Logger.instance.info('Platform adapter initialized');
+
+    Logger.instance.info(
+      'ServiceRegistry: ${ServiceLocator.instance.totalRegisteredCount} services registered',
+    );
 
     // 初始化ThemeManager
     final themeManager = ThemeManager();

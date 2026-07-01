@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:isolate';
 import 'dart:io';
-import 'package:http/http.dart' as http;
 import 'package:bamclaunch/src/download/resume_manager.dart' as resume;
 import 'package:crypto/crypto.dart' as crypto;
+import '../core/network_client.dart';
+import '../core/error_codes.dart';
 
 class MultiSourceDownloader {
   static const int defaultChunkSize = 4 * 1024 * 1024;
@@ -79,7 +80,7 @@ class MultiSourceDownloader {
         if (!isValid) {
           await tempFile.delete();
           await resumeManager.removeProgress(savePath);
-          throw Exception('文件哈希校验失败');
+          throw AppException.fromCode(ErrorCodes.fileHashMismatch);
         }
       }
       
@@ -104,7 +105,7 @@ class MultiSourceDownloader {
     CancellationToken? cancellationToken,
   }) async {
     if (cancellationToken?.isCancelled ?? false) {
-      throw Exception('下载已取消');
+      throw AppException.fromCode(ErrorCodes.networkCancelled);
     }
     
     int currentDownloaded = startByte;
@@ -188,8 +189,11 @@ class MultiSourceDownloader {
     for (final source in sources) {
       try {
         final actualUrl = await source.getUrl(url);
-        final response = await http.head(Uri.parse(actualUrl))
-            .timeout(sourceTimeout);
+        final networkClient = NetworkClient();
+        final response = await networkClient.get(
+          actualUrl,
+          timeoutSeconds: sourceTimeout.inSeconds,
+        );
         if (response.statusCode == 200) {
           return int.parse(response.headers['content-length'] ?? '0');
         }
@@ -198,11 +202,15 @@ class MultiSourceDownloader {
       }
     }
     
-    final response = await http.head(Uri.parse(url)).timeout(sourceTimeout);
+    final networkClient = NetworkClient();
+    final response = await networkClient.get(
+      url,
+      timeoutSeconds: sourceTimeout.inSeconds,
+    );
     if (response.statusCode == 200) {
       return int.parse(response.headers['content-length'] ?? '0');
     }
-    throw Exception('无法获取文件大小');
+    throw AppException.fromCode(ErrorCodes.networkFileSizeError);
   }
   
   Future<bool> _verifyHash(String filePath, String expectedHash, HashType hashType) async {
@@ -226,24 +234,17 @@ class MultiSourceDownloader {
   
   static Future<void> _downloadChunkIsolate(_DownloadChunkParams params) async {
     try {
-      final client = http.Client();
-      final request = http.Request('GET', Uri.parse(params.url));
-      request.headers['Range'] = 'bytes=${params.startByte}-${params.endByte - 1}';
-      
-      final response = await client.send(request);
+      final networkClient = NetworkClient();
+      final response = await networkClient.get(
+        params.url,
+        headers: {'Range': 'bytes=${params.startByte}-${params.endByte - 1}'},
+      );
       if (response.statusCode != 206) {
-        throw Exception('不支持分块下载');
+        throw AppException.fromCode(ErrorCodes.networkUnsupportedDownload);
       }
-      
-      int position = params.startByte;
-      final stream = response.stream;
-      
-      await for (final chunk in stream) {
-        position += chunk.length;
-        params.sendPort.send(position);
-      }
-      
-      client.close();
+
+      // 报告已下载的字节数
+      params.sendPort.send(response.bodyBytes.length);
       params.sendPort.send('done');
     } catch (e) {
       params.sendPort.send(e is Exception ? e : Exception(e.toString()));

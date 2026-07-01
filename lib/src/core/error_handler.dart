@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'logger.dart';
 import '../event/event.dart';
 import '../event/event_bus.dart';
+import '../di/service_locator.dart';
 
 /// 异常事件
 class ExceptionEvent extends Event {
@@ -21,13 +22,19 @@ class ExceptionEvent extends Event {
 
 /// 全局异常处理器
 class ErrorHandler {
+  /// 单例实例（本地缓存，用于 ServiceLocator 未初始化时的回退）
   static ErrorHandler? _instance;
 
-  factory ErrorHandler() => _instance ??= ErrorHandler._internal();
+  factory ErrorHandler() => instance;
 
   ErrorHandler._internal();
 
-  static ErrorHandler get instance => _instance ??= ErrorHandler._internal();
+  /// 获取单例实例
+  ///
+  /// 优先通过 [ServiceLocator] 获取，若未注册则回退到本地单例。
+  static ErrorHandler get instance =>
+      ServiceLocator.instance.tryGet<ErrorHandler>() ??
+      (_instance ??= ErrorHandler._internal());
 
   static void reset() {
     _instance = null;

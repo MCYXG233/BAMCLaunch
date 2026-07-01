@@ -1,5 +1,6 @@
-﻿import 'dart:ui';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../core/error_codes.dart';
 import '../../instance/instance_manager.dart';
 import '../../version/version_manager.dart';
 import '../../version/models.dart';
@@ -179,7 +180,7 @@ class _BACreateInstanceDialogState extends State<BACreateInstanceDialog> {
       final manager = InstanceManager();
       final directoryId = manager.selectedDirectoryId;
       if (directoryId == null) {
-        throw Exception('未选择游戏目录');
+        throw AppException.fromCode(ErrorCodes.instanceDirectoryNotSelected);
       }
 
       String? loader;

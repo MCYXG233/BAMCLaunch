@@ -2,9 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
-import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import '../core/logger.dart';
+import '../core/network_client.dart';
+import '../core/error_codes.dart';
 import 'models.dart';
 import 'modrinth_client.dart';
 
@@ -425,86 +426,44 @@ class DownloadManager {
 
   /// 下载文件
   Future<void> _downloadFile(String url, File destination, DownloadTask task) async {
-    final client = http.Client();
+    final networkClient = NetworkClient();
+    final watch = Stopwatch()..start();
+    int lastBytes = 0;
 
     try {
-      final request = http.Request('GET', Uri.parse(url));
-      final response = await client.send(request).timeout(Duration(seconds: timeoutSeconds));
+      await networkClient.downloadFile(
+        url,
+        destination.path,
+        onProgress: (downloaded, total) {
+          if (task.status == DownloadTaskStatus.cancelled) return;
 
-      if (response.statusCode != 200) {
-        throw Exception('HTTP ${response.statusCode}');
-      }
-
-      // 如果不知道总大小，从 content-length 获取
-      if (task.totalBytes == 0) {
-        final contentLength = response.contentLength;
-        if (contentLength != null) {
-          task.totalBytes = contentLength;
-          _notifyTaskUpdate(task);
-        }
-      }
-
-      // 检查磁盘空间（如果知道总大小）
-      if (task.totalBytes > 0) {
-        try {
-          final stat = await destination.parent.stat();
-          if (stat.type == FileSystemEntityType.directory) {
-            // 无法直接获取可用空间，跳过检查
-          }
-        } catch (_) {
-          // 磁盘空间检查失败不阻止下载
-        }
-      }
-
-      // 写入文件，跟踪进度
-      final sink = destination.openWrite();
-      int downloaded = 0;
-      int bytesSinceLastUpdate = 0;
-      final watch = Stopwatch()..start();
-
-      try {
-        await for (final data in response.stream) {
-          // 检查任务是否已取消
-          if (task.status == DownloadTaskStatus.cancelled) {
-            await sink.flush();
-            await sink.close();
-            // 清理未完成的临时文件
-            try {
-              if (await destination.exists()) {
-                await destination.delete();
-              }
-            } catch (_) {}
-            return;
-          }
-
-          sink.add(data);
-          downloaded += data.length;
-          bytesSinceLastUpdate += data.length;
           task.downloadedBytes = downloaded;
+          if (total > 0 && task.totalBytes == 0) {
+            task.totalBytes = total;
+          }
 
           // 计算速度（每200ms更新一次）
           if (watch.elapsedMilliseconds > 200) {
             final elapsedSeconds = watch.elapsedMilliseconds / 1000;
             if (elapsedSeconds > 0) {
-              task.downloadSpeed = (bytesSinceLastUpdate / elapsedSeconds).round();
+              task.downloadSpeed = ((downloaded - lastBytes) / elapsedSeconds).round();
             }
-            bytesSinceLastUpdate = 0;
+            lastBytes = downloaded;
             watch.reset();
             _notifyTaskUpdate(task);
           }
-        }
-      } finally {
-        await sink.flush();
-        await sink.close();
-      }
+        },
+        timeoutSeconds: timeoutSeconds,
+      );
 
-      task.downloadedBytes = downloaded;
-      if (task.totalBytes == 0) task.totalBytes = downloaded;
+      if (task.status == DownloadTaskStatus.cancelled) return;
+
+      if (task.totalBytes == 0) task.totalBytes = task.downloadedBytes;
       _notifyTaskUpdate(task);
 
       _logger.info('[Download] 文件下载完成: ${destination.path} (${(task.totalBytes / 1024).toStringAsFixed(1)} KB)');
-    } finally {
-      client.close();
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -568,7 +527,11 @@ class DownloadManager {
     try {
       archive = ZipDecoder().decodeBytes(bytes);
     } catch (e) {
-      throw Exception('无法解析为 zip/jar 归档: $e');
+      throw AppException.fromCode(
+        ErrorCodes.fileArchiveError,
+        detail: e.toString(),
+        originalError: e,
+      );
     }
 
     for (final file in archive) {

@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../auth/auth_manager.dart';
 import '../../account/account_manager.dart';
 import '../../core/logger.dart';
+import '../../core/error_codes.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/app_theme.dart';
@@ -214,7 +215,10 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (credentials.minecraftProfile == null) {
-        throw Exception('无法获取Minecraft档案');
+        throw AppException.fromCode(
+          ErrorCodes.authMinecraftFailed,
+          detail: '无法获取Minecraft档案',
+        );
       }
 
       // 创建或更新账户

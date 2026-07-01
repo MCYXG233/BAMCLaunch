@@ -41,6 +41,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
 import '../core/network_client.dart';
+import '../core/error_codes.dart';
 import 'models.dart';
 
 /// Microsoft OAuth2 认证服务
@@ -335,7 +336,11 @@ class MicrosoftAuthService {
 
     // 检查响应状态
     if (response.statusCode != 200) {
-      throw Exception('Failed to exchange code for token: ${response.statusCode} ${response.body}');
+      throw AppException.fromCode(
+        ErrorCodes.authCodeExchangeFailed,
+        detail: 'HTTP ${response.statusCode}: ${response.body}',
+        originalError: response.body,
+      );
     }
 
     // 解析响应并创建令牌对象
@@ -410,7 +415,11 @@ class MicrosoftAuthService {
 
     // 检查响应状态
     if (response.statusCode != 200) {
-      throw Exception('Failed to refresh token: ${response.statusCode} ${response.body}');
+      throw AppException.fromCode(
+        ErrorCodes.authRefreshFailed,
+        detail: 'HTTP ${response.statusCode}: ${response.body}',
+        originalError: response.body,
+      );
     }
 
     // 解析响应并创建令牌对象
@@ -469,7 +478,10 @@ class MicrosoftAuthService {
 
     // 检查是否有错误
     if (error != null) {
-      throw Exception('Authorization error: $error');
+      throw AppException.fromCode(
+        ErrorCodes.authFailed,
+        detail: error,
+      );
     }
 
     return code;
@@ -583,7 +595,11 @@ class MicrosoftAuthService {
 
     // 检查响应状态
     if (response.statusCode != 200) {
-      throw Exception('Failed to get device code: ${response.statusCode} ${response.body}');
+      throw AppException.fromCode(
+        ErrorCodes.authMicrosoftFailed,
+        detail: 'HTTP ${response.statusCode}: ${response.body}',
+        originalError: response.body,
+      );
     }
 
     // 解析响应并创建设备代码响应对象
@@ -700,13 +716,16 @@ class MicrosoftAuthService {
         continue;
       } else if (error == 'expired_token') {
         // 设备代码已过期
-        throw Exception('Device code expired');
+        throw AppException.fromCode(ErrorCodes.authDeviceCodeExpired);
       } else if (error == 'access_denied') {
         // 用户拒绝授权
-        throw Exception('User denied authorization');
+        throw AppException.fromCode(ErrorCodes.authUserDenied);
       } else {
         // 其他错误
-        throw Exception('Token polling failed: $error');
+        throw AppException.fromCode(
+          ErrorCodes.authMicrosoftFailed,
+          detail: error,
+        );
       }
     }
   }

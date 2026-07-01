@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
+import '../core/network_client.dart';
+import '../core/error_codes.dart';
 import '../config/config_manager.dart';
 import '../config/config_keys.dart';
 
@@ -150,7 +151,7 @@ class AuthlibLoginManager {
 
   final Logger _logger = Logger('AuthlibLoginManager');
   final IConfigManager _configManager = ConfigManager();
-  final http.Client _httpClient = http.Client();
+  final NetworkClient _networkClient = NetworkClient();
 
   AuthlibInjectorStatus _status = const AuthlibInjectorStatus();
   final StreamController<AuthlibInjectorStatus> _statusController =
@@ -275,7 +276,10 @@ class AuthlibLoginManager {
 
   Future<String?> downloadAuthlib() async {
     if (_selectedServer == null) {
-      throw Exception('请先选择一个外置登录服务器');
+      throw AppException.fromCode(
+        ErrorCodes.authMissingParameter,
+        detail: '请先选择一个外置登录服务器',
+      );
     }
 
     final jarUrl = _selectedServer!.url;
@@ -291,33 +295,21 @@ class AuthlibLoginManager {
     try {
       _logger.info('Downloading authlib-injector from: $jarUrl');
 
-      final request = http.Request('GET', Uri.parse(jarUrl));
-      final response = await _httpClient.send(request);
+      await _networkClient.downloadFile(
+        jarUrl,
+        jarPath,
+        onProgress: (downloadedBytes, contentLength) {
+          if (contentLength > 0) {
+            final progress = downloadedBytes / contentLength;
+            _status = AuthlibInjectorStatus(
+              downloadStatus: AuthlibDownloadStatus.downloading,
+              downloadProgress: progress,
+            );
+            _statusController.add(_status);
+          }
+        },
+      );
 
-      if (response.statusCode != 200) {
-        throw Exception('下载失败: HTTP ${response.statusCode}');
-      }
-
-      final contentLength = response.contentLength ?? 0;
-      int downloadedBytes = 0;
-
-      final file = File(jarPath);
-      final sink = file.openWrite();
-
-      await for (final chunk in response.stream) {
-        sink.add(chunk);
-        downloadedBytes += chunk.length;
-        if (contentLength > 0) {
-          final progress = downloadedBytes / contentLength;
-          _status = AuthlibInjectorStatus(
-            downloadStatus: AuthlibDownloadStatus.downloading,
-            downloadProgress: progress,
-          );
-          _statusController.add(_status);
-        }
-      }
-
-      await sink.close();
       await _configManager.setString(ConfigKeys.authlibPath, jarPath);
 
       _status = AuthlibInjectorStatus(
@@ -342,7 +334,10 @@ class AuthlibLoginManager {
 
   Future<AuthlibAccount?> login(String username, String password) async {
     if (_selectedServer == null || !isAuthlibReady) {
-      throw Exception('请先配置并下载 authlib-injector');
+      throw AppException.fromCode(
+        ErrorCodes.authAuthlibFailed,
+        detail: '请先配置并下载 authlib-injector',
+      );
     }
 
     final apiRoot = _selectedServer!.apiRoot ?? '${Uri.parse(_selectedServer!.url).origin}/api';
@@ -350,13 +345,12 @@ class AuthlibLoginManager {
     try {
       _logger.info('Authlib login to: $apiRoot');
 
-      final response = await _httpClient.post(
-        Uri.parse('$apiRoot/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
+      final response = await _networkClient.postJson(
+        '$apiRoot/auth/login',
+        {
           'username': username,
           'password': password,
-        }),
+        },
       );
 
       if (response.statusCode == 200) {
@@ -378,7 +372,10 @@ class AuthlibLoginManager {
         return account;
       } else {
         final error = jsonDecode(response.body);
-        throw Exception(error['errorMessage'] ?? '登录失败');
+        throw AppException.fromCode(
+          ErrorCodes.authAuthlibFailed,
+          detail: error['errorMessage'] ?? '登录失败',
+        );
       }
     } catch (e, stackTrace) {
       _logger.error('Authlib login failed', e, stackTrace);
@@ -440,16 +437,15 @@ class AuthlibLoginManager {
     final apiRoot = _selectedServer!.apiRoot ?? '${Uri.parse(_selectedServer!.url).origin}/api';
 
     try {
-      final response = await _httpClient.post(
-        Uri.parse('$apiRoot/auth/refresh'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${account.accessToken}',
-        },
-        body: jsonEncode({
+      final response = await _networkClient.postJson(
+        '$apiRoot/auth/refresh',
+        {
           'accessToken': account.accessToken,
           'clientToken': account.id,
-        }),
+        },
+        headers: {
+          'Authorization': 'Bearer ${account.accessToken}',
+        },
       );
 
       if (response.statusCode == 200) {
@@ -484,6 +480,5 @@ class AuthlibLoginManager {
   void dispose() {
     _statusController.close();
     _serversController.close();
-    _httpClient.close();
   }
 }

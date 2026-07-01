@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import '../config/config_manager.dart';
 import '../config/config_keys.dart';
+import '../core/network_client.dart';
 import 'java_checker.dart';
 import 'network_diagnostic.dart';
 
@@ -616,10 +617,11 @@ class AutoFixer {
       try {
         final uri = Uri.parse(mirror['url']!);
         // 请求镜像源的 mirrors.json 文件来测试可用性
-        final request = await HttpClient()
-            .getUrl(uri.replace(path: '/mirrors.json'))
-            .timeout(const Duration(seconds: 5));
-        final response = await request.close().timeout(const Duration(seconds: 5));
+        final networkClient = NetworkClient();
+        final response = await networkClient.get(
+          uri.replace(path: '/mirrors.json').toString(),
+          timeoutSeconds: 5,
+        );
 
         // 如果返回 200 状态码，说明镜像源可用
         if (response.statusCode == 200) {

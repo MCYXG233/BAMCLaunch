@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import '../core/logger.dart';
+import '../core/error_codes.dart';
 import '../config/config_manager.dart';
 import '../event/event_bus.dart';
 import '../event/event.dart';
@@ -306,7 +307,7 @@ class AutoBackupService {
       final instanceManager = InstanceManager();
       final instance = instanceManager.instances.firstWhere(
         (i) => i.id == instanceId,
-        orElse: () => throw Exception('Instance not found'),
+        orElse: () => throw AppException.fromCode(ErrorCodes.instanceNotFound),
       );
 
       await _backupInstance(instance, AutoBackupSchedule.beforeLaunch);
@@ -361,7 +362,7 @@ class AutoBackupService {
         await _updateLastBackupTime(schedule);
         _logger.info('Auto backup completed for ${instance.name}');
       } else {
-        throw Exception('Backup creation returned null');
+        throw AppException.fromCode(ErrorCodes.backupCreateFailed);
       }
     } catch (e, stackTrace) {
       _eventBus.publish(AutoBackupFailedEvent(

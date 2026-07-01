@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'package:crypto/crypto.dart';
 import '../core/network_client.dart';
+import '../core/error_codes.dart';
 import '../task/task.dart';
 import '../task/task_context.dart';
 import '../task/task_progress.dart';
@@ -57,7 +58,10 @@ class DownloadTask extends Task<String> {
         await Future.delayed(Duration(seconds: 1 + attempt));
       }
     }
-    throw Exception('下载失败，已超过最大重试次数');
+    throw AppException.fromCode(
+      ErrorCodes.networkDownloadFailed,
+      detail: '已超过最大重试次数',
+    );
   }
 
   /// 带进度的下载
@@ -158,7 +162,7 @@ class DownloadTask extends Task<String> {
       final isValid = await _verifyHash(savePath, hash!, hashType!);
       if (!isValid) {
         await file.delete();
-        throw Exception('文件哈希校验失败');
+        throw AppException.fromCode(ErrorCodes.fileHashMismatch);
       }
     }
 
@@ -179,7 +183,10 @@ class DownloadTask extends Task<String> {
       return int.parse(response.headers['content-length'] ?? '0');
     }
     
-    throw Exception('无法获取文件大小，HTTP ${response.statusCode}');
+    throw AppException.fromCode(
+      ErrorCodes.networkFileSizeError,
+      detail: 'HTTP ${response.statusCode}',
+    );
   }
 
   /// 校验文件哈希
@@ -316,7 +323,10 @@ class DownloadTask extends Task<String> {
         );
 
         if (response.statusCode != 206 && response.statusCode != 200) {
-          throw Exception('不支持分块下载，HTTP ${response.statusCode}');
+          throw AppException.fromCode(
+            ErrorCodes.networkUnsupportedDownload,
+            detail: 'HTTP ${response.statusCode}',
+          );
         }
 
         await raf.writeFrom(response.bodyBytes);

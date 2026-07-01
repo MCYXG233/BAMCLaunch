@@ -19,6 +19,7 @@ import 'dart:io';
 import '../../config/config_keys.dart';
 import '../../config/config_manager.dart';
 import '../../core/logger.dart';
+import '../../core/error_codes.dart';
 import '../../event/event.dart';
 import '../../event/event_bus.dart';
 import '../../platform/platform_adapter.dart';
@@ -598,7 +599,10 @@ class JavaManager implements IJavaManager {
       // 验证Java路径的有效性
       // 如果Java路径无效，抛出异常
       if (!await validateJava(javaPath)) {
-        throw Exception('Invalid Java path: $javaPath');
+        throw AppException.fromCode(
+          ErrorCodes.gameJavaInvalidPath,
+          detail: javaPath,
+        );
       }
 
       // 保存新的Java路径到配置

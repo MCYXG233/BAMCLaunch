@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:archive/archive.dart' as archive;
 import 'package:path/path.dart' as path;
-import 'package:http/http.dart' as http;
 import '../core/logger.dart';
+import '../core/network_client.dart';
 import '../config/config_manager.dart';
 import '../core/error_codes.dart';
 
@@ -209,8 +209,9 @@ class UpdateManager {
 
     try {
       // 调用 GitHub API 获取最新版本信息
-      final response = await http.get(
-        Uri.parse('https://api.github.com/repos/$repoToCheck/releases/latest'),
+      final networkClient = NetworkClient();
+      final response = await networkClient.get(
+        'https://api.github.com/repos/$repoToCheck/releases/latest',
         headers: {
           'Accept': 'application/vnd.github.v3+json',
           'User-Agent': 'BAMCLauncher',
@@ -351,39 +352,17 @@ class UpdateManager {
 
     // 下载文件
     final file = File(filePath);
-    final client = http.Client();
-    try {
-      final request = http.Request('GET', Uri.parse(url));
-      final response = await client.send(request).timeout(
-        const Duration(seconds: 300),
-      );
-
-      if (response.statusCode != 200) {
-        throw AppException.fromCode(
-          ErrorCodes.networkHttpError,
-          detail: 'Download failed: HTTP ${response.statusCode}',
-        );
-      }
-
-      final contentLength = response.contentLength;
-      final sink = file.openWrite();
-      int downloaded = 0;
-
-      try {
-        await for (final data in response.stream) {
-          sink.add(data);
-          downloaded += data.length;
-          if (onProgress != null && contentLength != null && contentLength > 0) {
-            onProgress(downloaded / contentLength);
-          }
+    final networkClient = NetworkClient();
+    await networkClient.downloadFile(
+      url,
+      filePath,
+      onProgress: (downloaded, total) {
+        if (onProgress != null && total > 0) {
+          onProgress(downloaded / total);
         }
-      } finally {
-        await sink.flush();
-        await sink.close();
-      }
-    } finally {
-      client.close();
-    }
+      },
+      timeoutSeconds: 300,
+    );
 
     _logger.info('Update downloaded: $filePath');
     return file;

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import '../config/config_manager.dart';
+import '../core/error_codes.dart';
 import 'models.dart';
 import 'microsoft_auth.dart';
 import 'xbox_auth.dart';
@@ -56,7 +57,10 @@ class AuthManager {
           codeVerifier: codeVerifier,
         );
       } else {
-        throw Exception('必须提供授权码或访问令牌');
+        throw AppException.fromCode(
+          ErrorCodes.authMissingParameter,
+          detail: '必须提供授权码或访问令牌',
+        );
       }
       
       credentials = credentials.copyWith(microsoftToken: microsoftToken);
@@ -96,7 +100,7 @@ class AuthManager {
   }) async {
     try {
       if (credentials.microsoftToken?.refreshToken == null) {
-        throw Exception('No refresh token available');
+        throw AppException.fromCode(ErrorCodes.authRefreshFailed, detail: 'No refresh token available');
       }
 
       onProgress?.call('Refreshing Microsoft token...');

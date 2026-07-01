@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import '../core/network_client.dart';
+import '../core/error_codes.dart';
 import 'models.dart';
 
 /// Minecraft认证服务
@@ -18,19 +19,23 @@ class MinecraftAuthService {
     required String userHash,
     required String xstsToken,
   }) async {
-    final response = await http.post(
-      Uri.parse(_loginWithXboxEndpoint),
+    final networkClient = NetworkClient();
+    final response = await networkClient.postJson(
+      _loginWithXboxEndpoint,
+      {
+        'identityToken': 'XBL3.0 x=$userHash;$xstsToken',
+      },
       headers: {
-        'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: json.encode({
-        'identityToken': 'XBL3.0 x=$userHash;$xstsToken',
-      }),
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to login with Xbox: ${response.statusCode} ${response.body}');
+      throw AppException.fromCode(
+        ErrorCodes.authMinecraftFailed,
+        detail: 'HTTP ${response.statusCode}: ${response.body}',
+        originalError: response.body,
+      );
     }
 
     final Map<String, dynamic> data = json.decode(response.body);
@@ -50,8 +55,9 @@ class MinecraftAuthService {
 
   /// 获取Minecraft个人资料
   Future<MinecraftProfile> getProfile(String accessToken) async {
-    final response = await http.get(
-      Uri.parse(_profileEndpoint),
+    final networkClient = NetworkClient();
+    final response = await networkClient.get(
+      _profileEndpoint,
       headers: {
         'Authorization': 'Bearer $accessToken',
         'Accept': 'application/json',
@@ -59,11 +65,15 @@ class MinecraftAuthService {
     );
 
     if (response.statusCode == 404) {
-      throw Exception('Account does not own Minecraft');
+      throw AppException.fromCode(ErrorCodes.authOwnershipCheckFailed);
     }
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to get profile: ${response.statusCode} ${response.body}');
+      throw AppException.fromCode(
+        ErrorCodes.authMinecraftFailed,
+        detail: 'HTTP ${response.statusCode}: ${response.body}',
+        originalError: response.body,
+      );
     }
 
     final Map<String, dynamic> data = json.decode(response.body);
@@ -98,8 +108,9 @@ class MinecraftAuthService {
 
   /// 检查账户是否拥有Minecraft游戏
   Future<bool> checkGameOwnership(String accessToken) async {
-    final response = await http.get(
-      Uri.parse(_entitlementsEndpoint),
+    final networkClient = NetworkClient();
+    final response = await networkClient.get(
+      _entitlementsEndpoint,
       headers: {
         'Authorization': 'Bearer $accessToken',
         'Accept': 'application/json',
@@ -107,7 +118,11 @@ class MinecraftAuthService {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to check game ownership: ${response.statusCode} ${response.body}');
+      throw AppException.fromCode(
+        ErrorCodes.authOwnershipCheckFailed,
+        detail: 'HTTP ${response.statusCode}: ${response.body}',
+        originalError: response.body,
+      );
     }
 
     final Map<String, dynamic> data = json.decode(response.body);

@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
 import '../core/logger.dart';
+import '../core/network_client.dart';
+import '../core/error_codes.dart';
 
 class OAuthService {
   static OAuthService? _instance;
@@ -16,6 +17,7 @@ class OAuthService {
   static OAuthService get instance => _instance ??= OAuthService._internal();
 
   final Logger _logger = Logger('OAuthService');
+  final NetworkClient _networkClient = NetworkClient();
 
   final String _clientId = '00000000482326AA';
   final String _redirectUri = 'https://login.live.com/oauth20_desktop.srf';
@@ -48,9 +50,6 @@ class OAuthService {
     _logger.info('Exchanging authorization code for tokens');
 
     try {
-      final request = await HttpClient().postUrl(Uri.parse('https://login.microsoftonline.com/consumers/oauth2/v2.0/token'));
-      request.headers.set('Content-Type', 'application/x-www-form-urlencoded');
-
       final body = {
         'client_id': _clientId,
         'code': code,
@@ -59,16 +58,21 @@ class OAuthService {
         'code_verifier': _currentCodeVerifier,
       };
 
-      request.write(body.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value.toString())}').join('&'));
-      final response = await request.close();
+      final response = await _networkClient.post(
+        'https://login.microsoftonline.com/consumers/oauth2/v2.0/token',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: body.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value.toString())}').join('&'),
+      );
 
       if (response.statusCode != 200) {
-        final errorContent = await response.transform(utf8.decoder).join();
-        throw Exception('Token exchange failed: $errorContent');
+        throw AppException.fromCode(
+          ErrorCodes.authCodeExchangeFailed,
+          detail: response.body,
+          originalError: response.body,
+        );
       }
 
-      final content = await response.transform(utf8.decoder).join();
-      final json = jsonDecode(content) as Map<String, dynamic>;
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
 
       return OAuthTokens.fromJson(json);
     } catch (e, stackTrace) {
@@ -81,25 +85,27 @@ class OAuthService {
     _logger.info('Refreshing access token');
 
     try {
-      final request = await HttpClient().postUrl(Uri.parse('https://login.microsoftonline.com/consumers/oauth2/v2.0/token'));
-      request.headers.set('Content-Type', 'application/x-www-form-urlencoded');
-
       final body = {
         'client_id': _clientId,
         'refresh_token': refreshToken,
         'grant_type': 'refresh_token',
       };
 
-      request.write(body.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value.toString())}').join('&'));
-      final response = await request.close();
+      final response = await _networkClient.post(
+        'https://login.microsoftonline.com/consumers/oauth2/v2.0/token',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: body.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value.toString())}').join('&'),
+      );
 
       if (response.statusCode != 200) {
-        final errorContent = await response.transform(utf8.decoder).join();
-        throw Exception('Token refresh failed: $errorContent');
+        throw AppException.fromCode(
+          ErrorCodes.authRefreshFailed,
+          detail: response.body,
+          originalError: response.body,
+        );
       }
 
-      final content = await response.transform(utf8.decoder).join();
-      final json = jsonDecode(content) as Map<String, dynamic>;
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
 
       return OAuthTokens.fromJson(json);
     } catch (e, stackTrace) {
@@ -112,9 +118,6 @@ class OAuthService {
     _logger.info('Authenticating with Xbox Live');
 
     try {
-      final request = await HttpClient().postUrl(Uri.parse('https://user.auth.xboxlive.com/user/authenticate'));
-      request.headers.set('Content-Type', 'application/json');
-
       final body = jsonEncode({
         'Properties': {
           'AuthMethod': 'RPS',
@@ -125,16 +128,21 @@ class OAuthService {
         'TokenType': 'JWT',
       });
 
-      request.write(body);
-      final response = await request.close();
+      final response = await _networkClient.post(
+        'https://user.auth.xboxlive.com/user/authenticate',
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
 
       if (response.statusCode != 200) {
-        final errorContent = await response.transform(utf8.decoder).join();
-        throw Exception('Xbox Live authentication failed: $errorContent');
+        throw AppException.fromCode(
+          ErrorCodes.authXboxLiveFailed,
+          detail: response.body,
+          originalError: response.body,
+        );
       }
 
-      final content = await response.transform(utf8.decoder).join();
-      final json = jsonDecode(content) as Map<String, dynamic>;
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
 
       return XboxLiveResponse.fromJson(json);
     } catch (e, stackTrace) {
@@ -147,9 +155,6 @@ class OAuthService {
     _logger.info('Getting Xbox Live token');
 
     try {
-      final request = await HttpClient().postUrl(Uri.parse('https://xsts.auth.xboxlive.com/xsts/authorize'));
-      request.headers.set('Content-Type', 'application/json');
-
       final body = jsonEncode({
         'Properties': {
           'SandboxId': 'RETAIL',
@@ -159,16 +164,21 @@ class OAuthService {
         'TokenType': 'JWT',
       });
 
-      request.write(body);
-      final response = await request.close();
+      final response = await _networkClient.post(
+        'https://xsts.auth.xboxlive.com/xsts/authorize',
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
 
       if (response.statusCode != 200) {
-        final errorContent = await response.transform(utf8.decoder).join();
-        throw Exception('Xbox Live token request failed: $errorContent');
+        throw AppException.fromCode(
+          ErrorCodes.authXstsFailed,
+          detail: response.body,
+          originalError: response.body,
+        );
       }
 
-      final content = await response.transform(utf8.decoder).join();
-      final json = jsonDecode(content) as Map<String, dynamic>;
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
 
       return XboxLiveResponse.fromJson(json);
     } catch (e, stackTrace) {
@@ -181,23 +191,25 @@ class OAuthService {
     _logger.info('Getting Minecraft profile');
 
     try {
-      final request = await HttpClient().postUrl(Uri.parse('https://api.minecraftservices.com/authentication/login_with_xbox'));
-      request.headers.set('Content-Type', 'application/json');
-
       final body = jsonEncode({
         'identityToken': 'XBL3.0 x=$xboxToken',
       });
 
-      request.write(body);
-      final response = await request.close();
+      final response = await _networkClient.post(
+        'https://api.minecraftservices.com/authentication/login_with_xbox',
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
 
       if (response.statusCode != 200) {
-        final errorContent = await response.transform(utf8.decoder).join();
-        throw Exception('Minecraft profile request failed: $errorContent');
+        throw AppException.fromCode(
+          ErrorCodes.authMinecraftFailed,
+          detail: response.body,
+          originalError: response.body,
+        );
       }
 
-      final content = await response.transform(utf8.decoder).join();
-      final json = jsonDecode(content) as Map<String, dynamic>;
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
 
       return MinecraftProfile.fromJson(json);
     } catch (e, stackTrace) {
@@ -210,18 +222,20 @@ class OAuthService {
     _logger.info('Checking Minecraft ownership');
 
     try {
-      final request = await HttpClient().getUrl(Uri.parse('https://api.minecraftservices.com/entitlements/mcstore'));
-      request.headers.set('Authorization', 'Bearer $accessToken');
-
-      final response = await request.close();
+      final response = await _networkClient.get(
+        'https://api.minecraftservices.com/entitlements/mcstore',
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
 
       if (response.statusCode != 200) {
-        final errorContent = await response.transform(utf8.decoder).join();
-        throw Exception('Ownership check failed: $errorContent');
+        throw AppException.fromCode(
+          ErrorCodes.authOwnershipCheckFailed,
+          detail: response.body,
+          originalError: response.body,
+        );
       }
 
-      final content = await response.transform(utf8.decoder).join();
-      final json = jsonDecode(content) as Map<String, dynamic>;
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
 
       return MinecraftOwnership.fromJson(json);
     } catch (e, stackTrace) {

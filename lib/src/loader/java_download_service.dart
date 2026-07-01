@@ -240,7 +240,11 @@ class JavaDownloadService {
         );
 
         if (result.exitCode != 0) {
-          throw Exception('Failed to extract archive: ${result.stderr}');
+          throw AppException.fromCode(
+            ErrorCodes.fileArchiveError,
+            detail: result.stderr.toString(),
+            originalError: result.stderr,
+          );
         }
       } else {
         // 其他平台: 尝试使用 unzip
@@ -250,7 +254,11 @@ class JavaDownloadService {
         );
 
         if (result.exitCode != 0) {
-          throw Exception('Failed to extract archive: ${result.stderr}');
+          throw AppException.fromCode(
+            ErrorCodes.fileArchiveError,
+            detail: result.stderr.toString(),
+            originalError: result.stderr,
+          );
         }
       }
 

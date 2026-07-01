@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
+import '../core/network_client.dart';
+import '../core/error_codes.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
 import 'account.dart';
@@ -385,20 +387,20 @@ class SkinManager {
     final cleanUuid = account.uuid?.replaceAll('-', '');
     final sessionUrl = 'https://sessionserver.mojang.com/session/minecraft/profile/$cleanUuid';
 
-    final client = HttpClient();
-    client.connectionTimeout = const Duration(seconds: 15);
     try {
-      final request = await client.getUrl(Uri.parse(sessionUrl));
-      request.headers.set('User-Agent', 'BAMCLaunch/1.0');
-      final response = await request.close().timeout(const Duration(seconds: 30));
+      final networkClient = NetworkClient();
+      final response = await networkClient.get(
+        sessionUrl,
+        headers: {'User-Agent': 'BAMCLaunch/1.0'},
+        timeoutSeconds: 30,
+      );
 
       if (response.statusCode != 200) {
-        throw Exception('Mojang API returned ${response.statusCode}');
+        throw NetworkException.fromStatusCode(response.statusCode);
       }
 
       // 读取并解析响应
-      final responseBody = await response.transform(utf8.decoder).join();
-      final profileData = jsonDecode(responseBody) as Map<String, dynamic>;
+      final profileData = jsonDecode(response.body) as Map<String, dynamic>;
 
       // 解析皮肤数据
       // properties 是一个数组，包含多个属性
@@ -429,9 +431,12 @@ class SkinManager {
         }
       }
 
-      throw Exception('No skin data found in profile');
-    } finally {
-      client.close();
+      throw AppException.fromCode(
+        ErrorCodes.networkJsonParseError,
+        detail: 'No skin data found in profile',
+      );
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -471,21 +476,20 @@ class SkinManager {
   /// 4. 判断皮肤类型
   /// 5. 创建并返回 SkinData 对象
   Future<SkinData> _downloadSkin(String skinUrl, String? capeUrl, Account account) async {
-    final client = HttpClient();
-    client.connectionTimeout = const Duration(seconds: 15);
     try {
-      final request = await client.getUrl(Uri.parse(skinUrl));
-      // 设置 User-Agent 标识客户端
-      request.headers.set('User-Agent', 'BAMCLaunch/1.0');
-
-      final response = await request.close().timeout(const Duration(seconds: 30));
+      final networkClient = NetworkClient();
+      final response = await networkClient.get(
+        skinUrl,
+        headers: {'User-Agent': 'BAMCLaunch/1.0'},
+        timeoutSeconds: 30,
+      );
 
       if (response.statusCode != 200) {
-        throw Exception('Skin download failed with ${response.statusCode}');
+        throw NetworkException.fromStatusCode(response.statusCode);
       }
 
       // 将响应数据转换为字节列表
-      final imageBytes = await response.expand((chunk) => chunk).toList();
+      final imageBytes = response.bodyBytes;
 
       // 计算哈希值，用于缓存验证和去重
       final hash = sha1.convert(imageBytes).toString();
@@ -502,8 +506,8 @@ class SkinManager {
         hash: hash,
         createdAt: DateTime.now(),
       );
-    } finally {
-      client.close();
+    } catch (e) {
+      rethrow;
     }
   }
 

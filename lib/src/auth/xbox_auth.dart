@@ -1,5 +1,6 @@
 import 'dart:convert';
 import '../core/network_client.dart';
+import '../core/error_codes.dart';
 import 'models.dart';
 
 /// Xbox Live认证服务
@@ -28,7 +29,11 @@ class XboxAuthService {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to authenticate user: ${response.statusCode} ${response.body}');
+      throw AppException.fromCode(
+        ErrorCodes.authXboxFailed,
+        detail: 'HTTP ${response.statusCode}: ${response.body}',
+        originalError: response.body,
+      );
     }
 
     final Map<String, dynamic> data = json.decode(response.body);
@@ -62,18 +67,22 @@ class XboxAuthService {
       final String errorCode = data['XErr']?.toString() ?? 'Unknown';
       
       if (errorCode == '2148916233') {
-        throw Exception('Account does not have Xbox Live');
+        throw AppException.fromCode(ErrorCodes.authXboxFailed, detail: '账户没有Xbox Live');
       } else if (errorCode == '2148916235') {
-        throw Exception('Account is banned from Xbox Live');
+        throw AppException.fromCode(ErrorCodes.authXboxFailed, detail: '账户已被Xbox Live封禁');
       } else if (errorCode == '2148916236') {
-        throw Exception('Account has not accepted Xbox Live Terms of Service');
+        throw AppException.fromCode(ErrorCodes.authXboxFailed, detail: '未接受Xbox Live服务条款');
       } else if (errorCode == '2148916237') {
-        throw Exception('Account needs adult verification');
+        throw AppException.fromCode(ErrorCodes.authXboxFailed, detail: '需要成人验证');
       } else if (errorCode == '2148916238') {
-        throw Exception('Account is a child account and needs family setup');
+        throw AppException.fromCode(ErrorCodes.authXboxFailed, detail: '子账户需要家庭设置');
       }
-      
-      throw Exception('Failed to acquire XSTS token: $errorCode ${response.body}');
+
+      throw AppException.fromCode(
+        ErrorCodes.authXstsFailed,
+        detail: 'XErr=$errorCode, ${response.body}',
+        originalError: response.body,
+      );
     }
 
     final Map<String, dynamic> data = json.decode(response.body);

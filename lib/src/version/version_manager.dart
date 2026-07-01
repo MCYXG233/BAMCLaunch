@@ -7,6 +7,7 @@ import '../config/config_keys.dart';
 import '../config/config_manager.dart';
 import '../core/logger.dart';
 import '../core/network_client.dart';
+import '../core/error_codes.dart';
 import '../download/download_engine.dart';
 import '../event/event.dart';
 import '../event/event_bus.dart';
@@ -429,8 +430,9 @@ class VersionManager implements IVersionManager {
 
       // 检查响应状态码
       if (response.statusCode != 200) {
-        throw Exception(
-          'Failed to fetch version manifest: ${response.statusCode}',
+        throw AppException.fromCode(
+          ErrorCodes.networkHttpError,
+          detail: 'Failed to fetch version manifest: ${response.statusCode}',
         );
       }
 
@@ -481,7 +483,10 @@ class VersionManager implements IVersionManager {
       final versions = await fetchVersionList();
       final version = versions.firstWhere(
         (v) => v.id == versionId,
-        orElse: () => throw Exception('Version $versionId not found'),
+        orElse: () => throw AppException.fromCode(
+          ErrorCodes.gameVersionNotFound,
+          detail: versionId,
+        ),
       );
 
       _logger.info('Fetching version JSON for $versionId');
@@ -494,7 +499,10 @@ class VersionManager implements IVersionManager {
       );
 
       if (response.statusCode != 200) {
-        throw Exception('Failed to fetch version JSON: ${response.statusCode}');
+        throw AppException.fromCode(
+          ErrorCodes.networkHttpError,
+          detail: 'Failed to fetch version JSON: ${response.statusCode}',
+        );
       }
 
       // 解析JSON响应

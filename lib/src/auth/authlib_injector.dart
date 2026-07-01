@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import '../core/logger.dart';
+import '../core/network_client.dart';
+import '../core/error_codes.dart';
 
 class AuthlibInjector {
   static AuthlibInjector? _instance;
@@ -14,6 +16,7 @@ class AuthlibInjector {
   static AuthlibInjector get instance => _instance ??= AuthlibInjector._internal();
 
   final Logger _logger = Logger('AuthlibInjector');
+  final NetworkClient _networkClient = NetworkClient();
 
   Future<bool> checkAuthlibJarExists() async {
     final jarPath = await getAuthlibJarPath();
@@ -35,10 +38,10 @@ class AuthlibInjector {
     }
 
     try {
-      final request = await HttpClient().getUrl(Uri.parse('https://github.com/yushijinhun/authlib-injector/releases/latest/download/authlib-injector.jar'));
-      final response = await request.close();
-      
-      await response.pipe(file.openWrite());
+      await _networkClient.downloadFile(
+        'https://github.com/yushijinhun/authlib-injector/releases/latest/download/authlib-injector.jar',
+        jarPath,
+      );
       _logger.info('Authlib injector downloaded successfully');
     } catch (e, stackTrace) {
       _logger.error('Failed to download authlib injector', e, stackTrace);
@@ -50,16 +53,14 @@ class AuthlibInjector {
     _logger.debug('Getting auth server info from: $authServerUrl');
     
     try {
-      final wellKnownUrl = Uri.parse(authServerUrl).resolve('.well-known/minecraft/services');
-      final request = await HttpClient().getUrl(wellKnownUrl);
-      final response = await request.close();
+      final wellKnownUrl = Uri.parse(authServerUrl).resolve('.well-known/minecraft/services').toString();
+      final response = await _networkClient.get(wellKnownUrl);
       
       if (response.statusCode != 200) {
         return await _fetchLegacyMetadata(authServerUrl);
       }
       
-      final content = await response.transform(utf8.decoder).join();
-      final json = jsonDecode(content) as Map<String, dynamic>;
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
       
       return AuthServerInfo(
         authUrl: authServerUrl,
@@ -75,11 +76,13 @@ class AuthlibInjector {
 
   Future<AuthServerInfo> _fetchLegacyMetadata(String authServerUrl) async {
     try {
-      final request = await HttpClient().getUrl(Uri.parse('$authServerUrl/api/profiles/minecraft'));
-      request.headers.set('Content-Type', 'application/json');
-      request.headers.set('Accept', 'application/json');
-      
-      final response = await request.close();
+      final response = await _networkClient.get(
+        '$authServerUrl/api/profiles/minecraft',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
       if (response.statusCode == 200 || response.statusCode == 400) {
         return AuthServerInfo(
           authUrl: authServerUrl,
@@ -114,9 +117,6 @@ class AuthlibInjector {
     _logger.info('Authenticating with server: $authServerUrl');
     
     try {
-      final request = await HttpClient().postUrl(Uri.parse('$authServerUrl/authserver/authenticate'));
-      request.headers.set('Content-Type', 'application/json');
-      
       final body = jsonEncode({
         'agent': {
           'name': 'Minecraft',
@@ -125,17 +125,22 @@ class AuthlibInjector {
         'username': username,
         'password': password,
       });
-      
-      request.write(body);
-      final response = await request.close();
+
+      final response = await _networkClient.post(
+        '$authServerUrl/authserver/authenticate',
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
       
       if (response.statusCode != 200) {
-        final errorContent = await response.transform(utf8.decoder).join();
-        throw Exception('Authentication failed: $errorContent');
+        throw AppException.fromCode(
+          ErrorCodes.authAuthlibFailed,
+          detail: response.body,
+          originalError: response.body,
+        );
       }
       
-      final content = await response.transform(utf8.decoder).join();
-      final json = jsonDecode(content) as Map<String, dynamic>;
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
       
       return UserProfile.fromJson(json);
     } catch (e, stackTrace) {
@@ -148,23 +153,22 @@ class AuthlibInjector {
     _logger.debug('Refreshing token with server: $authServerUrl');
     
     try {
-      final request = await HttpClient().postUrl(Uri.parse('$authServerUrl/authserver/refresh'));
-      request.headers.set('Content-Type', 'application/json');
-      
       final body = jsonEncode({
         'accessToken': accessToken,
         'clientToken': clientToken,
       });
-      
-      request.write(body);
-      final response = await request.close();
+
+      final response = await _networkClient.post(
+        '$authServerUrl/authserver/refresh',
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
       
       if (response.statusCode != 200) {
-        throw Exception('Refresh failed');
+        throw AppException.fromCode(ErrorCodes.authRefreshFailed, detail: 'Authlib refresh failed');
       }
       
-      final content = await response.transform(utf8.decoder).join();
-      final json = jsonDecode(content) as Map<String, dynamic>;
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
       
       return UserProfile.fromJson(json);
     } catch (e, stackTrace) {
@@ -177,15 +181,15 @@ class AuthlibInjector {
     _logger.debug('Validating token with server: $authServerUrl');
     
     try {
-      final request = await HttpClient().postUrl(Uri.parse('$authServerUrl/authserver/validate'));
-      request.headers.set('Content-Type', 'application/json');
-      
       final body = jsonEncode({
         'accessToken': accessToken,
       });
-      
-      request.write(body);
-      final response = await request.close();
+
+      final response = await _networkClient.post(
+        '$authServerUrl/authserver/validate',
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
       
       return response.statusCode == 200;
     } catch (e) {

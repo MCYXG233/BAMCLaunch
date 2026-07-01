@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import '../../account/account_manager.dart';
 import '../../account/account_widgets.dart';
 import '../../account/account.dart';
+import '../../core/error_codes.dart';
 import '../../event/event.dart';
 import '../../event/event_bus.dart';
 import '../../core/logger.dart';
@@ -931,7 +932,10 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
       );
 
       if (credentials.minecraftProfile == null) {
-        throw Exception('无法获取Minecraft档案');
+        throw AppException.fromCode(
+          ErrorCodes.authMinecraftFailed,
+          detail: '无法获取Minecraft档案',
+        );
       }
 
       final profile = credentials.minecraftProfile!;

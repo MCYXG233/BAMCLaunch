@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
 import '../core/network_client.dart';
+import '../core/error_codes.dart';
 import '../platform/platform_adapter.dart';
 
 /// Terracotta 服务状态枚举
@@ -570,7 +571,7 @@ class TerracottaManager {
     }
 
     // 遍历完整个目录都没找到二进制文件
-    throw Exception('Binary file not found');
+    throw AppException.fromCode(ErrorCodes.fileNotFound, detail: 'Binary file not found');
   }
 
   /// 启动 Terracotta 服务

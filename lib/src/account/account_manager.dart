@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'dart:io';
 import '../config/config_manager.dart';
 import '../config/config_keys.dart';
 import '../event/event.dart';
 import '../event/event_bus.dart';
 import '../core/logger.dart';
+import '../core/network_client.dart';
+import '../di/service_locator.dart';
 import 'account.dart';
 
 /// 账户管理器接口
@@ -209,28 +210,31 @@ abstract class IAccountManager {
 /// - 所有异步操作都会自动确保已初始化
 /// - 账户数据会自动持久化到配置文件
 class AccountManager implements IAccountManager {
-  /// 单例实例
+  /// 单例实例（本地缓存，用于 ServiceLocator 未初始化时的回退）
   static AccountManager? _instance;
 
   /// 工厂构造函数，返回单例实例
   ///
   /// 如果实例不存在，会自动创建一个新的实例。
-  factory AccountManager() => _instance ??= AccountManager._internal();
+  factory AccountManager() => instance;
 
   /// 私有内部构造函数，用于创建单例实例
   AccountManager._internal();
 
-  /// 获取单例实例的静态方法
+  /// 获取单例实例
   ///
-  /// 这是获取 AccountManager 实例的推荐方式。
-  /// 如果实例不存在，会自动创建。
+  /// 优先通过 [ServiceLocator] 获取（需先调用 [ServiceRegistry.initialize]）。
+  /// 若 ServiceLocator 未注册该服务，则回退到本地单例。
   ///
   /// 示例：
   /// ```dart
   /// final accountManager = AccountManager.instance;
+  /// // 或通过 ServiceRegistry
+  /// final accountManager = ServiceRegistry.get<AccountManager>();
   /// ```
   static AccountManager get instance =>
-      _instance ??= AccountManager._internal();
+      ServiceLocator.instance.tryGet<AccountManager>() ??
+      (_instance ??= AccountManager._internal());
 
   /// 重置单例实例
   ///
@@ -779,24 +783,19 @@ class AccountManager implements IAccountManager {
   /// - 401: 令牌无效或已过期
   /// - 其他: 验证失败
   Future<bool> _validateMicrosoftToken(String accessToken) async {
-    final client = HttpClient();
-    client.connectionTimeout = const Duration(seconds: 15);
     try {
       // 构建请求URI
-      final uri = Uri.parse('https://api.minecraftservices.com/minecraft/profile');
+      final uri = 'https://api.minecraftservices.com/minecraft/profile';
 
-      // 创建HTTP客户端并发送请求
-      final request = await client.getUrl(uri);
+      // 使用NetworkClient发送请求
+      final networkClient = NetworkClient();
+      final response = await networkClient.get(
+        uri,
+        headers: {'Authorization': 'Bearer $accessToken'},
+        timeoutSeconds: 30,
+      );
 
-      // 设置授权头
-      request.headers.set('Authorization', 'Bearer $accessToken');
-
-      // 获取响应
-      final response = await request.close().timeout(const Duration(seconds: 30));
       final statusCode = response.statusCode;
-
-      // 清理资源
-      await response.drain();
 
       // 根据状态码判断令牌有效性
       if (statusCode == 200) {
@@ -813,8 +812,6 @@ class AccountManager implements IAccountManager {
       // 记录验证过程中的错误
       _logger.error('Failed to validate Microsoft token', e, stackTrace);
       return false;
-    } finally {
-      client.close();
     }
   }
 

@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../core/logger.dart';
+import '../core/network_client.dart';
+import '../core/error_codes.dart';
 import 'models.dart';
 
 /// Modrinth API 客户端
@@ -35,13 +36,10 @@ import 'models.dart';
 class ModrinthClient {
   final String baseUrl = 'https://api.modrinth.com/v2';
   final Logger _logger = Logger();
-  final http.Client _httpClient;
+  final NetworkClient _networkClient = NetworkClient();
 
   /// 创建 Modrinth 客户端
-  ///
-  /// [httpClient] 可用于测试时注入 mock 客户端
-  ModrinthClient({http.Client? httpClient})
-      : _httpClient = httpClient ?? http.Client();
+  ModrinthClient();
 
   /// 搜索项目
   ///
@@ -110,10 +108,11 @@ class ModrinthClient {
     _logger.info('[Modrinth] 搜索: ${uri.toString()}');
 
     try {
-      final response = await _httpClient.get(
-        uri,
+      final response = await _networkClient.get(
+        uri.toString(),
         headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 15));
+        timeoutSeconds: 15,
+      );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
@@ -156,7 +155,7 @@ class ModrinthClient {
           pageSize: pageSize,
         );
       } else {
-        throw Exception('搜索失败: HTTP ${response.statusCode} - ${response.body}');
+        throw NetworkException.fromStatusCode(response.statusCode);
       }
     } catch (e) {
       _logger.error('[Modrinth] 搜索异常: $e');
@@ -171,10 +170,11 @@ class ModrinthClient {
     _logger.info('[Modrinth] 获取项目: $projectId');
 
     try {
-      final response = await _httpClient.get(
-        uri,
+      final response = await _networkClient.get(
+        uri.toString(),
         headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 15));
+        timeoutSeconds: 15,
+      );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
@@ -204,7 +204,7 @@ class ModrinthClient {
           supportedLoaders: (data['loaders'] as List<dynamic>?)?.cast<String>() ?? [],
         );
       } else {
-        throw Exception('获取项目失败: HTTP ${response.statusCode}');
+        throw NetworkException.fromStatusCode(response.statusCode);
       }
     } catch (e) {
       _logger.error('[Modrinth] 获取项目异常: $e');
@@ -236,10 +236,11 @@ class ModrinthClient {
     _logger.info('[Modrinth] 获取版本: $projectId');
 
     try {
-      final response = await _httpClient.get(
-        uri,
+      final response = await _networkClient.get(
+        uri.toString(),
         headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 15));
+        timeoutSeconds: 15,
+      );
 
       if (response.statusCode == 200) {
         final List<dynamic> versions = json.decode(response.body) as List<dynamic>;
@@ -285,7 +286,7 @@ class ModrinthClient {
           );
         }).toList();
       } else {
-        throw Exception('获取版本失败: HTTP ${response.statusCode}');
+        throw NetworkException.fromStatusCode(response.statusCode);
       }
     } catch (e) {
       _logger.error('[Modrinth] 获取版本异常: $e');
@@ -328,6 +329,6 @@ class ModrinthClient {
 
   /// 关闭 HTTP 客户端
   void close() {
-    _httpClient.close();
+    _networkClient.close();
   }
 }

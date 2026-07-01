@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../theme/colors.dart';
+import '../../core/error_codes.dart';
 import '../../instance/instance_manager.dart';
 import '../../instance/models.dart';
 import '../../modpack/modpack_exporter.dart';
@@ -77,7 +78,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
 
       final instance = _instanceManager.instances.firstWhere(
         (i) => i.id == widget.instanceId,
-        orElse: () => throw Exception('实例不存在'),
+        orElse: () => throw AppException.fromCode(ErrorCodes.instanceNotFound),
       );
 
       if (mounted) {

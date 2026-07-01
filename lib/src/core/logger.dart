@@ -6,6 +6,7 @@ import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
 import '../event/event.dart' as event_module;
 import '../event/event_bus.dart';
+import '../di/service_locator.dart';
 
 /// 日志级别枚举
 ///
@@ -598,16 +599,14 @@ class FileLogOutput implements LogOutput {
 /// await Logger.instance.dispose();
 /// ```
 class Logger {
-  /// 单例实例
-  ///
-  /// 存储全局唯一的 Logger 实例。
+  /// 单例实例（本地缓存，用于 ServiceLocator 未初始化时的回退）
   static Logger? _instance;
 
   /// 工厂构造函数
   ///
   /// 返回单例实例。如果实例不存在则创建新实例。
   /// [name] 参数被忽略，仅用于兼容性。
-  factory Logger([String? name]) => _instance ??= Logger._internal();
+  factory Logger([String? name]) => instance;
 
   /// 私有构造函数
   ///
@@ -616,9 +615,11 @@ class Logger {
 
   /// 获取单例实例
   ///
-  /// 静态属性，返回全局唯一的 Logger 实例。
-  /// 如果实例不存在则自动创建。
-  static Logger get instance => _instance ??= Logger._internal();
+  /// 优先通过 [ServiceLocator] 获取（需先调用 [ServiceRegistry.initialize]）。
+  /// 若 ServiceLocator 未注册该服务，则回退到本地单例。
+  static Logger get instance =>
+      ServiceLocator.instance.tryGet<Logger>() ??
+      (_instance ??= Logger._internal());
 
   /// 重置单例实例
   ///
