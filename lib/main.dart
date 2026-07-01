@@ -21,15 +21,13 @@ void main() {
   ErrorHandler.instance.initialize(() async {
     WidgetsFlutterBinding.ensureInitialized();
 
-    // 初始化窗口管理器
     await windowManager.ensureInitialized();
 
-    // 配置窗口
     WindowOptions windowOptions = const WindowOptions(
       size: Size(1200, 800),
       minimumSize: Size(900, 600),
       center: true,
-      backgroundColor: const Color(0xFF0A0E27),
+      backgroundColor: Color(0xFF0A0E27),
       skipTaskbar: false,
       titleBarStyle: TitleBarStyle.hidden,
     );
@@ -39,7 +37,6 @@ void main() {
       await windowManager.focus();
     });
 
-    // 注册所有管理器到 ServiceRegistry（懒加载，不会立即创建实例）
     await ServiceRegistry.initialize();
 
     await Logger.instance.initialize();
@@ -55,7 +52,6 @@ void main() {
       'ServiceRegistry: ${ServiceLocator.instance.totalRegisteredCount} services registered',
     );
 
-    // 初始化ThemeManager
     final themeManager = ThemeManager();
     await themeManager.initialize();
 

@@ -82,18 +82,14 @@ class ServiceLocator {
     );
   }
 
-  /// 尝试获取服务实例，未注册时返回 null
+  /// 尝试获取服务实例，未注册或未缓存时返回 null
+  ///
+  /// 注意：此方法不会触发懒加载工厂，仅返回已缓存的单例。
+  /// 这是为了避免循环依赖（如 Logger.instance → tryGet → lazyFactory → Logger.instance）。
+  /// 懒加载工厂仅在 [get] 方法中触发。
   T? tryGet<T>() {
     final cached = _singletons[T];
     if (cached is T) return cached;
-
-    final lazyFactory = _lazyFactories[T];
-    if (lazyFactory != null) {
-      final instance = lazyFactory() as T;
-      _singletons[T] = instance as Object;
-      return instance;
-    }
-
     return null;
   }
 
