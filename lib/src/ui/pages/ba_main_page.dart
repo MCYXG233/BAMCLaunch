@@ -187,10 +187,17 @@ class _BAMainPageState extends State<BAMainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _backgroundManager.buildBackground(
-        child: SafeArea(
-          child: Container(
-            color: Colors.transparent,
+      body: Container(
+        // 兜底渐变背景，防止 BackgroundManager 初始化失败时页面透明
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFE0ECFF), Color(0xFFC9D8FF)],
+          ),
+        ),
+        child: _backgroundManager.buildBackground(
+          child: SafeArea(
             child: Column(
               children: [
                 _buildTopBar(),

@@ -29,7 +29,7 @@ void main() {
       size: Size(1200, 800),
       minimumSize: Size(900, 600),
       center: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color(0xFF0A0E27),
       skipTaskbar: false,
       titleBarStyle: TitleBarStyle.hidden,
     );

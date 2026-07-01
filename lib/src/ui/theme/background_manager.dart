@@ -246,71 +246,76 @@ class BackgroundManager extends ChangeNotifier {
   /// 返回：
   /// - 对应类型的背景 Widget
   Widget _buildBackgroundLayer() {
-    switch (_currentConfig.type) {
-      case BackgroundType.solid:
-        // 纯色背景：使用配置的颜色，如果未配置则使用白色
-        return Container(
-          decoration: BoxDecoration(
-            color: _currentConfig.solidColor != null
-                ? Color(_currentConfig.solidColor!).withOpacity(_currentConfig.opacity)
-                : Colors.white.withOpacity(_currentConfig.opacity),
-          ),
-        );
-
-      case BackgroundType.gradient:
-        // 渐变背景：使用配置的颜色列表创建线性渐变
-        // 如果未配置颜色，则使用默认的白色到浅灰色渐变
-        final colors = _currentConfig.gradientColors
-                ?.map((c) => Color(c).withOpacity(_currentConfig.opacity))
-                .toList() ??
-            [Colors.white, Colors.grey.shade200];
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: colors,
-              // 渐变起始位置，根据配置的 alignment 值确定
-              begin: _getAlignment(_currentConfig.alignment),
-              end: Alignment.bottomRight,
-            ),
-          ),
-        );
-
-      case BackgroundType.image:
-        // 图片背景：从文件加载图片，覆盖整个区域
-        return Container(
-          decoration: BoxDecoration(
-            image: _currentConfig.imagePath != null
-                ? DecorationImage(
-                    image: FileImage(File(_currentConfig.imagePath!)),
-                    fit: BoxFit.cover,
-                    opacity: _currentConfig.opacity,
-                  )
-                : null,
-          ),
-        );
-
-      case BackgroundType.video:
-        // 视频背景：如果视频已初始化，则显示视频
-        if (_isVideoInitialized && _videoController != null) {
-          return Opacity(
-            opacity: _currentConfig.opacity,
-            child: Video(
-              controller: _videoController!,
-              controls: NoVideoControls,
+    try {
+      switch (_currentConfig.type) {
+        case BackgroundType.solid:
+          return Container(
+            decoration: BoxDecoration(
+              color: _currentConfig.solidColor != null
+                  ? Color(_currentConfig.solidColor!).withOpacity(_currentConfig.opacity)
+                  : Colors.white.withOpacity(_currentConfig.opacity),
             ),
           );
-        }
-        // 视频未初始化时显示黑色背景
-        return Container(color: Colors.black);
 
-      case BackgroundType.blur:
-        // 模糊背景：使用半透明白色覆盖
-        // opacity 乘以 0.5 使效果更加柔和
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(_currentConfig.opacity * 0.5),
+        case BackgroundType.gradient:
+          final colors = _currentConfig.gradientColors
+                  ?.map((c) => Color(c).withOpacity(_currentConfig.opacity))
+                  .toList() ??
+              [Colors.white, Colors.grey.shade200];
+          return Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: colors,
+                begin: _getAlignment(_currentConfig.alignment),
+                end: Alignment.bottomRight,
+              ),
+            ),
+          );
+
+        case BackgroundType.image:
+          return Container(
+            decoration: BoxDecoration(
+              image: _currentConfig.imagePath != null
+                  ? DecorationImage(
+                      image: FileImage(File(_currentConfig.imagePath!)),
+                      fit: BoxFit.cover,
+                      opacity: _currentConfig.opacity,
+                    )
+                  : null,
+            ),
+          );
+
+        case BackgroundType.video:
+          if (_isVideoInitialized && _videoController != null) {
+            return Opacity(
+              opacity: _currentConfig.opacity,
+              child: Video(
+                controller: _videoController!,
+                controls: NoVideoControls,
+              ),
+            );
+          }
+          return Container(color: Colors.black);
+
+        case BackgroundType.blur:
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(_currentConfig.opacity * 0.5),
+            ),
+          );
+      }
+    } catch (e) {
+      // 背景渲染失败时返回默认渐变兜底
+      debugPrint('Background render failed: $e');
+      return Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFE0ECFF), Color(0xFFC9D8FF)],
           ),
-        );
+        ),
+      );
     }
   }
 
