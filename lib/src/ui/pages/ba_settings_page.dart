@@ -812,7 +812,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
           try {
             await entity.delete(recursive: true);
             count++;
-          } catch (_) {}
+          } catch (e) {
+            debugPrint('删除临时文件失败: $e');
+          }
         }
         if (mounted) {
           NotificationManager().showSuccess('缓存已清除', message: '已清理 $count 个临时文件');

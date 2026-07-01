@@ -327,8 +327,9 @@ class ModrinthClient {
     }
   }
 
-  /// 关闭 HTTP 客户端
+  /// 关闭客户端
+  /// 注意：NetworkClient 是全局共享单例，不应在此处关闭
   void close() {
-    _networkClient.close();
+    // NetworkClient 是全局共享的，不在此处关闭
   }
 }

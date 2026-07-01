@@ -1,3 +1,4 @@
+import 'dart:convert';
 import '../config/config_manager.dart';
 import '../config/config_keys.dart';
 import '../core/logger.dart';
@@ -86,7 +87,7 @@ class PrivacyManager {
       );
       if (json != null) {
         return PrivacyConfig.fromJson(
-          _parseJsonString(json),
+          jsonDecode(json) as Map<String, dynamic>,
         );
       }
     } catch (e) {
@@ -98,7 +99,7 @@ class PrivacyManager {
   /// 保存隐私配置
   Future<void> setConfig(PrivacyConfig config) async {
     try {
-      final jsonString = _encodeJsonString(config.toJson());
+      final jsonString = jsonEncode(config.toJson());
       await _configManager.set(
         ConfigKeys.privacyConfig,
         jsonString,
@@ -156,127 +157,4 @@ class PrivacyManager {
     await setConfig(const PrivacyConfig());
   }
 
-  /// JSON解析辅助方法
-  Map<String, dynamic> _parseJsonString(String json) {
-    // 简单的JSON解析
-    try {
-      // 处理基本类型
-      if (json.startsWith('{') && json.endsWith('}')) {
-        final map = <String, dynamic>{};
-        final content = json.substring(1, json.length - 1);
-        final pairs = _splitJsonPairs(content);
-        
-        for (final pair in pairs) {
-          final colonIndex = pair.indexOf(':');
-          if (colonIndex > 0) {
-            final key = pair.substring(0, colonIndex).trim().replaceAll('"', '');
-            final value = pair.substring(colonIndex + 1).trim();
-            map[key] = _parseJsonValue(value);
-          }
-        }
-        return map;
-      }
-    } catch (e) {
-      _logger.warn('JSON parse error: $e');
-    }
-    return {};
-  }
-
-  List<String> _splitJsonPairs(String content) {
-    final pairs = <String>[];
-    var current = '';
-    var depth = 0;
-    var inString = false;
-    
-    for (var i = 0; i < content.length; i++) {
-      final char = content[i];
-      
-      if (char == '"' && (i == 0 || content[i - 1] != '\\')) {
-        inString = !inString;
-        current += char;
-      } else if (!inString) {
-        if (char == '{' || char == '[') depth++;
-        if (char == '}' || char == ']') depth--;
-        
-        if (char == ',' && depth == 0) {
-          pairs.add(current.trim());
-          current = '';
-        } else {
-          current += char;
-        }
-      } else {
-        current += char;
-      }
-    }
-    
-    if (current.isNotEmpty) {
-      pairs.add(current.trim());
-    }
-    
-    return pairs;
-  }
-
-  dynamic _parseJsonValue(String value) {
-    value = value.trim();
-    
-    if (value == 'true') return true;
-    if (value == 'false') return false;
-    if (value == 'null') return null;
-    
-    // 尝试解析数字
-    final numValue = num.tryParse(value);
-    if (numValue != null) {
-      if (value.contains('.')) {
-        return numValue.toDouble();
-      }
-      return numValue.toInt();
-    }
-    
-    // 移除引号
-    if (value.startsWith('"') && value.endsWith('"')) {
-      return value.substring(1, value.length - 1);
-    }
-    
-    return value;
-  }
-
-  /// JSON编码辅助方法
-  String _encodeJsonString(Map<String, dynamic> map) {
-    final buffer = StringBuffer();
-    buffer.write('{');
-    var first = true;
-    
-    for (final entry in map.entries) {
-      if (!first) buffer.write(',');
-      first = false;
-      buffer.write('"${entry.key}":');
-      buffer.write(_encodeValue(entry.value));
-    }
-    
-    buffer.write('}');
-    return buffer.toString();
-  }
-
-  String _encodeValue(dynamic value) {
-    if (value == null) return 'null';
-    if (value is bool) return value.toString();
-    if (value is num) return value.toString();
-    if (value is String) return '"${_escapeString(value)}"';
-    if (value is List) {
-      return '[${value.map(_encodeValue).join(',')}]';
-    }
-    if (value is Map) {
-      return _encodeJsonString(value.cast<String, dynamic>());
-    }
-    return '"$value"';
-  }
-
-  String _escapeString(String s) {
-    return s
-        .replaceAll('\\', '\\\\')
-        .replaceAll('"', '\\"')
-        .replaceAll('\n', '\\n')
-        .replaceAll('\r', '\\r')
-        .replaceAll('\t', '\\t');
-  }
 }

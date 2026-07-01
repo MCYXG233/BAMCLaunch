@@ -2210,7 +2210,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
       final stat = entity.statSync();
       size = stat.size;
       modified = stat.modified;
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('获取文件信息失败: $e');
+    }
 
     IconData fileIcon;
     if (isDir) {

@@ -246,7 +246,7 @@ class LogManager {
   /// 打印到控制台
   void _printToConsole(LogEntry entry) {
     // 简单的控制台输出
-    print(entry.toString());
+    _logger.debug(entry.toString());
   }
 
   /// 写入日志文件
@@ -262,7 +262,7 @@ class LogManager {
       // 检查是否需要轮转
       await _rotateLogIfNeeded();
     } catch (e) {
-      print('Failed to write log: $e');
+      _logger.warn('Failed to write log: $e');
     }
   }
 
@@ -285,7 +285,7 @@ class LogManager {
         await _rotateLog();
       }
     } catch (e) {
-      print('Failed to check log file size: $e');
+      _logger.warn('Failed to check log file size: $e');
     }
   }
 
@@ -305,7 +305,7 @@ class LogManager {
       _currentLogFile = File(_currentLogFile!.path);
       await _currentLogFile!.create(recursive: true);
     } catch (e) {
-      print('Failed to rotate log: $e');
+      _logger.warn('Failed to rotate log: $e');
     }
   }
 
@@ -324,7 +324,7 @@ class LogManager {
         }
       }
     } catch (e) {
-      print('Failed to clean old rotated logs: $e');
+      _logger.warn('Failed to clean old rotated logs: $e');
     }
   }
 
@@ -345,7 +345,7 @@ class LogManager {
         }
       }
     } catch (e) {
-      print('Failed to clean old logs: $e');
+      _logger.warn('Failed to clean old logs: $e');
     }
   }
 
@@ -361,7 +361,7 @@ class LogManager {
         }
       }
     } catch (e) {
-      print('Failed to list log files: $e');
+      _logger.warn('Failed to list log files: $e');
     }
 
     // 按修改时间排序
@@ -412,7 +412,7 @@ class LogManager {
         return entries.sublist(0, limit);
       }
     } catch (e) {
-      print('Failed to read logs: $e');
+      _logger.warn('Failed to read logs: $e');
     }
 
     return entries;
@@ -479,7 +479,7 @@ class LogManager {
       await _currentLogFile?.create(recursive: true);
       _logger.info('All logs cleared');
     } catch (e) {
-      print('Failed to clear logs: $e');
+      _logger.warn('Failed to clear logs: $e');
     }
   }
 
@@ -495,7 +495,7 @@ class LogManager {
         }
       }
     } catch (e) {
-      print('Failed to calculate log size: $e');
+      _logger.warn('Failed to calculate log size: $e');
     }
 
     return totalSize;
@@ -534,7 +534,7 @@ class LogManager {
 
       return output;
     } catch (e) {
-      print('Failed to export logs: $e');
+      _logger.warn('Failed to export logs: $e');
       return null;
     }
   }

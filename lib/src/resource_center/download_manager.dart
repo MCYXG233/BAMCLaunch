@@ -417,7 +417,9 @@ class DownloadManager {
             if (await localFile.exists()) {
               await localFile.delete();
             }
-          } catch (_) {}
+          } catch (e) {
+            _logger.warn('[Download] 清理临时文件失败: $e');
+          }
           _logger.error('[Download] 下载异常: $e');
           return;
         }

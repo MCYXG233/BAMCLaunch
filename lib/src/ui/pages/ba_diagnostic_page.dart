@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../../diagnostic/java_checker.dart';
@@ -225,7 +225,9 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
         final kb = int.parse(match.group(1)!);
         return (kb / 1024).round();
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('获取系统内存信息失败: $e');
+    }
     return 0;
   }
 
@@ -312,7 +314,9 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
         final bytes = int.parse(match.group(1)!);
         return bytes / (1024 * 1024 * 1024);
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('获取磁盘空间失败: $e');
+    }
     return -1;
   }
 

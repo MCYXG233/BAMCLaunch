@@ -8,6 +8,7 @@ import 'config_manager.dart';
 import 'config_keys.dart';
 import 'config_models.dart';
 import 'crypto_util.dart';
+import '../core/logger.dart';
 
 /// 配置管理器实现类
 /// 使用JSON格式存储配置，支持加密存储敏感信息
@@ -158,7 +159,7 @@ class ConfigManagerImpl implements IConfigManager {
         _configChangesController.add(key);
       }
     } catch (e) {
-      print('Failed to load config: $e');
+      Logger.instance.warn('Failed to load config: $e');
     }
   }
 
@@ -213,8 +214,8 @@ class ConfigManagerImpl implements IConfigManager {
         _cachedConfig = LauncherConfig.fromJson(configData);
         return _cachedConfig!;
       }
-    } catch (e) {
-      // 如果解析失败，使用默认配置
+    } catch (e, st) {
+      Logger.instance.error('解析启动器配置失败，使用默认配置', e, st);
     }
     return LauncherConfig.defaultConfig();
   }

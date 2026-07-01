@@ -31,8 +31,8 @@ class MemoryMonitor {
     
     _updateMemoryInfo();
     _monitorTimer?.cancel();
-    _monitorTimer = Timer.periodic(const Duration(seconds: 2), (_) {
-      _updateMemoryInfo();
+    _monitorTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
+      await _updateMemoryInfo();
       _emitMemoryData();
     });
   }
@@ -43,9 +43,9 @@ class MemoryMonitor {
     _isMonitoring = false;
   }
   
-  void _updateMemoryInfo() {
+  Future<void> _updateMemoryInfo() async {
     try {
-      final snapshot = _getMemorySnapshot();
+      final snapshot = await _getMemorySnapshot();
       _snapshots.add(snapshot);
       
       if (_snapshots.length > _sampleSize) {
@@ -71,12 +71,12 @@ class MemoryMonitor {
     }
   }
   
-  MemorySnapshot _getMemorySnapshot() {
+  Future<MemorySnapshot> _getMemorySnapshot() async {
     int totalMemory = 0;
     int usedMemory = 0;
     
     try {
-      final process = ProcessResultEx.run('wmic', ['OS', 'get', 'TotalVisibleMemorySize,FreePhysicalMemory', '/value']);
+      final process = await ProcessResultEx.run('wmic', ['OS', 'get', 'TotalVisibleMemorySize,FreePhysicalMemory', '/value']);
       if (process.exitCode == 0) {
         final lines = process.stdout.toString().split('\n');
         for (final line in lines) {
@@ -173,7 +173,7 @@ class MemoryData {
 }
 
 class ProcessResultEx {
-  static ProcessResult run(String executable, List<String> arguments) {
-    return Process.runSync(executable, arguments);
+  static Future<ProcessResult> run(String executable, List<String> arguments) {
+    return Process.run(executable, arguments);
   }
 }

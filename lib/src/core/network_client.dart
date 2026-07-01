@@ -718,14 +718,17 @@ class NetworkClient {
 
   /// 关闭客户端
   ///
-  /// 关闭HTTP客户端并释放相关资源。通常在应用程序退出时调用。
-  /// 关闭后不应再使用此客户端实例发送请求。
+  /// 关闭底层HTTP客户端并释放连接池资源。
+  ///
+  /// **注意：** 由于 NetworkClient 是全局单例，调用 close() 后底层
+  /// http.Client 将被永久关闭，且不会自动重建。此后任何通过此单例
+  /// 发起的请求都会失败。仅应在应用退出时（如 main() 的 shutdown 阶段）调用。
   ///
   /// 使用示例：
   /// ```dart
   /// final client = NetworkClient();
   /// // 使用客户端...
-  /// client.close(); // 释放资源
+  /// client.close(); // 释放资源（仅在应用退出时调用）
   /// ```
   void close() {
     _client.close();

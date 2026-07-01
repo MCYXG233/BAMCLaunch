@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'error_codes.dart';
 import 'logger.dart';
 
@@ -43,9 +44,12 @@ class RetryConfig {
     backoffMultiplier: 1.5,
   );
 
-  /// 计算第n次重试的延迟时间
+  /// 计算第n次重试的延迟时间（指数退避）
+  ///
+  /// 例如 backoffMultiplier=2.0, initialDelayMs=1000:
+  /// attempt=1 → 1000ms, attempt=2 → 2000ms, attempt=3 → 4000ms
   Duration getDelay(int attempt) {
-    final delayMs = initialDelayMs * (backoffMultiplier * (attempt - 1));
+    final delayMs = initialDelayMs * pow(backoffMultiplier, attempt - 1);
     return Duration(milliseconds: delayMs.clamp(initialDelayMs, maxDelayMs).toInt());
   }
 }

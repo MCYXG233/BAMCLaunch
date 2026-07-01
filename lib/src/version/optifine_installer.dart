@@ -455,7 +455,9 @@ class OptiFineInstaller {
           if (json is Map && json['mainClass'] == 'net.optifine.Launch') {
             return true;
           }
-        } catch (_) {}
+        } catch (e) {
+          _logger.warn('检查OptiFine安装状态失败: $e');
+        }
       }
     }
     return false;
@@ -476,7 +478,9 @@ class OptiFineInstaller {
             final jsonFile = File(entity.path);
             return path.basenameWithoutExtension(jsonFile.path);
           }
-        } catch (_) {}
+        } catch (e) {
+          _logger.warn('获取已安装OptiFine版本失败: $e');
+        }
       }
     }
     return null;

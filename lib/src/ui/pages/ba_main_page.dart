@@ -98,7 +98,7 @@ class _BAMainPageState extends State<BAMainPage> {
         });
       }
     } catch (e) {
-      // 初始化失败
+      debugPrint('初始化实例管理器失败: $e');
     }
   }
 
