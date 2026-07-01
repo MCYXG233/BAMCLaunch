@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'ba_theme_colors.dart';
+import '../../di/service_locator.dart';
+import 'app_theme.dart';
 import 'colors.dart';
 
 /// 主题管理器
@@ -9,6 +10,21 @@ class ThemeManager extends ChangeNotifier {
   static const String _themeKey = 'app_theme';
   static const String _blueArchiveKey = 'blue_archive';
   static const String _minecraftKey = 'minecraft';
+
+  /// 单例实例
+  static ThemeManager? _instance;
+
+  /// 获取单例实例
+  static ThemeManager get instance {
+    return ServiceLocator.instance.tryGet<ThemeManager>() ??
+        (_instance ??= ThemeManager._internal());
+  }
+
+  /// 工厂构造函数，返回单例实例
+  factory ThemeManager() => instance;
+
+  /// 私有构造函数
+  ThemeManager._internal();
 
   ThemeMode _themeMode = ThemeMode.system;
   String _currentTheme = _blueArchiveKey;
@@ -40,81 +56,11 @@ class ThemeManager extends ChangeNotifier {
     if (_currentTheme == _minecraftKey) {
       return _getMinecraftTheme(brightness);
     } else {
-      return _getBlueArchiveTheme(brightness);
+      // 使用 BATheme 的完整主题定义
+      return brightness == Brightness.light
+          ? BATheme.buildLightTheme()
+          : BATheme.buildDarkTheme();
     }
-  }
-
-  /// 蔚蓝档案主题
-  ThemeData _getBlueArchiveTheme(Brightness brightness) {
-    final isLight = brightness == Brightness.light;
-
-    return ThemeData(
-      useMaterial3: true,
-      brightness: brightness,
-      colorScheme: ColorScheme(
-        brightness: brightness,
-        primary: BAThemeColors.primary,
-        secondary: BAThemeColors.accent,
-        surface: isLight ? Colors.white : const Color(0xFF1A1A2E),
-        error: BAThemeColors.danger,
-        onPrimary: Colors.white,
-        onSecondary: Colors.white,
-        onSurface: isLight ? BAThemeColors.textPrimary : BAThemeColors.textPrimary,
-        onError: Colors.white,
-      ),
-      scaffoldBackgroundColor: Colors.transparent,
-      appBarTheme: AppBarTheme(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        titleTextStyle: TextStyle(
-          color: isLight ? BAThemeColors.textPrimary : BAThemeColors.textPrimary,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      cardTheme: CardThemeData(
-        color: isLight
-            ? Colors.white.withValues(alpha: 0.8)
-            : const Color(0xFF1A1A2E).withValues(alpha: 0.8),
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: BAThemeColors.primary,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: isLight
-            ? Colors.grey.withValues(alpha: 0.1)
-            : Colors.white.withValues(alpha: 0.05),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: isLight
-                ? Colors.grey.withValues(alpha: 0.3)
-                : Colors.white.withValues(alpha: 0.1),
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: BAThemeColors.primary),
-        ),
-      ),
-    );
   }
 
   /// Minecraft主题
