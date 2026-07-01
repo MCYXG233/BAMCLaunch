@@ -5,6 +5,7 @@ import 'package:path/path.dart' as path;
 import '../core/logger.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
+import '../core/json_utils.dart';
 import '../config/config_manager.dart';
 import '../config/config_keys.dart';
 import '../di/service_locator.dart';
@@ -29,9 +30,9 @@ class AuthlibInjectorServer {
 
   factory AuthlibInjectorServer.fromJson(Map<String, dynamic> json) {
     return AuthlibInjectorServer(
-      name: json['name'] as String,
-      url: json['url'] as String,
-      apiRoot: json['apiRoot'] as String?,
+      name: JsonUtils.getStringOrDefault(json['name']),
+      url: JsonUtils.getStringOrDefault(json['url']),
+      apiRoot: JsonUtils.getString(json['apiRoot']),
     );
   }
 }
@@ -75,14 +76,14 @@ class AuthlibAccount {
 
   factory AuthlibAccount.fromJson(Map<String, dynamic> json) {
     return AuthlibAccount(
-      id: json['id'] as String,
-      username: json['username'] as String,
-      uuid: json['uuid'] as String,
-      accessToken: json['accessToken'] as String,
-      serverName: json['serverName'] as String,
-      serverUrl: json['serverUrl'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      lastUsedAt: DateTime.parse(json['lastUsedAt'] as String),
+      id: JsonUtils.getStringOrDefault(json['id']),
+      username: JsonUtils.getStringOrDefault(json['username']),
+      uuid: JsonUtils.getStringOrDefault(json['uuid']),
+      accessToken: JsonUtils.getStringOrDefault(json['accessToken']),
+      serverName: JsonUtils.getStringOrDefault(json['serverName']),
+      serverUrl: JsonUtils.getStringOrDefault(json['serverUrl']),
+      createdAt: DateTime.tryParse(JsonUtils.getString(json['createdAt']) ?? '') ?? DateTime.now(),
+      lastUsedAt: DateTime.tryParse(JsonUtils.getString(json['lastUsedAt']) ?? '') ?? DateTime.now(),
     );
   }
 
@@ -361,9 +362,9 @@ class AuthlibLoginManager {
 
         final account = AuthlibAccount(
           id: '${DateTime.now().millisecondsSinceEpoch}',
-          username: data['selectedProfile']['name'] as String,
-          uuid: data['selectedProfile']['id'] as String,
-          accessToken: data['accessToken'] as String,
+          username: JsonUtils.getStringOrDefault(data['selectedProfile']['name']),
+          uuid: JsonUtils.getStringOrDefault(data['selectedProfile']['id']),
+          accessToken: JsonUtils.getStringOrDefault(data['accessToken']),
           serverName: _selectedServer!.name,
           serverUrl: _selectedServer!.url,
           createdAt: DateTime.now(),
@@ -454,7 +455,7 @@ class AuthlibLoginManager {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final refreshedAccount = account.copyWith(
-          accessToken: data['accessToken'] as String,
+          accessToken: JsonUtils.getStringOrDefault(data['accessToken']),
           lastUsedAt: DateTime.now(),
         );
         await _saveAccount(refreshedAccount);

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:path/path.dart' as path;
+import '../core/api_endpoints.dart';
 import '../core/logger.dart';
 import '../core/error_codes.dart';
 import '../di/service_locator.dart';
@@ -149,7 +150,7 @@ class ModLoaderManager {
       return LoaderInfo(
         type: LoaderType.fabric,
         version: version,
-        installerUrl: 'https://maven.fabricmc.net/net/fabricmc/fabric-installer/$version/fabric-installer-$version.jar',
+        installerUrl: '${ApiEndpoints.fabricMaven}/net/fabricmc/fabric-installer/$version/fabric-installer-$version.jar',
       );
     } catch (e) {
       _logger.debug('Failed to fetch Fabric info: $e');
@@ -165,7 +166,7 @@ class ModLoaderManager {
       return LoaderInfo(
         type: LoaderType.forge,
         version: version,
-        installerUrl: 'https://maven.minecraftforge.net/net/minecraftforge/forge/$gameVersion-$version/forge-$gameVersion-$version-installer.jar',
+        installerUrl: '${ApiEndpoints.forgeMaven}/net/minecraftforge/forge/$gameVersion-$version/forge-$gameVersion-$version-installer.jar',
       );
     } catch (e) {
       _logger.debug('Failed to fetch Forge info: $e');
@@ -181,7 +182,7 @@ class ModLoaderManager {
       return LoaderInfo(
         type: LoaderType.quilt,
         version: version,
-        installerUrl: 'https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-installer/$version/quilt-installer-$version.jar',
+        installerUrl: '${ApiEndpoints.quiltMaven}/org/quiltmc/quilt-installer/$version/quilt-installer-$version.jar',
       );
     } catch (e) {
       _logger.debug('Failed to fetch Quilt info: $e');
@@ -197,7 +198,7 @@ class ModLoaderManager {
       return LoaderInfo(
         type: LoaderType.neoforge,
         version: version,
-        installerUrl: 'https://maven.neoforged.net/net/neoforged/neoforge/$gameVersion-$version/neoforge-$gameVersion-$version-installer.jar',
+        installerUrl: '${ApiEndpoints.neoforgeMaven}/net/neoforged/neoforge/$gameVersion-$version/neoforge-$gameVersion-$version-installer.jar',
       );
     } catch (e) {
       _logger.debug('Failed to fetch NeoForge info: $e');

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../core/api_endpoints.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
 import 'models.dart';
@@ -6,13 +7,13 @@ import 'models.dart';
 /// Minecraft认证服务
 class MinecraftAuthService {
   /// Minecraft登录端点
-  static const String _loginWithXboxEndpoint = 'https://api.minecraftservices.com/authentication/login_with_xbox';
+  static const String _loginWithXboxEndpoint = ApiEndpoints.minecraftAuthLogin;
 
   /// Minecraft个人资料端点
-  static const String _profileEndpoint = 'https://api.minecraftservices.com/minecraft/profile';
+  static const String _profileEndpoint = ApiEndpoints.minecraftProfile;
 
   /// Minecraft游戏所有权检查端点
-  static const String _entitlementsEndpoint = 'https://api.minecraftservices.com/entitlements/mcstore';
+  static const String _entitlementsEndpoint = ApiEndpoints.minecraftEntitlements;
 
   /// 使用XSTS令牌登录Minecraft
   Future<MinecraftToken> loginWithXbox({

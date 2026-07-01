@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as path;
+import '../core/api_endpoints.dart';
 import '../core/network_client.dart';
 import '../core/logger.dart';
 import '../core/error_codes.dart';
@@ -108,7 +109,7 @@ class QuiltInstaller {
   QuiltInstaller._();
 
   /// Quilt API版本清单地址
-  static const String _quiltVersionsUrl = 'https://api.quiltmc.org/v2/versions/';
+  static const String _quiltVersionsUrl = '${ApiEndpoints.quiltApi}/versions/';
 
   final Logger _logger = Logger('QuiltInstaller');
   final NetworkClient _networkClient = NetworkClient();
@@ -175,7 +176,7 @@ class QuiltInstaller {
     void Function(int received, int total)? onProgress,
   }) async {
     final installerVersion = loaderVersion;
-    final url = 'https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-installer/$installerVersion/quilt-installer-$installerVersion.jar';
+    final url = '${ApiEndpoints.quiltMaven}/org/quiltmc/quilt-installer/$installerVersion/quilt-installer-$installerVersion.jar';
 
     _logger.info('Downloading Quilt installer from: $url');
 
@@ -203,7 +204,7 @@ class QuiltInstaller {
     required String gameDirectory,
     void Function(int received, int total)? onProgress,
   }) async {
-    final url = 'https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-loader/$loaderVersion/quilt-loader-$loaderVersion.jar';
+    final url = '${ApiEndpoints.quiltMaven}/org/quiltmc/quilt-loader/$loaderVersion/quilt-loader-$loaderVersion.jar';
 
     _logger.info('Downloading Quilt loader from: $url');
 
@@ -412,7 +413,7 @@ class QuiltInstaller {
                 'path': 'org/quiltmc/quilt-loader/$loaderVersion/quilt-loader-$loaderVersion.jar',
                 'sha1': '',  // 实际应该计算SHA1
                 'size': 0,  // 实际应该获取文件大小
-                'url': 'https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-loader/$loaderVersion/quilt-loader-$loaderVersion.jar',
+                'url': '${ApiEndpoints.quiltMaven}/org/quiltmc/quilt-loader/$loaderVersion/quilt-loader-$loaderVersion.jar',
               }
             }
           }

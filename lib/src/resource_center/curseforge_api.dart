@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../core/api_endpoints.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
 import 'models.dart';
@@ -9,7 +10,7 @@ class CurseForgeApi implements ResourceApi {
   final String apiKey;
   final NetworkClient _networkClient = NetworkClient();
 
-  static const String baseUrl = 'https://api.curseforge.com/v1';
+  static const String baseUrl = ApiEndpoints.curseforgeApi;
   static const int minecraftGameId = 432;
   static const int modCategoryId = 6;
   static const int resourcePackCategoryId = 12;
@@ -202,7 +203,7 @@ class CurseForgeApi implements ResourceApi {
       supportedLoaders: loaders,
       downloads: mod['downloadCount'] as int,
       likes: mod['thumbsUpCount'] as int? ?? 0,
-      pageUrl: 'https://www.curseforge.com/minecraft/mc-mods/${mod['slug']}',
+      pageUrl: '${ApiEndpoints.curseforgeWebsite}/minecraft/mc-mods/${mod['slug']}',
       publishedDate: DateTime.tryParse(mod['dateCreated'] as String? ?? ''),
       updatedDate: DateTime.tryParse(mod['dateModified'] as String? ?? ''),
       license: mod['license']?['name'] as String?,

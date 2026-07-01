@@ -40,6 +40,7 @@ library;
 import 'dart:convert';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
+import '../core/api_endpoints.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
 import 'models.dart';
@@ -91,7 +92,7 @@ class MicrosoftAuthService {
   /// 授权服务器在用户授权后重定向的 URI。
   /// 使用 Microsoft 提供的桌面应用专用重定向 URI。
   /// 注意：此 URI 必须在 Azure AD 应用注册中预先配置。
-  static const String _redirectUri = 'https://login.live.com/oauth20_desktop.srf';
+  static const String _redirectUri = ApiEndpoints.microsoftRedirectUri;
 
   /// OAuth2 授权范围
   ///
@@ -104,17 +105,17 @@ class MicrosoftAuthService {
   ///
   /// 用户在此端点进行身份验证和授权。
   /// 使用 `/consumers` 路径支持所有 Microsoft 账户类型（个人和组织账户）。
-  static const String _authorizationEndpoint = 'https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize';
+  static const String _authorizationEndpoint = ApiEndpoints.microsoftAuthAuthorize;
 
   /// OAuth2 令牌端点 URL
   ///
   /// 用于交换授权码获取访问令牌，或使用刷新令牌获取新的访问令牌。
-  static const String _tokenEndpoint = 'https://login.microsoftonline.com/consumers/oauth2/v2.0/token';
+  static const String _tokenEndpoint = ApiEndpoints.microsoftAuthToken;
 
   /// OAuth2 设备代码端点 URL
   ///
   /// 用于设备代码流，获取设备代码和用户验证信息。
-  static const String _deviceCodeEndpoint = 'https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode';
+  static const String _deviceCodeEndpoint = ApiEndpoints.microsoftAuthDeviceCode;
 
   /// 生成 PKCE 代码验证器（Code Verifier）
   ///

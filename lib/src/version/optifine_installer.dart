@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:archive/archive.dart';
+import '../core/api_endpoints.dart';
 import '../core/logger.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
@@ -109,10 +110,10 @@ class OptiFineInstaller {
   final NetworkClient _networkClient = NetworkClient();
 
   /// OptiFine官方下载页面
-  static const String _optiFineBaseUrl = 'https://optifine.net';
+  static const String _optiFineBaseUrl = ApiEndpoints.optifineNet;
 
   /// BMCLAPI镜像源（备选）
-  static const String _bmclApiBaseUrl = 'https://bmclapi2.bangbang93.com';
+  static const String _bmclApiBaseUrl = ApiEndpoints.bmclapi2;
 
   /// 获取OptiFine版本列表
   Future<List<OptiFineVersion>> getVersionList({

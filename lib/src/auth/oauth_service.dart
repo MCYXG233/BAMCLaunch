@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
+import '../core/api_endpoints.dart';
 import '../core/logger.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
+import '../core/json_utils.dart';
 import '../di/service_locator.dart';
 
 class OAuthService {
@@ -23,7 +25,7 @@ class OAuthService {
   final NetworkClient _networkClient = NetworkClient();
 
   final String _clientId = '00000000482326AA';
-  final String _redirectUri = 'https://login.live.com/oauth20_desktop.srf';
+  final String _redirectUri = ApiEndpoints.microsoftRedirectUri;
   final String _scope = 'XboxLive.signin offline_access';
 
   String? _currentCodeVerifier;
@@ -45,7 +47,7 @@ class OAuthService {
       'state': _currentState,
     };
 
-    final uri = Uri.https('login.microsoftonline.com', 'consumers/oauth2/v2.0/authorize', params);
+    final uri = Uri.parse(ApiEndpoints.microsoftAuthAuthorize).replace(queryParameters: params);
     return uri.toString();
   }
 
@@ -62,7 +64,7 @@ class OAuthService {
       };
 
       final response = await _networkClient.post(
-        'https://login.microsoftonline.com/consumers/oauth2/v2.0/token',
+        ApiEndpoints.microsoftAuthToken,
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: body.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value.toString())}').join('&'),
       );
@@ -95,7 +97,7 @@ class OAuthService {
       };
 
       final response = await _networkClient.post(
-        'https://login.microsoftonline.com/consumers/oauth2/v2.0/token',
+        ApiEndpoints.microsoftAuthToken,
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: body.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value.toString())}').join('&'),
       );
@@ -132,7 +134,7 @@ class OAuthService {
       });
 
       final response = await _networkClient.post(
-        'https://user.auth.xboxlive.com/user/authenticate',
+        ApiEndpoints.xboxUserAuth,
         headers: {'Content-Type': 'application/json'},
         body: body,
       );
@@ -168,7 +170,7 @@ class OAuthService {
       });
 
       final response = await _networkClient.post(
-        'https://xsts.auth.xboxlive.com/xsts/authorize',
+        ApiEndpoints.xboxXstsAuth,
         headers: {'Content-Type': 'application/json'},
         body: body,
       );
@@ -199,7 +201,7 @@ class OAuthService {
       });
 
       final response = await _networkClient.post(
-        'https://api.minecraftservices.com/authentication/login_with_xbox',
+        ApiEndpoints.minecraftAuthLogin,
         headers: {'Content-Type': 'application/json'},
         body: body,
       );
@@ -226,7 +228,7 @@ class OAuthService {
 
     try {
       final response = await _networkClient.get(
-        'https://api.minecraftservices.com/entitlements/mcstore',
+        ApiEndpoints.minecraftEntitlements,
         headers: {'Authorization': 'Bearer $accessToken'},
       );
 
@@ -293,11 +295,11 @@ class OAuthTokens {
 
   factory OAuthTokens.fromJson(Map<String, dynamic> json) {
     return OAuthTokens(
-      accessToken: json['access_token'] as String,
-      tokenType: json['token_type'] as String,
-      expiresIn: json['expires_in'] as int,
-      refreshToken: json['refresh_token'] as String,
-      scope: (json['scope'] as String).split(' '),
+      accessToken: JsonUtils.getStringOrDefault(json['access_token']),
+      tokenType: JsonUtils.getStringOrDefault(json['token_type']),
+      expiresIn: JsonUtils.getIntOrDefault(json['expires_in']),
+      refreshToken: JsonUtils.getStringOrDefault(json['refresh_token']),
+      scope: JsonUtils.getStringOrDefault(json['scope']).split(' '),
     );
   }
 }
@@ -320,7 +322,7 @@ class XboxLiveResponse {
 
   factory XboxLiveResponse.fromJson(Map<String, dynamic> json) {
     return XboxLiveResponse(
-      token: json['Token'] as String,
+      token: JsonUtils.getStringOrDefault(json['Token']),
       displayClaims: jsonEncode(json['DisplayClaims']),
     );
   }
@@ -347,9 +349,9 @@ class MinecraftProfile {
 
   factory MinecraftProfile.fromJson(Map<String, dynamic> json) {
     return MinecraftProfile(
-      accessToken: json['access_token'] as String,
-      username: json['username'] as String,
-      uuid: json['uuid'] as String,
+      accessToken: JsonUtils.getStringOrDefault(json['access_token']),
+      username: JsonUtils.getStringOrDefault(json['username']),
+      uuid: JsonUtils.getStringOrDefault(json['uuid']),
     );
   }
 }
@@ -393,8 +395,8 @@ class MinecraftEntitlement {
 
   factory MinecraftEntitlement.fromJson(Map<String, dynamic> json) {
     return MinecraftEntitlement(
-      name: json['name'] as String,
-      id: json['id'] as String,
+      name: JsonUtils.getStringOrDefault(json['name']),
+      id: JsonUtils.getStringOrDefault(json['id']),
     );
   }
 }

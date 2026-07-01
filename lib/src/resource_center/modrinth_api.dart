@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../core/api_endpoints.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
 import 'models.dart';
@@ -8,7 +9,7 @@ import 'package:archive/archive.dart' as archive;
 
 /// Modrinth API客户端
 class ModrinthApi implements ResourceApi {
-  static const String baseUrl = 'https://api.modrinth.com/v2';
+  static const String baseUrl = ApiEndpoints.modrinthApi;
 
   @override
   String get source => 'modrinth';
@@ -191,7 +192,7 @@ class ModrinthApi implements ResourceApi {
       supportedLoaders: loaders,
       downloads: hit['downloads'] as int,
       likes: hit['follows'] as int,
-      pageUrl: 'https://modrinth.com/${_projectTypeToString(type)}/${hit['slug']}',
+      pageUrl: '${ApiEndpoints.modrinthWebsite}/${_projectTypeToString(type)}/${hit['slug']}',
       publishedDate: DateTime.tryParse(hit['date_created'] as String? ?? ''),
       updatedDate: DateTime.tryParse(hit['date_modified'] as String? ?? ''),
       license: hit['license'] as String?,
@@ -244,7 +245,7 @@ class ModrinthApi implements ResourceApi {
       supportedLoaders: loaders,
       downloads: project['downloads'] as int,
       likes: project['followers'] as int,
-      pageUrl: 'https://modrinth.com/${_projectTypeToString(type)}/${project['slug']}',
+      pageUrl: '${ApiEndpoints.modrinthWebsite}/${_projectTypeToString(type)}/${project['slug']}',
       publishedDate: DateTime.tryParse(project['published'] as String? ?? ''),
       updatedDate: DateTime.tryParse(project['updated'] as String? ?? ''),
       license: project['license']?['name'] as String?,

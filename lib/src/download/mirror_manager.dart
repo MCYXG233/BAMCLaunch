@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import '../core/api_endpoints.dart';
 import '../core/network_client.dart';
 import '../config/config_manager.dart';
 import '../config/config_keys.dart';
@@ -293,7 +294,7 @@ class MirrorManager implements IMirrorManager {
     MirrorInfo(
       id: 'official',
       name: 'Mojang 官方源',
-      url: 'https://launcher.mojang.com',
+      url: ApiEndpoints.mojangLauncher,
       isBuiltIn: true,
       isOfficial: true,
       priority: 0,
@@ -301,21 +302,21 @@ class MirrorManager implements IMirrorManager {
     MirrorInfo(
       id: 'bmclapi2',
       name: 'BMCLAPI-2',
-      url: 'https://bmclapi2.bangbang93.com',
+      url: ApiEndpoints.bmclapi2,
       isBuiltIn: true,
       priority: 1,
     ),
     MirrorInfo(
       id: 'bmclapi',
       name: 'BMCLAPI',
-      url: 'https://bmclapi.bangbang93.com',
+      url: ApiEndpoints.bmclapi,
       isBuiltIn: true,
       priority: 2,
     ),
     MirrorInfo(
       id: 'mcbbs',
       name: 'MCBBS',
-      url: 'https://download.mcbbs.net',
+      url: ApiEndpoints.mcbbs,
       isBuiltIn: true,
       priority: 3,
     ),
@@ -479,7 +480,7 @@ class MirrorManager implements IMirrorManager {
       // 根据镜像类型选择不同的测试URL
       if (mirror.isOfficial) {
         // 官方镜像测试版本清单API
-        testUrl = 'https://launchermeta.mojang.com/mc/game/version_manifest.json';
+        testUrl = ApiEndpoints.minecraftVersionManifest;
       } else {
         // 第三方镜像测试特定版本目录
         testUrl = '${mirror.url}/minecraft/version/1.20.4';
@@ -579,7 +580,7 @@ class MirrorManager implements IMirrorManager {
         return path;
       }
       // 拼接官方域名
-      return 'https://launcher.mojang.com$path';
+      return '${ApiEndpoints.mojangLauncher}$path';
     }
 
     // 第三方镜像的URL处理

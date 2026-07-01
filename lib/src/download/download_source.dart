@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../core/api_endpoints.dart';
 import '../core/network_client.dart';
 import '../di/service_locator.dart';
 
@@ -71,7 +72,7 @@ class OfficialDownloadSource implements IDownloadSource {
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return path;
     }
-    return 'https://launcher.mojang.com$path';
+    return '${ApiEndpoints.mojangLauncher}$path';
   }
 
   @override
@@ -79,7 +80,7 @@ class OfficialDownloadSource implements IDownloadSource {
     try {
       final networkClient = NetworkClient();
       final response = await networkClient.get(
-        'https://launchermeta.mojang.com/mc/game/version_manifest.json',
+        ApiEndpoints.minecraftVersionManifest,
         timeoutSeconds: 10,
       );
       return response.statusCode == 200;
@@ -106,15 +107,15 @@ class MirrorSourceManager {
   /// 所有可用的 BMCLAPI 镜像源
   static final List<Map<String, String>> _bmclapiMirrors = [
     {
-      'url': 'https://bmclapi2.bangbang93.com',
+      'url': ApiEndpoints.bmclapi2,
       'name': 'BMCLAPI-2',
     },
     {
-      'url': 'https://bmclapi.bangbang93.com',
+      'url': ApiEndpoints.bmclapi,
       'name': 'BMCLAPI',
     },
     {
-      'url': 'https://download.mcbbs.net',
+      'url': ApiEndpoints.mcbbs,
       'name': 'MCBBS',
     },
   ];

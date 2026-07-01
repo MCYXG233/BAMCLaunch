@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../core/api_endpoints.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
 import 'models.dart';
@@ -6,10 +7,10 @@ import 'models.dart';
 /// Xbox Live认证服务
 class XboxAuthService {
   /// Xbox Live用户认证端点
-  static const String _userAuthenticateEndpoint = 'https://user.auth.xboxlive.com/user/authenticate';
+  static const String _userAuthenticateEndpoint = ApiEndpoints.xboxUserAuth;
 
   /// XSTS认证端点
-  static const String _xstsAuthenticateEndpoint = 'https://xsts.auth.xboxlive.com/xsts/authorize';
+  static const String _xstsAuthenticateEndpoint = ApiEndpoints.xboxXstsAuth;
 
   /// 获取Xbox Live令牌
   Future<XboxLiveToken> authenticateUser(String accessToken) async {

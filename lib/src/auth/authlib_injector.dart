@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import '../core/api_endpoints.dart';
 import '../core/logger.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
+import '../core/json_utils.dart';
 import '../di/service_locator.dart';
 
 class AuthlibInjector {
@@ -42,7 +44,7 @@ class AuthlibInjector {
 
     try {
       await _networkClient.downloadFile(
-        'https://github.com/yushijinhun/authlib-injector/releases/latest/download/authlib-injector.jar',
+        ApiEndpoints.authlibInjectorJar,
         jarPath,
       );
       _logger.info('Authlib injector downloaded successfully');
@@ -67,7 +69,7 @@ class AuthlibInjector {
       
       return AuthServerInfo(
         authUrl: authServerUrl,
-        clientId: json['client_id'] as String?,
+        clientId: JsonUtils.getString(json['client_id']),
         metadata: AuthServerMetadata.fromJson(json),
         timestamp: DateTime.now().millisecondsSinceEpoch,
       );
@@ -226,10 +228,10 @@ class AuthServerInfo {
 
   factory AuthServerInfo.fromJson(Map<String, dynamic> json) {
     return AuthServerInfo(
-      authUrl: json['authUrl'] as String,
-      clientId: json['clientId'] as String?,
+      authUrl: JsonUtils.getStringOrDefault(json['authUrl']),
+      clientId: JsonUtils.getString(json['clientId']),
       metadata: AuthServerMetadata.fromJson(json['metadata'] as Map<String, dynamic>),
-      timestamp: json['timestamp'] as int,
+      timestamp: JsonUtils.getIntOrDefault(json['timestamp']),
     );
   }
 }
@@ -258,10 +260,10 @@ class AuthServerMetadata {
 
   factory AuthServerMetadata.fromJson(Map<String, dynamic> json) {
     return AuthServerMetadata(
-      name: json['name'] as String? ?? 'Unknown Server',
-      description: json['description'] as String? ?? '',
-      icon: json['icon'] as String?,
-      links: json['links'] != null 
+      name: JsonUtils.getStringOrDefault(json['name'], 'Unknown Server'),
+      description: JsonUtils.getStringOrDefault(json['description']),
+      icon: JsonUtils.getString(json['icon']),
+      links: json['links'] != null
           ? Map<String, String>.from(json['links'] as Map)
           : null,
     );
@@ -292,8 +294,8 @@ class UserProfile {
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
-      accessToken: json['accessToken'] as String,
-      clientToken: json['clientToken'] as String,
+      accessToken: JsonUtils.getStringOrDefault(json['accessToken']),
+      clientToken: JsonUtils.getStringOrDefault(json['clientToken']),
       selectedProfile: Profile.fromJson(json['selectedProfile'] as Map<String, dynamic>),
       availableProfiles: (json['availableProfiles'] as List<dynamic>)
           .map((p) => Profile.fromJson(p as Map<String, dynamic>))
@@ -326,10 +328,10 @@ class Profile {
 
   factory Profile.fromJson(Map<String, dynamic> json) {
     return Profile(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      skinUrl: json['skinUrl'] as String?,
-      capeUrl: json['capeUrl'] as String?,
+      id: JsonUtils.getStringOrDefault(json['id']),
+      name: JsonUtils.getStringOrDefault(json['name']),
+      skinUrl: JsonUtils.getString(json['skinUrl']),
+      capeUrl: JsonUtils.getString(json['capeUrl']),
     );
   }
 }
