@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import '../../core/logger.dart';
+import '../../di/service_locator.dart';
 import 'models.dart';
 
 class ProcessMonitor {
@@ -190,7 +191,9 @@ class ProcessMonitorManager {
 
   ProcessMonitorManager._internal();
 
-  static ProcessMonitorManager get instance => _instance ??= ProcessMonitorManager._internal();
+  static ProcessMonitorManager get instance =>
+      ServiceLocator.instance.tryGet<ProcessMonitorManager>() ??
+      (_instance ??= ProcessMonitorManager._internal());
 
   final Map<String, ProcessMonitor> _monitors = {};
   final Logger _logger = Logger('ProcessMonitorManager');

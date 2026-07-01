@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
 import '../core/error_codes.dart';
+import '../di/service_locator.dart';
 import '../download/download_engine.dart';
 import '../download/models.dart';
 import '../event/event.dart';
@@ -82,7 +83,9 @@ class DownloadService {
 
   DownloadService._internal();
 
-  static DownloadService get instance => _instance ??= DownloadService._internal();
+  static DownloadService get instance =>
+      ServiceLocator.instance.tryGet<DownloadService>() ??
+      (_instance ??= DownloadService._internal());
 
   static void reset() {
     _instance = null;

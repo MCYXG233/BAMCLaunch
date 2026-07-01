@@ -2,6 +2,7 @@ import 'dart:async';
 import '../event/event_bus.dart';
 import '../event/event.dart';
 import '../core/logger.dart';
+import '../di/service_locator.dart';
 import 'download_source.dart';
 import 'multi_source_downloader.dart' as msd;
 import 'models.dart';
@@ -160,7 +161,8 @@ class DownloadEngine implements IDownloadEngine {
   ///
   /// 提供更明确的单例访问方式。
   static DownloadEngine get instance =>
-      _instance ??= DownloadEngine._internal();
+      ServiceLocator.instance.tryGet<DownloadEngine>() ??
+      (_instance ??= DownloadEngine._internal());
 
   /// 重置单例（仅用于测试）
   ///

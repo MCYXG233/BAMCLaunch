@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:path/path.dart' as path;
 import 'package:crypto/crypto.dart';
 import '../../core/logger.dart';
+import '../../di/service_locator.dart';
 import '../../platform/platform_adapter.dart';
 import '../../platform/platform_adapter_factory.dart';
 
@@ -103,8 +104,8 @@ class CapeManager {
   CapeManager._internal();
 
   static CapeManager get instance {
-    _instance ??= CapeManager._internal();
-    return _instance!;
+    return ServiceLocator.instance.tryGet<CapeManager>() ??
+        (_instance ??= CapeManager._internal());
   }
 
   factory CapeManager() => instance;

@@ -7,6 +7,7 @@ import 'package:crypto/crypto.dart';
 import '../../core/logger.dart';
 import '../../core/network_client.dart';
 import '../../core/error_codes.dart';
+import '../../di/service_locator.dart';
 import '../../platform/platform_adapter.dart';
 import '../../platform/platform_adapter_factory.dart';
 import '../../account/skin_manager.dart';
@@ -790,8 +791,8 @@ class SkinPreviewManager {
 
   /// 获取单例实例
   static SkinPreviewManager get instance {
-    _instance ??= SkinPreviewManager._internal();
-    return _instance!;
+    return ServiceLocator.instance.tryGet<SkinPreviewManager>() ??
+        (_instance ??= SkinPreviewManager._internal());
   }
 
   /// 工厂构造函数，返回单例实例

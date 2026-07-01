@@ -4,6 +4,7 @@ import 'package:path/path.dart' as path;
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
 import '../core/logger.dart';
+import '../di/service_locator.dart';
 import '../event/event_bus.dart';
 import '../event/event.dart';
 
@@ -39,7 +40,9 @@ class ModLoaderInfo {
 /// Mod 加载器下载服务
 class LoaderDownloadService {
   static LoaderDownloadService? _instance;
-  static LoaderDownloadService get instance => _instance ??= LoaderDownloadService._();
+  static LoaderDownloadService get instance =>
+      ServiceLocator.instance.tryGet<LoaderDownloadService>() ??
+      (_instance ??= LoaderDownloadService._());
   LoaderDownloadService._();
 
   final Logger _logger = Logger('LoaderDownloadService');

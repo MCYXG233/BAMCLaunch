@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import '../core/logger.dart';
+import '../di/service_locator.dart';
 
 /// 系统信息
 class SystemInfo {
@@ -82,8 +83,8 @@ class SystemDiagnostics {
 
   /// 获取单例实例
   static SystemDiagnostics get instance {
-    _instance ??= SystemDiagnostics._internal();
-    return _instance!;
+    return ServiceLocator.instance.tryGet<SystemDiagnostics>() ??
+        (_instance ??= SystemDiagnostics._internal());
   }
 
   /// 工厂构造函数

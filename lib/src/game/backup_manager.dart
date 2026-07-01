@@ -7,6 +7,7 @@ import 'package:path/path.dart' as path;
 import 'package:archive/archive.dart';
 import '../core/logger.dart';
 import '../core/error_codes.dart';
+import '../di/service_locator.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
 import '../config/config_manager.dart';
@@ -448,8 +449,8 @@ class BackupManager {
   /// 返回 [BackupManager] 的唯一实例，如果实例不存在则创建。
   /// 使用懒加载模式，首次访问时创建实例。
   static BackupManager get instance {
-    _instance ??= BackupManager._internal();
-    return _instance!;
+    return ServiceLocator.instance.tryGet<BackupManager>() ??
+        (_instance ??= BackupManager._internal());
   }
 
   /// 工厂构造函数

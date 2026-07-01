@@ -3,6 +3,7 @@ import 'dart:convert';
 import '../core/network_client.dart';
 import '../config/config_manager.dart';
 import '../config/config_keys.dart';
+import '../di/service_locator.dart';
 
 /// 镜像源信息类
 ///
@@ -271,7 +272,8 @@ class MirrorManager implements IMirrorManager {
   ///
   /// 提供更直观的单例访问方式
   static MirrorManager get instance =>
-      _instance ??= MirrorManager._internal();
+      ServiceLocator.instance.tryGet<MirrorManager>() ??
+      (_instance ??= MirrorManager._internal());
 
   /// 配置管理器实例
   ///

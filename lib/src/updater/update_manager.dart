@@ -7,6 +7,7 @@ import '../core/logger.dart';
 import '../core/network_client.dart';
 import '../config/config_manager.dart';
 import '../core/error_codes.dart';
+import '../di/service_locator.dart';
 
 /// 版本发布信息类
 ///
@@ -99,7 +100,9 @@ class UpdateManager {
   /// 获取单例实例
   ///
   /// 如果实例不存在则创建新实例。
-  static UpdateManager get instance => _instance ??= UpdateManager._internal();
+  static UpdateManager get instance =>
+      ServiceLocator.instance.tryGet<UpdateManager>() ??
+      (_instance ??= UpdateManager._internal());
 
   /// 日志记录器
   final Logger _logger = Logger('UpdateManager');

@@ -8,6 +8,7 @@ import '../config/config_manager.dart';
 import '../core/logger.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
+import '../di/service_locator.dart';
 import '../download/download_engine.dart';
 import '../event/event.dart';
 import '../event/event_bus.dart';
@@ -302,7 +303,8 @@ class VersionManager implements IVersionManager {
   ///
   /// 提供静态访问点，等同于 `VersionManager()` 工厂构造函数。
   static VersionManager get instance =>
-      _instance ??= VersionManager._internal();
+      ServiceLocator.instance.tryGet<VersionManager>() ??
+      (_instance ??= VersionManager._internal());
 
   /// 重置单例（仅用于测试）
   ///

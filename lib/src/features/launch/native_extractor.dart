@@ -3,6 +3,7 @@ import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 import '../../version/models.dart';
 import '../../core/logger.dart';
+import '../../di/service_locator.dart';
 import '../../platform/platform_adapter.dart';
 import '../../platform/platform_adapter_factory.dart';
 
@@ -64,7 +65,8 @@ class NativeExtractor {
   NativeExtractor._internal();
 
   static NativeExtractor get instance =>
-      _instance ??= NativeExtractor._internal();
+      ServiceLocator.instance.tryGet<NativeExtractor>() ??
+      (_instance ??= NativeExtractor._internal());
 
   static void reset() {
     _instance = null;

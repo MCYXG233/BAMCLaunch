@@ -3,6 +3,7 @@ import 'package:archive/archive.dart' as archive;
 import 'package:path/path.dart' as path;
 import '../../version/models.dart';
 import '../../core/logger.dart';
+import '../../di/service_locator.dart';
 import '../../platform/platform_adapter.dart';
 import '../../platform/platform_adapter_factory.dart';
 
@@ -16,7 +17,8 @@ class NativeLibraryManager {
   NativeLibraryManager._internal();
 
   static NativeLibraryManager get instance =>
-      _instance ??= NativeLibraryManager._internal();
+      ServiceLocator.instance.tryGet<NativeLibraryManager>() ??
+      (_instance ??= NativeLibraryManager._internal());
 
   static void reset() {
     _instance = null;

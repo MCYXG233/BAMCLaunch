@@ -3,6 +3,7 @@ import 'dart:math';
 import 'models.dart';
 import '../config/config_manager.dart';
 import '../core/logger.dart';
+import '../di/service_locator.dart';
 
 /// 资源管理器
 /// 负责管理集中化的游戏资源（模组、资源包、存档等）
@@ -23,7 +24,12 @@ class ResourceManager {
     return _instance!;
   }
 
-  static ResourceManager get instance => ResourceManager();
+  /// 获取单例实例
+  ///
+  /// 优先通过 [ServiceLocator] 获取，若未注册则回退到本地单例。
+  static ResourceManager get instance =>
+      ServiceLocator.instance.tryGet<ResourceManager>() ??
+      (_instance ??= ResourceManager._internal());
 
   bool get isInitialized => _isInitialized;
   List<ResourceItem> get resources => List.unmodifiable(_resources);

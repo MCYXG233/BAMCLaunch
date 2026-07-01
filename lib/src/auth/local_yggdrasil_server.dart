@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import '../core/logger.dart';
+import '../di/service_locator.dart';
 import '../account/account.dart';
 
 class LocalYggdrasilServer {
@@ -15,7 +16,8 @@ class LocalYggdrasilServer {
   LocalYggdrasilServer._internal();
 
   static LocalYggdrasilServer get instance =>
-      _instance ??= LocalYggdrasilServer._internal();
+      ServiceLocator.instance.tryGet<LocalYggdrasilServer>() ??
+      (_instance ??= LocalYggdrasilServer._internal());
 
   final Logger _logger = Logger('LocalYggdrasilServer');
 

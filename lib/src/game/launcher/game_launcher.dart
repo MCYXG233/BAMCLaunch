@@ -9,6 +9,7 @@ import '../../version/version_manager.dart';
 import '../../version/models.dart';
 import '../../config/config_manager.dart';
 import '../../config/config_keys.dart';
+import '../../di/service_locator.dart';
 import '../../platform/platform_adapter.dart';
 import '../../platform/platform_adapter_factory.dart';
 import '../../event/event.dart';
@@ -125,7 +126,9 @@ class GameLauncher implements IGameLauncher {
   GameLauncher._internal();
 
   /// 获取单例实例
-  static GameLauncher get instance => _instance ?? GameLauncher._internal();
+  static GameLauncher get instance =>
+      ServiceLocator.instance.tryGet<GameLauncher>() ??
+      (_instance ??= GameLauncher._internal());
 
   /// 重置单例实例
   ///

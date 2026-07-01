@@ -7,6 +7,7 @@ import '../core/network_client.dart';
 import '../core/error_codes.dart';
 import '../config/config_manager.dart';
 import '../config/config_keys.dart';
+import '../di/service_locator.dart';
 
 /// 外置登录认证服务器信息
 class AuthlibInjectorServer {
@@ -143,7 +144,9 @@ class AuthlibLoginManager {
 
   AuthlibLoginManager._internal();
 
-  static AuthlibLoginManager get instance => _instance ??= AuthlibLoginManager._internal();
+  static AuthlibLoginManager get instance =>
+      ServiceLocator.instance.tryGet<AuthlibLoginManager>() ??
+      (_instance ??= AuthlibLoginManager._internal());
 
   static void reset() {
     _instance = null;

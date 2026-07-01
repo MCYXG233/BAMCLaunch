@@ -4,6 +4,7 @@ import 'package:path/path.dart' as path;
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
 import '../core/logger.dart';
+import '../di/service_locator.dart';
 import '../platform/platform_adapter_factory.dart';
 
 /// Adoptium API 响应模型
@@ -42,7 +43,9 @@ class AdoptiumRelease {
 /// Java 下载服务
 class JavaDownloadService {
   static JavaDownloadService? _instance;
-  static JavaDownloadService get instance => _instance ??= JavaDownloadService._();
+  static JavaDownloadService get instance =>
+      ServiceLocator.instance.tryGet<JavaDownloadService>() ??
+      (_instance ??= JavaDownloadService._());
   JavaDownloadService._();
 
   final Logger _logger = Logger('JavaDownloadService');

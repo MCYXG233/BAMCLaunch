@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
+import '../di/service_locator.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
 
@@ -156,8 +157,8 @@ class ModpackManager {
 
   /// 获取单例实例
   static ModpackManager get instance {
-    _instance ??= ModpackManager._internal();
-    return _instance!;
+    return ServiceLocator.instance.tryGet<ModpackManager>() ??
+        (_instance ??= ModpackManager._internal());
   }
 
   /// 工厂构造函数

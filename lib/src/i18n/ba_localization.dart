@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import '../di/service_locator.dart';
 
 class BALocalizations {
   static BALocalizations? _instance;
   Locale _locale = const Locale('zh', 'CN');
 
   static BALocalizations get instance {
-    _instance ??= BALocalizations._internal();
-    return _instance!;
+    return ServiceLocator.instance.tryGet<BALocalizations>() ??
+        (_instance ??= BALocalizations._internal());
   }
 
   BALocalizations._internal();

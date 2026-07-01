@@ -1,6 +1,7 @@
 import '../config/config_manager.dart';
 import '../config/config_keys.dart';
 import '../core/logger.dart';
+import '../di/service_locator.dart';
 
 /// 资源收藏管理器
 ///
@@ -47,8 +48,8 @@ class FavoriteManager {
 
   /// 获取单例实例
   static FavoriteManager get instance {
-    _instance ??= FavoriteManager._internal();
-    return _instance!;
+    return ServiceLocator.instance.tryGet<FavoriteManager>() ??
+        (_instance ??= FavoriteManager._internal());
   }
 
   /// 工厂构造函数

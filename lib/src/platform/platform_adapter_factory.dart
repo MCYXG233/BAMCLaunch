@@ -3,6 +3,7 @@ import 'platform_adapter.dart';
 import 'windows_adapter.dart';
 import 'macos_adapter.dart';
 import 'linux_adapter.dart';
+import '../di/service_locator.dart';
 
 /// 平台适配器工厂类
 /// 根据当前运行平台返回对应的适配器实现
@@ -12,8 +13,8 @@ class PlatformAdapterFactory {
 
   /// 获取平台适配器实例
   static IPlatformAdapter get instance {
-    _instance ??= _createAdapter();
-    return _instance!;
+    return ServiceLocator.instance.tryGet<IPlatformAdapter>() ??
+        (_instance ??= _createAdapter());
   }
 
   /// 创建对应平台的适配器

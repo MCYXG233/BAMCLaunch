@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'event.dart';
+import '../di/service_locator.dart';
 
 /// 事件回调函数类型定义
 ///
@@ -233,7 +234,9 @@ class EventBus {
   /// ```dart
   /// EventBus.instance.publish(MyEvent());
   /// ```
-  static EventBus get instance => _instance ??= EventBus._internal();
+  static EventBus get instance =>
+      ServiceLocator.instance.tryGet<EventBus>() ??
+      (_instance ??= EventBus._internal());
 
   /// 重置单例实例
   ///

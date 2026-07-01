@@ -1,5 +1,6 @@
 import 'config_manager_impl.dart';
 import 'config_models.dart';
+import '../di/service_locator.dart';
 
 /// 配置管理器统一接口
 ///
@@ -579,9 +580,8 @@ class ConfigManager implements IConfigManager {
   ///
   /// 返回 [ConfigManager] 的唯一实例。
   static ConfigManager get instance {
-    // 使用 ??= 确保只创建一次实例
-    _instance ??= ConfigManager._internal();
-    return _instance!;
+    return ServiceLocator.instance.tryGet<ConfigManager>() ??
+        (_instance ??= ConfigManager._internal());
   }
 
   /// 私有构造函数

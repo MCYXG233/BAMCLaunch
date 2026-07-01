@@ -2,6 +2,7 @@ import 'dart:async';
 import '../event/event_bus.dart';
 import '../event/event.dart';
 import '../core/logger.dart';
+import '../di/service_locator.dart';
 import 'download_engine.dart';
 import 'models.dart';
 import 'multi_source_downloader.dart' as msd;
@@ -16,8 +17,9 @@ class DownloadQueueManager {
   
   DownloadQueueManager._internal();
   
-  static DownloadQueueManager get instance => 
-      _instance ??= DownloadQueueManager._internal();
+  static DownloadQueueManager get instance =>
+      ServiceLocator.instance.tryGet<DownloadQueueManager>() ??
+      (_instance ??= DownloadQueueManager._internal());
   
   static void reset() {
     _instance?.dispose();

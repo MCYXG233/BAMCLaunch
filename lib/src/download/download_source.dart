@@ -1,5 +1,6 @@
 import 'dart:async';
 import '../core/network_client.dart';
+import '../di/service_locator.dart';
 
 /// 下载源接口
 abstract class IDownloadSource {
@@ -99,7 +100,8 @@ class MirrorSourceManager {
   MirrorSourceManager._internal();
 
   static MirrorSourceManager get instance =>
-      _instance ??= MirrorSourceManager._internal();
+      ServiceLocator.instance.tryGet<MirrorSourceManager>() ??
+      (_instance ??= MirrorSourceManager._internal());
 
   /// 所有可用的 BMCLAPI 镜像源
   static final List<Map<String, String>> _bmclapiMirrors = [

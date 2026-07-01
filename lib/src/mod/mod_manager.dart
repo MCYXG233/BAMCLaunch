@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:url_launcher/url_launcher.dart';
 import '../core/logger.dart';
+import '../di/service_locator.dart';
 import '../instance/instance_manager.dart';
 import '../instance/models.dart';
 import 'mod_info.dart';
@@ -63,7 +64,9 @@ class ModManager {
   /// ```dart
   /// final manager = ModManager.instance;
   /// ```
-  static ModManager get instance => _instance ??= ModManager._internal();
+  static ModManager get instance =>
+      ServiceLocator.instance.tryGet<ModManager>() ??
+      (_instance ??= ModManager._internal());
 
   /// 日志记录器
   ///

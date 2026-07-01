@@ -1,3 +1,4 @@
+import '../di/service_locator.dart';
 import 'models.dart';
 import 'modrinth_api.dart';
 import 'api_interface.dart';
@@ -15,7 +16,9 @@ class SearchService {
 
   SearchService._internal();
 
-  static SearchService get instance => _instance ??= SearchService._internal();
+  static SearchService get instance =>
+      ServiceLocator.instance.tryGet<SearchService>() ??
+      (_instance ??= SearchService._internal());
 
   static void reset() {
     _instance = null;

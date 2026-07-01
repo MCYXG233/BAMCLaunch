@@ -6,6 +6,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import '../../config/config_manager.dart';
 import '../../config/config_keys.dart';
 import '../../config/background_config.dart';
+import '../../di/service_locator.dart';
 
 /// 背景管理器
 ///
@@ -54,8 +55,8 @@ class BackgroundManager extends ChangeNotifier {
   /// 如果实例不存在，则创建一个新实例。
   /// 使用懒加载模式，仅在首次访问时创建。
   static BackgroundManager get instance {
-    _instance ??= BackgroundManager._internal();
-    return _instance!;
+    return ServiceLocator.instance.tryGet<BackgroundManager>() ??
+        (_instance ??= BackgroundManager._internal());
   }
 
   /// 工厂构造函数，返回单例实例

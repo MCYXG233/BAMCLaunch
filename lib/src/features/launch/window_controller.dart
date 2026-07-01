@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:io';
 import 'package:ffi/ffi.dart';
 import '../../core/logger.dart';
+import '../../di/service_locator.dart';
 import '../../event/event.dart';
 import '../../event/event_bus.dart';
 
@@ -74,7 +75,8 @@ class WindowController {
   WindowController._internal();
 
   static WindowController get instance =>
-      _instance ??= WindowController._internal();
+      ServiceLocator.instance.tryGet<WindowController>() ??
+      (_instance ??= WindowController._internal());
 
   static void reset() {
     _instance = null;

@@ -3,6 +3,7 @@ import 'dart:convert';
 import '../core/logger.dart';
 import '../core/error_codes.dart';
 import '../config/config_manager.dart';
+import '../di/service_locator.dart';
 import '../event/event_bus.dart';
 import '../event/event.dart';
 import '../instance/instance_manager.dart';
@@ -146,7 +147,9 @@ class AutoBackupService {
   }
 
   /// 获取单例实例
-  static AutoBackupService get instance => _instance ?? AutoBackupService._internal();
+  static AutoBackupService get instance =>
+      ServiceLocator.instance.tryGet<AutoBackupService>() ??
+      (_instance ??= AutoBackupService._internal());
 
   /// 初始化服务
   Future<void> initialize() async {

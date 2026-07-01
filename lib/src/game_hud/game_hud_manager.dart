@@ -1,6 +1,7 @@
 import 'dart:async';
 import '../event/event_bus.dart';
 import '../event/event.dart';
+import '../di/service_locator.dart';
 import 'fps_monitor.dart';
 import 'memory_monitor.dart';
 
@@ -14,7 +15,9 @@ class GameHUDManager {
   
   GameHUDManager._internal();
   
-  static GameHUDManager get instance => _instance ??= GameHUDManager._internal();
+  static GameHUDManager get instance =>
+      ServiceLocator.instance.tryGet<GameHUDManager>() ??
+      (_instance ??= GameHUDManager._internal());
   
   static void reset() {
     _instance?.dispose();

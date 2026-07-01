@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
+import '../di/service_locator.dart';
 import '../event/event.dart';
 import '../event/event_bus.dart';
 import '../platform/platform_adapter.dart';
@@ -19,7 +20,9 @@ class ResourceManager {
 
   ResourceManager._internal();
 
-  static ResourceManager get instance => _instance ??= ResourceManager._internal();
+  static ResourceManager get instance =>
+      ServiceLocator.instance.tryGet<ResourceManager>() ??
+      (_instance ??= ResourceManager._internal());
 
   static void reset() {
     _instance = null;

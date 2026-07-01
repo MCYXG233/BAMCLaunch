@@ -4,6 +4,7 @@ import 'package:crypto/crypto.dart';
 import '../core/logger.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
+import '../di/service_locator.dart';
 
 class OAuthService {
   static OAuthService? _instance;
@@ -14,7 +15,9 @@ class OAuthService {
 
   OAuthService._internal();
 
-  static OAuthService get instance => _instance ??= OAuthService._internal();
+  static OAuthService get instance =>
+      ServiceLocator.instance.tryGet<OAuthService>() ??
+      (_instance ??= OAuthService._internal());
 
   final Logger _logger = Logger('OAuthService');
   final NetworkClient _networkClient = NetworkClient();

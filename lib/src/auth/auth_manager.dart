@@ -1,6 +1,7 @@
 import 'dart:convert';
 import '../config/config_manager.dart';
 import '../core/error_codes.dart';
+import '../di/service_locator.dart';
 import 'models.dart';
 import 'microsoft_auth.dart';
 import 'xbox_auth.dart';
@@ -26,7 +27,12 @@ class AuthManager {
     return _instance!;
   }
 
-  static AuthManager get instance => AuthManager();
+  /// 获取单例实例
+  ///
+  /// 优先通过 [ServiceLocator] 获取，若未注册则回退到本地单例。
+  static AuthManager get instance =>
+      ServiceLocator.instance.tryGet<AuthManager>() ??
+      (_instance ??= AuthManager._internal());
 
   /// 完整的认证流程
   Future<AuthCredentials> authenticate({

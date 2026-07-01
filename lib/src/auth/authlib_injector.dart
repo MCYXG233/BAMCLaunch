@@ -3,6 +3,7 @@ import 'dart:io';
 import '../core/logger.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
+import '../di/service_locator.dart';
 
 class AuthlibInjector {
   static AuthlibInjector? _instance;
@@ -13,7 +14,9 @@ class AuthlibInjector {
 
   AuthlibInjector._internal();
 
-  static AuthlibInjector get instance => _instance ??= AuthlibInjector._internal();
+  static AuthlibInjector get instance =>
+      ServiceLocator.instance.tryGet<AuthlibInjector>() ??
+      (_instance ??= AuthlibInjector._internal());
 
   final Logger _logger = Logger('AuthlibInjector');
   final NetworkClient _networkClient = NetworkClient();

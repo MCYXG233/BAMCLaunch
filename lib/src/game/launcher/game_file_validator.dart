@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
 import '../../version/models.dart';
 import '../../core/logger.dart';
+import '../../di/service_locator.dart';
 import '../../platform/platform_adapter.dart';
 import '../../platform/platform_adapter_factory.dart';
 import 'models.dart';
@@ -56,7 +57,8 @@ class GameFileValidator {
   GameFileValidator._internal();
 
   static GameFileValidator get instance =>
-      _instance ??= GameFileValidator._internal();
+      ServiceLocator.instance.tryGet<GameFileValidator>() ??
+      (_instance ??= GameFileValidator._internal());
 
   static void reset() {
     _instance = null;

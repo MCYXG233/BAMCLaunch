@@ -5,6 +5,7 @@ import 'package:path/path.dart' as path;
 import '../core/logger.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
+import '../di/service_locator.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
 import 'account.dart';
@@ -199,8 +200,8 @@ class SkinManager {
   /// 返回 [SkinManager] 的唯一实例。
   /// 如果实例不存在，会自动创建。
   static SkinManager get instance {
-    _instance ??= SkinManager._internal();
-    return _instance!;
+    return ServiceLocator.instance.tryGet<SkinManager>() ??
+        (_instance ??= SkinManager._internal());
   }
 
   /// 工厂构造函数

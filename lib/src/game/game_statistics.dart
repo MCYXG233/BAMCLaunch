@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
+import '../di/service_locator.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
 
@@ -250,8 +251,8 @@ class GameStatisticsManager {
 
   /// 获取单例实例
   static GameStatisticsManager get instance {
-    _instance ??= GameStatisticsManager._internal();
-    return _instance!;
+    return ServiceLocator.instance.tryGet<GameStatisticsManager>() ??
+        (_instance ??= GameStatisticsManager._internal());
   }
 
   /// 工厂构造函数

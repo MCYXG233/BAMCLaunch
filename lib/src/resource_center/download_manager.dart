@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import '../core/logger.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
+import '../di/service_locator.dart';
 import 'models.dart';
 import 'modrinth_client.dart';
 
@@ -142,8 +143,8 @@ class DownloadManager {
   static DownloadManager? _instance;
 
   static DownloadManager get instance {
-    _instance ??= DownloadManager._();
-    return _instance!;
+    return ServiceLocator.instance.tryGet<DownloadManager>() ??
+        (_instance ??= DownloadManager._());
   }
 
   DownloadManager._();

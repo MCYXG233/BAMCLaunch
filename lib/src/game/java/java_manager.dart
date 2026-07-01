@@ -20,6 +20,7 @@ import '../../config/config_keys.dart';
 import '../../config/config_manager.dart';
 import '../../core/logger.dart';
 import '../../core/error_codes.dart';
+import '../../di/service_locator.dart';
 import '../../event/event.dart';
 import '../../event/event_bus.dart';
 import '../../platform/platform_adapter.dart';
@@ -219,7 +220,9 @@ class JavaManager implements IJavaManager {
   ///
   /// 返回值：
   /// - [JavaManager] Java管理器的单例实例
-  static JavaManager get instance => _instance ??= JavaManager._internal();
+  static JavaManager get instance =>
+      ServiceLocator.instance.tryGet<JavaManager>() ??
+      (_instance ??= JavaManager._internal());
 
   /// 重置单例实例
   ///

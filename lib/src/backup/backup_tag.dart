@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 import '../config/config_manager.dart';
+import '../di/service_locator.dart';
 
 /// 备份标签
 class BackupTag {
@@ -94,7 +95,9 @@ class BackupTagManager {
   }
 
   /// 获取单例实例
-  static BackupTagManager get instance => _instance ?? BackupTagManager._internal();
+  static BackupTagManager get instance =>
+      ServiceLocator.instance.tryGet<BackupTagManager>() ??
+      (_instance ??= BackupTagManager._internal());
 
   /// 初始化
   Future<void> initialize() async {

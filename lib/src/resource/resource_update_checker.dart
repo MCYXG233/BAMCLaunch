@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
+import '../di/service_locator.dart';
 
 /// Mod信息
 class ModInfo {
@@ -86,8 +87,8 @@ class ModUpdateChecker {
 
   /// 获取单例实例
   static ModUpdateChecker get instance {
-    _instance ??= ModUpdateChecker._internal();
-    return _instance!;
+    return ServiceLocator.instance.tryGet<ModUpdateChecker>() ??
+        (_instance ??= ModUpdateChecker._internal());
   }
 
   /// 工厂构造函数

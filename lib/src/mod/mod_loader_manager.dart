@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
 import '../core/error_codes.dart';
+import '../di/service_locator.dart';
 import '../download/download_engine.dart';
 
 class ModLoaderManager {
@@ -15,7 +16,9 @@ class ModLoaderManager {
 
   ModLoaderManager._internal();
 
-  static ModLoaderManager get instance => _instance ??= ModLoaderManager._internal();
+  static ModLoaderManager get instance =>
+      ServiceLocator.instance.tryGet<ModLoaderManager>() ??
+      (_instance ??= ModLoaderManager._internal());
 
   final Logger _logger = Logger('ModLoaderManager');
   final DownloadEngine _downloadEngine = DownloadEngine();

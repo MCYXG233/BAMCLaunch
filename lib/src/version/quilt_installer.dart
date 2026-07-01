@@ -4,6 +4,7 @@ import 'package:path/path.dart' as path;
 import '../core/network_client.dart';
 import '../core/logger.dart';
 import '../core/error_codes.dart';
+import '../di/service_locator.dart';
 import '../event/event_bus.dart';
 import '../event/event.dart';
 
@@ -101,7 +102,9 @@ class QuiltInstallFailedEvent extends Event {
 /// Quilt加载器安装服务
 class QuiltInstaller {
   static QuiltInstaller? _instance;
-  static QuiltInstaller get instance => _instance ??= QuiltInstaller._();
+  static QuiltInstaller get instance =>
+      ServiceLocator.instance.tryGet<QuiltInstaller>() ??
+      (_instance ??= QuiltInstaller._());
   QuiltInstaller._();
 
   /// Quilt API版本清单地址

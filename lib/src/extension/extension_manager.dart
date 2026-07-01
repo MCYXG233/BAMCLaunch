@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import '../config/config_manager.dart';
 import '../core/logger.dart';
+import '../di/service_locator.dart';
 
 /// 扩展状态
 enum ExtensionStatus {
@@ -194,7 +195,9 @@ class ExtensionManager {
 
   ExtensionManager._internal();
 
-  static ExtensionManager get instance => _instance ??= ExtensionManager._internal();
+  static ExtensionManager get instance =>
+      ServiceLocator.instance.tryGet<ExtensionManager>() ??
+      (_instance ??= ExtensionManager._internal());
 
   final Logger _logger = Logger('ExtensionManager');
   final ConfigManager _configManager = ConfigManager.instance;

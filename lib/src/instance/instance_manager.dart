@@ -6,6 +6,7 @@ import 'package:path/path.dart' as path;
 import 'models.dart';
 import '../config/config_manager.dart';
 import '../core/logger.dart';
+import '../di/service_locator.dart';
 
 /// 实例管理器
 /// 
@@ -95,9 +96,11 @@ class InstanceManager {
   }
 
   /// 获取单例实例的静态方法
-  /// 
-  /// 这是访问 [InstanceManager] 实例的推荐方式
-  static InstanceManager get instance => InstanceManager();
+  ///
+  /// 优先通过 [ServiceLocator] 获取，若未注册则回退到本地单例。
+  static InstanceManager get instance =>
+      ServiceLocator.instance.tryGet<InstanceManager>() ??
+      (_instance ??= InstanceManager._internal());
 
   /// 管理器是否已初始化
   bool get isInitialized => _isInitialized;

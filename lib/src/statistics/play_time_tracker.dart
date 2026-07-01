@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
+import '../di/service_locator.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
 import '../game/game_statistics.dart';
@@ -182,8 +183,8 @@ class PlayTimeTracker {
   /// 如果实例尚未创建，会自动创建一个新实例。
   /// 返回 [PlayTimeTracker] 的唯一实例。
   static PlayTimeTracker get instance {
-    _instance ??= PlayTimeTracker._internal();
-    return _instance!;
+    return ServiceLocator.instance.tryGet<PlayTimeTracker>() ??
+        (_instance ??= PlayTimeTracker._internal());
   }
 
   /// 工厂构造函数
