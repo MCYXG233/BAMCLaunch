@@ -481,12 +481,10 @@ class BATheme {
         onErrorContainer: const Color(0xFFFFCDD2),
         surface: BAColors.darkSurface,
         onSurface: BAColors.darkTextPrimary,
-        surfaceVariant: BAColors.darkSurfaceVariant,
+        surfaceContainerHighest: BAColors.darkSurfaceVariant,
         onSurfaceVariant: BAColors.darkTextSecondary,
         outline: BAColors.darkBorder,
         shadow: BAColors.darkShadow,
-        background: BAColors.darkBackground,
-        onBackground: BAColors.darkTextPrimary,
         surfaceTint: primary,
       );
     } else {
@@ -505,31 +503,15 @@ class BATheme {
         onErrorContainer: const Color(0xFFB71C1C),
         surface: BAColors.lightSurface,
         onSurface: BAColors.lightTextPrimary,
-        surfaceVariant: BAColors.lightSurfaceVariant,
+        surfaceContainerHighest: BAColors.lightSurfaceVariant,
         onSurfaceVariant: BAColors.lightTextSecondary,
         outline: BAColors.lightBorder,
         shadow: BAColors.lightShadow,
-        background: BAColors.lightBackground,
-        onBackground: BAColors.lightTextPrimary,
         surfaceTint: primary,
       );
     }
   }
 
-  /// 深色主题颜色方案（兼容旧代码）
-  static ColorScheme get _darkColorScheme => _buildColorScheme(Brightness.dark, null);
-
-  /// 浅色主题颜色方案（兼容旧代码）
-  static ColorScheme get _lightColorScheme => _buildColorScheme(Brightness.light, null);
-
-  /// 文本主题（通用）
-  ///
-  /// 返回应用通用的 [TextTheme] 配置。
-  /// 文本主题定义了各种文本样式的层级关系，
-  /// 从大标题到小标签，形成完整的文本样式体系。
-  ///
-  /// 文本主题使用 [BATypography] 中定义的样式，
-  /// 确保字体、大小、粗细等参数的一致性。
   static TextTheme get _textTheme {
     return TextTheme(
       displayLarge: BATypography.headlineLarge,
@@ -550,106 +532,14 @@ class BATheme {
     );
   }
 
-  /// 深色主题输入框装饰主题
-  ///
-  /// 返回深色主题下输入框的 [InputDecorationTheme] 配置。
-  /// 定义了输入框的填充色、边框样式、提示文本样式等。
-  ///
-  /// 深色输入框的特点：
-  /// - 填充色采用深色表面变体色
-  /// - 边框采用深色边框色，聚焦时显示主色调
-  /// - 提示文本采用深色禁用文本色
-  static InputDecorationTheme get _darkInputDecorationTheme {
-    return InputDecorationTheme(
-      filled: true,
-      fillColor: BAColors.darkSurfaceVariant,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: BAColors.darkBorder, width: 1),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: BAColors.darkBorder, width: 1),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: BAColors.primary, width: 2),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: BAColors.danger, width: 2),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: BAColors.danger, width: 2),
-      ),
-      hintStyle: const TextStyle(color: BAColors.darkTextDisabled, fontSize: 14),
-      labelStyle: const TextStyle(color: BAColors.darkTextSecondary, fontSize: 14),
-      errorStyle: const TextStyle(color: BAColors.danger, fontSize: 12),
-    );
-  }
-
-  /// 浅色主题输入框装饰主题
-  ///
-  /// 返回浅色主题下输入框的 [InputDecorationTheme] 配置。
-  /// 这是蔚蓝档案风格输入框的核心样式定义。
-  ///
-  /// 浅色输入框的特点：
-  /// - 填充色采用浅色表面变体色，营造柔和的背景
-  /// - 边框采用浅色边框色，聚焦时显示天蓝色主色调
-  /// - 圆角设计，符合蔚蓝档案的圆润风格
-  static InputDecorationTheme get _lightInputDecorationTheme {
-    return InputDecorationTheme(
-      filled: true,
-      fillColor: BAColors.lightSurfaceVariant,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: BAColors.lightBorder, width: 1),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: BAColors.lightBorder, width: 1),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: BAColors.primary, width: 2),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: BAColors.danger, width: 2),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: BAColors.danger, width: 2),
-      ),
-      hintStyle: const TextStyle(color: BAColors.lightTextDisabled, fontSize: 14),
-      labelStyle: const TextStyle(color: BAColors.lightTextSecondary, fontSize: 14),
-      errorStyle: const TextStyle(color: BAColors.danger, fontSize: 12),
-    );
-  }
-
-  /// 深色主题图标主题
-  ///
-  /// 返回深色主题下图标的标准样式配置。
-  /// 定义了图标的颜色和默认大小。
   static IconThemeData get _darkIconTheme {
     return const IconThemeData(color: BAColors.darkTextPrimary, size: 24);
   }
 
-  /// 浅色主题图标主题
-  ///
-  /// 返回浅色主题下图标的标准样式配置。
-  /// 图标颜色采用主要文本色，确保与整体配色的一致性。
   static IconThemeData get _lightIconTheme {
     return const IconThemeData(color: BAColors.lightTextPrimary, size: 24);
   }
 
-  /// 深色主题分割线主题
-  ///
-  /// 返回深色主题下分割线的样式配置。
-  /// 定义了分割线的颜色、粗细和间距。
   static DividerThemeData get _darkDividerTheme {
     return const DividerThemeData(
       color: BAColors.darkBorder,
@@ -658,85 +548,11 @@ class BATheme {
     );
   }
 
-  /// 浅色主题分割线主题
-  ///
-  /// 返回浅色主题下分割线的样式配置。
-  /// 分割线采用柔和的边框色，避免视觉干扰。
   static DividerThemeData get _lightDividerTheme {
     return const DividerThemeData(
       color: BAColors.lightBorder,
       thickness: 1,
       space: 1,
-    );
-  }
-
-  /// 深色主题应用栏主题
-  ///
-  /// 返回深色主题下顶部应用栏（AppBar）的样式配置。
-  /// 定义了应用栏的背景色、标题样式、图标颜色等。
-  ///
-  /// 深色应用栏的特点：
-  /// - 背景色采用深色表面色
-  /// - 无阴影（elevation: 0），保持简洁
-  /// - 标题不居中，采用左对齐布局
-  static AppBarTheme get _darkAppBarTheme {
-    return AppBarTheme(
-      backgroundColor: BAColors.darkSurface,
-      elevation: 0,
-      centerTitle: false,
-      titleTextStyle: BATypography.titleBar.copyWith(
-        color: BAColors.darkTextPrimary,
-      ),
-      iconTheme: const IconThemeData(color: BAColors.darkTextPrimary),
-    );
-  }
-
-  /// 浅色主题应用栏主题
-  ///
-  /// 返回浅色主题下顶部应用栏（AppBar）的样式配置。
-  /// 这是蔚蓝档案风格应用栏的核心样式定义。
-  ///
-  /// 浅色应用栏的特点：
-  /// - 背景色采用浅色表面色，与页面背景协调
-  /// - 无阴影，营造轻盈的视觉感受
-  /// - 标题采用标题栏样式，左对齐布局
-  static AppBarTheme get _lightAppBarTheme {
-    return AppBarTheme(
-      backgroundColor: BAColors.lightSurface,
-      elevation: 0,
-      centerTitle: false,
-      titleTextStyle: BATypography.titleBar.copyWith(
-        color: BAColors.lightTextPrimary,
-      ),
-      iconTheme: const IconThemeData(color: BAColors.lightTextPrimary),
-    );
-  }
-
-  /// 深色主题底部导航栏主题
-  ///
-  /// 返回深色主题下底部导航栏的样式配置。
-  /// 定义了导航栏的背景色、选中/未选中项的颜色等。
-  static BottomNavigationBarThemeData get _darkBottomNavBarTheme {
-    return const BottomNavigationBarThemeData(
-      backgroundColor: BAColors.darkSurface,
-      selectedItemColor: BAColors.primary,
-      unselectedItemColor: BAColors.darkTextSecondary,
-      elevation: 2,
-      type: BottomNavigationBarType.fixed,
-    );
-  }
-
-  /// 浅色主题底部导航栏主题
-  ///
-  /// 返回浅色主题下底部导航栏的样式配置。
-  /// 选中项采用天蓝色主色调，未选中项采用次要文本色。
-  static BottomNavigationBarThemeData get _lightBottomNavBarTheme {
-    return const BottomNavigationBarThemeData(
-      backgroundColor: BAColors.lightSurface,
-      selectedItemColor: BAColors.primary,
-      unselectedItemColor: BAColors.lightTextSecondary,
-      elevation: 2,
-      type: BottomNavigationBarType.fixed,
     );
   }
 

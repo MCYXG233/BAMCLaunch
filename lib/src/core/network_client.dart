@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:archive/archive.dart' as archive;
 import 'error_codes.dart';
@@ -571,20 +570,31 @@ class NetworkClient {
           // 获取文件总大小（可能为0，表示服务器未返回Content-Length）
           final contentLength = response.contentLength ?? 0;
 
-          // 流式读取响应数据并写入文件
-          await for (final chunk in response.stream) {
-            // 将数据块写入文件
-            sink.add(chunk);
-            // 更新已下载字节数
-            downloadedBytes += chunk.length;
-            // 如果有进度回调且知道总大小，则调用进度回调
-            if (onProgress != null && contentLength > 0) {
-              onProgress(downloadedBytes, contentLength);
+          try {
+            // 流式读取响应数据并写入文件
+            await for (final chunk in response.stream) {
+              // 将数据块写入文件
+              sink.add(chunk);
+              // 更新已下载字节数
+              downloadedBytes += chunk.length;
+              // 如果有进度回调且知道总大小，则调用进度回调
+              if (onProgress != null && contentLength > 0) {
+                onProgress(downloadedBytes, contentLength);
+              }
             }
-          }
 
-          // 关闭文件写入流，确保数据写入磁盘
-          await sink.close();
+            // 关闭文件写入流，确保数据写入磁盘
+            await sink.close();
+          } catch (e) {
+            // 关闭 sink 并清理不完整的下载文件
+            try { await sink.close(); } catch (_) {}
+            try {
+              if (await file.exists()) {
+                await file.delete();
+              }
+            } catch (_) {}
+            rethrow;
+          }
           // 记录下载完成日志
           _logger.info('Download completed: $destinationPath');
         } on TimeoutException catch (e, stackTrace) {

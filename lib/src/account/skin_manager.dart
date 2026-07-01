@@ -386,9 +386,11 @@ class SkinManager {
     final sessionUrl = 'https://sessionserver.mojang.com/session/minecraft/profile/$cleanUuid';
 
     final client = HttpClient();
+    client.connectionTimeout = const Duration(seconds: 15);
     try {
       final request = await client.getUrl(Uri.parse(sessionUrl));
-      final response = await request.close();
+      request.headers.set('User-Agent', 'BAMCLaunch/1.0');
+      final response = await request.close().timeout(const Duration(seconds: 30));
 
       if (response.statusCode != 200) {
         throw Exception('Mojang API returned ${response.statusCode}');
@@ -470,12 +472,13 @@ class SkinManager {
   /// 5. 创建并返回 SkinData 对象
   Future<SkinData> _downloadSkin(String skinUrl, String? capeUrl, Account account) async {
     final client = HttpClient();
+    client.connectionTimeout = const Duration(seconds: 15);
     try {
       final request = await client.getUrl(Uri.parse(skinUrl));
       // 设置 User-Agent 标识客户端
       request.headers.set('User-Agent', 'BAMCLaunch/1.0');
 
-      final response = await request.close();
+      final response = await request.close().timeout(const Duration(seconds: 30));
 
       if (response.statusCode != 200) {
         throw Exception('Skin download failed with ${response.statusCode}');
@@ -796,5 +799,15 @@ class SkinManager {
     } catch (e) {
       _logger.warn('Failed to delete cache files for account: ${account.username}');
     }
+  }
+
+  /// 释放资源
+  ///
+  /// 清空内存缓存并重置初始化状态。
+  void dispose() {
+    _skinCache.clear();
+    _initialized = false;
+    _cacheDir = null;
+    _customSkinDir = null;
   }
 }

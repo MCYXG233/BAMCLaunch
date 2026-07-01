@@ -441,12 +441,18 @@ class MirrorManager implements IMirrorManager {
     // 清空之前的测速结果
     _speedTestResults = [];
 
-    // 并发测试所有镜像
-    final futures = allMirrors.map((mirror) => _speedTestMirror(mirror));
-    // 等待所有测速完成
-    _speedTestResults = await Future.wait(futures);
+    try {
+      // 并发测试所有镜像
+      final futures = allMirrors.map((mirror) => _speedTestMirror(mirror));
+      // 等待所有测速完成
+      _speedTestResults = await Future.wait(futures);
+    } catch (e) {
+      // Future.wait 可能因某个镜像测速异常而抛出错误
+      // 此时保留已成功的结果
+    } finally {
+      _isSpeedTesting = false;
+    }
 
-    _isSpeedTesting = false;
     return _speedTestResults;
   }
 
@@ -629,26 +635,41 @@ class MirrorManager implements IMirrorManager {
   /// 如果加载失败或配置不存在，使用默认值
   @override
   Future<void> loadConfig() async {
-    // 加载自定义镜像列表
-    final customMirrorsStr = _configManager.getString(ConfigKeys.customMirrors);
-    if (customMirrorsStr != null && customMirrorsStr.isNotEmpty) {
-      try {
-        // 解析JSON数据
-        final List<dynamic> decoded = jsonDecode(customMirrorsStr);
-        _customMirrors = decoded
-            .map((json) => MirrorInfo.fromJson(json as Map<String, dynamic>))
-            .toList();
-      } catch (e) {
-        // 解析失败，使用空列表
-        _customMirrors = [];
+    try {
+      // 加载自定义镜像列表
+      final customMirrorsStr = _configManager.getString(ConfigKeys.customMirrors);
+      if (customMirrorsStr != null && customMirrorsStr.isNotEmpty) {
+        try {
+          // 解析JSON数据
+          final decoded = jsonDecode(customMirrorsStr);
+          if (decoded is List) {
+            _customMirrors = [];
+            for (final item in decoded) {
+              try {
+                if (item is Map<String, dynamic>) {
+                  _customMirrors.add(MirrorInfo.fromJson(item));
+                }
+              } catch (e) {
+                // 跳过无效的镜像条目
+              }
+            }
+          }
+        } catch (e) {
+          // 解析失败，使用空列表
+          _customMirrors = [];
+        }
       }
-    }
 
-    // 加载当前选中的镜像ID
-    final selectedMirror = _configManager.getString(ConfigKeys.selectedMirror);
-    // 验证镜像ID是否有效
-    if (selectedMirror != null && allMirrors.any((m) => m.id == selectedMirror)) {
-      _selectedMirrorId = selectedMirror;
+      // 加载当前选中的镜像ID
+      final selectedMirror = _configManager.getString(ConfigKeys.selectedMirror);
+      // 验证镜像ID是否有效
+      if (selectedMirror != null && allMirrors.any((m) => m.id == selectedMirror)) {
+        _selectedMirrorId = selectedMirror;
+      }
+    } catch (e) {
+      // 配置加载失败，使用默认值
+      _customMirrors = [];
+      _selectedMirrorId = 'bmclapi2';
     }
   }
 }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import '../config/config_manager.dart';
 import '../config/config_keys.dart';
@@ -780,24 +779,24 @@ class AccountManager implements IAccountManager {
   /// - 401: 令牌无效或已过期
   /// - 其他: 验证失败
   Future<bool> _validateMicrosoftToken(String accessToken) async {
+    final client = HttpClient();
+    client.connectionTimeout = const Duration(seconds: 15);
     try {
       // 构建请求URI
       final uri = Uri.parse('https://api.minecraftservices.com/minecraft/profile');
 
       // 创建HTTP客户端并发送请求
-      final client = HttpClient();
       final request = await client.getUrl(uri);
 
       // 设置授权头
       request.headers.set('Authorization', 'Bearer $accessToken');
 
       // 获取响应
-      final response = await request.close();
+      final response = await request.close().timeout(const Duration(seconds: 30));
       final statusCode = response.statusCode;
 
       // 清理资源
       await response.drain();
-      client.close();
 
       // 根据状态码判断令牌有效性
       if (statusCode == 200) {
@@ -814,6 +813,8 @@ class AccountManager implements IAccountManager {
       // 记录验证过程中的错误
       _logger.error('Failed to validate Microsoft token', e, stackTrace);
       return false;
+    } finally {
+      client.close();
     }
   }
 

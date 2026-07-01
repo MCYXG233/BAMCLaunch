@@ -56,27 +56,28 @@ class ReleaseInfo {
   /// [json] GitHub API 返回的 release JSON 对象
   /// 返回解析后的 [ReleaseInfo] 实例
   factory ReleaseInfo.fromJson(Map<String, dynamic> json) {
-    return ReleaseInfo(
-      // 从 tag_name 字段获取版本号
-      version: json['tag_name'] ?? '',
-      // 发布名称
-      name: json['name'],
-      // 发布说明内容
-      body: json['body'],
-      // 从 assets 数组中查找第一个 .exe 或 .zip 文件的下载链接
-      downloadUrl: (json['assets'] as List<dynamic>?)
+    String? downloadUrl;
+    try {
+      downloadUrl = (json['assets'] as List<dynamic>?)
           ?.firstWhere(
             (asset) =>
-                (asset['name'] as String).endsWith('.exe') ||
-                (asset['name'] as String).endsWith('.zip'),
+                (asset['name'] as String?)?.endsWith('.exe') == true ||
+                (asset['name'] as String?)?.endsWith('.zip') == true,
             orElse: () => null,
-          )?['browser_download_url'],
-      // 解析 ISO 8601 格式的发布时间
+          )?['browser_download_url'] as String?;
+    } catch (_) {
+      downloadUrl = null;
+    }
+
+    return ReleaseInfo(
+      version: json['tag_name'] as String? ?? '',
+      name: json['name'] as String?,
+      body: json['body'] as String?,
+      downloadUrl: downloadUrl,
       publishedAt: json['published_at'] != null
-          ? DateTime.parse(json['published_at'])
+          ? DateTime.tryParse(json['published_at'] as String)
           : null,
-      // 是否为预发布版本
-      isPreRelease: json['prerelease'] ?? false,
+      isPreRelease: json['prerelease'] as bool? ?? false,
     );
   }
 }
@@ -198,7 +199,7 @@ class UpdateManager {
       final timeSinceLastCheck = DateTime.now().difference(_lastCheckedAt!);
       if (timeSinceLastCheck < checkInterval) {
         // 未超过间隔时间，跳过检查
-        _logger.info('Skipping update check (last checked ${_lastCheckedAt})');
+        _logger.info('Skipping update check (last checked $_lastCheckedAt)');
         return _latestRelease;
       }
     }
@@ -267,8 +268,8 @@ class UpdateManager {
   /// - 大于 0：当前版本比新版本新
   int compareVersions(String currentVersion, String newVersion) {
     // 移除版本号前的 'v' 前缀（如果有）
-    final current = currentVersion.replaceFirst('v', '');
-    final latest = newVersion.replaceFirst('v', '');
+    final current = currentVersion.replaceFirst(RegExp(r'^v'), '');
+    final latest = newVersion.replaceFirst(RegExp(r'^v'), '');
 
     // 按点号分割版本号，并转换为整数
     final currentParts = current.split('.').map(int.tryParse).toList();
@@ -350,10 +351,39 @@ class UpdateManager {
 
     // 下载文件
     final file = File(filePath);
-    final request = await http.Client().get(Uri.parse(url));
+    final client = http.Client();
+    try {
+      final request = http.Request('GET', Uri.parse(url));
+      final response = await client.send(request).timeout(
+        const Duration(seconds: 300),
+      );
 
-    // 将下载内容写入文件
-    await file.writeAsBytes(request.bodyBytes);
+      if (response.statusCode != 200) {
+        throw AppException.fromCode(
+          ErrorCodes.networkHttpError,
+          detail: 'Download failed: HTTP ${response.statusCode}',
+        );
+      }
+
+      final contentLength = response.contentLength;
+      final sink = file.openWrite();
+      int downloaded = 0;
+
+      try {
+        await for (final data in response.stream) {
+          sink.add(data);
+          downloaded += data.length;
+          if (onProgress != null && contentLength != null && contentLength > 0) {
+            onProgress(downloaded / contentLength);
+          }
+        }
+      } finally {
+        await sink.flush();
+        await sink.close();
+      }
+    } finally {
+      client.close();
+    }
 
     _logger.info('Update downloaded: $filePath');
     return file;

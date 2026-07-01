@@ -4,7 +4,6 @@ import 'package:path/path.dart' as path;
 import '../core/logger.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
-import 'java/java_manager.dart';
 
 /// 游戏会话记录
 class GameSession {
@@ -83,13 +82,15 @@ class GameSession {
 
   factory GameSession.fromJson(Map<String, dynamic> json) {
     return GameSession(
-      id: json['id'] as String,
-      instanceName: json['instanceName'] as String,
-      instanceId: json['instanceId'] as String,
-      gameVersion: json['gameVersion'] as String,
-      startTime: DateTime.parse(json['startTime'] as String),
+      id: json['id'] as String? ?? '',
+      instanceName: json['instanceName'] as String? ?? '',
+      instanceId: json['instanceId'] as String? ?? '',
+      gameVersion: json['gameVersion'] as String? ?? '',
+      startTime: json['startTime'] != null
+          ? DateTime.tryParse(json['startTime'] as String) ?? DateTime.now()
+          : DateTime.now(),
       endTime: json['endTime'] != null
-          ? DateTime.parse(json['endTime'] as String)
+          ? DateTime.tryParse(json['endTime'] as String)
           : null,
       serverAddress: json['serverAddress'] as String?,
       serverPort: json['serverPort'] as int?,
@@ -173,11 +174,13 @@ class ServerRecord {
 
   factory ServerRecord.fromJson(Map<String, dynamic> json) {
     return ServerRecord(
-      address: json['address'] as String,
+      address: json['address'] as String? ?? '',
       port: json['port'] as int? ?? 25565,
       name: json['name'] as String?,
       connectionCount: json['connectionCount'] as int? ?? 0,
-      lastConnected: DateTime.parse(json['lastConnected'] as String),
+      lastConnected: json['lastConnected'] != null
+          ? DateTime.tryParse(json['lastConnected'] as String) ?? DateTime.now()
+          : DateTime.now(),
       totalPlayTimeSeconds: json['totalPlayTimeSeconds'] as int? ?? 0,
     );
   }
@@ -287,17 +290,26 @@ class GameStatisticsManager {
 
     try {
       final content = await _dataFile!.readAsString();
-      final data = jsonDecode(content) as Map<String, dynamic>;
+      final decoded = jsonDecode(content);
+      if (decoded is! Map<String, dynamic>) {
+        _logger.warn('Statistics file format invalid, starting fresh');
+        return;
+      }
+      final data = decoded;
 
       // 加载会话
       final sessionsData = data['sessions'] as List?;
       if (sessionsData != null) {
         _sessions.clear();
-        _sessions.addAll(
-          sessionsData
-              .whereType<Map<String, dynamic>>()
-              .map((e) => GameSession.fromJson(e)),
-        );
+        for (final item in sessionsData) {
+          try {
+            if (item is Map<String, dynamic>) {
+              _sessions.add(GameSession.fromJson(item));
+            }
+          } catch (e) {
+            _logger.warn('Skipping invalid session entry: $e');
+          }
+        }
       }
 
       // 加载服务器记录
@@ -306,7 +318,11 @@ class GameStatisticsManager {
         _servers.clear();
         serversData.forEach((key, value) {
           if (value is Map<String, dynamic>) {
-            _servers[key] = ServerRecord.fromJson(value);
+            try {
+              _servers[key.toString()] = ServerRecord.fromJson(value);
+            } catch (e) {
+              _logger.warn('Skipping invalid server entry: $e');
+            }
           }
         });
       }
@@ -329,7 +345,13 @@ class GameStatisticsManager {
         'lastUpdated': DateTime.now().toIso8601String(),
       };
 
-      await _dataFile!.writeAsString(jsonEncode(data));
+      // 原子写入：先写入临时文件，再重命名
+      final tempFile = File('${_dataFile!.path}.tmp');
+      await tempFile.writeAsString(jsonEncode(data));
+      if (await _dataFile!.exists()) {
+        await _dataFile!.delete();
+      }
+      await tempFile.rename(_dataFile!.path);
     } catch (e, stackTrace) {
       _logger.error('Failed to save statistics data', e, stackTrace);
     }
@@ -385,7 +407,10 @@ class GameStatisticsManager {
     _sessions.add(session);
 
     _logger.info('Started new session: ${session.id} for $instanceName');
-    _saveData();
+    // fire-and-forget 保存，不阻塞调用方
+    _saveData().catchError((e) {
+      _logger.error('Failed to save session start data', e);
+    });
 
     return session;
   }
@@ -512,8 +537,11 @@ class GameStatisticsManager {
   /// 获取本周游戏时长
   Duration getWeekPlayTime() {
     final now = DateTime.now();
-    final weekStart = now.subtract(Duration(days: now.weekday - 1));
-    weekStart.copyWith(hour: 0, minute: 0, second: 0);
+    final weekStart = DateTime(
+      now.year,
+      now.month,
+      now.day - (now.weekday - 1),
+    );
 
     int total = 0;
     for (final session in _sessions) {

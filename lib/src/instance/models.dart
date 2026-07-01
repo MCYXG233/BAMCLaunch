@@ -1,5 +1,3 @@
-import 'dart:io';
-
 /// 实例状态
 enum InstanceStatus {
   idle,
@@ -70,11 +68,15 @@ class GameDirectory {
 
   factory GameDirectory.fromJson(Map<String, dynamic> json) {
     return GameDirectory(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      path: json['path'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? 'Unknown',
+      path: json['path'] as String? ?? '',
+      createdAt: json['createdAt'] is String
+          ? DateTime.tryParse(json['createdAt'] as String) ?? DateTime.now()
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] is String
+          ? DateTime.tryParse(json['updatedAt'] as String) ?? DateTime.now()
+          : DateTime.now(),
     );
   }
 }
@@ -178,28 +180,36 @@ class GameInstance {
 
   factory GameInstance.fromJson(Map<String, dynamic> json) {
     return GameInstance(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      directoryId: json['directoryId'] as String,
-      version: json['version'] as String,
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? 'Unknown',
+      directoryId: json['directoryId'] as String? ?? '',
+      version: json['version'] as String? ?? 'unknown',
       loader: json['loader'] as String?,
       loaderVersion: json['loaderVersion'] as String?,
       icon: json['icon'] as String?,
       description: json['description'] as String?,
       status: InstanceStatus.values.firstWhere(
-        (e) => e.name == json['status'] as String,
+        (e) => e.name == json['status'],
         orElse: () => InstanceStatus.idle,
       ),
       loaderStatus: LoaderStatus.values.firstWhere(
-        (e) => e.name == json['loaderStatus'] as String?,
+        (e) => e.name == json['loaderStatus'],
         orElse: () => LoaderStatus.notInstalled,
       ),
-      config: InstanceConfig.fromJson(json['config'] as Map<String, dynamic>),
-      resources: InstanceResources.fromJson(json['resources'] as Map<String, dynamic>),
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-      lastPlayed: json['lastPlayed'] != null
-          ? DateTime.parse(json['lastPlayed'] as String)
+      config: json['config'] is Map<String, dynamic>
+          ? InstanceConfig.fromJson(json['config'] as Map<String, dynamic>)
+          : InstanceConfig(),
+      resources: json['resources'] is Map<String, dynamic>
+          ? InstanceResources.fromJson(json['resources'] as Map<String, dynamic>)
+          : InstanceResources(mods: [], resourcePacks: [], shaderPacks: [], worlds: [], screenshots: []),
+      createdAt: json['createdAt'] is String
+          ? DateTime.tryParse(json['createdAt'] as String) ?? DateTime.now()
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] is String
+          ? DateTime.tryParse(json['updatedAt'] as String) ?? DateTime.now()
+          : DateTime.now(),
+      lastPlayed: json['lastPlayed'] is String
+          ? DateTime.tryParse(json['lastPlayed'] as String)
           : null,
       playTimeSeconds: json['playTimeSeconds'] as int?,
     );
@@ -286,20 +296,20 @@ class InstanceConfig {
   factory InstanceConfig.fromJson(Map<String, dynamic> json) {
     return InstanceConfig(
       javaPath: json['javaPath'] as String?,
-      maxMemory: json['maxMemory'] as int?,
-      minMemory: json['minMemory'] as int?,
+      maxMemory: json['maxMemory'] is int ? json['maxMemory'] as int : null,
+      minMemory: json['minMemory'] is int ? json['minMemory'] as int : null,
       jvmArgs: (json['jvmArgs'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          ?.toList(),
+          ?.map((e) => e.toString())
+          .toList(),
       gameArgs: (json['gameArgs'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          ?.toList(),
+          ?.map((e) => e.toString())
+          .toList(),
       windowWidth: json['windowWidth'] as String?,
       windowHeight: json['windowHeight'] as String?,
       fullscreen: json['fullscreen'] as bool?,
       demo: json['demo'] as bool?,
       customProperties: (json['customProperties'] as Map<String, dynamic>?)
-          ?.map((key, value) => MapEntry(key, value as String)),
+          ?.map((key, value) => MapEntry(key, value.toString())),
       modLoader: json['modLoader'] as String?,
       modLoaderVersion: json['modLoaderVersion'] as String?,
     );
@@ -352,23 +362,23 @@ class InstanceResources {
     return InstanceResources(
       mods: (json['mods'] as List<dynamic>?)
               ?.map((e) => e as String)
-              ?.toList() ??
+              .toList() ??
           [],
       resourcePacks: (json['resourcePacks'] as List<dynamic>?)
               ?.map((e) => e as String)
-              ?.toList() ??
+              .toList() ??
           [],
       shaderPacks: (json['shaderPacks'] as List<dynamic>?)
               ?.map((e) => e as String)
-              ?.toList() ??
+              .toList() ??
           [],
       worlds: (json['worlds'] as List<dynamic>?)
               ?.map((e) => e as String)
-              ?.toList() ??
+              .toList() ??
           [],
       screenshots: (json['screenshots'] as List<dynamic>?)
               ?.map((e) => e as String)
-              ?.toList() ??
+              .toList() ??
           [],
     );
   }
@@ -438,22 +448,24 @@ class ResourceItem {
 
   factory ResourceItem.fromJson(Map<String, dynamic> json) {
     return ResourceItem(
-      id: json['id'] as String,
-      name: json['name'] as String,
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? 'Unknown',
       type: ResourceType.values.firstWhere(
-        (e) => e.name == json['type'] as String,
+        (e) => e.name == json['type'],
         orElse: () => ResourceType.mod,
       ),
-      path: json['path'] as String,
+      path: json['path'] as String? ?? '',
       source: json['source'] as String?,
       version: json['version'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      lastUsed: json['lastUsed'] != null
-          ? DateTime.parse(json['lastUsed'] as String)
+      createdAt: json['createdAt'] is String
+          ? DateTime.tryParse(json['createdAt'] as String) ?? DateTime.now()
+          : DateTime.now(),
+      lastUsed: json['lastUsed'] is String
+          ? DateTime.tryParse(json['lastUsed'] as String)
           : null,
       linkedInstances: (json['linkedInstances'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          ?.toList(),
+          ?.map((e) => e.toString())
+          .toList(),
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:window_manager/window_manager.dart';
 
 import '../../instance/instance_manager.dart';
 import '../../instance/models.dart';
@@ -19,10 +18,8 @@ import '../components/ba_buttons.dart';
 import '../components/ba_create_instance_dialog.dart';
 import '../components/ba_backup_dialog.dart';
 import '../components/ba_mod_manager_dialog.dart';
-import '../components/ba_common_widgets.dart';
 import '../theme/colors.dart';
 import '../animations/ba_animations.dart';
-import '../animations/ba_effects.dart';
 import '../../game/game_statistics.dart';
 
 /// 蔚蓝档案风格游戏库页面 - 模仿蔚蓝档案的"学生"列表风格
@@ -38,7 +35,6 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   int _selectedFilter = 0;
-  bool _isMaximized = false;
 
   // 实例详情页状态
   GameInstance? _selectedInstance;
@@ -63,20 +59,8 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
   @override
   void initState() {
     super.initState();
-    _initWindow();
     _initializeAndLoadInstances();
     _subscribeToEvents();
-  }
-
-  Future<void> _initWindow() async {
-    if (Platform.isWindows || Platform.isMacOS) {
-      final isMaximized = await windowManager.isMaximized();
-      if (mounted) {
-        setState(() {
-          _isMaximized = isMaximized;
-        });
-      }
-    }
   }
 
   Future<void> _initializeAndLoadInstances() async {
@@ -2471,6 +2455,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
   void _openFile(String filePath) {
     try {
       Process.run('explorer', [filePath]);
-    } catch (_) {}
+    } on Exception catch (_) {
+      if (mounted) {
+        NotificationManager().showError('打开文件失败');
+      }
+    }
   }
 }

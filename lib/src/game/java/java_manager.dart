@@ -14,6 +14,7 @@
 /// ```
 library;
 
+import 'dart:async';
 import 'dart:io';
 import '../../config/config_keys.dart';
 import '../../config/config_manager.dart';
@@ -696,6 +697,12 @@ class JavaManager implements IJavaManager {
         ['-version'],
         stdoutEncoding: SystemEncoding(),
         stderrEncoding: SystemEncoding(),
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          _logger.debug('Java version check timed out: $javaPath');
+          throw TimeoutException('Java -version timed out');
+        },
       );
 
       // java -version 输出到 stderr

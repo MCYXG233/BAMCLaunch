@@ -80,6 +80,9 @@ class InstanceManager {
   /// 标记管理器是否已初始化
   bool _isInitialized = false;
 
+  /// 标记管理器是否正在初始化中（防止并发初始化）
+  bool _isInitializing = false;
+
   /// 私有构造函数（单例模式）
   InstanceManager._internal();
 
@@ -121,11 +124,12 @@ class InstanceManager {
   /// 异常：
   /// - [StateError]：当选中的目录ID无效且目录列表为空时抛出
   GameDirectory? get selectedDirectory {
-    if (_selectedDirectoryId == null) return null;
-    return _directories.firstWhere(
-      (d) => d.id == _selectedDirectoryId,
-      orElse: () => _directories.isNotEmpty ? _directories.first : throw StateError('No directories found'),
-    );
+    if (_selectedDirectoryId == null) return _directories.isNotEmpty ? _directories.first : null;
+    try {
+      return _directories.firstWhere((d) => d.id == _selectedDirectoryId);
+    } catch (_) {
+      return _directories.isNotEmpty ? _directories.first : null;
+    }
   }
 
   /// 获取当前选中的实例
@@ -138,11 +142,12 @@ class InstanceManager {
   /// 异常：
   /// - [StateError]：当选中的实例ID无效且实例列表为空时抛出
   GameInstance? get selectedInstance {
-    if (_selectedInstanceId == null) return null;
-    return _instances.firstWhere(
-      (i) => i.id == _selectedInstanceId,
-      orElse: () => _instances.isNotEmpty ? _instances.first : throw StateError('No instances found'),
-    );
+    if (_selectedInstanceId == null) return _instances.isNotEmpty ? _instances.first : null;
+    try {
+      return _instances.firstWhere((i) => i.id == _selectedInstanceId);
+    } catch (_) {
+      return _instances.isNotEmpty ? _instances.first : null;
+    }
   }
 
   /// 获取指定目录下的所有实例
@@ -185,6 +190,15 @@ class InstanceManager {
   /// ```
   Future<void> initialize() async {
     if (_isInitialized) return;
+    if (_isInitializing) {
+      // 等待正在进行的初始化完成
+      while (_isInitializing) {
+        await Future.delayed(const Duration(milliseconds: 50));
+      }
+      return;
+    }
+
+    _isInitializing = true;
 
     try {
       _logger.info('Initializing InstanceManager...');
@@ -201,6 +215,8 @@ class InstanceManager {
     } catch (e, stackTrace) {
       _logger.error('Failed to initialize InstanceManager', e, stackTrace);
       rethrow;
+    } finally {
+      _isInitializing = false;
     }
   }
 

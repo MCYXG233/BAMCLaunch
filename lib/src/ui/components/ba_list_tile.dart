@@ -90,7 +90,7 @@ class _BAListTileState extends State<BAListTile> {
           decoration: BoxDecoration(
             color: widget.selected
                 ? (enabled
-                      ? BAColors.primaryOf(context).withOpacity(0.15)
+                      ? BAColors.primaryOf(context).withValues(alpha: 0.15)
                       : BAColors.surfaceVariantOf(context))
                 : (enabled ? BAColors.surfaceOf(context) : BAColors.surfaceVariantOf(context)),
             borderRadius: BATheme.borderRadius,
@@ -98,14 +98,14 @@ class _BAListTileState extends State<BAListTile> {
               color: widget.selected
                   ? (enabled ? BAColors.primaryOf(context) : BAColors.borderOf(context))
                   : (_isHovered
-                        ? BAColors.primaryOf(context).withOpacity(0.5)
+                        ? BAColors.primaryOf(context).withValues(alpha: 0.5)
                         : BAColors.borderOf(context)),
               width: widget.selected ? 2 : 1,
             ),
             boxShadow: enabled
                 ? [
                     BoxShadow(
-                      color: BAColors.shadowOf(context).withOpacity(shadowOpacity),
+                      color: BAColors.shadowOf(context).withValues(alpha: shadowOpacity),
                       blurRadius: blurRadius,
                       offset: Offset(0, offsetY),
                     ),
@@ -272,7 +272,7 @@ class _BAProgressListTileState extends State<BAProgressListTile> {
           decoration: BoxDecoration(
             color: widget.selected
                 ? (enabled
-                      ? BAColors.primaryOf(context).withOpacity(0.15)
+                      ? BAColors.primaryOf(context).withValues(alpha: 0.15)
                       : BAColors.surfaceVariantOf(context))
                 : (enabled ? BAColors.surfaceOf(context) : BAColors.surfaceVariantOf(context)),
             borderRadius: BATheme.borderRadius,
@@ -280,14 +280,14 @@ class _BAProgressListTileState extends State<BAProgressListTile> {
               color: widget.selected
                   ? (enabled ? BAColors.primaryOf(context) : BAColors.borderOf(context))
                   : (_isHovered
-                        ? BAColors.primaryOf(context).withOpacity(0.5)
+                        ? BAColors.primaryOf(context).withValues(alpha: 0.5)
                         : BAColors.borderOf(context)),
               width: widget.selected ? 2 : 1,
             ),
             boxShadow: enabled
                 ? [
                     BoxShadow(
-                      color: BAColors.shadowOf(context).withOpacity(shadowOpacity),
+                      color: BAColors.shadowOf(context).withValues(alpha: shadowOpacity),
                       blurRadius: blurRadius,
                       offset: Offset(0, offsetY),
                     ),

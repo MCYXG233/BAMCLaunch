@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
@@ -53,8 +52,6 @@ class _SettingsPanelState extends State<SettingsPanel>
   final BackgroundManager _backgroundManager = BackgroundManager();
   late final ThemeManager _themeManager;
 
-  bool _managersInitialized = false;
-
   // 设置项状态
   String _gameDirectory = '';
   String _javaPath = '';
@@ -68,7 +65,6 @@ class _SettingsPanelState extends State<SettingsPanel>
   bool _launchAtStartup = false;
   bool _minimizeToTray = true;
   bool _closeToTray = false;
-  bool _autoRetryDownload = true;
   bool _enableAnimation = true;
   String _proxyHost = '';
   int _proxyPort = 0;
@@ -131,7 +127,6 @@ class _SettingsPanelState extends State<SettingsPanel>
     await _themeManager.initialize();
     if (mounted) {
       setState(() {
-        _managersInitialized = true;
         _backgroundConfig = _backgroundManager.currentConfig;
       });
     }
@@ -150,7 +145,7 @@ class _SettingsPanelState extends State<SettingsPanel>
       _launchAtStartup = _configManager.getBool(ConfigKeys.launchAtStartup) ?? false;
       _minimizeToTray = _configManager.getBool(ConfigKeys.minimizeToTray) ?? true;
       _closeToTray = _configManager.getBool(ConfigKeys.closeToTray) ?? false;
-      _autoRetryDownload = _configManager.getBool(ConfigKeys.autoRetryDownload) ?? true;
+
       _enableAnimation = _configManager.getBool(ConfigKeys.enableSplashAnimation) ?? true;
       _proxyHost = _configManager.getString(ConfigKeys.proxyHost) ?? '';
       _proxyPort = _configManager.getInt(ConfigKeys.proxyPort) ?? 0;
@@ -1531,7 +1526,7 @@ class _SettingsPanelState extends State<SettingsPanel>
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: BAColors.primaryOf(context),
+            activeThumbColor: BAColors.primaryOf(context),
           ),
         ],
       ),
@@ -1544,7 +1539,7 @@ class _SettingsPanelState extends State<SettingsPanel>
   void _showBackgroundSelector() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('背景设置'),
         content: SizedBox(
           width: 400,
@@ -1552,12 +1547,14 @@ class _SettingsPanelState extends State<SettingsPanel>
             currentConfig: _backgroundConfig,
             onConfigChanged: (config) async {
               await _backgroundManager.saveBackgroundConfig(config);
+              if (!mounted) return;
               setState(() => _backgroundConfig = config);
             },
             onPickImage: () async {
               final result = await FilePicker.platform.pickFiles(
                 type: FileType.image,
               );
+              if (!mounted) return;
               if (result != null && result.files.isNotEmpty) {
                 final path = result.files.single.path;
                 if (path != null) {
@@ -1566,9 +1563,11 @@ class _SettingsPanelState extends State<SettingsPanel>
                     imagePath: path,
                     opacity: 1.0,
                   );
+                  // ignore: use_build_context_synchronously
+                  Navigator.pop(dialogContext);
                   await _backgroundManager.saveBackgroundConfig(config);
+                  if (!mounted) return;
                   setState(() => _backgroundConfig = config);
-                  Navigator.pop(context);
                   NotificationManager().showSuccess('背景已更新');
                 }
               }
@@ -1577,6 +1576,7 @@ class _SettingsPanelState extends State<SettingsPanel>
               final result = await FilePicker.platform.pickFiles(
                 type: FileType.video,
               );
+              if (!mounted) return;
               if (result != null && result.files.isNotEmpty) {
                 final path = result.files.single.path;
                 if (path != null) {
@@ -1585,9 +1585,11 @@ class _SettingsPanelState extends State<SettingsPanel>
                     videoPath: path,
                     opacity: 1.0,
                   );
+                  // ignore: use_build_context_synchronously
+                  Navigator.pop(dialogContext);
                   await _backgroundManager.saveBackgroundConfig(config);
+                  if (!mounted) return;
                   setState(() => _backgroundConfig = config);
-                  Navigator.pop(context);
                   NotificationManager().showSuccess('背景已更新');
                 }
               }

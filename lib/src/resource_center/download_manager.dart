@@ -410,6 +410,12 @@ class DownloadManager {
           task.errorMessage = '下载失败: $e';
           _notifyTaskUpdate(task);
           _removeActiveTask(task);
+          // 清理可能残留的临时文件
+          try {
+            if (await localFile.exists()) {
+              await localFile.delete();
+            }
+          } catch (_) {}
           _logger.error('[Download] 下载异常: $e');
           return;
         }
@@ -438,26 +444,59 @@ class DownloadManager {
         }
       }
 
+      // 检查磁盘空间（如果知道总大小）
+      if (task.totalBytes > 0) {
+        try {
+          final stat = await destination.parent.stat();
+          if (stat.type == FileSystemEntityType.directory) {
+            // 无法直接获取可用空间，跳过检查
+          }
+        } catch (_) {
+          // 磁盘空间检查失败不阻止下载
+        }
+      }
+
       // 写入文件，跟踪进度
       final sink = destination.openWrite();
       int downloaded = 0;
+      int bytesSinceLastUpdate = 0;
       final watch = Stopwatch()..start();
 
-      await response.stream.listen((List<int> data) {
-        sink.add(data);
-        downloaded += data.length;
-        task.downloadedBytes = downloaded;
+      try {
+        await for (final data in response.stream) {
+          // 检查任务是否已取消
+          if (task.status == DownloadTaskStatus.cancelled) {
+            await sink.flush();
+            await sink.close();
+            // 清理未完成的临时文件
+            try {
+              if (await destination.exists()) {
+                await destination.delete();
+              }
+            } catch (_) {}
+            return;
+          }
 
-        // 计算速度（每200ms更新一次）
-        if (watch.elapsedMilliseconds > 200) {
-          task.downloadSpeed = downloaded ~/ (watch.elapsedMilliseconds / 1000).toInt().clamp(1, 99999);
-          watch.reset();
-          _notifyTaskUpdate(task);
+          sink.add(data);
+          downloaded += data.length;
+          bytesSinceLastUpdate += data.length;
+          task.downloadedBytes = downloaded;
+
+          // 计算速度（每200ms更新一次）
+          if (watch.elapsedMilliseconds > 200) {
+            final elapsedSeconds = watch.elapsedMilliseconds / 1000;
+            if (elapsedSeconds > 0) {
+              task.downloadSpeed = (bytesSinceLastUpdate / elapsedSeconds).round();
+            }
+            bytesSinceLastUpdate = 0;
+            watch.reset();
+            _notifyTaskUpdate(task);
+          }
         }
-      }).asFuture();
-
-      await sink.flush();
-      await sink.close();
+      } finally {
+        await sink.flush();
+        await sink.close();
+      }
 
       task.downloadedBytes = downloaded;
       if (task.totalBytes == 0) task.totalBytes = downloaded;

@@ -251,17 +251,25 @@ class ModrinthApi implements ResourceApi {
   }
 
   ResourceVersion _parseVersion(Map<String, dynamic> version) {
-    final files = version['files'] as List<dynamic>;
+    final files = version['files'] as List<dynamic>? ?? [];
+    if (files.isEmpty) {
+      throw Exception('Version has no downloadable files');
+    }
+
     final primaryFile = files.firstWhere(
-      (f) => f['primary'] as bool? ?? false,
+      (f) => f is Map && (f['primary'] as bool? ?? false),
       orElse: () => files.first,
     );
+
+    if (primaryFile is! Map) {
+      throw Exception('Invalid file data in version');
+    }
 
     final hashes = primaryFile['hashes'] as Map<String, dynamic>?;
     final fileHashes = <String, String>{};
     if (hashes != null) {
       hashes.forEach((key, value) {
-        fileHashes[key] = value as String;
+        fileHashes[key] = value.toString();
       });
     }
 

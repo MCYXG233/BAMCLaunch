@@ -52,9 +52,12 @@ class SearchService {
       // }
 
       return result;
-    } catch (e) {
+    } catch (e, stackTrace) {
       // 网络错误时提供友好提示
-      throw Exception('搜索失败，请检查网络连接: $e');
+      Error.throwWithStackTrace(
+        Exception('搜索失败，请检查网络连接: $e'),
+        stackTrace,
+      );
     }
   }
 
@@ -65,8 +68,11 @@ class SearchService {
         return await _curseforgeApi!.getResource(id);
       }
       return await _modrinthApi.getResource(id);
-    } catch (e) {
-      throw Exception('获取资源详情失败: $e');
+    } catch (e, stackTrace) {
+      Error.throwWithStackTrace(
+        Exception('获取资源详情失败: $e'),
+        stackTrace,
+      );
     }
   }
 
@@ -77,8 +83,11 @@ class SearchService {
         return await _curseforgeApi!.getVersions(id);
       }
       return await _modrinthApi.getVersions(id);
-    } catch (e) {
-      throw Exception('获取版本列表失败: $e');
+    } catch (e, stackTrace) {
+      Error.throwWithStackTrace(
+        Exception('获取版本列表失败: $e'),
+        stackTrace,
+      );
     }
   }
 
@@ -89,8 +98,11 @@ class SearchService {
         return await _curseforgeApi!.getVersion(resourceId, versionId);
       }
       return await _modrinthApi.getVersion(resourceId, versionId);
-    } catch (e) {
-      throw Exception('获取版本信息失败: $e');
+    } catch (e, stackTrace) {
+      Error.throwWithStackTrace(
+        Exception('获取版本信息失败: $e'),
+        stackTrace,
+      );
     }
   }
 }

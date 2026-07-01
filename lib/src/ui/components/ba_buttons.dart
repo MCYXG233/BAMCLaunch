@@ -104,8 +104,6 @@ class _BAButtonState extends State<BAButton> {
   }
 
   BoxDecoration _getDecoration(BuildContext context, bool isDisabled) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     Color backgroundColor;
     Color borderColor;
     List<BoxShadow> shadows;
@@ -113,19 +111,19 @@ class _BAButtonState extends State<BAButton> {
     switch (widget.style) {
       case BAButtonStyle.primary:
         backgroundColor = isDisabled
-            ? BAColors.primaryOf(context).withOpacity(0.4)
+            ? BAColors.primaryOf(context).withValues(alpha: 0.4)
             : (_isHovered ? BAColors.primaryDarkOf(context) : BAColors.primaryOf(context));
         borderColor = Colors.transparent;
         shadows = isDisabled ? [] : BATheme.shadowsSmallOf(context);
         break;
       case BAButtonStyle.secondary:
         backgroundColor = isDisabled
-            ? BAColors.surfaceVariantOf(context).withOpacity(0.4)
+            ? BAColors.surfaceVariantOf(context).withValues(alpha: 0.4)
             : BAColors.surfaceVariantOf(context);
         borderColor = isDisabled
             ? BAColors.borderOf(context)
             : (_isHovered
-                ? BAColors.primaryOf(context).withOpacity(0.5)
+                ? BAColors.primaryOf(context).withValues(alpha: 0.5)
                 : BAColors.borderOf(context));
         shadows = isDisabled ? [] : BATheme.shadowsSmallOf(context);
         break;
@@ -143,18 +141,18 @@ class _BAButtonState extends State<BAButton> {
         break;
       case BAButtonStyle.danger:
         backgroundColor = isDisabled
-            ? BAColors.dangerOf(context).withOpacity(0.4)
+            ? BAColors.dangerOf(context).withValues(alpha: 0.4)
             : (_isHovered
-                ? BAColors.dangerOf(context).withOpacity(0.8)
+                ? BAColors.dangerOf(context).withValues(alpha: 0.8)
                 : BAColors.dangerOf(context));
         borderColor = Colors.transparent;
         shadows = isDisabled ? [] : BATheme.shadowsSmallOf(context);
         break;
       case BAButtonStyle.success:
         backgroundColor = isDisabled
-            ? BAColors.successOf(context).withOpacity(0.4)
+            ? BAColors.successOf(context).withValues(alpha: 0.4)
             : (_isHovered
-                ? BAColors.successOf(context).withOpacity(0.8)
+                ? BAColors.successOf(context).withValues(alpha: 0.8)
                 : BAColors.successOf(context));
         borderColor = Colors.transparent;
         shadows = isDisabled ? [] : BATheme.shadowsSmallOf(context);
@@ -170,7 +168,6 @@ class _BAButtonState extends State<BAButton> {
   }
 
   TextStyle _getTextStyle(BuildContext context, bool isDisabled) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     Color textColor;
 
     switch (widget.style) {
@@ -178,7 +175,7 @@ class _BAButtonState extends State<BAButton> {
       case BAButtonStyle.danger:
       case BAButtonStyle.success:
         textColor = isDisabled
-            ? Colors.white.withOpacity(0.5)
+            ? Colors.white.withValues(alpha: 0.5)
             : Colors.white;
         break;
       case BAButtonStyle.secondary:
@@ -202,7 +199,7 @@ class _BAButtonState extends State<BAButton> {
       case BAButtonStyle.primary:
       case BAButtonStyle.danger:
       case BAButtonStyle.success:
-        return Colors.white.withOpacity(isDisabled ? 0.5 : 1.0);
+        return Colors.white.withValues(alpha: isDisabled ? 0.5 : 1.0);
       case BAButtonStyle.secondary:
       case BAButtonStyle.text:
       case BAButtonStyle.outline:
@@ -377,44 +374,50 @@ class _BAIconButtonState extends State<BAIconButton> {
     final isDisabled = !widget.enabled;
     final effectiveOnPressed = isDisabled ? null : widget.onPressed;
 
-    return MouseRegion(
+    Widget button = MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
         onTapDown: (_) => setState(() => _isPressed = true),
         onTapUp: (_) => setState(() => _isPressed = false),
         onTapCancel: () => setState(() => _isPressed = false),
-        child: Tooltip(
-          message: widget.tooltip,
-          child: AnimatedContainer(
-            duration: BAAnimation.fast,
-            curve: Curves.easeOutCubic,
-            decoration: BoxDecoration(
-              color: widget.backgroundColor ??
-                  (_isHovered
-                      ? BAColors.surfaceVariantOf(context)
-                      : Colors.transparent),
-              borderRadius: BorderRadius.circular(BAThemeData.radius),
-            ),
-            child: AnimatedScale(
-              scale: _isPressed ? 0.92 : 1.0,
-              duration: BAAnimation.micro,
-              child: IconButton(
-                onPressed: effectiveOnPressed,
-                icon: Icon(widget.icon),
-                iconSize: widget.size,
-                color: isDisabled
-                    ? BAColors.textDisabledOf(context)
-                    : (widget.color ?? BAColors.textPrimaryOf(context)),
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                padding: const EdgeInsets.all(8),
-              ),
+        child: AnimatedContainer(
+          duration: BAAnimation.fast,
+          curve: Curves.easeOutCubic,
+          decoration: BoxDecoration(
+            color: widget.backgroundColor ??
+                (_isHovered
+                    ? BAColors.surfaceVariantOf(context)
+                    : Colors.transparent),
+            borderRadius: BorderRadius.circular(BAThemeData.radius),
+          ),
+          child: AnimatedScale(
+            scale: _isPressed ? 0.92 : 1.0,
+            duration: BAAnimation.micro,
+            child: IconButton(
+              onPressed: effectiveOnPressed,
+              icon: Icon(widget.icon),
+              iconSize: widget.size,
+              color: isDisabled
+                  ? BAColors.textDisabledOf(context)
+                  : (widget.color ?? BAColors.textPrimaryOf(context)),
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              hoverColor: Colors.transparent,
+              padding: const EdgeInsets.all(8),
             ),
           ),
         ),
       ),
     );
+
+    if (widget.tooltip != null) {
+      button = Tooltip(
+        message: widget.tooltip!,
+        child: button,
+      );
+    }
+
+    return button;
   }
 }

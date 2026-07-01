@@ -51,15 +51,15 @@ class BADialog extends StatelessWidget {
     return showDialog<T>(
       context: context,
       barrierDismissible: barrierDismissible,
-      barrierColor: Colors.black.withOpacity(0.4),
+      barrierColor: Colors.black.withValues(alpha: 0.4),
       builder: (context) => BADialog(
         title: title,
-        child: child,
         actions: actions,
         showCloseButton: showCloseButton,
         onClose: () => Navigator.of(context).pop(),
         width: width,
         height: height,
+        child: child,
       ),
     );
   }
@@ -87,7 +87,7 @@ class BADialog extends StatelessWidget {
               color: BAColors.glassOf(context),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: BAColors.borderOf(context).withOpacity(0.6),
+                color: BAColors.borderOf(context).withValues(alpha: 0.6),
                 width: 1,
               ),
               boxShadow: [
@@ -110,13 +110,13 @@ class BADialog extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        BAColors.primaryOf(context).withOpacity(0.2),
-                        BAColors.primaryOf(context).withOpacity(0.05),
+                        BAColors.primaryOf(context).withValues(alpha: 0.2),
+                        BAColors.primaryOf(context).withValues(alpha: 0.05),
                       ],
                     ),
                     border: Border(
                       bottom: BorderSide(
-                        color: BAColors.borderOf(context).withOpacity(0.4),
+                        color: BAColors.borderOf(context).withValues(alpha: 0.4),
                         width: 1,
                       ),
                     ),
@@ -141,7 +141,7 @@ class BADialog extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: BAColors.surfaceVariantOf(context).withOpacity(0.5),
+                              color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Icon(
@@ -168,7 +168,7 @@ class BADialog extends StatelessWidget {
                     decoration: BoxDecoration(
                       border: Border(
                         top: BorderSide(
-                          color: BAColors.borderOf(context).withOpacity(0.4),
+                          color: BAColors.borderOf(context).withValues(alpha: 0.4),
                           width: 1,
                         ),
                       ),
@@ -213,12 +213,6 @@ class BAConfirmDialog {
       context: context,
       builder: (context) => BADialog(
         title: title,
-        child: Text(
-          content,
-          style: TextStyle(
-            color: BAColors.textPrimaryOf(context),
-          ),
-        ),
         actions: [
           BASecondaryButton(
             text: cancelText,
@@ -235,6 +229,12 @@ class BAConfirmDialog {
                   onPressed: () => Navigator.of(context).pop(true),
                 ),
         ],
+        child: Text(
+          content,
+          style: TextStyle(
+            color: BAColors.textPrimaryOf(context),
+          ),
+        ),
       ),
     );
     return result ?? false;

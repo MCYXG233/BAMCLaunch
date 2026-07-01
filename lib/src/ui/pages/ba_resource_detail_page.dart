@@ -78,10 +78,9 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
         });
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _isLoadingVersions = false);
-        NotificationManager().showError('加载版本失败', message: e.toString());
-      }
+      if (!mounted) return;
+      setState(() => _isLoadingVersions = false);
+      NotificationManager().showError('加载版本失败', message: e.toString());
     }
   }
 
@@ -134,20 +133,30 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
       await FavoriteManager.instance.initialize();
     }
 
+    if (!mounted) return;
     setState(() {
       _isFavorite = !_isFavorite;
     });
 
-    if (_isFavorite) {
-      await FavoriteManager.instance.addFavorite(
-        widget.resource.id,
-        resourceName: widget.resource.name,
-      );
-    } else {
-      await FavoriteManager.instance.removeFavorite(widget.resource.id);
+    try {
+      if (_isFavorite) {
+        await FavoriteManager.instance.addFavorite(
+          widget.resource.id,
+          resourceName: widget.resource.name,
+        );
+      } else {
+        await FavoriteManager.instance.removeFavorite(widget.resource.id);
+      }
+      if (!mounted) return;
+      widget.onFavoriteToggle();
+    } catch (e) {
+      if (!mounted) return;
+      // 回滚 UI 状态
+      setState(() {
+        _isFavorite = !_isFavorite;
+      });
+      NotificationManager().showError('收藏操作失败', message: e.toString());
     }
-
-    widget.onFavoriteToggle();
   }
 
   @override
@@ -655,8 +664,6 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
   }
 
   Widget _buildStatBlock(BuildContext context, String label, String value, Color color) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-
     return Column(
       children: [
         Text(

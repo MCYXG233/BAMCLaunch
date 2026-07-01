@@ -56,9 +56,16 @@ class ResourceManager {
       if (await _storageFile!.exists()) {
         final content = await _storageFile!.readAsString();
         final data = jsonDecode(content) as List<dynamic>;
-        _installedResources = data
-            .map((item) => InstalledResource.fromJson(item as Map<String, dynamic>))
-            .toList();
+        _installedResources = [];
+        for (final item in data) {
+          try {
+            if (item is Map<String, dynamic>) {
+              _installedResources.add(InstalledResource.fromJson(item));
+            }
+          } catch (e) {
+            _logger.warn('Skipping invalid resource entry: $e');
+          }
+        }
       }
 
       _initialized = true;
@@ -102,10 +109,16 @@ class ResourceManager {
     if (_storageFile == null) return;
     try {
       final data = _installedResources.map((r) => r.toJson()).toList();
-      await _storageFile!.writeAsString(jsonEncode(data));
+      // 原子写入：先写入临时文件，再重命名，防止写入中途崩溃导致数据损坏
+      final tempFile = File('${_storageFile!.path}.tmp');
+      await tempFile.writeAsString(jsonEncode(data));
+      if (await _storageFile!.exists()) {
+        await _storageFile!.delete();
+      }
+      await tempFile.rename(_storageFile!.path);
     } catch (e, stackTrace) {
       _logger.error('Failed to save installed resources', e, stackTrace);
-      rethrow;
+      // 不再 rethrow，内存状态是权威来源，保存失败不影响运行时状态
     }
   }
 

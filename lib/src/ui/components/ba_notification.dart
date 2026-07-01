@@ -132,7 +132,7 @@ class BANotification extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: BAColors.surfaceVariantOf(context).withOpacity(0.5),
+                              color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Icon(

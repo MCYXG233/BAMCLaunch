@@ -2,11 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:path/path.dart' as path;
-import 'package:window_manager/window_manager.dart';
-import '../components/ba_common_widgets.dart';
 import '../theme/colors.dart';
-import '../theme/app_theme.dart';
 import '../../config/config_manager.dart';
 import '../../config/config_keys.dart';
 import '../../updater/update_manager.dart';
@@ -24,11 +20,8 @@ import '../../instance/instance_manager.dart';
 import '../components/ba_backup_dialog.dart';
 import '../components/ba_dialog.dart';
 import '../../download/mirror_manager.dart';
-import '../components/ba_settings_item.dart';
 import '../animations/ba_animations.dart';
 import '../animations/ba_effects.dart';
-import '../../event/event_bus.dart';
-import '../../event/event.dart';
 
 class BASettingsPage extends StatefulWidget {
   const BASettingsPage({super.key});
@@ -50,7 +43,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
   bool _notificationInitialized = false;
   bool _themeManagerInitialized = false;
   bool _managersInitialized = false;
-  bool _isMaximized = false;
 
   BackgroundConfig _backgroundConfig = BackgroundConfig.classic;
 
@@ -104,20 +96,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
     _proxyPortFocusNode.addListener(_onProxyPortFocusChange);
     _jvmArgsFocusNode.addListener(_onJvmArgsFocusChange);
     _gameArgsFocusNode.addListener(_onGameArgsFocusChange);
-    _initWindow();
     _initAllManagers();
     _loadSettings();
-  }
-
-  Future<void> _initWindow() async {
-    if (Platform.isWindows || Platform.isMacOS) {
-      final isMaximized = await windowManager.isMaximized();
-      if (mounted) {
-        setState(() {
-          _isMaximized = isMaximized;
-        });
-      }
-    }
   }
 
   Future<void> _initAllManagers() async {
@@ -1013,7 +993,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         child: ListView.separated(
           padding: EdgeInsets.zero,
           itemCount: categoryNames.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 4),
+          separatorBuilder: (_, _) => const SizedBox(height: 4),
           itemBuilder: (context, index) {
             final categoryId = categoryNames.keys.elementAt(index);
             final categoryName = categoryNames[categoryId]!;
@@ -2293,7 +2273,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
               child: Builder(
                 builder: (context) {
-                  final isLight = Theme.of(context).brightness == Brightness.light;
                   final primaryText = BAColors.textPrimaryOf(context);
 
                   return Column(

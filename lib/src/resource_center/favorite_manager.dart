@@ -1,5 +1,6 @@
 import '../config/config_manager.dart';
 import '../config/config_keys.dart';
+import '../core/logger.dart';
 
 /// 资源收藏管理器
 ///
@@ -41,6 +42,9 @@ class FavoriteManager {
   /// 是否已初始化
   bool _isInitialized = false;
 
+  /// 日志记录器
+  final Logger _logger = Logger();
+
   /// 获取单例实例
   static FavoriteManager get instance {
     _instance ??= FavoriteManager._internal();
@@ -68,7 +72,16 @@ class FavoriteManager {
     }
 
     final saved = config.get<List<dynamic>>(ConfigKeys.favoriteResources);
-    _favorites = saved?.cast<String>().toList() ?? [];
+    if (saved != null) {
+      _favorites = [];
+      for (final item in saved) {
+        if (item is String) {
+          _favorites.add(item);
+        }
+      }
+    } else {
+      _favorites = [];
+    }
     _isInitialized = true;
   }
 
@@ -100,11 +113,18 @@ class FavoriteManager {
     }
 
     _favorites.add(resourceId);
-    await ConfigManager.instance.set<List<String>>(
-      ConfigKeys.favoriteResources,
-      List.from(_favorites),
-    );
-    await ConfigManager.instance.save();
+    try {
+      await ConfigManager.instance.set<List<String>>(
+        ConfigKeys.favoriteResources,
+        List.from(_favorites),
+      );
+      await ConfigManager.instance.save();
+    } catch (e) {
+      _logger.error('Failed to persist favorite add: $e');
+      // 回滚内存状态
+      _favorites.remove(resourceId);
+      return false;
+    }
     return true;
   }
 
@@ -119,11 +139,18 @@ class FavoriteManager {
     }
 
     _favorites.remove(resourceId);
-    await ConfigManager.instance.set<List<String>>(
-      ConfigKeys.favoriteResources,
-      List.from(_favorites),
-    );
-    await ConfigManager.instance.save();
+    try {
+      await ConfigManager.instance.set<List<String>>(
+        ConfigKeys.favoriteResources,
+        List.from(_favorites),
+      );
+      await ConfigManager.instance.save();
+    } catch (e) {
+      _logger.error('Failed to persist favorite remove: $e');
+      // 回滚内存状态
+      _favorites.add(resourceId);
+      return false;
+    }
     return true;
   }
 
@@ -144,22 +171,40 @@ class FavoriteManager {
 
   /// 清空所有收藏
   Future<void> clearAllFavorites() async {
+    final previousFavorites = List<String>.from(_favorites);
     _favorites.clear();
-    await ConfigManager.instance.remove(ConfigKeys.favoriteResources);
-    await ConfigManager.instance.save();
+    try {
+      await ConfigManager.instance.remove(ConfigKeys.favoriteResources);
+      await ConfigManager.instance.save();
+    } catch (e) {
+      _logger.error('Failed to clear favorites: $e');
+      // 回滚内存状态
+      _favorites = previousFavorites;
+    }
   }
 
   /// 批量添加收藏
   Future<void> addFavorites(List<String> resourceIds) async {
+    final added = <String>[];
     for (final id in resourceIds) {
       if (!_favorites.contains(id)) {
         _favorites.add(id);
+        added.add(id);
       }
     }
-    await ConfigManager.instance.set<List<String>>(
-      ConfigKeys.favoriteResources,
-      List.from(_favorites),
-    );
-    await ConfigManager.instance.save();
+    if (added.isEmpty) return;
+    try {
+      await ConfigManager.instance.set<List<String>>(
+        ConfigKeys.favoriteResources,
+        List.from(_favorites),
+      );
+      await ConfigManager.instance.save();
+    } catch (e) {
+      _logger.error('Failed to persist batch favorites: $e');
+      // 回滚内存状态
+      for (final id in added) {
+        _favorites.remove(id);
+      }
+    }
   }
 }

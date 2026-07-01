@@ -131,11 +131,15 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
   // ==================== Modrinth 搜索逻辑 ====================
 
   void _onModrinthScroll() {
-    if (_modrinthScrollCtrl.position.pixels >=
-        _modrinthScrollCtrl.position.maxScrollExtent - 300) {
-      if (!_modrinthLoadingMore && _modrinthHasMore && !_modrinthLoading) {
-        _loadMoreModrinth();
+    try {
+      if (_modrinthScrollCtrl.position.pixels >=
+          _modrinthScrollCtrl.position.maxScrollExtent - 300) {
+        if (!_modrinthLoadingMore && _modrinthHasMore && !_modrinthLoading) {
+          _loadMoreModrinth();
+        }
       }
+    } catch (_) {
+      // 控制器已释放时忽略
     }
   }
 
@@ -208,11 +212,15 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
   // ==================== 热门整合包搜索逻辑 ====================
 
   void _onModpackScroll() {
-    if (_modpackScrollCtrl.position.pixels >=
-        _modpackScrollCtrl.position.maxScrollExtent - 300) {
-      if (!_modpackLoadingMore && _modpackHasMore && !_modpackLoading) {
-        _loadMoreModpack();
+    try {
+      if (_modpackScrollCtrl.position.pixels >=
+          _modpackScrollCtrl.position.maxScrollExtent - 300) {
+        if (!_modpackLoadingMore && _modpackHasMore && !_modpackLoading) {
+          _loadMoreModpack();
+        }
       }
+    } catch (_) {
+      // 控制器已释放时忽略
     }
   }
 

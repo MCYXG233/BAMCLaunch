@@ -78,6 +78,12 @@ class _BAContextMenuState extends State<BAContextMenu> {
   }
 
   @override
+  void dispose() {
+    _hideMenu();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return CompositedTransformTarget(
       link: _layerLink,
@@ -158,7 +164,6 @@ class _BAContextMenuContent extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: items.asMap().entries.map((entry) {
-                  final index = entry.key;
                   final item = entry.value;
 
                   if (item is BAContextMenuDivider) {
@@ -225,8 +230,8 @@ class _BAContextMenuItemWidgetState extends State<_BAContextMenuItemWidget> {
           duration: const Duration(milliseconds: 150),
           color: _isHovered
               ? (widget.item.danger
-                    ? dangerColor.withOpacity(0.2)
-                    : primaryColor.withOpacity(0.15))
+                    ? dangerColor.withValues(alpha: 0.2)
+                    : primaryColor.withValues(alpha: 0.15))
               : Colors.transparent,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(

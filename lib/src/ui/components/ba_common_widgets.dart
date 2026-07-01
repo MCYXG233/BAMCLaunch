@@ -432,7 +432,6 @@ class _BAIconButtonState extends State<BAIconButton> {
 
   @override
   Widget build(BuildContext context) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
     final defaultBg = BAColors.surfaceOf(context);
     final borderColor = BAColors.borderOf(context);
     final effectiveOnTap = widget.enabled ? widget.onTap : null;
