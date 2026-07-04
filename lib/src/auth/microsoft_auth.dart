@@ -85,7 +85,7 @@ class MicrosoftAuthService {
   /// 该 ID 已在 Microsoft Azure AD 中注册，配置了以下权限：
   /// - XboxLive.signin：Xbox Live 登录权限
   /// - offline_access：离线访问权限（用于获取刷新令牌）
-  static const String _clientId = '000000004C12AE6F';
+  static const String _clientId = '00000000482326AA';
 
   /// OAuth2 重定向 URI
   ///
