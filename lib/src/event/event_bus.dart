@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/widgets.dart';
 import 'event.dart';
 import '../di/service_locator.dart';
 
@@ -87,72 +88,23 @@ class EventSubscription {
   }
 }
 
-/// 弱引用回调包装器
+/// 回调包装器
 ///
-/// 内部类，用于包装事件回调函数，实现弱引用订阅机制。
-/// 当订阅者（回调函数的持有者）被垃圾回收后，
-/// 包装器会自动检测到并允许事件总线清理这些无效订阅。
-///
-/// ## 设计目的
-/// - 避免内存泄漏：当订阅者被销毁后，不需要显式取消订阅
-/// - 自动清理：事件发布时会自动清理已失效的订阅
-/// - 性能优化：减少手动管理订阅的负担
-///
-/// ## 实现细节
-/// 使用 [WeakReference] 包装回调函数，
-/// 当回调函数的外部引用被释放后，[isAlive] 将返回 false。
-class _WeakCallbackWrapper {
-  /// 订阅的唯一标识符
-  ///
-  /// 由 [EventBus] 分配，用于在取消订阅时精确定位此包装器。
+/// 内部类，用于包装事件回调函数，使用强引用确保回调不会意外被 GC 回收。
+/// 订阅者必须通过 [EventSubscription.unsubscribe] 显式取消订阅，
+/// 或使用 [EventBusAutoDisposeMixin] 在 Widget dispose 时自动解绑。
+class _CallbackWrapper {
   final int id;
 
-  /// 回调函数的弱引用
-  ///
-  /// 使用 [WeakReference] 包装回调函数，
-  /// 允许回调函数在没有外部强引用时被垃圾回收。
-  ///
-  /// ## 注意
-  /// 如果回调函数是匿名函数且没有其他引用持有它，
-  /// 可能会被立即回收，导致订阅失效。
-  final WeakReference<Function> callbackRef;
+  final Function callback;
 
-  /// 构造函数
-  ///
-  /// 创建一个弱引用包装器。
-  ///
-  /// 参数：
-  /// - [id] 订阅的唯一标识符
-  /// - [callback] 要包装的回调函数
-  ///
-  /// ## 注意事项
-  /// 传入的 [callback] 应该是一个有稳定引用的方法或函数，
-  /// 避免使用可能被立即回收的临时匿名函数。
-  _WeakCallbackWrapper(this.id, Function callback)
-      : callbackRef = WeakReference(callback);
+  _CallbackWrapper(this.id, this.callback);
 
-  /// 检查回调是否仍然有效
-  ///
-  /// 返回 true 表示回调函数仍然存在（未被垃圾回收），
-  /// 返回 false 表示回调函数已被回收，此订阅应该被清理。
-  ///
-  /// ## 返回值
-  /// - `true`: 回调函数仍然存活，可以正常调用
-  /// - `false`: 回调函数已被垃圾回收，订阅无效
-  bool get isAlive => callbackRef.target != null;
+  bool get isAlive => true;
 
-  /// 获取回调函数
-  ///
-  /// 如果回调函数仍然存活，返回该函数；否则返回 null。
-  ///
-  /// ## 返回值
-  /// - 非 null: 回调函数的引用
-  /// - null: 回调函数已被垃圾回收
-  ///
-  /// ## 使用注意
-  /// 调用方应该先检查 [isAlive] 或判断返回值是否为 null，
-  /// 避免在回调已失效时调用。
-  Function? get callback => callbackRef.target;
+  void call(Event event) {
+    callback(event);
+  }
 }
 
 /// 事件总线
@@ -168,7 +120,7 @@ class _WeakCallbackWrapper {
 ///
 /// ## 设计特点
 /// - **单例模式**：全局唯一实例，确保事件通信的一致性
-/// - **弱引用订阅**：避免内存泄漏，订阅者被销毁后自动清理
+/// - **强引用订阅**：回调使用强引用持有，需显式取消订阅或使用 [EventBusAutoDisposeMixin]
 /// - **类型安全**：使用泛型确保事件类型的正确性
 /// - **异常隔离**：单个订阅者的异常不会影响其他订阅者
 ///
@@ -256,13 +208,17 @@ class EventBus {
   /// });
   /// ```
   static void reset() {
+    _instance?._subscribers.clear();
     _instance = null;
+    if (ServiceLocator.instance.isRegistered<EventBus>()) {
+      ServiceLocator.instance.unregister<EventBus>();
+    }
   }
 
   /// 存储订阅者的映射表
   ///
   /// 键为事件类型（[Type]），值为该事件类型的订阅者列表。
-  /// 每个订阅者使用 [_WeakCallbackWrapper] 包装，实现弱引用机制。
+  /// 每个订阅者使用 [_CallbackWrapper] 包装，使用强引用确保回调不被 GC 回收。
   ///
   /// ## 数据结构
   /// ```
@@ -271,7 +227,7 @@ class EventBus {
   ///   EventTypeB: [wrapper3, wrapper4, ...],
   /// }
   /// ```
-  final Map<Type, List<_WeakCallbackWrapper>> _subscribers = {};
+  final Map<Type, List<_CallbackWrapper>> _subscribers = {};
 
   /// 订阅ID生成器
   ///
@@ -312,36 +268,19 @@ class EventBus {
   /// ```
   ///
   /// ## 注意事项
-  /// - 回调函数使用弱引用存储，如果回调函数没有其他引用持有，可能会被垃圾回收
-  /// - 建议使用命名方法而非匿名函数，以确保引用稳定
+  /// - 回调函数使用强引用存储，必须通过 [EventSubscription.unsubscribe] 显式取消订阅
+  /// - 推荐使用 [EventBusAutoDisposeMixin] 在 Widget dispose 时自动解绑
   /// - 回调函数中的异常不会影响其他订阅者，但会被记录到当前 Zone
-  ///
-  /// ## 可能的问题
-  /// 如果使用临时匿名函数作为回调，可能会因为弱引用特性导致订阅立即失效：
-  /// ```dart
-  /// // 错误示例 - 匿名函数可能被立即回收
-  /// EventBus().subscribe<MyEvent>((e) => print(e)); // 可能失效
-  ///
-  /// // 正确示例 - 使用有稳定引用的方法
-  /// void myHandler(MyEvent e) => print(e);
-  /// EventBus().subscribe(myHandler); // 稳定
-  /// ```
   EventSubscription subscribe<T extends Event>(EventCallback<T> callback) {
-    // 获取事件类型，用于作为订阅者映射表的键
     final eventType = T;
-    // 生成唯一的订阅ID
     final id = _nextId++;
-    // 创建弱引用包装器
-    final wrapper = _WeakCallbackWrapper(id, callback);
+    final wrapper = _CallbackWrapper(id, callback);
 
-    // 如果该事件类型还没有订阅者列表，创建一个空列表
     if (!_subscribers.containsKey(eventType)) {
       _subscribers[eventType] = [];
     }
 
-    // 将包装器添加到订阅者列表
     _subscribers[eventType]!.add(wrapper);
-    // 返回订阅器实例，允许调用方管理订阅生命周期
     return EventSubscription._(this, eventType, id);
   }
 
@@ -413,42 +352,18 @@ class EventBus {
   /// });
   /// ```
   void publish<T extends Event>(T event) {
-    // 获取事件类型
     final eventType = T;
-    // 获取该事件类型的订阅者列表
     final subscribers = _subscribers[eventType];
 
-    // 如果没有订阅者，直接返回
     if (subscribers == null) return;
 
-    // 用于存储仍然有效的订阅者
-    final aliveSubscribers = <_WeakCallbackWrapper>[];
-
-    // 遍历所有订阅者
     for (final wrapper in subscribers) {
-      // 检查订阅者是否仍然有效（回调是否被垃圾回收）
-      if (wrapper.isAlive) {
-        // 保留有效的订阅者
-        aliveSubscribers.add(wrapper);
-        // 获取回调函数
-        final callback = wrapper.callback;
-        if (callback != null) {
-          try {
-            // 调用回调函数，传递事件实例
-            callback(event);
-          } catch (e, stackTrace) {
-            // 捕获异常，防止单个订阅者的异常影响其他订阅者
-            // 将异常传递给当前 Zone 的错误处理器
-            Zone.current.handleUncaughtError(e, stackTrace);
-          }
-        }
+      try {
+        wrapper.call(event);
+      } catch (e, stackTrace) {
+        Zone.current.handleUncaughtError(e, stackTrace);
       }
-      // 如果订阅者已失效（isAlive 为 false），不添加到 aliveSubscribers，
-      // 实现自动清理
     }
-
-    // 更新订阅者列表，移除已失效的订阅
-    _subscribers[eventType] = aliveSubscribers;
   }
 
   /// 取消订阅（内部方法）
@@ -485,54 +400,10 @@ class EventBus {
 
   /// 清理所有已失效的订阅者
   ///
-  /// 遍历所有事件类型的订阅者，移除已被垃圾回收的订阅。
-  /// 通常在事件发布时会自动清理，但也可以手动调用此方法进行主动清理。
-  ///
-  /// ## 使用场景
-  /// - 应用进入后台时，释放不必要的资源引用
-  /// - 定期维护，清理积累的失效订阅
-  /// - 内存紧张时，主动释放资源
-  ///
-  /// ## 行为说明
-  /// - 遍历所有事件类型的订阅者列表
-  /// - 移除所有失效的订阅（回调已被垃圾回收）
-  /// - 如果某个事件类型的订阅者列表为空，移除该条目
-  ///
-  /// ## 使用示例
-  /// ```dart
-  /// // 在应用进入后台时清理
-  /// void onAppPaused() {
-  ///   EventBus.instance.cleanup();
-  /// }
-  ///
-  /// // 定期清理（如每分钟）
-  /// Timer.periodic(Duration(minutes: 1), (_) {
-  ///   EventBus.instance.cleanup();
-  /// });
-  /// ```
-  void cleanup() {
-    // 记录需要完全移除的事件类型
-    final typesToRemove = <Type>[];
-
-    // 遍历所有订阅者列表
-    for (final entry in _subscribers.entries) {
-      // 过滤出仍然有效的订阅者
-      final aliveSubscribers = entry.value.where((w) => w.isAlive).toList();
-
-      if (aliveSubscribers.isEmpty) {
-        // 如果没有有效的订阅者，标记此事件类型待移除
-        typesToRemove.add(entry.key);
-      } else {
-        // 更新为有效的订阅者列表
-        _subscribers[entry.key] = aliveSubscribers;
-      }
-    }
-
-    // 移除没有订阅者的事件类型条目
-    for (final type in typesToRemove) {
-      _subscribers.remove(type);
-    }
-  }
+  /// 在强引用模式下，[isAlive] 始终为 true，因此此方法实际上不会清理任何订阅。
+  /// 订阅者必须通过 [EventSubscription.unsubscribe] 或 [EventBusAutoDisposeMixin] 显式解绑。
+  /// 保留此方法以保持 API 兼容性。
+  void cleanup() {}
 
   /// 获取当前订阅者数量
   ///
@@ -575,5 +446,22 @@ class EventBus {
       count += list.length;
     }
     return count;
+  }
+}
+
+mixin EventBusAutoDisposeMixin<T extends StatefulWidget> on State<T> {
+  final List<EventSubscription> _subscriptions = [];
+
+  void autoDispose(EventSubscription subscription) {
+    _subscriptions.add(subscription);
+  }
+
+  @override
+  void dispose() {
+    for (final sub in _subscriptions) {
+      sub.unsubscribe();
+    }
+    _subscriptions.clear();
+    super.dispose();
   }
 }

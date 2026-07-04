@@ -8,6 +8,8 @@ import 'config_manager.dart';
 import 'config_keys.dart';
 import 'config_models.dart';
 import 'crypto_util.dart';
+import 'package:flutter/foundation.dart';
+
 import '../core/logger.dart';
 
 /// 配置管理器实现类
@@ -138,9 +140,20 @@ class ConfigManagerImpl implements IConfigManager {
 
     try {
       final jsonString = jsonEncode(_config);
-      await _configFile!.writeAsString(jsonString);
+      final tempFile = File('${_configFile!.path}.tmp');
+
+      if (await tempFile.exists()) {
+        await tempFile.delete();
+      }
+
+      await tempFile.writeAsString(jsonString);
+
+      if (await _configFile!.exists()) {
+        await _configFile!.delete();
+      }
+      await tempFile.rename(_configFile!.path);
     } catch (e) {
-      print('Failed to save config: $e');
+      debugPrint('[ConfigManager] Failed to save config: $e');
     }
   }
 
@@ -150,16 +163,32 @@ class ConfigManagerImpl implements IConfigManager {
 
     try {
       final jsonString = await _configFile!.readAsString();
-      final Map<String, dynamic> loaded = jsonDecode(jsonString);
+      if (jsonString.trim().isEmpty) {
+        debugPrint('[ConfigManager] Config file is empty, using defaults');
+        return;
+      }
 
+      final Map<String, dynamic> loaded = jsonDecode(jsonString);
       _config.clear();
       _config.addAll(loaded);
 
       for (final key in loaded.keys) {
         _configChangesController.add(key);
       }
+    } on FormatException catch (e) {
+      final backupPath =
+          '${_configFile!.path}.corrupted.${DateTime.now().millisecondsSinceEpoch}';
+      try {
+        await _configFile!.rename(backupPath);
+        debugPrint(
+            '[ConfigManager] Config file corrupted, backed up to $backupPath');
+      } catch (_) {
+        debugPrint('[ConfigManager] Failed to backup corrupted config');
+      }
+      debugPrint(
+          '[ConfigManager] Using default config due to corruption: $e');
     } catch (e) {
-      Logger.instance.warn('Failed to load config: $e');
+      debugPrint('[ConfigManager] Failed to load config: $e');
     }
   }
 
