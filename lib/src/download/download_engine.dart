@@ -53,6 +53,7 @@ abstract class IDownloadEngine {
     String savePath, {
     String? hash,
     HashType? hashType,
+    msd.CancellationToken? cancellationToken,
   });
 
   /// 批量下载文件
@@ -260,6 +261,7 @@ class DownloadEngine implements IDownloadEngine {
     String savePath, {
     String? hash,
     HashType? hashType,
+    msd.CancellationToken? cancellationToken,
   }) async {
     _logger.info('开始下载: $url -> $savePath');
 
@@ -277,10 +279,10 @@ class DownloadEngine implements IDownloadEngine {
         final sources = _buildDownloadSources();
         // 创建多源下载器
         final downloader = msd.MultiSourceDownloader(sources: sources);
-        // 创建取消令牌，用于支持任务取消
-        final cancellationToken = msd.CancellationToken();
+        // 使用传入的取消令牌，或创建新的
+        final token = cancellationToken ?? msd.CancellationToken();
         // 将取消令牌添加到活跃列表，便于统一取消
-        _activeCancellationTokens.add(cancellationToken);
+        _activeCancellationTokens.add(token);
 
         // 生成唯一的任务ID，用于事件追踪
         final taskId = DateTime.now().millisecondsSinceEpoch.toString();
@@ -299,12 +301,14 @@ class DownloadEngine implements IDownloadEngine {
             // 转换哈希类型枚举，从本地枚举映射到多源下载器的枚举
             hashType: hashType != null ? msd.HashType.values[hashType.index] : null,
             // 进度回调：将进度信息发送到进度流
-            onProgress: (progress, downloaded, total) {
+            onProgress: (progress, downloaded, total, {int speed = 0, int remainingSeconds = 0}) {
               _progressController.add(
                 DownloadProgress(
                   downloadedBytes: downloaded,
                   totalBytes: total,
                   progress: progress,
+                  speed: speed,
+                  remainingTime: remainingSeconds,
                 ),
               );
             },
@@ -314,7 +318,7 @@ class DownloadEngine implements IDownloadEngine {
                 DownloadInfoEvent(message: '切换到下载源: $sourceName'),
               );
             },
-            cancellationToken: cancellationToken,
+            cancellationToken: token,
           );
 
           // 下载成功，发布完成事件
@@ -329,7 +333,7 @@ class DownloadEngine implements IDownloadEngine {
           return result;
         } finally {
           // 无论成功或失败，都从活跃列表中移除取消令牌
-          _activeCancellationTokens.remove(cancellationToken);
+          _activeCancellationTokens.remove(token);
         }
       } catch (e) {
         // 捕获并记录错误
@@ -498,17 +502,25 @@ class DownloadInfoEvent extends Event {
 
 class _Semaphore {
   int _permits;
+  final _waitQueue = <Completer<void>>[];
 
   _Semaphore(this._permits);
 
   Future<void> acquire() async {
-    while (_permits <= 0) {
-      await Future.delayed(const Duration(milliseconds: 50));
+    if (_permits > 0) {
+      _permits--;
+      return;
     }
-    _permits--;
+    final completer = Completer<void>();
+    _waitQueue.add(completer);
+    await completer.future;
   }
 
   void release() {
-    _permits++;
+    if (_waitQueue.isNotEmpty) {
+      _waitQueue.removeAt(0).complete();
+    } else {
+      _permits++;
+    }
   }
 }

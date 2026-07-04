@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
+import '../core/network_client.dart';
 import '../di/service_locator.dart';
 
 /// Mod信息
@@ -166,10 +167,74 @@ class ModUpdateChecker {
     }
 
     try {
-      // TODO: 实现 Modrinth/CurseForge API 调用以检查真实更新
-      // 当前返回 upToDate，待接入真实 API 后替换
-
+      // 尝试通过 Modrinth API 检查更新
       UpdateCheckResult result;
+
+      try {
+        final networkClient = NetworkClient();
+        // 搜索匹配的项目
+        final searchUrl = Uri.parse('https://api.modrinth.com/v2/search')
+            .replace(queryParameters: {
+          'query': modInfo.name,
+          'limit': '5',
+          'index': 'relevance',
+        });
+        final searchResponse = await networkClient.get(
+          searchUrl.toString(),
+          headers: {'Content-Type': 'application/json'},
+          timeoutSeconds: 10,
+        );
+
+        if (searchResponse.statusCode == 200) {
+          final searchData = jsonDecode(searchResponse.body) as Map<String, dynamic>;
+          final hits = searchData['hits'] as List<dynamic>? ?? [];
+
+          if (hits.isNotEmpty) {
+            final projectId = (hits.first as Map<String, dynamic>)['project_id'] as String?;
+
+            if (projectId != null) {
+              // 获取项目最新版本
+              final versionsUrl = Uri.parse(
+                'https://api.modrinth.com/v2/project/$projectId/version',
+              ).replace(queryParameters: {'limit': '1'});
+              final versionsResponse = await networkClient.get(
+                versionsUrl.toString(),
+                headers: {'Content-Type': 'application/json'},
+                timeoutSeconds: 10,
+              );
+
+              if (versionsResponse.statusCode == 200) {
+                final versions = jsonDecode(versionsResponse.body) as List<dynamic>;
+                if (versions.isNotEmpty) {
+                  final latestVersion = versions.first as Map<String, dynamic>;
+                  final versionNumber = latestVersion['version_number'] as String? ?? '';
+                  final files = latestVersion['files'] as List<dynamic>? ?? [];
+                  final primaryFile = files.isNotEmpty ? files.first as Map<String, dynamic> : null;
+
+                  if (versionNumber.isNotEmpty && versionNumber != modInfo.version) {
+                    result = UpdateCheckResult(
+                      modInfo: modInfo,
+                      status: UpdateStatus.updateAvailable,
+                      latestVersion: ModVersionInfo(
+                        version: versionNumber,
+                        downloadUrl: primaryFile?['url'] as String? ?? '',
+                        releaseDate: DateTime.tryParse(latestVersion['date_published'] as String? ?? '') ?? DateTime.now(),
+                        changelog: latestVersion['changelog'] as String?,
+                        gameVersions: (latestVersion['game_versions'] as List<dynamic>?)?.cast<String>(),
+                      ),
+                    );
+                    _checkCache[cacheKey] = (DateTime.now(), result);
+                    _logger.info('Checked update for ${modInfo.name}: ${result.status}');
+                    return result;
+                  }
+                }
+              }
+            }
+          }
+        }
+      } catch (e) {
+        _logger.warn('API update check failed for ${modInfo.name}: $e');
+      }
 
       result = UpdateCheckResult(
         modInfo: modInfo,

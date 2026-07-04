@@ -31,6 +31,7 @@ class CurseForgeApi implements ResourceApi {
   @override
   Future<SearchResult> search(SearchParams params) async {
     final queryParams = <String, String>{
+      'gameId': '432', // Minecraft Java Edition
       'pageSize': params.pageSize.toString(),
       'index': ((params.page - 1) * params.pageSize).toString(),
       'sortOrder': 'desc',
@@ -230,8 +231,19 @@ class CurseForgeApi implements ResourceApi {
       }
     }
 
-    final downloadUrl = file['downloadUrl'] as String?;
+    String? downloadUrl = file['downloadUrl'] as String?;
     final fileName = file['fileName'] as String?;
+
+    // CurseForge 备用 CDN：当 downloadUrl 为 null 时根据 fileId 构造
+    if (downloadUrl == null || downloadUrl.isEmpty) {
+      final fileId = file['id'] as int?;
+      if (fileId != null && fileName != null) {
+        final idStr = fileId.toString();
+        final prefix = idStr.length > 4 ? idStr.substring(0, idStr.length - 4) : idStr;
+        final suffix = idStr.length > 4 ? idStr.substring(idStr.length - 4) : '0';
+        downloadUrl = 'https://edge.forgecdn.net/files/$prefix/$suffix/$fileName';
+      }
+    }
     final fileSize = file['fileLength'] as int? ?? 0;
 
     final gameVersions = (file['gameVersions'] as List<dynamic>?)

@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 import '../core/api_endpoints.dart';
+import '../core/error_codes.dart';
 import '../core/logger.dart';
 import '../core/network_client.dart';
 import '../di/service_locator.dart';
@@ -203,19 +205,193 @@ class ModpackManager {
         return null;
       }
 
-      // 这里应该解压文件并解析
-      // 简化版本：假设是JSON manifest文件
-      final content = await file.readAsString();
-      final json = jsonDecode(content) as Map<String, dynamic>;
+      if (filePath.endsWith('.mrpack') || filePath.endsWith('.zip')) {
+        // 解压 ZIP 到临时目录
+        final tempDir = await Directory.systemTemp.createTemp('bamclaunch_modpack_');
+        try {
+          final bytes = await file.readAsBytes();
+          final archive = ZipDecoder().decodeBytes(bytes);
 
-      final manifest = ModpackManifest.fromJson(json);
-      _logger.info('Imported modpack: ${manifest.name}');
+          for (final entry in archive) {
+            final entryPath = path.join(tempDir.path, entry.name);
+            if (entry.isFile) {
+              final entryFile = File(entryPath);
+              await entryFile.parent.create(recursive: true);
+              await entryFile.writeAsBytes(entry.content as List<int>);
+            } else {
+              await Directory(entryPath).create(recursive: true);
+            }
+          }
 
-      return manifest;
+          // 检测格式
+          final modrinthIndex = File(path.join(tempDir.path, 'modrinth.index.json'));
+          final curseManifest = File(path.join(tempDir.path, 'manifest.json'));
+
+          if (await modrinthIndex.exists()) {
+            // Modrinth mrpack 格式
+            return _parseModrinthMrpack(tempDir.path);
+          } else if (await curseManifest.exists()) {
+            // CurseForge 格式
+            return _parseCurseForgeModpack(tempDir.path);
+          }
+        } finally {
+          await tempDir.delete(recursive: true);
+        }
+      } else if (filePath.endsWith('.json')) {
+        // 纯 JSON（可能是 Modrinth index 或 CurseForge manifest）
+        final content = await file.readAsString();
+        final jsonData = jsonDecode(content) as Map<String, dynamic>;
+        if (jsonData.containsKey('formatVersion')) {
+          return _parseModrinthIndex(jsonData);
+        } else if (jsonData.containsKey('manifestType')) {
+          return _parseCurseForgeManifest(jsonData);
+        } else {
+          // 通用 JSON manifest
+          final manifest = ModpackManifest.fromJson(jsonData);
+          _logger.info('Imported modpack: ${manifest.name}');
+          return manifest;
+        }
+      }
+
+      throw AppException.fromCode(
+        ErrorCodes.fileArchiveError,
+        detail: 'Unsupported modpack format: $filePath',
+      );
     } catch (e, stackTrace) {
       _logger.error('Failed to import modpack', e, stackTrace);
       return null;
     }
+  }
+
+  /// 解析 Modrinth mrpack（modrinth.index.json）
+  ModpackManifest _parseModrinthMrpack(String tempDirPath) {
+    final indexFile = File(path.join(tempDirPath, 'modrinth.index.json'));
+    final data = jsonDecode(indexFile.readAsStringSync()) as Map<String, dynamic>;
+
+    final name = data['name'] as String? ?? 'Unknown';
+    final versionId = data['versionId'] as String? ?? '1.0.0';
+    final gameVersion = (data['gameVersions'] as List<dynamic>?)?.first as String? ?? 'unknown';
+    final dependencies = data['dependencies'] as Map<String, dynamic>? ?? {};
+
+    String? modLoader;
+    String? loaderVersion;
+    if (dependencies.containsKey('fabric-loader')) {
+      modLoader = 'fabric';
+      loaderVersion = dependencies['fabric-loader'] as String?;
+    } else if (dependencies.containsKey('forge')) {
+      modLoader = 'forge';
+      loaderVersion = dependencies['forge'] as String?;
+    } else if (dependencies.containsKey('quilt-loader')) {
+      modLoader = 'quilt';
+      loaderVersion = dependencies['quilt-loader'] as String?;
+    } else if (dependencies.containsKey('neoforge')) {
+      modLoader = 'neoforge';
+      loaderVersion = dependencies['neoforge'] as String?;
+    }
+
+    final files = data['files'] as List<dynamic>? ?? [];
+    final mods = files.map((f) {
+      final fMap = f as Map<String, dynamic>;
+      final env = fMap['env'] as Map<String, dynamic>?;
+      final optional = env != null && env['client'] == 'optional';
+      return ModpackMod(
+        name: fMap['path'] as String? ?? 'unknown',
+        downloadUrl: fMap['downloads']?.first as String?,
+        sha1: fMap['hashes']?['sha1'] as String?,
+        size: fMap['fileSize'] as int?,
+        optional: optional,
+        fileName: fMap['path'] as String?,
+      );
+    }).toList();
+
+    return ModpackManifest(
+      name: name,
+      version: versionId,
+      gameVersion: gameVersion,
+      modLoader: modLoader,
+      loaderVersion: loaderVersion,
+      mods: mods,
+      overrides: 'overrides',
+    );
+  }
+
+  /// 解析 CurseForge 整合包（manifest.json）
+  ModpackManifest _parseCurseForgeModpack(String tempDirPath) {
+    final manifestFile = File(path.join(tempDirPath, 'manifest.json'));
+    final data = jsonDecode(manifestFile.readAsStringSync()) as Map<String, dynamic>;
+    return _parseCurseForgeManifest(data);
+  }
+
+  /// 解析 Modrinth index JSON
+  ModpackManifest _parseModrinthIndex(Map<String, dynamic> data) {
+    final name = data['name'] as String? ?? 'Unknown';
+    final versionId = data['versionId'] as String? ?? '1.0.0';
+    final gameVersion = (data['gameVersions'] as List<dynamic>?)?.first as String? ?? 'unknown';
+
+    final files = data['files'] as List<dynamic>? ?? [];
+    final mods = files.map((f) {
+      final fMap = f as Map<String, dynamic>;
+      return ModpackMod(
+        name: fMap['path'] as String? ?? 'unknown',
+        downloadUrl: fMap['downloads']?.first as String?,
+        sha1: fMap['hashes']?['sha1'] as String?,
+        size: fMap['fileSize'] as int?,
+        fileName: fMap['path'] as String?,
+      );
+    }).toList();
+
+    return ModpackManifest(
+      name: name,
+      version: versionId,
+      gameVersion: gameVersion,
+      mods: mods,
+      overrides: 'overrides',
+    );
+  }
+
+  /// 解析 CurseForge manifest JSON
+  ModpackManifest _parseCurseForgeManifest(Map<String, dynamic> data) {
+    final name = data['name'] as String? ?? 'Unknown';
+    final version = data['version'] as String? ?? '1.0.0';
+    final author = data['author'] as String?;
+    final mcData = data['minecraft'] as Map<String, dynamic>? ?? {};
+    final gameVersion = (mcData['version'] as String?) ?? 'unknown';
+    final modLoaders = mcData['modLoaders'] as List<dynamic>? ?? [];
+
+    String? modLoader;
+    String? loaderVersion;
+    if (modLoaders.isNotEmpty) {
+      final loaderId = (modLoaders.first as Map<String, dynamic>)['id'] as String? ?? '';
+      if (loaderId.contains('forge')) {
+        modLoader = 'forge';
+        loaderVersion = loaderId.replaceAll('forge-', '');
+      } else if (loaderId.contains('fabric')) {
+        modLoader = 'fabric';
+        loaderVersion = loaderId.replaceAll('fabric-', '');
+      }
+    }
+
+    final files = data['files'] as List<dynamic>? ?? [];
+    final mods = files.map((f) {
+      final fMap = f as Map<String, dynamic>;
+      return ModpackMod(
+        name: fMap['fileID']?.toString() ?? 'unknown',
+        projectId: fMap['projectID']?.toString(),
+        fileId: fMap['fileID']?.toString(),
+        fileName: fMap['fileName'] as String?,
+      );
+    }).toList();
+
+    return ModpackManifest(
+      name: name,
+      version: version,
+      author: author,
+      gameVersion: gameVersion,
+      modLoader: modLoader,
+      loaderVersion: loaderVersion,
+      mods: mods,
+      overrides: 'overrides',
+    );
   }
 
   /// 安装整合包

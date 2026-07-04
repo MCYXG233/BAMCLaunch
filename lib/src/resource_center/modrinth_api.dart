@@ -99,9 +99,29 @@ class ModrinthApi implements ResourceApi {
 
   @override
   Future<List<ResourceVersion>> getVersions(String id) async {
+    return getProjectVersions(id);
+  }
+
+  /// 获取项目版本列表（支持过滤参数）
+  Future<List<ResourceVersion>> getProjectVersions(
+    String id, {
+    List<String>? gameVersions,
+    List<String>? loaders,
+  }) async {
+    final queryParams = <String, String>{};
+    if (gameVersions != null && gameVersions.isNotEmpty) {
+      queryParams['game_versions'] = json.encode(gameVersions);
+    }
+    if (loaders != null && loaders.isNotEmpty) {
+      queryParams['loaders'] = json.encode(loaders);
+    }
+
     final networkClient = NetworkClient();
+    final uri = Uri.parse('$baseUrl/project/$id/version')
+        .replace(queryParameters: queryParams.isNotEmpty ? queryParams : null);
+
     final response = await networkClient.get(
-      '$baseUrl/project/$id/version',
+      uri.toString(),
       headers: _headers,
     );
 

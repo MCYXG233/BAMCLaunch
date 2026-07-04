@@ -224,7 +224,10 @@ class DownloadQueueManager {
     _eventBus.publish(QueueItemStartedEvent(item));
     _logger.info('开始下载队列项: ${item.request.url}');
 
-    item.execute(_downloadEngine).then((result) {
+    final cancellationToken = msd.CancellationToken();
+    item.bindCancellationToken(cancellationToken);
+
+    item.execute(_downloadEngine, cancellationToken: cancellationToken).then((result) {
       _onDownloadComplete(item, result);
     }).catchError((error) {
       _onDownloadError(item, error);
@@ -299,6 +302,7 @@ class DownloadQueueItem {
   String? result;
   String? error;
   double progress = 0.0;
+  msd.CancellationToken? _cancellationToken;
 
   DownloadQueueItem({
     required this.id,
@@ -309,15 +313,25 @@ class DownloadQueueItem {
     this.error,
   });
 
-  void cancel() {
+  void bindCancellationToken(msd.CancellationToken token) {
+    _cancellationToken = token;
   }
 
-  Future<String> execute(DownloadEngine downloadEngine) async {
+  void cancel() {
+    _cancellationToken?.cancel();
+    status = QueueItemStatus.cancelled;
+  }
+
+  Future<String> execute(DownloadEngine downloadEngine, {msd.CancellationToken? cancellationToken}) async {
+    if (cancellationToken != null) {
+      bindCancellationToken(cancellationToken);
+    }
     return await downloadEngine.download(
       request.url,
       request.savePath,
       hash: request.hash,
       hashType: request.hashType,
+      cancellationToken: cancellationToken,
     );
   }
 }

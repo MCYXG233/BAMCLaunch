@@ -348,8 +348,8 @@ class ModLoaderManager {
     return [
       '-jar',
       installerPath,
-      'client',
-      '-dir',
+      '--installClient',
+      '--installDir',
       instancePath,
       '-version',
       gameVersion,

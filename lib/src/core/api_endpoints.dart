@@ -55,7 +55,7 @@ class ApiEndpoints {
   // ━━━ 元数据源 ━━━
   static const String minecraftVersionManifest =
       'https://launchermeta.mojang.com/mc/game/version_manifest.json';
-  static const String quiltApi = 'https://api.quiltmc.org/v2';
+  static const String quiltApi = 'https://api.quiltmc.org/v3';
 
   // ━━━ 镜像源 ━━━
   static const String mojangLauncher = 'https://launcher.mojang.com';

@@ -34,7 +34,7 @@ class MultiSourceDownloader {
     HashType? hashType,
     int chunkSize = defaultChunkSize,
     int threadCount = defaultThreadCount,
-    void Function(double progress, int downloaded, int total)? onProgress,
+    void Function(double progress, int downloaded, int total, {int speed, int remainingSeconds})? onProgress,
     void Function(String source)? onSourceSwitch,
     CancellationToken? cancellationToken,
   }) async {
@@ -108,7 +108,7 @@ class MultiSourceDownloader {
     required int startByte,
     required int chunkSize,
     required int threadCount,
-    void Function(double progress, int downloaded, int total)? onProgress,
+    void Function(double progress, int downloaded, int total, {int speed, int remainingSeconds})? onProgress,
     void Function(String source)? onSourceSwitch,
     CancellationToken? cancellationToken,
   }) async {
@@ -131,7 +131,12 @@ class MultiSourceDownloader {
 
     final actualThreadCount = (remainingBytes < chunkSize) ? 1 : threadCount;
     final bytesPerThread = (remainingBytes + actualThreadCount - 1) ~/ actualThreadCount;
+    final chunkFiles = <int, String>{};
     final futures = <Future<void>>[];
+
+    // 速度计算变量
+    int lastBytes = startByte;
+    DateTime lastTime = DateTime.now();
 
     for (int i = 0; i < actualThreadCount; i++) {
       final threadStart = startByte + i * bytesPerThread;
@@ -139,27 +144,59 @@ class MultiSourceDownloader {
       if (threadEnd > totalSize) threadEnd = totalSize;
       if (threadStart >= threadEnd) continue;
 
+      final chunkPath = '${tempFile.path}.chunk.$threadStart';
+      chunkFiles[threadStart] = chunkPath;
+
       futures.add(_downloadChunkToFile(
         url: url,
-        tempFile: tempFile,
+        chunkPath: chunkPath,
         startByte: threadStart,
         endByte: threadEnd,
         cancellationToken: cancellationToken,
         onBytesDownloaded: (bytes) {
           currentDownloaded += bytes;
-          final progress = currentDownloaded / totalSize;
-          onProgress?.call(progress, currentDownloaded, totalSize);
+          final now = DateTime.now();
+          final elapsed = now.difference(lastTime).inMilliseconds;
+          if (elapsed > 500) {
+            final speed = ((currentDownloaded - lastBytes) * 1000 ~/ elapsed);
+            final remaining = speed > 0 ? ((totalSize - currentDownloaded) ~/ speed) : 0;
+            final progress = currentDownloaded / totalSize;
+            onProgress?.call(progress, currentDownloaded, totalSize, speed: speed, remainingSeconds: remaining);
+            lastBytes = currentDownloaded;
+            lastTime = now;
+          } else {
+            final progress = currentDownloaded / totalSize;
+            onProgress?.call(progress, currentDownloaded, totalSize);
+          }
         },
       ));
     }
 
     await Future.wait(futures);
+
+    // 合并所有 chunk 到目标文件
+    final raf = await tempFile.open(mode: FileMode.writeOnly);
+    try {
+      final sortedStarts = chunkFiles.keys.toList()..sort();
+      for (final start in sortedStarts) {
+        final chunkFile = File(chunkFiles[start]!);
+        if (await chunkFile.exists()) {
+          final data = await chunkFile.readAsBytes();
+          await raf.setPosition(start);
+          await raf.writeFrom(data);
+          await chunkFile.delete();
+        }
+      }
+    } finally {
+      await raf.close();
+    }
+
     return currentDownloaded;
   }
 
   Future<void> _downloadChunkToFile({
     required String url,
-    required File tempFile,
+    required String chunkPath,
     required int startByte,
     required int endByte,
     CancellationToken? cancellationToken,
@@ -173,35 +210,16 @@ class MultiSourceDownloader {
 
     if (cancellationToken?.isCancelled ?? false) return;
 
-    if (response.statusCode == 206) {
-      // 正常的 Range 响应：写入指定位置
+    if (response.statusCode == 416) {
+      // Range 不满足，清除续传信息重新下载
+      throw AppException.fromCode(ErrorCodes.networkUnsupportedDownload, detail: 'HTTP 416: Range not satisfiable');
+    }
+
+    if (response.statusCode == 206 || response.statusCode == 200) {
       final data = response.bodyBytes;
       if (data.isEmpty) return;
-      final raf = await tempFile.open(mode: FileMode.writeOnlyAppend);
-      try {
-        await raf.setPosition(startByte);
-        await raf.writeFrom(data);
-      } finally {
-        await raf.close();
-      }
+      await File(chunkPath).writeAsBytes(data);
       onBytesDownloaded?.call(data.length);
-    } else if (response.statusCode == 200) {
-      // 服务器不支持 Range，整个文件都在响应中
-      final data = response.bodyBytes;
-      if (data.isEmpty) return;
-      if (startByte == 0) {
-        // 单线程从头下载，正常写入整个文件
-        final raf = await tempFile.open(mode: FileMode.writeOnly);
-        try {
-          await raf.writeFrom(data);
-        } finally {
-          await raf.close();
-        }
-        onBytesDownloaded?.call(data.length);
-      } else {
-        // 不支持 Range 但请求了部分内容，回退到单线程模式
-        throw AppException.fromCode(ErrorCodes.networkUnsupportedDownload);
-      }
     } else {
       throw AppException.fromCode(ErrorCodes.networkUnsupportedDownload);
     }

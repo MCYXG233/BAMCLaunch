@@ -579,14 +579,30 @@ class DownloadManager {
       }
 
       try {
+        ResourceVersion? depVersion;
         final depResource = await _modrinth.getProject(depId);
-        final depVersions = await _modrinth.getVersions(
-          depId,
-          gameVersions: [task.targetGameVersion],
-        );
 
-        if (depVersions.isNotEmpty) {
-          final depVersion = depVersions.first;
+        if (dep.versionId != null) {
+          // 优先使用精确 versionId
+          try {
+            depVersion = await _modrinth.getVersion(depId, dep.versionId!);
+          } catch (e) {
+            _logger.warning('[Download] 精确版本获取失败 ($depId/${dep.versionId})，回退到列表: $e');
+          }
+        }
+
+        if (depVersion == null) {
+          // 获取最新兼容版本
+          final depVersions = await _modrinth.getVersions(
+            depId,
+            gameVersions: [task.targetGameVersion],
+          );
+          if (depVersions.isNotEmpty) {
+            depVersion = depVersions.first;
+          }
+        }
+
+        if (depVersion != null) {
           // 为每个分支创建独立副本，避免平行链互相污染
           final branchVisited = Set<String>.of(currentVisited);
           await download(

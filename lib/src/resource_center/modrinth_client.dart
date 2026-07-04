@@ -76,20 +76,15 @@ class ModrinthClient {
       final typeValue = _typeToString(type);
       facets.add(['project_type:$typeValue']);
     }
+    // Modrinth facets: 同一子数组内是 OR，不同子数组间是 AND
     if (loaders != null && loaders.isNotEmpty) {
-      for (final loader in loaders) {
-        facets.add(['categories:$loader']);
-      }
+      facets.add(loaders.map((l) => 'categories:$l').toList());
     }
     if (gameVersions != null && gameVersions.isNotEmpty) {
-      for (final v in gameVersions) {
-        facets.add(['versions:$v']);
-      }
+      facets.add(gameVersions.map((v) => 'versions:$v').toList());
     }
     if (categories != null && categories.isNotEmpty) {
-      for (final cat in categories) {
-        facets.add(['categories:$cat']);
-      }
+      facets.add(categories.map((cat) => 'categories:$cat').toList());
     }
 
     final queryParams = <String, String>{
@@ -290,6 +285,68 @@ class ModrinthClient {
       }
     } catch (e) {
       _logger.error('[Modrinth] 获取版本异常: $e');
+      rethrow;
+    }
+  }
+
+  /// 获取单个版本详情
+  Future<ResourceVersion> getVersion(String projectId, String versionId) async {
+    final uri = Uri.parse('$baseUrl/version/$versionId');
+
+    _logger.info('[Modrinth] 获取版本详情: $versionId');
+
+    try {
+      final response = await _networkClient.get(
+        uri.toString(),
+        headers: {'Content-Type': 'application/json'},
+        timeoutSeconds: 15,
+      );
+
+      if (response.statusCode == 200) {
+        final vMap = json.decode(response.body) as Map<String, dynamic>;
+        final files = vMap['files'] as List<dynamic>? ?? [];
+        final primaryFile = files.firstWhere(
+          (f) => (f as Map<String, dynamic>)['primary'] as bool? ?? false,
+          orElse: () => files.isNotEmpty ? files.first : <String, dynamic>{},
+        ) as Map<String, dynamic>;
+
+        return ResourceVersion(
+          id: vMap['id'] as String,
+          versionNumber: vMap['version_number'] as String,
+          name: vMap['name'] as String,
+          changelog: vMap['changelog'] as String?,
+          gameVersions: (vMap['game_versions'] as List<dynamic>?)?.cast<String>() ?? [],
+          loaders: (vMap['loaders'] as List<dynamic>?)?.cast<String>() ?? [],
+          dependencies: (vMap['dependencies'] as List<dynamic>?)
+                  ?.map((d) {
+                final dMap = d as Map<String, dynamic>;
+                return VersionDependency(
+                  projectId: dMap['project_id'] as String?,
+                  versionId: dMap['version_id'] as String?,
+                  dependencyType: dMap['dependency_type'] as String? ?? 'required',
+                );
+              }).toList() ??
+              [],
+          downloads: vMap['downloads'] as int? ?? 0,
+          downloadUrl: primaryFile['url'] as String?,
+          fileName: primaryFile['filename'] as String?,
+          fileSize: primaryFile['size'] as int? ?? 0,
+          fileHashes: (primaryFile['hashes'] as Map<String, dynamic>?)
+                  ?.map((key, value) => MapEntry(key, value as String)) ??
+              {},
+          releaseType: vMap['version_type'] as String? ?? 'release',
+          isFeatured: vMap['featured'] as bool? ?? false,
+          publishedDate: vMap['date_published'] != null
+              ? DateTime.tryParse(vMap['date_published'] as String)
+              : null,
+          source: 'modrinth',
+          projectId: vMap['project_id'] as String,
+        );
+      } else {
+        throw NetworkException.fromStatusCode(response.statusCode);
+      }
+    } catch (e) {
+      _logger.error('[Modrinth] 获取版本详情异常: $e');
       rethrow;
     }
   }

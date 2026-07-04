@@ -189,24 +189,21 @@ class DownloadTask extends Task<String> {
     );
   }
 
-  /// 校验文件哈希
+  /// 校验文件哈希（流式，避免将整个文件读入内存）
   Future<bool> _verifyHash(
     String filePath,
     String expectedHash,
     HashType hashType,
   ) async {
     final file = File(filePath);
-    final bytes = await file.readAsBytes();
-    Digest digest;
-
-    if (hashType == HashType.sha1) {
-      digest = sha1.convert(bytes);
-    } else if (hashType == HashType.sha256) {
-      digest = sha256.convert(bytes);
-    } else {
-      digest = md5.convert(bytes);
-    }
-
+    final stream = file.openRead();
+    final digest = await stream.transform(
+      hashType == HashType.sha1
+          ? sha1
+          : hashType == HashType.sha256
+              ? sha256
+              : md5,
+    ).first;
     final actualHash = digest.bytes
         .map((b) => b.toRadixString(16).padLeft(2, '0'))
         .join();
