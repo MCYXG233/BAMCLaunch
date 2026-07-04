@@ -57,26 +57,18 @@ abstract class IDownloadEngine {
 
   /// 批量下载文件
   ///
-  /// 批量执行多个下载请求，按顺序依次下载。
-  /// 注意：当前实现为串行下载，不支持并行下载。
+  /// 并发下载多个文件，使用 Future.wait 实现并发控制。
   ///
   /// 参数：
-  /// - [requests] 下载请求列表，包含URL、保存路径和可选的哈希信息
+  /// - [requests] 下载请求列表
+  /// - [parallelCount] 可选，最大并发数
   ///
   /// 返回值：
-  /// - 返回所有成功下载的文件路径列表
-  ///
-  /// 异常：
-  /// - [DownloadException] 当任一文件下载失败时抛出
-  ///
-  /// 示例：
-  /// ```dart
-  /// final results = await engine.downloadBatch([
-  ///   DownloadRequest(url: 'url1', savePath: 'path1'),
-  ///   DownloadRequest(url: 'url2', savePath: 'path2'),
-  /// ]);
-  /// ```
-  Future<List<String>> downloadBatch(List<DownloadRequest> requests);
+  /// - 所有成功下载的文件路径列表
+  Future<List<String>> downloadBatch(
+    List<DownloadRequest> requests, {
+    int? parallelCount,
+  });
 
   /// 取消所有下载任务
   ///
@@ -388,31 +380,39 @@ class DownloadEngine implements IDownloadEngine {
 
   /// 批量下载文件
   ///
-  /// 按顺序依次下载多个文件。
-  /// 注意：当前实现为串行下载，一个文件下载完成后再下载下一个。
+  /// 并发下载多个文件。每个文件独立下载，整体进度报告。
   ///
   /// 参数：
   /// - [requests] 下载请求列表
+  /// - [parallelCount] 最大并发下载数，默认与请求数量相同
   ///
   /// 返回值：
   /// - 所有成功下载的文件路径列表
-  ///
-  /// 异常：
-  /// - [DownloadException] 任一文件下载失败时抛出
   @override
-  Future<List<String>> downloadBatch(List<DownloadRequest> requests) async {
-    final results = <String>[];
-    // 串行处理每个下载请求
+  Future<List<String>> downloadBatch(
+    List<DownloadRequest> requests, {
+    int? parallelCount,
+  }) async {
+    final semaphore = parallelCount != null ? _Semaphore(parallelCount) : null;
+    final futures = <Future<String>>[];
+
     for (final request in requests) {
-      final result = await download(
-        request.url,
-        request.savePath,
-        hash: request.hash,
-        hashType: request.hashType,
-      );
-      results.add(result);
+      futures.add(() async {
+        if (semaphore != null) await semaphore.acquire();
+        try {
+          return await download(
+            request.url,
+            request.savePath,
+            hash: request.hash,
+            hashType: request.hashType,
+          );
+        } finally {
+          semaphore?.release();
+        }
+      }());
     }
-    return results;
+
+    return Future.wait(futures);
   }
 
   /// 取消所有下载任务
@@ -494,4 +494,21 @@ class DownloadInfoEvent extends Event {
   /// 参数：
   /// - [message] 要发布的信息消息
   DownloadInfoEvent({required this.message});
+}
+
+class _Semaphore {
+  int _permits;
+
+  _Semaphore(this._permits);
+
+  Future<void> acquire() async {
+    while (_permits <= 0) {
+      await Future.delayed(const Duration(milliseconds: 50));
+    }
+    _permits--;
+  }
+
+  void release() {
+    _permits++;
+  }
 }

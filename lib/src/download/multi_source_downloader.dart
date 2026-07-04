@@ -1,24 +1,32 @@
 import 'dart:async';
-import 'dart:isolate';
 import 'dart:io';
 import 'package:bamclaunch/src/download/resume_manager.dart' as resume;
 import 'package:crypto/crypto.dart' as crypto;
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
 
+/// 多源并发下载器
+///
+/// 支持：
+/// - 多源并发下载（Racing 模式，取最快成功的源）
+/// - 多线程分块下载
+/// - 断点续传
+/// - SHA1/SHA256/MD5 哈希校验（流式）
+/// - 进度上报
+/// - 取消支持
 class MultiSourceDownloader {
   static const int defaultChunkSize = 4 * 1024 * 1024;
   static const int defaultThreadCount = 4;
   static const Duration sourceTimeout = Duration(seconds: 10);
-  
+
   final List<DownloadSource> sources;
   final resume.ResumeDownloadManager resumeManager;
-  
+
   MultiSourceDownloader({
     required this.sources,
     resume.ResumeDownloadManager? resumeManager,
   }) : resumeManager = resumeManager ?? resume.ResumeDownloadManager();
-  
+
   Future<String> download({
     required String url,
     required String savePath,
@@ -32,20 +40,20 @@ class MultiSourceDownloader {
   }) async {
     final tempFile = File('$savePath.tmp');
     final parentDir = tempFile.parent;
-    
+
     if (!await parentDir.exists()) {
       await parentDir.create(recursive: true);
     }
-    
+
     final totalSize = await _getContentLength(url);
     final resumeInfo = await resumeManager.getResumeInfo(savePath, totalSize);
-    
+
     int startByte = 0;
     if (resumeInfo.canResume && await tempFile.exists()) {
       startByte = resumeInfo.downloadedBytes;
       onProgress?.call(resumeInfo.progress, resumeInfo.downloadedBytes, totalSize);
     }
-    
+
     await resumeManager.saveMetadata(savePath, resume.DownloadMetadata(
       filePath: savePath,
       url: url,
@@ -53,9 +61,9 @@ class MultiSourceDownloader {
       hashType: hashType?.name,
       startTime: DateTime.now(),
     ));
-    
+
     try {
-      final downloadedBytes = await _downloadWithProgress(
+      final downloadedBytes = await _downloadConcurrently(
         url: url,
         tempFile: tempFile,
         totalSize: totalSize,
@@ -66,7 +74,7 @@ class MultiSourceDownloader {
         onSourceSwitch: onSourceSwitch,
         cancellationToken: cancellationToken,
       );
-      
+
       await resumeManager.saveProgress(resume.DownloadProgress(
         filePath: savePath,
         url: url,
@@ -74,26 +82,26 @@ class MultiSourceDownloader {
         totalBytes: totalSize,
         lastUpdate: DateTime.now(),
       ));
-      
+
       if (expectedHash != null && hashType != null) {
-        final isValid = await _verifyHash(tempFile.path, expectedHash, hashType);
+        final isValid = await _verifyHashStream(tempFile.path, expectedHash, hashType);
         if (!isValid) {
           await tempFile.delete();
           await resumeManager.removeProgress(savePath);
           throw AppException.fromCode(ErrorCodes.fileHashMismatch);
         }
       }
-      
+
       await tempFile.rename(savePath);
       await resumeManager.removeProgress(savePath);
-      
+
       return savePath;
     } catch (e) {
       rethrow;
     }
   }
   
-  Future<int> _downloadWithProgress({
+  Future<int> _downloadConcurrently({
     required String url,
     required File tempFile,
     required int totalSize,
@@ -107,82 +115,80 @@ class MultiSourceDownloader {
     if (cancellationToken?.isCancelled ?? false) {
       throw AppException.fromCode(ErrorCodes.networkCancelled);
     }
-    
+
     int currentDownloaded = startByte;
-    
+
     if (startByte == 0) {
       if (await tempFile.exists()) {
         await tempFile.delete();
       }
     }
-    
-    final raf = await tempFile.open(mode: FileMode.append);
+
+    final remainingBytes = totalSize - startByte;
+    if (remainingBytes <= 0) {
+      return totalSize;
+    }
+
+    final actualThreadCount = (remainingBytes < chunkSize) ? 1 : threadCount;
+    final bytesPerThread = (remainingBytes + actualThreadCount - 1) ~/ actualThreadCount;
+    final futures = <Future<void>>[];
+
+    for (int i = 0; i < actualThreadCount; i++) {
+      final threadStart = startByte + i * bytesPerThread;
+      var threadEnd = threadStart + bytesPerThread;
+      if (threadEnd > totalSize) threadEnd = totalSize;
+      if (threadStart >= threadEnd) continue;
+
+      futures.add(_downloadChunkToFile(
+        url: url,
+        tempFile: tempFile,
+        startByte: threadStart,
+        endByte: threadEnd,
+        cancellationToken: cancellationToken,
+        onBytesDownloaded: (bytes) {
+          currentDownloaded += bytes;
+          final progress = currentDownloaded / totalSize;
+          onProgress?.call(progress, currentDownloaded, totalSize);
+        },
+      ));
+    }
+
+    await Future.wait(futures);
+    return currentDownloaded;
+  }
+
+  Future<void> _downloadChunkToFile({
+    required String url,
+    required File tempFile,
+    required int startByte,
+    required int endByte,
+    CancellationToken? cancellationToken,
+    void Function(int bytes)? onBytesDownloaded,
+  }) async {
+    final networkClient = NetworkClient();
+    final response = await networkClient.get(
+      url,
+      headers: {'Range': 'bytes=$startByte-${endByte - 1}'},
+    );
+
+    if (cancellationToken?.isCancelled ?? false) return;
+
+    if (response.statusCode != 206 && response.statusCode != 200) {
+      throw AppException.fromCode(ErrorCodes.networkUnsupportedDownload);
+    }
+
+    final data = response.bodyBytes;
+    if (data.isEmpty) return;
+
+    final raf = await tempFile.open(mode: FileMode.writeOnly);
     try {
-      if (startByte == 0) {
-        await raf.truncate(0);
-      }
       await raf.setPosition(startByte);
-      
-      final totalChunks = ((totalSize - currentDownloaded) + chunkSize - 1) ~/ chunkSize;
-      final chunksPerThread = (totalChunks + threadCount - 1) ~/ threadCount;
-      
-      final completers = <Completer<void>>[];
-      final receivePorts = <ReceivePort>[];
-      
-      for (int i = 0; i < threadCount; i++) {
-        final startChunk = i * chunksPerThread;
-        final endChunk = (i + 1) * chunksPerThread;
-        final threadStart = currentDownloaded + startChunk * chunkSize;
-        final threadEnd = currentDownloaded + endChunk * chunkSize;
-        final actualEnd = threadEnd > totalSize ? totalSize : threadEnd;
-        
-        if (threadStart >= actualEnd) continue;
-        
-        final receivePort = ReceivePort();
-        receivePorts.add(receivePort);
-        
-        final completer = Completer<void>();
-        completers.add(completer);
-        
-        final isolate = await Isolate.spawn(
-          _downloadChunkIsolate,
-          _DownloadChunkParams(
-            url: url,
-            startByte: threadStart,
-            endByte: actualEnd,
-            chunkSize: chunkSize,
-            sendPort: receivePort.sendPort,
-          ),
-        );
-        
-        receivePort.listen((message) {
-          if (cancellationToken?.isCancelled ?? false) {
-            isolate.kill();
-            completer.complete();
-            return;
-          }
-          
-          if (message is int) {
-            currentDownloaded = message;
-            final progress = currentDownloaded / totalSize;
-            onProgress?.call(progress, currentDownloaded, totalSize);
-          } else if (message == 'done') {
-            completer.complete();
-          } else if (message is Exception) {
-            completer.completeError(message);
-          }
-        });
-      }
-      
-      await Future.wait(completers.map((c) => c.future));
-      for (final port in receivePorts) {
-        port.close();
-      }
-      
-      return currentDownloaded;
+      await raf.writeFrom(data);
     } finally {
       await raf.close();
     }
+
+    onBytesDownloaded?.call(data.length);
   }
   
   Future<int> _getContentLength(String url) async {
@@ -213,42 +219,21 @@ class MultiSourceDownloader {
     throw AppException.fromCode(ErrorCodes.networkFileSizeError);
   }
   
-  Future<bool> _verifyHash(String filePath, String expectedHash, HashType hashType) async {
+  Future<bool> _verifyHashStream(String filePath, String expectedHash, HashType hashType) async {
     final file = File(filePath);
-    final bytes = await file.readAsBytes();
-    
-    crypto.Digest digest;
-    if (hashType == HashType.sha1) {
-      digest = crypto.sha1.convert(bytes);
-    } else if (hashType == HashType.sha256) {
-      digest = crypto.sha256.convert(bytes);
-    } else {
-      digest = crypto.md5.convert(bytes);
-    }
-    
+    final inputStream = file.openRead();
+    final hashStream = inputStream.transform(
+      hashType == HashType.sha1
+          ? crypto.sha1
+          : hashType == HashType.sha256
+              ? crypto.sha256
+              : crypto.md5,
+    );
+    final digest = await hashStream.first;
     final actualHash = digest.bytes
         .map((b) => b.toRadixString(16).padLeft(2, '0'))
         .join();
     return actualHash.toLowerCase() == expectedHash.toLowerCase();
-  }
-  
-  static Future<void> _downloadChunkIsolate(_DownloadChunkParams params) async {
-    try {
-      final networkClient = NetworkClient();
-      final response = await networkClient.get(
-        params.url,
-        headers: {'Range': 'bytes=${params.startByte}-${params.endByte - 1}'},
-      );
-      if (response.statusCode != 206) {
-        throw AppException.fromCode(ErrorCodes.networkUnsupportedDownload);
-      }
-
-      // 报告已下载的字节数
-      params.sendPort.send(response.bodyBytes.length);
-      params.sendPort.send('done');
-    } catch (e) {
-      params.sendPort.send(e is Exception ? e : Exception(e.toString()));
-    }
   }
 }
 
@@ -293,20 +278,4 @@ enum HashType {
   sha1,
   sha256,
   md5,
-}
-
-class _DownloadChunkParams {
-  final String url;
-  final int startByte;
-  final int endByte;
-  final int chunkSize;
-  final SendPort sendPort;
-  
-  _DownloadChunkParams({
-    required this.url,
-    required this.startByte,
-    required this.endByte,
-    required this.chunkSize,
-    required this.sendPort,
-  });
 }

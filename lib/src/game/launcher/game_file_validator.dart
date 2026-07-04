@@ -403,8 +403,10 @@ class GameFileValidator {
 
   Future<bool> _verifySha1(File file, String expectedHash) async {
     try {
-      final bytes = await file.readAsBytes();
-      final actualHash = sha1.convert(bytes).toString();
+      final inputStream = file.openRead();
+      final hashStream = inputStream.transform(sha1);
+      final digest = await hashStream.first;
+      final actualHash = digest.toString();
       return actualHash == expectedHash;
     } catch (e, stackTrace) {
       _logger.error('Failed to compute SHA1 for ${file.path}', e, stackTrace);
