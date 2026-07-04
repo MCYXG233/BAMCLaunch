@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/utils.dart';
 import 'models.dart';
 
 /// 版本卡片组件
@@ -393,7 +394,7 @@ class InstallProgressDialog extends StatelessWidget {
                 ),
                 if (totalBytes > 0)
                   Text(
-                    '${_formatBytes(downloadedBytes)} / ${_formatBytes(totalBytes)}',
+                    '${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)}',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: Colors.grey,
                     ),
@@ -424,14 +425,5 @@ class InstallProgressDialog extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  /// 格式化字节数
-  String _formatBytes(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024)
-      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
   }
 }

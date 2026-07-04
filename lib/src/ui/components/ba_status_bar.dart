@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
+import '../../core/constants.dart';
 
 /// 底部状态栏组件
 /// 显示游戏版本、Java状态、内存使用、联机状态
@@ -17,8 +18,8 @@ class BAStatusBar extends StatelessWidget {
     this.gameVersion = '1.20.4',
     this.javaVersion = '17.0.8',
     this.javaAvailable = true,
-    this.memoryUsedMB = 2048,
-    this.memoryTotalMB = 4096,
+    this.memoryUsedMB = BAMCConstants.defaultMaxMemoryMB,
+    this.memoryTotalMB = BAMCConstants.recommendedMaxMemoryMB,
     this.isOnline = false,
     this.onlineStatus,
   });

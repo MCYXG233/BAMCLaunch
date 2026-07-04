@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
+import '../core/utils.dart';
 import '../di/service_locator.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
@@ -415,16 +416,6 @@ class ModManager {
             m.id.toLowerCase().contains(lowerQuery) ||
             m.fileName.toLowerCase().contains(lowerQuery))
         .toList();
-  }
-
-  /// 格式化文件大小
-  String formatFileSize(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024) {
-      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-    }
-    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
   }
 
   /// 清空缓存

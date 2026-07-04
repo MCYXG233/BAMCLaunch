@@ -10,6 +10,7 @@ import '../../version/version_manager.dart';
 import '../../version/models.dart';
 import '../../config/config_manager.dart';
 import '../../config/config_keys.dart';
+import '../../core/constants.dart';
 import '../../di/service_locator.dart';
 import '../../platform/platform_adapter.dart';
 import '../../platform/platform_adapter_factory.dart';
@@ -284,7 +285,7 @@ class GameLauncher implements IGameLauncher {
       fileValidatePolicy: fileValidatePolicy,
       autoJoinServer: args.serverAddress != null,
       serverAddress: args.serverAddress ?? '',
-      serverPort: args.serverPort ?? 25565,
+      serverPort: args.serverPort ?? BAMCConstants.defaultMinecraftPort,
       launcherVisibility: launcherVisibility,
     );
 

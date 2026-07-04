@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import '../../core/utils.dart';
 import '../../resource_center/models.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
@@ -352,7 +353,7 @@ class InstalledResourceCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _formatFileSize(resource.fileSize),
+                    formatBytes(resource.fileSize),
                     style: BATypography.bodySmall.copyWith(
                       color: textSecondary,
                     ),
@@ -462,16 +463,5 @@ class InstalledResourceCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _formatFileSize(int bytes) {
-    if (bytes >= 1073741824) {
-      return '${(bytes / 1073741824).toStringAsFixed(2)} GB';
-    } else if (bytes >= 1048576) {
-      return '${(bytes / 1048576).toStringAsFixed(2)} MB';
-    } else if (bytes >= 1024) {
-      return '${(bytes / 1024).toStringAsFixed(2)} KB';
-    }
-    return '$bytes B';
   }
 }

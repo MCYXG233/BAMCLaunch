@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../theme/colors.dart';
 import '../../config/config_manager.dart';
 import '../../config/config_keys.dart';
+import '../../core/constants.dart';
 import '../../updater/update_manager.dart';
 import '../../platform/platform_adapter.dart';
 import '../../platform/platform_adapter_factory.dart';
@@ -48,7 +49,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
   String _gameDirectory = '';
   String _javaPath = '';
-  double _memoryAllocation = 4096;
+  double _memoryAllocation = BAMCConstants.recommendedMaxMemoryMB.toDouble();
   String _themeMode = 'dark';
   bool _autoUpdate = true;
   String _language = '简体中文';
@@ -178,7 +179,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
     try {
       final gameDir = _configManager.getString(ConfigKeys.gameDirectory) ?? '';
       final javaPath = _configManager.getString(ConfigKeys.javaPath) ?? '';
-      final memory = _configManager.getInt(ConfigKeys.memoryAllocation) ?? 4096;
+      final memory = _configManager.getInt(ConfigKeys.memoryAllocation) ?? BAMCConstants.recommendedMaxMemoryMB;
       final autoUpdate = _configManager.getBool(ConfigKeys.autoUpdate) ?? true;
       final language = _configManager.getString(ConfigKeys.language) ?? '简体中文';
       final downloadSource = _configManager.getString(ConfigKeys.downloadSource) ?? 'official';

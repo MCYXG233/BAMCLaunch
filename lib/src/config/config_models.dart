@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import '../core/constants.dart';
+
 /// 垃圾回收器类型
 enum GarbageCollector {
   g1gc,
@@ -239,7 +241,7 @@ class GameServerConfig {
   GameServerConfig({
     this.autoJoin = false,
     this.serverAddress = '',
-    this.serverPort = 25565,
+    this.serverPort = BAMCConstants.defaultMinecraftPort,
   });
 
   Map<String, dynamic> toJson() {
@@ -254,7 +256,7 @@ class GameServerConfig {
     return GameServerConfig(
       autoJoin: json['autoJoin'] as bool? ?? false,
       serverAddress: json['serverAddress'] as String? ?? '',
-      serverPort: json['serverPort'] as int? ?? 25565,
+      serverPort: json['serverPort'] as int? ?? BAMCConstants.defaultMinecraftPort,
     );
   }
 

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as path;
+import '../core/constants.dart';
 import '../core/logger.dart';
 import '../di/service_locator.dart';
 import '../platform/platform_adapter.dart';
@@ -176,7 +177,7 @@ class ServerRecord {
   factory ServerRecord.fromJson(Map<String, dynamic> json) {
     return ServerRecord(
       address: json['address'] as String? ?? '',
-      port: json['port'] as int? ?? 25565,
+      port: json['port'] as int? ?? BAMCConstants.defaultMinecraftPort,
       name: json['name'] as String?,
       connectionCount: json['connectionCount'] as int? ?? 0,
       lastConnected: json['lastConnected'] != null
@@ -434,13 +435,13 @@ class GameStatisticsManager {
     // 更新服务器记录
     if (updatedSession.serverAddress != null) {
       final serverKey =
-          '${updatedSession.serverAddress}:${updatedSession.serverPort ?? 25565}';
+          '${updatedSession.serverAddress}:${updatedSession.serverPort ?? BAMCConstants.defaultMinecraftPort}';
 
       final server = _servers.putIfAbsent(
         serverKey,
         () => ServerRecord(
           address: updatedSession.serverAddress!,
-          port: updatedSession.serverPort ?? 25565,
+          port: updatedSession.serverPort ?? BAMCConstants.defaultMinecraftPort,
           lastConnected: updatedSession.startTime,
         ),
       );

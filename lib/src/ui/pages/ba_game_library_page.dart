@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
+import '../../core/utils.dart';
 import '../../instance/instance_manager.dart';
 import '../../instance/models.dart';
 import '../../event/event_bus.dart';
@@ -245,15 +246,6 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
         });
       }
     }
-  }
-
-  String _formatFileSize(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024) {
-      return '${(bytes / 1024 / 1024).toStringAsFixed(1)} MB';
-    }
-    return '${(bytes / 1024 / 1024 / 1024).toStringAsFixed(1)} GB';
   }
 
   String _formatDateTime(DateTime? dateTime) {
@@ -2271,7 +2263,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${isDir ? '文件夹' : _formatFileSize(size)}${modified != null ? ' · ${_formatDateTime(modified)}' : ''}',
+                  '${isDir ? '文件夹' : formatBytes(size)}${modified != null ? ' · ${_formatDateTime(modified)}' : ''}',
                   style: TextStyle(
                     color: BAColors.textSecondaryOf(context).withValues(alpha: 0.8),
                     fontSize: 11,

@@ -5,6 +5,7 @@ import '../../ui/theme/colors.dart';
 import '../../ui/theme/typography.dart';
 import '../../ui/components/ba_buttons.dart';
 import '../../ui/components/ba_dialog.dart';
+import '../../core/constants.dart';
 import '../../core/logger.dart';
 import '../../loader/java_selector_dialog.dart';
 
@@ -143,7 +144,7 @@ class _InstanceConfigPageState extends State<InstanceConfigPage> {
     );
   }
 
-  int? _maxMemory = 2048;
+  int? _maxMemory = BAMCConstants.defaultMaxMemoryMB;
   int? _minMemory = 1024;
   bool _fullscreen = false;
   bool _demo = false;

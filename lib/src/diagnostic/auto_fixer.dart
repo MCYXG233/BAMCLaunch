@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import '../config/config_manager.dart';
 import '../config/config_keys.dart';
+import '../core/constants.dart';
 import '../core/network_client.dart';
 import 'java_checker.dart';
 import 'network_diagnostic.dart';
@@ -742,7 +743,7 @@ class AutoFixer {
     _log('正在调整内存分配...');
 
     final config = ConfigManager();
-    await config.setInt(ConfigKeys.memoryAllocation, 2048);
+    await config.setInt(ConfigKeys.memoryAllocation, BAMCConstants.defaultMaxMemoryMB);
     _log('内存已调整为 2048 MB');
 
     return FixResult(

@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../theme/colors.dart';
 import '../../config/config_manager.dart';
 import '../../config/config_keys.dart';
+import '../../core/constants.dart';
 import '../theme/theme_manager.dart';
 import '../theme/background_manager.dart';
 import '../components/ba_notification.dart';
@@ -55,7 +56,7 @@ class _SettingsPanelState extends State<SettingsPanel>
   // 设置项状态
   String _gameDirectory = '';
   String _javaPath = '';
-  double _memoryAllocation = 4096;
+  double _memoryAllocation = BAMCConstants.recommendedMaxMemoryMB.toDouble();
   String _themeMode = 'dark';
   String _colorScheme = 'blue_archive';
   bool _autoUpdate = true;
@@ -137,7 +138,7 @@ class _SettingsPanelState extends State<SettingsPanel>
       _gameDirectory = _configManager.getString(ConfigKeys.gameDirectory) ?? '';
       _javaPath = _configManager.getString(ConfigKeys.javaPath) ?? '';
       _memoryAllocation =
-          (_configManager.getInt(ConfigKeys.memoryAllocation) ?? 4096).toDouble();
+          (_configManager.getInt(ConfigKeys.memoryAllocation) ?? BAMCConstants.recommendedMaxMemoryMB).toDouble();
       _autoUpdate = _configManager.getBool(ConfigKeys.autoUpdate) ?? true;
       _downloadSource = _configManager.getString(ConfigKeys.downloadSource) ?? 'official';
       _concurrentDownloads = _configManager.getInt(ConfigKeys.concurrentDownloads) ?? 3;
@@ -1694,7 +1695,7 @@ class _SettingsPanelState extends State<SettingsPanel>
     try {
       await _configManager.setString(ConfigKeys.gameDirectory, '');
       await _configManager.setString(ConfigKeys.javaPath, '');
-      await _configManager.setInt(ConfigKeys.memoryAllocation, 4096);
+      await _configManager.setInt(ConfigKeys.memoryAllocation, BAMCConstants.recommendedMaxMemoryMB);
       await _configManager.setBool(ConfigKeys.autoUpdate, true);
       await _configManager.setString(ConfigKeys.downloadSource, 'official');
       await _configManager.setInt(ConfigKeys.concurrentDownloads, 3);

@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
+import '../core/utils.dart';
+
 class MemoryMonitor {
   static const int _sampleSize = 60;
   
@@ -148,19 +150,10 @@ class MemoryData {
     required this.timestamp,
   });
   
-  String get usedMemoryFormatted => _formatBytes(usedMemory);
-  String get totalMemoryFormatted => _formatBytes(totalMemory);
-  String get peakUsedMemoryFormatted => _formatBytes(peakUsedMemory);
-  String get averageUsedMemoryFormatted => _formatBytes(averageUsedMemory);
-  
-  static String _formatBytes(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024) {
-      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-    }
-    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
-  }
+  String get usedMemoryFormatted => formatBytes(usedMemory);
+  String get totalMemoryFormatted => formatBytes(totalMemory);
+  String get peakUsedMemoryFormatted => formatBytes(peakUsedMemory);
+  String get averageUsedMemoryFormatted => formatBytes(averageUsedMemory);
   
   Map<String, dynamic> toJson() => {
     'usedMemory': usedMemory,

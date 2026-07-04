@@ -1,4 +1,5 @@
 import '../../account/account.dart';
+import '../../core/constants.dart';
 
 /// 游戏进程状态枚举
 enum GameProcessStatus {
@@ -508,7 +509,7 @@ class GameConfig {
     this.fileValidatePolicy = FileValidatePolicy.normal,
     this.autoJoinServer = false,
     this.serverAddress = '',
-    this.serverPort = 25565,
+    this.serverPort = BAMCConstants.defaultMinecraftPort,
     this.launcherVisibility = 'always',
     this.displayGameLog = false,
     this.customTitle = '',
@@ -537,7 +538,7 @@ class GameConfig {
       ),
       autoJoinServer: json['autoJoinServer'] as bool? ?? false,
       serverAddress: json['serverAddress'] as String? ?? '',
-      serverPort: json['serverPort'] as int? ?? 25565,
+      serverPort: json['serverPort'] as int? ?? BAMCConstants.defaultMinecraftPort,
       launcherVisibility: json['launcherVisibility'] as String? ?? 'always',
       displayGameLog: json['displayGameLog'] as bool? ?? false,
       customTitle: json['customTitle'] as String? ?? '',
