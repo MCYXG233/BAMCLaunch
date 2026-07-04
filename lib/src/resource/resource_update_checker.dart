@@ -166,35 +166,15 @@ class ModUpdateChecker {
     }
 
     try {
-      // 这里应该调用Modrinth或CurseForge的API
-      // 由于没有实际API实现，这里返回模拟结果
-
-      // 模拟检查延迟
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      // 为了演示，假设一部分Mod有更新
-      final shouldUpdate = modInfo.name.hashCode % 3 == 0;
+      // TODO: 实现 Modrinth/CurseForge API 调用以检查真实更新
+      // 当前返回 upToDate，待接入真实 API 后替换
 
       UpdateCheckResult result;
 
-      if (shouldUpdate) {
-        result = UpdateCheckResult(
-          modInfo: modInfo,
-          status: UpdateStatus.updateAvailable,
-          latestVersion: ModVersionInfo(
-            version: '${modInfo.version}.1',
-            downloadUrl: 'https://example.com/download',
-            releaseDate: DateTime.now(),
-            changelog: 'Fix some bugs and add new features',
-            gameVersions: ['1.20.1', '1.20.2'],
-          ),
-        );
-      } else {
-        result = UpdateCheckResult(
-          modInfo: modInfo,
-          status: UpdateStatus.upToDate,
-        );
-      }
+      result = UpdateCheckResult(
+        modInfo: modInfo,
+        status: UpdateStatus.upToDate,
+      );
 
       // 更新缓存
       _checkCache[cacheKey] = (DateTime.now(), result);

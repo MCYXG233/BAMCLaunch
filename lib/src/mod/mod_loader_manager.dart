@@ -4,6 +4,7 @@ import 'package:path/path.dart' as path;
 import '../core/api_endpoints.dart';
 import '../core/logger.dart';
 import '../core/error_codes.dart';
+import '../core/network_client.dart';
 import '../di/service_locator.dart';
 import '../download/download_engine.dart';
 
@@ -207,19 +208,105 @@ class ModLoaderManager {
   }
 
   Future<String?> _getLatestFabricVersion(String gameVersion) async {
-    return '0.15.11';
+    try {
+      final client = NetworkClient();
+      final data = await client.getJson(
+        'https://meta.fabricmc.net/v2/versions/loader/$gameVersion',
+      );
+      if (data is List && data.isNotEmpty) {
+        // 优先选择稳定版本
+        for (final entry in data) {
+          if (entry is Map && entry['stable'] == true) {
+            return entry['version'] as String;
+          }
+        }
+        // 若无稳定版本，使用第一个
+        return (data.first as Map)['version'] as String;
+      }
+      return null;
+    } catch (e) {
+      _logger.debug('Failed to fetch latest Fabric version for $gameVersion: $e');
+      return null;
+    }
   }
 
   Future<String?> _getLatestForgeVersion(String gameVersion) async {
-    return '47.1.0';
+    try {
+      final client = NetworkClient();
+      final data = await client.getJson(
+        'https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json',
+      );
+      if (data is Map && data['promos'] is Map) {
+        final promos = data['promos'] as Map;
+        // promotions_slim.json 的 key 格式为 "{gameVersion}-latest"
+        final key = '$gameVersion-latest';
+        if (promos.containsKey(key)) {
+          return promos[key] as String;
+        }
+      }
+      return null;
+    } catch (e) {
+      _logger.debug('Failed to fetch latest Forge version for $gameVersion: $e');
+      return null;
+    }
   }
 
   Future<String?> _getLatestQuiltVersion(String gameVersion) async {
-    return '1.2.0';
+    try {
+      final client = NetworkClient();
+      final data = await client.getJson(
+        'https://api.quiltmc.org/v3/versions/loader/$gameVersion',
+      );
+      if (data is List && data.isNotEmpty) {
+        // 优先选择稳定版本
+        for (final entry in data) {
+          if (entry is Map &&
+              entry['version'] is Map &&
+              (entry['version'] as Map)['stable'] == true) {
+            return (entry['version'] as Map)['version'] as String;
+          }
+        }
+        // 若无稳定版本，使用第一个
+        final first = data.first;
+        if (first is Map && first['version'] is Map) {
+          return (first['version'] as Map)['version'] as String;
+        }
+        return (first as Map)['version'] as String;
+      }
+      return null;
+    } catch (e) {
+      _logger.debug('Failed to fetch latest Quilt version for $gameVersion: $e');
+      return null;
+    }
   }
 
   Future<String?> _getLatestNeoForgeVersion(String gameVersion) async {
-    return '20.4.85-beta';
+    try {
+      final client = NetworkClient();
+      final response = await client.get(
+        '${ApiEndpoints.neoforgeMaven}/releases/net/neoforged/neoforge/maven-metadata.xml',
+      );
+      if (response.statusCode != 200) return null;
+
+      final body = response.body;
+      // 从 maven-metadata.xml 中提取所有 <version> 标签
+      final versions = RegExp(r'<version>([^<]+)</version>')
+          .allMatches(body)
+          .map((m) => m.group(1)!)
+          .where((v) => v.startsWith('$gameVersion-'))
+          .toList();
+
+      if (versions.isEmpty) return null;
+
+      // 按版本号排序，取最新（最后一个）
+      versions.sort();
+      final latest = versions.last;
+      // 返回不含游戏版本前缀的 loader 版本号
+      return latest.substring('$gameVersion-'.length);
+    } catch (e) {
+      _logger.debug('Failed to fetch latest NeoForge version for $gameVersion: $e');
+      return null;
+    }
   }
 
   Future<void> _runInstaller(

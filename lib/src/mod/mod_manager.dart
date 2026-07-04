@@ -278,8 +278,6 @@ class ModManager {
   /// 1. 使用 `url_launcher` 的 `launchUrl` 方法
   /// 2. 如果失败，使用系统命令 `explorer`（Windows）
   ///
-  /// 注意：当前实现中 `canLaunchUrl` 的判断逻辑可能存在问题，
-  /// 应该是 `if (await canLaunchUrl(uri))` 而非 `if (!await canLaunchUrl(uri))`。
   Future<void> openModsFolder(String instancePath) async {
     try {
       // 构建 mods 文件夹路径
@@ -294,8 +292,7 @@ class ModManager {
       final uri = Uri.directory(modsDir.path);
 
       // 尝试使用 url_launcher 打开文件夹
-      // 注意：这里的逻辑可能有误，应该是 if (await canLaunchUrl(uri))
-      if (!await canLaunchUrl(uri)) {
+      if (await canLaunchUrl(uri)) {
         await launchUrl(uri);
       } else {
         // 备用方案：使用系统命令打开文件夹（Windows）

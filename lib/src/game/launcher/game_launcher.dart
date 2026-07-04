@@ -111,6 +111,30 @@ abstract class IGameLauncher {
 ///
 /// 注意：此类采用单例模式，使用 [GameLauncher.instance] 或 [GameLauncher()] 获取实例。
 class GameLauncher implements IGameLauncher {
+  /// 已知故障模式库
+  ///
+  /// 键为错误特征字符串，值为对应的诊断建议。
+  /// 用于在游戏崩溃时快速匹配并提供修复指导。
+  static const Map<String, String> _knownCrashPatterns = {
+    'OutOfMemoryError': '内存不足。请在设置中增加分配的内存，或关闭其他程序释放内存。',
+    'java.lang.OutOfMemoryError': 'Java 堆内存不足。请在设置中增加分配的内存。',
+    'ClassNotFoundException': '缺少必要的类文件。请检查游戏完整性或重新安装。',
+    'NoClassDefFoundError': '缺少必要的类文件。请检查 Mod 兼容性或重新安装。',
+    'IncompatibleClassChangeError': '类版本冲突。请检查 Mod 兼容性。',
+    'UnsupportedClassVersionError': 'Java 版本不兼容。请检查是否使用了正确版本的 Java。',
+    'GLFW error 65542': 'GLFW 错误：显卡驱动不兼容。请更新显卡驱动。',
+    'GLFW error 65548': 'GLFW 错误：OpenGL 版本过低。请更新显卡驱动。',
+    'Could not create the Java Virtual Machine': '无法创建 Java 虚拟机。请检查 Java 路径和 JVM 参数。',
+    'java.lang.StackOverflowError': '栈溢出。请检查是否有无限递归或增加栈大小。',
+    'LWJGL error': 'LWJGL 初始化失败。请更新显卡驱动或检查 OpenGL 支持。',
+    'Shaders not supported': '显卡不支持着色器。请关闭着色器或更新显卡驱动。',
+    'Failed to authenticate': '认证失败。请重新登录账户。',
+    'Session ID is null': '会话 ID 为空。请重新登录账户。',
+    'TimeoutException': '连接超时。请检查网络连接。',
+    'SocketException': '网络连接失败。请检查网络设置。',
+    'java.net.ConnectException': '连接被拒绝。请检查服务器地址和端口。',
+  };
+
   /// 单例实例
   static GameLauncher? _instance;
 
@@ -167,6 +191,9 @@ class GameLauncher implements IGameLauncher {
 
   /// 启动状态映射表，键为进程ID
   final Map<String, LaunchingState> _launchingStates = {};
+
+  /// 已检测到的崩溃模式映射表，键为进程ID，值为匹配到的模式 -> 建议
+  final Map<String, Map<String, String>> _detectedCrashPatterns = {};
 
   /// 进程ID计数器，用于生成唯一进程ID
   int _processIdCounter = 0;
@@ -657,6 +684,7 @@ class GameLauncher implements IGameLauncher {
     _processes.clear();
     _runningProcesses.clear();
     _launchingStates.clear();
+    _detectedCrashPatterns.clear();
     _initialized = false;
   }
 
@@ -772,20 +800,97 @@ class GameLauncher implements IGameLauncher {
 
   /// 检查输出中的错误信息
   ///
-  /// 扫描输出行中是否包含错误关键字，记录警告日志。
+  /// 扫描输出行中是否包含错误关键字，与已知故障模式库进行匹配。
+  /// 匹配到的模式会被记录到 [_detectedCrashPatterns] 中，用于后续崩溃诊断。
   ///
   /// [processId] 进程ID
   /// [line] 输出行
   void _checkForErrors(String processId, String line) {
     final lower = line.toLowerCase();
     // 检查常见的错误关键字
-    if (lower.contains('error') || 
-        lower.contains('exception') || 
+    if (lower.contains('error') ||
+        lower.contains('exception') ||
         lower.contains('crash') ||
         lower.contains('failed') ||
         lower.contains('fatal')) {
       _logger.warn('Potential error detected in game output: $line');
+
+      // 与已知故障模式库匹配
+      for (final entry in _knownCrashPatterns.entries) {
+        if (line.contains(entry.key)) {
+          _detectedCrashPatterns.putIfAbsent(processId, () => {});
+          final patterns = _detectedCrashPatterns[processId]!;
+          if (!patterns.containsKey(entry.key)) {
+            patterns[entry.key] = entry.value;
+            _logger.warn('Crash pattern matched: ${entry.key} -> ${entry.value}');
+          }
+        }
+      }
     }
+  }
+
+  /// 分析崩溃日志，生成诊断报告
+  ///
+  /// 收集进程的最后 [maxLogLines] 行日志，结合已匹配的故障模式，
+  /// 生成一份格式化的诊断报告并通过 [CrashDiagnosticEvent] 发布到 EventBus。
+  ///
+  /// [processId] 进程ID
+  /// [maxLogLines] 收集的最大日志行数，默认 50
+  ///
+  /// 返回格式化的诊断报告字符串。
+  String _analyzeCrashLog(String processId, {int maxLogLines = 50}) {
+    final processInfo = _runningProcesses[processId];
+    final matchedPatterns = _detectedCrashPatterns[processId] ?? {};
+    final buffer = StringBuffer();
+
+    buffer.writeln('========== 崩溃诊断报告 ==========');
+    buffer.writeln('进程ID: $processId');
+    buffer.writeln('分析时间: ${DateTime.now().toLocal()}');
+
+    if (processInfo != null) {
+      buffer.writeln('游戏版本: ${processInfo.arguments.gameVersion}');
+      buffer.writeln('退出码: ${processInfo.exitCode ?? "未知"}');
+      buffer.writeln('运行时长: ${processInfo.duration.inSeconds} 秒');
+    }
+
+    // 输出匹配到的故障模式及建议
+    buffer.writeln();
+    if (matchedPatterns.isNotEmpty) {
+      buffer.writeln('--- 匹配到的故障模式 ---');
+      for (final entry in matchedPatterns.entries) {
+        buffer.writeln('  [${entry.key}]');
+        buffer.writeln('    建议: ${entry.value}');
+      }
+    } else {
+      buffer.writeln('--- 未匹配到已知故障模式 ---');
+      buffer.writeln('  请查看下方日志输出以获取更多线索。');
+    }
+
+    // 输出最近的日志上下文
+    buffer.writeln();
+    buffer.writeln('--- 最近 $maxLogLines 行日志 ---');
+    if (processInfo != null) {
+      final recentLogs = processInfo.getRecentLogs(maxLogLines);
+      for (final log in recentLogs) {
+        buffer.writeln(log.format());
+      }
+    } else {
+      buffer.writeln('  (进程信息不可用，无法收集日志)');
+    }
+
+    buffer.writeln('====================================');
+
+    final report = buffer.toString();
+    _logger.info('Crash diagnostic report generated for process $processId');
+
+    // 通过 EventBus 发布诊断事件，使 UI 层能够获取诊断结果
+    _eventBus.publish(CrashDiagnosticEvent(
+      processId: processId,
+      matchedPatterns: Map.unmodifiable(matchedPatterns),
+      diagnosticReport: report,
+    ));
+
+    return report;
   }
 
   /// 检查游戏是否已就绪
@@ -866,10 +971,14 @@ class GameLauncher implements IGameLauncher {
       await _restoreLauncherVisibility();
       await _recordPlayTime(processId);
     } else {
-      // 异常退出（崩溃）
+      // 异常退出（崩溃）：执行诊断分析
       processInfo.status = GameProcessStatus.crashed;
       processInfo.errorMessage = 'Exit code: $exitCode';
       _statusControllers[processId]?.add(GameProcessStatus.crashed);
+
+      // 分析崩溃日志，生成诊断报告并发布 CrashDiagnosticEvent
+      _analyzeCrashLog(processId);
+
       _eventBus.publish(GameCrashedEvent(
         processId: processId,
         error: 'Exit code: $exitCode',
@@ -981,6 +1090,7 @@ class GameLauncher implements IGameLauncher {
     _processes.remove(processId);
     _runningProcesses.remove(processId);
     _launchingStates.remove(processId);
+    _detectedCrashPatterns.remove(processId);
 
     // 延迟关闭流控制器，给客户端时间读取最后的输出
     Future.delayed(const Duration(seconds: 10), () {

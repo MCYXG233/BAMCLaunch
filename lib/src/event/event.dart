@@ -389,6 +389,27 @@ class GameReadyEvent extends GameLaunchEvent {
   });
 }
 
+/// 崩溃诊断事件
+///
+/// 当游戏进程崩溃并完成诊断分析后发布。
+/// 包含匹配到的故障模式和格式化的诊断报告。
+class CrashDiagnosticEvent extends GameLaunchEvent {
+  /// 进程ID
+  final String processId;
+
+  /// 匹配到的故障模式列表（模式名 -> 诊断建议）
+  final Map<String, String> matchedPatterns;
+
+  /// 诊断报告（包含上下文日志和建议）
+  final String diagnosticReport;
+
+  CrashDiagnosticEvent({
+    required this.processId,
+    required this.matchedPatterns,
+    required this.diagnosticReport,
+  });
+}
+
 /// 游玩时长记录事件
 class PlayTimeRecordedEvent extends GameLaunchEvent {
   /// 游戏版本
