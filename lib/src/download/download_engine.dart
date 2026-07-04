@@ -299,7 +299,7 @@ class DownloadEngine implements IDownloadEngine {
             savePath: savePath,
             expectedHash: hash,
             // 转换哈希类型枚举，从本地枚举映射到多源下载器的枚举
-            hashType: hashType != null ? msd.HashType.values[hashType.index] : null,
+            hashType: hashType != null ? HashType.values[hashType.index] : null,
             // 进度回调：将进度信息发送到进度流
             onProgress: (progress, downloaded, total, {int speed = 0, int remainingSeconds = 0}) {
               _progressController.add(

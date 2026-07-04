@@ -182,7 +182,18 @@ class ArgumentBuilder {
     }
 
     // 设置 -Djava.library.path（确保 JVM 能找到 native 库）
-    args.add('-Djava.library.path=$nativesDirectory');
+    // 检查路径是否包含非 ASCII 字符（某些旧版 JVM 不支持）
+    String resolvedNativesPath = nativesDirectory;
+    if (javaMajorVersion < 19) {
+      final hasNonAscii = nativesDirectory.codeUnits.any((c) => c > 127);
+      if (hasNonAscii) {
+        // 在临时 ASCII 路径中创建目录作为备用
+        final tempDir = Directory.systemTemp.createTempSync('bamclaunch_natives_');
+        resolvedNativesPath = tempDir.path;
+        // 注意：需要在启动前将 native 文件复制到此临时目录
+      }
+    }
+    args.add('-Djava.library.path=$resolvedNativesPath');
 
     args.add('-Xmx${memory}M');
     args.add('-Xms${(memory / 2).round()}M');

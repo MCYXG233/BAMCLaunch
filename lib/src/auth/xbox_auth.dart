@@ -29,6 +29,14 @@ class XboxAuthService {
       headers: NetworkClient.xboxLiveHeaders,
     );
 
+    if (response.statusCode == 400) {
+      throw AppException.fromCode(
+        ErrorCodes.authXboxFailed,
+        detail: 'Xbox Live 请求格式错误 (HTTP 400)',
+        originalError: response.body,
+      );
+    }
+
     if (response.statusCode != 200) {
       throw AppException.fromCode(
         ErrorCodes.authXboxFailed,
@@ -71,6 +79,14 @@ class XboxAuthService {
       },
       headers: NetworkClient.xboxLiveHeaders,
     );
+
+    if (response.statusCode == 400) {
+      throw AppException.fromCode(
+        ErrorCodes.authXboxFailed,
+        detail: 'Xbox Live 请求格式错误 (HTTP 400)',
+        originalError: response.body,
+      );
+    }
 
     if (response.statusCode != 200) {
       final Map<String, dynamic> data;

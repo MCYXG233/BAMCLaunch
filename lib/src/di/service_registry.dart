@@ -19,7 +19,6 @@ import '../auth/auth_manager.dart';
 import '../auth/authlib_injector.dart';
 import '../auth/authlib_login.dart';
 import '../auth/local_yggdrasil_server.dart';
-import '../auth/oauth_service.dart';
 
 // 账户 & 皮肤
 import '../account/account_manager.dart';
@@ -213,9 +212,6 @@ class ServiceRegistry {
 
     // CapeManager - 披风管理器
     locator.registerLazySingleton<CapeManager>(() => CapeManager.instance);
-
-    // OAuthService - OAuth 服务
-    locator.registerLazySingleton<OAuthService>(() => OAuthService.instance);
 
     // AuthlibInjector - Authlib 注入器
     locator.registerLazySingleton<AuthlibInjector>(() => AuthlibInjector.instance);

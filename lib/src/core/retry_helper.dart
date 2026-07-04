@@ -3,6 +3,23 @@ import 'dart:math';
 import 'error_codes.dart';
 import 'logger.dart';
 
+/// 携带重试延迟信息的异常
+///
+/// 当服务器返回 429 (Too Many Requests) 且包含 Retry-After 头时，
+/// 抛出此异常以指定下次重试应等待的秒数。
+class RetryAfterException implements Exception {
+  final int delaySeconds;
+  final int statusCode;
+
+  RetryAfterException({
+    required this.delaySeconds,
+    this.statusCode = 429,
+  });
+
+  @override
+  String toString() => 'RetryAfterException: HTTP $statusCode, retry after ${delaySeconds}s';
+}
+
 /// 重试策略配置
 class RetryConfig {
   /// 最大重试次数
@@ -88,7 +105,13 @@ class RetryHelper {
         final shouldRetry = config.shouldRetry?.call(e) ?? _defaultShouldRetry(e);
 
         if (attempt <= config.maxRetries && shouldRetry) {
-          final delay = config.getDelay(attempt);
+          // 优先使用 Retry-After 指定的延迟（HTTP 429）
+          Duration delay;
+          if (e is RetryAfterException) {
+            delay = Duration(seconds: e.delaySeconds);
+          } else {
+            delay = config.getDelay(attempt);
+          }
           _logger.info('Retrying in ${delay.inMilliseconds}ms...');
 
           onRetry?.call(attempt, e);

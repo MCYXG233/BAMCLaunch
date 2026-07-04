@@ -5,6 +5,7 @@ import '../core/network_client.dart';
 import '../config/config_manager.dart';
 import '../config/config_keys.dart';
 import '../di/service_locator.dart';
+import 'download_source.dart';
 
 /// 镜像源信息类
 ///
@@ -691,4 +692,17 @@ extension ConfigKeysMirrorExtension on ConfigKeys {
   ///
   /// 用于存储用户当前选择的镜像源ID
   static const String selectedMirror = 'selectedMirror';
+}
+
+/// MirrorInfo 的扩展，提供 IDownloadSource 兼容接口
+extension MirrorInfoDownloadSource on MirrorInfo {
+  /// 将镜像信息转换为 IDownloadSource 兼容的下载源
+  ///
+  /// 返回一个 BMCLApiDownloadSource（第三方镜像）或 OfficialDownloadSource（官方镜像）
+  IDownloadSource toDownloadSource() {
+    if (isOfficial) {
+      return OfficialDownloadSource();
+    }
+    return BMCLApiDownloadSource(url, name);
+  }
 }

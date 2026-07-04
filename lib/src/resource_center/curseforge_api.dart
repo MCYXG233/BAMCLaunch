@@ -177,11 +177,20 @@ class CurseForgeApi implements ResourceApi {
 
     final loaders = <String>[];
     final slug = mod['slug'] as String?;
-    if (slug != null && slug.contains('fabric')) {
-      loaders.add('fabric');
+    // 从 latestFilesIndexes 的 gameVersion 字段推断加载器类型
+    if (latestFileIndex != null) {
+      for (final index in latestFileIndex) {
+        final gv = (index['gameVersion'] as String?)?.toLowerCase() ?? '';
+        if (gv == 'fabric') loaders.add('fabric');
+        if (gv == 'forge') loaders.add('forge');
+        if (gv == 'quilt') loaders.add('quilt');
+        if (gv == 'neoforge') loaders.add('neoforge');
+      }
     }
-    if (slug != null && slug.contains('forge')) {
-      loaders.add('forge');
+    // 回退：从 slug 推断（不够可靠但作为最后手段）
+    if (loaders.isEmpty && slug != null) {
+      if (slug.contains('fabric')) loaders.add('fabric');
+      if (slug.contains('forge')) loaders.add('forge');
     }
     if (loaders.isEmpty) {
       loaders.add('forge');
@@ -253,15 +262,11 @@ class CurseForgeApi implements ResourceApi {
 
     final loaders = <String>[];
     for (final version in gameVersions) {
-      if (version.toLowerCase().contains('fabric')) {
-        loaders.add('fabric');
-      }
-      if (version.toLowerCase().contains('forge')) {
-        loaders.add('forge');
-      }
-      if (version.toLowerCase().contains('quilt')) {
-        loaders.add('quilt');
-      }
+      final v = version.toLowerCase();
+      if (v == 'fabric') loaders.add('fabric');
+      if (v == 'forge') loaders.add('forge');
+      if (v == 'quilt') loaders.add('quilt');
+      if (v == 'neoforge') loaders.add('neoforge');
     }
     if (loaders.isEmpty) {
       loaders.add('forge');

@@ -226,6 +226,7 @@ class ModpackManager {
           // 检测格式
           final modrinthIndex = File(path.join(tempDir.path, 'modrinth.index.json'));
           final curseManifest = File(path.join(tempDir.path, 'manifest.json'));
+          final mmcPack = File(path.join(tempDir.path, 'mmc-pack.json'));
 
           if (await modrinthIndex.exists()) {
             // Modrinth mrpack 格式
@@ -233,6 +234,9 @@ class ModpackManager {
           } else if (await curseManifest.exists()) {
             // CurseForge 格式
             return _parseCurseForgeModpack(tempDir.path);
+          } else if (await mmcPack.exists()) {
+            // MultiMC/MMC 格式
+            return _parseMMCPack(tempDir.path);
           }
         } finally {
           await tempDir.delete(recursive: true);
@@ -391,6 +395,62 @@ class ModpackManager {
       loaderVersion: loaderVersion,
       mods: mods,
       overrides: 'overrides',
+    );
+  }
+
+  /// 解析 MultiMC/MMC 格式 (mmc-pack.json)
+  ModpackManifest _parseMMCPack(String tempDirPath) {
+    final mmcFile = File(path.join(tempDirPath, 'mmc-pack.json'));
+    final data = jsonDecode(mmcFile.readAsStringSync()) as Map<String, dynamic>;
+
+    final components = data['components'] as List<dynamic>? ?? [];
+
+    String gameVersion = 'unknown';
+    String? modLoader;
+    String? loaderVersion;
+
+    for (final comp in components) {
+      final compMap = comp as Map<String, dynamic>;
+      final uid = compMap['uid'] as String? ?? '';
+      final compVersion = compMap['version'] as String? ?? '';
+
+      if (uid == 'net.minecraft') {
+        gameVersion = compVersion;
+      } else if (uid == 'net.minecraftforge') {
+        modLoader = 'forge';
+        loaderVersion = compVersion;
+      } else if (uid == 'net.fabricmc.fabric-loader') {
+        modLoader = 'fabric';
+        loaderVersion = compVersion;
+      } else if (uid == 'org.quiltmc.quilt-loader') {
+        modLoader = 'quilt';
+        loaderVersion = compVersion;
+      } else if (uid == 'net.neoforged') {
+        modLoader = 'neoforge';
+        loaderVersion = compVersion;
+      }
+    }
+
+    // 尝试从 instance.cfg 读取名称
+    String name = 'MMC Modpack';
+    final instanceCfg = File(path.join(tempDirPath, 'instance.cfg'));
+    if (instanceCfg.existsSync()) {
+      final cfgContent = instanceCfg.readAsStringSync();
+      for (final line in cfgContent.split('\n')) {
+        if (line.startsWith('name=')) {
+          name = line.substring(5).trim();
+          break;
+        }
+      }
+    }
+
+    return ModpackManifest(
+      name: name,
+      version: '1.0.0',
+      gameVersion: gameVersion,
+      modLoader: modLoader,
+      loaderVersion: loaderVersion,
+      overrides: '.minecraft',
     );
   }
 
@@ -609,16 +669,68 @@ class ModpackManager {
         mods: mods,
       );
 
-      // 这里应该打包文件
-      // 简化实现：只保存manifest
-      final outputFile = File(outputPath);
-      await outputFile.writeAsString(jsonEncode(manifest.toJson()));
+      // 创建临时目录用于打包
+      final tempDir = await Directory.systemTemp.createTemp('bamclaunch_export_');
+      try {
+        // 写入 manifest.json
+        final manifestFile = File(path.join(tempDir.path, 'manifest.json'));
+        await manifestFile.writeAsString(
+          const JsonEncoder.withIndent('  ').convert(manifest.toJson()),
+        );
+
+        // 复制 overrides 目录（mods, config, resourcepacks 等）
+        final overridesDir = Directory(path.join(tempDir.path, 'overrides'));
+        await overridesDir.create();
+        await _copyInstanceFiles(instancePath, overridesDir.path);
+
+        // 打包为 ZIP
+        await _createZipArchive(tempDir.path, outputPath);
+      } finally {
+        // 清理临时目录
+        if (await tempDir.exists()) {
+          await tempDir.delete(recursive: true);
+        }
+      }
 
       _logger.info('Exported modpack to: $outputPath');
       return true;
     } catch (e, stackTrace) {
       _logger.error('Failed to export modpack', e, stackTrace);
       return false;
+    }
+  }
+
+  /// 复制实例文件到 overrides 目录
+  Future<void> _copyInstanceFiles(String instancePath, String overridesPath) async {
+    final overridesToCopy = ['mods', 'config', 'resourcepacks', 'shaderpacks'];
+    for (final dirName in overridesToCopy) {
+      final sourceDir = Directory(path.join(instancePath, dirName));
+      if (await sourceDir.exists()) {
+        final targetDir = Directory(path.join(overridesPath, dirName));
+        await _copyDirectory(sourceDir, targetDir);
+      }
+    }
+  }
+
+  /// 创建 ZIP 归档
+  Future<void> _createZipArchive(String sourcePath, String outputPath) async {
+    final archive = Archive();
+    final sourceDir = Directory(sourcePath);
+
+    await for (final entity in sourceDir.list(recursive: true)) {
+      if (entity is File) {
+        final relativePath = path.relative(entity.path, from: sourcePath);
+        final bytes = await entity.readAsBytes();
+        final archiveFile = ArchiveFile(relativePath, bytes.length, bytes);
+        archive.addFile(archiveFile);
+      }
+    }
+
+    final zipBytes = ZipEncoder().encode(archive);
+    if (zipBytes != null) {
+      final outputFile = File(outputPath);
+      await outputFile.parent.create(recursive: true);
+      await outputFile.writeAsBytes(zipBytes);
     }
   }
 

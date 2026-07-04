@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
 import '../core/utils.dart';
@@ -251,23 +252,38 @@ class ModManager {
           ? fileName.substring(0, fileName.length - '.disabled'.length)
           : fileName;
 
-      // 简单解析，实际应该读取jar包中的mod信息
-      final nameParts = cleanName.replaceAll('.jar', '').replaceAll('.litemod', '').split('-');
-
-      String name = nameParts.first;
+      String name;
       String version = 'unknown';
+      String? description;
+      List<String>? authors;
 
-      if (nameParts.length > 1) {
-        version = nameParts.last;
-        if (nameParts.length > 2) {
-          name = nameParts.sublist(0, nameParts.length - 1).join('-');
+      // 优先从 JAR 内读取元数据
+      if (cleanName.endsWith('.jar')) {
+        final metadata = await _readModMetadataFromJar(file.path);
+        if (metadata != null) {
+          name = metadata['name'] ?? _parseNameFromFileName(cleanName);
+          version = metadata['version'] ?? 'unknown';
+          description = metadata['description'];
+          authors = metadata['authors'];
+        } else {
+          // JAR 解析失败，回退到文件名解析
+          final parsed = _parseNameAndVersion(cleanName);
+          name = parsed['name']!;
+          version = parsed['version']!;
         }
+      } else {
+        // 非 JAR 文件，从文件名解析
+        final parsed = _parseNameAndVersion(cleanName);
+        name = parsed['name']!;
+        version = parsed['version']!;
       }
 
       return ModMetadata(
         id: '${instanceId}_$fileName',
         name: name,
         version: version,
+        description: description,
+        authors: authors,
         status: isDisabled ? ModStatus.disabled : ModStatus.enabled,
         fileName: fileName,
         filePath: file.path,
@@ -278,6 +294,140 @@ class ModManager {
       _logger.error('Failed to load mod from file ${file.path}', e, stackTrace);
       return null;
     }
+  }
+
+  /// 从 JAR 文件中读取 Mod 元数据
+  Future<Map<String, dynamic>?> _readModMetadataFromJar(String jarPath) async {
+    try {
+      final bytes = await File(jarPath).readAsBytes();
+      final archive = ZipDecoder().decodeBytes(bytes);
+
+      // 尝试 Fabric mod (fabric.mod.json)
+      final fabricMod = archive.findFile('fabric.mod.json');
+      if (fabricMod != null) {
+        final content = utf8.decode(fabricMod.content as List<int>);
+        final data = jsonDecode(content) as Map<String, dynamic>;
+        return {
+          'name': data['name'] as String?,
+          'version': data['version'] as String?,
+          'description': data['description'] as String?,
+          'authors': (data['authors'] as List<dynamic>?)?.map((a) {
+            if (a is String) return a;
+            if (a is Map) return a['name']?.toString() ?? '';
+            return '';
+          }).where((s) => s.isNotEmpty).toList(),
+        };
+      }
+
+      // 尝试 Forge mods.toml (META-INF/mods.toml)
+      final forgeToml = archive.findFile('META-INF/mods.toml');
+      if (forgeToml != null) {
+        final content = utf8.decode(forgeToml.content as List<int>);
+        return _parseForgeToml(content);
+      }
+
+      // 尝试 Legacy mcmod.info
+      final legacyInfo = archive.findFile('mcmod.info');
+      if (legacyInfo != null) {
+        final content = utf8.decode(legacyInfo.content as List<int>);
+        try {
+          final data = jsonDecode(content);
+          if (data is List && data.isNotEmpty) {
+            final mod = data[0] as Map<String, dynamic>;
+            return {
+              'name': mod['name'] as String?,
+              'version': mod['version'] as String?,
+              'description': mod['description'] as String?,
+              'authors': (mod['authorList'] as List<dynamic>?)?.cast<String>(),
+            };
+          } else if (data is Map) {
+            final modList = data['modList'] as List<dynamic>?;
+            if (modList != null && modList.isNotEmpty) {
+              final mod = modList[0] as Map<String, dynamic>;
+              return {
+                'name': mod['name'] as String?,
+                'version': mod['version'] as String?,
+                'description': mod['description'] as String?,
+                'authors': (mod['authorList'] as List<dynamic>?)?.cast<String>(),
+              };
+            }
+          }
+        } catch (_) {
+          // JSON 解析失败
+        }
+      }
+    } catch (e) {
+      _logger.warning('Failed to read mod metadata from JAR: $jarPath: $e');
+    }
+    return null;
+  }
+
+  /// 解析 Forge mods.toml 格式
+  Map<String, dynamic>? _parseForgeToml(String content) {
+    String? name;
+    String? version;
+    String? description;
+    List<String>? authors;
+
+    for (final line in content.split('\n')) {
+      final trimmed = line.trim();
+      if (trimmed.startsWith('displayName')) {
+        name = _extractTomlValue(trimmed);
+      } else if (trimmed.startsWith('version')) {
+        version = _extractTomlValue(trimmed);
+      } else if (trimmed.startsWith('description')) {
+        description = _extractTomlValue(trimmed);
+      } else if (trimmed.startsWith('authors')) {
+        authors = _extractTomlValue(trimmed)?.split(',').map((s) => s.trim()).toList();
+      }
+    }
+
+    if (name == null && version == null) return null;
+    return {
+      'name': name,
+      'version': version,
+      'description': description,
+      'authors': authors,
+    };
+  }
+
+  /// 提取 TOML 键值对的值
+  String? _extractTomlValue(String line) {
+    final eqIndex = line.indexOf('=');
+    if (eqIndex < 0) return null;
+    var value = line.substring(eqIndex + 1).trim();
+    // 移除引号
+    if ((value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.substring(1, value.length - 1);
+    }
+    return value;
+  }
+
+  /// 从文件名解析名称（不带版本）
+  String _parseNameFromFileName(String fileName) {
+    final clean = fileName.replaceAll('.jar', '').replaceAll('.litemod', '');
+    final parts = clean.split('-');
+    if (parts.length > 1) {
+      return parts.sublist(0, parts.length - 1).join('-');
+    }
+    return parts.first;
+  }
+
+  /// 从文件名解析名称和版本
+  Map<String, String> _parseNameAndVersion(String fileName) {
+    final clean = fileName.replaceAll('.jar', '').replaceAll('.litemod', '');
+    final nameParts = clean.split('-');
+    String name = nameParts.first;
+    String version = 'unknown';
+
+    if (nameParts.length > 1) {
+      version = nameParts.last;
+      if (nameParts.length > 2) {
+        name = nameParts.sublist(0, nameParts.length - 1).join('-');
+      }
+    }
+    return {'name': name, 'version': version};
   }
 
   /// 获取实例的Mod列表

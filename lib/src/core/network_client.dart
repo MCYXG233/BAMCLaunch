@@ -236,6 +236,14 @@ class NetworkClient {
           final response = await _client
               .get(uri, headers: finalHeaders)
               .timeout(Duration(seconds: timeoutSeconds));
+
+          // 处理 HTTP 429 (Too Many Requests)
+          if (response.statusCode == 429) {
+            final retryAfter = response.headers['retry-after'];
+            final delay = retryAfter != null ? int.tryParse(retryAfter) ?? 60 : 60;
+            throw RetryAfterException(delaySeconds: delay);
+          }
+
           return response;
         } on TimeoutException catch (e, stackTrace) {
           // 处理请求超时异常
@@ -335,6 +343,14 @@ class NetworkClient {
           final response = await _client
               .post(uri, headers: finalHeaders, body: body)
               .timeout(Duration(seconds: timeoutSeconds));
+
+          // 处理 HTTP 429 (Too Many Requests)
+          if (response.statusCode == 429) {
+            final retryAfter = response.headers['retry-after'];
+            final delay = retryAfter != null ? int.tryParse(retryAfter) ?? 60 : 60;
+            throw RetryAfterException(delaySeconds: delay);
+          }
+
           return response;
         } on TimeoutException catch (e, stackTrace) {
           // 处理请求超时异常
@@ -445,6 +461,14 @@ class NetworkClient {
                 body: jsonEncode(body),
               )
               .timeout(Duration(seconds: timeoutSeconds));
+
+          // 处理 HTTP 429 (Too Many Requests)
+          if (response.statusCode == 429) {
+            final retryAfter = response.headers['retry-after'];
+            final delay = retryAfter != null ? int.tryParse(retryAfter) ?? 60 : 60;
+            throw RetryAfterException(delaySeconds: delay);
+          }
+
           return response;
         } on TimeoutException catch (e, stackTrace) {
           // 处理请求超时异常

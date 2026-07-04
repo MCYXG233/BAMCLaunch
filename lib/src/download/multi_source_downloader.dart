@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:archive/archive.dart' as archive;
 import 'package:bamclaunch/src/download/resume_manager.dart' as resume;
 import 'package:crypto/crypto.dart' as crypto;
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
+import 'models.dart';
 
 /// 多源并发下载器
 ///
@@ -89,6 +91,22 @@ class MultiSourceDownloader {
           await tempFile.delete();
           await resumeManager.removeProgress(savePath);
           throw AppException.fromCode(ErrorCodes.fileHashMismatch);
+        }
+      }
+
+      // ZIP/JAR 完整性校验
+      if (savePath.endsWith('.jar') || savePath.endsWith('.zip') || savePath.endsWith('.mrpack')) {
+        try {
+          final bytes = await tempFile.readAsBytes();
+          archive.ZipDecoder().decodeBytes(bytes);
+        } catch (e) {
+          await tempFile.delete();
+          await resumeManager.removeProgress(savePath);
+          throw AppException.fromCode(
+            ErrorCodes.fileArchiveError,
+            detail: 'ZIP/JAR 文件损坏: $savePath',
+            originalError: e,
+          );
         }
       }
 
@@ -306,10 +324,4 @@ class CancellationToken {
   void reset() {
     _isCancelled = false;
   }
-}
-
-enum HashType {
-  sha1,
-  sha256,
-  md5,
 }

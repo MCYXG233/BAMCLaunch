@@ -132,8 +132,37 @@ class NativeLibraryManager {
   String? _getPlatformKey() {
     if (_platformAdapter.isWindows) return 'windows';
     if (_platformAdapter.isLinux) return 'linux';
-    if (_platformAdapter.isMacOS) return 'osx';
+    if (_platformAdapter.isMacOS) {
+      // Apple Silicon Mac 使用 arm64 版本
+      if (_isArm64()) return 'osx-arm64';
+      return 'osx';
+    }
     return null;
+  }
+
+  bool _isArm64() {
+    // 检测是否为 ARM64 架构
+    // 通过 Platform.version 或环境变量判断
+    try {
+      // Dart 的 Platform.version 包含架构信息
+      // 例如 "3.3.0 (stable) ... on macos_arm64"
+      final version = Platform.version.toLowerCase();
+      if (version.contains('arm64') || version.contains('aarch64')) {
+        return true;
+      }
+    } catch (_) {
+      // Platform.version 不可用时回退
+    }
+    // 检查环境变量
+    try {
+      final arch = Platform.environment['PROCESSOR_ARCHITECTURE'] ??
+          Platform.environment['HOSTTYPE'] ?? '';
+      if (arch.toLowerCase().contains('arm64') ||
+          arch.toLowerCase().contains('aarch64')) {
+        return true;
+      }
+    } catch (_) {}
+    return false;
   }
 
   List<String> _getNativeExtensions() {

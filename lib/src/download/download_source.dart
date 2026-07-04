@@ -2,6 +2,7 @@ import 'dart:async';
 import '../core/api_endpoints.dart';
 import '../core/network_client.dart';
 import '../di/service_locator.dart';
+import 'mirror_manager.dart';
 
 /// 下载源接口
 abstract class IDownloadSource {
@@ -91,6 +92,10 @@ class OfficialDownloadSource implements IDownloadSource {
 }
 
 /// 镜像源管理器
+///
+/// 已废弃：请使用 [MirrorManager] 替代。此类保留用于向后兼容，
+/// 内部已委托给 [MirrorManager]。
+@Deprecated('Use MirrorManager instead. This class delegates to MirrorManager.')
 class MirrorSourceManager {
   static MirrorSourceManager? _instance;
 
@@ -104,48 +109,48 @@ class MirrorSourceManager {
       ServiceLocator.instance.tryGet<MirrorSourceManager>() ??
       (_instance ??= MirrorSourceManager._internal());
 
-  /// 所有可用的 BMCLAPI 镜像源
-  static final List<Map<String, String>> _bmclapiMirrors = [
-    {
-      'url': ApiEndpoints.bmclapi2,
-      'name': 'BMCLAPI-2',
-    },
-    {
-      'url': ApiEndpoints.bmclapi,
-      'name': 'BMCLAPI',
-    },
-    {
-      'url': ApiEndpoints.mcbbs,
-      'name': 'MCBBS',
-    },
-  ];
+  /// 内部委托给 MirrorManager
+  MirrorManager get _mirrorManager => MirrorManager.instance;
 
   List<BMCLApiDownloadSource>? _cachedMirrorSources;
 
   /// 获取所有 BMCLAPI 镜像源
+  ///
+  /// 从 [MirrorManager] 获取所有镜像并转换为 [BMCLApiDownloadSource] 列表
   List<BMCLApiDownloadSource> get allMirrorSources {
-    _cachedMirrorSources ??= _bmclapiMirrors
-        .map((mirror) => BMCLApiDownloadSource(mirror['url']!, mirror['name']!))
+    _cachedMirrorSources ??= _mirrorManager.allMirrors
+        .where((m) => !m.isOfficial)
+        .map((m) => BMCLApiDownloadSource(m.url, m.name))
         .toList();
     return _cachedMirrorSources!;
   }
 
-  /// 当前选中的镜像源索引
-  int _selectedMirrorIndex = 0;
-
   /// 获取当前选中的镜像源
-  BMCLApiDownloadSource get currentMirrorSource =>
-      allMirrorSources[_selectedMirrorIndex];
+  BMCLApiDownloadSource get currentMirrorSource {
+    final mirror = _mirrorManager.currentMirror;
+    if (mirror.isOfficial) {
+      return allMirrorSources.isNotEmpty
+          ? allMirrorSources[0]
+          : BMCLApiDownloadSource(ApiEndpoints.bmclapi2, 'BMCLAPI-2');
+    }
+    return BMCLApiDownloadSource(mirror.url, mirror.name);
+  }
 
   /// 设置当前选中的镜像源索引
   void setSelectedMirrorIndex(int index) {
-    if (index >= 0 && index < allMirrorSources.length) {
-      _selectedMirrorIndex = index;
+    final nonOfficial = _mirrorManager.allMirrors.where((m) => !m.isOfficial).toList();
+    if (index >= 0 && index < nonOfficial.length) {
+      _mirrorManager.setCurrentMirror(nonOfficial[index].id);
+      _cachedMirrorSources = null; // 清除缓存
     }
   }
 
   /// 获取当前选中的镜像源索引
-  int get selectedMirrorIndex => _selectedMirrorIndex;
+  int get selectedMirrorIndex {
+    final currentId = _mirrorManager.currentMirror.id;
+    final nonOfficial = _mirrorManager.allMirrors.where((m) => !m.isOfficial).toList();
+    return nonOfficial.indexWhere((m) => m.id == currentId);
+  }
 
   /// 检查所有镜像源的可用性
   Future<List<(BMCLApiDownloadSource, bool)>> checkAllMirrors() async {
@@ -159,29 +164,24 @@ class MirrorSourceManager {
 
   /// 自动选择一个可用的镜像源
   Future<BMCLApiDownloadSource> selectAvailableMirror() async {
-    final results = await checkAllMirrors();
-    
-    // 先尝试使用当前选中的镜像源
-    final currentResult = results[_selectedMirrorIndex];
-    if (currentResult.$2) {
-      return currentResult.$1;
+    final fastest = await _mirrorManager.autoSelectFastestMirror();
+    if (!fastest.isOfficial) {
+      return BMCLApiDownloadSource(fastest.url, fastest.name);
     }
-
-    // 查找第一个可用的镜像源
-    for (var i = 0; i < results.length; i++) {
-      if (results[i].$2 && i != _selectedMirrorIndex) {
-        _selectedMirrorIndex = i;
-        return results[i].$1;
-      }
-    }
-
-    // 如果没有可用的镜像源，返回默认的
-    return allMirrorSources[0];
+    // 回退到第一个非官方镜像
+    return allMirrorSources.isNotEmpty
+        ? allMirrorSources[0]
+        : BMCLApiDownloadSource(ApiEndpoints.bmclapi2, 'BMCLAPI-2');
   }
 
   /// 切换到下一个镜像源
   BMCLApiDownloadSource switchToNextMirror() {
-    _selectedMirrorIndex = (_selectedMirrorIndex + 1) % allMirrorSources.length;
-    return currentMirrorSource;
+    final nonOfficial = _mirrorManager.allMirrors.where((m) => !m.isOfficial).toList();
+    final currentId = _mirrorManager.currentMirror.id;
+    int currentIndex = nonOfficial.indexWhere((m) => m.id == currentId);
+    final nextIndex = (currentIndex + 1) % nonOfficial.length;
+    _mirrorManager.setCurrentMirror(nonOfficial[nextIndex].id);
+    _cachedMirrorSources = null;
+    return BMCLApiDownloadSource(nonOfficial[nextIndex].url, nonOfficial[nextIndex].name);
   }
 }
