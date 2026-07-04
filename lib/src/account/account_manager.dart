@@ -6,6 +6,7 @@ import '../event/event_bus.dart';
 import '../core/logger.dart';
 import '../core/network_client.dart';
 import '../di/service_locator.dart';
+import '../auth/microsoft_auth.dart';
 import 'account.dart';
 
 /// 账户管理器接口
@@ -884,18 +885,26 @@ class AccountManager implements IAccountManager {
     try {
       _logger.debug('Attempting to refresh Microsoft token for ${account.id}');
 
-      // TODO: 这里应该实现实际的令牌刷新逻辑
-      // 当前仅作为占位实现，模拟刷新过程
-      await Future.delayed(const Duration(seconds: 1));
+      final storedRefreshToken = account.refreshToken;
+      if (storedRefreshToken == null || storedRefreshToken.isEmpty) {
+        _logger.warning('No refresh token stored for account ${account.id}');
+        return false;
+      }
 
-      // 更新账户的最后使用时间
+      final authService = MicrosoftAuthService();
+      final oauthToken = await authService.refreshToken(storedRefreshToken);
+
+      // 用新令牌更新账户
       final updatedAccount = account.copyWith(
+        accessToken: oauthToken.accessToken,
+        refreshToken: oauthToken.refreshToken ?? storedRefreshToken,
         lastUsedAt: DateTime.now(),
       );
       await updateAccount(updatedAccount);
 
       // 发布账户更新事件
       _eventBus?.publish(AccountUpdatedEvent(accountId: account.id));
+      _logger.info('Successfully refreshed Microsoft token for ${account.id}');
       return true;
     } catch (e, stackTrace) {
       _logger.error('Failed to refresh Microsoft token', e, stackTrace);

@@ -37,9 +37,18 @@ class XboxAuthService {
       );
     }
 
-    final Map<String, dynamic> data = json.decode(response.body);
+    final Map<String, dynamic> data;
+    try {
+      data = json.decode(response.body) as Map<String, dynamic>;
+    } on FormatException catch (e) {
+      throw AppException.fromCode(
+        ErrorCodes.networkJsonParseError,
+        detail: 'Xbox auth returned invalid JSON: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}',
+        originalError: e,
+      );
+    }
     final Map<String, dynamic> displayClaims = data['DisplayClaims']['xui'][0] as Map<String, dynamic>;
-    
+
     return XboxLiveToken(
       userHash: displayClaims['uhs'] as String,
       token: data['Token'] as String,
@@ -64,7 +73,16 @@ class XboxAuthService {
     );
 
     if (response.statusCode != 200) {
-      final Map<String, dynamic> data = json.decode(response.body);
+      final Map<String, dynamic> data;
+      try {
+        data = json.decode(response.body) as Map<String, dynamic>;
+      } on FormatException catch (e) {
+        throw AppException.fromCode(
+          ErrorCodes.networkJsonParseError,
+          detail: 'XSTS error returned invalid JSON: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}',
+          originalError: e,
+        );
+      }
       final String errorCode = data['XErr']?.toString() ?? 'Unknown';
       
       if (errorCode == '2148916233') {
@@ -86,9 +104,18 @@ class XboxAuthService {
       );
     }
 
-    final Map<String, dynamic> data = json.decode(response.body);
+    final Map<String, dynamic> data;
+    try {
+      data = json.decode(response.body) as Map<String, dynamic>;
+    } on FormatException catch (e) {
+      throw AppException.fromCode(
+        ErrorCodes.networkJsonParseError,
+        detail: 'XSTS success returned invalid JSON: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}',
+        originalError: e,
+      );
+    }
     final Map<String, dynamic> displayClaims = data['DisplayClaims']['xui'][0] as Map<String, dynamic>;
-    
+
     return XstsToken(
       userHash: displayClaims['uhs'] as String,
       token: data['Token'] as String,

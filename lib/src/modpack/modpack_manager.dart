@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:path/path.dart' as path;
+import '../core/api_endpoints.dart';
 import '../core/logger.dart';
+import '../core/network_client.dart';
 import '../di/service_locator.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
@@ -17,7 +19,7 @@ class ModpackManifest {
   final String? modLoader;
   final String? loaderVersion;
   final List<ModpackMod> mods;
-  final Map<String, String>? overrides;
+  final String? overrides;
 
   ModpackManifest({
     required this.name,
@@ -61,7 +63,7 @@ class ModpackManifest {
               ?.map((e) => ModpackMod.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      overrides: (json['overrides'] as Map<String, dynamic>?)?.cast<String, String>(),
+      overrides: json['overrides'] as String?,
     );
   }
 }
@@ -74,6 +76,9 @@ class ModpackMod {
   final String? sha1;
   final int? size;
   final bool optional;
+  final String? projectId;
+  final String? fileId;
+  final String? fileName;
 
   ModpackMod({
     required this.name,
@@ -82,6 +87,9 @@ class ModpackMod {
     this.sha1,
     this.size,
     this.optional = false,
+    this.projectId,
+    this.fileId,
+    this.fileName,
   });
 
   Map<String, dynamic> toJson() {
@@ -92,6 +100,9 @@ class ModpackMod {
       'sha1': sha1,
       'size': size,
       'optional': optional,
+      'projectId': projectId,
+      'fileId': fileId,
+      'fileName': fileName,
     };
   }
 
@@ -103,6 +114,9 @@ class ModpackMod {
       sha1: json['sha1'] as String?,
       size: json['size'] as int?,
       optional: json['optional'] as bool? ?? false,
+      projectId: json['projectId'] as String?,
+      fileId: json['fileId'] as String?,
+      fileName: json['fileName'] as String?,
     );
   }
 }
@@ -235,13 +249,20 @@ class ModpackManager {
           totalMods: manifest.mods.length,
         ));
 
+        final instanceDir = Directory(targetPath);
+
+        // 确保 mods 目录存在
+        final modsDir = Directory(path.join(instanceDir.path, 'mods'));
+        if (!await modsDir.exists()) {
+          await modsDir.create(recursive: true);
+        }
+
         for (int i = 0; i < manifest.mods.length; i++) {
           final mod = manifest.mods[i];
 
-          // 跳过可选Mod（简化实现）
+          // 跳过可选Mod
           if (mod.optional) continue;
 
-          // 模拟下载
           _emitProgress(ModpackInstallProgress(
             status: ModpackInstallStatus.downloadingMods,
             progress: i / manifest.mods.length,
@@ -250,7 +271,31 @@ class ModpackManager {
             currentFile: mod.name,
           ));
 
-          await Future.delayed(const Duration(milliseconds: 100));
+          try {
+            String? downloadUrl;
+
+            if (mod.downloadUrl != null && mod.downloadUrl!.isNotEmpty) {
+              // 有直接下载 URL（Modrinth 格式）
+              downloadUrl = mod.downloadUrl;
+            } else if (mod.projectId != null && mod.fileId != null) {
+              // CurseForge 格式：通过 API 获取下载 URL
+              downloadUrl = await _getCurseForgeDownloadUrl(mod.projectId!, mod.fileId!);
+            }
+
+            if (downloadUrl != null) {
+              final savePath = path.join(
+                modsDir.path,
+                mod.fileName ?? '${mod.name}.jar',
+              );
+              await _downloadFile(downloadUrl, savePath);
+              _logger.info('Downloaded mod: ${mod.name}');
+            } else {
+              _logger.warn('No download URL for mod: ${mod.name}');
+            }
+          } catch (e) {
+            _logger.warn('Failed to download mod: ${mod.name}: $e');
+            // 继续下载其他 Mod，不中断整个流程
+          }
         }
       }
 
@@ -261,8 +306,12 @@ class ModpackManager {
           progress: 0,
         ));
 
-        // 模拟处理覆盖文件
-        await Future.delayed(const Duration(milliseconds: 500));
+        // 从解压的临时目录中找到 overrides 目录
+        final sourceOverridesDir = Directory(path.join(targetPath, manifest.overrides!));
+        if (await sourceOverridesDir.exists()) {
+          await _copyDirectory(sourceOverridesDir, Directory(targetPath));
+          _logger.info('Applied overrides from: ${manifest.overrides}');
+        }
       }
 
       // 设置实例
@@ -401,6 +450,58 @@ class ModpackManager {
   void _emitProgress(ModpackInstallProgress progress) {
     if (_onProgress != null) {
       _onProgress!(progress);
+    }
+  }
+
+  /// 递归复制目录内容
+  Future<void> _copyDirectory(Directory source, Directory target) async {
+    if (!await target.exists()) {
+      await target.create(recursive: true);
+    }
+    await for (final entity in source.list(recursive: true)) {
+      final relativePath = path.relative(entity.path, from: source.path);
+      final targetPath = path.join(target.path, relativePath);
+      if (entity is File) {
+        await File(targetPath).parent.create(recursive: true);
+        await entity.copy(targetPath);
+      } else if (entity is Directory) {
+        await Directory(targetPath).create(recursive: true);
+      }
+    }
+  }
+
+  /// 下载单个文件
+  Future<void> _downloadFile(String url, String savePath) async {
+    final saveDir = Directory(path.dirname(savePath));
+    if (!await saveDir.exists()) {
+      await saveDir.create(recursive: true);
+    }
+    final networkClient = NetworkClient();
+    await networkClient.downloadFile(url, savePath);
+  }
+
+  /// 通过 CurseForge API 获取 Mod 文件的下载 URL
+  Future<String?> _getCurseForgeDownloadUrl(String projectId, String fileId) async {
+    try {
+      final networkClient = NetworkClient();
+      final url = '${ApiEndpoints.curseforgeApi}/mods/$projectId/files/$fileId';
+      final response = await networkClient.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final fileData = data['data'] as Map<String, dynamic>?;
+        return fileData?['downloadUrl'] as String?;
+      }
+      _logger.warn('CurseForge API returned ${response.statusCode} for mod $projectId file $fileId');
+      return null;
+    } catch (e) {
+      _logger.warn('Failed to get CurseForge download URL for $projectId/$fileId: $e');
+      return null;
     }
   }
 

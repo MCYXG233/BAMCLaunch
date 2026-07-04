@@ -509,11 +509,141 @@ class VersionManager implements IVersionManager {
 
       // 解析JSON响应
       final json = jsonDecode(response.body) as Map<String, dynamic>;
-      return VersionJson.fromJson(json);
+
+      // 解析 inheritsFrom 继承链
+      final resolvedJson = await _resolveVersionJson(json);
+
+      return VersionJson.fromJson(resolvedJson);
     } catch (e) {
       _logger.error('Failed to fetch version JSON for $versionId', e);
       rethrow;
     }
+  }
+
+  /// 解析版本 JSON 的 inheritsFrom 继承链
+  ///
+  /// 递归处理 inheritsFrom 字段，将父版本的配置合并到子版本中。
+  /// 支持多层继承（如 Forge -> NeoForge -> MC）。
+  ///
+  /// 合并策略：
+  /// - libraries：合并（父版本 + 子版本）
+  /// - arguments：合并（子版本覆盖同名参数组）
+  /// - mainClass/downloads/assetIndex/其他：子版本覆盖父版本
+  Future<Map<String, dynamic>> _resolveVersionJson(
+    Map<String, dynamic> json,
+  ) async {
+    if (!json.containsKey('inheritsFrom')) {
+      return json;
+    }
+
+    final parentId = json['inheritsFrom'] as String;
+    _logger.info('Resolving inheritsFrom: $parentId');
+
+    final parentJson = await _loadVersionJsonById(parentId);
+    final resolvedParent = await _resolveVersionJson(parentJson);
+
+    return _mergeVersionJson(resolvedParent, json);
+  }
+
+  /// 通过版本 ID 加载版本 JSON
+  ///
+  /// 优先从本地 versions 目录读取，若不存在则从远程下载。
+  Future<Map<String, dynamic>> _loadVersionJsonById(String versionId) async {
+    // 尝试从本地文件加载
+    final gameDir = await getGameDir();
+    final localPath = path.join(
+      gameDir,
+      'versions',
+      versionId,
+      '$versionId.json',
+    );
+    final localFile = File(localPath);
+    if (await localFile.exists()) {
+      _logger.debug('Loading parent version JSON from local: $localPath');
+      final content = await localFile.readAsString();
+      return jsonDecode(content) as Map<String, dynamic>;
+    }
+
+    // 本地不存在，从远程下载
+    _logger.info('Parent version JSON not found locally, fetching: $versionId');
+    final versions = await fetchVersionList();
+    final version = versions.firstWhere(
+      (v) => v.id == versionId,
+      orElse: () => throw AppException.fromCode(
+        ErrorCodes.gameVersionNotFound,
+        detail: versionId,
+      ),
+    );
+
+    final networkClient = NetworkClient();
+    final response = await networkClient.get(
+      version.url,
+      headers: NetworkClient.bmclapiHeaders,
+    );
+
+    if (response.statusCode != 200) {
+      throw AppException.fromCode(
+        ErrorCodes.networkHttpError,
+        detail: 'Failed to fetch parent version JSON: ${response.statusCode}',
+      );
+    }
+
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  /// 合并父子版本 JSON
+  ///
+  /// - libraries：追加（父 + 子）
+  /// - arguments：合并子覆盖父的同名参数组
+  /// - 其他字段：子覆盖父
+  Map<String, dynamic> _mergeVersionJson(
+    Map<String, dynamic> parent,
+    Map<String, dynamic> child,
+  ) {
+    final result = Map<String, dynamic>.from(parent);
+
+    // 合并 libraries（追加）
+    if (child.containsKey('libraries')) {
+      final parentLibs = parent['libraries'] as List<dynamic>? ?? [];
+      final childLibs = child['libraries'] as List<dynamic>? ?? [];
+      result['libraries'] = [...parentLibs, ...childLibs];
+    }
+
+    // 合并 arguments
+    if (child.containsKey('arguments')) {
+      final parentArgs = parent['arguments'] as Map<String, dynamic>? ?? {};
+      final childArgs = child['arguments'] as Map<String, dynamic>? ?? {};
+      result['arguments'] = _mergeArguments(parentArgs, childArgs);
+    }
+
+    // 其他字段：子覆盖父（排除 libraries、arguments、inheritsFrom）
+    for (final key in child.keys) {
+      if (key != 'libraries' && key != 'arguments' && key != 'inheritsFrom') {
+        result[key] = child[key];
+      }
+    }
+
+    return result;
+  }
+
+  /// 合并 arguments 对象
+  ///
+  /// 同名参数组合并（父 + 子），新参数组直接覆盖。
+  Map<String, dynamic> _mergeArguments(
+    Map<String, dynamic> parent,
+    Map<String, dynamic> child,
+  ) {
+    final result = Map<String, dynamic>.from(parent);
+    for (final key in child.keys) {
+      if (result.containsKey(key) &&
+          result[key] is List &&
+          child[key] is List) {
+        result[key] = [...(result[key] as List), ...(child[key] as List)];
+      } else {
+        result[key] = child[key];
+      }
+    }
+    return result;
   }
 
   /// 安装指定版本
@@ -856,20 +986,15 @@ class VersionManager implements IVersionManager {
       return true;
     }
 
-    // 遍历规则判断是否允许
-    bool allowed = true;
+    // 最后一条匹配的规则生效（标准 Minecraft 行为）
+    bool? lastMatch;
     for (final rule in library.rules!) {
-      final matches = _ruleMatches(rule);
-      if (rule.action == 'allow') {
-        // allow 规则：匹配时允许，不匹配时禁止
-        allowed = matches;
-      } else if (rule.action == 'disallow') {
-        // disallow 规则：匹配时禁止，不匹配时允许
-        allowed = !matches;
+      if (_ruleMatches(rule)) {
+        lastMatch = rule.action == 'allow';
       }
     }
 
-    return allowed;
+    return lastMatch ?? true; // 无匹配规则时默认允许
   }
 
   /// 检查规则是否匹配当前平台

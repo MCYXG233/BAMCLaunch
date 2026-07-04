@@ -137,6 +137,10 @@ class ArgumentBuilder {
     required int memory,
     required int javaMajorVersion,
     required GameConfig gameConfig,
+    required String nativesDirectory,
+    required String libraryDirectory,
+    required String classpathSeparator,
+    String? classpath,
     String? clientJarPath,
     String? authlibJarPath,
     String? authServerUrl,
@@ -144,6 +148,40 @@ class ArgumentBuilder {
     String? unsafeAgentPath,
   }) {
     final args = <String>[];
+
+    // 处理版本 JSON 中的 arguments.jvm（MC 1.13+）
+    if (versionJson.arguments?.jvm != null) {
+      final jvmVarMap = _buildJvmVariableMap(
+        nativesDirectory: nativesDirectory,
+        libraryDirectory: libraryDirectory,
+        classpathSeparator: classpathSeparator,
+        classpath: classpath ?? '',
+      );
+      for (final arg in versionJson.arguments!.jvm!) {
+        if (arg is String) {
+          // 跳过 -cp 和 ${classpath}，这些由启动命令构建器单独处理
+          if (arg == '-cp' || arg == r'${classpath}') continue;
+          args.add(_replaceJvmVariables(arg, jvmVarMap));
+        } else if (arg is Map<String, dynamic>) {
+          if (_shouldUseRule(arg)) {
+            final value = arg['value'];
+            if (value is String) {
+              if (value == '-cp' || value == r'${classpath}') continue;
+              args.add(_replaceJvmVariables(value, jvmVarMap));
+            } else if (value is List) {
+              for (final v in value) {
+                final s = v.toString();
+                if (s == '-cp' || s == r'${classpath}') continue;
+                args.add(_replaceJvmVariables(s, jvmVarMap));
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // 设置 -Djava.library.path（确保 JVM 能找到 native 库）
+    args.add('-Djava.library.path=$nativesDirectory');
 
     args.add('-Xmx${memory}M');
 
@@ -207,6 +245,31 @@ class ArgumentBuilder {
     }
 
     return args;
+  }
+
+  Map<String, String> _buildJvmVariableMap({
+    required String nativesDirectory,
+    required String libraryDirectory,
+    required String classpathSeparator,
+    required String classpath,
+  }) {
+    return {
+      '\${natives_directory}': nativesDirectory,
+      '\${launcher_name}': 'BAMC Launcher',
+      '\${launcher_version}': '1.0.0',
+      '\${version_name}': versionJson.id,
+      '\${library_directory}': libraryDirectory,
+      '\${classpath_separator}': classpathSeparator,
+      '\${classpath}': classpath,
+    };
+  }
+
+  String _replaceJvmVariables(String arg, Map<String, String> varMap) {
+    var result = arg;
+    for (final entry in varMap.entries) {
+      result = result.replaceAll(entry.key, entry.value);
+    }
+    return result;
   }
 
   String _base64Encode(String s) {
@@ -375,6 +438,10 @@ class ArgumentBuilder {
     final librariesDir = path.join(gameDirectory, 'libraries');
     final assetsDir = path.join(gameDirectory, 'assets');
 
+    // 先构建 classpath，以便 JVM 参数中 ${classpath} 可用
+    final classpaths = await buildClasspath(nativesDirectory: nativesDir);
+    final classpathStr = classpaths.join(isWindows ? ';' : ':');
+
     final templateArgs = LaunchTemplateArguments(
       gameAssets: path.join(assetsDir, 'virtual', 'legacy'),
       assetsRoot: assetsDir,
@@ -387,7 +454,7 @@ class ArgumentBuilder {
       launcherVersion: '1.0.0',
       authAccessToken: account.accessToken ?? '0',
       authPlayerName: account.username,
-      userType: 'msa',
+      userType: _getUserType(account.type),
       authUuid: account.uuid ?? _generateOfflineUUID(account.username),
       clientid: '0',
       authXuid: '0',
@@ -407,14 +474,16 @@ class ArgumentBuilder {
       memory: gameConfig.memory,
       javaMajorVersion: javaMajorVersion,
       gameConfig: gameConfig,
+      nativesDirectory: nativesDir,
+      libraryDirectory: librariesDir,
+      classpathSeparator: isWindows ? ';' : ':',
+      classpath: classpathStr,
       clientJarPath: clientJarPath,
       authlibJarPath: authlibJarPath,
       authServerUrl: authServerUrl,
       authServerMeta: authServerMeta,
       unsafeAgentPath: gameConfig.useLwjglUnsafeAgent ? path.join(librariesDir, 'lwjgl-unsafe-agent.jar') : null,
     );
-
-    final classpaths = await buildClasspath(nativesDirectory: nativesDir);
 
     final gameArgs = buildGameArguments(
       templateArgs: templateArgs,
@@ -430,7 +499,7 @@ class ArgumentBuilder {
     fullCommand.add(javaPath);
     fullCommand.addAll(jvmArgs);
     fullCommand.add('-cp');
-    fullCommand.add(classpaths.join(isWindows ? ';' : ':'));
+    fullCommand.add(classpathStr);
     fullCommand.add(mainClass);
     fullCommand.addAll(gameArgs);
 
@@ -444,6 +513,17 @@ class ArgumentBuilder {
     required LaunchCommand command,
   }) {
     return command.args.join(' ');
+  }
+
+  String _getUserType(AccountType accountType) {
+    switch (accountType) {
+      case AccountType.microsoft:
+        return 'msa';
+      case AccountType.offline:
+        return 'legacy';
+      case AccountType.authlib:
+        return 'mojang';
+    }
   }
 
   String _generateOfflineUUID(String username) {

@@ -450,7 +450,8 @@ class GameStatisticsManager {
       server.totalPlayTimeSeconds += updatedSession.playTimeSeconds;
     }
 
-    // 更新实例统计
+    // 更新实例统计（不手动累加 launchCount/totalPlayTimeSeconds，
+    // 完全依赖 _rebuildInstanceStats() 从 sessions 重建，避免双重计数）
     final stats = _instanceStats.putIfAbsent(
       updatedSession.instanceId,
       () => InstanceStatistics(
@@ -459,8 +460,6 @@ class GameStatisticsManager {
       ),
     );
 
-    stats.launchCount++;
-    stats.totalPlayTimeSeconds += updatedSession.playTimeSeconds;
     stats.lastLaunchTime = updatedSession.startTime;
     stats.lastPlayTimeSeconds = updatedSession.playTimeSeconds;
 

@@ -1188,12 +1188,12 @@ class InstanceManager {
           _logger.info('Copied instance files: ${instance.id} -> $id');
         }
 
-        // 如果指定，复制版本目录
+        // 如果指定，复制版本目录（仅当源和目标路径不同时）
         if (options?.copyVersionDir ?? false) {
           final sourceVersionDir = Directory(path.join(directory.path, 'versions', instance.version));
           final targetVersionDir = Directory(path.join(directory.path, 'versions', instance.version));
 
-          if (await sourceVersionDir.exists()) {
+          if (await sourceVersionDir.exists() && sourceVersionDir.path != targetVersionDir.path) {
             await _copyDirectory(sourceVersionDir, targetVersionDir, options: options);
             _logger.info('Copied version directory: ${instance.version}');
           }

@@ -36,6 +36,9 @@ class Account {
   /// 访问令牌
   final String? accessToken;
 
+  /// 刷新令牌（用于 Microsoft OAuth2 token 刷新）
+  final String? refreshToken;
+
   /// 账户创建时间
   final DateTime createdAt;
 
@@ -71,6 +74,7 @@ class Account {
     this.skinUrl,
     this.capeUrl,
     this.accessToken,
+    this.refreshToken,
     required this.createdAt,
     required this.lastUsedAt,
     this.modelType = SkinType.steve,
@@ -88,6 +92,7 @@ class Account {
       'skinUrl': skinUrl,
       'capeUrl': capeUrl,
       'accessToken': accessToken,
+      'refreshToken': refreshToken,
       'createdAt': createdAt.toIso8601String(),
       'lastUsedAt': lastUsedAt.toIso8601String(),
       'modelType': modelType.name,
@@ -109,6 +114,7 @@ class Account {
       skinUrl: json['skinUrl'] as String?,
       capeUrl: json['capeUrl'] as String?,
       accessToken: json['accessToken'] as String?,
+      refreshToken: json['refreshToken'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       lastUsedAt: DateTime.parse(json['lastUsedAt'] as String),
       modelType: json['modelType'] != null
@@ -148,6 +154,7 @@ class Account {
     String? skinUrl,
     String? capeUrl,
     String? accessToken,
+    String? refreshToken,
     DateTime? createdAt,
     DateTime? lastUsedAt,
     SkinType? modelType,
@@ -162,6 +169,7 @@ class Account {
       skinUrl: skinUrl ?? this.skinUrl,
       capeUrl: capeUrl ?? this.capeUrl,
       accessToken: accessToken ?? this.accessToken,
+      refreshToken: refreshToken ?? this.refreshToken,
       createdAt: createdAt ?? this.createdAt,
       lastUsedAt: lastUsedAt ?? this.lastUsedAt,
       modelType: modelType ?? this.modelType,

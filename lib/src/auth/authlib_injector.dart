@@ -144,9 +144,18 @@ class AuthlibInjector {
           originalError: response.body,
         );
       }
-      
-      final json = jsonDecode(response.body) as Map<String, dynamic>;
-      
+
+      final Map<String, dynamic> json;
+      try {
+        json = jsonDecode(response.body) as Map<String, dynamic>;
+      } on FormatException catch (e) {
+        throw AppException.fromCode(
+          ErrorCodes.networkJsonParseError,
+          detail: 'Authlib authenticate returned invalid JSON: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}',
+          originalError: e,
+        );
+      }
+
       return UserProfile.fromJson(json);
     } catch (e, stackTrace) {
       _logger.error('Authentication failed', e, stackTrace);
@@ -172,9 +181,18 @@ class AuthlibInjector {
       if (response.statusCode != 200) {
         throw AppException.fromCode(ErrorCodes.authRefreshFailed, detail: 'Authlib refresh failed');
       }
-      
-      final json = jsonDecode(response.body) as Map<String, dynamic>;
-      
+
+      final Map<String, dynamic> json;
+      try {
+        json = jsonDecode(response.body) as Map<String, dynamic>;
+      } on FormatException catch (e) {
+        throw AppException.fromCode(
+          ErrorCodes.networkJsonParseError,
+          detail: 'Authlib refresh returned invalid JSON: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}',
+          originalError: e,
+        );
+      }
+
       return UserProfile.fromJson(json);
     } catch (e, stackTrace) {
       _logger.error('Token refresh failed', e, stackTrace);

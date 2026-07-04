@@ -173,22 +173,38 @@ class MultiSourceDownloader {
 
     if (cancellationToken?.isCancelled ?? false) return;
 
-    if (response.statusCode != 206 && response.statusCode != 200) {
+    if (response.statusCode == 206) {
+      // 正常的 Range 响应：写入指定位置
+      final data = response.bodyBytes;
+      if (data.isEmpty) return;
+      final raf = await tempFile.open(mode: FileMode.writeOnlyAppend);
+      try {
+        await raf.setPosition(startByte);
+        await raf.writeFrom(data);
+      } finally {
+        await raf.close();
+      }
+      onBytesDownloaded?.call(data.length);
+    } else if (response.statusCode == 200) {
+      // 服务器不支持 Range，整个文件都在响应中
+      final data = response.bodyBytes;
+      if (data.isEmpty) return;
+      if (startByte == 0) {
+        // 单线程从头下载，正常写入整个文件
+        final raf = await tempFile.open(mode: FileMode.writeOnly);
+        try {
+          await raf.writeFrom(data);
+        } finally {
+          await raf.close();
+        }
+        onBytesDownloaded?.call(data.length);
+      } else {
+        // 不支持 Range 但请求了部分内容，回退到单线程模式
+        throw AppException.fromCode(ErrorCodes.networkUnsupportedDownload);
+      }
+    } else {
       throw AppException.fromCode(ErrorCodes.networkUnsupportedDownload);
     }
-
-    final data = response.bodyBytes;
-    if (data.isEmpty) return;
-
-    final raf = await tempFile.open(mode: FileMode.writeOnly);
-    try {
-      await raf.setPosition(startByte);
-      await raf.writeFrom(data);
-    } finally {
-      await raf.close();
-    }
-
-    onBytesDownloaded?.call(data.length);
   }
   
   Future<int> _getContentLength(String url) async {
