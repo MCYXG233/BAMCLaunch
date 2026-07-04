@@ -24,7 +24,7 @@ class OAuthService {
   final Logger _logger = Logger('OAuthService');
   final NetworkClient _networkClient = NetworkClient();
 
-  final String _clientId = '00000000482326AA';
+  final String _clientId = '0b1a81c9-6e23-41fd-8690-98a17d81bf4a';
   final String _redirectUri = ApiEndpoints.microsoftRedirectUri;
   final String _scope = 'XboxLive.signin offline_access';
 
