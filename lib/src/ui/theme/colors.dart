@@ -1,5 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
+import 'custom_theme_colors.dart';
 import 'mc_theme_colors.dart';
 
 /// 蔚蓝档案风格 MC 启动器 - 完整色彩系统
@@ -9,12 +10,22 @@ class BAColors {
   static const String schemeMinecraft = 'minecraft';
 
   static String _currentColorScheme = schemeBlueArchive;
+  static CustomThemeColors _customColors = const CustomThemeColors();
 
   static void setScheme(String scheme) {
     _currentColorScheme = scheme;
   }
 
   static String get currentScheme => _currentColorScheme;
+
+  /// 设置自定义颜色（在用户更改设置后由 ThemeManager 调用）
+  static void setCustomColors(CustomThemeColors colors) {
+    _customColors = colors;
+  }
+
+  /// 获取当前自定义颜色
+  static CustomThemeColors get customColors => _customColors;
+
   // ==================== 品牌核心色（蔚蓝档案风格） ====================
   
   /// 主色调 - 天蓝色 #4A90D9 (Primary Blue)
@@ -422,32 +433,48 @@ class BAColors {
         : darkBackgroundGradient;
   }
 
-  /// 获取主色
+  /// 获取主色（支持自定义）
   static Color primaryOf(BuildContext context) {
     if (_isMC()) {
       return _isLight(context)
           ? MCThemeColors.primary
           : MCThemeColorsDark.primary;
     }
+    // 蔚蓝档案主题：如果用户自定义了主色，使用自定义
+    if (!_customColors.isDefault) {
+      return _customColors.getPrimary(
+          _currentColorScheme,
+          _isLight(context) ? Brightness.light : Brightness.dark);
+    }
     return primary;
   }
 
-  /// 获取主色浅色
+  /// 获取主色浅色（支持自定义 - 自动从主色派生）
   static Color primaryLightOf(BuildContext context) {
     if (_isMC()) {
       return _isLight(context)
           ? MCThemeColors.primaryLight
           : MCThemeColorsDark.primaryLight;
     }
+    if (!_customColors.isDefault) {
+      return _customColors.getPrimaryLight(
+          _currentColorScheme,
+          _isLight(context) ? Brightness.light : Brightness.dark);
+    }
     return primaryLight;
   }
 
-  /// 获取主色深色
+  /// 获取主色深色（支持自定义 - 自动从主色派生）
   static Color primaryDarkOf(BuildContext context) {
     if (_isMC()) {
       return _isLight(context)
           ? MCThemeColors.primaryDark
           : MCThemeColorsDark.primaryDark;
+    }
+    if (!_customColors.isDefault) {
+      return _customColors.getPrimaryDark(
+          _currentColorScheme,
+          _isLight(context) ? Brightness.light : Brightness.dark);
     }
     return primaryDark;
   }

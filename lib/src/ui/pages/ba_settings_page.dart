@@ -11,6 +11,7 @@ import '../../platform/platform_adapter.dart';
 import '../../platform/platform_adapter_factory.dart';
 import '../theme/theme_manager.dart';
 import '../theme/background_manager.dart';
+import '../components/color_picker_panel.dart';
 import '../components/ba_notification.dart';
 import '../components/ba_background_selector.dart';
 import '../../config/background_config.dart';
@@ -1714,6 +1715,47 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 },
               ),
             ),
+            _buildSettingsRow(
+              icon: Icons.style,
+              title: '主题风格',
+              subtitle: _themeManager.isBlueArchive
+                  ? '蔚蓝档案'
+                  : 'Minecraft',
+              control: _buildDropdown<String>(
+                value: _themeManager.isBlueArchive
+                    ? 'blue_archive'
+                    : 'minecraft',
+                items: const [
+                  DropdownMenuItem(
+                      value: 'blue_archive', child: Text('蔚蓝档案')),
+                  DropdownMenuItem(
+                      value: 'minecraft', child: Text('Minecraft')),
+                ],
+                onChanged: (value) async {
+                  if (value == null) return;
+                  if (value == 'blue_archive') {
+                    await _themeManager.setBlueArchiveTheme();
+                  } else {
+                    await _themeManager.setMinecraftTheme();
+                  }
+                  NotificationManager().showSuccess('主题风格已切换');
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ColorPickerPanel(
+                themeKey: _themeManager.isBlueArchive
+                    ? 'blue_archive'
+                    : 'minecraft',
+                brightness:
+                    Theme.of(context).brightness == Brightness.light
+                        ? Brightness.light
+                        : Brightness.dark,
+              ),
+            ),
+            const SizedBox(height: 8),
           ],
         ),
         _buildSettingsCard(
