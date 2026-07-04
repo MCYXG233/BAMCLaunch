@@ -298,8 +298,18 @@ class ModLoaderManager {
 
       if (versions.isEmpty) return null;
 
-      // 按版本号排序，取最新（最后一个）
-      versions.sort();
+      // 按语义版本号排序，取最新（最后一个）
+      versions.sort((a, b) {
+        final aParts = a.split(RegExp(r'[.\-]')).map(int.tryParse).toList();
+        final bParts = b.split(RegExp(r'[.\-]')).map(int.tryParse).toList();
+
+        for (var i = 0; i < aParts.length && i < bParts.length; i++) {
+          final aVal = aParts[i] ?? 0;
+          final bVal = bParts[i] ?? 0;
+          if (aVal != bVal) return aVal.compareTo(bVal);
+        }
+        return aParts.length.compareTo(bParts.length);
+      });
       final latest = versions.last;
       // 返回不含游戏版本前缀的 loader 版本号
       return latest.substring('$gameVersion-'.length);

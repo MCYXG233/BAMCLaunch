@@ -184,6 +184,7 @@ class ArgumentBuilder {
     args.add('-Djava.library.path=$nativesDirectory');
 
     args.add('-Xmx${memory}M');
+    args.add('-Xms${(memory / 2).round()}M');
 
     if (!gameConfig.noJvmArgs) {
       if (isWindows) {
@@ -403,6 +404,9 @@ class ArgumentBuilder {
     final librariesDir = path.join(gameDirectory, 'libraries');
 
     for (final library in versionJson.libraries) {
+      // 跳过 native 库，这些库应解压到 natives 目录而非加入 classpath
+      if (library.natives != null) continue;
+
       if (library.downloads?.artifact != null) {
         final artifact = library.downloads!.artifact!;
         final libPath = path.join(librariesDir, artifact.path);

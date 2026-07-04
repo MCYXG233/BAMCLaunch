@@ -1,10 +1,12 @@
 import 'dart:io';
-import 'dart:convert';
 import 'package:path/path.dart' as path;
+import 'package:archive/archive.dart' as archive_lib;
 import '../../core/logger.dart';
+import '../../core/network_client.dart';
 import '../../di/service_locator.dart';
 import '../../platform/platform_adapter.dart';
 import '../../platform/platform_adapter_factory.dart';
+import 'models.dart';
 
 /// Java版本信息
 class JavaRelease {
@@ -98,44 +100,52 @@ class JavaDownloader {
     }
   }
 
-  /// 获取可用的Java版本列表（简化实现）
+  /// 获取可用的Java版本列表
+  ///
+  /// 从 Adoptium API 获取可用的 Java 版本。
   Future<List<JavaRelease>> getAvailableReleases() async {
-    // 这里应该调用API获取实际的Java版本列表
-    // 这里返回一些常用版本作为示例
-    return [
-      JavaRelease(
-        version: '21',
-        vendor: 'Eclipse Temurin',
-        downloadUrl: 'https://example.com/java21',
-      ),
-      JavaRelease(
-        version: '17',
-        vendor: 'Eclipse Temurin',
-        downloadUrl: 'https://example.com/java17',
-      ),
-      JavaRelease(
-        version: '8',
-        vendor: 'Eclipse Temurin',
-        downloadUrl: 'https://example.com/java8',
-      ),
-    ];
+    try {
+      final data = await NetworkClient().getJson(
+        'https://api.adoptium.net/v3/info/available_releases',
+      );
+      final available = data['available_lts_releases'] as List<dynamic>? ??
+          data['available_releases'] as List<dynamic>? ??
+          [];
+      return available.map((v) {
+        final version = v.toString();
+        return JavaRelease(
+          version: version,
+          vendor: 'Eclipse Temurin',
+        );
+      }).toList();
+    } catch (e, stackTrace) {
+      _logger.error('Failed to fetch available Java releases', e, stackTrace);
+      // 回退到常用版本列表
+      return [
+        JavaRelease(version: '21', vendor: 'Eclipse Temurin'),
+        JavaRelease(version: '17', vendor: 'Eclipse Temurin'),
+        JavaRelease(version: '8', vendor: 'Eclipse Temurin'),
+      ];
+    }
   }
 
   /// 根据游戏版本推荐Java版本
   Future<JavaRelease?> getRecommendedJava(String gameVersion) async {
-    // 简单的推荐逻辑
-    // - 1.20+ → Java 17 或 21
-    // - 1.17-1.19 → Java 17
-    // - 1.16及以下 → Java 8
-    final recommended = await getAvailableReleases();
+    final recommendedVersions = JavaVersion.getRecommendedForGameVersion(gameVersion);
+    final available = await getAvailableReleases();
 
-    if (gameVersion.compareTo('1.20') >= 0) {
-      return recommended.firstWhere((r) => r.version == '21', orElse: () => recommended.first);
-    } else if (gameVersion.compareTo('1.17') >= 0) {
-      return recommended.firstWhere((r) => r.version == '17', orElse: () => recommended.first);
-    } else {
-      return recommended.firstWhere((r) => r.version == '8', orElse: () => recommended.first);
+    // 按优先级遍历推荐的 Java 主版本号，查找匹配的可用版本
+    for (final reqVersion in recommendedVersions) {
+      final match = available.where(
+        (r) => int.tryParse(r.version) == reqVersion,
+      );
+      if (match.isNotEmpty) {
+        return match.first;
+      }
     }
+
+    // 未找到精确匹配，返回最高版本
+    return available.isNotEmpty ? available.first : null;
   }
 
   /// 下载并安装Java
@@ -163,72 +173,84 @@ class JavaDownloader {
         return installedPath;
       }
 
-      // 模拟下载过程（实际应该从真实URL下载）
+      // 确保目录存在
+      if (_downloadDir == null || _installDir == null) {
+        await initialize();
+      }
+
+      // 从 Adoptium API 获取下载信息
       _emitProgress(JavaDownloadProgress(
         status: JavaInstallStatus.downloading,
         progress: 0,
-        message: 'Starting download...',
+        message: '正在获取下载信息...',
       ));
 
-      // 模拟下载进度
-      for (int i = 0; i <= 100; i += 10) {
-        await Future.delayed(const Duration(milliseconds: 100));
-        _emitProgress(JavaDownloadProgress(
-          status: JavaInstallStatus.downloading,
-          progress: i / 100,
-          message: 'Downloading: $i%',
-        ));
+      final apiUrl = 'https://api.adoptium.net/v3/assets/latest/${release.version}/hotspot'
+          '?os=${_getOsName()}&architecture=${_getArchitecture()}'
+          '&image_type=jre&vendor=eclipse';
+
+      final data = await NetworkClient().getJson(apiUrl) as List<dynamic>;
+      if (data.isEmpty) {
+        throw Exception('Adoptium API returned empty result for Java ${release.version}');
       }
 
-      // 模拟解压
+      final binary = data[0]['binary'] as Map<String, dynamic>;
+      final package = binary['package'] as Map<String, dynamic>;
+      final downloadUrl = package['link'] as String;
+      final fileName = package['name'] as String;
+
+      // 下载文件
+      _emitProgress(JavaDownloadProgress(
+        status: JavaInstallStatus.downloading,
+        progress: 0.1,
+        message: '正在下载 $fileName...',
+      ));
+
+      final zipPath = path.join(_downloadDir!.path, fileName);
+      await NetworkClient().downloadFile(
+        downloadUrl,
+        zipPath,
+        onProgress: (downloaded, total) {
+          if (total > 0) {
+            final progress = downloaded / total;
+            _emitProgress(JavaDownloadProgress(
+              status: JavaInstallStatus.downloading,
+              progress: 0.1 + progress * 0.7,
+              message: '下载中... ${(downloaded / 1024 / 1024).toStringAsFixed(1)} MB / ${(total / 1024 / 1024).toStringAsFixed(1)} MB',
+            ));
+          }
+        },
+      );
+
+      // 解压文件
       _emitProgress(JavaDownloadProgress(
         status: JavaInstallStatus.extracting,
-        progress: 0,
-        message: 'Extracting files...',
+        progress: 0.8,
+        message: '正在解压...',
       ));
 
-      for (int i = 0; i <= 100; i += 20) {
-        await Future.delayed(const Duration(milliseconds: 100));
-        _emitProgress(JavaDownloadProgress(
-          status: JavaInstallStatus.extracting,
-          progress: i / 100,
-          message: 'Extracting: $i%',
-        ));
+      final extractDir = path.join(_installDir!.path, 'java-${release.version}');
+      await _extractArchive(zipPath, extractDir);
+
+      // 删除下载的压缩包
+      try {
+        await File(zipPath).delete();
+      } catch (_) {}
+
+      // 查找 java 可执行文件路径
+      final javaExePath = getJavaExecutable(extractDir);
+      if (javaExePath == null) {
+        throw Exception('Java executable not found in extracted directory');
       }
-
-      // 模拟安装
-      _emitProgress(JavaDownloadProgress(
-        status: JavaInstallStatus.installing,
-        progress: 0,
-        message: 'Finalizing installation...',
-      ));
-
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      // 创建安装目录
-      final installPath = path.join(_installDir!.path, 'java-${release.version}');
-      final installDirectory = Directory(installPath);
-      if (!await installDirectory.exists()) {
-        await installDirectory.create(recursive: true);
-      }
-
-      // 这里实际上应该解压文件并设置
-      // 由于这是简化版，我们创建一个标记文件
-      final markerFile = File(path.join(installPath, '.installed'));
-      await markerFile.writeAsString('''
-version=${release.version}
-vendor=${release.vendor}
-installedAt=${DateTime.now().toIso8601String()}
-''');
 
       _emitProgress(JavaDownloadProgress(
         status: JavaInstallStatus.completed,
-        progress: 1,
-        message: 'Java ${release.version} installed successfully!',
+        progress: 1.0,
+        message: 'Java ${release.version} 安装成功！',
       ));
 
-      _logger.info('Java ${release.version} installed at $installPath');
-      return installPath;
+      _logger.info('Java ${release.version} installed at $extractDir');
+      return extractDir;
     } catch (e, stackTrace) {
       _logger.error('Failed to install Java ${release.version}', e, stackTrace);
       _emitProgress(JavaDownloadProgress(
@@ -242,12 +264,65 @@ installedAt=${DateTime.now().toIso8601String()}
     }
   }
 
+  /// 获取当前操作系统名称（用于 Adoptium API）
+  String _getOsName() {
+    if (Platform.isWindows) return 'windows';
+    if (Platform.isMacOS) return 'mac';
+    return 'linux';
+  }
+
+  /// 获取当前架构名称（用于 Adoptium API）
+  String _getArchitecture() {
+    // 常见架构映射
+    final arch = Platform.version;
+    if (arch.contains('arm64') || arch.contains('aarch64')) return 'aarch64';
+    return 'x64';
+  }
+
+  /// 解压归档文件（支持 .zip 和 .tar.gz）
+  Future<void> _extractArchive(String archivePath, String targetDir) async {
+    final file = File(archivePath);
+    final bytes = await file.readAsBytes();
+
+    if (archivePath.endsWith('.zip')) {
+      // 解压 ZIP 文件
+      final zipArchive = archive_lib.ZipDecoder().decodeBytes(bytes);
+      for (final entry in zipArchive) {
+        final entryPath = path.join(targetDir, entry.name);
+        if (entry.isFile) {
+          final outFile = File(entryPath);
+          await outFile.create(recursive: true);
+          await outFile.writeAsBytes(entry.content as List<int>);
+        } else {
+          await Directory(entryPath).create(recursive: true);
+        }
+      }
+    } else if (archivePath.endsWith('.tar.gz') || archivePath.endsWith('.tgz')) {
+      // 解压 tar.gz 文件
+      final gzDecoded = archive_lib.GZipDecoder().decodeBytes(bytes);
+      final tarArchive = archive_lib.TarDecoder().decodeBytes(gzDecoded);
+      for (final entry in tarArchive) {
+        final entryPath = path.join(targetDir, entry.name);
+        if (entry.isFile) {
+          final outFile = File(entryPath);
+          await outFile.create(recursive: true);
+          await outFile.writeAsBytes(entry.content as List<int>);
+        } else {
+          await Directory(entryPath).create(recursive: true);
+        }
+      }
+    } else {
+      throw Exception('Unsupported archive format: $archivePath');
+    }
+  }
+
   /// 检查是否已经安装
   Future<String?> _checkExistingInstallation(JavaRelease release) async {
     final installPath = path.join(_installDir!.path, 'java-${release.version}');
-    final markerFile = File(path.join(installPath, '.installed'));
 
-    if (await markerFile.exists()) {
+    // 检查 java 可执行文件是否存在
+    final javaExe = getJavaExecutable(installPath);
+    if (javaExe != null) {
       return installPath;
     }
     return null;
@@ -261,31 +336,17 @@ installedAt=${DateTime.now().toIso8601String()}
 
     await for (final dir in _installDir!.list()) {
       if (dir is Directory) {
-        final markerFile = File(path.join(dir.path, '.installed'));
-        if (await markerFile.exists()) {
-          try {
-            final content = await markerFile.readAsString();
-            final lines = content.split('\n');
-
-            String? version;
-            String? vendor;
-
-            for (final line in lines) {
-              if (line.startsWith('version=')) {
-                version = line.substring(8);
-              } else if (line.startsWith('vendor=')) {
-                vendor = line.substring(7);
-              }
-            }
-
-            if (version != null) {
-              installed.add(JavaRelease(
-                version: version,
-                vendor: vendor ?? 'Unknown',
-              ));
-            }
-          } catch (e) {
-            // 忽略错误
+        final dirName = path.basename(dir.path);
+        // 检查目录名是否符合 java-{version} 格式
+        if (dirName.startsWith('java-')) {
+          final version = dirName.substring(5);
+          // 检查 java 可执行文件是否存在
+          final javaExe = getJavaExecutable(dir.path);
+          if (javaExe != null) {
+            installed.add(JavaRelease(
+              version: version,
+              vendor: 'Eclipse Temurin',
+            ));
           }
         }
       }

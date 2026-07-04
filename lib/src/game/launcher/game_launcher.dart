@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:path/path.dart' as path;
 import 'package:window_manager/window_manager.dart';
 import '../java/models.dart';
 import '../java/java_manager.dart';
@@ -829,6 +830,45 @@ class GameLauncher implements IGameLauncher {
     }
   }
 
+  /// 查找最新的崩溃报告文件
+  ///
+  /// 在游戏目录的 `crash-reports/` 子目录中查找最新的 `.txt` 崩溃报告文件，
+  /// 并读取其最后 50 行内容。
+  ///
+  /// [gameDir] 游戏目录路径
+  ///
+  /// 返回崩溃报告内容，如果没有找到则返回 null。
+  Future<String?> _findLatestCrashReport(String gameDir) async {
+    try {
+      final crashDir = Directory(path.join(gameDir, 'crash-reports'));
+      if (!await crashDir.exists()) return null;
+
+      File? latestFile;
+      DateTime? latestTime;
+
+      await for (final entity in crashDir.list()) {
+        if (entity is File && entity.path.endsWith('.txt')) {
+          final stat = await entity.stat();
+          if (latestTime == null || stat.modified.isAfter(latestTime)) {
+            latestTime = stat.modified;
+            latestFile = entity;
+          }
+        }
+      }
+
+      if (latestFile != null) {
+        final lines = await latestFile.readAsLines();
+        final tailLines = lines.length > 50
+            ? lines.sublist(lines.length - 50)
+            : lines;
+        return tailLines.join('\n');
+      }
+    } catch (e) {
+      _logger.warn('Failed to read crash report: $e');
+    }
+    return null;
+  }
+
   /// 分析崩溃日志，生成诊断报告
   ///
   /// 收集进程的最后 [maxLogLines] 行日志，结合已匹配的故障模式，
@@ -838,7 +878,7 @@ class GameLauncher implements IGameLauncher {
   /// [maxLogLines] 收集的最大日志行数，默认 50
   ///
   /// 返回格式化的诊断报告字符串。
-  String _analyzeCrashLog(String processId, {int maxLogLines = 50}) {
+  Future<String> _analyzeCrashLog(String processId, {int maxLogLines = 50}) async {
     final processInfo = _runningProcesses[processId];
     final matchedPatterns = _detectedCrashPatterns[processId] ?? {};
     final buffer = StringBuffer();
@@ -869,6 +909,23 @@ class GameLauncher implements IGameLauncher {
     // 输出最近的日志上下文
     buffer.writeln();
     buffer.writeln('--- 最近 $maxLogLines 行日志 ---');
+
+    // 检查 crash-reports 目录中的最新崩溃报告
+    if (processInfo != null) {
+      final crashReport = await _findLatestCrashReport(
+        processInfo.arguments.gameDirectory,
+      );
+      if (crashReport != null) {
+        buffer.writeln();
+        buffer.writeln('--- crash-reports 最新报告 ---');
+        buffer.writeln(crashReport);
+        buffer.writeln('--- crash-reports 报告结束 ---');
+        buffer.writeln();
+      }
+    }
+
+    buffer.writeln();
+    buffer.writeln('--- 最近 $maxLogLines 行游戏日志 ---');
     if (processInfo != null) {
       final recentLogs = processInfo.getRecentLogs(maxLogLines);
       for (final log in recentLogs) {
@@ -977,7 +1034,7 @@ class GameLauncher implements IGameLauncher {
       _statusControllers[processId]?.add(GameProcessStatus.crashed);
 
       // 分析崩溃日志，生成诊断报告并发布 CrashDiagnosticEvent
-      _analyzeCrashLog(processId);
+      await _analyzeCrashLog(processId);
 
       _eventBus.publish(GameCrashedEvent(
         processId: processId,

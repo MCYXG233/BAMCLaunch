@@ -858,7 +858,7 @@ class InstanceManager {
       (d) => d.id == instance.directoryId,
       orElse: () => throw ArgumentError('Directory not found: ${instance.directoryId}'),
     );
-    return '${directory.path}\\instances\\${instance.id}';
+    return path.join(directory.path, 'instances', instance.id);
   }
 
   /// 获取实例的 mods 目录路径
@@ -869,7 +869,7 @@ class InstanceManager {
   /// 返回值：
   /// - 返回 mods 目录路径
   String getInstanceModsPath(String instanceId) {
-    return '${getInstancePath(instanceId)}\\mods';
+    return path.join(getInstancePath(instanceId), 'mods');
   }
 
   /// 获取实例的 config 目录路径
@@ -880,7 +880,7 @@ class InstanceManager {
   /// 返回值：
   /// - 返回 config 目录路径
   String getInstanceConfigPath(String instanceId) {
-    return '${getInstancePath(instanceId)}\\config';
+    return path.join(getInstancePath(instanceId), 'config');
   }
 
   /// 获取实例的 saves（存档）目录路径
@@ -891,7 +891,7 @@ class InstanceManager {
   /// 返回值：
   /// - 返回 saves 目录路径
   String getInstanceSavesPath(String instanceId) {
-    return '${getInstancePath(instanceId)}\\saves';
+    return path.join(getInstancePath(instanceId), 'saves');
   }
 
   /// 获取实例的 resourcepacks（资源包）目录路径
@@ -902,7 +902,7 @@ class InstanceManager {
   /// 返回值：
   /// - 返回 resourcepacks 目录路径
   String getInstanceResourcePacksPath(String instanceId) {
-    return '${getInstancePath(instanceId)}\\resourcepacks';
+    return path.join(getInstancePath(instanceId), 'resourcepacks');
   }
 
   /// 获取实例的 shaderpacks（光影包）目录路径
@@ -913,7 +913,7 @@ class InstanceManager {
   /// 返回值：
   /// - 返回 shaderpacks 目录路径
   String getInstanceShaderPacksPath(String instanceId) {
-    return '${getInstancePath(instanceId)}\\shaderpacks';
+    return path.join(getInstancePath(instanceId), 'shaderpacks');
   }
 
   /// 获取实例的 screenshots（截图）目录路径
@@ -924,7 +924,7 @@ class InstanceManager {
   /// 返回值：
   /// - 返回 screenshots 目录路径
   String getInstanceScreenshotsPath(String instanceId) {
-    return '${getInstancePath(instanceId)}\\screenshots';
+    return path.join(getInstancePath(instanceId), 'screenshots');
   }
 
   /// 获取实例的 logs（日志）目录路径
@@ -935,7 +935,7 @@ class InstanceManager {
   /// 返回值：
   /// - 返回 logs 目录路径
   String getInstanceLogsPath(String instanceId) {
-    return '${getInstancePath(instanceId)}\\logs';
+    return path.join(getInstancePath(instanceId), 'logs');
   }
 
   /// 确保实例的所有必要目录都存在
@@ -963,13 +963,13 @@ class InstanceManager {
     final basePath = getInstancePath(instanceId);
     // 定义需要创建的目录列表
     final dirs = [
-      '$basePath\\mods',
-      '$basePath\\config',
-      '$basePath\\saves',
-      '$basePath\\resourcepacks',
-      '$basePath\\shaderpacks',
-      '$basePath\\screenshots',
-      '$basePath\\logs',
+      path.join(basePath, 'mods'),
+      path.join(basePath, 'config'),
+      path.join(basePath, 'saves'),
+      path.join(basePath, 'resourcepacks'),
+      path.join(basePath, 'shaderpacks'),
+      path.join(basePath, 'screenshots'),
+      path.join(basePath, 'logs'),
     ];
     // 逐个创建目录（如果不存在）
     for (final dir in dirs) {
@@ -1595,7 +1595,7 @@ class InstanceManager {
     _instances.add(instance);
 
     // 提取实例文件
-    final targetDir = Directory('${directory.path}\\instances\\$id');
+    final targetDir = Directory(path.join(directory.path, 'instances', id));
     if (!await targetDir.exists()) {
       await targetDir.create(recursive: true);
     }
@@ -1713,7 +1713,7 @@ class InstanceManager {
     _instances.add(instance);
 
     // 创建实例目录
-    final targetDir = Directory('${directory.path}\\instances\\$id');
+    final targetDir = Directory(path.join(directory.path, 'instances', id));
     if (!await targetDir.exists()) {
       await targetDir.create(recursive: true);
     }

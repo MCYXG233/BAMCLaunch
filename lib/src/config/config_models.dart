@@ -1457,6 +1457,8 @@ class GameDirectory {
 
 /// 启动器配置主类
 class LauncherConfig {
+  static const int currentSchemaVersion = 1;
+
   final BasicInfo basicInfo;
   final bool mocked;
   final int runCount;
@@ -1489,6 +1491,7 @@ class LauncherConfig {
 
   Map<String, dynamic> toJson() {
     return {
+      'schemaVersion': currentSchemaVersion,
       'basicInfo': basicInfo.toJson(),
       'mocked': mocked,
       'runCount': runCount,
@@ -1506,6 +1509,10 @@ class LauncherConfig {
   }
 
   factory LauncherConfig.fromJson(Map<String, dynamic> json) {
+    final version = json['schemaVersion'] as int? ?? 0;
+    if (version < currentSchemaVersion) {
+      json = _migrate(json, fromVersion: version);
+    }
     return LauncherConfig(
       basicInfo: json['basicInfo'] != null
           ? BasicInfo.fromJson(json['basicInfo'] as Map<String, dynamic>)
@@ -1568,6 +1575,17 @@ class LauncherConfig {
               .toList() ??
           [],
     );
+  }
+
+  static Map<String, dynamic> _migrate(Map<String, dynamic> json, {required int fromVersion}) {
+    var migrated = Map<String, dynamic>.from(json);
+
+    if (fromVersion < 1) {
+      // v0 → v1 迁移逻辑
+      migrated['schemaVersion'] = 1;
+    }
+
+    return migrated;
   }
 
   /// 获取默认配置

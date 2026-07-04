@@ -80,7 +80,7 @@ class PlayTimeEntry {
       launchCount: json['launchCount'] as int,
       // 解析ISO8601格式的日期时间字符串
       lastPlayed: json['lastPlayed'] != null
-          ? DateTime.parse(json['lastPlayed'] as String)
+          ? DateTime.tryParse(json['lastPlayed'] as String)
           : null,
     );
   }
@@ -267,9 +267,10 @@ class PlayTimeTracker {
     }
   }
 
-  /// 保存时长数据到文件
+  /// 保存时长数据到文件（原子写入）
   ///
   /// 将 [_instancePlayTimes] 映射表序列化为JSON格式并写入数据文件。
+  /// 使用临时文件+重命名的方式实现原子写入，防止写入中断导致数据损坏。
   /// 保存失败时会记录错误日志但不抛出异常。
   Future<void> _saveData() async {
     if (_dataFile == null) return;
@@ -283,8 +284,13 @@ class PlayTimeTracker {
         'lastUpdated': DateTime.now().toIso8601String(),
       };
 
-      // 将数据写入文件
-      await _dataFile!.writeAsString(jsonEncode(data));
+      final jsonString = jsonEncode(data);
+      final tempFile = File('${_dataFile!.path}.tmp');
+
+      if (await tempFile.exists()) await tempFile.delete();
+      await tempFile.writeAsString(jsonString);
+      if (await _dataFile!.exists()) await _dataFile!.delete();
+      await tempFile.rename(_dataFile!.path);
     } catch (e, stackTrace) {
       _logger.error('Failed to save play time data', e, stackTrace);
     }

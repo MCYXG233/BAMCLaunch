@@ -53,24 +53,23 @@ class LoaderDownloadService {
   /// 获取 Forge 可用版本列表
   Future<List<String>> getForgeVersions(String mcVersion) async {
     try {
-      final url = 'https://maven.neoforged.net/releases/net/neoforged/forge/maven-metadata.json';
-      
+      final url = '${ApiEndpoints.forgeMaven}/net/minecraftforge/forge/maven-metadata.xml';
+
       _logger.info('Fetching Forge versions for Minecraft $mcVersion...');
-      
+
       final response = await _networkClient.get(url);
-      
+
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final body = response.body;
         final versions = <String>[];
-        
-        // 过滤出匹配 Minecraft 版本的 Forge
-        final allVersions = data['versions'] as List<dynamic>? ?? [];
-        for (final v in allVersions) {
-          final version = v.toString();
-          if (version.contains(mcVersion)) {
-            versions.add(version);
-          }
-        }
+
+        // 从 maven-metadata.xml 中提取所有 <version> 标签
+        final allVersions = RegExp(r'<version>([^<]+)</version>')
+            .allMatches(body)
+            .map((m) => m.group(1)!)
+            .where((v) => v.startsWith('$mcVersion-'))
+            .toList();
+        versions.addAll(allVersions);
         
         _logger.info('Found ${versions.length} Forge versions');
         return versions;
@@ -97,7 +96,7 @@ class LoaderDownloadService {
       final mcVersion = parts[0];
       final forgeVersion = parts[1];
       
-      final url = 'https://maven.neoforged.net/releases/net/neoforged/forge/$mcVersion-$forgeVersion/forge-$mcVersion-$forgeVersion-installer.jar';
+      final url = '${ApiEndpoints.forgeMaven}/net/minecraftforge/forge/$mcVersion-$forgeVersion/forge-$mcVersion-$forgeVersion-installer.jar';
       
       _logger.info('Forge download URL: $url');
       return url;
@@ -383,15 +382,25 @@ class LoaderDownloadService {
       final loaderName = loaderType == LoaderType.fabric ? 'fabric' : 'quilt';
       final loaderVersion = version.split('-').last;
 
-      // 复制 jar 文件到正确位置
-      final targetPath = path.join(
-        gameDirectory,
-        'libraries',
-        loaderName,
-        'loader',
-        '$mcVersion-$loaderVersion',
-        '$loaderName-loader-$loaderVersion.jar',
-      );
+      // 复制 jar 文件到正确位置（Maven 标准路径）
+      final String targetPath;
+      if (loaderType == LoaderType.fabric) {
+        targetPath = path.join(
+          gameDirectory,
+          'libraries',
+          'net', 'fabricmc', 'fabric-loader',
+          loaderVersion,
+          'fabric-loader-$loaderVersion.jar',
+        );
+      } else {
+        targetPath = path.join(
+          gameDirectory,
+          'libraries',
+          'org', 'quiltmc', 'quilt-loader',
+          loaderVersion,
+          'quilt-loader-$loaderVersion.jar',
+        );
+      }
 
       final targetFile = File(targetPath);
       final targetDir = targetFile.parent;
@@ -417,28 +426,49 @@ class LoaderDownloadService {
     try {
       String id;
       String mainClass;
-      String librariesPath;
+      String loaderGroup;
+      String loaderGroupPath;
+      String loaderName;
+      String loaderDownloadUrl;
 
       switch (loaderType) {
         case LoaderType.forge:
           id = '$mcVersion-forge-$loaderVersion';
           mainClass = 'cpw.mods.modlauncher.Launcher';
-          librariesPath = 'libraries/net/minecraftforge/forge/$mcVersion-$loaderVersion';
+          loaderGroup = 'net.minecraftforge';
+          loaderGroupPath = 'net/minecraftforge';
+          loaderName = 'forge';
+          loaderDownloadUrl =
+              '${ApiEndpoints.forgeMaven}/$loaderGroupPath/forge/$mcVersion-$loaderVersion/forge-$mcVersion-$loaderVersion.jar';
           break;
         case LoaderType.neoforge:
           id = '$mcVersion-neoforge-$loaderVersion';
           mainClass = 'cpw.mods.modlauncher.Launcher';
-          librariesPath = 'libraries/net/neoforged/forge/$mcVersion-$loaderVersion';
+          loaderGroup = 'net.neoforged';
+          loaderGroupPath = 'net/neoforged';
+          loaderName = 'neoforge';
+          loaderDownloadUrl =
+              '${ApiEndpoints.neoforgeMaven}/$loaderGroupPath/neoforge/$mcVersion-$loaderVersion/neoforge-$mcVersion-$loaderVersion.jar';
           break;
         case LoaderType.fabric:
+          final fabricLoaderVersion = loaderVersion.split('-').last;
           id = '$mcVersion-fabric-$loaderVersion';
           mainClass = 'net.fabricmc.loader.impl.launch.knot.KnotClient';
-          librariesPath = 'libraries/net/fabricmc/fabric-loader/${loaderVersion.split('-').last}';
+          loaderGroup = 'net.fabricmc';
+          loaderGroupPath = 'net/fabricmc';
+          loaderName = 'fabric-loader';
+          loaderDownloadUrl =
+              '${ApiEndpoints.fabricMaven}/$loaderGroupPath/fabric-loader/$fabricLoaderVersion/fabric-loader-$fabricLoaderVersion.jar';
           break;
         case LoaderType.quilt:
+          final quiltLoaderVersion = loaderVersion.split('-').last;
           id = '$mcVersion-quilt-$loaderVersion';
           mainClass = 'org.quiltmc.loader.impl.launch.knot.KnotClient';
-          librariesPath = 'libraries/org/quiltmc/quilt-loader/${loaderVersion.split('-').last}';
+          loaderGroup = 'org.quiltmc';
+          loaderGroupPath = 'org/quiltmc';
+          loaderName = 'quilt-loader';
+          loaderDownloadUrl =
+              '${ApiEndpoints.quiltMaven}/$loaderGroupPath/quilt-loader/$quiltLoaderVersion/quilt-loader-$quiltLoaderVersion.jar';
           break;
       }
 
@@ -450,13 +480,29 @@ class LoaderDownloadService {
         'type': 'release',
         'mainClass': mainClass,
         'arguments': {
-          'game': [
-            '--fml.forgeVersion',
-            loaderVersion,
-            '--fml.mcVersion',
-            mcVersion,
-          ],
+          'game': loaderType == LoaderType.forge || loaderType == LoaderType.neoforge
+              ? [
+                  '--fml.forgeVersion',
+                  loaderVersion,
+                  '--fml.mcVersion',
+                  mcVersion,
+                ]
+              : <String>[],
+          'jvm': <String>[],
         },
+        'libraries': [
+          {
+            'name': '$loaderGroup:$loaderName:$loaderVersion',
+            'downloads': {
+              'artifact': {
+                'path': '$loaderGroupPath/$loaderName/$loaderVersion/$loaderName-$loaderVersion.jar',
+                'url': loaderDownloadUrl,
+                'sha1': '',
+                'size': 0,
+              }
+            }
+          }
+        ],
       };
 
       final jsonPath = path.join(
