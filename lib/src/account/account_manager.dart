@@ -716,15 +716,8 @@ class AccountManager implements IAccountManager {
     return _accountsStreamController!.stream;
   }
 
-  /// 生成唯一的账户ID
-  ///
-  /// 使用当前时间戳和账户数量组合生成唯一标识符。
-  /// 格式：`{时间戳毫秒数}_{当前账户数量}`
-  ///
-  /// 返回值：
-  /// - `String`: 唯一的账户ID字符串
   String _generateId() {
-    return '${DateTime.now().millisecondsSinceEpoch}_${_cachedAccounts.length}';
+    return Account.generateId();
   }
 
   /// 检查账户令牌是否有效

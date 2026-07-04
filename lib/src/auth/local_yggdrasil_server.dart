@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 import '../core/logger.dart';
 import '../di/service_locator.dart';
 import '../account/account.dart';
@@ -337,7 +336,7 @@ class LocalYggdrasilServer {
   }
 
   String _generateToken() {
-    return 'token_${DateTime.now().millisecondsSinceEpoch}_${_randomString(16)}';
+    return 'token_${Account.generateId()}';
   }
 
   String _generateUuid(String name) {
@@ -365,17 +364,5 @@ class LocalYggdrasilServer {
   String _bytesToUuid(List<int> bytes) {
     final hex = bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
     return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20)}';
-  }
-
-  String _randomString(int length) {
-    const chars =
-        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final random = Random();
-    return String.fromCharCodes(
-      List.generate(
-        length,
-        (_) => chars.codeUnitAt(random.nextInt(chars.length)),
-      ),
-    );
   }
 }

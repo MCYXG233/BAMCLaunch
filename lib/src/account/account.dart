@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'skin_manager.dart';
 
 /// 账户类型枚举
@@ -49,6 +50,17 @@ class Account {
 
   /// 本地披风文件路径
   final String? localCapePath;
+
+  /// 使用 UUID v4 生成唯一的账户标识符
+  static String generateId() {
+    final random = Random();
+    String hexChars(int count) => List.generate(
+          count,
+          (_) => '0123456789abcdef'[random.nextInt(16)],
+        ).join();
+    return '${hexChars(8)}-${hexChars(4)}-4${hexChars(3)}-'
+        '${'89ab'[random.nextInt(4)]}${hexChars(3)}-${hexChars(12)}';
+  }
 
   /// 创建账户实例
   Account({

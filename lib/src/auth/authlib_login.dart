@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
 import '../core/network_client.dart';
@@ -58,6 +59,16 @@ class AuthlibAccount {
     required this.createdAt,
     required this.lastUsedAt,
   });
+
+  static String _generateAccountId() {
+    final random = Random();
+    String hexChars(int count) => List.generate(
+          count,
+          (_) => '0123456789abcdef'[random.nextInt(16)],
+        ).join();
+    return '${hexChars(8)}-${hexChars(4)}-4${hexChars(3)}-'
+        '${'89ab'[random.nextInt(4)]}${hexChars(3)}-${hexChars(12)}';
+  }
 
   String get avatarUrl => 'https://mc-heads.net/avatar/$uuid/32';
 
@@ -204,6 +215,7 @@ class AuthlibLoginManager {
     }
   }
 
+  /// 默认服务器列表，用户可通过界面添加、删除或修改服务器。
   List<AuthlibInjectorServer> _getDefaultServers() {
     return const [
       AuthlibInjectorServer(
@@ -361,7 +373,7 @@ class AuthlibLoginManager {
         final data = jsonDecode(response.body);
 
         final account = AuthlibAccount(
-          id: '${DateTime.now().millisecondsSinceEpoch}',
+          id: AuthlibAccount._generateAccountId(),
           username: JsonUtils.getStringOrDefault(data['selectedProfile']['name']),
           uuid: JsonUtils.getStringOrDefault(data['selectedProfile']['id']),
           accessToken: JsonUtils.getStringOrDefault(data['accessToken']),
