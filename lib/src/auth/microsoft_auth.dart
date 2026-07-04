@@ -679,13 +679,13 @@ class MicrosoftAuthService {
 
     // 持续轮询直到获得令牌或发生错误
     while (true) {
-      // 向令牌端点发送轮询请求
+      // 向设备代码令牌端点发送轮询请求（必须用 v2.0 端点）
       final response = await networkClient.post(
-        _tokenEndpoint,
+        ApiEndpoints.microsoftDeviceCodeToken,
         headers: NetworkClient.microsoftHeaders,
         body: {
           'client_id': _clientId,
-          'grant_type': 'urn:ietf:params:oauth:grant-type:device_code', // 设备代码授权类型
+          'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
           'device_code': deviceCode,
         },
       );

@@ -8,12 +8,16 @@ class ApiEndpoints {
   ApiEndpoints._();
 
   // ━━━ Microsoft OAuth ━━━
+  // 授权码流使用 login.live.com 旧端点（社区 Client ID 不在 Azure AD 中）
+  // 设备代码流使用 login.microsoftonline.com/consumers v2.0 端点
   static const String microsoftAuthAuthorize =
-      'https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize';
+      'https://login.live.com/oauth20_authorize.srf';
   static const String microsoftAuthToken =
-      'https://login.microsoftonline.com/consumers/oauth2/v2.0/token';
+      'https://login.live.com/oauth20_token.srf';
   static const String microsoftAuthDeviceCode =
       'https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode';
+  static const String microsoftDeviceCodeToken =
+      'https://login.microsoftonline.com/consumers/oauth2/v2.0/token';
   static const String microsoftRedirectUri =
       'https://login.live.com/oauth20_desktop.srf';
 
