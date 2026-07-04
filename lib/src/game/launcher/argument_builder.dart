@@ -8,6 +8,7 @@ import '../java/models.dart';
 import '../../version/models.dart';
 import 'models.dart';
 import 'argument_rule.dart';
+import '../../core/error_codes.dart';
 
 enum GarbageCollector {
   auto,
@@ -195,10 +196,24 @@ class ArgumentBuilder {
         args.add('-Dminecraft.client.jar=$clientJarPath');
       }
 
-      if (gameConfig.gcStrategy == 'g1gc') {
-        args.add('-XX:+UseG1GC');
+      if (gameConfig.gcStrategy == 'auto' || gameConfig.gcStrategy == 'g1gc') {
+        if (javaMajorVersion >= 8) {
+          args.addAll([
+            '-XX:+UseG1GC',
+            '-XX:G1NewSizePercent=20',
+            '-XX:G1ReservePercent=20',
+            '-XX:MaxGCPauseMillis=50',
+            '-XX:G1HeapRegionSize=32M',
+          ]);
+        } else {
+          args.add('-XX:+UseG1GC');
+        }
       } else if (gameConfig.gcStrategy == 'zgc') {
-        args.add('-XX:+UseZGC');
+        if (javaMajorVersion >= 11) {
+          args.add('-XX:+UseZGC');
+        } else {
+          args.add('-XX:+UseG1GC');
+        }
       } else if (gameConfig.gcStrategy == 'shenandoah') {
         args.add('-XX:+UseShenandoahGC');
       } else if (gameConfig.gcStrategy == 'parallel') {
@@ -211,12 +226,16 @@ class ArgumentBuilder {
         '-Djava.rmi.server.useCodebaseOnly=true',
         '-Dcom.sun.jndi.rmi.object.trustURLCodebase=false',
         '-Dcom.sun.jndi.cosnaming.object.trustURLCodebase=false',
+        '-Dlog4j2.formatMsgNoLookups=true',
+        '-XX:-OmitStackTraceInFastThrow',
       ]);
 
       args.addAll([
         '-Dfml.ignoreInvalidMinecraftCertificates=true',
         '-Dfml.ignorePatchDiscrepancies=true',
       ]);
+
+      args.add('-Dfile.encoding=UTF-8');
 
       if (javaMajorVersion < 19) {
         args.addAll([
@@ -228,6 +247,14 @@ class ArgumentBuilder {
           '-Dstdout.encoding=UTF-8',
           '-Dstderr.encoding=UTF-8',
         ]);
+      }
+
+      // Java 版本特定兼容性参数
+      if (javaMajorVersion == 16) {
+        args.add('--illegal-access=permit');
+      }
+      if (javaMajorVersion >= 24) {
+        args.add('--sun-misc-unsafe-memory-access=allow');
       }
     }
 
@@ -404,8 +431,10 @@ class ArgumentBuilder {
     final librariesDir = path.join(gameDirectory, 'libraries');
 
     for (final library in versionJson.libraries) {
-      // 跳过 native 库，这些库应解压到 natives 目录而非加入 classpath
       if (library.natives != null) continue;
+      if (library.rules != null && library.rules!.isNotEmpty) {
+        if (!_isAllowedByRules(library.rules!)) continue;
+      }
 
       if (library.downloads?.artifact != null) {
         final artifact = library.downloads!.artifact!;
@@ -413,16 +442,55 @@ class ArgumentBuilder {
         if (await File(libPath).exists()) {
           paths.add(libPath);
         }
+      } else if (library.name.isNotEmpty) {
+        final libPath = _resolveForgeLibraryPath(library.name, librariesDir);
+        if (libPath != null && await File(libPath).exists()) {
+          paths.add(libPath);
+        }
       }
     }
 
-    final versionDir = path.join(gameDirectory, 'versions', versionJson.id);
-    final jarPath = path.join(versionDir, '${versionJson.id}.jar');
+    final jarPath = path.join(gameDirectory, 'versions', versionJson.id, '${versionJson.id}.jar');
     if (await File(jarPath).exists()) {
       paths.add(jarPath);
+    } else {
+      throw AppException.fromCode(ErrorCodes.fileNotFound, detail: 'Minecraft JAR not found: $jarPath');
     }
 
     return paths;
+  }
+
+  /// 将 Forge 格式的 library name 转换为本地路径
+  /// "org.ow2.asm:asm-all:5.0.3" → "org/ow2/asm/asm-all/5.0.3/asm-all-5.0.3.jar"
+  String? _resolveForgeLibraryPath(String name, String librariesDir) {
+    final parts = name.split(':');
+    if (parts.length < 3) return null;
+    final package = parts[0].replaceAll('.', '/');
+    final artifact = parts[1];
+    final version = parts[2];
+    final relativePath = '$package/$artifact/$version/$artifact-$version.jar';
+    return path.join(librariesDir, relativePath);
+  }
+
+  bool _isAllowedByRules(List<Rule> rules) {
+    final platform = PlatformInfo.current();
+    for (final rule in rules) {
+      if (rule.action == 'allow') {
+        if (rule.os == null) return true;
+        if (_osMatches(rule.os!, platform)) return true;
+      } else if (rule.action == 'disallow') {
+        if (rule.os == null) return false;
+        if (_osMatches(rule.os!, platform)) return false;
+      }
+    }
+    return false;
+  }
+
+  bool _osMatches(OsRule os, PlatformInfo platform) {
+    if (os.name != null && os.name != platform.os.name) return false;
+    if (os.arch != null && os.arch != platform.arch.name) return false;
+    if (os.version != null && !RegExp(os.version!).hasMatch(platform.osVersion ?? '')) return false;
+    return true;
   }
 
   Future<LaunchCommand> buildLaunchCommand({

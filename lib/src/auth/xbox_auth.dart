@@ -85,16 +85,14 @@ class XboxAuthService {
       }
       final String errorCode = data['XErr']?.toString() ?? 'Unknown';
       
-      if (errorCode == '2148916233') {
-        throw AppException.fromCode(ErrorCodes.authXboxFailed, detail: '账户没有Xbox Live');
+      if (errorCode == '2148916227') {
+        throw AppException.fromCode(ErrorCodes.authXboxFailed, detail: '账户已被Xbox Live封禁 (2148916227)');
+      } else if (errorCode == '2148916233') {
+        throw AppException.fromCode(ErrorCodes.authXboxFailed, detail: '账户没有Xbox Live (2148916233)');
       } else if (errorCode == '2148916235') {
-        throw AppException.fromCode(ErrorCodes.authXboxFailed, detail: '账户已被Xbox Live封禁');
-      } else if (errorCode == '2148916236') {
-        throw AppException.fromCode(ErrorCodes.authXboxFailed, detail: '未接受Xbox Live服务条款');
-      } else if (errorCode == '2148916237') {
-        throw AppException.fromCode(ErrorCodes.authXboxFailed, detail: '需要成人验证');
+        throw AppException.fromCode(ErrorCodes.authXboxFailed, detail: '当前地区不可用Xbox Live (2148916235)');
       } else if (errorCode == '2148916238') {
-        throw AppException.fromCode(ErrorCodes.authXboxFailed, detail: '子账户需要家庭设置');
+        throw AppException.fromCode(ErrorCodes.authXboxFailed, detail: '子账户需要家庭设置 (2148916238)');
       }
 
       throw AppException.fromCode(

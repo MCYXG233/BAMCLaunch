@@ -332,14 +332,27 @@ class MicrosoftAuthService {
         'code': code,
         'redirect_uri': _redirectUri,
         'code_verifier': codeVerifier, // PKCE 验证
+        'scope': _scope,
       },
     );
 
     // 检查响应状态
     if (response.statusCode != 200) {
+      String detail = 'HTTP ${response.statusCode}';
+      try {
+        final errorData = json.decode(response.body) as Map<String, dynamic>;
+        final error = errorData['error'] as String? ?? '';
+        final errorDesc = errorData['error_description'] as String? ?? '';
+        detail = '$error: $errorDesc';
+        if (error == 'invalid_grant' && errorDesc.contains('AADSTS70000')) {
+          throw AppException.fromCode(ErrorCodes.authTokenExpired, detail: '凭据已过期，请重新登录');
+        }
+      } catch (e) {
+        if (e is AppException) rethrow;
+      }
       throw AppException.fromCode(
         ErrorCodes.authCodeExchangeFailed,
-        detail: 'HTTP ${response.statusCode}: ${response.body}',
+        detail: detail,
         originalError: response.body,
       );
     }
@@ -411,14 +424,27 @@ class MicrosoftAuthService {
         'client_id': _clientId,
         'grant_type': 'refresh_token', // 刷新令牌授权类型
         'refresh_token': refreshToken,
+        'scope': _scope,
       },
     );
 
     // 检查响应状态
     if (response.statusCode != 200) {
+      String detail = 'HTTP ${response.statusCode}';
+      try {
+        final errorData = json.decode(response.body) as Map<String, dynamic>;
+        final error = errorData['error'] as String? ?? '';
+        final errorDesc = errorData['error_description'] as String? ?? '';
+        detail = '$error: $errorDesc';
+        if (error == 'invalid_grant' && errorDesc.contains('AADSTS70000')) {
+          throw AppException.fromCode(ErrorCodes.authTokenExpired, detail: '凭据已过期，请重新登录');
+        }
+      } catch (e) {
+        if (e is AppException) rethrow;
+      }
       throw AppException.fromCode(
         ErrorCodes.authRefreshFailed,
-        detail: 'HTTP ${response.statusCode}: ${response.body}',
+        detail: detail,
         originalError: response.body,
       );
     }
@@ -674,11 +700,13 @@ class MicrosoftAuthService {
   /// - 这是一个阻塞方法，会持续运行直到成功或失败
   /// - 应在 UI 中显示取消选项，允许用户中止流程
   /// - 轮询间隔应遵循服务器建议
-  Future<OAuthToken> pollForToken(String deviceCode) async {
+  Future<OAuthToken> pollForToken(String deviceCode, {int expiresIn = 900}) async {
     final networkClient = NetworkClient();
+    // 超时取 min(expiresIn, 900)，最多等15分钟
+    final deadline = DateTime.now().add(Duration(seconds: expiresIn.clamp(1, 900)));
+    int intervalSeconds = 5;
 
-    // 持续轮询直到获得令牌或发生错误
-    while (true) {
+    while (DateTime.now().isBefore(deadline)) {
       // 向令牌端点发送轮询请求
       final response = await networkClient.post(
         _tokenEndpoint,
@@ -709,16 +737,17 @@ class MicrosoftAuthService {
       // 根据错误类型处理
       if (error == 'authorization_pending') {
         // 用户尚未完成授权，等待后继续轮询
-        await Future.delayed(const Duration(seconds: 5));
+        await Future.delayed(Duration(seconds: intervalSeconds));
         continue;
       } else if (error == 'slow_down') {
         // 轮询过快，增加等待时间
-        await Future.delayed(const Duration(seconds: 10));
+        intervalSeconds += 5;
+        await Future.delayed(Duration(seconds: intervalSeconds));
         continue;
       } else if (error == 'expired_token') {
         // 设备代码已过期
         throw AppException.fromCode(ErrorCodes.authDeviceCodeExpired);
-      } else if (error == 'access_denied') {
+      } else if (error == 'authorization_declined' || error == 'access_denied') {
         // 用户拒绝授权
         throw AppException.fromCode(ErrorCodes.authUserDenied);
       } else {
@@ -729,6 +758,8 @@ class MicrosoftAuthService {
         );
       }
     }
+    // 超时
+    throw AppException.fromCode(ErrorCodes.authDeviceCodeExpired);
   }
 }
 
