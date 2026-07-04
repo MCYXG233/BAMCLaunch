@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
-import '../event/event.dart' as event_module;
+import '../event/event.dart';
 import '../event/event_bus.dart';
 import '../di/service_locator.dart';
 
@@ -832,39 +832,13 @@ class Logger {
 
     // 发布日志事件到事件总线，供其他模块订阅处理
     _eventBus.publish(
-      event_module.LogEvent(
-        level: _convertLogLevel(level),
+      LogEvent(
+        level: level,
         message: message,
         error: error,
         stackTrace: stackTrace,
       ),
     );
-  }
-
-  /// 转换日志级别
-  ///
-  /// 将内部 [LogLevel] 枚举转换为事件模块的 [event_module.LogLevel] 枚举。
-  /// 这是必要的，因为日志系统和事件系统使用了不同的日志级别枚举定义。
-  ///
-  /// 注意：[LogLevel.fatal] 会被转换为 [event_module.LogLevel.error]，
-  /// 因为事件模块没有 fatal 级别。
-  ///
-  /// [level] 内部日志级别
-  /// 返回对应的日志事件级别
-  event_module.LogLevel _convertLogLevel(LogLevel level) {
-    switch (level) {
-      case LogLevel.debug:
-        return event_module.LogLevel.debug;
-      case LogLevel.info:
-        return event_module.LogLevel.info;
-      case LogLevel.warn:
-        return event_module.LogLevel.warn;
-      case LogLevel.error:
-        return event_module.LogLevel.error;
-      case LogLevel.fatal:
-        // 事件模块没有 fatal 级别，使用 error 代替
-        return event_module.LogLevel.error;
-    }
   }
 
   /// 关闭日志系统

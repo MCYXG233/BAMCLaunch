@@ -1,5 +1,6 @@
 import '../resource_center/index.dart';
 import '../download/index.dart';
+import '../core/logger.dart' show LogLevel;
 
 /// 事件基类
 ///
@@ -33,21 +34,6 @@ class LogEvent extends Event {
     this.error,
     this.stackTrace,
   });
-}
-
-/// 日志级别枚举
-enum LogLevel {
-  /// 调试信息
-  debug,
-
-  /// 一般信息
-  info,
-
-  /// 警告信息
-  warn,
-
-  /// 错误信息
-  error,
 }
 
 /// 任务相关事件基类

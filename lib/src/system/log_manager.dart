@@ -6,14 +6,6 @@ import '../di/service_locator.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
 
-/// 日志级别
-enum LogLevel {
-  debug,
-  info,
-  warning,
-  error,
-}
-
 /// 日志条目
 class LogEntry {
   final DateTime timestamp;
