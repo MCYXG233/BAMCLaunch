@@ -35,6 +35,13 @@ class BASettingsPage extends StatefulWidget {
 class _BASettingsPageState extends State<BASettingsPage> {
   Color _color(Color dark, Color light, bool isLight) => isLight ? light : dark;
 
+  /// 应用版本号(集中管理,与 pubspec.yaml 保持一致)
+  static const String _appVersion = '1.0.0';
+  /// 应用构建号
+  static const String _appBuild = '1';
+  /// 应用全版本显示
+  String get _appVersionDisplay => 'v$_appVersion+$_appBuild';
+
   final ConfigManager _configManager = ConfigManager();
   final ThemeManager _themeManager = ThemeManager();
   final BackgroundManager _backgroundManager = BackgroundManager();
@@ -803,6 +810,34 @@ class _BASettingsPageState extends State<BASettingsPage> {
     }
   }
 
+  Future<void> _confirmClearCache() async {
+    if (!mounted) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('确认清除缓存'),
+        content: const Text(
+            '此操作将清理启动器临时文件（包括下载缓存、解压中间文件等）。\n\n确定要继续吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(
+              foregroundColor: BAColors.dangerOf(context),
+            ),
+            child: const Text('清除'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await _clearCache();
+    }
+  }
+
   Future<void> _clearCache() async {
     try {
       final platformAdapter = PlatformAdapterFactory.create();
@@ -856,11 +891,11 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
   Widget _buildTopBar() {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final cardBg = _color(const Color(0xFF1E2747), const Color(0xFFFFFFFF), isLight);
-    final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFD0D8EE), isLight);
+    final cardBg = BAColors.surfaceOf(context);
+    final borderColor = BAColors.borderOf(context);
     final primaryText = BAColors.textPrimaryOf(context);
-    final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
-    final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
+    final secondaryText = BAColors.textSecondaryOf(context);
+    final accentBlue = BAColors.primaryLightOf(context);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
@@ -928,7 +963,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'v1.0.0',
+                  _appVersionDisplay,
                   style: TextStyle(
                     color: secondaryText,
                     fontSize: 12,
@@ -965,13 +1000,13 @@ class _BASettingsPageState extends State<BASettingsPage> {
     };
 
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final bgColor = _color(const Color(0xFF1E2747), const Color(0xFFFFFFFF), isLight);
-    final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFD0D8EE), isLight);
-    final selectedBgColor = _color(const Color(0xFF2A3766), const Color(0xFFEEF3FF), isLight);
-    final unselectedText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
-    final unselectedIcon = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
-    final unselectedBgA = _color(const Color(0xFF2A3766), const Color(0xFFDCE4F8), isLight);
-    final unselectedBgB = _color(const Color(0xFF1E2747), const Color(0xFFFFFFFF), isLight);
+    final bgColor = BAColors.surfaceOf(context);
+    final borderColor = BAColors.borderOf(context);
+    final selectedBgColor = BAColors.surfaceTertiaryOf(context);
+    final unselectedText = BAColors.textSecondaryOf(context);
+    final unselectedIcon = BAColors.primaryLightOf(context);
+    final unselectedBgA = BAColors.surfaceTertiaryOf(context);
+    final unselectedBgB = BAColors.surfaceOf(context);
     final primaryText = BAColors.textPrimaryOf(context);
 
     return BAAnimations.gradientBorder(
@@ -979,8 +1014,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
       duration: const Duration(milliseconds: 4000),
       gradientColors: [
         BAColors.primaryOf(context),
-        BAColors.primaryOf(context).withOpacity(0.3),
-        const Color(0xFF8EAAFF).withOpacity(0.2),
+        BAColors.primaryOf(context).withValues(alpha: 0.3),
+        BAColors.primaryLightOf(context).withValues(alpha: 0.2),
         BAColors.primaryOf(context),
       ],
       borderWidth: 1.5,
@@ -1152,11 +1187,11 @@ class _BASettingsPageState extends State<BASettingsPage> {
     required List<Widget> children,
   }) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final bgColor = _color(const Color(0xFF1E2747), const Color(0xFFFFFFFF), isLight);
-    final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFD0D8EE), isLight);
+    final bgColor = BAColors.surfaceOf(context);
+    final borderColor = BAColors.borderOf(context);
     final shadowOpacity = isLight ? 0.08 : 0.2;
     final titleText = BAColors.textPrimaryOf(context);
-    final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
+    final accentBlue = BAColors.primaryLightOf(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -1233,8 +1268,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
   }) {
     final isLight = Theme.of(context).brightness == Brightness.light;
     final primaryText = BAColors.textPrimaryOf(context);
-    final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
-    final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
+    final secondaryText = BAColors.textSecondaryOf(context);
+    final accentBlue = BAColors.primaryLightOf(context);
     final effectiveIconColor = iconColor ?? accentBlue;
 
     return Padding(
@@ -1318,9 +1353,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
   Widget _buildSwitch(bool value, ValueChanged<bool> onChanged) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final accentBlueDyn = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
-    final offBgDyn = _color(const Color(0xFF2A3766), const Color(0xFFDCE4F8), isLight);
-    final offBorderDyn = _color(const Color(0xFF3A4D7A), const Color(0xFFB9C3DE), isLight);
+    final accentBlueDyn = BAColors.primaryLightOf(context);
+    final offBgDyn = BAColors.surfaceTertiaryOf(context);
+    final offBorderDyn = BAColors.borderOf(context);
 
     return GestureDetector(
       onTap: () => onChanged(!value),
@@ -1388,11 +1423,11 @@ class _BASettingsPageState extends State<BASettingsPage> {
     final validValues = items.map((item) => item.value).toList();
     final effectiveValue = validValues.contains(value) ? value : items.first.value;
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final fillBg = _color(const Color(0xFF0F1733), const Color(0xFFEEF3FF), isLight);
-    final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFB9C3DE), isLight);
+    final fillBg = BAColors.surfaceVariantOf(context);
+    final borderColor = BAColors.borderOf(context);
     final primaryText = BAColors.textPrimaryOf(context);
-    final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
-    final dropdownBg = _color(const Color(0xFF1E2747), const Color(0xFFFFFFFF), isLight);
+    final secondaryText = BAColors.textSecondaryOf(context);
+    final dropdownBg = BAColors.surfaceOf(context);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
@@ -1424,10 +1459,10 @@ class _BASettingsPageState extends State<BASettingsPage> {
     double width = 200,
   }) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final fillBg = _color(const Color(0xFF0F1733), const Color(0xFFEEF3FF), isLight);
-    final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFB9C3DE), isLight);
+    final fillBg = BAColors.surfaceVariantOf(context);
+    final borderColor = BAColors.borderOf(context);
     final primaryText = BAColors.textPrimaryOf(context);
-    final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
+    final secondaryText = BAColors.textSecondaryOf(context);
 
     return SizedBox(
       width: width,
@@ -1466,10 +1501,10 @@ class _BASettingsPageState extends State<BASettingsPage> {
     required VoidCallback onBrowse,
   }) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final fillBg = _color(const Color(0xFF0F1733), const Color(0xFFEEF3FF), isLight);
-    final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFB9C3DE), isLight);
+    final fillBg = BAColors.surfaceVariantOf(context);
+    final borderColor = BAColors.borderOf(context);
     final primaryText = BAColors.textPrimaryOf(context);
-    final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
+    final secondaryText = BAColors.textSecondaryOf(context);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -1508,7 +1543,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
     Color? color,
   }) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
+    final accentBlue = BAColors.primaryLightOf(context);
     final effectiveColor = color ?? accentBlue;
 
     return MouseRegion(
@@ -1562,9 +1597,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
     bool isLoading = false,
   }) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final offBg = _color(const Color(0xFF2A3766), const Color(0xFFEEF3FF), isLight);
-    final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFB9C3DE), isLight);
-    final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
+    final offBg = BAColors.surfaceTertiaryOf(context);
+    final borderColor = BAColors.borderOf(context);
+    final accentBlue = BAColors.primaryLightOf(context);
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -1848,9 +1883,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 builder: (context) {
                   final isLight = Theme.of(context).brightness == Brightness.light;
                   final primaryText = BAColors.textPrimaryOf(context);
-                  final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
-                  final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
-                  final inactiveTrack = _color(const Color(0xFF2A3766), const Color(0xFFDCE4F8), isLight);
+                  final secondaryText = BAColors.textSecondaryOf(context);
+                  final accentBlue = BAColors.primaryLightOf(context);
+                  final inactiveTrack = BAColors.surfaceTertiaryOf(context);
 
                   return Row(
                     children: [
@@ -2039,9 +2074,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 builder: (context) {
                   final isLight = Theme.of(context).brightness == Brightness.light;
                   final primaryText = BAColors.textPrimaryOf(context);
-                  final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
-                  final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
-                  final inactiveTrack = _color(const Color(0xFF2A3766), const Color(0xFFDCE4F8), isLight);
+                  final secondaryText = BAColors.textSecondaryOf(context);
+                  final accentBlue = BAColors.primaryLightOf(context);
+                  final inactiveTrack = BAColors.surfaceTertiaryOf(context);
 
                   return Row(
                     children: [
@@ -2150,9 +2185,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   builder: (context) {
                     final isLight = Theme.of(context).brightness == Brightness.light;
                     final primaryText = BAColors.textPrimaryOf(context);
-                    final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
-                    final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
-                    final inactiveTrack = _color(const Color(0xFF2A3766), const Color(0xFFDCE4F8), isLight);
+                    final secondaryText = BAColors.textSecondaryOf(context);
+                    final accentBlue = BAColors.primaryLightOf(context);
+                    final inactiveTrack = BAColors.surfaceTertiaryOf(context);
 
                     return Row(
                       children: [
@@ -2414,11 +2449,11 @@ class _BASettingsPageState extends State<BASettingsPage> {
             builder: (context) {
               final isLight = Theme.of(context).brightness == Brightness.light;
               final primaryText = BAColors.textPrimaryOf(context);
-              final secondaryText = _color(const Color(0xFFA0B0C8), const Color(0xFF5A6A8A), isLight);
-              final accentBlue = _color(const Color(0xFF8EAAFF), const Color(0xFF4A7BD9), isLight);
-              final selectedBg = _color(const Color(0xFF2A3766), const Color(0xFFEEF3FF), isLight);
-              final defaultBg = _color(const Color(0xFF1E2747), const Color(0xFFFFFFFF), isLight);
-              final borderColor = _color(const Color(0xFF3A4D7A), const Color(0xFFB9C3DE), isLight);
+              final secondaryText = BAColors.textSecondaryOf(context);
+              final accentBlue = BAColors.primaryLightOf(context);
+              final selectedBg = BAColors.surfaceTertiaryOf(context);
+              final defaultBg = BAColors.surfaceOf(context);
+              final borderColor = BAColors.borderOf(context);
 
               return GestureDetector(
                 onTap: () => _selectMirror(mirror.id),
@@ -2603,7 +2638,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   context: context,
                   builder: (context) => AlertDialog(
                     title: const Text('关于 BAMC Launch'),
-                    content: const Text('版本 v1.0.0\n© 2024 BAMC Launch Team'),
+                    content: Text('版本 $_appVersionDisplay\n© 2024 BAMC Launch Team'),
                     actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('关闭'))],
                   ),
                 ),
@@ -2639,7 +2674,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               subtitle: '清理临时文件释放存储空间',
               control: _buildPrimaryButton(
                 text: '清除',
-                onPressed: _clearCache,
+                onPressed: _confirmClearCache,
                 color: BAColors.accentPinkDarkOf(context),
               ),
             ),
