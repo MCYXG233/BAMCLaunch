@@ -64,6 +64,13 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
     _subscribeToEvents();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 将 NotificationManager 初始化移到依赖变化时,避免 build 中重复调用
+    NotificationManager().init(context);
+  }
+
   Future<void> _initializeAndLoadInstances() async {
     try {
       final manager = InstanceManager();
@@ -264,8 +271,19 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
       case 1:
         list = list.where((i) => i.status == InstanceStatus.running).toList();
         break;
+      case 2:
+        list = list.where((i) => i.version != null).toList();
+        break;
       case 3:
-        list = [];
+        // 集合包: 包含 mod loader 的实例视为 modpack 实例
+        list = list
+            .where((i) =>
+                i.loader != null &&
+                (i.loader == 'forge' ||
+                    i.loader == 'fabric' ||
+                    i.loader == 'neoforge' ||
+                    i.loader == 'quilt'))
+            .toList();
         break;
     }
     return list;
@@ -517,8 +535,6 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
 
   @override
   Widget build(BuildContext context) {
-    NotificationManager().init(context);
-
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 200),
       switchInCurve: Curves.easeOut,
@@ -1056,17 +1072,32 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          childAspectRatio: 1.1,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-        ),
-        itemCount: instances.length,
-        itemBuilder: (context, index) {
-          final instance = instances[index];
-          return _buildInstanceCard(context, instance);
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // 响应式网格:根据宽度动态调整列数
+          final width = constraints.maxWidth;
+          final crossAxisCount = width < 600
+              ? 2
+              : width < 900
+                  ? 3
+                  : width < 1300
+                      ? 4
+                      : width < 1700
+                          ? 5
+                          : 6;
+          return GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              childAspectRatio: 1.1,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+            ),
+            itemCount: instances.length,
+            itemBuilder: (context, index) {
+              final instance = instances[index];
+              return _buildInstanceCard(context, instance);
+            },
+          );
         },
       ),
     );
@@ -1423,7 +1454,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                 ),
               ],
               border: Border.all(
-                color: const Color(0xFFFFFFFF).withOpacity(0.2),
+                color: BAColors.surfaceOf(context).withValues(alpha: 0.2),
                 width: 1.5,
               ),
             ),
