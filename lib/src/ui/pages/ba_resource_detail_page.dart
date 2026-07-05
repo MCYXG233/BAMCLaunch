@@ -246,7 +246,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
               onTap: _toggleFavorite,
               size: 36,
               iconSize: 18,
-              iconColor: _isFavorite ? Colors.red : null,
+              iconColor: _isFavorite ? BAColors.dangerOf(context) : null,
             ),
             const SizedBox(width: 8),
 
@@ -440,7 +440,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
           Text(
             widget.resource.description,
             style: TextStyle(
-              color: isLight ? const Color(0xFF1A2744) : const Color(0xFFE0E8F5),
+              color: BAColors.textPrimaryOf(context),
               fontSize: 14,
               height: 1.6,
             ),
@@ -601,7 +601,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
                   BAColors.primaryOf(context),
                 ),
               ),
-              Container(width: 1, height: 40, color: const Color(0xFF3A4D7A)),
+              Container(width: 1, height: 40, color: BAColors.borderOf(context)),
               Expanded(
                 child: _buildStatBlock(
                   context,
@@ -640,7 +640,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
               context,
               '收藏数',
               _formatNumber(widget.resource.likes),
-              Colors.red,
+              BAColors.dangerOf(context),
             ),
           ),
           Container(
@@ -701,13 +701,13 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
               onPressed: _toggleFavorite,
               icon: Icon(
                 _isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: _isFavorite ? Colors.red : null,
+                color: _isFavorite ? BAColors.dangerOf(context) : null,
               ),
               label: Text(_isFavorite ? '已收藏' : '收藏'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: BAColors.textPrimaryOf(context),
                 side: BorderSide(
-                  color: _isFavorite ? Colors.red : (BAColors.borderOf(context)),
+                  color: _isFavorite ? BAColors.dangerOf(context) : BAColors.borderOf(context),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -778,7 +778,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
       case ResourceType.modpack:
         return BAColors.primaryOf(context);
       case ResourceType.dataPack:
-        return const Color(0xFF8B7DD9);
+        return BAColors.primaryLightOf(context);
     }
   }
 
