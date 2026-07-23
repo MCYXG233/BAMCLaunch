@@ -1,3 +1,4 @@
+import 'package:bamclaunch/src/core/index.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bamclaunch/src/event/event_bus.dart';
 import 'package:bamclaunch/src/event/event.dart';
