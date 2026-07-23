@@ -201,6 +201,9 @@ class ServiceRegistry {
   }
 
   static void _registerAuth(ServiceLocator locator) {
+    // AccountStore - 账户持久化存储（统一 AuthManager 和 AccountManager 的存储路径）
+    locator.registerLazySingleton<AccountStore>(() => AccountStore.instance);
+
     // AuthManager - 认证管理器
     locator.registerLazySingleton<AuthManager>(() => AuthManager.instance);
 

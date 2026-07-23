@@ -173,6 +173,8 @@ class AuthManager {
   }
 
   /// 保存凭据
+  ///
+  /// 保存完整的认证凭据到加密存储
   Future<void> _saveCredentials(AuthCredentials credentials) async {
     final json = jsonEncode(credentials.toJson());
     await _configManager.setEncrypted('auth_credentials', json);

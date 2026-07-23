@@ -245,9 +245,6 @@ class AccountManager implements IAccountManager {
     _instance = null;
   }
 
-  /// 配置管理器实例，用于持久化账户数据
-  IConfigManager? _configManager;
-
   /// 事件总线实例，用于发布账户相关事件
   EventBus? _eventBus;
 
@@ -311,13 +308,12 @@ class AccountManager implements IAccountManager {
     // 如果已初始化，直接返回，避免重复初始化
     if (_isInitialized) return;
 
-    _configManager = configManager;
     _eventBus = eventBus;
 
     // 创建广播模式的流控制器，支持多个监听者
     _accountsStreamController = StreamController<List<Account>>.broadcast();
 
-    // 从配置文件加载账户数据到缓存
+    // 从 AccountStore 加载账户数据到缓存
     await _loadAccounts();
 
     _isInitialized = true;
@@ -334,10 +330,10 @@ class AccountManager implements IAccountManager {
     if (_isInitialized) return;
 
     // 使用默认实例进行自动初始化
-    _configManager = ConfigManager.instance;
     _eventBus = EventBus.instance;
     _accountsStreamController = StreamController<List<Account>>.broadcast();
 
+    // 从 AccountStore 加载账户数据到缓存
     await _loadAccounts();
     _isInitialized = true;
   }
@@ -350,27 +346,8 @@ class AccountManager implements IAccountManager {
   /// 如果配置管理器未设置，会使用 ConfigManager.instance 作为默认值。
   /// 如果配置中没有账户数据，会初始化为空列表。
   Future<void> _loadAccounts() async {
-    // 确保配置管理器可用
-    if (_configManager == null) {
-      _configManager = ConfigManager.instance;
-    }
-
-    // 从配置中读取账户列表JSON
-    final accountsJson = _configManager!.get<List<dynamic>>(
-      ConfigKeys.accounts,
-      defaultValue: [],
-    );
-
-    // 解析JSON为Account对象列表
-    // 使用安全转换确保类型正确
-    _cachedAccounts =
-        accountsJson
-            ?.map(
-              (json) =>
-                  Account.fromJson(Map<String, dynamic>.from(json as Map)),
-            )
-            .toList() ??
-        [];
+    // 从 AccountStore 加载账户列表（已包含敏感字段解密）
+    _cachedAccounts = await AccountStore.instance.loadAccounts();
   }
 
   /// 保存账户数据到配置文件
@@ -380,18 +357,10 @@ class AccountManager implements IAccountManager {
   ///
   /// 此方法应在任何修改账户缓存后调用，确保数据持久化。
   Future<void> _saveAccounts() async {
-    // 确保配置管理器可用
-    if (_configManager == null) {
-      _configManager = ConfigManager.instance;
-    }
+    // 保存账户列表到 AccountStore（敏感字段会自动加密）
+    await AccountStore.instance.saveAccounts(_cachedAccounts);
 
-    // 将账户列表序列化为JSON
-    final accountsJson = _cachedAccounts
-        .map((account) => account.toJson())
-        .toList();
-
-    // 保存到配置并通知监听者
-    await _configManager!.set(ConfigKeys.accounts, accountsJson);
+    // 通知监听者
     _accountsStreamController?.add(_cachedAccounts);
   }
 
@@ -428,12 +397,8 @@ class AccountManager implements IAccountManager {
   Future<Account?> getSelectedAccount() async {
     await _ensureInitialized();
 
-    if (_configManager == null) {
-      _configManager = ConfigManager.instance;
-    }
-
-    // 从配置中获取选中的账户ID
-    final selectedId = _configManager!.get<String>(ConfigKeys.selectedAccount);
+    // 从 AccountStore 获取选中的账户ID
+    final selectedId = AccountStore.instance.loadSelectedAccountId();
     if (selectedId == null) return null;
 
     // 在缓存中查找对应的账户
@@ -459,12 +424,8 @@ class AccountManager implements IAccountManager {
   Future<void> selectAccount(String accountId) async {
     await _ensureInitialized();
 
-    if (_configManager == null) {
-      _configManager = ConfigManager.instance;
-    }
-
     // 保存旧的选中账户ID，用于事件通知
-    final oldAccountId = _configManager!.get<String>(ConfigKeys.selectedAccount);
+    final oldAccountId = AccountStore.instance.loadSelectedAccountId();
 
     // 验证账户是否存在
     final accountExists = _cachedAccounts.any(
@@ -474,8 +435,8 @@ class AccountManager implements IAccountManager {
       throw ArgumentError('账户不存在: $accountId');
     }
 
-    // 更新配置中的选中账户
-    await _configManager!.set(ConfigKeys.selectedAccount, accountId);
+    // 更新选中的账户
+    await AccountStore.instance.saveSelectedAccountId(accountId);
 
     // 更新账户的最后使用时间
     final index = _cachedAccounts.indexWhere(

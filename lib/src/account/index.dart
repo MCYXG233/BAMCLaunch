@@ -4,4 +4,5 @@
 
 export 'account.dart';
 export 'account_manager.dart';
+export 'account_store.dart';
 export 'account_widgets.dart';
