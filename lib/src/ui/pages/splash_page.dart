@@ -84,7 +84,6 @@ class _BAMCSplashPageState extends State<BAMCSplashPage>
 
       final accountManager = AccountManager();
       await accountManager.initialize(
-        configManager: configManager,
         eventBus: EventBus(),
       );
       logger.info('账户管理器初始化完成');

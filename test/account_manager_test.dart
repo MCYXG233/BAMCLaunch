@@ -282,7 +282,6 @@ void main() {
       configManager = MockConfigManager();
       eventBus = EventBus();
       accountManager.initialize(
-        configManager: configManager,
         eventBus: eventBus,
       );
     });

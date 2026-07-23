@@ -1,6 +1,4 @@
 import 'dart:async';
-import '../config/config_manager.dart';
-import '../config/config_keys.dart';
 import '../event/event.dart';
 import '../event/event_bus.dart';
 import '../core/logger.dart';
@@ -8,6 +6,7 @@ import '../core/network_client.dart';
 import '../di/service_locator.dart';
 import '../auth/microsoft_auth.dart';
 import 'account.dart';
+import 'account_store.dart';
 
 /// 账户管理器接口
 ///
@@ -302,7 +301,6 @@ class AccountManager implements IAccountManager {
   /// );
   /// ```
   Future<void> initialize({
-    required IConfigManager configManager,
     required EventBus eventBus,
   }) async {
     // 如果已初始化，直接返回，避免重复初始化
@@ -622,10 +620,6 @@ class AccountManager implements IAccountManager {
   Future<void> removeAccount(String accountId) async {
     await _ensureInitialized();
 
-    if (_configManager == null) {
-      _configManager = ConfigManager.instance;
-    }
-
     // 查找账户索引
     final index = _cachedAccounts.indexWhere(
       (account) => account.id == accountId,
@@ -635,9 +629,9 @@ class AccountManager implements IAccountManager {
     }
 
     // 如果删除的是当前选中的账户，清除选中状态
-    final selectedId = _configManager!.get<String>(ConfigKeys.selectedAccount);
+    final selectedId = AccountStore.instance.loadSelectedAccountId();
     if (selectedId == accountId) {
-      await _configManager!.remove(ConfigKeys.selectedAccount);
+      await AccountStore.instance.saveSelectedAccountId(null);
 
       // 发布选中账户变更事件（新账户ID为null）
       if (_eventBus == null) {
@@ -965,7 +959,6 @@ class AccountManager implements IAccountManager {
     _isInitialized = false;
 
     // 清空引用
-    _configManager = null;
     _eventBus = null;
   }
 }
