@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import '../core/logger.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
+import '../core/safe_archive_extractor.dart';
 import '../di/service_locator.dart';
 import '../instance/models.dart' show ResourceType;
 import 'models.dart';
@@ -562,13 +563,22 @@ class DownloadManager {
 
   /// 解压 modpack（zip/jar）到目标目录
   ///
+  /// 使用 SafeArchiveExtractor 防止 Zip Slip 路径穿越漏洞。
   /// 如果解压失败，会抛出异常，由调用方回退到文件复制。
   Future<String> _extractModpack(File sourceFile, String targetDir) async {
     final bytes = await sourceFile.readAsBytes();
-    final Archive archive;
-
     try {
-      archive = ZipDecoder().decodeBytes(bytes);
+      await SafeArchiveExtractor.extractZip(
+        bytes: bytes,
+        targetDir: targetDir,
+        verify: false,
+      );
+    } on ArchiveSecurityException catch (e) {
+      throw AppException.fromCode(
+        ErrorCodes.fileArchiveError,
+        detail: e.message,
+        originalError: e,
+      );
     } catch (e) {
       throw AppException.fromCode(
         ErrorCodes.fileArchiveError,
@@ -576,20 +586,6 @@ class DownloadManager {
         originalError: e,
       );
     }
-
-    for (final file in archive) {
-      final String filePath;
-      if (file.isFile) {
-        filePath = path.join(targetDir, file.name);
-        final destFile = File(filePath);
-        await destFile.parent.create(recursive: true);
-        await destFile.writeAsBytes(file.content as List<int>);
-      } else {
-        filePath = path.join(targetDir, file.name);
-        await Directory(filePath).create(recursive: true);
-      }
-    }
-
     return targetDir;
   }
 

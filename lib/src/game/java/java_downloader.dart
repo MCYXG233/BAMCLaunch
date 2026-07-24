@@ -3,6 +3,7 @@ import 'package:path/path.dart' as path;
 import 'package:archive/archive.dart' as archive_lib;
 import '../../core/logger.dart';
 import '../../core/network_client.dart';
+import '../../core/safe_archive_extractor.dart';
 import '../../di/service_locator.dart';
 import '../../platform/platform_adapter.dart';
 import '../../platform/platform_adapter_factory.dart';
@@ -280,37 +281,24 @@ class JavaDownloader {
   }
 
   /// 解压归档文件（支持 .zip 和 .tar.gz）
+  ///
+  /// 使用 SafeArchiveExtractor 防止 Zip Slip 路径穿越漏洞。
   Future<void> _extractArchive(String archivePath, String targetDir) async {
     final file = File(archivePath);
     final bytes = await file.readAsBytes();
 
     if (archivePath.endsWith('.zip')) {
       // 解压 ZIP 文件
-      final zipArchive = archive_lib.ZipDecoder().decodeBytes(bytes);
-      for (final entry in zipArchive) {
-        final entryPath = path.join(targetDir, entry.name);
-        if (entry.isFile) {
-          final outFile = File(entryPath);
-          await outFile.create(recursive: true);
-          await outFile.writeAsBytes(entry.content as List<int>);
-        } else {
-          await Directory(entryPath).create(recursive: true);
-        }
-      }
+      await SafeArchiveExtractor.extractZip(
+        bytes: bytes,
+        targetDir: targetDir,
+      );
     } else if (archivePath.endsWith('.tar.gz') || archivePath.endsWith('.tgz')) {
       // 解压 tar.gz 文件
-      final gzDecoded = archive_lib.GZipDecoder().decodeBytes(bytes);
-      final tarArchive = archive_lib.TarDecoder().decodeBytes(gzDecoded);
-      for (final entry in tarArchive) {
-        final entryPath = path.join(targetDir, entry.name);
-        if (entry.isFile) {
-          final outFile = File(entryPath);
-          await outFile.create(recursive: true);
-          await outFile.writeAsBytes(entry.content as List<int>);
-        } else {
-          await Directory(entryPath).create(recursive: true);
-        }
-      }
+      await SafeArchiveExtractor.extractTarGz(
+        bytes: bytes,
+        targetDir: targetDir,
+      );
     } else {
       throw Exception('Unsupported archive format: $archivePath');
     }
