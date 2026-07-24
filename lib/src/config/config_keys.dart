@@ -128,6 +128,12 @@ class ConfigKeys {
   static const String customMirrors = 'customMirrors';
   static const String selectedMirror = 'selectedMirror';
 
+  /// 自定义游戏目录候选路径列表
+  ///
+  /// 用于自动检测 Minecraft 游戏目录时补充候选。
+  /// 用户可在设置中配置多个候选路径。
+  static const String customGameDirectories = 'customGameDirectories';
+
   /// 隐私保护配置
   static const String privacyConfig = 'privacyConfig';
   static const String autoSelectMirror = 'autoSelectMirror';

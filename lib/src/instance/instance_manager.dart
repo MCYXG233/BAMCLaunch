@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:archive/archive.dart' as archive;
 import 'package:path/path.dart' as path;
 import 'models.dart';
+import 'path_resolver.dart';
+import '../config/config_keys.dart';
 import '../config/config_manager.dart';
 import '../core/logger.dart';
 import '../di/service_locator.dart';
@@ -224,33 +226,42 @@ class InstanceManager {
   }
 
   /// 自动检测常见的 Minecraft 目录和实例
-  /// 
-  /// 该方法会扫描以下路径：
-  /// - 用户指定的路径：`E:\TSSForsunshine\Minecraft`
-  /// - Windows APPDATA 目录下的 `.minecraft`
-  /// - `C:\Minecraft`
-  /// - `D:\Minecraft`
-  /// 
+  ///
+  /// 候选路径通过 [MinecraftPathResolver] 解析，包含：
+  /// - 用户自定义路径（从配置项读取）
+  /// - 平台默认路径（Windows APPDATA、macOS Library、Linux ~/.minecraft）
+  /// - Windows 常用盘符（C:/D: 上的 Minecraft 目录）
+  ///
   /// 对于每个存在的目录：
   /// 1. 检查是否已在目录列表中
   /// 2. 如果不存在，创建新的目录记录
   /// 3. 扫描目录中的 `versions` 文件夹，自动创建实例记录
-  /// 
+  ///
   /// 注意：
   /// - 该方法是私有方法，在初始化时自动调用
   /// - 检测失败不会影响整体初始化流程，只会记录警告日志
   Future<void> _autoDetectDirectories() async {
     try {
-      // 候选路径列表
-      final List<String> candidatePaths = [
-        // 用户指定的路径
-        r'E:\TSSForsunshine\Minecraft',
-        // Windows 常见的 Minecraft 目录
-        path.join(Platform.environment['APPDATA'] ?? '', '.minecraft'),
-        // 其他可能的路径
-        r'C:\Minecraft',
-        r'D:\Minecraft',
-      ];
+      // 通过 MinecraftPathResolver 统一生成候选路径列表
+      // 自定义候选从 ConfigManager 读取
+      final customCandidates = <String>[];
+      try {
+        final configManager = ConfigManager.instance;
+        await configManager.initialize();
+        final stored = configManager.get<List<dynamic>>(ConfigKeys.customGameDirectories);
+        if (stored != null) {
+          for (final entry in stored) {
+            if (entry is String && entry.isNotEmpty) {
+              customCandidates.add(entry);
+            }
+          }
+        }
+      } catch (e) {
+        _logger.warning('Failed to load customGameDirectories: $e');
+      }
+
+      final resolver = MinecraftPathResolver(customCandidates: customCandidates);
+      final candidatePaths = resolver.resolveCandidates();
 
       // 遍历每个候选路径
       for (final candidatePath in candidatePaths) {

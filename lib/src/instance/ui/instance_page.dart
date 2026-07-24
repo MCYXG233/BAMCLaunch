@@ -237,7 +237,7 @@ class _InstancePageState extends State<InstancePage> {
           TextField(
             controller: pathController,
             decoration: InputDecoration(
-              hintText: 'C:\\Games\\Minecraft\\Instances',
+              hintText: '请输入游戏目录的绝对路径',
               filled: true,
               fillColor: BAColors.surfaceVariantOf(context),
               border: OutlineInputBorder(
