@@ -12,7 +12,7 @@ class HUDOverlay extends StatefulWidget {
   final bool showPosition;
   final HUDPosition position;
   final HUDTheme theme;
-  
+
   const HUDOverlay({
     super.key,
     required this.child,
@@ -22,7 +22,7 @@ class HUDOverlay extends StatefulWidget {
     this.position = HUDPosition.topRight,
     this.theme = HUDTheme.dark,
   });
-  
+
   @override
   State<HUDOverlay> createState() => _HUDOverlayState();
 }
@@ -30,24 +30,24 @@ class HUDOverlay extends StatefulWidget {
 class _HUDOverlayState extends State<HUDOverlay> {
   final FPSMonitor _fpsMonitor = FPSMonitor();
   final MemoryMonitor _memoryMonitor = MemoryMonitor();
-  
+
   FPSData? _fpsData;
   MemoryData? _memoryData;
   Offset _gamePosition = Offset.zero;
-  
+
   @override
   void initState() {
     super.initState();
     _startMonitoring();
   }
-  
+
   @override
   void dispose() {
     _fpsMonitor.dispose();
     _memoryMonitor.dispose();
     super.dispose();
   }
-  
+
   void _startMonitoring() {
     _fpsMonitor.start();
     _fpsMonitor.fpsStream.listen((data) {
@@ -55,7 +55,7 @@ class _HUDOverlayState extends State<HUDOverlay> {
         setState(() => _fpsData = data);
       }
     });
-    
+
     _memoryMonitor.start();
     _memoryMonitor.memoryStream.listen((data) {
       if (mounted) {
@@ -63,23 +63,20 @@ class _HUDOverlayState extends State<HUDOverlay> {
       }
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        widget.child,
-        _buildHUDOverlay(),
-      ],
-    );
+    return Stack(children: [widget.child, _buildHUDOverlay()]);
   }
-  
+
   Widget _buildHUDOverlay() {
-    final isTop = widget.position == HUDPosition.topLeft || 
-                  widget.position == HUDPosition.topRight;
-    final isRight = widget.position == HUDPosition.topRight || 
-                    widget.position == HUDPosition.bottomRight;
-    
+    final isTop =
+        widget.position == HUDPosition.topLeft ||
+        widget.position == HUDPosition.topRight;
+    final isRight =
+        widget.position == HUDPosition.topRight ||
+        widget.position == HUDPosition.bottomRight;
+
     return Positioned(
       top: isTop ? 16 : null,
       bottom: !isTop ? 16 : null,
@@ -87,23 +84,22 @@ class _HUDOverlayState extends State<HUDOverlay> {
       left: !isRight ? 16 : null,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: isRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: isRight
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: [
-          if (widget.showFPS && _fpsData != null) 
-            _buildFPSWidget(),
-          if (widget.showMemory && _memoryData != null)
-            _buildMemoryWidget(),
-          if (widget.showPosition)
-            _buildPositionWidget(),
+          if (widget.showFPS && _fpsData != null) _buildFPSWidget(),
+          if (widget.showMemory && _memoryData != null) _buildMemoryWidget(),
+          if (widget.showPosition) _buildPositionWidget(),
         ],
       ),
     );
   }
-  
+
   Widget _buildFPSWidget() {
     final fps = _fpsData!.currentFPS;
     Color fpsColor;
-    
+
     if (fps >= 55) {
       fpsColor = BAColors.successOf(context);
     } else if (fps >= 30) {
@@ -111,7 +107,7 @@ class _HUDOverlayState extends State<HUDOverlay> {
     } else {
       fpsColor = BAColors.dangerOf(context);
     }
-    
+
     return _HUDPanel(
       theme: widget.theme,
       child: Row(
@@ -130,11 +126,11 @@ class _HUDOverlayState extends State<HUDOverlay> {
       ),
     );
   }
-  
+
   Widget _buildMemoryWidget() {
     final memory = _memoryData!;
     final usagePercent = memory.usagePercentage;
-    
+
     Color memoryColor;
     if (usagePercent < 60) {
       memoryColor = BAColors.successOf(context);
@@ -143,7 +139,7 @@ class _HUDOverlayState extends State<HUDOverlay> {
     } else {
       memoryColor = BAColors.dangerOf(context);
     }
-    
+
     return Padding(
       padding: const EdgeInsets.only(top: 4),
       child: _HUDPanel(
@@ -165,7 +161,7 @@ class _HUDOverlayState extends State<HUDOverlay> {
       ),
     );
   }
-  
+
   Widget _buildPositionWidget() {
     return Padding(
       padding: const EdgeInsets.only(top: 4),
@@ -174,7 +170,11 @@ class _HUDOverlayState extends State<HUDOverlay> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.location_on, color: BAColors.primaryOf(context), size: 16),
+            Icon(
+              Icons.location_on,
+              color: BAColors.primaryOf(context),
+              size: 16,
+            ),
             const SizedBox(width: 8),
             Text(
               'X: ${_gamePosition.dx.toStringAsFixed(1)} Y: ${_gamePosition.dy.toStringAsFixed(1)}',
@@ -193,12 +193,9 @@ class _HUDOverlayState extends State<HUDOverlay> {
 class _HUDPanel extends StatelessWidget {
   final Widget child;
   final HUDTheme theme;
-  
-  const _HUDPanel({
-    required this.child,
-    required this.theme,
-  });
-  
+
+  const _HUDPanel({required this.child, required this.theme});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -220,40 +217,35 @@ class _HUDPanel extends StatelessWidget {
   }
 }
 
-enum HUDPosition {
-  topLeft,
-  topRight,
-  bottomLeft,
-  bottomRight,
-}
+enum HUDPosition { topLeft, topRight, bottomLeft, bottomRight }
 
 class HUDTheme {
   final Color backgroundColor;
   final Color borderColor;
   final Color shadowColor;
   final Color textColor;
-  
+
   const HUDTheme({
     required this.backgroundColor,
     required this.borderColor,
     required this.shadowColor,
     required this.textColor,
   });
-  
+
   static const dark = HUDTheme(
     backgroundColor: Color(0xCC1A1A2E),
     borderColor: Color(0xFF2A2A4A),
     shadowColor: Color(0x80000000),
     textColor: Color(0xFFFFFFFF),
   );
-  
+
   static const light = HUDTheme(
     backgroundColor: Color(0xCCF5F7FA),
     borderColor: Color(0xFFD0D0E0),
     shadowColor: Color(0x30000000),
     textColor: Color(0xFF1A1A2E),
   );
-  
+
   static const game = HUDTheme(
     backgroundColor: Color(0x00000000),
     borderColor: Color(0x40FFFFFF),
@@ -265,18 +257,14 @@ class HUDTheme {
 class MiniFPSWidget extends StatelessWidget {
   final FPSData fpsData;
   final bool compact;
-  
-  const MiniFPSWidget({
-    super.key,
-    required this.fpsData,
-    this.compact = false,
-  });
-  
+
+  const MiniFPSWidget({super.key, required this.fpsData, this.compact = false});
+
   @override
   Widget build(BuildContext context) {
     final fps = fpsData.currentFPS;
     Color fpsColor;
-    
+
     if (fps >= 55) {
       fpsColor = const Color(0xFF00FF00);
     } else if (fps >= 30) {
@@ -284,7 +272,7 @@ class MiniFPSWidget extends StatelessWidget {
     } else {
       fpsColor = const Color(0xFFFF0000);
     }
-    
+
     if (compact) {
       return Text(
         '${fps.toStringAsFixed(0)}',
@@ -292,16 +280,11 @@ class MiniFPSWidget extends StatelessWidget {
           color: fpsColor,
           fontSize: 14,
           fontWeight: FontWeight.bold,
-          shadows: const [
-            Shadow(
-              color: Colors.black,
-              blurRadius: 2,
-            ),
-          ],
+          shadows: const [Shadow(color: Colors.black, blurRadius: 2)],
         ),
       );
     }
-    
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -312,9 +295,7 @@ class MiniFPSWidget extends StatelessWidget {
             color: fpsColor,
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            shadows: const [
-              Shadow(color: Colors.black, blurRadius: 2),
-            ],
+            shadows: const [Shadow(color: Colors.black, blurRadius: 2)],
           ),
         ),
         if (fpsData.averageFPS > 0)
@@ -334,18 +315,18 @@ class MiniFPSWidget extends StatelessWidget {
 class MiniMemoryWidget extends StatelessWidget {
   final MemoryData memoryData;
   final bool compact;
-  
+
   const MiniMemoryWidget({
     super.key,
     required this.memoryData,
     this.compact = false,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final usagePercent = memoryData.usagePercentage;
     Color memoryColor;
-    
+
     if (usagePercent < 60) {
       memoryColor = const Color(0xFF00FF00);
     } else if (usagePercent < 85) {
@@ -353,7 +334,7 @@ class MiniMemoryWidget extends StatelessWidget {
     } else {
       memoryColor = const Color(0xFFFF0000);
     }
-    
+
     if (compact) {
       return Text(
         '${memoryData.usedMemoryFormatted}',
@@ -361,13 +342,11 @@ class MiniMemoryWidget extends StatelessWidget {
           color: memoryColor,
           fontSize: 14,
           fontWeight: FontWeight.bold,
-          shadows: const [
-            Shadow(color: Colors.black, blurRadius: 2),
-          ],
+          shadows: const [Shadow(color: Colors.black, blurRadius: 2)],
         ),
       );
     }
-    
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -378,9 +357,7 @@ class MiniMemoryWidget extends StatelessWidget {
             color: memoryColor,
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            shadows: const [
-              Shadow(color: Colors.black, blurRadius: 2),
-            ],
+            shadows: const [Shadow(color: Colors.black, blurRadius: 2)],
           ),
         ),
         Text(

@@ -8,18 +8,17 @@ import 'instance_manager.dart';
 import 'models.dart';
 
 /// 导入进度回调
-typedef ImportProgressCallback = void Function(
-  int completed,
-  int total,
-  String? currentTask,
-);
+typedef ImportProgressCallback =
+    void Function(int completed, int total, String? currentTask);
 
 /// 冲突处理选项
 enum ConflictResolution {
   /// 覆盖现有文件
   overwrite,
+
   /// 重命名导入的文件
   rename,
+
   /// 取消导入
   cancel,
 }
@@ -94,7 +93,10 @@ class InstanceImporter {
       }
 
       // 确定目标目录
-      String directoryId = options.targetDirectoryId ?? manager.selectedDirectoryId ?? manager.directories.first.id;
+      String directoryId =
+          options.targetDirectoryId ??
+          manager.selectedDirectoryId ??
+          manager.directories.first.id;
       if (!manager.directories.any((d) => d.id == directoryId)) {
         throw AppException.fromCode(
           ErrorCodes.instanceNotFound,
@@ -138,14 +140,19 @@ class InstanceImporter {
       final instance = GameInstance.fromJson(config).copyWith(
         id: id,
         directoryId: directoryId,
-        name: options.customName ?? config['name'] as String? ?? 'Imported Instance',
+        name:
+            options.customName ??
+            config['name'] as String? ??
+            'Imported Instance',
         createdAt: now,
         updatedAt: now,
         lastPlayed: null,
         playTimeSeconds: 0,
       );
 
-      final directory = manager.directories.firstWhere((d) => d.id == directoryId);
+      final directory = manager.directories.firstWhere(
+        (d) => d.id == directoryId,
+      );
 
       // 检查冲突
       final conflicts = <FileConflict>[];
@@ -156,20 +163,25 @@ class InstanceImporter {
       for (final file in zipArchive.files) {
         if (file.name.startsWith('instances/') && file.isFile) {
           final subPath = file.name.substring('instances/'.length);
-          final destPath = path.join(targetDir.path, subPath.replaceAll('/', path.separator));
+          final destPath = path.join(
+            targetDir.path,
+            subPath.replaceAll('/', path.separator),
+          );
           final destFile = File(destPath);
 
           if (await destFile.exists()) {
             final existingStat = await destFile.stat();
-            conflicts.add(FileConflict(
-              path: destPath,
-              existingFile: destPath,
-              incomingFile: file.name,
-              existingSize: existingStat.size,
-              incomingSize: file.size,
-              existingModified: existingStat.modified,
-              incomingModified: DateTime.now(),
-            ));
+            conflicts.add(
+              FileConflict(
+                path: destPath,
+                existingFile: destPath,
+                incomingFile: file.name,
+                existingSize: existingStat.size,
+                incomingSize: file.size,
+                existingModified: existingStat.modified,
+                incomingModified: DateTime.now(),
+              ),
+            );
           }
         }
       }
@@ -182,14 +194,19 @@ class InstanceImporter {
       final importedFiles = <String>[];
       final skippedFiles = <String>[];
 
-      int totalFiles = zipArchive.files.where((f) => f.name.startsWith('instances/') && f.isFile).length;
+      int totalFiles = zipArchive.files
+          .where((f) => f.name.startsWith('instances/') && f.isFile)
+          .length;
       int processedFiles = 0;
 
       // 提取文件
       for (final file in zipArchive.files) {
         if (file.name.startsWith('instances/') && file.isFile) {
           final subPath = file.name.substring('instances/'.length);
-          final destPath = path.join(targetDir.path, subPath.replaceAll('/', path.separator));
+          final destPath = path.join(
+            targetDir.path,
+            subPath.replaceAll('/', path.separator),
+          );
 
           // 创建目录
           final destDir = Directory(path.dirname(destPath));
@@ -302,16 +319,23 @@ class InstanceImporter {
       final indexData = jsonDecode(indexJson) as Map<String, dynamic>;
 
       // 确定目标目录
-      String directoryId = options.targetDirectoryId ?? manager.selectedDirectoryId ?? manager.directories.first.id;
+      String directoryId =
+          options.targetDirectoryId ??
+          manager.selectedDirectoryId ??
+          manager.directories.first.id;
 
       // 生成实例信息
       final id = manager.generateId();
       final now = DateTime.now();
-      final name = options.customName ?? indexData['name'] as String? ?? 'Modrinth Modpack';
+      final name =
+          options.customName ??
+          indexData['name'] as String? ??
+          'Modrinth Modpack';
 
       // 解析依赖获取Minecraft版本
       final dependencies = indexData['dependencies'] as Map<String, dynamic>?;
-      final minecraftVersion = dependencies?['minecraft'] as String? ?? '1.20.1';
+      final minecraftVersion =
+          dependencies?['minecraft'] as String? ?? '1.20.1';
 
       // 创建实例
       final instance = GameInstance(
@@ -332,7 +356,9 @@ class InstanceImporter {
         updatedAt: now,
       );
 
-      final directory = manager.directories.firstWhere((d) => d.id == directoryId);
+      final directory = manager.directories.firstWhere(
+        (d) => d.id == directoryId,
+      );
       final targetDir = Directory('${directory.path}\\instances\\$id');
 
       if (!await targetDir.exists()) {
@@ -346,14 +372,19 @@ class InstanceImporter {
       }
 
       final importedFiles = <String>[];
-      int totalFiles = zipArchive.files.where((f) => f.name.startsWith('overrides/') && f.isFile).length;
+      int totalFiles = zipArchive.files
+          .where((f) => f.name.startsWith('overrides/') && f.isFile)
+          .length;
       int processedFiles = 0;
 
       // 提取overrides
       for (final file in zipArchive.files) {
         if (file.name.startsWith('overrides/') && file.isFile) {
           final subPath = file.name.substring('overrides/'.length);
-          final destPath = path.join(targetDir.path, subPath.replaceAll('/', path.separator));
+          final destPath = path.join(
+            targetDir.path,
+            subPath.replaceAll('/', path.separator),
+          );
 
           final destDir = Directory(path.dirname(destPath));
           if (!await destDir.exists()) {
@@ -428,10 +459,13 @@ class InstanceImporter {
 enum InstanceFileFormat {
   /// BAMC格式
   bamc,
+
   /// Modrinth mrpack格式
   modrinth,
+
   /// CurseForge格式
   curseforge,
+
   /// 未知格式
   unknown,
 }

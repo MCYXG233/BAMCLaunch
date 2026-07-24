@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import '../ui/theme/colors.dart';
@@ -6,6 +6,7 @@ import 'network_diagnostic.dart';
 import 'auto_fixer.dart';
 
 enum NetworkDiagnosticStatus { pending, running, passed, warning, failed }
+
 enum AutoFixStatus { idle, scanning, fixing, completed }
 
 class DiagnosticPage extends StatefulWidget {
@@ -100,7 +101,9 @@ class _DiagnosticPageState extends State<DiagnosticPage>
   }
 
   Future<void> _autoFixIssues() async {
-    final autoFixableIssues = _detectedIssues.where((i) => i.canAutoFix).toList();
+    final autoFixableIssues = _detectedIssues
+        .where((i) => i.canAutoFix)
+        .toList();
 
     if (autoFixableIssues.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -138,9 +141,17 @@ class _DiagnosticPageState extends State<DiagnosticPage>
     if (_networkReport == null || _networkReport!.htmlReport == null) return;
 
     try {
-      final downloadsDir = Directory('${Platform.environment['USERPROFILE']}\\Downloads');
-      final timestamp = DateTime.now().toString().replaceAll(':', '-').substring(0, 19);
-      final filePath = p.join(downloadsDir.path, 'network_report_$timestamp.html');
+      final downloadsDir = Directory(
+        '${Platform.environment['USERPROFILE']}\\Downloads',
+      );
+      final timestamp = DateTime.now()
+          .toString()
+          .replaceAll(':', '-')
+          .substring(0, 19);
+      final filePath = p.join(
+        downloadsDir.path,
+        'network_report_$timestamp.html',
+      );
 
       await NetworkDiagnostic.saveReportToFile(_networkReport!, filePath);
 
@@ -211,8 +222,11 @@ class _DiagnosticPageState extends State<DiagnosticPage>
       child: Row(
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back_ios_new_rounded,
-                color: BAColors.textSecondaryOf(context), size: 18),
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: BAColors.textSecondaryOf(context),
+              size: 18,
+            ),
             onPressed: () => Navigator.of(context).pop(),
           ),
           const SizedBox(width: 8),
@@ -220,7 +234,10 @@ class _DiagnosticPageState extends State<DiagnosticPage>
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [BAColors.primaryOf(context), BAColors.primaryLightOf(context)],
+                colors: [
+                  BAColors.primaryOf(context),
+                  BAColors.primaryLightOf(context),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -233,7 +250,11 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                 ),
               ],
             ),
-            child: const Icon(Icons.wifi_tethering_rounded, color: Colors.white, size: 22),
+            child: const Icon(
+              Icons.wifi_tethering_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
           ),
           const SizedBox(width: 12),
           Text(
@@ -326,9 +347,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _isNetworkRunning
-                          ? '诊断中...'
-                          : _getNetworkStatusText(),
+                      _isNetworkRunning ? '诊断中...' : _getNetworkStatusText(),
                       style: TextStyle(
                         color: _isNetworkRunning
                             ? BAColors.infoOf(context)
@@ -517,7 +536,9 @@ class _DiagnosticPageState extends State<DiagnosticPage>
         children: [
           Icon(
             result.isReachable ? Icons.check_circle : Icons.cancel,
-            color: result.isReachable ? BAColors.successOf(context) : BAColors.dangerOf(context),
+            color: result.isReachable
+                ? BAColors.successOf(context)
+                : BAColors.dangerOf(context),
             size: 16,
           ),
           const SizedBox(width: 8),
@@ -572,7 +593,9 @@ class _DiagnosticPageState extends State<DiagnosticPage>
         children: [
           Icon(
             result.isSuccess ? Icons.check_circle : Icons.cancel,
-            color: result.isSuccess ? BAColors.successOf(context) : BAColors.dangerOf(context),
+            color: result.isSuccess
+                ? BAColors.successOf(context)
+                : BAColors.dangerOf(context),
             size: 16,
           ),
           const SizedBox(width: 8),
@@ -605,8 +628,8 @@ class _DiagnosticPageState extends State<DiagnosticPage>
               color: result.resolutionTimeMs < 100
                   ? BAColors.successOf(context)
                   : result.resolutionTimeMs < 500
-                      ? BAColors.warningOf(context)
-                      : BAColors.dangerOf(context),
+                  ? BAColors.warningOf(context)
+                  : BAColors.dangerOf(context),
               fontSize: 12,
               fontFamily: 'monospace',
             ),
@@ -645,7 +668,9 @@ class _DiagnosticPageState extends State<DiagnosticPage>
         children: [
           Icon(
             result.isSuccess ? Icons.check_circle : Icons.cancel,
-            color: result.isSuccess ? BAColors.successOf(context) : BAColors.dangerOf(context),
+            color: result.isSuccess
+                ? BAColors.successOf(context)
+                : BAColors.dangerOf(context),
             size: 16,
           ),
           const SizedBox(width: 8),
@@ -666,10 +691,10 @@ class _DiagnosticPageState extends State<DiagnosticPage>
             style: TextStyle(
               color: result.isSuccess
                   ? (result.speedMbps > 5
-                      ? BAColors.successOf(context)
-                      : result.speedMbps > 1
-                          ? BAColors.warningOf(context)
-                          : BAColors.dangerOf(context))
+                        ? BAColors.successOf(context)
+                        : result.speedMbps > 1
+                        ? BAColors.warningOf(context)
+                        : BAColors.dangerOf(context))
                   : BAColors.dangerOf(context),
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -728,7 +753,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
             const SizedBox(height: 8),
             Text(
               '网络诊断详情',
-                           style: TextStyle(
+              style: TextStyle(
                 color: BAColors.textSecondaryOf(context),
                 fontSize: 12,
               ),
@@ -759,9 +784,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: BAColors.borderOf(context).withOpacity(0.6),
-        ),
+        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.6)),
         boxShadow: [
           BoxShadow(
             color: BAColors.primaryOf(context).withOpacity(0.05),
@@ -786,8 +809,8 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                   _autoFixStatus == AutoFixStatus.scanning
                       ? Icons.search_rounded
                       : _autoFixStatus == AutoFixStatus.fixing
-                          ? Icons.build_rounded
-                          : Icons.auto_fix_high_rounded,
+                      ? Icons.build_rounded
+                      : Icons.auto_fix_high_rounded,
                   color: BAColors.primaryOf(context),
                   size: 24,
                 ),
@@ -841,7 +864,8 @@ class _DiagnosticPageState extends State<DiagnosticPage>
               const SizedBox(width: 12),
               Expanded(
                 child: _buildActionButton(
-                  onPressed: (_isScanning || _isFixing || _detectedIssues.isEmpty)
+                  onPressed:
+                      (_isScanning || _isFixing || _detectedIssues.isEmpty)
                       ? null
                       : _autoFixIssues,
                   icon: Icons.build_rounded,
@@ -876,9 +900,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: BAColors.borderOf(context).withOpacity(0.6),
-        ),
+        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.6)),
       ),
       child: Column(
         children: [
@@ -887,7 +909,10 @@ class _DiagnosticPageState extends State<DiagnosticPage>
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: BAColors.warningOf(context).withOpacity(0.12),
                     borderRadius: BorderRadius.circular(8),
@@ -968,7 +993,9 @@ class _DiagnosticPageState extends State<DiagnosticPage>
       subtitle: Text(
         issue.canAutoFix ? '可自动修复' : '需手动修复',
         style: TextStyle(
-          color: issue.canAutoFix ? BAColors.successOf(context) : BAColors.textSecondaryOf(context),
+          color: issue.canAutoFix
+              ? BAColors.successOf(context)
+              : BAColors.textSecondaryOf(context),
           fontSize: 12,
         ),
       ),
@@ -1020,54 +1047,59 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                   ],
                 ),
               ],
-              Builder(builder: (context) {
-                final fixResult = _fixResults.where((r) => r.issueId == issue.id).firstOrNull;
-                if (fixResult == null) return const SizedBox.shrink();
-                return Column(children: [
-                  const SizedBox(height: 12),
-                  Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: fixResult.isFixed
-                        ? BAColors.successOf(context).withOpacity(0.1)
-                        : BAColors.dangerOf(context).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: fixResult.isFixed
-                          ? BAColors.successOf(context).withOpacity(0.3)
-                          : BAColors.dangerOf(context).withOpacity(0.3),
-                    ),
-                  ),
-                  child: Row(
+              Builder(
+                builder: (context) {
+                  final fixResult = _fixResults
+                      .where((r) => r.issueId == issue.id)
+                      .firstOrNull;
+                  if (fixResult == null) return const SizedBox.shrink();
+                  return Column(
                     children: [
-                      Icon(
-                        fixResult.isFixed
-                            ? Icons.check_circle_rounded
-                            : Icons.error_rounded,
-                        color: fixResult.isFixed
-                            ? BAColors.successOf(context)
-                            : BAColors.dangerOf(context),
-                        size: 16,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          fixResult.message ?? (fixResult.isFixed ? '修复成功' : '修复失败'),
-                          style: TextStyle(
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: fixResult.isFixed
+                              ? BAColors.successOf(context).withOpacity(0.1)
+                              : BAColors.dangerOf(context).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
                             color: fixResult.isFixed
-                                ? BAColors.successOf(context)
-                                : BAColors.dangerOf(context),
-                            fontSize: 12,
+                                ? BAColors.successOf(context).withOpacity(0.3)
+                                : BAColors.dangerOf(context).withOpacity(0.3),
                           ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              fixResult.isFixed
+                                  ? Icons.check_circle_rounded
+                                  : Icons.error_rounded,
+                              color: fixResult.isFixed
+                                  ? BAColors.successOf(context)
+                                  : BAColors.dangerOf(context),
+                              size: 16,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                fixResult.message ??
+                                    (fixResult.isFixed ? '修复成功' : '修复失败'),
+                                style: TextStyle(
+                                  color: fixResult.isFixed
+                                      ? BAColors.successOf(context)
+                                      : BAColors.dangerOf(context),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
-                  ),
-                ),
-                ],
-              );
-            },
-          ),
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -1097,7 +1129,10 @@ class _DiagnosticPageState extends State<DiagnosticPage>
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: BAColors.primaryOf(context).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(8),
@@ -1211,8 +1246,8 @@ class _DiagnosticPageState extends State<DiagnosticPage>
           decoration: BoxDecoration(
             color: isPrimary
                 ? (onPressed == null
-                    ? BAColors.primaryOf(context).withOpacity(0.4)
-                    : BAColors.primaryOf(context))
+                      ? BAColors.primaryOf(context).withOpacity(0.4)
+                      : BAColors.primaryOf(context))
                 : BAColors.surfaceVariantOf(context),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
@@ -1229,8 +1264,8 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                 color: isPrimary
                     ? Colors.white
                     : (onPressed == null
-                        ? BAColors.textDisabledOf(context)
-                        : BAColors.textPrimaryOf(context)),
+                          ? BAColors.textDisabledOf(context)
+                          : BAColors.textPrimaryOf(context)),
                 size: 18,
               ),
               const SizedBox(width: 8),
@@ -1240,8 +1275,8 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                   color: isPrimary
                       ? Colors.white
                       : (onPressed == null
-                          ? BAColors.textDisabledOf(context)
-                          : BAColors.textPrimaryOf(context)),
+                            ? BAColors.textDisabledOf(context)
+                            : BAColors.textPrimaryOf(context)),
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),

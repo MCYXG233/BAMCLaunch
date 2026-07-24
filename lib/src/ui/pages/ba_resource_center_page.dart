@@ -72,8 +72,15 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
   ];
 
   static const _gameVersions = [
-    '1.21.4', '1.21.1', '1.20.6', '1.20.4', '1.20.1',
-    '1.19.4', '1.18.2', '1.16.5', '1.12.2',
+    '1.21.4',
+    '1.21.1',
+    '1.20.6',
+    '1.20.4',
+    '1.20.1',
+    '1.19.4',
+    '1.18.2',
+    '1.16.5',
+    '1.12.2',
   ];
 
   static const _loaders = <MapEntry<String, String>>[
@@ -124,7 +131,9 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
   void _onTabChanged() {
     if (!_tabController.indexIsChanging) return;
     // 切换到热门整合包时自动加载
-    if (_tabController.index == 2 && _modpackResources.isEmpty && !_modpackLoading) {
+    if (_tabController.index == 2 &&
+        _modpackResources.isEmpty &&
+        !_modpackLoading) {
       _performModpackSearch();
     }
   }
@@ -160,7 +169,9 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
         page: 1,
         pageSize: _pageSize,
         sortBy: _modrinthSort,
-        gameVersions: _modrinthGameVersion != null ? [_modrinthGameVersion!] : null,
+        gameVersions: _modrinthGameVersion != null
+            ? [_modrinthGameVersion!]
+            : null,
         loaders: _modrinthLoader != null ? [_modrinthLoader!] : null,
       );
       final result = await _searchService.search(params);
@@ -192,7 +203,9 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
         page: nextPage,
         pageSize: _pageSize,
         sortBy: _modrinthSort,
-        gameVersions: _modrinthGameVersion != null ? [_modrinthGameVersion!] : null,
+        gameVersions: _modrinthGameVersion != null
+            ? [_modrinthGameVersion!]
+            : null,
         loaders: _modrinthLoader != null ? [_modrinthLoader!] : null,
       );
       final result = await _searchService.search(params);
@@ -241,7 +254,9 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
         page: 1,
         pageSize: _pageSize,
         sortBy: _modpackSort,
-        gameVersions: _modpackGameVersion != null ? [_modpackGameVersion!] : null,
+        gameVersions: _modpackGameVersion != null
+            ? [_modpackGameVersion!]
+            : null,
         loaders: _modpackLoader != null ? [_modpackLoader!] : null,
       );
       final result = await _searchService.search(params);
@@ -273,7 +288,9 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
         page: nextPage,
         pageSize: _pageSize,
         sortBy: _modpackSort,
-        gameVersions: _modpackGameVersion != null ? [_modpackGameVersion!] : null,
+        gameVersions: _modpackGameVersion != null
+            ? [_modpackGameVersion!]
+            : null,
         loaders: _modpackLoader != null ? [_modpackLoader!] : null,
       );
       final result = await _searchService.search(params);
@@ -430,14 +447,20 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.inventory_2,
-                    color: BAColors.textPrimaryOf(context).withValues(alpha: 0.85),
-                    size: 14),
+                Icon(
+                  Icons.inventory_2,
+                  color: BAColors.textPrimaryOf(
+                    context,
+                  ).withValues(alpha: 0.85),
+                  size: 14,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   '${_currentResourceCount()} 个资源',
                   style: TextStyle(
-                    color: BAColors.textPrimaryOf(context).withValues(alpha: 0.9),
+                    color: BAColors.textPrimaryOf(
+                      context,
+                    ).withValues(alpha: 0.9),
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),
@@ -492,8 +515,10 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
         labelColor: BAColors.primaryOf(context),
         unselectedLabelColor: BAColors.textSecondaryOf(context),
         labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-        unselectedLabelStyle:
-            const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
         labelPadding: EdgeInsets.zero,
         indicatorPadding: const EdgeInsets.all(3),
         tabs: [
@@ -513,9 +538,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
         children: [
           Icon(icon, size: 15),
           const SizedBox(width: 6),
-          Flexible(
-            child: Text(label, overflow: TextOverflow.ellipsis),
-          ),
+          Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
         ],
       ),
     );
@@ -562,18 +585,24 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
                       _modrinthQuery = v;
                       _performModrinthSearch();
                     },
-                    style: TextStyle(
-                        color: textPrimary, fontSize: 12),
+                    style: TextStyle(color: textPrimary, fontSize: 12),
                     decoration: InputDecoration(
                       hintText: '搜索模组、资源包、整合包...',
                       hintStyle: TextStyle(
-                          color: BAColors.textDisabledOf(context)),
-                      prefixIcon: Icon(Icons.search,
-                          color: textSecondary, size: 16),
+                        color: BAColors.textDisabledOf(context),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: textSecondary,
+                        size: 16,
+                      ),
                       suffixIcon: _modrinthQuery.isNotEmpty
                           ? IconButton(
-                              icon: Icon(Icons.clear,
-                                  color: textSecondary, size: 14),
+                              icon: Icon(
+                                Icons.clear,
+                                color: textSecondary,
+                                size: 14,
+                              ),
                               onPressed: () {
                                 _modrinthSearchCtrl.clear();
                                 _modrinthQuery = '';
@@ -587,8 +616,9 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                      ),
                       isDense: true,
                     ),
                   ),
@@ -642,7 +672,8 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
               itemBuilder: (context, index) {
                 final opt = _modrinthTypeOptions[index];
                 final selected = _modrinthType == opt.value;
-                final color = _typeColorsOf(context)[opt.value] ??
+                final color =
+                    _typeColorsOf(context)[opt.value] ??
                     BAColors.primaryOf(context);
                 return _buildTypeChip(
                   label: opt.key,
@@ -667,7 +698,11 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
       return _buildLoadingPlaceholder(context);
     }
     if (_modrinthError != null) {
-      return _buildErrorWidget(context, _modrinthError!, _performModrinthSearch);
+      return _buildErrorWidget(
+        context,
+        _modrinthError!,
+        _performModrinthSearch,
+      );
     }
     if (_modrinthResources.isEmpty) {
       return _buildEmptyWidget(context, '没有找到相关资源', '尝试调整筛选条件');
@@ -691,7 +726,8 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
               crossAxisSpacing: 10,
               childAspectRatio: 3.2,
             ),
-            itemCount: _modrinthResources.length + (_modrinthLoadingMore ? 1 : 0),
+            itemCount:
+                _modrinthResources.length + (_modrinthLoadingMore ? 1 : 0),
             itemBuilder: (context, index) {
               if (index >= _modrinthResources.length) {
                 return _buildGridLoadingMore(context);
@@ -764,11 +800,9 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
           ),
           const SizedBox(height: 24),
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
             decoration: BoxDecoration(
-              color: BAColors.surfaceVariantOf(context)
-                  .withValues(alpha: 0.6),
+              color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: BAColors.borderOf(context).withValues(alpha: 0.3),
@@ -777,9 +811,11 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.info_outline,
-                    size: 14,
-                    color: BAColors.textSecondaryOf(context)),
+                Icon(
+                  Icons.info_outline,
+                  size: 14,
+                  color: BAColors.textSecondaryOf(context),
+                ),
                 const SizedBox(width: 8),
                 Text(
                   '需要配置 CurseForge API Key 后启用',
@@ -827,8 +863,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
         children: [
           // 整合包标识
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -844,8 +879,11 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.inventory_2,
-                    size: 14, color: BAColors.warningOf(context)),
+                Icon(
+                  Icons.inventory_2,
+                  size: 14,
+                  color: BAColors.warningOf(context),
+                ),
                 const SizedBox(width: 6),
                 Text(
                   '整合包',
@@ -872,14 +910,19 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
                 style: TextStyle(color: textPrimary, fontSize: 12),
                 decoration: InputDecoration(
                   hintText: '搜索整合包...',
-                  hintStyle:
-                      TextStyle(color: BAColors.textDisabledOf(context)),
-                  prefixIcon: Icon(Icons.search,
-                      color: textSecondary, size: 16),
+                  hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: textSecondary,
+                    size: 16,
+                  ),
                   suffixIcon: _modpackQuery.isNotEmpty
                       ? IconButton(
-                          icon: Icon(Icons.clear,
-                              color: textSecondary, size: 14),
+                          icon: Icon(
+                            Icons.clear,
+                            color: textSecondary,
+                            size: 14,
+                          ),
                           onPressed: () {
                             _modpackSearchCtrl.clear();
                             _modpackQuery = '';
@@ -893,8 +936,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide.none,
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                   isDense: true,
                 ),
               ),
@@ -997,8 +1039,10 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
     required Color textPrimary,
   }) {
     final label = _sortOptions
-        .firstWhere((e) => e.key == currentSort,
-            orElse: () => const MapEntry('downloads', '最多下载'))
+        .firstWhere(
+          (e) => e.key == currentSort,
+          orElse: () => const MapEntry('downloads', '最多下载'),
+        )
         .value;
 
     return PopupMenuButton<String>(
@@ -1007,32 +1051,37 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       color: BAColors.backgroundSecondaryOf(context),
       itemBuilder: (_) => _sortOptions
-          .map((opt) => PopupMenuItem(
-                value: opt.key,
-                height: 36,
-                child: Row(
-                  children: [
-                    if (currentSort == opt.key)
-                      Icon(Icons.check,
-                          size: 14, color: BAColors.primaryOf(context))
-                    else
-                      const SizedBox(width: 14),
-                    const SizedBox(width: 8),
-                    Text(
-                      opt.value,
-                      style: TextStyle(
-                        color: currentSort == opt.key
-                            ? BAColors.primaryOf(context)
-                            : textPrimary,
-                        fontSize: 12,
-                        fontWeight: currentSort == opt.key
-                            ? FontWeight.w600
-                            : FontWeight.normal,
-                      ),
+          .map(
+            (opt) => PopupMenuItem(
+              value: opt.key,
+              height: 36,
+              child: Row(
+                children: [
+                  if (currentSort == opt.key)
+                    Icon(
+                      Icons.check,
+                      size: 14,
+                      color: BAColors.primaryOf(context),
+                    )
+                  else
+                    const SizedBox(width: 14),
+                  const SizedBox(width: 8),
+                  Text(
+                    opt.value,
+                    style: TextStyle(
+                      color: currentSort == opt.key
+                          ? BAColors.primaryOf(context)
+                          : textPrimary,
+                      fontSize: 12,
+                      fontWeight: currentSort == opt.key
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                     ),
-                  ],
-                ),
-              ))
+                  ),
+                ],
+              ),
+            ),
+          )
           .toList(),
       child: Container(
         height: 36,
@@ -1046,11 +1095,13 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
           children: [
             Icon(Icons.sort, size: 14, color: textPrimary),
             const SizedBox(width: 4),
-            Text(label,
-                style: TextStyle(color: textPrimary, fontSize: 11)),
+            Text(label, style: TextStyle(color: textPrimary, fontSize: 11)),
             const SizedBox(width: 2),
-            Icon(Icons.keyboard_arrow_down,
-                size: 14, color: textPrimary.withValues(alpha: 0.6)),
+            Icon(
+              Icons.keyboard_arrow_down,
+              size: 14,
+              color: textPrimary.withValues(alpha: 0.6),
+            ),
           ],
         ),
       ),
@@ -1077,17 +1128,27 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
         child: DropdownButton<String>(
           value: value,
           isDense: true,
-          hint: Text(hint,
-              style: TextStyle(
-                  color: textPrimary.withValues(alpha: 0.5), fontSize: 11)),
-          icon: Icon(Icons.keyboard_arrow_down,
-              size: 14, color: textPrimary.withValues(alpha: 0.6)),
+          hint: Text(
+            hint,
+            style: TextStyle(
+              color: textPrimary.withValues(alpha: 0.5),
+              fontSize: 11,
+            ),
+          ),
+          icon: Icon(
+            Icons.keyboard_arrow_down,
+            size: 14,
+            color: textPrimary.withValues(alpha: 0.6),
+          ),
           dropdownColor: BAColors.backgroundSecondaryOf(context),
           style: TextStyle(color: textPrimary, fontSize: 11),
           items: [
             DropdownMenuItem<String>(
               value: null,
-              child: Text('全部', style: TextStyle(fontSize: 11, color: textPrimary)),
+              child: Text(
+                '全部',
+                style: TextStyle(fontSize: 11, color: textPrimary),
+              ),
             ),
             ...List.generate(items.length, (i) {
               return DropdownMenuItem<String>(
@@ -1122,19 +1183,19 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
               : BAColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: selected
-                ? color.withValues(alpha: 0.5)
-                : Colors.transparent,
+            color: selected ? color.withValues(alpha: 0.5) : Colors.transparent,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                size: 13,
-                color: selected
-                    ? color
-                    : BAColors.textSecondaryOf(context).withValues(alpha: 0.7)),
+            Icon(
+              icon,
+              size: 13,
+              color: selected
+                  ? color
+                  : BAColors.textSecondaryOf(context).withValues(alpha: 0.7),
+            ),
             const SizedBox(width: 5),
             Text(
               label,
@@ -1269,27 +1330,38 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
                     runSpacing: 3,
                     children: [
                       // 分类标签（最多2个）
-                      ...resource.categories.take(2).map(
-                        (cat) => Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 5, vertical: 1),
-                          decoration: BoxDecoration(
-                            color: BAColors.backgroundSecondaryOf(context),
-                            borderRadius: BorderRadius.circular(4),
+                      ...resource.categories
+                          .take(2)
+                          .map(
+                            (cat) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                                vertical: 1,
+                              ),
+                              decoration: BoxDecoration(
+                                color: BAColors.backgroundSecondaryOf(context),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                cat,
+                                style: TextStyle(
+                                  color: textSecondary,
+                                  fontSize: 9,
+                                ),
+                              ),
+                            ),
                           ),
-                          child: Text(cat,
-                              style: TextStyle(
-                                  color: textSecondary, fontSize: 9)),
-                        ),
-                      ),
                       // 游戏版本
                       if (resource.supportedGameVersions.isNotEmpty)
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 5, vertical: 1),
+                            horizontal: 5,
+                            vertical: 1,
+                          ),
                           decoration: BoxDecoration(
-                            color: BAColors.primaryOf(context)
-                                .withValues(alpha: 0.1),
+                            color: BAColors.primaryOf(
+                              context,
+                            ).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -1318,8 +1390,9 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
                   Text(
                     resource.authors.first.name,
                     style: TextStyle(
-                        color: textSecondary.withValues(alpha: 0.8),
-                        fontSize: 10),
+                      color: textSecondary.withValues(alpha: 0.8),
+                      fontSize: 10,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1328,9 +1401,11 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.download,
-                        size: 11,
-                        color: textSecondary.withValues(alpha: 0.7)),
+                    Icon(
+                      Icons.download,
+                      size: 11,
+                      color: textSecondary.withValues(alpha: 0.7),
+                    ),
                     const SizedBox(width: 2),
                     Text(
                       _formatDownloads(resource.downloads),
@@ -1404,13 +1479,19 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
   }
 
   Widget _buildErrorWidget(
-      BuildContext context, String error, VoidCallback onRetry) {
+    BuildContext context,
+    String error,
+    VoidCallback onRetry,
+  ) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline,
-              color: BAColors.dangerOf(context), size: 36),
+          Icon(
+            Icons.error_outline,
+            color: BAColors.dangerOf(context),
+            size: 36,
+          ),
           const SizedBox(height: 12),
           Text(
             '加载失败',
@@ -1450,14 +1531,19 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
   }
 
   Widget _buildEmptyWidget(
-      BuildContext context, String title, String subtitle) {
+    BuildContext context,
+    String title,
+    String subtitle,
+  ) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search_off,
-              color: BAColors.textSecondaryOf(context).withValues(alpha: 0.5),
-              size: 48),
+          Icon(
+            Icons.search_off,
+            color: BAColors.textSecondaryOf(context).withValues(alpha: 0.5),
+            size: 48,
+          ),
           const SizedBox(height: 12),
           Text(
             title,
@@ -1529,12 +1615,14 @@ class _HoverScaleCardState extends State<_HoverScaleCard>
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.02).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-    );
-    _shadowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.02,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    _shadowAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
   }
 
   @override
@@ -1570,14 +1658,14 @@ class _HoverScaleCardState extends State<_HoverScaleCard>
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(
-                          alpha: 0.04 + 0.06 * _shadowAnimation.value),
+                        alpha: 0.04 + 0.06 * _shadowAnimation.value,
+                      ),
                       blurRadius: 8 + 12 * _shadowAnimation.value,
                       offset: Offset(0, 2 + 4 * _shadowAnimation.value),
                     ),
                     if (_isHovered)
                       BoxShadow(
-                        color: widget.hoverBorderColor
-                            .withValues(alpha: 0.15),
+                        color: widget.hoverBorderColor.withValues(alpha: 0.15),
                         blurRadius: 16,
                         spreadRadius: 1,
                       ),

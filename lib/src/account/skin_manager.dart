@@ -227,7 +227,8 @@ class SkinManager {
 
     try {
       // 获取应用支持目录
-      final supportDir = await _platformAdapter.getApplicationSupportDirectory();
+      final supportDir = await _platformAdapter
+          .getApplicationSupportDirectory();
       // 创建皮肤缓存目录
       _cacheDir = Directory(path.join(supportDir, 'skins'));
 
@@ -242,7 +243,9 @@ class SkinManager {
         await _customSkinDir!.create(recursive: true);
       }
 
-      _logger.info('Skin manager initialized, cache dir: ${_cacheDir!.path}, custom dir: ${_customSkinDir!.path}');
+      _logger.info(
+        'Skin manager initialized, cache dir: ${_cacheDir!.path}, custom dir: ${_customSkinDir!.path}',
+      );
       _initialized = true;
     } catch (e, stackTrace) {
       _logger.error('Failed to initialize skin manager', e, stackTrace);
@@ -270,7 +273,10 @@ class SkinManager {
   /// 4. 检查文件缓存（如果未强制刷新）
   /// 5. 从网络获取皮肤
   /// 6. 更新内存和文件缓存
-  Future<SkinData?> getSkin(Account account, {bool forceRefresh = false}) async {
+  Future<SkinData?> getSkin(
+    Account account, {
+    bool forceRefresh = false,
+  }) async {
     // 确保管理器已初始化
     await initialize();
 
@@ -304,7 +310,11 @@ class SkinManager {
       }
       return skin;
     } catch (e, stackTrace) {
-      _logger.error('Failed to fetch skin for ${account.username}', e, stackTrace);
+      _logger.error(
+        'Failed to fetch skin for ${account.username}',
+        e,
+        stackTrace,
+      );
       // 如果获取失败，尝试使用缓存（即使过期了）
       return await _loadCachedSkin(cacheKey, ignoreExpiry: true);
     }
@@ -386,7 +396,8 @@ class SkinManager {
   Future<SkinData> _fetchFromMojang(Account account) async {
     // Mojang API 需要完整的 UUID（不带连字符）
     final cleanUuid = account.uuid?.replaceAll('-', '');
-    final sessionUrl = 'https://sessionserver.mojang.com/session/minecraft/profile/$cleanUuid';
+    final sessionUrl =
+        'https://sessionserver.mojang.com/session/minecraft/profile/$cleanUuid';
 
     try {
       final networkClient = NetworkClient();
@@ -413,7 +424,8 @@ class SkinManager {
             // textures 的 value 是 Base64 编码的 JSON
             final value = property['value'] as String;
             final decodedValue = utf8.decode(base64Decode(value));
-            final textureData = jsonDecode(decodedValue) as Map<String, dynamic>;
+            final textureData =
+                jsonDecode(decodedValue) as Map<String, dynamic>;
 
             // 提取皮肤和披风的 URL
             final textures = textureData['textures'] as Map?;
@@ -476,7 +488,11 @@ class SkinManager {
   /// 3. 计算 SHA1 哈希值
   /// 4. 判断皮肤类型
   /// 5. 创建并返回 SkinData 对象
-  Future<SkinData> _downloadSkin(String skinUrl, String? capeUrl, Account account) async {
+  Future<SkinData> _downloadSkin(
+    String skinUrl,
+    String? capeUrl,
+    Account account,
+  ) async {
     try {
       final networkClient = NetworkClient();
       final response = await networkClient.get(
@@ -540,7 +556,10 @@ class SkinManager {
   /// [ignoreExpiry] 是否忽略缓存有效期，为 true 时即使过期也返回缓存数据
   ///
   /// 返回皮肤数据，如果缓存不存在或已过期则返回 null。
-  Future<SkinData?> _loadCachedSkin(String cacheKey, {bool ignoreExpiry = false}) async {
+  Future<SkinData?> _loadCachedSkin(
+    String cacheKey, {
+    bool ignoreExpiry = false,
+  }) async {
     if (_cacheDir == null) return null;
 
     try {
@@ -559,7 +578,8 @@ class SkinManager {
 
       // 检查缓存是否过期
       final createdAt = DateTime.parse(metadata['createdAt'] as String);
-      if (!ignoreExpiry && DateTime.now().difference(createdAt) > _cacheDuration) {
+      if (!ignoreExpiry &&
+          DateTime.now().difference(createdAt) > _cacheDuration) {
         _logger.debug('Cache expired for $cacheKey');
         return null;
       }
@@ -603,13 +623,15 @@ class SkinManager {
       final imageFile = File(path.join(_cacheDir!.path, '$cacheKey.png'));
 
       // 保存元数据（不包含图片数据，图片单独存储）
-      await metadataFile.writeAsString(jsonEncode({
-        'type': skin.type.name,
-        'skinUrl': skin.skinUrl,
-        'capeUrl': skin.capeUrl,
-        'hash': skin.hash,
-        'createdAt': skin.createdAt.toIso8601String(),
-      }));
+      await metadataFile.writeAsString(
+        jsonEncode({
+          'type': skin.type.name,
+          'skinUrl': skin.skinUrl,
+          'capeUrl': skin.capeUrl,
+          'hash': skin.hash,
+          'createdAt': skin.createdAt.toIso8601String(),
+        }),
+      );
 
       // 保存图片数据
       await imageFile.writeAsBytes(skin.imageData);
@@ -649,7 +671,9 @@ class SkinManager {
             if (DateTime.now().difference(createdAt) > _cacheDuration) {
               // 获取基础文件名，用于查找对应的图片文件
               final baseName = path.basenameWithoutExtension(file.path);
-              final imageFile = File(path.join(_cacheDir!.path, '$baseName.png'));
+              final imageFile = File(
+                path.join(_cacheDir!.path, '$baseName.png'),
+              );
 
               // 删除元数据文件
               await file.delete();
@@ -732,7 +756,7 @@ class SkinManager {
 
     try {
       final cacheKey = _getCacheKey(account);
-      
+
       // 保存自定义皮肤文件
       final skinFileName = '${cacheKey}_custom.png';
       final skinFile = File(path.join(_customSkinDir!.path, skinFileName));
@@ -740,7 +764,9 @@ class SkinManager {
 
       // 更新账户皮肤URL
       final accountManager = AccountManager();
-      await accountManager.updateAccount(account.copyWith(skinUrl: skinFile.path));
+      await accountManager.updateAccount(
+        account.copyWith(skinUrl: skinFile.path),
+      );
 
       // 清除缓存，强制重新加载
       _skinCache.remove(cacheKey);
@@ -763,7 +789,7 @@ class SkinManager {
 
     try {
       final cacheKey = _getCacheKey(account);
-      
+
       // 删除自定义皮肤文件
       final skinFileName = '${cacheKey}_custom.png';
       final skinFile = File(path.join(_customSkinDir!.path, skinFileName));
@@ -793,16 +819,18 @@ class SkinManager {
     await initialize();
 
     final cacheKey = _getCacheKey(account);
-    
+
     // 删除缓存文件
     try {
       final metadataFile = File(path.join(_cacheDir!.path, '$cacheKey.json'));
       final imageFile = File(path.join(_cacheDir!.path, '$cacheKey.png'));
-      
+
       if (await metadataFile.exists()) await metadataFile.delete();
       if (await imageFile.exists()) await imageFile.delete();
     } catch (e) {
-      _logger.warn('Failed to delete cache files for account: ${account.username}');
+      _logger.warn(
+        'Failed to delete cache files for account: ${account.username}',
+      );
     }
   }
 

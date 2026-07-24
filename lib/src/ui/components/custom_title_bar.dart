@@ -1,4 +1,4 @@
-﻿import 'dart:io' show Platform;
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import '../theme/colors.dart';
@@ -255,7 +255,9 @@ class _WindowControlButtonState extends State<_WindowControlButton> {
             ),
             child: Icon(
               widget.icon,
-              color: _isHovered ? Colors.white : BAColors.textSecondaryOf(context),
+              color: _isHovered
+                  ? Colors.white
+                  : BAColors.textSecondaryOf(context),
               size: 14,
             ),
           ),
@@ -268,8 +270,10 @@ class _WindowControlButtonState extends State<_WindowControlButton> {
   Color _getBackgroundColor() {
     final brightness = Theme.of(context).brightness;
     final isLight = brightness == Brightness.light;
-    final hoverColor = isLight ? BAColors.surfaceTertiaryOf(context) : BAColors.surfaceTertiaryOf(context);
-    
+    final hoverColor = isLight
+        ? BAColors.surfaceTertiaryOf(context)
+        : BAColors.surfaceTertiaryOf(context);
+
     if (_isPressed) {
       switch (widget.buttonType) {
         case _WindowButtonType.close:

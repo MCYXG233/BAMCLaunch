@@ -11,12 +11,7 @@ import '../platform/platform_adapter_factory.dart';
 import 'resource_update_checker.dart' hide ModInfo;
 
 /// Mod状态
-enum ModStatus {
-  enabled,
-  disabled,
-  needsUpdate,
-  incompatible,
-}
+enum ModStatus { enabled, disabled, needsUpdate, incompatible }
 
 /// Mod元数据（继承 ModInfo，补充额外字段）
 ///
@@ -94,7 +89,8 @@ class ModMetadata extends ModInfo {
       modId: json['modId'] as String?,
       isEnabled: json['isEnabled'] as bool? ?? true,
       gameVersions: (json['gameVersions'] as List<dynamic>?)?.cast<String>(),
-      dependencies: (json['dependencies'] as List<dynamic>?)?.cast<String>() ?? const [],
+      dependencies:
+          (json['dependencies'] as List<dynamic>?)?.cast<String>() ?? const [],
       installedAt: json['installedAt'] != null
           ? DateTime.parse(json['installedAt'] as String)
           : null,
@@ -191,7 +187,8 @@ class ModManager {
     if (_initialized) return;
 
     try {
-      final supportDir = await _platformAdapter.getApplicationSupportDirectory();
+      final supportDir = await _platformAdapter
+          .getApplicationSupportDirectory();
       _metadataFile = File(path.join(supportDir, 'mod_metadata.json'));
 
       if (await _metadataFile!.exists()) {
@@ -241,7 +238,10 @@ class ModManager {
   }
 
   /// 扫描实例目录获取所有Mod
-  Future<List<ModMetadata>> scanInstanceMods(String instanceId, String instancePath) async {
+  Future<List<ModMetadata>> scanInstanceMods(
+    String instanceId,
+    String instancePath,
+  ) async {
     final modsDir = Directory(path.join(instancePath, 'mods'));
     final mods = <ModMetadata>[];
 
@@ -339,11 +339,14 @@ class ModManager {
           'name': data['name'] as String?,
           'version': data['version'] as String?,
           'description': data['description'] as String?,
-          'authors': (data['authors'] as List<dynamic>?)?.map((a) {
-            if (a is String) return a;
-            if (a is Map) return a['name']?.toString() ?? '';
-            return '';
-          }).where((s) => s.isNotEmpty).toList(),
+          'authors': (data['authors'] as List<dynamic>?)
+              ?.map((a) {
+                if (a is String) return a;
+                if (a is Map) return a['name']?.toString() ?? '';
+                return '';
+              })
+              .where((s) => s.isNotEmpty)
+              .toList(),
         };
       }
 
@@ -376,7 +379,8 @@ class ModManager {
                 'name': mod['name'] as String?,
                 'version': mod['version'] as String?,
                 'description': mod['description'] as String?,
-                'authors': (mod['authorList'] as List<dynamic>?)?.cast<String>(),
+                'authors': (mod['authorList'] as List<dynamic>?)
+                    ?.cast<String>(),
               };
             }
           }
@@ -406,7 +410,9 @@ class ModManager {
       } else if (trimmed.startsWith('description')) {
         description = _extractTomlValue(trimmed);
       } else if (trimmed.startsWith('authors')) {
-        authors = _extractTomlValue(trimmed)?.split(',').map((s) => s.trim()).toList();
+        authors = _extractTomlValue(
+          trimmed,
+        )?.split(',').map((s) => s.trim()).toList();
       }
     }
 
@@ -573,26 +579,28 @@ class ModManager {
 
   /// 获取启用的Mod
   List<ModMetadata> getEnabledMods(String instanceId) {
-    return getInstanceMods(instanceId)
-        .where((m) => m.status == ModStatus.enabled)
-        .toList();
+    return getInstanceMods(
+      instanceId,
+    ).where((m) => m.status == ModStatus.enabled).toList();
   }
 
   /// 获取禁用的Mod
   List<ModMetadata> getDisabledMods(String instanceId) {
-    return getInstanceMods(instanceId)
-        .where((m) => m.status == ModStatus.disabled)
-        .toList();
+    return getInstanceMods(
+      instanceId,
+    ).where((m) => m.status == ModStatus.disabled).toList();
   }
 
   /// 搜索Mod
   List<ModMetadata> searchMods(String instanceId, String query) {
     final lowerQuery = query.toLowerCase();
     return getInstanceMods(instanceId)
-        .where((m) =>
-            m.name.toLowerCase().contains(lowerQuery) ||
-            m.id.toLowerCase().contains(lowerQuery) ||
-            m.fileName.toLowerCase().contains(lowerQuery))
+        .where(
+          (m) =>
+              m.name.toLowerCase().contains(lowerQuery) ||
+              m.id.toLowerCase().contains(lowerQuery) ||
+              m.fileName.toLowerCase().contains(lowerQuery),
+        )
         .toList();
   }
 

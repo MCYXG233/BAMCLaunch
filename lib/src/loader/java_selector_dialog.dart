@@ -104,9 +104,10 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
       final version = versionMatch?.group(1) ?? 'Unknown';
 
       final majorVersion = int.tryParse(version.split('.').first) ?? 0;
-      final is64Bit = output.contains('64-Bit') ||
-                      output.contains('amd64') ||
-                      output.contains('x86_64');
+      final is64Bit =
+          output.contains('64-Bit') ||
+          output.contains('amd64') ||
+          output.contains('x86_64');
 
       return JavaInfo(
         path: javaPath,
@@ -134,7 +135,8 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
       final downloadService = JavaDownloadService.instance;
 
       // 获取默认安装路径
-      final installPath = '${Platform.environment['APPDATA']}\\BAMCLauncher\\java\\jdk-$targetVersion';
+      final installPath =
+          '${Platform.environment['APPDATA']}\\BAMCLauncher\\java\\jdk-$targetVersion';
 
       final javaPath = await downloadService.downloadAndInstallJava(
         majorVersion: targetVersion,
@@ -189,9 +191,7 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
             _buildHeader(context),
 
             // 内容
-            Expanded(
-              child: _buildContent(context),
-            ),
+            Expanded(child: _buildContent(context)),
 
             // 按钮栏
             _buildActions(context),
@@ -255,7 +255,11 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, color: BAColors.dangerOf(context), size: 48),
+            Icon(
+              Icons.error_outline,
+              color: BAColors.dangerOf(context),
+              size: 48,
+            ),
             const SizedBox(height: 16),
             Text(
               _error!,
@@ -264,10 +268,7 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            BAPrimaryButton(
-              text: '重试',
-              onPressed: _loadInstalledJava,
-            ),
+            BAPrimaryButton(text: '重试', onPressed: _loadInstalledJava),
           ],
         ),
       );
@@ -344,7 +345,11 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.lightbulb_outline, color: BAColors.primaryOf(context), size: 20),
+                  Icon(
+                    Icons.lightbulb_outline,
+                    color: BAColors.primaryOf(context),
+                    size: 20,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -416,7 +421,9 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
           child: ListTile(
             leading: Icon(
               isSelected ? Icons.check_circle : Icons.circle_outlined,
-              color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
+              color: isSelected
+                  ? BAColors.primaryOf(context)
+                  : BAColors.textSecondaryOf(context),
             ),
             title: Text(
               'Java ${java.majorVersion}',
@@ -449,7 +456,10 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
               children: [
                 if (java.is64Bit)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: BAColors.successOf(context).withOpacity(0.2),
                       borderRadius: BorderRadius.circular(4),
@@ -464,7 +474,10 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
                 const SizedBox(width: 8),
                 if (java.majorVersion == widget.recommendedVersion)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: BAColors.primaryOf(context).withOpacity(0.2),
                       borderRadius: BorderRadius.circular(4),
@@ -493,11 +506,7 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: BAColors.borderOf(context),
-          ),
-        ),
+        border: Border(top: BorderSide(color: BAColors.borderOf(context))),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,

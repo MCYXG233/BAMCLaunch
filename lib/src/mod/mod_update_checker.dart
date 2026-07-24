@@ -19,12 +19,20 @@ class ModUpdateChecker {
 
     for (final mod in mods) {
       try {
-        final update = await checkModUpdate(mod, gameVersion: gameVersion, loader: loader);
+        final update = await checkModUpdate(
+          mod,
+          gameVersion: gameVersion,
+          loader: loader,
+        );
         if (update != null && update.hasUpdate) {
           updates.add(update);
         }
       } catch (e, stackTrace) {
-        _logger.debug('Failed to check update for ${mod.name}: $e', e, stackTrace);
+        _logger.debug(
+          'Failed to check update for ${mod.name}: $e',
+          e,
+          stackTrace,
+        );
       }
     }
 
@@ -46,13 +54,18 @@ class ModUpdateChecker {
         return null;
       }
 
-      final latestVersion = await _getLatestVersion(projectId, gameVersion: gameVersion, loader: loader);
+      final latestVersion = await _getLatestVersion(
+        projectId,
+        gameVersion: gameVersion,
+        loader: loader,
+      );
       if (latestVersion == null) {
         return null;
       }
 
       final currentVersion = mod.version ?? '0.0.0';
-      final hasUpdate = _compareVersions(currentVersion, latestVersion.versionNumber) < 0;
+      final hasUpdate =
+          _compareVersions(currentVersion, latestVersion.versionNumber) < 0;
 
       return ModUpdateInfo(
         mod: mod,
@@ -127,7 +140,10 @@ class ModUpdateChecker {
     return null;
   }
 
-  ResourceVersion _parseVersion(Map<String, dynamic> version, String projectId) {
+  ResourceVersion _parseVersion(
+    Map<String, dynamic> version,
+    String projectId,
+  ) {
     final files = version['files'] as List<dynamic>;
     final primaryFile = files.firstWhere(
       (f) => f['primary'] as bool? ?? false,
@@ -144,12 +160,14 @@ class ModUpdateChecker {
       sha256: hashes?['sha512'] as String?,
     );
 
-    final loaders = (version['loaders'] as List<dynamic>?)
+    final loaders =
+        (version['loaders'] as List<dynamic>?)
             ?.map((l) => l as String)
             .toList() ??
         [];
 
-    final gameVersions = (version['game_versions'] as List<dynamic>?)
+    final gameVersions =
+        (version['game_versions'] as List<dynamic>?)
             ?.map((v) => v as String)
             .toList() ??
         [];
@@ -171,7 +189,9 @@ class ModUpdateChecker {
     final parts1 = _parseVersionParts(v1);
     final parts2 = _parseVersionParts(v2);
 
-    final maxLen = parts1.length > parts2.length ? parts1.length : parts2.length;
+    final maxLen = parts1.length > parts2.length
+        ? parts1.length
+        : parts2.length;
     for (var i = 0; i < maxLen; i++) {
       final p1 = i < parts1.length ? parts1[i] : 0;
       final p2 = i < parts2.length ? parts2[i] : 0;
@@ -182,14 +202,17 @@ class ModUpdateChecker {
   }
 
   List<int> _parseVersionParts(String version) {
-    final cleanVersion = version.replaceAll(RegExp(r'^[vV]'), '').split('-').first;
-    return cleanVersion
-        .split('.')
-        .map((e) => int.tryParse(e) ?? 0)
-        .toList();
+    final cleanVersion = version
+        .replaceAll(RegExp(r'^[vV]'), '')
+        .split('-')
+        .first;
+    return cleanVersion.split('.').map((e) => int.tryParse(e) ?? 0).toList();
   }
 
-  Future<String?> downloadUpdate(ModUpdateInfo update, String destinationPath) async {
+  Future<String?> downloadUpdate(
+    ModUpdateInfo update,
+    String destinationPath,
+  ) async {
     try {
       await _networkClient.downloadFile(
         update.downloadUrl,
@@ -198,7 +221,11 @@ class ModUpdateChecker {
       );
       return destinationPath;
     } catch (e, stackTrace) {
-      _logger.error('Failed to download update for ${update.mod.name}', e, stackTrace);
+      _logger.error(
+        'Failed to download update for ${update.mod.name}',
+        e,
+        stackTrace,
+      );
       return null;
     }
   }

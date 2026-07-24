@@ -137,15 +137,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
 
   void _subscribeToEvents() {
     final bus = EventBus.instance;
-    _subscriptions.add(
-      bus.on<InstanceCreatedEvent>((_) => _loadInstances()),
-    );
-    _subscriptions.add(
-      bus.on<InstanceDeletedEvent>((_) => _loadInstances()),
-    );
-    _subscriptions.add(
-      bus.on<InstanceUpdatedEvent>((_) => _loadInstances()),
-    );
+    _subscriptions.add(bus.on<InstanceCreatedEvent>((_) => _loadInstances()));
+    _subscriptions.add(bus.on<InstanceDeletedEvent>((_) => _loadInstances()));
+    _subscriptions.add(bus.on<InstanceUpdatedEvent>((_) => _loadInstances()));
   }
 
   // ===== 实例详情页导航 =====
@@ -278,12 +272,14 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
       case 3:
         // 集合包: 包含 mod loader 的实例视为 modpack 实例
         list = list
-            .where((i) =>
-                i.loader != null &&
-                (i.loader == 'forge' ||
-                    i.loader == 'fabric' ||
-                    i.loader == 'neoforge' ||
-                    i.loader == 'quilt'))
+            .where(
+              (i) =>
+                  i.loader != null &&
+                  (i.loader == 'forge' ||
+                      i.loader == 'fabric' ||
+                      i.loader == 'neoforge' ||
+                      i.loader == 'quilt'),
+            )
             .toList();
         break;
     }
@@ -318,10 +314,12 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
       );
 
       final config = ConfigManager.instance;
-      final javaPath = instance.config.javaPath ??
+      final javaPath =
+          instance.config.javaPath ??
           config.get<String>(ConfigKeys.javaPath) ??
           'java';
-      final memory = instance.config.maxMemory ??
+      final memory =
+          instance.config.maxMemory ??
           config.get<int>(ConfigKeys.memory) ??
           2048;
       final jvmArgs = instance.config.jvmArgs ?? [];
@@ -392,9 +390,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
   }
 
   Future<void> _duplicateInstance(GameInstance instance) async {
-    final nameController = TextEditingController(
-      text: '${instance.name} - 副本',
-    );
+    final nameController = TextEditingController(text: '${instance.name} - 副本');
 
     try {
       final newName = await BAFrostedDialog.show<String>(
@@ -403,9 +399,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
         child: Builder(
           builder: (context) => TextField(
             controller: nameController,
-            style: TextStyle(
-              color: BAColors.textPrimaryOf(context),
-            ),
+            style: TextStyle(color: BAColors.textPrimaryOf(context)),
             decoration: InputDecoration(
               hintText: '请输入新实例名称',
               hintStyle: TextStyle(
@@ -415,9 +409,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
               fillColor: BAColors.surfaceOf(context),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: BAColors.borderOf(context),
-                ),
+                borderSide: BorderSide(color: BAColors.borderOf(context)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -444,10 +436,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
 
       await InstanceManager().duplicateInstance(instance.id, newName);
       if (!mounted) return;
-      NotificationManager().showSuccess(
-        '复制成功',
-        message: '实例 $newName 已创建',
-      );
+      NotificationManager().showSuccess('复制成功', message: '实例 $newName 已创建');
       _loadInstances();
     } catch (e) {
       if (!mounted) return;
@@ -509,10 +498,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
       final manager = InstanceManager();
       if (!manager.isInitialized || manager.directories.isEmpty) {
         if (!mounted) return;
-        NotificationManager().showError(
-          '导入失败',
-          message: '请先创建一个游戏目录',
-        );
+        NotificationManager().showError('导入失败', message: '请先创建一个游戏目录');
         return;
       }
 
@@ -544,13 +530,13 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
         return FadeTransition(
           opacity: animation,
           child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0.05, 0),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOut,
-            )),
+            position:
+                Tween<Offset>(
+                  begin: const Offset(0.05, 0),
+                  end: Offset.zero,
+                ).animate(
+                  CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                ),
             child: child,
           ),
         );
@@ -585,9 +571,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
             const SizedBox(height: 20),
 
             // 实例列表
-            Expanded(
-              child: _buildInstanceGrid(context),
-            ),
+            Expanded(child: _buildInstanceGrid(context)),
 
             // 底部操作区
             _buildBottomActions(context),
@@ -595,11 +579,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
         ),
 
         // 浮动按钮
-        Positioned(
-          right: 32,
-          bottom: 32,
-          child: _buildFloatingButton(context),
-        ),
+        Positioned(right: 32, bottom: 32, child: _buildFloatingButton(context)),
       ],
     );
   }
@@ -628,7 +608,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                 height: 44,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                    colors: [
+                      BAColors.primaryLightOf(context),
+                      BAColors.primaryOf(context),
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -676,8 +659,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
 
           // 右侧：实例总数统计
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
               color: BAColors.surfaceOf(context).withOpacity(0.5),
               borderRadius: BorderRadius.circular(14),
@@ -693,7 +675,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                   height: 28,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                      colors: [
+                        BAColors.primaryLightOf(context),
+                        BAColors.primaryOf(context),
+                      ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -829,9 +814,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: accent.withOpacity(0.4),
-                ),
+                border: Border.all(color: accent.withOpacity(0.4)),
               ),
               child: Icon(
                 icon,
@@ -963,7 +946,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                       decoration: BoxDecoration(
                         gradient: isSelected
                             ? LinearGradient(
-                                colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                                colors: [
+                                  BAColors.primaryLightOf(context),
+                                  BAColors.primaryOf(context),
+                                ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               )
@@ -980,7 +966,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                  color: BAColors.primaryOf(context).withOpacity(0.4),
+                                  color: BAColors.primaryOf(
+                                    context,
+                                  ).withOpacity(0.4),
                                   blurRadius: 10,
                                   offset: const Offset(0, 3),
                                 ),
@@ -994,8 +982,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                               ? const Color(0xFFFFFFFF)
                               : BAColors.textSecondaryOf(context),
                           fontSize: 13,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w500,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.w500,
                         ),
                       ),
                     ),
@@ -1024,7 +1013,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
               height: 120,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                  colors: [
+                    BAColors.primaryLightOf(context),
+                    BAColors.primaryOf(context),
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -1080,12 +1072,12 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
           final crossAxisCount = width < 600
               ? 2
               : width < 900
-                  ? 3
-                  : width < 1300
-                      ? 4
-                      : width < 1700
-                          ? 5
-                          : 6;
+              ? 3
+              : width < 1300
+              ? 4
+              : width < 1700
+              ? 5
+              : 6;
           return GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
@@ -1105,10 +1097,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
   }
 
   void _openBackupManager(GameInstance instance) {
-    BABackupDialog.show(
-      context: context,
-      instance: instance,
-    );
+    BABackupDialog.show(context: context, instance: instance);
   }
 
   /// 实例卡片 - 带动画悬停效果
@@ -1120,8 +1109,8 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
     final statusColor = isRunning
         ? BAColors.successOf(context)
         : (isLaunching
-            ? BAColors.warningOf(context)
-            : BAColors.primaryLightOf(context));
+              ? BAColors.warningOf(context)
+              : BAColors.primaryLightOf(context));
 
     Widget card = BAContextMenu(
       items: [
@@ -1167,230 +1156,238 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
           curve: Curves.easeOutCubic,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-                decoration: BoxDecoration(
-                  color: BAColors.surfaceOf(context).withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isRunning
-                        ? BAColors.successOf(context).withOpacity(0.6)
-                        : BAColors.borderOf(context).withOpacity(0.5),
-                    width: isRunning ? 1.5 : 1,
+            decoration: BoxDecoration(
+              color: BAColors.surfaceOf(context).withOpacity(0.7),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isRunning
+                    ? BAColors.successOf(context).withOpacity(0.6)
+                    : BAColors.borderOf(context).withOpacity(0.5),
+                width: isRunning ? 1.5 : 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: isRunning
+                      ? BAColors.successOf(context).withOpacity(0.25)
+                      : BAColors.shadowOf(context).withOpacity(0.4),
+                  blurRadius: _hoveredInstanceIds.contains(instance.id)
+                      ? 24
+                      : 16,
+                  offset: Offset(
+                    0,
+                    _hoveredInstanceIds.contains(instance.id) ? 10 : 6,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: isRunning
-                          ? BAColors.successOf(context).withOpacity(0.25)
-                          : BAColors.shadowOf(context).withOpacity(0.4),
-                      blurRadius: _hoveredInstanceIds.contains(instance.id) ? 24 : 16,
-                      offset: Offset(0, _hoveredInstanceIds.contains(instance.id) ? 10 : 6),
-                    ),
-                    if (_hoveredInstanceIds.contains(instance.id))
-                      BoxShadow(
-                        color: BAColors.primaryOf(context).withOpacity(0.12),
-                        blurRadius: 32,
-                        spreadRadius: -4,
-                        offset: const Offset(0, 12),
-                      ),
-                    if (isRunning)
-                      BoxShadow(
-                        color: BAColors.successOf(context).withOpacity(0.15),
-                        blurRadius: 20,
-                        spreadRadius: 2,
-                      ),
-                  ],
                 ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => _selectInstance(instance),
-                    borderRadius: BorderRadius.circular(16),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                if (_hoveredInstanceIds.contains(instance.id))
+                  BoxShadow(
+                    color: BAColors.primaryOf(context).withOpacity(0.12),
+                    blurRadius: 32,
+                    spreadRadius: -4,
+                    offset: const Offset(0, 12),
+                  ),
+                if (isRunning)
+                  BoxShadow(
+                    color: BAColors.successOf(context).withOpacity(0.15),
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                  ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _selectInstance(instance),
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 顶部状态和图标
+                      Row(
                         children: [
-                          // 顶部状态和图标
-                          Row(
-                            children: [
-                              // 脉冲状态指示器
-                              BAAnimations.pulse(
-                                isActive: isRunning || isLaunching,
-                                duration: Duration(
-                                  milliseconds: isRunning ? 1000 : 1500,
-                                ),
-                                scaleBegin: 1.0,
-                                scaleEnd: isRunning ? 1.4 : 1.2,
-                                glowColor: statusColor,
-                                glowRadius: isRunning ? 8 : 5,
-                                child: Container(
-                                  width: 10,
-                                  height: 10,
-                                  decoration: BoxDecoration(
-                                    color: statusColor,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
+                          // 脉冲状态指示器
+                          BAAnimations.pulse(
+                            isActive: isRunning || isLaunching,
+                            duration: Duration(
+                              milliseconds: isRunning ? 1000 : 1500,
+                            ),
+                            scaleBegin: 1.0,
+                            scaleEnd: isRunning ? 1.4 : 1.2,
+                            glowColor: statusColor,
+                            glowRadius: isRunning ? 8 : 5,
+                            child: Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: statusColor,
+                                shape: BoxShape.circle,
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                isRunning
-                                    ? '运行中'
-                                    : (isLaunching ? '启动中' : '就绪'),
-                                style: TextStyle(
-                                  color: statusColor,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const Spacer(),
-                              // 操作按钮
-                              if (isLaunching)
-                                SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      BAColors.warningOf(context),
-                                    ),
-                                  ),
-                                )
-                              else
-                                Icon(
-                                  isRunning
-                                      ? Icons.stop_circle_outlined
-                                      : Icons.play_circle_fill_rounded,
-                                  color: isRunning
-                                      ? BAColors.successOf(context)
-                                      : BAColors.primaryLightOf(context),
-                                  size: 20,
-                                ),
-                            ],
+                            ),
                           ),
-                          const SizedBox(height: 12),
-
-                          // 实例图标
-                          Container(
-                            width: 64,
-                            height: 64,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: isRunning
-                                    ? [
-                                        BAColors.successOf(context),
-                                        BAColors.successDark
-                                      ]
-                                    : [
-                                        BAColors.primaryLightOf(context),
-                                        BAColors.primaryOf(context)
-                                      ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
+                          const SizedBox(width: 8),
+                          Text(
+                            isRunning ? '运行中' : (isLaunching ? '启动中' : '就绪'),
+                            style: TextStyle(
+                              color: statusColor,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const Spacer(),
+                          // 操作按钮
+                          if (isLaunching)
+                            SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  BAColors.warningOf(context),
+                                ),
                               ),
-                              borderRadius: BorderRadius.circular(14),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: (isRunning
+                            )
+                          else
+                            Icon(
+                              isRunning
+                                  ? Icons.stop_circle_outlined
+                                  : Icons.play_circle_fill_rounded,
+                              color: isRunning
+                                  ? BAColors.successOf(context)
+                                  : BAColors.primaryLightOf(context),
+                              size: 20,
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+
+                      // 实例图标
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: isRunning
+                                ? [
+                                    BAColors.successOf(context),
+                                    BAColors.successDark,
+                                  ]
+                                : [
+                                    BAColors.primaryLightOf(context),
+                                    BAColors.primaryOf(context),
+                                  ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color:
+                                  (isRunning
                                           ? BAColors.successOf(context)
                                           : BAColors.primaryOf(context))
                                       .withOpacity(0.35),
-                                  blurRadius: _hoveredInstanceIds.contains(instance.id) ? 18 : 14,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.sports_esports_rounded,
-                              color: Color(0xFFFFFFFF),
-                              size: 30,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // 实例名称
-                          Text(
-                            instance.name,
-                            style: TextStyle(
-                              color: BAColors.textPrimaryOf(context),
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 6),
-
-                          // 版本信息
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                                  BAColors.primaryOf(context).withOpacity(0.18),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: BAColors.primaryOf(context)
-                                    .withOpacity(0.3),
-                              ),
-                            ),
-                            child: Text(
-                              instance.version,
-                              style: TextStyle(
-                                color: BAColors.primaryLightOf(context),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-
-                          // 加载器信息
-                          if (instance.loader != null)
-                            Text(
-                              instance.loader!,
-                              style: TextStyle(
-                                color: BAColors.textSecondaryOf(context)
-                                    .withOpacity(0.9),
-                                fontSize: 11,
-                              ),
-                            ),
-                          if (instanceStats != null) ...[
-                            const SizedBox(height: 6),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.access_time,
-                                  size: 12,
-                                  color: BAColors.textSecondaryOf(context)
-                                      .withOpacity(0.8),
-                                ),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  child: Text(
-                                    '${_formatDuration(Duration(seconds: instanceStats.totalPlayTimeSeconds))} / ${instanceStats.launchCount}次',
-                                    style: TextStyle(
-                                      color: BAColors.textSecondaryOf(context)
-                                          .withOpacity(0.8),
-                                      fontSize: 10,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
+                              blurRadius:
+                                  _hoveredInstanceIds.contains(instance.id)
+                                  ? 18
+                                  : 14,
+                              offset: const Offset(0, 4),
                             ),
                           ],
-                        ],
+                        ),
+                        child: const Icon(
+                          Icons.sports_esports_rounded,
+                          color: Color(0xFFFFFFFF),
+                          size: 30,
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 12),
+
+                      // 实例名称
+                      Text(
+                        instance.name,
+                        style: TextStyle(
+                          color: BAColors.textPrimaryOf(context),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+
+                      // 版本信息
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: BAColors.primaryOf(context).withOpacity(0.18),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: BAColors.primaryOf(context).withOpacity(0.3),
+                          ),
+                        ),
+                        child: Text(
+                          instance.version,
+                          style: TextStyle(
+                            color: BAColors.primaryLightOf(context),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+
+                      // 加载器信息
+                      if (instance.loader != null)
+                        Text(
+                          instance.loader!,
+                          style: TextStyle(
+                            color: BAColors.textSecondaryOf(
+                              context,
+                            ).withOpacity(0.9),
+                            fontSize: 11,
+                          ),
+                        ),
+                      if (instanceStats != null) ...[
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.access_time,
+                              size: 12,
+                              color: BAColors.textSecondaryOf(
+                                context,
+                              ).withOpacity(0.8),
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                '${_formatDuration(Duration(seconds: instanceStats.totalPlayTimeSeconds))} / ${instanceStats.launchCount}次',
+                                style: TextStyle(
+                                  color: BAColors.textSecondaryOf(
+                                    context,
+                                  ).withOpacity(0.8),
+                                  fontSize: 10,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-              ),     // AnimatedContainer
-            ),       // AnimatedScale
-          ),         // MouseRegion
-        );           // BAContextMenu
+              ),
+            ),
+          ), // AnimatedContainer
+        ), // AnimatedScale
+      ), // MouseRegion
+    ); // BAContextMenu
 
     // 运行中的实例添加渐变边框动画
     if (isRunning) {
@@ -1436,7 +1433,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
             height: 64,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                colors: [
+                  BAColors.primaryLightOf(context),
+                  BAColors.primaryOf(context),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -1470,8 +1470,6 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
     );
   }
 
-
-
   /// 底部操作区
   Widget _buildBottomActions(BuildContext context) {
     return Container(
@@ -1484,10 +1482,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
             onTap: _importInstance,
             borderRadius: BorderRadius.circular(14),
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 12,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
                 color: BAColors.surfaceOf(context).withOpacity(0.6),
                 borderRadius: BorderRadius.circular(14),
@@ -1586,7 +1581,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
             height: 44,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                colors: [
+                  BAColors.primaryLightOf(context),
+                  BAColors.primaryOf(context),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -1627,7 +1625,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                 Text(
                   '${instance.version}${instance.loader != null ? ' · ${instance.loader}' : ''}',
                   style: TextStyle(
-                    color: BAColors.textSecondaryOf(context).withValues(alpha: 0.9),
+                    color: BAColors.textSecondaryOf(
+                      context,
+                    ).withValues(alpha: 0.9),
                     fontSize: 12,
                   ),
                 ),
@@ -1669,17 +1669,21 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                     gradient: LinearGradient(
                       colors: isRunning
                           ? [BAColors.successOf(context), BAColors.successDark]
-                          : [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                          : [
+                              BAColors.primaryLightOf(context),
+                              BAColors.primaryOf(context),
+                            ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
-                        color: (isRunning
-                                ? BAColors.successOf(context)
-                                : BAColors.primaryOf(context))
-                            .withValues(alpha: 0.4),
+                        color:
+                            (isRunning
+                                    ? BAColors.successOf(context)
+                                    : BAColors.primaryOf(context))
+                                .withValues(alpha: 0.4),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -1706,26 +1710,24 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context).withOpacity(0.5),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: BAColors.borderOf(context).withOpacity(0.5),
-        ),
+        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
       ),
       child: TabBar(
         controller: _detailTabController,
         isScrollable: true,
         labelColor: const Color(0xFFFFFFFF),
         unselectedLabelColor: BAColors.textSecondaryOf(context),
-        labelStyle: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-        ),
+        labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w500,
         ),
         indicator: BoxDecoration(
           gradient: LinearGradient(
-            colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+            colors: [
+              BAColors.primaryLightOf(context),
+              BAColors.primaryOf(context),
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -1770,7 +1772,11 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                   icon: Icons.access_time_rounded,
                   label: '游戏时长',
                   value: _formatDuration(
-                    Duration(seconds: instanceStats?.totalPlayTimeSeconds ?? (instance.playTimeSeconds ?? 0)),
+                    Duration(
+                      seconds:
+                          instanceStats?.totalPlayTimeSeconds ??
+                          (instance.playTimeSeconds ?? 0),
+                    ),
                   ),
                 ),
               ),
@@ -1780,7 +1786,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                   context,
                   icon: Icons.calendar_today_rounded,
                   label: '上次启动',
-                  value: _formatDateTime(instance.lastPlayed ?? instanceStats?.lastLaunchTime),
+                  value: _formatDateTime(
+                    instance.lastPlayed ?? instanceStats?.lastLaunchTime,
+                  ),
                 ),
               ),
             ],
@@ -1816,7 +1824,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
             child: MouseRegion(
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
-                onTap: (isRunning || isLaunching) ? null : () => _launchGame(instance),
+                onTap: (isRunning || isLaunching)
+                    ? null
+                    : () => _launchGame(instance),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   decoration: BoxDecoration(
@@ -1824,20 +1834,24 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                       colors: isRunning
                           ? [BAColors.successOf(context), BAColors.successDark]
                           : isLaunching
-                              ? [BAColors.warningOf(context), BAColors.warningDark]
-                              : [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                          ? [BAColors.warningOf(context), BAColors.warningDark]
+                          : [
+                              BAColors.primaryLightOf(context),
+                              BAColors.primaryOf(context),
+                            ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
-                        color: (isRunning
-                                ? BAColors.successOf(context)
-                                : isLaunching
+                        color:
+                            (isRunning
+                                    ? BAColors.successOf(context)
+                                    : isLaunching
                                     ? BAColors.warningOf(context)
                                     : BAColors.primaryOf(context))
-                            .withValues(alpha: 0.4),
+                                .withValues(alpha: 0.4),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),
@@ -1850,14 +1864,18 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                             height: 22,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
-                              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFFFFFF)),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xFFFFFFFF),
+                              ),
                             ),
                           )
                         : Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                isRunning ? Icons.stop_rounded : Icons.play_arrow_rounded,
+                                isRunning
+                                    ? Icons.stop_rounded
+                                    : Icons.play_arrow_rounded,
                                 color: const Color(0xFFFFFFFF),
                                 size: 22,
                               ),
@@ -1938,9 +1956,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context).withOpacity(0.7),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: BAColors.borderOf(context).withOpacity(0.5),
-        ),
+        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
         boxShadow: [
           BoxShadow(
             color: BAColors.shadowOf(context).withOpacity(0.3),
@@ -1959,17 +1975,21 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
               gradient: LinearGradient(
                 colors: isRunning
                     ? [BAColors.successOf(context), BAColors.successDark]
-                    : [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                    : [
+                        BAColors.primaryLightOf(context),
+                        BAColors.primaryOf(context),
+                      ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: (isRunning
-                          ? BAColors.successOf(context)
-                          : BAColors.primaryOf(context))
-                      .withValues(alpha: 0.35),
+                  color:
+                      (isRunning
+                              ? BAColors.successOf(context)
+                              : BAColors.primaryOf(context))
+                          .withValues(alpha: 0.35),
                   blurRadius: 14,
                   offset: const Offset(0, 4),
                 ),
@@ -1997,14 +2017,30 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                   ),
                 ),
                 const SizedBox(height: 8),
-                _buildInfoRow(context, Icons.update_rounded, '版本', instance.version),
+                _buildInfoRow(
+                  context,
+                  Icons.update_rounded,
+                  '版本',
+                  instance.version,
+                ),
                 if (instance.loader != null) ...[
                   const SizedBox(height: 4),
-                  _buildInfoRow(context, Icons.layers_rounded, '加载器', instance.loader!),
+                  _buildInfoRow(
+                    context,
+                    Icons.layers_rounded,
+                    '加载器',
+                    instance.loader!,
+                  ),
                 ],
-                if (instance.description != null && instance.description!.isNotEmpty) ...[
+                if (instance.description != null &&
+                    instance.description!.isNotEmpty) ...[
                   const SizedBox(height: 4),
-                  _buildInfoRow(context, Icons.info_outline_rounded, '描述', instance.description!),
+                  _buildInfoRow(
+                    context,
+                    Icons.info_outline_rounded,
+                    '描述',
+                    instance.description!,
+                  ),
                 ],
                 const SizedBox(height: 4),
                 _buildInfoRow(
@@ -2015,8 +2051,8 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                   valueColor: isRunning
                       ? BAColors.successOf(context)
                       : isLaunching
-                          ? BAColors.warningOf(context)
-                          : BAColors.primaryLightOf(context),
+                      ? BAColors.warningOf(context)
+                      : BAColors.primaryLightOf(context),
                 ),
               ],
             ),
@@ -2077,9 +2113,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context).withOpacity(0.5),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: BAColors.borderOf(context).withOpacity(0.5),
-        ),
+        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
       ),
       child: Row(
         children: [
@@ -2114,7 +2148,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                 Text(
                   label,
                   style: TextStyle(
-                    color: BAColors.textSecondaryOf(context).withValues(alpha: 0.9),
+                    color: BAColors.textSecondaryOf(
+                      context,
+                    ).withValues(alpha: 0.9),
                     fontSize: 12,
                   ),
                 ),
@@ -2257,9 +2293,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context).withOpacity(0.6),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: BAColors.borderOf(context).withOpacity(0.4),
-        ),
+        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.4)),
       ),
       child: Row(
         children: [
@@ -2297,7 +2331,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                 Text(
                   '${isDir ? '文件夹' : formatBytes(size)}${modified != null ? ' · ${_formatDateTime(modified)}' : ''}',
                   style: TextStyle(
-                    color: BAColors.textSecondaryOf(context).withValues(alpha: 0.8),
+                    color: BAColors.textSecondaryOf(
+                      context,
+                    ).withValues(alpha: 0.8),
                     fontSize: 11,
                   ),
                 ),
@@ -2323,7 +2359,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
 
     final imageFiles = _detailFiles.where((f) {
       final name = f.path.toLowerCase();
-      return name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg');
+      return name.endsWith('.png') ||
+          name.endsWith('.jpg') ||
+          name.endsWith('.jpeg');
     }).toList();
 
     if (imageFiles.isEmpty) {
@@ -2436,7 +2474,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
             height: 80,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                colors: [
+                  BAColors.primaryLightOf(context),
+                  BAColors.primaryOf(context),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -2449,11 +2490,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                 ),
               ],
             ),
-            child: Icon(
-              icon,
-              size: 36,
-              color: const Color(0xFFFFFFFF),
-            ),
+            child: Icon(icon, size: 36, color: const Color(0xFFFFFFFF)),
           ),
           const SizedBox(height: 20),
           Text(

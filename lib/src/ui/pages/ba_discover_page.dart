@@ -50,9 +50,7 @@ class _BADiscoverPageState extends State<BADiscoverPage>
           const SizedBox(height: 16),
 
           // 内容区
-          Expanded(
-            child: _buildContent(),
-          ),
+          Expanded(child: _buildContent()),
         ],
       ),
     );
@@ -61,11 +59,7 @@ class _BADiscoverPageState extends State<BADiscoverPage>
   Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          Icons.explore,
-          color: BAColors.primaryOf(context),
-          size: 28,
-        ),
+        Icon(Icons.explore, color: BAColors.primaryOf(context), size: 28),
         const SizedBox(width: 12),
         Text(
           '发现',
@@ -91,9 +85,7 @@ class _BADiscoverPageState extends State<BADiscoverPage>
         },
         decoration: InputDecoration(
           hintText: '搜索模组、资源包、光影...',
-          hintStyle: TextStyle(
-            color: BAColors.textSecondaryOf(context),
-          ),
+          hintStyle: TextStyle(color: BAColors.textSecondaryOf(context)),
           prefixIcon: Icon(
             Icons.search,
             color: BAColors.textSecondaryOf(context),

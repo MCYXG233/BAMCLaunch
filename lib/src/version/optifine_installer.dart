@@ -89,10 +89,7 @@ class OptiFineInstallFailedEvent extends Event {
   final String instanceId;
   final String error;
 
-  OptiFineInstallFailedEvent({
-    required this.instanceId,
-    required this.error,
-  });
+  OptiFineInstallFailedEvent({required this.instanceId, required this.error});
 }
 
 /// OptiFine安装器
@@ -124,7 +121,7 @@ class OptiFineInstaller {
 
       // 首先尝试从BMCLAPI获取版本列表
       final versions = await _getVersionsFromBMCLAPI();
-      
+
       if (versions.isNotEmpty) {
         onProgress?.call('获取成功', 100, 100);
         return versions;
@@ -162,9 +159,7 @@ class OptiFineInstaller {
     try {
       final response = await _networkClient.post(
         '$_optiFineBaseUrl/adloadx.php',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: '.downloadLink=1',
       );
 
@@ -181,37 +176,43 @@ class OptiFineInstaller {
   /// 解析官方页面版本列表
   List<OptiFineVersion> _parseOfficialVersions(String html) {
     final versions = <OptiFineVersion>[];
-    
+
     // 使用正则匹配版本信息
     final versionRegex = RegExp(
       r'version=([0-9.]+)_([A-Z_]+(?:_RC\d+)?(?:_preview_\d+)?)',
     );
-    
+
     final matches = versionRegex.allMatches(html);
     final seen = <String>{};
-    
+
     for (final match in matches) {
       final mcVersion = match.group(1) ?? '';
       final optiVersion = match.group(2) ?? '';
       final fullVersion = '${mcVersion}_$optiVersion';
-      
+
       if (!seen.contains(fullVersion)) {
         seen.add(fullVersion);
-        versions.add(OptiFineVersion(
-          minecraftVersion: mcVersion,
-          optiFineVersion: optiVersion,
-          fullVersion: fullVersion,
-        ));
+        versions.add(
+          OptiFineVersion(
+            minecraftVersion: mcVersion,
+            optiFineVersion: optiVersion,
+            fullVersion: fullVersion,
+          ),
+        );
       }
     }
-    
+
     return versions;
   }
 
   /// 获取特定Minecraft版本的OptiFine列表
-  Future<List<OptiFineVersion>> getVersionsForMinecraft(String minecraftVersion) async {
+  Future<List<OptiFineVersion>> getVersionsForMinecraft(
+    String minecraftVersion,
+  ) async {
     final allVersions = await getVersionList();
-    return allVersions.where((v) => v.minecraftVersion == minecraftVersion).toList();
+    return allVersions
+        .where((v) => v.minecraftVersion == minecraftVersion)
+        .toList();
   }
 
   /// 安装OptiFine到指定实例
@@ -227,11 +228,13 @@ class OptiFineInstaller {
 
     try {
       // 触发进度事件
-      EventBus().publish(OptiFineInstallProgressEvent(
-        instanceId: instanceId,
-        progress: 0,
-        stage: '准备安装...',
-      ));
+      EventBus().publish(
+        OptiFineInstallProgressEvent(
+          instanceId: instanceId,
+          progress: 0,
+          stage: '准备安装...',
+        ),
+      );
       onProgress?.call('准备安装...', 0);
 
       // 1. 查找Forge版本目录
@@ -244,7 +247,10 @@ class OptiFineInstaller {
       }
 
       // 找到对应的Forge版本
-      final forgeVersionDir = await _findForgeVersion(versionsDir, minecraftVersion);
+      final forgeVersionDir = await _findForgeVersion(
+        versionsDir,
+        minecraftVersion,
+      );
       if (forgeVersionDir == null) {
         throw AppException.fromCode(
           ErrorCodes.fileNotFound,
@@ -253,23 +259,27 @@ class OptiFineInstaller {
       }
 
       onProgress?.call('正在合并JAR文件...', 30);
-      EventBus().publish(OptiFineInstallProgressEvent(
-        instanceId: instanceId,
-        progress: 0.3,
-        stage: '正在合并JAR文件...',
-      ));
+      EventBus().publish(
+        OptiFineInstallProgressEvent(
+          instanceId: instanceId,
+          progress: 0.3,
+          stage: '正在合并JAR文件...',
+        ),
+      );
 
       // 2. 合并OptiFine到Forge JAR
-      final forgeJarPath = path.join(forgeVersionDir.path, '$minecraftVersion.jar');
+      final forgeJarPath = path.join(
+        forgeVersionDir.path,
+        '$minecraftVersion.jar',
+      );
       if (!await File(forgeJarPath).exists()) {
         // 尝试带Forge后缀的名称
         final files = await versionsDir.list().toList();
         for (final entity in files) {
           if (entity is Directory && entity.path.contains(minecraftVersion)) {
-            final jarFiles = await Directory(entity.path)
-                .list()
-                .where((f) => f.path.endsWith('.jar'))
-                .toList();
+            final jarFiles = await Directory(
+              entity.path,
+            ).list().where((f) => f.path.endsWith('.jar')).toList();
             if (jarFiles.isNotEmpty) {
               // 使用找到的第一个JAR
               await _mergeOptiFine(
@@ -286,11 +296,13 @@ class OptiFineInstaller {
       }
 
       onProgress?.call('正在更新版本JSON...', 70);
-      EventBus().publish(OptiFineInstallProgressEvent(
-        instanceId: instanceId,
-        progress: 0.7,
-        stage: '正在更新版本JSON...',
-      ));
+      EventBus().publish(
+        OptiFineInstallProgressEvent(
+          instanceId: instanceId,
+          progress: 0.7,
+          stage: '正在更新版本JSON...',
+        ),
+      );
 
       // 3. 更新版本JSON添加OptiFine作为前置Mod
       await _updateVersionJson(
@@ -299,25 +311,29 @@ class OptiFineInstaller {
       );
 
       onProgress?.call('安装完成', 100);
-      EventBus().publish(OptiFineInstallCompletedEvent(
-        instanceId: instanceId,
-        version: optiFineVersion,
-      ));
+      EventBus().publish(
+        OptiFineInstallCompletedEvent(
+          instanceId: instanceId,
+          version: optiFineVersion,
+        ),
+      );
 
       _logger.info('OptiFine安装成功: $optiFineVersion');
       return true;
     } catch (e, stackTrace) {
       _logger.error('OptiFine安装失败', e, stackTrace);
-      EventBus().publish(OptiFineInstallFailedEvent(
-        instanceId: instanceId,
-        error: e.toString(),
-      ));
+      EventBus().publish(
+        OptiFineInstallFailedEvent(instanceId: instanceId, error: e.toString()),
+      );
       return false;
     }
   }
 
   /// 查找Forge版本目录
-  Future<Directory?> _findForgeVersion(Directory versionsDir, String minecraftVersion) async {
+  Future<Directory?> _findForgeVersion(
+    Directory versionsDir,
+    String minecraftVersion,
+  ) async {
     await for (final entity in versionsDir.list()) {
       if (entity is Directory) {
         final dirName = path.basename(entity.path);
@@ -326,7 +342,9 @@ class OptiFineInstaller {
           return entity;
         }
         // 也检查子目录
-        if (await Directory(entity.path).list().any((f) => f.path.endsWith('.jar'))) {
+        if (await Directory(
+          entity.path,
+        ).list().any((f) => f.path.endsWith('.jar'))) {
           return entity;
         }
       }
@@ -335,7 +353,11 @@ class OptiFineInstaller {
   }
 
   /// 合并OptiFine到JAR文件
-  Future<void> _mergeOptiFine(String optiFineJar, String forgeJar, String outputPath) async {
+  Future<void> _mergeOptiFine(
+    String optiFineJar,
+    String forgeJar,
+    String outputPath,
+  ) async {
     // 读取Forge JAR
     final forgeFile = File(forgeJar);
     final forgeBytes = await forgeFile.readAsBytes();
@@ -363,7 +385,7 @@ class OptiFineInstaller {
       if (!file.isFile) continue;
       final name = file.name;
       // 只添加OptiFine相关的类
-      if (name.startsWith('optifine/') || 
+      if (name.startsWith('optifine/') ||
           name.startsWith('Config.class') ||
           name.startsWith('GuiOptiFine')) {
         optifineClasses[name] = file;
@@ -385,7 +407,10 @@ class OptiFineInstaller {
   }
 
   /// 更新版本JSON
-  Future<void> _updateVersionJson(String jsonPath, String optiFineVersion) async {
+  Future<void> _updateVersionJson(
+    String jsonPath,
+    String optiFineVersion,
+  ) async {
     final jsonFile = File(jsonPath);
     if (!await jsonFile.exists()) return;
 
@@ -396,7 +421,7 @@ class OptiFineInstaller {
     final mainClass = json['mainClass'] as String?;
     if (mainClass != null && !mainClass.contains('OptiFine')) {
       json['mainClass'] = 'net.optifine.Launch';
-      
+
       // 保存原始主类到OptiFine配置
       json['_originalMainClass'] = mainClass;
     }

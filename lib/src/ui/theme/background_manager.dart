@@ -169,7 +169,8 @@ class BackgroundManager extends ChangeNotifier {
     await _disposeVideo();
 
     // 仅在视频背景类型且有视频路径时初始化
-    if (_currentConfig.type == BackgroundType.video && _currentConfig.videoPath != null) {
+    if (_currentConfig.type == BackgroundType.video &&
+        _currentConfig.videoPath != null) {
       try {
         // 创建新的播放器实例
         _player = Player();
@@ -192,7 +193,11 @@ class BackgroundManager extends ChangeNotifier {
         // 开始播放
         await _player!.play();
       } catch (e, st) {
-        Logger.instance.error('Failed to load video: ${_currentConfig.videoPath}', e, st);
+        Logger.instance.error(
+          'Failed to load video: ${_currentConfig.videoPath}',
+          e,
+          st,
+        );
         // 加载失败时清理状态
         await _disposeVideo();
       }
@@ -252,13 +257,16 @@ class BackgroundManager extends ChangeNotifier {
           return Container(
             decoration: BoxDecoration(
               color: _currentConfig.solidColor != null
-                  ? Color(_currentConfig.solidColor!).withOpacity(_currentConfig.opacity)
+                  ? Color(
+                      _currentConfig.solidColor!,
+                    ).withOpacity(_currentConfig.opacity)
                   : Colors.white.withOpacity(_currentConfig.opacity),
             ),
           );
 
         case BackgroundType.gradient:
-          final colors = _currentConfig.gradientColors
+          final colors =
+              _currentConfig.gradientColors
                   ?.map((c) => Color(c).withOpacity(_currentConfig.opacity))
                   .toList() ??
               [Colors.white, Colors.grey.shade200];

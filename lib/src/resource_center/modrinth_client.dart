@@ -99,7 +99,9 @@ class ModrinthClient {
       queryParams['facets'] = json.encode(facets);
     }
 
-    final uri = Uri.parse('$baseUrl/search').replace(queryParameters: queryParams);
+    final uri = Uri.parse(
+      '$baseUrl/search',
+    ).replace(queryParameters: queryParams);
 
     _logger.info('[Modrinth] 搜索: ${uri.toString()}');
 
@@ -121,16 +123,21 @@ class ModrinthClient {
             id: hitMap['project_id'] as String? ?? hitMap['id'] as String,
             type: _parseResourceType(hitMap['project_type'] as String?),
             source: 'modrinth',
-            name: hitMap['title'] as String? ?? hitMap['name'] as String? ?? 'Unknown',
+            name:
+                hitMap['title'] as String? ??
+                hitMap['name'] as String? ??
+                'Unknown',
             description: hitMap['description'] as String? ?? '',
             summary: hitMap['summary'] as String?,
             authors: (hitMap['author'] as String?) != null
                 ? [Author(id: 'author', name: hitMap['author'] as String)]
                 : [],
-            categories: (hitMap['categories'] as List<dynamic>?)?.cast<String>() ?? [],
+            categories:
+                (hitMap['categories'] as List<dynamic>?)?.cast<String>() ?? [],
             downloads: hitMap['downloads'] as int? ?? 0,
             likes: hitMap['follows'] as int? ?? 0,
-            pageUrl: 'https://modrinth.com/${_typeToString(_parseResourceType(hitMap['project_type'] as String?))}/${hitMap['slug'] as String? ?? hitMap['id'] as String}',
+            pageUrl:
+                'https://modrinth.com/${_typeToString(_parseResourceType(hitMap['project_type'] as String?))}/${hitMap['slug'] as String? ?? hitMap['id'] as String}',
             iconUrl: hitMap['icon_url'] as String?,
             publishedDate: hitMap['published'] != null
                 ? DateTime.tryParse(hitMap['published'] as String)
@@ -138,8 +145,10 @@ class ModrinthClient {
             updatedDate: hitMap['date_modified'] != null
                 ? DateTime.tryParse(hitMap['date_modified'] as String)
                 : null,
-            supportedGameVersions: (hitMap['versions'] as List<dynamic>?)?.cast<String>() ?? [],
-            supportedLoaders: (hitMap['loaders'] as List<dynamic>?)?.cast<String>() ?? [],
+            supportedGameVersions:
+                (hitMap['versions'] as List<dynamic>?)?.cast<String>() ?? [],
+            supportedLoaders:
+                (hitMap['loaders'] as List<dynamic>?)?.cast<String>() ?? [],
             slug: hitMap['slug'] as String?,
           );
         }).toList();
@@ -178,17 +187,22 @@ class ModrinthClient {
           id: data['id'] as String,
           type: _parseResourceType(data['project_type'] as String?),
           source: 'modrinth',
-          name: data['title'] as String? ?? data['name'] as String? ?? 'Unknown',
+          name:
+              data['title'] as String? ?? data['name'] as String? ?? 'Unknown',
           slug: data['slug'] as String?,
-          description: data['body'] as String? ?? data['description'] as String? ?? '',
+          description:
+              data['body'] as String? ?? data['description'] as String? ?? '',
           summary: data['summary'] as String?,
           authors: [
             Author(id: 'author', name: data['author'] as String? ?? 'Unknown'),
           ],
-          categories: (data['categories'] as List<dynamic>?)?.cast<String>() ?? [],
+          categories:
+              (data['categories'] as List<dynamic>?)?.cast<String>() ?? [],
           downloads: data['downloads'] as int? ?? 0,
           likes: data['follows'] as int? ?? 0,
-          pageUrl: data['url'] as String? ?? 'https://modrinth.com/project/$projectId',
+          pageUrl:
+              data['url'] as String? ??
+              'https://modrinth.com/project/$projectId',
           iconUrl: data['icon_url'] as String?,
           publishedDate: data['published'] != null
               ? DateTime.tryParse(data['published'] as String)
@@ -196,8 +210,10 @@ class ModrinthClient {
           updatedDate: data['updated'] != null
               ? DateTime.tryParse(data['updated'] as String)
               : null,
-          supportedGameVersions: (data['game_versions'] as List<dynamic>?)?.cast<String>() ?? [],
-          supportedLoaders: (data['loaders'] as List<dynamic>?)?.cast<String>() ?? [],
+          supportedGameVersions:
+              (data['game_versions'] as List<dynamic>?)?.cast<String>() ?? [],
+          supportedLoaders:
+              (data['loaders'] as List<dynamic>?)?.cast<String>() ?? [],
         );
       } else {
         throw NetworkException.fromStatusCode(response.statusCode);
@@ -226,8 +242,9 @@ class ModrinthClient {
       params['loaders'] = json.encode(loaders);
     }
 
-    final uri = Uri.parse('$baseUrl/project/$projectId/version')
-        .replace(queryParameters: params.isNotEmpty ? params : null);
+    final uri = Uri.parse(
+      '$baseUrl/project/$projectId/version',
+    ).replace(queryParameters: params.isNotEmpty ? params : null);
 
     _logger.info('[Modrinth] 获取版本: $projectId');
 
@@ -239,29 +256,36 @@ class ModrinthClient {
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> versions = json.decode(response.body) as List<dynamic>;
+        final List<dynamic> versions =
+            json.decode(response.body) as List<dynamic>;
         return versions.map((v) {
           final vMap = v as Map<String, dynamic>;
           final files = vMap['files'] as List<dynamic>? ?? [];
-          final primaryFile = files.firstWhere(
-            (f) => (f as Map<String, dynamic>)['primary'] as bool? ?? false,
-            orElse: () => files.first,
-          ) as Map<String, dynamic>;
+          final primaryFile =
+              files.firstWhere(
+                    (f) =>
+                        (f as Map<String, dynamic>)['primary'] as bool? ??
+                        false,
+                    orElse: () => files.first,
+                  )
+                  as Map<String, dynamic>;
 
           return ResourceVersion(
             id: vMap['id'] as String,
             versionNumber: vMap['version_number'] as String,
             name: vMap['name'] as String,
             changelog: vMap['changelog'] as String?,
-            gameVersions: (vMap['game_versions'] as List<dynamic>?)?.cast<String>() ?? [],
+            gameVersions:
+                (vMap['game_versions'] as List<dynamic>?)?.cast<String>() ?? [],
             loaders: (vMap['loaders'] as List<dynamic>?)?.cast<String>() ?? [],
-            dependencies: (vMap['dependencies'] as List<dynamic>?)
-                    ?.map((d) {
+            dependencies:
+                (vMap['dependencies'] as List<dynamic>?)?.map((d) {
                   final dMap = d as Map<String, dynamic>;
                   return VersionDependency(
                     projectId: dMap['project_id'] as String?,
                     versionId: dMap['version_id'] as String?,
-                    dependencyType: dMap['dependency_type'] as String? ?? 'required',
+                    dependencyType:
+                        dMap['dependency_type'] as String? ?? 'required',
                   );
                 }).toList() ??
                 [],
@@ -269,8 +293,10 @@ class ModrinthClient {
             downloadUrl: primaryFile['url'] as String?,
             fileName: primaryFile['filename'] as String?,
             fileSize: primaryFile['size'] as int? ?? 0,
-            fileHashes: (primaryFile['hashes'] as Map<String, dynamic>?)
-                    ?.map((key, value) => MapEntry(key, value as String)) ??
+            fileHashes:
+                (primaryFile['hashes'] as Map<String, dynamic>?)?.map(
+                  (key, value) => MapEntry(key, value as String),
+                ) ??
                 {},
             releaseType: vMap['version_type'] as String? ?? 'release',
             isFeatured: vMap['featured'] as bool? ?? false,
@@ -306,25 +332,31 @@ class ModrinthClient {
       if (response.statusCode == 200) {
         final vMap = json.decode(response.body) as Map<String, dynamic>;
         final files = vMap['files'] as List<dynamic>? ?? [];
-        final primaryFile = files.firstWhere(
-          (f) => (f as Map<String, dynamic>)['primary'] as bool? ?? false,
-          orElse: () => files.isNotEmpty ? files.first : <String, dynamic>{},
-        ) as Map<String, dynamic>;
+        final primaryFile =
+            files.firstWhere(
+                  (f) =>
+                      (f as Map<String, dynamic>)['primary'] as bool? ?? false,
+                  orElse: () =>
+                      files.isNotEmpty ? files.first : <String, dynamic>{},
+                )
+                as Map<String, dynamic>;
 
         return ResourceVersion(
           id: vMap['id'] as String,
           versionNumber: vMap['version_number'] as String,
           name: vMap['name'] as String,
           changelog: vMap['changelog'] as String?,
-          gameVersions: (vMap['game_versions'] as List<dynamic>?)?.cast<String>() ?? [],
+          gameVersions:
+              (vMap['game_versions'] as List<dynamic>?)?.cast<String>() ?? [],
           loaders: (vMap['loaders'] as List<dynamic>?)?.cast<String>() ?? [],
-          dependencies: (vMap['dependencies'] as List<dynamic>?)
-                  ?.map((d) {
+          dependencies:
+              (vMap['dependencies'] as List<dynamic>?)?.map((d) {
                 final dMap = d as Map<String, dynamic>;
                 return VersionDependency(
                   projectId: dMap['project_id'] as String?,
                   versionId: dMap['version_id'] as String?,
-                  dependencyType: dMap['dependency_type'] as String? ?? 'required',
+                  dependencyType:
+                      dMap['dependency_type'] as String? ?? 'required',
                 );
               }).toList() ??
               [],
@@ -332,8 +364,10 @@ class ModrinthClient {
           downloadUrl: primaryFile['url'] as String?,
           fileName: primaryFile['filename'] as String?,
           fileSize: primaryFile['size'] as int? ?? 0,
-          fileHashes: (primaryFile['hashes'] as Map<String, dynamic>?)
-                  ?.map((key, value) => MapEntry(key, value as String)) ??
+          fileHashes:
+              (primaryFile['hashes'] as Map<String, dynamic>?)?.map(
+                (key, value) => MapEntry(key, value as String),
+              ) ??
               {},
           releaseType: vMap['version_type'] as String? ?? 'release',
           isFeatured: vMap['featured'] as bool? ?? false,

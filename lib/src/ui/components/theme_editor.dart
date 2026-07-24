@@ -9,14 +9,19 @@ import '../../core/logger.dart';
 enum ThemePreset {
   /// 蔚蓝档案蓝
   archiveBlue,
+
   /// 深空黑
   deepSpace,
+
   /// 森林绿
   forestGreen,
+
   /// 日落橙
   sunsetOrange,
+
   /// 紫罗兰
   violet,
+
   /// 自定义
   custom,
 }
@@ -195,7 +200,9 @@ class CustomThemeConfig {
 /// 主题编辑器状态
 class ThemeEditorState extends ChangeNotifier {
   ThemePreset _currentPreset = ThemePreset.archiveBlue;
-  CustomThemeConfig _customConfig = CustomThemeConfig.fromPreset(ThemePreset.archiveBlue);
+  CustomThemeConfig _customConfig = CustomThemeConfig.fromPreset(
+    ThemePreset.archiveBlue,
+  );
   bool _isEditing = false;
   final Logger _logger = Logger('ThemeEditor');
 
@@ -398,46 +405,47 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: [
-                Colors.red,
-                Colors.pink,
-                Colors.purple,
-                Colors.deepPurple,
-                Colors.indigo,
-                Colors.blue,
-                Colors.lightBlue,
-                Colors.cyan,
-                Colors.teal,
-                Colors.green,
-                Colors.lightGreen,
-                Colors.lime,
-                Colors.yellow,
-                Colors.amber,
-                Colors.orange,
-                Colors.deepOrange,
-                Colors.brown,
-                Colors.grey,
-                Colors.blueGrey,
-              ].map((color) {
-                return GestureDetector(
-                  onTap: () {
-                    final hsl = HSLColor.fromColor(color);
-                    setState(() {
-                      _hue = hsl.hue;
-                      _saturation = hsl.saturation;
-                      _lightness = hsl.lightness;
-                    });
-                  },
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                );
-              }).toList(),
+              children:
+                  [
+                    Colors.red,
+                    Colors.pink,
+                    Colors.purple,
+                    Colors.deepPurple,
+                    Colors.indigo,
+                    Colors.blue,
+                    Colors.lightBlue,
+                    Colors.cyan,
+                    Colors.teal,
+                    Colors.green,
+                    Colors.lightGreen,
+                    Colors.lime,
+                    Colors.yellow,
+                    Colors.amber,
+                    Colors.orange,
+                    Colors.deepOrange,
+                    Colors.brown,
+                    Colors.grey,
+                    Colors.blueGrey,
+                  ].map((color) {
+                    return GestureDetector(
+                      onTap: () {
+                        final hsl = HSLColor.fromColor(color);
+                        setState(() {
+                          _hue = hsl.hue;
+                          _saturation = hsl.saturation;
+                          _lightness = hsl.lightness;
+                        });
+                      },
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: color,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    );
+                  }).toList(),
             ),
             const SizedBox(height: 16),
             // 滑块
@@ -512,12 +520,7 @@ class SliderSettingTile extends StatelessWidget {
             '$label: ${value.toStringAsFixed(1)}$suffix',
             style: Theme.of(context).textTheme.bodyLarge,
           ),
-          Slider(
-            value: value,
-            min: min,
-            max: max,
-            onChanged: onChanged,
-          ),
+          Slider(value: value, min: min, max: max, onChanged: onChanged),
         ],
       ),
     );
@@ -528,10 +531,7 @@ class SliderSettingTile extends StatelessWidget {
 class ThemeEditorWidget extends StatelessWidget {
   final ThemeEditorState editorState;
 
-  const ThemeEditorWidget({
-    super.key,
-    required this.editorState,
-  });
+  const ThemeEditorWidget({super.key, required this.editorState});
 
   @override
   Widget build(BuildContext context) {
@@ -547,21 +547,20 @@ class ThemeEditorWidget extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '主题预设',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+                  Text('主题预设', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 12,
                     runSpacing: 12,
                     children: ThemePreset.values
                         .where((p) => p != ThemePreset.custom)
-                        .map((preset) => _PresetChip(
-                              preset: preset,
-                              isSelected: editorState.currentPreset == preset,
-                              onTap: () => editorState.selectPreset(preset),
-                            ))
+                        .map(
+                          (preset) => _PresetChip(
+                            preset: preset,
+                            isSelected: editorState.currentPreset == preset,
+                            onTap: () => editorState.selectPreset(preset),
+                          ),
+                        )
                         .toList(),
                   ),
                 ],
@@ -630,10 +629,7 @@ class ThemeEditorWidget extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '其他设置',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+                  Text('其他设置', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
                   SliderSettingTile(
                     label: '字体缩放',
@@ -671,10 +667,7 @@ class ThemeEditorWidget extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '预览',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+                  Text('预览', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 12),
                   _ThemePreview(config: editorState.customConfig),
                 ],
@@ -812,10 +805,7 @@ class _PresetChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? _presetColor : _presetColor.withOpacity(0.2),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: _presetColor,
-            width: isSelected ? 2 : 1,
-          ),
+          border: Border.all(color: _presetColor, width: isSelected ? 2 : 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

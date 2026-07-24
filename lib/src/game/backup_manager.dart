@@ -342,10 +342,8 @@ class BackupRecord {
 ///   onProgress: onProgress,
 /// );
 /// ```
-typedef BackupProgressCallback = void Function(
-  double progress,
-  String currentFile,
-);
+typedef BackupProgressCallback =
+    void Function(double progress, String currentFile);
 
 /// 备份管理器
 ///
@@ -487,7 +485,8 @@ class BackupManager {
 
     try {
       // 获取应用支持目录作为备份存储的基础路径
-      final supportDir = await _platformAdapter.getApplicationSupportDirectory();
+      final supportDir = await _platformAdapter
+          .getApplicationSupportDirectory();
       _backupDir = Directory(path.join(supportDir, 'backups'));
 
       // 如果备份目录不存在，创建它（包括所有父目录）
@@ -498,7 +497,9 @@ class BackupManager {
       // 加载已有的备份记录和压缩设置
       await _loadBackupRecords();
       await _loadCompressionSettings();
-      _logger.info('Backup manager initialized, ${_backups.length} backups loaded');
+      _logger.info(
+        'Backup manager initialized, ${_backups.length} backups loaded',
+      );
       _initialized = true;
     } catch (e, stackTrace) {
       // 初始化失败时记录错误，但标记为已初始化以避免无限重试
@@ -513,9 +514,12 @@ class BackupManager {
   /// 如果配置中没有这些设置，使用默认值。
   Future<void> _loadCompressionSettings() async {
     // 从配置读取压缩启用状态，默认为 true
-    _compressEnabled = _configManager.getBool(ConfigKeys.backupCompressEnabled) ?? true;
+    _compressEnabled =
+        _configManager.getBool(ConfigKeys.backupCompressEnabled) ?? true;
     // 从配置读取压缩级别字符串，默认为 'balanced'
-    final levelStr = _configManager.getString(ConfigKeys.backupCompressionLevel) ?? 'balanced';
+    final levelStr =
+        _configManager.getString(ConfigKeys.backupCompressionLevel) ??
+        'balanced';
     // 将字符串转换为 CompressionLevel 枚举值
     _compressionLevel = CompressionLevel.values.firstWhere(
       (e) => e.name == levelStr,
@@ -527,8 +531,14 @@ class BackupManager {
   ///
   /// 将当前的压缩设置持久化到配置管理器中。
   Future<void> _saveCompressionSettings() async {
-    await _configManager.setBool(ConfigKeys.backupCompressEnabled, _compressEnabled);
-    await _configManager.setString(ConfigKeys.backupCompressionLevel, _compressionLevel.name);
+    await _configManager.setBool(
+      ConfigKeys.backupCompressEnabled,
+      _compressEnabled,
+    );
+    await _configManager.setString(
+      ConfigKeys.backupCompressionLevel,
+      _compressionLevel.name,
+    );
   }
 
   /// 获取压缩功能是否启用
@@ -655,9 +665,9 @@ class BackupManager {
       if (backupsData != null) {
         _backups.clear();
         _backups.addAll(
-          backupsData
-              .whereType<Map<String, dynamic>>()
-              .map((e) => BackupRecord.fromJson(e)),
+          backupsData.whereType<Map<String, dynamic>>().map(
+            (e) => BackupRecord.fromJson(e),
+          ),
         );
       }
     } catch (e, stackTrace) {
@@ -740,16 +750,18 @@ class BackupManager {
             final fileStat = await file.stat();
 
             // 创建备份记录（使用默认值填充缺失的信息）
-            _backups.add(BackupRecord(
-              id: fileName,
-              instanceId: instanceId,
-              instanceName: instanceId, // 暂时使用ID作为名称（无法从文件名获取）
-              type: type,
-              createdAt: DateTime.fromMillisecondsSinceEpoch(timestamp),
-              filePath: file.path,
-              fileSize: fileStat.size,
-              isCompressed: true,
-            ));
+            _backups.add(
+              BackupRecord(
+                id: fileName,
+                instanceId: instanceId,
+                instanceName: instanceId, // 暂时使用ID作为名称（无法从文件名获取）
+                type: type,
+                createdAt: DateTime.fromMillisecondsSinceEpoch(timestamp),
+                filePath: file.path,
+                fileSize: fileStat.size,
+                isCompressed: true,
+              ),
+            );
           }
         }
       }
@@ -814,11 +826,7 @@ class BackupManager {
         final fileBytes = await entity.readAsBytes();
 
         // 将文件添加到归档中
-        archive.addFile(ArchiveFile(
-          relativePath,
-          fileBytes.length,
-          fileBytes,
-        ));
+        archive.addFile(ArchiveFile(relativePath, fileBytes.length, fileBytes));
 
         // 更新进度并回调
         processedFiles++;
@@ -907,10 +915,7 @@ class BackupManager {
     // 由于 SafeArchiveExtractor 内部已处理所有条目，这里按已处理数简单报告进度
     processedFiles = result.filesExtracted + result.directoriesCreated;
     if (onProgress != null) {
-      onProgress(
-        totalFiles > 0 ? processedFiles / totalFiles : 0,
-        '完成',
-      );
+      onProgress(totalFiles > 0 ? processedFiles / totalFiles : 0, '完成');
     }
   }
 
@@ -998,7 +1003,8 @@ class BackupManager {
 
     try {
       // 生成唯一的备份ID：格式为 instanceId_timestamp_type
-      final id = '${instanceId}_${DateTime.now().millisecondsSinceEpoch}_${type.name}';
+      final id =
+          '${instanceId}_${DateTime.now().millisecondsSinceEpoch}_${type.name}';
       final timestamp = DateTime.now();
       final backupFileName = '$id.zip';
       final backupPath = path.join(_backupDir!.path, backupFileName);
@@ -1104,7 +1110,9 @@ class BackupManager {
       _backups.add(backupRecord);
       await _saveBackupRecords();
 
-      _logger.info('Backup completed: $id, size: $fileSize bytes, compressed: $useCompression');
+      _logger.info(
+        'Backup completed: $id, size: $fileSize bytes, compressed: $useCompression',
+      );
       return backupRecord;
     } catch (e, stackTrace) {
       // 捕获所有异常，记录日志并返回 null
@@ -1229,7 +1237,10 @@ class BackupManager {
 
         // 第二阶段：复制文件到目标目录
         await for (final entity in backupSourceDir.list(recursive: true)) {
-          final relativePath = path.relative(entity.path, from: backupSourceDir.path);
+          final relativePath = path.relative(
+            entity.path,
+            from: backupSourceDir.path,
+          );
           final destPath = path.join(targetPath, relativePath);
 
           if (entity is File) {
@@ -1311,9 +1322,7 @@ class BackupManager {
   /// }
   /// ```
   List<BackupRecord> getBackupsForInstance(String instanceId) {
-    return _backups
-        .where((b) => b.instanceId == instanceId)
-        .toList()
+    return _backups.where((b) => b.instanceId == instanceId).toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt)); // 按时间降序排序
   }
 
@@ -1360,9 +1369,7 @@ class BackupManager {
   /// }
   /// ```
   List<BackupRecord> getBackupsByTag(String tagId) {
-    return _backups
-        .where((b) => b.tags.contains(tagId))
-        .toList()
+    return _backups.where((b) => b.tags.contains(tagId)).toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt)); // 按时间降序排序
   }
 

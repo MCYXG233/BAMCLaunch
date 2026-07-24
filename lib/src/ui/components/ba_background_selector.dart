@@ -85,7 +85,8 @@ class _BABackgroundSelectorState extends State<BABackgroundSelector> {
           children: _presets.map((preset) {
             return _PresetCard(
               config: preset,
-              isSelected: _config.type == preset.type &&
+              isSelected:
+                  _config.type == preset.type &&
                   _config.gradientColors == preset.gradientColors,
               onTap: () => _selectPreset(preset),
             );
@@ -185,8 +186,12 @@ class _PresetCard extends StatelessWidget {
           height: 80,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: config.gradientColors?.map((c) => Color(c)).toList() ??
-                  [BAColors.backgroundOf(context), BAColors.backgroundSecondaryOf(context)],
+              colors:
+                  config.gradientColors?.map((c) => Color(c)).toList() ??
+                  [
+                    BAColors.backgroundOf(context),
+                    BAColors.backgroundSecondaryOf(context),
+                  ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -226,10 +231,7 @@ class _CustomImageButton extends StatelessWidget {
   final VoidCallback onTap;
   final bool isSelected;
 
-  const _CustomImageButton({
-    required this.onTap,
-    required this.isSelected,
-  });
+  const _CustomImageButton({required this.onTap, required this.isSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -255,7 +257,9 @@ class _CustomImageButton extends StatelessWidget {
             children: [
               Icon(
                 Icons.add_photo_alternate_outlined,
-                color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
+                color: isSelected
+                    ? BAColors.primaryOf(context)
+                    : BAColors.textSecondaryOf(context),
                 size: 28,
               ),
               const SizedBox(height: 4),
@@ -263,7 +267,9 @@ class _CustomImageButton extends StatelessWidget {
                 '上传图片',
                 style: TextStyle(
                   fontSize: 11,
-                  color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
+                  color: isSelected
+                      ? BAColors.primaryOf(context)
+                      : BAColors.textSecondaryOf(context),
                 ),
               ),
             ],
@@ -278,10 +284,7 @@ class _CustomVideoButton extends StatelessWidget {
   final VoidCallback onTap;
   final bool isSelected;
 
-  const _CustomVideoButton({
-    required this.onTap,
-    required this.isSelected,
-  });
+  const _CustomVideoButton({required this.onTap, required this.isSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -309,7 +312,9 @@ class _CustomVideoButton extends StatelessWidget {
               children: [
                 Icon(
                   Icons.videocam_outlined,
-                  color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
+                  color: isSelected
+                      ? BAColors.primaryOf(context)
+                      : BAColors.textSecondaryOf(context),
                   size: 28,
                 ),
                 const SizedBox(height: 4),
@@ -317,7 +322,9 @@ class _CustomVideoButton extends StatelessWidget {
                   '上传视频',
                   style: TextStyle(
                     fontSize: 11,
-                    color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
+                    color: isSelected
+                        ? BAColors.primaryOf(context)
+                        : BAColors.textSecondaryOf(context),
                   ),
                 ),
               ],
@@ -379,12 +386,7 @@ class _SliderOption extends StatelessWidget {
             trackHeight: 4,
             thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8),
           ),
-          child: Slider(
-            value: value,
-            min: min,
-            max: max,
-            onChanged: onChanged,
-          ),
+          child: Slider(value: value, min: min, max: max, onChanged: onChanged),
         ),
       ],
     );

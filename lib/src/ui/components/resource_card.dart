@@ -62,7 +62,8 @@ class ResourceCard extends StatelessWidget {
                 ],
               ),
             ),
-            if (isInstalled && showInstalledBadge) _buildInstalledBadge(context),
+            if (isInstalled && showInstalledBadge)
+              _buildInstalledBadge(context),
           ],
         ),
       ),
@@ -71,7 +72,7 @@ class ResourceCard extends StatelessWidget {
 
   Widget _buildIcon(BuildContext context) {
     final surfaceVariant = BAColors.surfaceVariantOf(context);
-    
+
     if (resource.iconUrl != null) {
       return Container(
         width: 64,
@@ -107,7 +108,7 @@ class ResourceCard extends StatelessWidget {
   Widget _buildPlaceholderIcon(BuildContext context) {
     final primaryColor = BAColors.primaryOf(context);
     final IconData iconData;
-    
+
     switch (resource.type) {
       case ResourceType.mod:
         iconData = Icons.extension;
@@ -130,11 +131,7 @@ class ResourceCard extends StatelessWidget {
         break;
     }
 
-    return Icon(
-      iconData,
-      color: primaryColor,
-      size: 32,
-    );
+    return Icon(iconData, color: primaryColor, size: 32);
   }
 
   Widget _buildTitleAndBadge(BuildContext context, Color textPrimary) {
@@ -163,7 +160,7 @@ class ResourceCard extends StatelessWidget {
 
     Color badgeColor;
     String badgeText;
-    
+
     if (resource.source == 'modrinth') {
       badgeColor = secondaryColor;
       badgeText = 'Modrinth';
@@ -195,9 +192,7 @@ class ResourceCard extends StatelessWidget {
   Widget _buildDescription(Color textSecondary) {
     return Text(
       resource.description,
-      style: BATypography.bodyMedium.copyWith(
-        color: textSecondary,
-      ),
+      style: BATypography.bodyMedium.copyWith(color: textSecondary),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );
@@ -212,19 +207,13 @@ class ResourceCard extends StatelessWidget {
           _formatNumber(resource.downloads),
         ),
         const SizedBox(width: 16),
-        _buildMetaItem(
-          context,
-          Icons.thumb_up,
-          _formatNumber(resource.likes),
-        ),
+        _buildMetaItem(context, Icons.thumb_up, _formatNumber(resource.likes)),
         const SizedBox(width: 16),
         if (resource.authors.isNotEmpty)
           Expanded(
             child: Text(
               'by ${resource.authors.first.name}',
-              style: BATypography.bodySmall.copyWith(
-                color: textSecondary,
-              ),
+              style: BATypography.bodySmall.copyWith(color: textSecondary),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -235,16 +224,14 @@ class ResourceCard extends StatelessWidget {
 
   Widget _buildMetaItem(BuildContext context, IconData icon, String text) {
     final textSecondary = BAColors.textSecondaryOf(context);
-    
+
     return Row(
       children: [
         Icon(icon, size: 14, color: textSecondary),
         const SizedBox(width: 4),
         Text(
           text,
-          style: BATypography.bodySmall.copyWith(
-            color: textSecondary,
-          ),
+          style: BATypography.bodySmall.copyWith(color: textSecondary),
         ),
       ],
     );
@@ -252,7 +239,7 @@ class ResourceCard extends StatelessWidget {
 
   Widget _buildInstalledBadge(BuildContext context) {
     final successColor = BAColors.successOf(context);
-    
+
     return Positioned(
       top: 8,
       right: 8,
@@ -373,7 +360,9 @@ class InstalledResourceCard extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     resource.enabled ? Icons.visibility : Icons.visibility_off,
-                    color: resource.enabled ? BAColors.successOf(context) : textSecondary,
+                    color: resource.enabled
+                        ? BAColors.successOf(context)
+                        : textSecondary,
                   ),
                   onPressed: onToggle,
                   tooltip: resource.enabled ? '禁用' : '启用',
@@ -394,7 +383,7 @@ class InstalledResourceCard extends StatelessWidget {
   Widget _buildIcon(BuildContext context) {
     final surfaceVariant = BAColors.surfaceVariantOf(context);
     final primaryColor = BAColors.primaryOf(context);
-    
+
     final IconData iconData;
     switch (resource.type) {
       case ResourceType.mod:
@@ -453,7 +442,7 @@ class InstalledResourceCard extends StatelessWidget {
   Widget _buildStatusBadge(BuildContext context) {
     final successColor = BAColors.successOf(context);
     final textSecondary = BAColors.textSecondaryOf(context);
-    
+
     final Color badgeColor = resource.enabled ? successColor : textSecondary;
     final String badgeText = resource.enabled ? '已启用' : '已禁用';
 

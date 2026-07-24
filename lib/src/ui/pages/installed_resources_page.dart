@@ -58,18 +58,14 @@ class _InstalledResourcesPageState extends State<InstalledResourcesPage>
       await _loadInstalledResources();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              resource.enabled ? '资源已禁用' : '资源已启用',
-            ),
-          ),
+          SnackBar(content: Text(resource.enabled ? '资源已禁用' : '资源已启用')),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('操作失败: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('操作失败: $e')));
       }
     }
   }
@@ -101,15 +97,15 @@ class _InstalledResourcesPageState extends State<InstalledResourcesPage>
         await _resourceManager.removeInstalledResource(resource.localId);
         await _loadInstalledResources();
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('资源已删除')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('资源已删除')));
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('删除失败: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('删除失败: $e')));
         }
       }
     }
@@ -154,9 +150,7 @@ class _InstalledResourcesPageState extends State<InstalledResourcesPage>
   Widget _buildResourceList(BuildContext context, ResourceType? filterType) {
     final resources = filterType == null
         ? _installedResources
-        : _installedResources
-            .where((r) => r.type == filterType)
-            .toList();
+        : _installedResources.where((r) => r.type == filterType).toList();
 
     if (resources.isEmpty) {
       return Center(

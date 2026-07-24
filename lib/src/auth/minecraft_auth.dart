@@ -13,7 +13,8 @@ class MinecraftAuthService {
   static const String _profileEndpoint = ApiEndpoints.minecraftProfile;
 
   /// Minecraft游戏所有权检查端点
-  static const String _entitlementsEndpoint = ApiEndpoints.minecraftEntitlements;
+  static const String _entitlementsEndpoint =
+      ApiEndpoints.minecraftEntitlements;
 
   /// 使用XSTS令牌登录Minecraft
   Future<({MinecraftToken token, MinecraftProfile profile})> loginWithXbox({
@@ -23,12 +24,8 @@ class MinecraftAuthService {
     final networkClient = NetworkClient();
     final response = await networkClient.postJson(
       _loginWithXboxEndpoint,
-      {
-        'identityToken': 'XBL3.0 x=$userHash;$xstsToken',
-      },
-      headers: {
-        'Accept': 'application/json',
-      },
+      {'identityToken': 'XBL3.0 x=$userHash;$xstsToken'},
+      headers: {'Accept': 'application/json'},
     );
 
     if (response.statusCode != 200) {
@@ -72,21 +69,34 @@ class MinecraftAuthService {
       // 进一步检查是否拥有游戏许可
       final licenseResponse = await networkClient.get(
         _entitlementsEndpoint,
-        headers: {'Authorization': 'Bearer $accessToken', 'Accept': 'application/json'},
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Accept': 'application/json',
+        },
       );
       if (licenseResponse.statusCode == 200) {
         try {
-          final licenseData = json.decode(licenseResponse.body) as Map<String, dynamic>;
+          final licenseData =
+              json.decode(licenseResponse.body) as Map<String, dynamic>;
           final items = licenseData['items'] as List<dynamic>? ?? [];
-          final hasLicense = items.any((item) => (item as Map<String, dynamic>)['name'] == 'game_minecraft');
+          final hasLicense = items.any(
+            (item) =>
+                (item as Map<String, dynamic>)['name'] == 'game_minecraft',
+          );
           if (hasLicense) {
-            throw AppException.fromCode(ErrorCodes.authOwnershipCheckFailed, detail: '已购买Minecraft但未创建角色名，请前往官网创建');
+            throw AppException.fromCode(
+              ErrorCodes.authOwnershipCheckFailed,
+              detail: '已购买Minecraft但未创建角色名，请前往官网创建',
+            );
           }
         } catch (e) {
           if (e is AppException) rethrow;
         }
       }
-      throw AppException.fromCode(ErrorCodes.authOwnershipCheckFailed, detail: '未购买Minecraft');
+      throw AppException.fromCode(
+        ErrorCodes.authOwnershipCheckFailed,
+        detail: '未购买Minecraft',
+      );
     }
 
     if (response.statusCode != 200) {
@@ -98,7 +108,7 @@ class MinecraftAuthService {
     }
 
     final Map<String, dynamic> data = json.decode(response.body);
-    
+
     MinecraftSkin? skin;
     MinecraftCape? cape;
 
@@ -114,9 +124,7 @@ class MinecraftAuthService {
     final List<dynamic> capes = data['capes'] as List<dynamic>? ?? [];
     if (capes.isNotEmpty) {
       final Map<String, dynamic> capeData = capes.first as Map<String, dynamic>;
-      cape = MinecraftCape(
-        url: capeData['url'] as String,
-      );
+      cape = MinecraftCape(url: capeData['url'] as String);
     }
 
     return MinecraftProfile(

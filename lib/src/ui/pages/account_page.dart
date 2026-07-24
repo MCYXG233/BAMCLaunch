@@ -145,9 +145,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
       // 跳转到Authlib登录页面
       if (mounted) {
         Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const _AuthlibLoginWrapper(),
-          ),
+          MaterialPageRoute(builder: (context) => const _AuthlibLoginWrapper()),
         );
       }
     }
@@ -196,10 +194,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
         ],
       ),
       actions: [
-        BASecondaryButton(
-          text: '取消',
-          onPressed: () => Navigator.pop(context),
-        ),
+        BASecondaryButton(text: '取消', onPressed: () => Navigator.pop(context)),
       ],
     );
   }
@@ -256,7 +251,11 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
                   ],
                 ),
               ),
-              Icon(Icons.arrow_forward_ios, color: BAColors.textSecondaryOf(context), size: 16),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: BAColors.textSecondaryOf(context),
+                size: 16,
+              ),
             ],
           ),
         ),
@@ -274,10 +273,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
       title: '添加离线账户',
       width: 400,
       actions: [
-        BASecondaryButton(
-          text: '取消',
-          onPressed: () => Navigator.pop(context),
-        ),
+        BASecondaryButton(text: '取消', onPressed: () => Navigator.pop(context)),
         const SizedBox(width: 12),
         BAPrimaryButton(
           text: '添加',
@@ -317,7 +313,10 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BATheme.borderRadiusSmall,
-                  borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                  borderSide: BorderSide(
+                    color: BAColors.primaryOf(context),
+                    width: 2,
+                  ),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -396,11 +395,17 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
               hintText: '输入用户名',
               border: const OutlineInputBorder(),
               enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: BAColors.borderOf(context), width: 1),
+                borderSide: BorderSide(
+                  color: BAColors.borderOf(context),
+                  width: 1,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                borderSide: BorderSide(
+                  color: BAColors.primaryOf(context),
+                  width: 2,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
@@ -466,7 +471,9 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: success ? BAColors.successOf(context) : BAColors.dangerOf(context),
+        backgroundColor: success
+            ? BAColors.successOf(context)
+            : BAColors.dangerOf(context),
         duration: const Duration(seconds: 3),
       ),
     );
@@ -491,7 +498,9 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
-        border: Border(bottom: BorderSide(color: BAColors.borderOf(context), width: 1)),
+        border: Border(
+          bottom: BorderSide(color: BAColors.borderOf(context), width: 1),
+        ),
       ),
       child: Row(
         children: [
@@ -551,7 +560,11 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.person_off, size: 64, color: BAColors.textDisabledOf(context)),
+            Icon(
+              Icons.person_off,
+              size: 64,
+              color: BAColors.textDisabledOf(context),
+            ),
             const SizedBox(height: 16),
             Text(
               '暂无账户',
@@ -593,7 +606,9 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
         color: BAColors.surfaceOf(context),
         borderRadius: BATheme.borderRadius,
         border: Border.all(
-          color: isSelected ? BAColors.primaryOf(context) : BAColors.borderOf(context),
+          color: isSelected
+              ? BAColors.primaryOf(context)
+              : BAColors.borderOf(context),
           width: isSelected ? 2 : 1,
         ),
         boxShadow: BATheme.shadowsSmall,
@@ -630,10 +645,14 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: BAColors.primaryOf(context).withOpacity(0.1),
+                                color: BAColors.primaryOf(
+                                  context,
+                                ).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
-                                  color: BAColors.primaryOf(context).withOpacity(0.3),
+                                  color: BAColors.primaryOf(
+                                    context,
+                                  ).withOpacity(0.3),
                                 ),
                               ),
                               child: Text(
@@ -655,10 +674,14 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: BAColors.secondaryOf(context).withOpacity(0.1),
+                              color: BAColors.secondaryOf(
+                                context,
+                              ).withOpacity(0.1),
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(
-                                color: BAColors.secondaryOf(context).withOpacity(0.3),
+                                color: BAColors.secondaryOf(
+                                  context,
+                                ).withOpacity(0.3),
                               ),
                             ),
                             child: Text(
@@ -765,7 +788,10 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
       }
 
       if (mounted) {
-        _showSnackBar(account.type == AccountType.microsoft ? '已登出' : '已退出登录', success: true);
+        _showSnackBar(
+          account.type == AccountType.microsoft ? '已登出' : '已退出登录',
+          success: true,
+        );
         await _loadAccounts();
       }
     } catch (e, stackTrace) {
@@ -900,7 +926,7 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
 
     try {
       final deviceCodeResponse = await _authManager.getDeviceCode();
-      
+
       if (mounted) {
         setState(() {
           _authProgress = '请在浏览器中完成登录';
@@ -993,7 +1019,10 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BATheme.borderRadiusSmall,
-                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                borderSide: BorderSide(
+                  color: BAColors.primaryOf(context),
+                  width: 2,
+                ),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -1008,10 +1037,7 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
         ],
       ),
       actions: [
-        BASecondaryButton(
-          text: '取消',
-          onPressed: () => Navigator.pop(context),
-        ),
+        BASecondaryButton(text: '取消', onPressed: () => Navigator.pop(context)),
         const SizedBox(width: 8),
         BAPrimaryButton(
           text: '确认',
@@ -1058,7 +1084,9 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
         backgroundColor: BAColors.surfaceOf(context),
         title: Text(
           'Microsoft登录',
-          style: BATypography.headlineSmall.copyWith(color: BAColors.textPrimaryOf(context)),
+          style: BATypography.headlineSmall.copyWith(
+            color: BAColors.textPrimaryOf(context),
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1067,36 +1095,48 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
             const SizedBox(height: 16),
             Text(
               '请按照以下步骤完成登录:',
-              style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+              style: BATypography.bodyMedium.copyWith(
+                color: BAColors.textSecondaryOf(context),
+              ),
             ),
             const SizedBox(height: 16),
             ListTile(
               leading: const CircleAvatar(child: Text('1')),
               title: Text(
                 '打开浏览器访问:',
-                style: BATypography.bodyMedium.copyWith(color: BAColors.textPrimaryOf(context)),
+                style: BATypography.bodyMedium.copyWith(
+                  color: BAColors.textPrimaryOf(context),
+                ),
               ),
               subtitle: SelectableText(
                 deviceCode.verificationUri,
-                style: BATypography.bodySmall.copyWith(color: BAColors.primaryOf(context)),
+                style: BATypography.bodySmall.copyWith(
+                  color: BAColors.primaryOf(context),
+                ),
               ),
             ),
             ListTile(
               leading: const CircleAvatar(child: Text('2')),
               title: Text(
                 '输入代码:',
-                style: BATypography.bodyMedium.copyWith(color: BAColors.textPrimaryOf(context)),
+                style: BATypography.bodyMedium.copyWith(
+                  color: BAColors.textPrimaryOf(context),
+                ),
               ),
               subtitle: SelectableText(
                 deviceCode.userCode,
-                style: BATypography.bodyLarge.copyWith(color: BAColors.successOf(context)),
+                style: BATypography.bodyLarge.copyWith(
+                  color: BAColors.successOf(context),
+                ),
               ),
             ),
             ListTile(
               leading: const CircleAvatar(child: Text('3')),
               title: Text(
                 '完成登录后点击继续',
-                style: BATypography.bodyMedium.copyWith(color: BAColors.textPrimaryOf(context)),
+                style: BATypography.bodyMedium.copyWith(
+                  color: BAColors.textPrimaryOf(context),
+                ),
               ),
             ),
           ],
@@ -1108,7 +1148,9 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
             },
             child: Text(
               '取消',
-              style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+              style: BATypography.bodyMedium.copyWith(
+                color: BAColors.textSecondaryOf(context),
+              ),
             ),
           ),
           ElevatedButton(
@@ -1255,7 +1297,10 @@ class _AuthlibLoginWrapperState extends State<_AuthlibLoginWrapper> {
           horizontal: 16,
           vertical: 16,
         ),
-        prefixIcon: Icon(Icons.public, color: BAColors.textSecondaryOf(context)),
+        prefixIcon: Icon(
+          Icons.public,
+          color: BAColors.textSecondaryOf(context),
+        ),
       ),
       style: BATypography.bodyMedium.copyWith(
         color: BAColors.textPrimaryOf(context),
@@ -1298,7 +1343,10 @@ class _AuthlibLoginWrapperState extends State<_AuthlibLoginWrapper> {
           horizontal: 16,
           vertical: 16,
         ),
-        prefixIcon: Icon(Icons.email_outlined, color: BAColors.textSecondaryOf(context)),
+        prefixIcon: Icon(
+          Icons.email_outlined,
+          color: BAColors.textSecondaryOf(context),
+        ),
       ),
       style: BATypography.bodyMedium.copyWith(
         color: BAColors.textPrimaryOf(context),
@@ -1341,10 +1389,15 @@ class _AuthlibLoginWrapperState extends State<_AuthlibLoginWrapper> {
           horizontal: 16,
           vertical: 16,
         ),
-        prefixIcon: Icon(Icons.lock_outline, color: BAColors.textSecondaryOf(context)),
+        prefixIcon: Icon(
+          Icons.lock_outline,
+          color: BAColors.textSecondaryOf(context),
+        ),
         suffixIcon: IconButton(
           icon: Icon(
-            _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+            _obscurePassword
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
             color: BAColors.textSecondaryOf(context),
           ),
           onPressed: () {
@@ -1503,7 +1556,9 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
       await _accountManager.updateAccount(updatedAccount);
       await _loadSkinData();
       if (mounted) {
-        NotificationManager().showSuccess('模型已切换为 ${type == SkinType.alex ? "Alex" : "Steve"}');
+        NotificationManager().showSuccess(
+          '模型已切换为 ${type == SkinType.alex ? "Alex" : "Steve"}',
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -1588,7 +1643,9 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
               skinType: widget.account.modelType,
               width: 200,
               height: 280,
-              backgroundColor: BAColors.surfaceVariantOf(context).withOpacity(0.5),
+              backgroundColor: BAColors.surfaceVariantOf(
+                context,
+              ).withOpacity(0.5),
             ),
           ),
           const SizedBox(height: 12),
@@ -1733,15 +1790,13 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
           decoration: BoxDecoration(
             color: BAColors.surfaceVariantOf(context).withOpacity(0.5),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
+            border: Border.all(
+              color: BAColors.borderOf(context).withOpacity(0.5),
+            ),
           ),
           child: Row(
             children: [
-              Icon(
-                Icons.image,
-                color: BAColors.primaryOf(context),
-                size: 20,
-              ),
+              Icon(Icons.image, color: BAColors.primaryOf(context), size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -1771,7 +1826,10 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: BAColors.primaryOf(context),
                   foregroundColor: BAColors.textOnPrimary,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -1788,7 +1846,9 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
             decoration: BoxDecoration(
               color: BAColors.dangerOf(context).withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: BAColors.dangerOf(context).withOpacity(0.3)),
+              border: Border.all(
+                color: BAColors.dangerOf(context).withOpacity(0.3),
+              ),
             ),
             child: Row(
               children: [
@@ -1826,7 +1886,10 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: BAColors.dangerOf(context),
                     foregroundColor: BAColors.textOnPrimary,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -1850,11 +1913,7 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.layers,
-            color: BAColors.secondaryOf(context),
-            size: 20,
-          ),
+          Icon(Icons.layers, color: BAColors.secondaryOf(context), size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

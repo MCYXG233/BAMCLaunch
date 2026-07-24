@@ -118,13 +118,11 @@ class ModrinthApi implements ResourceApi {
     }
 
     final networkClient = NetworkClient();
-    final uri = Uri.parse('$baseUrl/project/$id/version')
-        .replace(queryParameters: queryParams.isNotEmpty ? queryParams : null);
+    final uri = Uri.parse(
+      '$baseUrl/project/$id/version',
+    ).replace(queryParameters: queryParams.isNotEmpty ? queryParams : null);
 
-    final response = await networkClient.get(
-      uri.toString(),
-      headers: _headers,
-    );
+    final response = await networkClient.get(uri.toString(), headers: _headers);
 
     if (response.statusCode != 200) {
       throw NetworkException.fromStatusCode(response.statusCode);
@@ -137,7 +135,10 @@ class ModrinthApi implements ResourceApi {
   }
 
   @override
-  Future<ResourceVersion> getVersion(String resourceId, String versionId) async {
+  Future<ResourceVersion> getVersion(
+    String resourceId,
+    String versionId,
+  ) async {
     final networkClient = NetworkClient();
     final response = await networkClient.get(
       '$baseUrl/version/$versionId',
@@ -166,30 +167,31 @@ class ModrinthApi implements ResourceApi {
 
     final data = json.decode(response.body) as List<dynamic>;
     return data
-        .map((cat) => Category(
-              id: cat['name'] as String,
-              name: cat['name'] as String,
-              iconUrl: cat['icon'] as String?,
-            ))
+        .map(
+          (cat) => Category(
+            id: cat['name'] as String,
+            name: cat['name'] as String,
+            iconUrl: cat['icon'] as String?,
+          ),
+        )
         .toList();
   }
 
   Resource _parseSearchHit(Map<String, dynamic> hit) {
-    final categories = (hit['categories'] as List<dynamic>?)
+    final categories =
+        (hit['categories'] as List<dynamic>?)
             ?.map((c) => c as String)
             .toList() ??
         [];
 
     final type = _stringToProjectType(hit['project_type'] as String);
 
-    final loaders = (hit['loaders'] as List<dynamic>?)
-            ?.map((l) => l as String)
-            .toList() ??
+    final loaders =
+        (hit['loaders'] as List<dynamic>?)?.map((l) => l as String).toList() ??
         [];
 
-    final gameVersions = (hit['versions'] as List<dynamic>?)
-            ?.map((v) => v as String)
-            .toList() ??
+    final gameVersions =
+        (hit['versions'] as List<dynamic>?)?.map((v) => v as String).toList() ??
         [];
 
     final author = hit['author'] as String?;
@@ -213,7 +215,8 @@ class ModrinthApi implements ResourceApi {
       supportedLoaders: loaders,
       downloads: hit['downloads'] as int,
       likes: hit['follows'] as int,
-      pageUrl: '${ApiEndpoints.modrinthWebsite}/${_projectTypeToString(type)}/${hit['slug']}',
+      pageUrl:
+          '${ApiEndpoints.modrinthWebsite}/${_projectTypeToString(type)}/${hit['slug']}',
       publishedDate: DateTime.tryParse(hit['date_created'] as String? ?? ''),
       updatedDate: DateTime.tryParse(hit['date_modified'] as String? ?? ''),
       license: hit['license'] as String?,
@@ -227,24 +230,28 @@ class ModrinthApi implements ResourceApi {
       authors.add(Author(id: members, name: members));
     }
 
-    final categories = (project['categories'] as List<dynamic>?)
+    final categories =
+        (project['categories'] as List<dynamic>?)
             ?.map((c) => c as String)
             .toList() ??
         [];
 
     final type = _stringToProjectType(project['project_type'] as String);
 
-    final loaders = (project['loaders'] as List<dynamic>?)
+    final loaders =
+        (project['loaders'] as List<dynamic>?)
             ?.map((l) => l as String)
             .toList() ??
         [];
 
-    final gameVersions = (project['game_versions'] as List<dynamic>?)
+    final gameVersions =
+        (project['game_versions'] as List<dynamic>?)
             ?.map((v) => v as String)
             .toList() ??
         [];
 
-    final gallery = (project['gallery'] as List<dynamic>?)
+    final gallery =
+        (project['gallery'] as List<dynamic>?)
             ?.map((g) => g['url'] as String)
             .toList() ??
         [];
@@ -266,7 +273,8 @@ class ModrinthApi implements ResourceApi {
       supportedLoaders: loaders,
       downloads: project['downloads'] as int,
       likes: project['followers'] as int,
-      pageUrl: '${ApiEndpoints.modrinthWebsite}/${_projectTypeToString(type)}/${project['slug']}',
+      pageUrl:
+          '${ApiEndpoints.modrinthWebsite}/${_projectTypeToString(type)}/${project['slug']}',
       publishedDate: DateTime.tryParse(project['published'] as String? ?? ''),
       updatedDate: DateTime.tryParse(project['updated'] as String? ?? ''),
       license: project['license']?['name'] as String?,
@@ -302,12 +310,14 @@ class ModrinthApi implements ResourceApi {
       });
     }
 
-    final loaders = (version['loaders'] as List<dynamic>?)
+    final loaders =
+        (version['loaders'] as List<dynamic>?)
             ?.map((l) => l as String)
             .toList() ??
         [];
 
-    final gameVersions = (version['game_versions'] as List<dynamic>?)
+    final gameVersions =
+        (version['game_versions'] as List<dynamic>?)
             ?.map((v) => v as String)
             .toList() ??
         [];
@@ -316,11 +326,13 @@ class ModrinthApi implements ResourceApi {
     final depsList = version['dependencies'] as List<dynamic>?;
     if (depsList != null) {
       for (final dep in depsList) {
-        dependencies.add(VersionDependency(
-          projectId: dep['project_id'] as String?,
-          versionId: dep['version_id'] as String?,
-          dependencyType: dep['dependency_type'] as String? ?? 'required',
-        ));
+        dependencies.add(
+          VersionDependency(
+            projectId: dep['project_id'] as String?,
+            versionId: dep['version_id'] as String?,
+            dependencyType: dep['dependency_type'] as String? ?? 'required',
+          ),
+        );
       }
     }
 
@@ -330,7 +342,9 @@ class ModrinthApi implements ResourceApi {
       source: source,
       versionNumber: version['version_number'] as String? ?? '',
       name: version['name'] as String? ?? '',
-      publishedDate: DateTime.tryParse(version['date_published'] as String? ?? ''),
+      publishedDate: DateTime.tryParse(
+        version['date_published'] as String? ?? '',
+      ),
       gameVersions: gameVersions,
       loaders: loaders,
       dependencies: dependencies,

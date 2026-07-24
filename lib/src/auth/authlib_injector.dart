@@ -36,7 +36,7 @@ class AuthlibInjector {
     _logger.info('Downloading authlib-injector.jar');
     final jarPath = await getAuthlibJarPath();
     final file = File(jarPath);
-    
+
     if (await file.exists()) {
       _logger.debug('Authlib injector already exists');
       return;
@@ -56,17 +56,19 @@ class AuthlibInjector {
 
   Future<AuthServerInfo> getAuthServerInfo(String authServerUrl) async {
     _logger.debug('Getting auth server info from: $authServerUrl');
-    
+
     try {
-      final wellKnownUrl = Uri.parse(authServerUrl).resolve('.well-known/minecraft/services').toString();
+      final wellKnownUrl = Uri.parse(
+        authServerUrl,
+      ).resolve('.well-known/minecraft/services').toString();
       final response = await _networkClient.get(wellKnownUrl);
-      
+
       if (response.statusCode != 200) {
         return await _fetchLegacyMetadata(authServerUrl);
       }
-      
+
       final json = jsonDecode(response.body) as Map<String, dynamic>;
-      
+
       return AuthServerInfo(
         authUrl: authServerUrl,
         clientId: JsonUtils.getString(json['client_id']),
@@ -74,7 +76,9 @@ class AuthlibInjector {
         timestamp: DateTime.now().millisecondsSinceEpoch,
       );
     } catch (e, stackTrace) {
-      _logger.warn('Failed to get auth server info, falling back to legacy: $e');
+      _logger.warn(
+        'Failed to get auth server info, falling back to legacy: $e',
+      );
       return await _fetchLegacyMetadata(authServerUrl);
     }
   }
@@ -104,7 +108,7 @@ class AuthlibInjector {
     } catch (e) {
       _logger.debug('Legacy metadata fetch failed: $e');
     }
-    
+
     return AuthServerInfo(
       authUrl: authServerUrl,
       clientId: null,
@@ -118,15 +122,16 @@ class AuthlibInjector {
     );
   }
 
-  Future<UserProfile> authenticate(String authServerUrl, String username, String password) async {
+  Future<UserProfile> authenticate(
+    String authServerUrl,
+    String username,
+    String password,
+  ) async {
     _logger.info('Authenticating with server: $authServerUrl');
-    
+
     try {
       final body = jsonEncode({
-        'agent': {
-          'name': 'Minecraft',
-          'version': 1,
-        },
+        'agent': {'name': 'Minecraft', 'version': 1},
         'username': username,
         'password': password,
       });
@@ -136,7 +141,7 @@ class AuthlibInjector {
         headers: {'Content-Type': 'application/json'},
         body: body,
       );
-      
+
       if (response.statusCode != 200) {
         throw AppException.fromCode(
           ErrorCodes.authAuthlibFailed,
@@ -151,7 +156,8 @@ class AuthlibInjector {
       } on FormatException catch (e) {
         throw AppException.fromCode(
           ErrorCodes.networkJsonParseError,
-          detail: 'Authlib authenticate returned invalid JSON: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}',
+          detail:
+              'Authlib authenticate returned invalid JSON: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}',
           originalError: e,
         );
       }
@@ -163,9 +169,13 @@ class AuthlibInjector {
     }
   }
 
-  Future<UserProfile> refresh(String authServerUrl, String accessToken, String clientToken) async {
+  Future<UserProfile> refresh(
+    String authServerUrl,
+    String accessToken,
+    String clientToken,
+  ) async {
     _logger.debug('Refreshing token with server: $authServerUrl');
-    
+
     try {
       final body = jsonEncode({
         'accessToken': accessToken,
@@ -177,9 +187,12 @@ class AuthlibInjector {
         headers: {'Content-Type': 'application/json'},
         body: body,
       );
-      
+
       if (response.statusCode != 200) {
-        throw AppException.fromCode(ErrorCodes.authRefreshFailed, detail: 'Authlib refresh failed');
+        throw AppException.fromCode(
+          ErrorCodes.authRefreshFailed,
+          detail: 'Authlib refresh failed',
+        );
       }
 
       final Map<String, dynamic> json;
@@ -188,7 +201,8 @@ class AuthlibInjector {
       } on FormatException catch (e) {
         throw AppException.fromCode(
           ErrorCodes.networkJsonParseError,
-          detail: 'Authlib refresh returned invalid JSON: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}',
+          detail:
+              'Authlib refresh returned invalid JSON: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}',
           originalError: e,
         );
       }
@@ -202,18 +216,16 @@ class AuthlibInjector {
 
   Future<bool> validate(String authServerUrl, String accessToken) async {
     _logger.debug('Validating token with server: $authServerUrl');
-    
+
     try {
-      final body = jsonEncode({
-        'accessToken': accessToken,
-      });
+      final body = jsonEncode({'accessToken': accessToken});
 
       final response = await _networkClient.post(
         '$authServerUrl/authserver/validate',
         headers: {'Content-Type': 'application/json'},
         body: body,
       );
-      
+
       return response.statusCode == 200;
     } catch (e) {
       _logger.debug('Validation failed: $e');
@@ -248,7 +260,9 @@ class AuthServerInfo {
     return AuthServerInfo(
       authUrl: JsonUtils.getStringOrDefault(json['authUrl']),
       clientId: JsonUtils.getString(json['clientId']),
-      metadata: AuthServerMetadata.fromJson(json['metadata'] as Map<String, dynamic>),
+      metadata: AuthServerMetadata.fromJson(
+        json['metadata'] as Map<String, dynamic>,
+      ),
       timestamp: JsonUtils.getIntOrDefault(json['timestamp']),
     );
   }
@@ -314,7 +328,9 @@ class UserProfile {
     return UserProfile(
       accessToken: JsonUtils.getStringOrDefault(json['accessToken']),
       clientToken: JsonUtils.getStringOrDefault(json['clientToken']),
-      selectedProfile: Profile.fromJson(json['selectedProfile'] as Map<String, dynamic>),
+      selectedProfile: Profile.fromJson(
+        json['selectedProfile'] as Map<String, dynamic>,
+      ),
       availableProfiles: (json['availableProfiles'] as List<dynamic>)
           .map((p) => Profile.fromJson(p as Map<String, dynamic>))
           .toList(),
@@ -328,20 +344,10 @@ class Profile {
   final String? skinUrl;
   final String? capeUrl;
 
-  Profile({
-    required this.id,
-    required this.name,
-    this.skinUrl,
-    this.capeUrl,
-  });
+  Profile({required this.id, required this.name, this.skinUrl, this.capeUrl});
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'skinUrl': skinUrl,
-      'capeUrl': capeUrl,
-    };
+    return {'id': id, 'name': name, 'skinUrl': skinUrl, 'capeUrl': capeUrl};
   }
 
   factory Profile.fromJson(Map<String, dynamic> json) {

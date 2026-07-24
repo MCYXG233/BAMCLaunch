@@ -28,14 +28,16 @@ class ConflictDetector {
       if (modList.length > 1) {
         final versions = modList.map((m) => m.version ?? 'unknown').toSet();
         if (versions.length > 1) {
-          conflicts.add(ModConflict(
-            type: ConflictType.sameModDifferentVersions,
-            severity: ConflictSeverity.error,
-            title: '同一Mod存在多个版本',
-            description: '${entry.key} 存在 ${versions.length} 个不同版本',
-            involvedMods: modList,
-            suggestion: '保留最新版本，删除其他版本',
-          ));
+          conflicts.add(
+            ModConflict(
+              type: ConflictType.sameModDifferentVersions,
+              severity: ConflictSeverity.error,
+              title: '同一Mod存在多个版本',
+              description: '${entry.key} 存在 ${versions.length} 个不同版本',
+              involvedMods: modList,
+              suggestion: '保留最新版本，删除其他版本',
+            ),
+          );
         }
       }
     }
@@ -46,20 +48,24 @@ class ConflictDetector {
   List<ModConflict> _detectIncompatibleLoaders(List<ModInfo> mods) {
     final conflicts = <ModConflict>[];
 
-    final fabricQuiltMods = mods.where((m) =>
-        m.modLoader == 'fabric' || m.modLoader == 'quilt').toList();
-    final forgeMods = mods.where((m) =>
-        m.modLoader == 'forge' || m.modLoader == 'neoforge').toList();
+    final fabricQuiltMods = mods
+        .where((m) => m.modLoader == 'fabric' || m.modLoader == 'quilt')
+        .toList();
+    final forgeMods = mods
+        .where((m) => m.modLoader == 'forge' || m.modLoader == 'neoforge')
+        .toList();
 
     if (fabricQuiltMods.isNotEmpty && forgeMods.isNotEmpty) {
-      conflicts.add(ModConflict(
-        type: ConflictType.incompatibleLoaders,
-        severity: ConflictSeverity.error,
-        title: '加载器不兼容',
-        description: 'Fabric/Quilt模组与Forge/NeoForge模组不能同时使用',
-        involvedMods: [...fabricQuiltMods, ...forgeMods],
-        suggestion: '选择使用Fabric/Quilt或Forge/NeoForge模组，确保所有模组使用相同的加载器',
-      ));
+      conflicts.add(
+        ModConflict(
+          type: ConflictType.incompatibleLoaders,
+          severity: ConflictSeverity.error,
+          title: '加载器不兼容',
+          description: 'Fabric/Quilt模组与Forge/NeoForge模组不能同时使用',
+          involvedMods: [...fabricQuiltMods, ...forgeMods],
+          suggestion: '选择使用Fabric/Quilt或Forge/NeoForge模组，确保所有模组使用相同的加载器',
+        ),
+      );
     }
 
     return conflicts;
@@ -79,14 +85,16 @@ class ConflictDetector {
       if (modList.length > 1) {
         final enabledCount = modList.where((m) => m.isEnabled).length;
         if (enabledCount > 1) {
-          conflicts.add(ModConflict(
-            type: ConflictType.duplicateMods,
-            severity: ConflictSeverity.warning,
-            title: '存在重复模组',
-            description: '${entry.key} 存在 ${modList.length} 个副本',
-            involvedMods: modList,
-            suggestion: '保留一个副本，删除其他重复项',
-          ));
+          conflicts.add(
+            ModConflict(
+              type: ConflictType.duplicateMods,
+              severity: ConflictSeverity.warning,
+              title: '存在重复模组',
+              description: '${entry.key} 存在 ${modList.length} 个副本',
+              involvedMods: modList,
+              suggestion: '保留一个副本，删除其他重复项',
+            ),
+          );
         }
       }
     }
@@ -119,8 +127,9 @@ class ConflictDetector {
 
   ConflictSolution _solveSameModDifferentVersions(ModConflict conflict) {
     final sortedMods = List<ModInfo>.from(conflict.involvedMods)
-      ..sort((a, b) => _compareVersions(
-          b.version ?? '0.0.0', a.version ?? '0.0.0'));
+      ..sort(
+        (a, b) => _compareVersions(b.version ?? '0.0.0', a.version ?? '0.0.0'),
+      );
 
     final keep = sortedMods.first;
     final remove = sortedMods.skip(1).toList();
@@ -164,8 +173,12 @@ class ConflictDetector {
   }
 
   ConflictSolution _solveDuplicateMods(ModConflict conflict) {
-    final enabledMods = conflict.involvedMods.where((m) => m.isEnabled).toList();
-    final disabledMods = conflict.involvedMods.where((m) => !m.isEnabled).toList();
+    final enabledMods = conflict.involvedMods
+        .where((m) => m.isEnabled)
+        .toList();
+    final disabledMods = conflict.involvedMods
+        .where((m) => !m.isEnabled)
+        .toList();
 
     return ConflictSolution(
       conflict: conflict,
@@ -190,7 +203,9 @@ class ConflictDetector {
     final parts1 = _parseVersionParts(v1);
     final parts2 = _parseVersionParts(v2);
 
-    final maxLen = parts1.length > parts2.length ? parts1.length : parts2.length;
+    final maxLen = parts1.length > parts2.length
+        ? parts1.length
+        : parts2.length;
     for (var i = 0; i < maxLen; i++) {
       final p1 = i < parts1.length ? parts1[i] : 0;
       final p2 = i < parts2.length ? parts2[i] : 0;
@@ -201,11 +216,11 @@ class ConflictDetector {
   }
 
   List<int> _parseVersionParts(String version) {
-    final cleanVersion = version.replaceAll(RegExp(r'^[vV]'), '').split('-').first;
-    return cleanVersion
-        .split('.')
-        .map((e) => int.tryParse(e) ?? 0)
-        .toList();
+    final cleanVersion = version
+        .replaceAll(RegExp(r'^[vV]'), '')
+        .split('-')
+        .first;
+    return cleanVersion.split('.').map((e) => int.tryParse(e) ?? 0).toList();
   }
 }
 
@@ -216,10 +231,7 @@ enum ConflictType {
   dependencyConflict,
 }
 
-enum ConflictSeverity {
-  warning,
-  error,
-}
+enum ConflictSeverity { warning, error }
 
 enum SolutionAction {
   keepLatestRemoveOthers,

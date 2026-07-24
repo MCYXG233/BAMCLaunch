@@ -84,7 +84,8 @@ class JavaDownloader {
   /// 初始化Java下载器
   Future<void> initialize() async {
     try {
-      final supportDir = await _platformAdapter.getApplicationSupportDirectory();
+      final supportDir = await _platformAdapter
+          .getApplicationSupportDirectory();
       _downloadDir = Directory(path.join(supportDir, 'java_downloads'));
       _installDir = Directory(path.join(supportDir, 'java_runtime'));
 
@@ -109,15 +110,13 @@ class JavaDownloader {
       final data = await NetworkClient().getJson(
         'https://api.adoptium.net/v3/info/available_releases',
       );
-      final available = data['available_lts_releases'] as List<dynamic>? ??
+      final available =
+          data['available_lts_releases'] as List<dynamic>? ??
           data['available_releases'] as List<dynamic>? ??
           [];
       return available.map((v) {
         final version = v.toString();
-        return JavaRelease(
-          version: version,
-          vendor: 'Eclipse Temurin',
-        );
+        return JavaRelease(version: version, vendor: 'Eclipse Temurin');
       }).toList();
     } catch (e, stackTrace) {
       _logger.error('Failed to fetch available Java releases', e, stackTrace);
@@ -132,7 +131,9 @@ class JavaDownloader {
 
   /// 根据游戏版本推荐Java版本
   Future<JavaRelease?> getRecommendedJava(String gameVersion) async {
-    final recommendedVersions = JavaVersion.getRecommendedForGameVersion(gameVersion);
+    final recommendedVersions = JavaVersion.getRecommendedForGameVersion(
+      gameVersion,
+    );
     final available = await getAvailableReleases();
 
     // 按优先级遍历推荐的 Java 主版本号，查找匹配的可用版本
@@ -167,10 +168,12 @@ class JavaDownloader {
       final installedPath = await _checkExistingInstallation(release);
       if (installedPath != null) {
         _logger.info('Java ${release.version} already installed');
-        _emitProgress(JavaDownloadProgress(
-          status: JavaInstallStatus.completed,
-          message: 'Java ${release.version} already installed',
-        ));
+        _emitProgress(
+          JavaDownloadProgress(
+            status: JavaInstallStatus.completed,
+            message: 'Java ${release.version} already installed',
+          ),
+        );
         return installedPath;
       }
 
@@ -180,19 +183,24 @@ class JavaDownloader {
       }
 
       // 从 Adoptium API 获取下载信息
-      _emitProgress(JavaDownloadProgress(
-        status: JavaInstallStatus.downloading,
-        progress: 0,
-        message: '正在获取下载信息...',
-      ));
+      _emitProgress(
+        JavaDownloadProgress(
+          status: JavaInstallStatus.downloading,
+          progress: 0,
+          message: '正在获取下载信息...',
+        ),
+      );
 
-      final apiUrl = 'https://api.adoptium.net/v3/assets/latest/${release.version}/hotspot'
+      final apiUrl =
+          'https://api.adoptium.net/v3/assets/latest/${release.version}/hotspot'
           '?os=${_getOsName()}&architecture=${_getArchitecture()}'
           '&image_type=jre&vendor=eclipse';
 
       final data = await NetworkClient().getJson(apiUrl) as List<dynamic>;
       if (data.isEmpty) {
-        throw Exception('Adoptium API returned empty result for Java ${release.version}');
+        throw Exception(
+          'Adoptium API returned empty result for Java ${release.version}',
+        );
       }
 
       final binary = data[0]['binary'] as Map<String, dynamic>;
@@ -201,11 +209,13 @@ class JavaDownloader {
       final fileName = package['name'] as String;
 
       // 下载文件
-      _emitProgress(JavaDownloadProgress(
-        status: JavaInstallStatus.downloading,
-        progress: 0.1,
-        message: '正在下载 $fileName...',
-      ));
+      _emitProgress(
+        JavaDownloadProgress(
+          status: JavaInstallStatus.downloading,
+          progress: 0.1,
+          message: '正在下载 $fileName...',
+        ),
+      );
 
       final zipPath = path.join(_downloadDir!.path, fileName);
       await NetworkClient().downloadFile(
@@ -214,23 +224,31 @@ class JavaDownloader {
         onProgress: (downloaded, total) {
           if (total > 0) {
             final progress = downloaded / total;
-            _emitProgress(JavaDownloadProgress(
-              status: JavaInstallStatus.downloading,
-              progress: 0.1 + progress * 0.7,
-              message: '下载中... ${(downloaded / 1024 / 1024).toStringAsFixed(1)} MB / ${(total / 1024 / 1024).toStringAsFixed(1)} MB',
-            ));
+            _emitProgress(
+              JavaDownloadProgress(
+                status: JavaInstallStatus.downloading,
+                progress: 0.1 + progress * 0.7,
+                message:
+                    '下载中... ${(downloaded / 1024 / 1024).toStringAsFixed(1)} MB / ${(total / 1024 / 1024).toStringAsFixed(1)} MB',
+              ),
+            );
           }
         },
       );
 
       // 解压文件
-      _emitProgress(JavaDownloadProgress(
-        status: JavaInstallStatus.extracting,
-        progress: 0.8,
-        message: '正在解压...',
-      ));
+      _emitProgress(
+        JavaDownloadProgress(
+          status: JavaInstallStatus.extracting,
+          progress: 0.8,
+          message: '正在解压...',
+        ),
+      );
 
-      final extractDir = path.join(_installDir!.path, 'java-${release.version}');
+      final extractDir = path.join(
+        _installDir!.path,
+        'java-${release.version}',
+      );
       await _extractArchive(zipPath, extractDir);
 
       // 删除下载的压缩包
@@ -244,20 +262,24 @@ class JavaDownloader {
         throw Exception('Java executable not found in extracted directory');
       }
 
-      _emitProgress(JavaDownloadProgress(
-        status: JavaInstallStatus.completed,
-        progress: 1.0,
-        message: 'Java ${release.version} 安装成功！',
-      ));
+      _emitProgress(
+        JavaDownloadProgress(
+          status: JavaInstallStatus.completed,
+          progress: 1.0,
+          message: 'Java ${release.version} 安装成功！',
+        ),
+      );
 
       _logger.info('Java ${release.version} installed at $extractDir');
       return extractDir;
     } catch (e, stackTrace) {
       _logger.error('Failed to install Java ${release.version}', e, stackTrace);
-      _emitProgress(JavaDownloadProgress(
-        status: JavaInstallStatus.error,
-        error: e.toString(),
-      ));
+      _emitProgress(
+        JavaDownloadProgress(
+          status: JavaInstallStatus.error,
+          error: e.toString(),
+        ),
+      );
       return null;
     } finally {
       _isDownloading = false;
@@ -289,11 +311,9 @@ class JavaDownloader {
 
     if (archivePath.endsWith('.zip')) {
       // 解压 ZIP 文件
-      await SafeArchiveExtractor.extractZip(
-        bytes: bytes,
-        targetDir: targetDir,
-      );
-    } else if (archivePath.endsWith('.tar.gz') || archivePath.endsWith('.tgz')) {
+      await SafeArchiveExtractor.extractZip(bytes: bytes, targetDir: targetDir);
+    } else if (archivePath.endsWith('.tar.gz') ||
+        archivePath.endsWith('.tgz')) {
       // 解压 tar.gz 文件
       await SafeArchiveExtractor.extractTarGz(
         bytes: bytes,
@@ -331,10 +351,9 @@ class JavaDownloader {
           // 检查 java 可执行文件是否存在
           final javaExe = getJavaExecutable(dir.path);
           if (javaExe != null) {
-            installed.add(JavaRelease(
-              version: version,
-              vendor: 'Eclipse Temurin',
-            ));
+            installed.add(
+              JavaRelease(version: version, vendor: 'Eclipse Temurin'),
+            );
           }
         }
       }

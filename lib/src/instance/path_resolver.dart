@@ -13,9 +13,7 @@ class MinecraftPathResolver {
   /// 自定义候选路径（由调用方从 ConfigManager 传入）
   final List<String> customCandidates;
 
-  const MinecraftPathResolver({
-    this.customCandidates = const [],
-  });
+  const MinecraftPathResolver({this.customCandidates = const []});
 
   /// 解析所有候选路径（含用户自定义 + 平台默认）
   ///
@@ -54,9 +52,7 @@ class MinecraftPathResolver {
       // ~/Library/Application Support/minecraft
       final home = Platform.environment['HOME'];
       if (home != null && home.isNotEmpty) {
-        return [
-          path.join(home, 'Library', 'Application Support', 'minecraft'),
-        ];
+        return [path.join(home, 'Library', 'Application Support', 'minecraft')];
       }
       return [];
     }

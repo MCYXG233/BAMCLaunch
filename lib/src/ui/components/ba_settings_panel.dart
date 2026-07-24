@@ -90,13 +90,13 @@ class _SettingsPanelState extends State<SettingsPanel>
       vsync: this,
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
     _tabController = TabController(
       length: SettingsTab.values.length,
@@ -138,19 +138,27 @@ class _SettingsPanelState extends State<SettingsPanel>
       _gameDirectory = _configManager.getString(ConfigKeys.gameDirectory) ?? '';
       _javaPath = _configManager.getString(ConfigKeys.javaPath) ?? '';
       _memoryAllocation =
-          (_configManager.getInt(ConfigKeys.memoryAllocation) ?? BAMCConstants.recommendedMaxMemoryMB).toDouble();
+          (_configManager.getInt(ConfigKeys.memoryAllocation) ??
+                  BAMCConstants.recommendedMaxMemoryMB)
+              .toDouble();
       _autoUpdate = _configManager.getBool(ConfigKeys.autoUpdate) ?? true;
-      _downloadSource = _configManager.getString(ConfigKeys.downloadSource) ?? 'official';
-      _concurrentDownloads = _configManager.getInt(ConfigKeys.concurrentDownloads) ?? 3;
+      _downloadSource =
+          _configManager.getString(ConfigKeys.downloadSource) ?? 'official';
+      _concurrentDownloads =
+          _configManager.getInt(ConfigKeys.concurrentDownloads) ?? 3;
       _downloadPath = _configManager.getString(ConfigKeys.downloadPath) ?? '';
-      _launchAtStartup = _configManager.getBool(ConfigKeys.launchAtStartup) ?? false;
-      _minimizeToTray = _configManager.getBool(ConfigKeys.minimizeToTray) ?? true;
+      _launchAtStartup =
+          _configManager.getBool(ConfigKeys.launchAtStartup) ?? false;
+      _minimizeToTray =
+          _configManager.getBool(ConfigKeys.minimizeToTray) ?? true;
       _closeToTray = _configManager.getBool(ConfigKeys.closeToTray) ?? false;
 
-      _enableAnimation = _configManager.getBool(ConfigKeys.enableSplashAnimation) ?? true;
+      _enableAnimation =
+          _configManager.getBool(ConfigKeys.enableSplashAnimation) ?? true;
       _proxyHost = _configManager.getString(ConfigKeys.proxyHost) ?? '';
       _proxyPort = _configManager.getInt(ConfigKeys.proxyPort) ?? 0;
-      _gameWindowSize = _configManager.getString(ConfigKeys.gameWindowSize) ?? '1280x720';
+      _gameWindowSize =
+          _configManager.getString(ConfigKeys.gameWindowSize) ?? '1280x720';
       _jvmArguments = _configManager.getString(ConfigKeys.jvmArguments) ?? '';
       _gameArguments = _configManager.getString(ConfigKeys.gameArguments) ?? '';
 
@@ -171,8 +179,9 @@ class _SettingsPanelState extends State<SettingsPanel>
           _themeMode = themeModeStr;
           _colorScheme = _themeManager.currentTheme;
           _proxyHostController.text = _proxyHost;
-          _proxyPortController.text =
-              _proxyPort == 0 ? '' : _proxyPort.toString();
+          _proxyPortController.text = _proxyPort == 0
+              ? ''
+              : _proxyPort.toString();
           _jvmArgsController.text = _jvmArguments;
           _gameArgsController.text = _gameArguments;
         });
@@ -190,7 +199,8 @@ class _SettingsPanelState extends State<SettingsPanel>
       if (mounted) setState(() => _gameDirectory = dir);
       NotificationManager().showSuccess('游戏目录已保存');
     } catch (e) {
-      if (mounted) NotificationManager().showError('保存游戏目录失败', message: e.toString());
+      if (mounted)
+        NotificationManager().showError('保存游戏目录失败', message: e.toString());
     }
   }
 
@@ -200,7 +210,8 @@ class _SettingsPanelState extends State<SettingsPanel>
       if (mounted) setState(() => _javaPath = path);
       NotificationManager().showSuccess('Java路径已保存');
     } catch (e) {
-      if (mounted) NotificationManager().showError('保存Java路径失败', message: e.toString());
+      if (mounted)
+        NotificationManager().showError('保存Java路径失败', message: e.toString());
     }
   }
 
@@ -210,7 +221,8 @@ class _SettingsPanelState extends State<SettingsPanel>
       if (mounted) setState(() => _memoryAllocation = value);
       NotificationManager().showSuccess('内存分配已保存: ${value.toInt()} MB');
     } catch (e) {
-      if (mounted) NotificationManager().showError('保存内存分配失败', message: e.toString());
+      if (mounted)
+        NotificationManager().showError('保存内存分配失败', message: e.toString());
     }
   }
 
@@ -231,7 +243,8 @@ class _SettingsPanelState extends State<SettingsPanel>
       if (mounted) setState(() => _themeMode = mode);
       NotificationManager().showSuccess('主题已切换');
     } catch (e) {
-      if (mounted) NotificationManager().showError('切换主题失败', message: e.toString());
+      if (mounted)
+        NotificationManager().showError('切换主题失败', message: e.toString());
     }
   }
 
@@ -259,7 +272,8 @@ class _SettingsPanelState extends State<SettingsPanel>
       if (mounted) setState(() => _downloadSource = source);
       NotificationManager().showSuccess('下载源已保存');
     } catch (e) {
-      if (mounted) NotificationManager().showError('保存下载源失败', message: e.toString());
+      if (mounted)
+        NotificationManager().showError('保存下载源失败', message: e.toString());
     }
   }
 
@@ -269,7 +283,8 @@ class _SettingsPanelState extends State<SettingsPanel>
       if (mounted) setState(() => _concurrentDownloads = count);
       NotificationManager().showSuccess('下载线程已保存');
     } catch (e) {
-      if (mounted) NotificationManager().showError('保存下载线程失败', message: e.toString());
+      if (mounted)
+        NotificationManager().showError('保存下载线程失败', message: e.toString());
     }
   }
 
@@ -339,9 +354,7 @@ class _SettingsPanelState extends State<SettingsPanel>
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
-        border: Border(
-          bottom: BorderSide(color: BAColors.borderOf(context)),
-        ),
+        border: Border(bottom: BorderSide(color: BAColors.borderOf(context))),
       ),
       child: Row(
         children: [
@@ -352,7 +365,11 @@ class _SettingsPanelState extends State<SettingsPanel>
               gradient: BAColors.primaryGradient,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(Icons.settings, color: BAColors.textPrimaryOf(context), size: 16),
+            child: Icon(
+              Icons.settings,
+              color: BAColors.textPrimaryOf(context),
+              size: 16,
+            ),
           ),
           const SizedBox(width: 10),
           Text(
@@ -369,7 +386,11 @@ class _SettingsPanelState extends State<SettingsPanel>
           // 恢复默认按钮
           TextButton.icon(
             onPressed: _showResetDialog,
-            icon: Icon(Icons.restore, size: 14, color: BAColors.textSecondaryOf(context)),
+            icon: Icon(
+              Icons.restore,
+              size: 14,
+              color: BAColors.textSecondaryOf(context),
+            ),
             label: Text(
               '恢复默认',
               style: TextStyle(
@@ -389,7 +410,11 @@ class _SettingsPanelState extends State<SettingsPanel>
           // 关闭按钮
           IconButton(
             onPressed: _close,
-            icon: Icon(Icons.close, color: BAColors.textSecondaryOf(context), size: 20),
+            icon: Icon(
+              Icons.close,
+              color: BAColors.textSecondaryOf(context),
+              size: 20,
+            ),
             tooltip: '关闭',
             splashRadius: 18,
           ),
@@ -404,19 +429,14 @@ class _SettingsPanelState extends State<SettingsPanel>
       height: 48,
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
-        border: Border(
-          bottom: BorderSide(color: BAColors.borderOf(context)),
-        ),
+        border: Border(bottom: BorderSide(color: BAColors.borderOf(context))),
       ),
       child: TabBar(
         controller: _tabController,
         isScrollable: false,
         labelColor: Colors.white,
         unselectedLabelColor: BAColors.textSecondaryOf(context),
-        labelStyle: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-        ),
+        labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.normal,
@@ -433,7 +453,10 @@ class _SettingsPanelState extends State<SettingsPanel>
           ],
         ),
         indicatorSize: TabBarIndicatorSize.tab,
-        indicatorPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+        indicatorPadding: const EdgeInsets.symmetric(
+          horizontal: 6,
+          vertical: 5,
+        ),
         dividerColor: Colors.transparent,
         overlayColor: WidgetStateProperty.all(
           BAColors.primaryOf(context).withValues(alpha: 0.06),
@@ -490,12 +513,18 @@ class _SettingsPanelState extends State<SettingsPanel>
                 value: _launchAtStartup,
                 onChanged: (value) async {
                   try {
-                    await _configManager.setBool(ConfigKeys.launchAtStartup, value);
+                    await _configManager.setBool(
+                      ConfigKeys.launchAtStartup,
+                      value,
+                    );
                     if (!mounted) return;
                     setState(() => _launchAtStartup = value);
                   } catch (e) {
                     if (mounted) {
-                      NotificationManager().showError('保存失败', message: e.toString());
+                      NotificationManager().showError(
+                        '保存失败',
+                        message: e.toString(),
+                      );
                     }
                   }
                 },
@@ -516,12 +545,18 @@ class _SettingsPanelState extends State<SettingsPanel>
                 value: _minimizeToTray,
                 onChanged: (value) async {
                   try {
-                    await _configManager.setBool(ConfigKeys.minimizeToTray, value);
+                    await _configManager.setBool(
+                      ConfigKeys.minimizeToTray,
+                      value,
+                    );
                     if (!mounted) return;
                     setState(() => _minimizeToTray = value);
                   } catch (e) {
                     if (mounted) {
-                      NotificationManager().showError('保存失败', message: e.toString());
+                      NotificationManager().showError(
+                        '保存失败',
+                        message: e.toString(),
+                      );
                     }
                   }
                 },
@@ -547,7 +582,10 @@ class _SettingsPanelState extends State<SettingsPanel>
                     setState(() => _closeToTray = value);
                   } catch (e) {
                     if (mounted) {
-                      NotificationManager().showError('保存失败', message: e.toString());
+                      NotificationManager().showError(
+                        '保存失败',
+                        message: e.toString(),
+                      );
                     }
                   }
                 },
@@ -573,7 +611,10 @@ class _SettingsPanelState extends State<SettingsPanel>
                     setState(() => _autoUpdate = value);
                   } catch (e) {
                     if (mounted) {
-                      NotificationManager().showError('保存失败', message: e.toString());
+                      NotificationManager().showError(
+                        '保存失败',
+                        message: e.toString(),
+                      );
                     }
                   }
                 },
@@ -594,13 +635,19 @@ class _SettingsPanelState extends State<SettingsPanel>
                 value: _enableAnimation,
                 onChanged: (value) async {
                   try {
-                    await _configManager.setBool(ConfigKeys.enableSplashAnimation, value);
+                    await _configManager.setBool(
+                      ConfigKeys.enableSplashAnimation,
+                      value,
+                    );
                     if (!mounted) return;
                     setState(() => _enableAnimation = value);
                     NotificationManager().showSuccess('动画设置已保存');
                   } catch (e) {
                     if (mounted) {
-                      NotificationManager().showError('保存失败', message: e.toString());
+                      NotificationManager().showError(
+                        '保存失败',
+                        message: e.toString(),
+                      );
                     }
                   }
                 },
@@ -679,7 +726,11 @@ class _SettingsPanelState extends State<SettingsPanel>
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.memory, color: BAColors.primaryOf(context), size: 20),
+                        Icon(
+                          Icons.memory,
+                          color: BAColors.primaryOf(context),
+                          size: 20,
+                        ),
                         const SizedBox(width: 12),
                         Text(
                           '内存分配',
@@ -704,9 +755,13 @@ class _SettingsPanelState extends State<SettingsPanel>
                     SliderTheme(
                       data: SliderThemeData(
                         activeTrackColor: BAColors.primaryOf(context),
-                        inactiveTrackColor: BAColors.primaryOf(context).withValues(alpha: 0.2),
+                        inactiveTrackColor: BAColors.primaryOf(
+                          context,
+                        ).withValues(alpha: 0.2),
                         thumbColor: BAColors.primaryOf(context),
-                        overlayColor: BAColors.primaryOf(context).withValues(alpha: 0.1),
+                        overlayColor: BAColors.primaryOf(
+                          context,
+                        ).withValues(alpha: 0.1),
                       ),
                       child: Slider(
                         value: _memoryAllocation,
@@ -724,8 +779,20 @@ class _SettingsPanelState extends State<SettingsPanel>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('512 MB', style: TextStyle(color: BAColors.textSecondaryOf(context), fontSize: 11)),
-                        Text('16 GB', style: TextStyle(color: BAColors.textSecondaryOf(context), fontSize: 11)),
+                        Text(
+                          '512 MB',
+                          style: TextStyle(
+                            color: BAColors.textSecondaryOf(context),
+                            fontSize: 11,
+                          ),
+                        ),
+                        Text(
+                          '16 GB',
+                          style: TextStyle(
+                            color: BAColors.textSecondaryOf(context),
+                            fontSize: 11,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -749,20 +816,38 @@ class _SettingsPanelState extends State<SettingsPanel>
                   underline: const SizedBox(),
                   dropdownColor: BAColors.surfaceOf(context),
                   items: const [
-                    DropdownMenuItem(value: '1280x720', child: Text('1280x720')),
-                    DropdownMenuItem(value: '1920x1080', child: Text('1920x1080')),
-                    DropdownMenuItem(value: '1600x900', child: Text('1600x900')),
-                    DropdownMenuItem(value: '1366x768', child: Text('1366x768')),
+                    DropdownMenuItem(
+                      value: '1280x720',
+                      child: Text('1280x720'),
+                    ),
+                    DropdownMenuItem(
+                      value: '1920x1080',
+                      child: Text('1920x1080'),
+                    ),
+                    DropdownMenuItem(
+                      value: '1600x900',
+                      child: Text('1600x900'),
+                    ),
+                    DropdownMenuItem(
+                      value: '1366x768',
+                      child: Text('1366x768'),
+                    ),
                   ],
                   onChanged: (value) async {
                     if (value != null) {
                       try {
-                        await _configManager.setString(ConfigKeys.gameWindowSize, value);
+                        await _configManager.setString(
+                          ConfigKeys.gameWindowSize,
+                          value,
+                        );
                         if (!mounted) return;
                         setState(() => _gameWindowSize = value);
                       } catch (e) {
                         if (mounted) {
-                          NotificationManager().showError('保存失败', message: e.toString());
+                          NotificationManager().showError(
+                            '保存失败',
+                            message: e.toString(),
+                          );
                         }
                       }
                     }
@@ -784,7 +869,11 @@ class _SettingsPanelState extends State<SettingsPanel>
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.code, color: BAColors.secondaryOf(context), size: 20),
+                        Icon(
+                          Icons.code,
+                          color: BAColors.secondaryOf(context),
+                          size: 20,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -826,27 +915,42 @@ class _SettingsPanelState extends State<SettingsPanel>
                         ),
                         filled: true,
                         fillColor: BAColors.surfaceOf(context),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                          borderSide: BorderSide(
+                            color: BAColors.borderOf(context),
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                          borderSide: BorderSide(
+                            color: BAColors.borderOf(context),
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.primaryOf(context)),
+                          borderSide: BorderSide(
+                            color: BAColors.primaryOf(context),
+                          ),
                         ),
                       ),
                       onSubmitted: (value) async {
                         try {
-                          await _configManager.setString(ConfigKeys.jvmArguments, value);
+                          await _configManager.setString(
+                            ConfigKeys.jvmArguments,
+                            value,
+                          );
                           if (mounted) setState(() => _jvmArguments = value);
                         } catch (e) {
                           if (mounted) {
-                            NotificationManager().showError('保存失败', message: e.toString());
+                            NotificationManager().showError(
+                              '保存失败',
+                              message: e.toString(),
+                            );
                           }
                         }
                       },
@@ -869,7 +973,11 @@ class _SettingsPanelState extends State<SettingsPanel>
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.gamepad, color: BAColors.accentPinkOf(context), size: 20),
+                        Icon(
+                          Icons.gamepad,
+                          color: BAColors.accentPinkOf(context),
+                          size: 20,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -911,27 +1019,42 @@ class _SettingsPanelState extends State<SettingsPanel>
                         ),
                         filled: true,
                         fillColor: BAColors.surfaceOf(context),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                          borderSide: BorderSide(
+                            color: BAColors.borderOf(context),
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                          borderSide: BorderSide(
+                            color: BAColors.borderOf(context),
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.primaryOf(context)),
+                          borderSide: BorderSide(
+                            color: BAColors.primaryOf(context),
+                          ),
                         ),
                       ),
                       onSubmitted: (value) async {
                         try {
-                          await _configManager.setString(ConfigKeys.gameArguments, value);
+                          await _configManager.setString(
+                            ConfigKeys.gameArguments,
+                            value,
+                          );
                           if (mounted) setState(() => _gameArguments = value);
                         } catch (e) {
                           if (mounted) {
-                            NotificationManager().showError('保存失败', message: e.toString());
+                            NotificationManager().showError(
+                              '保存失败',
+                              message: e.toString(),
+                            );
                           }
                         }
                       },
@@ -1021,12 +1144,18 @@ class _SettingsPanelState extends State<SettingsPanel>
                     final result = await FilePicker.platform.getDirectoryPath();
                     if (result != null) {
                       try {
-                        await _configManager.setString(ConfigKeys.downloadPath, result);
+                        await _configManager.setString(
+                          ConfigKeys.downloadPath,
+                          result,
+                        );
                         if (!mounted) return;
                         setState(() => _downloadPath = result);
                       } catch (e) {
                         if (mounted) {
-                          NotificationManager().showError('保存失败', message: e.toString());
+                          NotificationManager().showError(
+                            '保存失败',
+                            message: e.toString(),
+                          );
                         }
                       }
                     }
@@ -1059,16 +1188,27 @@ class _SettingsPanelState extends State<SettingsPanel>
                 icon: Icons.palette,
                 iconColor: BAColors.primaryOf(context),
                 title: '配色方案',
-                subtitle: _colorScheme == 'blue_archive' ? '蔚蓝档案风格' : 'Minecraft 风格',
+                subtitle: _colorScheme == 'blue_archive'
+                    ? '蔚蓝档案风格'
+                    : 'Minecraft 风格',
                 trailing: DropdownButton<String>(
                   value: _colorScheme,
                   underline: const SizedBox(),
                   dropdownColor: BAColors.surfaceOf(context),
                   iconEnabledColor: BAColors.textPrimaryOf(context),
-                  style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 13),
+                  style: TextStyle(
+                    color: BAColors.textPrimaryOf(context),
+                    fontSize: 13,
+                  ),
                   items: const [
-                    DropdownMenuItem(value: 'blue_archive', child: Text('蔚蓝档案')),
-                    DropdownMenuItem(value: 'minecraft', child: Text('Minecraft')),
+                    DropdownMenuItem(
+                      value: 'blue_archive',
+                      child: Text('蔚蓝档案'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'minecraft',
+                      child: Text('Minecraft'),
+                    ),
                   ],
                   onChanged: (value) {
                     if (value != null) _saveColorScheme(value);
@@ -1093,7 +1233,10 @@ class _SettingsPanelState extends State<SettingsPanel>
                   underline: const SizedBox(),
                   dropdownColor: BAColors.surfaceOf(context),
                   iconEnabledColor: BAColors.textPrimaryOf(context),
-                  style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 13),
+                  style: TextStyle(
+                    color: BAColors.textPrimaryOf(context),
+                    fontSize: 13,
+                  ),
                   items: const [
                     DropdownMenuItem(value: 'dark', child: Text('深色')),
                     DropdownMenuItem(value: 'light', child: Text('浅色')),
@@ -1119,7 +1262,9 @@ class _SettingsPanelState extends State<SettingsPanel>
                 subtitle: '自定义应用背景',
                 trailing: TextButton(
                   onPressed: () => _showBackgroundSelector(),
-                  style: TextButton.styleFrom(foregroundColor: BAColors.textPrimaryOf(context)),
+                  style: TextButton.styleFrom(
+                    foregroundColor: BAColors.textPrimaryOf(context),
+                  ),
                   child: const Text('选择'),
                 ),
               ),
@@ -1151,7 +1296,11 @@ class _SettingsPanelState extends State<SettingsPanel>
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.language, color: BAColors.infoOf(context), size: 20),
+                        Icon(
+                          Icons.language,
+                          color: BAColors.infoOf(context),
+                          size: 20,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -1193,28 +1342,43 @@ class _SettingsPanelState extends State<SettingsPanel>
                         ),
                         filled: true,
                         fillColor: BAColors.surfaceOf(context),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                          borderSide: BorderSide(
+                            color: BAColors.borderOf(context),
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                          borderSide: BorderSide(
+                            color: BAColors.borderOf(context),
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.primaryOf(context)),
+                          borderSide: BorderSide(
+                            color: BAColors.primaryOf(context),
+                          ),
                         ),
                       ),
                       onSubmitted: (value) async {
                         try {
-                          await _configManager.setString(ConfigKeys.proxyHost, value);
+                          await _configManager.setString(
+                            ConfigKeys.proxyHost,
+                            value,
+                          );
                           if (mounted) setState(() => _proxyHost = value);
                           NotificationManager().showSuccess('代理主机已保存');
                         } catch (e) {
                           if (mounted) {
-                            NotificationManager().showError('保存失败', message: e.toString());
+                            NotificationManager().showError(
+                              '保存失败',
+                              message: e.toString(),
+                            );
                           }
                         }
                       },
@@ -1237,7 +1401,11 @@ class _SettingsPanelState extends State<SettingsPanel>
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.numbers, color: BAColors.infoOf(context), size: 20),
+                        Icon(
+                          Icons.numbers,
+                          color: BAColors.infoOf(context),
+                          size: 20,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -1280,29 +1448,44 @@ class _SettingsPanelState extends State<SettingsPanel>
                         ),
                         filled: true,
                         fillColor: BAColors.surfaceOf(context),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                          borderSide: BorderSide(
+                            color: BAColors.borderOf(context),
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.borderOf(context)),
+                          borderSide: BorderSide(
+                            color: BAColors.borderOf(context),
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: BAColors.primaryOf(context)),
+                          borderSide: BorderSide(
+                            color: BAColors.primaryOf(context),
+                          ),
                         ),
                       ),
                       onSubmitted: (value) async {
                         try {
                           final port = int.tryParse(value) ?? 0;
-                          await _configManager.setInt(ConfigKeys.proxyPort, port);
+                          await _configManager.setInt(
+                            ConfigKeys.proxyPort,
+                            port,
+                          );
                           if (mounted) setState(() => _proxyPort = port);
                           NotificationManager().showSuccess('代理端口已保存');
                         } catch (e) {
                           if (mounted) {
-                            NotificationManager().showError('保存失败', message: e.toString());
+                            NotificationManager().showError(
+                              '保存失败',
+                              message: e.toString(),
+                            );
                           }
                         }
                       },
@@ -1412,18 +1595,14 @@ class _SettingsPanelState extends State<SettingsPanel>
     );
   }
 
-  Widget _buildSettingCard({
-    required List<Widget> children,
-  }) {
+  Widget _buildSettingCard({required List<Widget> children}) {
     return Container(
       decoration: BoxDecoration(
         color: BAColors.surfaceVariantOf(context),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: BAColors.borderOf(context)),
       ),
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 
@@ -1610,12 +1789,37 @@ class _SettingsPanelState extends State<SettingsPanel>
   /// 显示开源组件对话框
   void _showOpenSourceDialog() {
     final openSourceProjects = [
-      {'name': 'Flutter', 'url': 'https://github.com/flutter/flutter', 'license': 'BSD-3-Clause'},
-      {'name': 'PCL', 'url': 'https://github.com/Meloong-Git/PCL', 'license': 'MIT'},
-      {'name': 'HMCL', 'url': 'https://github.com/HMCL-dev/HMCL', 'license': 'GPL-3.0'},
-      {'name': 'SJMCL', 'url': 'https://github.com/UNIkeEN/SJMCL', 'license': 'MIT'},
-      {'name': 'url_launcher', 'url': 'https://github.com/flutter/packages/tree/main/packages/url_launcher', 'license': 'BSD-3-Clause'},
-      {'name': 'file_picker', 'url': 'https://github.com/miguelpruivo/flutter_file_picker', 'license': 'MIT'},
+      {
+        'name': 'Flutter',
+        'url': 'https://github.com/flutter/flutter',
+        'license': 'BSD-3-Clause',
+      },
+      {
+        'name': 'PCL',
+        'url': 'https://github.com/Meloong-Git/PCL',
+        'license': 'MIT',
+      },
+      {
+        'name': 'HMCL',
+        'url': 'https://github.com/HMCL-dev/HMCL',
+        'license': 'GPL-3.0',
+      },
+      {
+        'name': 'SJMCL',
+        'url': 'https://github.com/UNIkeEN/SJMCL',
+        'license': 'MIT',
+      },
+      {
+        'name': 'url_launcher',
+        'url':
+            'https://github.com/flutter/packages/tree/main/packages/url_launcher',
+        'license': 'BSD-3-Clause',
+      },
+      {
+        'name': 'file_picker',
+        'url': 'https://github.com/miguelpruivo/flutter_file_picker',
+        'license': 'MIT',
+      },
     ];
 
     showDialog(
@@ -1623,7 +1827,11 @@ class _SettingsPanelState extends State<SettingsPanel>
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.favorite, color: BAColors.accentPinkOf(context), size: 20),
+            Icon(
+              Icons.favorite,
+              color: BAColors.accentPinkOf(context),
+              size: 20,
+            ),
             const SizedBox(width: 8),
             const Text('开源组件'),
           ],
@@ -1644,7 +1852,10 @@ class _SettingsPanelState extends State<SettingsPanel>
                   onPressed: () async {
                     final uri = Uri.parse(project['url'] as String);
                     if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      await launchUrl(
+                        uri,
+                        mode: LaunchMode.externalApplication,
+                      );
                     }
                   },
                 ),
@@ -1695,7 +1906,10 @@ class _SettingsPanelState extends State<SettingsPanel>
     try {
       await _configManager.setString(ConfigKeys.gameDirectory, '');
       await _configManager.setString(ConfigKeys.javaPath, '');
-      await _configManager.setInt(ConfigKeys.memoryAllocation, BAMCConstants.recommendedMaxMemoryMB);
+      await _configManager.setInt(
+        ConfigKeys.memoryAllocation,
+        BAMCConstants.recommendedMaxMemoryMB,
+      );
       await _configManager.setBool(ConfigKeys.autoUpdate, true);
       await _configManager.setString(ConfigKeys.downloadSource, 'official');
       await _configManager.setInt(ConfigKeys.concurrentDownloads, 3);

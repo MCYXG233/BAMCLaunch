@@ -171,28 +171,40 @@ class NetworkDiagnosticReport {
   /// 便于序列化存储或传输。
   Map<String, dynamic> toJson() => {
     'timestamp': timestamp.toIso8601String(),
-    'pingResults': pingResults.map((r) => {
-      'nodeName': r.nodeName,
-      'nodeUrl': r.nodeUrl,
-      'latencyMs': r.latencyMs,
-      'isReachable': r.isReachable,
-      'errorMessage': r.errorMessage,
-    }).toList(),
-    'dnsResults': dnsResults.map((r) => {
-      'hostname': r.hostname,
-      'ipAddresses': r.ipAddresses,
-      'resolutionTimeMs': r.resolutionTimeMs,
-      'isSuccess': r.isSuccess,
-      'errorMessage': r.errorMessage,
-    }).toList(),
-    'downloadResults': downloadResults.map((r) => {
-      'url': r.url,
-      'speedMbps': r.speedMbps,
-      'responseTimeMs': r.responseTimeMs,
-      'contentLength': r.contentLength,
-      'isSuccess': r.isSuccess,
-      'errorMessage': r.errorMessage,
-    }).toList(),
+    'pingResults': pingResults
+        .map(
+          (r) => {
+            'nodeName': r.nodeName,
+            'nodeUrl': r.nodeUrl,
+            'latencyMs': r.latencyMs,
+            'isReachable': r.isReachable,
+            'errorMessage': r.errorMessage,
+          },
+        )
+        .toList(),
+    'dnsResults': dnsResults
+        .map(
+          (r) => {
+            'hostname': r.hostname,
+            'ipAddresses': r.ipAddresses,
+            'resolutionTimeMs': r.resolutionTimeMs,
+            'isSuccess': r.isSuccess,
+            'errorMessage': r.errorMessage,
+          },
+        )
+        .toList(),
+    'downloadResults': downloadResults
+        .map(
+          (r) => {
+            'url': r.url,
+            'speedMbps': r.speedMbps,
+            'responseTimeMs': r.responseTimeMs,
+            'contentLength': r.contentLength,
+            'isSuccess': r.isSuccess,
+            'errorMessage': r.errorMessage,
+          },
+        )
+        .toList(),
     'isAllPassed': isAllPassed,
   };
 }
@@ -309,9 +321,9 @@ class NetworkDiagnostic {
       request.headers['User-Agent'] = 'BAMCLauncher/2.0.0';
 
       // 发送请求，设置10秒超时
-      final response = await _httpClient.send(request).timeout(
-        const Duration(seconds: 10),
-      );
+      final response = await _httpClient
+          .send(request)
+          .timeout(const Duration(seconds: 10));
 
       stopwatch.stop();
       // 清空响应流，释放连接资源
@@ -395,8 +407,9 @@ class NetworkDiagnostic {
 
     try {
       // 执行DNS解析，设置5秒超时
-      final addresses = await InternetAddress.lookup(hostname)
-          .timeout(const Duration(seconds: 5));
+      final addresses = await InternetAddress.lookup(
+        hostname,
+      ).timeout(const Duration(seconds: 5));
       stopwatch.stop();
 
       return DnsResult(
@@ -486,9 +499,9 @@ class NetworkDiagnostic {
       request.headers['User-Agent'] = 'BAMCLauncher/2.0.0';
 
       // 发送请求，设置15秒超时
-      final streamedResponse = await _httpClient.send(request).timeout(
-        const Duration(seconds: 15),
-      );
+      final streamedResponse = await _httpClient
+          .send(request)
+          .timeout(const Duration(seconds: 15));
 
       final statusCode = streamedResponse.statusCode;
       final contentLength = streamedResponse.contentLength ?? 0;
@@ -596,7 +609,8 @@ class NetworkDiagnostic {
     final downloadResults = await testDownloadSpeed();
 
     // 判断所有检测是否都通过
-    final isAllPassed = pingResults.every((r) => r.isReachable) &&
+    final isAllPassed =
+        pingResults.every((r) => r.isReachable) &&
         dnsResults.every((r) => r.isSuccess) &&
         downloadResults.every((r) => r.isSuccess);
 
@@ -768,10 +782,10 @@ class NetworkDiagnostic {
       final latencyClass = result.latencyMs == null
           ? 'latency-bad'
           : result.latencyMs! < 100
-              ? 'latency-good'
-              : result.latencyMs! < 200
-                  ? 'latency-medium'
-                  : 'latency-bad';
+          ? 'latency-good'
+          : result.latencyMs! < 200
+          ? 'latency-medium'
+          : 'latency-bad';
       // 确定状态图标
       final statusIcon = result.isReachable ? '✓' : '✗';
       // 确定状态文本
@@ -818,8 +832,8 @@ class NetworkDiagnostic {
       final timeClass = result.resolutionTimeMs < 100
           ? 'latency-good'
           : result.resolutionTimeMs < 500
-              ? 'latency-medium'
-              : 'latency-bad';
+          ? 'latency-medium'
+          : 'latency-bad';
       // 格式化IP地址列表
       final ips = result.ipAddresses.isNotEmpty
           ? result.ipAddresses.join(', ')
@@ -864,10 +878,10 @@ class NetworkDiagnostic {
       final speedClass = !result.isSuccess
           ? 'latency-bad'
           : result.speedMbps > 5
-              ? 'latency-good'
-              : result.speedMbps > 1
-                  ? 'latency-medium'
-                  : 'latency-bad';
+          ? 'latency-good'
+          : result.speedMbps > 1
+          ? 'latency-medium'
+          : 'latency-bad';
 
       buffer.writeln('''
             <tr>

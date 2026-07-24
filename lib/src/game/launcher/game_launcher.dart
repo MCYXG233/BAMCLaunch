@@ -126,7 +126,8 @@ class GameLauncher implements IGameLauncher {
     'UnsupportedClassVersionError': 'Java 版本不兼容。请检查是否使用了正确版本的 Java。',
     'GLFW error 65542': 'GLFW 错误：显卡驱动不兼容。请更新显卡驱动。',
     'GLFW error 65548': 'GLFW 错误：OpenGL 版本过低。请更新显卡驱动。',
-    'Could not create the Java Virtual Machine': '无法创建 Java 虚拟机。请检查 Java 路径和 JVM 参数。',
+    'Could not create the Java Virtual Machine':
+        '无法创建 Java 虚拟机。请检查 Java 路径和 JVM 参数。',
     'java.lang.StackOverflowError': '栈溢出。请检查是否有无限递归或增加栈大小。',
     'LWJGL error': 'LWJGL 初始化失败。请更新显卡驱动或检查 OpenGL 支持。',
     'Shaders not supported': '显卡不支持着色器。请关闭着色器或更新显卡驱动。',
@@ -189,7 +190,8 @@ class GameLauncher implements IGameLauncher {
   final Map<String, StreamController<GameLog>> _logControllers = {};
 
   /// 状态流控制器映射表，键为进程ID
-  final Map<String, StreamController<GameProcessStatus>> _statusControllers = {};
+  final Map<String, StreamController<GameProcessStatus>> _statusControllers =
+      {};
 
   /// 启动状态映射表，键为进程ID
   final Map<String, LaunchingState> _launchingStates = {};
@@ -207,7 +209,8 @@ class GameLauncher implements IGameLauncher {
   ///
   /// 返回一个不可修改的进程信息映射表。
   @override
-  Map<String, GameProcessInfo> get runningProcesses => Map.unmodifiable(_runningProcesses);
+  Map<String, GameProcessInfo> get runningProcesses =>
+      Map.unmodifiable(_runningProcesses);
 
   /// 初始化游戏启动器
   ///
@@ -261,14 +264,26 @@ class GameLauncher implements IGameLauncher {
     }
 
     // 生成唯一的进程ID
-    final processId = 'proc_${DateTime.now().millisecondsSinceEpoch}_${_processIdCounter++}';
-    _logger.info('Launching game: ${args.gameVersion} with process ID: $processId');
+    final processId =
+        'proc_${DateTime.now().millisecondsSinceEpoch}_${_processIdCounter++}';
+    _logger.info(
+      'Launching game: ${args.gameVersion} with process ID: $processId',
+    );
 
     // 从配置中读取启动相关设置
-    final gcStrategy = _configManager.getString(ConfigKeys.gcStrategy, defaultValue: 'auto')!;
-    final fileValidatePolicyStr = _configManager.getString(ConfigKeys.fileValidatePolicy, defaultValue: 'normal')!;
-    final launcherVisibility = _configManager.getString(ConfigKeys.launcherVisibility, defaultValue: 'always')!;
-    
+    final gcStrategy = _configManager.getString(
+      ConfigKeys.gcStrategy,
+      defaultValue: 'auto',
+    )!;
+    final fileValidatePolicyStr = _configManager.getString(
+      ConfigKeys.fileValidatePolicy,
+      defaultValue: 'normal',
+    )!;
+    final launcherVisibility = _configManager.getString(
+      ConfigKeys.launcherVisibility,
+      defaultValue: 'always',
+    )!;
+
     // 解析文件验证策略
     FileValidatePolicy fileValidatePolicy = FileValidatePolicy.normal;
     if (fileValidatePolicyStr == 'disable') {
@@ -311,10 +326,11 @@ class GameLauncher implements IGameLauncher {
       startTime: DateTime.now(),
     );
     _runningProcesses[processId] = processInfo;
-    
+
     // 创建日志和状态流控制器
     _logControllers[processId] = StreamController<GameLog>.broadcast();
-    _statusControllers[processId] = StreamController<GameProcessStatus>.broadcast();
+    _statusControllers[processId] =
+        StreamController<GameProcessStatus>.broadcast();
     _statusControllers[processId]!.add(GameProcessStatus.starting);
 
     try {
@@ -343,12 +359,16 @@ class GameLauncher implements IGameLauncher {
   /// 可能抛出：
   /// - [LaunchError.selectedJavaUnavailable] 用户指定的Java不可用
   /// - [LaunchError.noSuitableJava] 没有找到合适的Java运行时
-  Future<void> _step1SelectJava(String processId, LaunchArguments args, GameConfig gameConfig) async {
+  Future<void> _step1SelectJava(
+    String processId,
+    LaunchArguments args,
+    GameConfig gameConfig,
+  ) async {
     _updateLaunchingStep(processId, 1);
     _logger.info('Step 1: Selecting Java runtime');
 
     JavaInstallation java;
-    
+
     // 如果用户指定了Java路径，则验证并使用该路径
     if (args.javaPath.isNotEmpty) {
       final foundJava = await JavaManager.instance.getJavaInfo(args.javaPath);
@@ -358,7 +378,9 @@ class GameLauncher implements IGameLauncher {
       java = foundJava;
     } else {
       // 否则自动选择与游戏版本兼容的Java
-      final foundJava = await JavaManager.instance.getJavaForGameVersion(args.gameVersion);
+      final foundJava = await JavaManager.instance.getJavaForGameVersion(
+        args.gameVersion,
+      );
       if (foundJava == null) {
         throw LaunchError.noSuitableJava;
       }
@@ -379,10 +401,11 @@ class GameLauncher implements IGameLauncher {
     }
 
     // 更新启动状态，记录选中的Java信息
-    _updateLaunchingState(processId, (state) => state.copyWith(
-      javaPath: java.path,
-      javaVersion: java.majorVersion,
-    ));
+    _updateLaunchingState(
+      processId,
+      (state) =>
+          state.copyWith(javaPath: java.path, javaVersion: java.majorVersion),
+    );
   }
 
   /// 启动步骤2：验证游戏文件
@@ -398,7 +421,11 @@ class GameLauncher implements IGameLauncher {
   /// - [FileValidatePolicy.disable] 禁用验证
   /// - [FileValidatePolicy.normal] 标准验证（默认）
   /// - [FileValidatePolicy.full] 完整验证
-  Future<void> _step2ValidateFiles(String processId, LaunchArguments args, GameConfig gameConfig) async {
+  Future<void> _step2ValidateFiles(
+    String processId,
+    LaunchArguments args,
+    GameConfig gameConfig,
+  ) async {
     _updateLaunchingStep(processId, 2);
     _logger.info('Step 2: Validating game files');
 
@@ -407,11 +434,16 @@ class GameLauncher implements IGameLauncher {
 
     // 验证所有游戏文件
     final invalidFiles = await GameFileValidator.instance.validateAll(
-      versionJson, args.gameDirectory, gameConfig.fileValidatePolicy);
+      versionJson,
+      args.gameDirectory,
+      gameConfig.fileValidatePolicy,
+    );
 
     // 如果存在无效文件，触发修复下载
     if (invalidFiles.isNotEmpty) {
-      _logger.warn('Found ${invalidFiles.length} invalid files, triggering patch');
+      _logger.warn(
+        'Found ${invalidFiles.length} invalid files, triggering patch',
+      );
       await _patchFiles(processId, invalidFiles);
     }
 
@@ -423,9 +455,10 @@ class GameLauncher implements IGameLauncher {
     );
 
     // 更新启动状态，记录版本JSON
-    _updateLaunchingState(processId, (state) => state.copyWith(
-      versionJson: versionJson.toJson(),
-    ));
+    _updateLaunchingState(
+      processId,
+      (state) => state.copyWith(versionJson: versionJson.toJson()),
+    );
   }
 
   /// 修复缺失或损坏的游戏文件
@@ -434,7 +467,10 @@ class GameLauncher implements IGameLauncher {
   ///
   /// [processId] 进程ID（用于日志记录）
   /// [invalidFiles] 无效文件列表
-  Future<void> _patchFiles(String processId, List<InvalidFile> invalidFiles) async {
+  Future<void> _patchFiles(
+    String processId,
+    List<InvalidFile> invalidFiles,
+  ) async {
     _logger.info('Patching ${invalidFiles.length} files');
     for (final file in invalidFiles) {
       _logger.debug('Downloading missing file: ${file.path}');
@@ -457,7 +493,11 @@ class GameLauncher implements IGameLauncher {
   ///
   /// 可能抛出：
   /// - [LaunchError.playerValidationFailed] 玩家身份验证失败且无法刷新令牌
-  Future<void> _step3ValidatePlayer(String processId, LaunchArguments args, GameConfig gameConfig) async {
+  Future<void> _step3ValidatePlayer(
+    String processId,
+    LaunchArguments args,
+    GameConfig gameConfig,
+  ) async {
     _updateLaunchingStep(processId, 3);
     _logger.info('Step 3: Validating player authentication');
 
@@ -485,12 +525,15 @@ class GameLauncher implements IGameLauncher {
     }
 
     // 更新启动状态，记录账户信息
-    _updateLaunchingState(processId, (state) => state.copyWith(
-      accountId: account.id,
-      accountName: account.username,
-      accountUuid: account.uuid,
-      accountToken: account.accessToken,
-    ));
+    _updateLaunchingState(
+      processId,
+      (state) => state.copyWith(
+        accountId: account.id,
+        accountName: account.username,
+        accountUuid: account.uuid,
+        accountToken: account.accessToken,
+      ),
+    );
   }
 
   /// 启动步骤4：启动游戏进程
@@ -504,7 +547,11 @@ class GameLauncher implements IGameLauncher {
   /// 可能抛出：
   /// - [LaunchError.launchingStateNotFound] 启动状态丢失
   /// - [LaunchError.processStartFailed] 进程启动失败
-  Future<void> _step4LaunchGame(String processId, LaunchArguments args, GameConfig gameConfig) async {
+  Future<void> _step4LaunchGame(
+    String processId,
+    LaunchArguments args,
+    GameConfig gameConfig,
+  ) async {
     _updateLaunchingStep(processId, 4);
     _logger.info('Step 4: Launching game');
 
@@ -531,7 +578,9 @@ class GameLauncher implements IGameLauncher {
     );
 
     // 导出命令字符串用于日志记录
-    final fullCommandStr = argumentBuilder.exportFullLaunchCommand(command: command);
+    final fullCommandStr = argumentBuilder.exportFullLaunchCommand(
+      command: command,
+    );
     _logger.debug('Launch command: $fullCommandStr');
 
     // 启动游戏进程
@@ -559,17 +608,19 @@ class GameLauncher implements IGameLauncher {
     _statusControllers[processId]!.add(GameProcessStatus.running);
 
     // 更新启动状态
-    _updateLaunchingState(processId, (state) => state.copyWith(
-      fullCommand: fullCommandStr,
-      pid: process!.pid,
-    ));
+    _updateLaunchingState(
+      processId,
+      (state) => state.copyWith(fullCommand: fullCommandStr, pid: process!.pid),
+    );
 
     // 发布游戏启动事件
-    _eventBus.publish(GameLaunchedEvent(
-      processId: processId,
-      version: args.gameVersion,
-      username: args.account.username,
-    ));
+    _eventBus.publish(
+      GameLaunchedEvent(
+        processId: processId,
+        version: args.gameVersion,
+        username: args.account.username,
+      ),
+    );
 
     // 根据配置处理启动器窗口可见性
     await _handleLauncherVisibility(gameConfig.launcherVisibility);
@@ -631,7 +682,9 @@ class GameLauncher implements IGameLauncher {
     // 根据平台选择不同的终止方式
     if (Platform.isWindows) {
       // Windows 使用 taskkill 强制终止进程
-      unawaited(Process.run('taskkill', ['/F', '/PID', process.pid.toString()]));
+      unawaited(
+        Process.run('taskkill', ['/F', '/PID', process.pid.toString()]),
+      );
     } else {
       // 其他平台发送终止信号
       process.kill(ProcessSignal.sigterm);
@@ -721,9 +774,13 @@ class GameLauncher implements IGameLauncher {
       if (!logDir.existsSync()) {
         logDir.createSync(recursive: true);
       }
-      final logFile = File('${processInfo.arguments.gameDirectory}/logs/launcher_${processId}.log');
+      final logFile = File(
+        '${processInfo.arguments.gameDirectory}/logs/launcher_${processId}.log',
+      );
       logSink = logFile.openWrite(mode: FileMode.append);
-      logSink.writeln('=== Launcher Log - Process $processId - ${DateTime.now().toIso8601String()} ===');
+      logSink.writeln(
+        '=== Launcher Log - Process $processId - ${DateTime.now().toIso8601String()} ===',
+      );
     } catch (e) {
       _logger.warn('Failed to open log file: $e');
     }
@@ -750,7 +807,9 @@ class GameLauncher implements IGameLauncher {
     process.exitCode.then((_) {
       stdoutSubscription.cancel();
       stderrSubscription.cancel();
-      logSink?.writeln('=== Log ended - ${DateTime.now().toIso8601String()} ===');
+      logSink?.writeln(
+        '=== Log ended - ${DateTime.now().toIso8601String()} ===',
+      );
       logSink?.close();
     });
   }
@@ -764,7 +823,12 @@ class GameLauncher implements IGameLauncher {
   /// [data] 输出数据
   /// [source] 输出来源（'stdout' 或 'stderr'）
   /// [logSink] 日志文件写入器（可选）
-  void _handleOutput(String processId, String data, String source, [IOSink? logSink]) {
+  void _handleOutput(
+    String processId,
+    String data,
+    String source, [
+    IOSink? logSink,
+  ]) {
     final processInfo = _runningProcesses[processId];
     if (processInfo == null) return;
 
@@ -824,7 +888,9 @@ class GameLauncher implements IGameLauncher {
           final patterns = _detectedCrashPatterns[processId]!;
           if (!patterns.containsKey(entry.key)) {
             patterns[entry.key] = entry.value;
-            _logger.warn('Crash pattern matched: ${entry.key} -> ${entry.value}');
+            _logger.warn(
+              'Crash pattern matched: ${entry.key} -> ${entry.value}',
+            );
           }
         }
       }
@@ -879,7 +945,10 @@ class GameLauncher implements IGameLauncher {
   /// [maxLogLines] 收集的最大日志行数，默认 50
   ///
   /// 返回格式化的诊断报告字符串。
-  Future<String> _analyzeCrashLog(String processId, {int maxLogLines = 50}) async {
+  Future<String> _analyzeCrashLog(
+    String processId, {
+    int maxLogLines = 50,
+  }) async {
     final processInfo = _runningProcesses[processId];
     final matchedPatterns = _detectedCrashPatterns[processId] ?? {};
     final buffer = StringBuffer();
@@ -942,11 +1011,13 @@ class GameLauncher implements IGameLauncher {
     _logger.info('Crash diagnostic report generated for process $processId');
 
     // 通过 EventBus 发布诊断事件，使 UI 层能够获取诊断结果
-    _eventBus.publish(CrashDiagnosticEvent(
-      processId: processId,
-      matchedPatterns: Map.unmodifiable(matchedPatterns),
-      diagnosticReport: report,
-    ));
+    _eventBus.publish(
+      CrashDiagnosticEvent(
+        processId: processId,
+        matchedPatterns: Map.unmodifiable(matchedPatterns),
+        diagnosticReport: report,
+      ),
+    );
 
     return report;
   }
@@ -974,14 +1045,19 @@ class GameLauncher implements IGameLauncher {
     if (readyKeywords.any((keyword) => lower.contains(keyword))) {
       _logger.info('Game is ready');
       processInfo.readyTime = DateTime.now();
-      _updateLaunchingState(processId, (state) => state.copyWith(readyTime: DateTime.now()));
-      
+      _updateLaunchingState(
+        processId,
+        (state) => state.copyWith(readyTime: DateTime.now()),
+      );
+
       // 发布游戏就绪事件
-      _eventBus.publish(GameReadyEvent(
-        processId: processId,
-        version: processInfo.arguments.gameVersion,
-        username: processInfo.arguments.account.username,
-      ));
+      _eventBus.publish(
+        GameReadyEvent(
+          processId: processId,
+          version: processInfo.arguments.gameVersion,
+          username: processInfo.arguments.account.username,
+        ),
+      );
     }
   }
 
@@ -1025,7 +1101,9 @@ class GameLauncher implements IGameLauncher {
       // 正常退出
       processInfo.status = GameProcessStatus.stopped;
       _statusControllers[processId]?.add(GameProcessStatus.stopped);
-      _eventBus.publish(GameStoppedEvent(processId: processId, exitCode: exitCode));
+      _eventBus.publish(
+        GameStoppedEvent(processId: processId, exitCode: exitCode),
+      );
       await _restoreLauncherVisibility();
       await _recordPlayTime(processId);
     } else {
@@ -1037,11 +1115,16 @@ class GameLauncher implements IGameLauncher {
       // 分析崩溃日志，生成诊断报告并发布 CrashDiagnosticEvent
       await _analyzeCrashLog(processId);
 
-      _eventBus.publish(GameCrashedEvent(
-        processId: processId,
-        error: 'Exit code: $exitCode',
-        logs: processInfo.getRecentLogs(50).map((log) => log.format()).toList(),
-      ));
+      _eventBus.publish(
+        GameCrashedEvent(
+          processId: processId,
+          error: 'Exit code: $exitCode',
+          logs: processInfo
+              .getRecentLogs(50)
+              .map((log) => log.format())
+              .toList(),
+        ),
+      );
     }
 
     _cleanupProcess(processId);
@@ -1060,12 +1143,14 @@ class GameLauncher implements IGameLauncher {
     if (processInfo.readyTime != null && processInfo.stopTime != null) {
       final playTime = processInfo.stopTime!.difference(processInfo.readyTime!);
       _logger.info('Recorded play time: ${playTime.inSeconds} seconds');
-      
+
       // 发布游戏时长记录事件
-      _eventBus.publish(PlayTimeRecordedEvent(
-        version: processInfo.arguments.gameVersion,
-        playTime: playTime,
-      ));
+      _eventBus.publish(
+        PlayTimeRecordedEvent(
+          version: processInfo.arguments.gameVersion,
+          playTime: playTime,
+        ),
+      );
 
       // 尝试更新实例的游戏时长统计
       try {
@@ -1077,7 +1162,8 @@ class GameLauncher implements IGameLauncher {
           );
           await instanceManager.updateInstance(
             id: instance.id,
-            playTimeSeconds: (instance.playTimeSeconds ?? 0) + playTime.inSeconds,
+            playTimeSeconds:
+                (instance.playTimeSeconds ?? 0) + playTime.inSeconds,
           );
         } catch (e) {
           // 实例未找到，这是正常情况，不需要处理
@@ -1095,7 +1181,11 @@ class GameLauncher implements IGameLauncher {
   /// [processId] 进程ID
   /// [error] 错误对象
   /// [stackTrace] 堆栈跟踪
-  void _handleLaunchError(String processId, Object error, StackTrace stackTrace) {
+  void _handleLaunchError(
+    String processId,
+    Object error,
+    StackTrace stackTrace,
+  ) {
     _logger.error('Failed to launch game', error, stackTrace);
     final processInfo = _runningProcesses[processId];
     if (processInfo == null) return;
@@ -1105,12 +1195,11 @@ class GameLauncher implements IGameLauncher {
     processInfo.errorMessage = error.toString();
     processInfo.stopTime = DateTime.now();
     _statusControllers[processId]?.add(GameProcessStatus.crashed);
-    
+
     // 发布崩溃事件
-    _eventBus.publish(GameCrashedEvent(
-      processId: processId,
-      error: error.toString(),
-    ));
+    _eventBus.publish(
+      GameCrashedEvent(processId: processId, error: error.toString()),
+    );
 
     _cleanupProcess(processId);
   }
@@ -1122,7 +1211,10 @@ class GameLauncher implements IGameLauncher {
   /// [processId] 进程ID
   /// [step] 步骤编号（1-4）
   void _updateLaunchingStep(String processId, int step) {
-    _updateLaunchingState(processId, (state) => state.copyWith(currentStep: step));
+    _updateLaunchingState(
+      processId,
+      (state) => state.copyWith(currentStep: step),
+    );
   }
 
   /// 更新启动状态
@@ -1131,7 +1223,10 @@ class GameLauncher implements IGameLauncher {
   ///
   /// [processId] 进程ID
   /// [updater] 状态更新函数
-  void _updateLaunchingState(String processId, LaunchingState Function(LaunchingState) updater) {
+  void _updateLaunchingState(
+    String processId,
+    LaunchingState Function(LaunchingState) updater,
+  ) {
     final state = _launchingStates[processId];
     if (state == null) return;
     _launchingStates[processId] = updater(state);

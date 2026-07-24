@@ -128,7 +128,9 @@ class _BATextFieldState extends State<BATextField> {
         ? BAColors.dangerOf(context)
         : (_isFocused
               ? BAColors.primaryOf(context)
-              : (_isHovered ? BAColors.borderOf(context) : BAColors.borderOf(context)));
+              : (_isHovered
+                    ? BAColors.borderOf(context)
+                    : BAColors.borderOf(context)));
 
     final shadowOpacity = _isFocused ? 0.4 : 0.2;
 
@@ -160,7 +162,9 @@ class _BATextFieldState extends State<BATextField> {
               boxShadow: widget.enabled
                   ? [
                       BoxShadow(
-                        color: BAColors.shadowOf(context).withOpacity(shadowOpacity),
+                        color: BAColors.shadowOf(
+                          context,
+                        ).withOpacity(shadowOpacity),
                         blurRadius: _isFocused ? 12 : 6,
                         offset: Offset(0, _isFocused ? 4 : 2),
                       ),
@@ -226,7 +230,9 @@ class _BATextFieldState extends State<BATextField> {
           const SizedBox(height: 6),
           Text(
             widget.errorText!,
-            style: BATypography.bodySmall.copyWith(color: BAColors.dangerOf(context)),
+            style: BATypography.bodySmall.copyWith(
+              color: BAColors.dangerOf(context),
+            ),
           ),
         ],
       ],
@@ -266,12 +272,18 @@ class _BASwitchState extends State<BASwitch> {
   @override
   Widget build(BuildContext context) {
     final trackColor = widget.value
-        ? (widget.disabled ? BAColors.primaryDarkOf(context) : BAColors.primaryOf(context))
-        : (widget.disabled ? BAColors.surfaceVariantOf(context) : BAColors.surfaceOf(context));
+        ? (widget.disabled
+              ? BAColors.primaryDarkOf(context)
+              : BAColors.primaryOf(context))
+        : (widget.disabled
+              ? BAColors.surfaceVariantOf(context)
+              : BAColors.surfaceOf(context));
 
     final thumbColor = widget.value
         ? Colors.white
-        : (widget.disabled ? BAColors.textDisabledOf(context) : BAColors.textSecondaryOf(context));
+        : (widget.disabled
+              ? BAColors.textDisabledOf(context)
+              : BAColors.textSecondaryOf(context));
 
     final shadowOpacity = widget.value && !widget.disabled ? 0.4 : 0.2;
 
@@ -315,7 +327,9 @@ class _BASwitchState extends State<BASwitch> {
                     ? null
                     : [
                         BoxShadow(
-                          color: BAColors.shadowOf(context).withOpacity(shadowOpacity),
+                          color: BAColors.shadowOf(
+                            context,
+                          ).withOpacity(shadowOpacity),
                           blurRadius: 6,
                           offset: const Offset(0, 2),
                         ),
@@ -339,7 +353,9 @@ class _BASwitchState extends State<BASwitch> {
                             ? null
                             : [
                                 BoxShadow(
-                                  color: BAColors.shadowOf(context).withOpacity(0.3),
+                                  color: BAColors.shadowOf(
+                                    context,
+                                  ).withOpacity(0.3),
                                   blurRadius: 4,
                                   offset: const Offset(0, 1),
                                 ),

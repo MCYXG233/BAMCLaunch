@@ -58,9 +58,9 @@ class Account {
   static String generateId() {
     final random = Random();
     String hexChars(int count) => List.generate(
-          count,
-          (_) => '0123456789abcdef'[random.nextInt(16)],
-        ).join();
+      count,
+      (_) => '0123456789abcdef'[random.nextInt(16)],
+    ).join();
     return '${hexChars(8)}-${hexChars(4)}-4${hexChars(3)}-'
         '${'89ab'[random.nextInt(4)]}${hexChars(3)}-${hexChars(12)}';
   }

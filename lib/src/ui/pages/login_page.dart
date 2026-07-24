@@ -26,7 +26,8 @@ class _LoginPageState extends State<LoginPage> {
   final AccountManager _accountManager = AccountManager();
   bool _isAuthenticating = false;
   String? _authProgress;
-  final TextEditingController _offlineUsernameController = TextEditingController();
+  final TextEditingController _offlineUsernameController =
+      TextEditingController();
   bool _showOfflineLogin = false;
   StreamSubscription<String>? _redirectSubscription;
 
@@ -86,7 +87,9 @@ class _LoginPageState extends State<LoginPage> {
           }
 
           // 提取授权代码
-          final authorizationCode = _authManager.extractAuthorizationCode(redirectUrl);
+          final authorizationCode = _authManager.extractAuthorizationCode(
+            redirectUrl,
+          );
           if (authorizationCode == null) {
             if (mounted) {
               _showErrorSnackBar('授权失败：无法提取授权代码');
@@ -172,10 +175,7 @@ class _LoginPageState extends State<LoginPage> {
         ],
       ),
       actions: [
-        BASecondaryButton(
-          text: '取消',
-          onPressed: () => Navigator.pop(context),
-        ),
+        BASecondaryButton(text: '取消', onPressed: () => Navigator.pop(context)),
         const SizedBox(width: 8),
         BAPrimaryButton(
           text: '确认',
@@ -316,10 +316,7 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: BAColors.backgroundOf(context),
       body: Column(
         children: [
-          CustomTitleBar(
-            title: '登录',
-            showWindowControls: true,
-          ),
+          CustomTitleBar(title: '登录', showWindowControls: true),
           Expanded(
             child: Center(
               child: SingleChildScrollView(
@@ -368,11 +365,7 @@ class _LoginPageState extends State<LoginPage> {
             color: BAColors.primary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(32),
           ),
-          child: Icon(
-            Icons.sports_esports,
-            size: 64,
-            color: BAColors.primary,
-          ),
+          child: Icon(Icons.sports_esports, size: 64, color: BAColors.primary),
         ),
         const SizedBox(height: 24),
         Text(
@@ -403,14 +396,8 @@ class _LoginPageState extends State<LoginPage> {
       leadingIcon: Container(
         width: 24,
         height: 24,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-        ),
-        child: Icon(
-            Icons.window,
-            size: 18,
-            color: BAColors.primary,
-          ),
+        decoration: const BoxDecoration(color: Colors.white),
+        child: Icon(Icons.window, size: 18, color: BAColors.primary),
       ),
     );
   }
@@ -420,10 +407,7 @@ class _LoginPageState extends State<LoginPage> {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 1,
-            color: BAColors.borderOf(context),
-          ),
+          child: Container(height: 1, color: BAColors.borderOf(context)),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -435,10 +419,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         Expanded(
-          child: Container(
-            height: 1,
-            color: BAColors.borderOf(context),
-          ),
+          child: Container(height: 1, color: BAColors.borderOf(context)),
         ),
       ],
     );
@@ -457,10 +438,7 @@ class _LoginPageState extends State<LoginPage> {
             },
       height: 56,
       width: double.infinity,
-      leadingIcon: Icon(
-        Icons.person_outline,
-        color: BAColors.secondary,
-      ),
+      leadingIcon: Icon(Icons.person_outline, color: BAColors.secondary),
     );
   }
 

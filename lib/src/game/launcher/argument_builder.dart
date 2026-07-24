@@ -127,7 +127,10 @@ class ArgumentBuilder {
   }
 
   String _camelToSnake(String s) {
-    return s.replaceAllMapped(RegExp(r'([A-Z])'), (m) => '_${m[1]!.toLowerCase()}');
+    return s.replaceAllMapped(
+      RegExp(r'([A-Z])'),
+      (m) => '_${m[1]!.toLowerCase()}',
+    );
   }
 
   List<String> buildJvmArguments({
@@ -184,7 +187,9 @@ class ArgumentBuilder {
       final hasNonAscii = nativesDirectory.codeUnits.any((c) => c > 127);
       if (hasNonAscii) {
         // 在临时 ASCII 路径中创建目录作为备用
-        final tempDir = Directory.systemTemp.createTempSync('bamclaunch_natives_');
+        final tempDir = Directory.systemTemp.createTempSync(
+          'bamclaunch_natives_',
+        );
         resolvedNativesPath = tempDir.path;
         // 注意：需要在启动前将 native 文件复制到此临时目录
       }
@@ -196,7 +201,9 @@ class ArgumentBuilder {
 
     if (!gameConfig.noJvmArgs) {
       if (isWindows) {
-        args.add('-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump');
+        args.add(
+          '-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump',
+        );
       }
 
       if (clientJarPath != null) {
@@ -250,10 +257,7 @@ class ArgumentBuilder {
           '-Dsun.stderr.encoding=UTF-8',
         ]);
       } else {
-        args.addAll([
-          '-Dstdout.encoding=UTF-8',
-          '-Dstderr.encoding=UTF-8',
-        ]);
+        args.addAll(['-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8']);
       }
 
       // Java 版本特定兼容性参数
@@ -269,10 +273,14 @@ class ArgumentBuilder {
       args.addAll(gameConfig.jvmArgs);
     }
 
-    if (authServerUrl != null && authServerMeta != null && authlibJarPath != null) {
+    if (authServerUrl != null &&
+        authServerMeta != null &&
+        authlibJarPath != null) {
       args.add('-javaagent:$authlibJarPath=$authServerUrl');
       args.add('-Dauthlibinjector.side=client');
-      args.add('-Dauthlibinjector.yggdrasil.prefetched=${_base64Encode(authServerMeta)}');
+      args.add(
+        '-Dauthlibinjector.yggdrasil.prefetched=${_base64Encode(authServerMeta)}',
+      );
     }
 
     if (gameConfig.useLwjglUnsafeAgent && unsafeAgentPath != null) {
@@ -355,10 +363,17 @@ class ArgumentBuilder {
 
     if (quickPlaySingleplayer != null && quickPlaySingleplayer.isNotEmpty) {
       processedArgs.addAll(['--quickPlaySingleplayer', quickPlaySingleplayer]);
-    } else if (quickPlayMultiplayer != null && quickPlayMultiplayer.isNotEmpty) {
+    } else if (quickPlayMultiplayer != null &&
+        quickPlayMultiplayer.isNotEmpty) {
       processedArgs.addAll(['--quickPlayMultiplayer', quickPlayMultiplayer]);
-    } else if (gameConfig.autoJoinServer && gameConfig.serverAddress.isNotEmpty) {
-      processedArgs.addAll(['--server', gameConfig.serverAddress, '--port', gameConfig.serverPort.toString()]);
+    } else if (gameConfig.autoJoinServer &&
+        gameConfig.serverAddress.isNotEmpty) {
+      processedArgs.addAll([
+        '--server',
+        gameConfig.serverAddress,
+        '--port',
+        gameConfig.serverPort.toString(),
+      ]);
     }
 
     // 添加皮肤模型参数
@@ -368,7 +383,9 @@ class ArgumentBuilder {
     }
 
     if (gameConfig.minecraftArgument.isNotEmpty) {
-      processedArgs.addAll(_splitMinecraftArguments(gameConfig.minecraftArgument));
+      processedArgs.addAll(
+        _splitMinecraftArguments(gameConfig.minecraftArgument),
+      );
     }
 
     return processedArgs;
@@ -457,11 +474,19 @@ class ArgumentBuilder {
       }
     }
 
-    final jarPath = path.join(gameDirectory, 'versions', versionJson.id, '${versionJson.id}.jar');
+    final jarPath = path.join(
+      gameDirectory,
+      'versions',
+      versionJson.id,
+      '${versionJson.id}.jar',
+    );
     if (await File(jarPath).exists()) {
       paths.add(jarPath);
     } else {
-      throw AppException.fromCode(ErrorCodes.fileNotFound, detail: 'Minecraft JAR not found: $jarPath');
+      throw AppException.fromCode(
+        ErrorCodes.fileNotFound,
+        detail: 'Minecraft JAR not found: $jarPath',
+      );
     }
 
     return paths;
@@ -496,7 +521,9 @@ class ArgumentBuilder {
   bool _osMatches(OsRule os, PlatformInfo platform) {
     if (os.name != null && os.name != platform.os.name) return false;
     if (os.arch != null && os.arch != platform.arch.name) return false;
-    if (os.version != null && !RegExp(os.version!).hasMatch(platform.osVersion ?? '')) return false;
+    if (os.version != null &&
+        !RegExp(os.version!).hasMatch(platform.osVersion ?? ''))
+      return false;
     return true;
   }
 
@@ -527,7 +554,9 @@ class ArgumentBuilder {
       assetsIndexName: versionJson.assetIndex?.id ?? 'legacy',
       gameDirectory: gameDirectory,
       versionName: versionJson.id,
-      versionType: gameConfig.customInfo.isNotEmpty ? gameConfig.customInfo : 'BAMC Launcher',
+      versionType: gameConfig.customInfo.isNotEmpty
+          ? gameConfig.customInfo
+          : 'BAMC Launcher',
       nativesDirectory: nativesDir,
       launcherName: 'BAMC Launcher',
       launcherVersion: '1.0.0',
@@ -544,7 +573,9 @@ class ArgumentBuilder {
       resolutionWidth: gameConfig.resolutionWidth,
       resolutionHeight: gameConfig.resolutionHeight,
       quickPlaySingleplayer: quickPlaySingleplayer ?? '',
-      quickPlayMultiplayer: quickPlayMultiplayer ?? (gameConfig.autoJoinServer ? gameConfig.serverAddress : ''),
+      quickPlayMultiplayer:
+          quickPlayMultiplayer ??
+          (gameConfig.autoJoinServer ? gameConfig.serverAddress : ''),
       quickPlayRealms: '',
       quickPlayPath: '',
     );
@@ -561,7 +592,9 @@ class ArgumentBuilder {
       authlibJarPath: authlibJarPath,
       authServerUrl: authServerUrl,
       authServerMeta: authServerMeta,
-      unsafeAgentPath: gameConfig.useLwjglUnsafeAgent ? path.join(librariesDir, 'lwjgl-unsafe-agent.jar') : null,
+      unsafeAgentPath: gameConfig.useLwjglUnsafeAgent
+          ? path.join(librariesDir, 'lwjgl-unsafe-agent.jar')
+          : null,
     );
 
     final gameArgs = buildGameArguments(
@@ -582,15 +615,10 @@ class ArgumentBuilder {
     fullCommand.add(mainClass);
     fullCommand.addAll(gameArgs);
 
-    return LaunchCommand(
-      classPaths: classpaths,
-      args: fullCommand,
-    );
+    return LaunchCommand(classPaths: classpaths, args: fullCommand);
   }
 
-  String exportFullLaunchCommand({
-    required LaunchCommand command,
-  }) {
+  String exportFullLaunchCommand({required LaunchCommand command}) {
     return command.args.join(' ');
   }
 

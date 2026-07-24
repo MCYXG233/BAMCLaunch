@@ -8,11 +8,7 @@ class CacheEntry<T> {
   final DateTime timestamp;
   final Duration ttl;
 
-  CacheEntry({
-    required this.data,
-    required this.timestamp,
-    required this.ttl,
-  });
+  CacheEntry({required this.data, required this.timestamp, required this.ttl});
 
   bool get isExpired => DateTime.now().difference(timestamp) > ttl;
 }
@@ -22,9 +18,7 @@ class CacheManager {
   final Map<String, CacheEntry<dynamic>> _cache = {};
   final Duration defaultTtl;
 
-  CacheManager({
-    this.defaultTtl = const Duration(minutes: 30),
-  });
+  CacheManager({this.defaultTtl = const Duration(minutes: 30)});
 
   /// 获取缓存的搜索结果
   SearchResult? getSearchResult(String key) {
@@ -167,7 +161,10 @@ class CachedResourceApi implements ResourceApi {
   }
 
   @override
-  Future<ResourceVersion> getVersion(String resourceId, String versionId) async {
+  Future<ResourceVersion> getVersion(
+    String resourceId,
+    String versionId,
+  ) async {
     return await _api.getVersion(resourceId, versionId);
   }
 

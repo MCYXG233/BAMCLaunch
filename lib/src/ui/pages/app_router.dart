@@ -32,14 +32,13 @@ PageRouteBuilder _createSlideRoute(Widget page, RouteSettings settings) {
       const end = Offset.zero;
       const curve = Curves.easeOutCubic;
 
-      var tween = Tween(begin: begin, end: end).chain(
-        CurveTween(curve: curve),
-      );
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
       // 添加淡入淡出效果
-      var fadeTween = Tween(begin: 0.0, end: 1.0).chain(
-        CurveTween(curve: curve),
-      );
+      var fadeTween = Tween(
+        begin: 0.0,
+        end: 1.0,
+      ).chain(CurveTween(curve: curve));
 
       return SlideTransition(
         position: animation.drive(tween),

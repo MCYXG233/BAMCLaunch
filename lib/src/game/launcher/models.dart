@@ -287,10 +287,7 @@ class LaunchCommand {
   final List<String> classPaths;
   final List<String> args;
 
-  const LaunchCommand({
-    required this.classPaths,
-    required this.args,
-  });
+  const LaunchCommand({required this.classPaths, required this.args});
 
   String get fullCommand => args.join(' ');
 }
@@ -537,7 +534,8 @@ class GameConfig {
       ),
       autoJoinServer: json['autoJoinServer'] as bool? ?? false,
       serverAddress: json['serverAddress'] as String? ?? '',
-      serverPort: json['serverPort'] as int? ?? BAMCConstants.defaultMinecraftPort,
+      serverPort:
+          json['serverPort'] as int? ?? BAMCConstants.defaultMinecraftPort,
       launcherVisibility: json['launcherVisibility'] as String? ?? 'always',
       displayGameLog: json['displayGameLog'] as bool? ?? false,
       customTitle: json['customTitle'] as String? ?? '',

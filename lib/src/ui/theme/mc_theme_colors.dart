@@ -330,48 +330,48 @@ class MCThemeColors {
 
   /// 卡片阴影
   static List<BoxShadow> get cardShadow => [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.04),
-          blurRadius: 24,
-          offset: const Offset(0, 6),
-        ),
-      ];
+    BoxShadow(
+      color: Colors.black.withOpacity(0.04),
+      blurRadius: 24,
+      offset: const Offset(0, 6),
+    ),
+  ];
 
   /// 卡片悬停阴影
   static List<BoxShadow> get cardShadowHover => [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.08),
-          blurRadius: 32,
-          offset: const Offset(0, 10),
-        ),
-      ];
+    BoxShadow(
+      color: Colors.black.withOpacity(0.08),
+      blurRadius: 32,
+      offset: const Offset(0, 10),
+    ),
+  ];
 
   /// 发光阴影（蓝色）
   static List<BoxShadow> get glowShadow => [
-        BoxShadow(
-          color: primary.withOpacity(0.25),
-          blurRadius: 20,
-          offset: const Offset(0, 4),
-        ),
-      ];
+    BoxShadow(
+      color: primary.withOpacity(0.25),
+      blurRadius: 20,
+      offset: const Offset(0, 4),
+    ),
+  ];
 
   /// 发光阴影（草绿色）
   static List<BoxShadow> get glowShadowGreen => [
-        BoxShadow(
-          color: secondary.withOpacity(0.25),
-          blurRadius: 20,
-          offset: const Offset(0, 4),
-        ),
-      ];
+    BoxShadow(
+      color: secondary.withOpacity(0.25),
+      blurRadius: 20,
+      offset: const Offset(0, 4),
+    ),
+  ];
 
   /// 发光阴影（金色）
   static List<BoxShadow> get glowShadowGold => [
-        BoxShadow(
-          color: gold.withOpacity(0.25),
-          blurRadius: 20,
-          offset: const Offset(0, 4),
-        ),
-      ];
+    BoxShadow(
+      color: gold.withOpacity(0.25),
+      blurRadius: 20,
+      offset: const Offset(0, 4),
+    ),
+  ];
 }
 
 /// 深色模式的 Minecraft 风格配色
@@ -561,19 +561,29 @@ class MCThemeData {
 /// Minecraft 风格的圆角常量
 class MCRadius {
   /// 小圆角
-  static const BorderRadius small = BorderRadius.all(Radius.circular(MCThemeData.radiusSmall));
+  static const BorderRadius small = BorderRadius.all(
+    Radius.circular(MCThemeData.radiusSmall),
+  );
 
   /// 标准圆角
-  static const BorderRadius normal = BorderRadius.all(Radius.circular(MCThemeData.radius));
+  static const BorderRadius normal = BorderRadius.all(
+    Radius.circular(MCThemeData.radius),
+  );
 
   /// 大圆角
-  static const BorderRadius large = BorderRadius.all(Radius.circular(MCThemeData.radiusLarge));
+  static const BorderRadius large = BorderRadius.all(
+    Radius.circular(MCThemeData.radiusLarge),
+  );
 
   /// 超大圆角
-  static const BorderRadius xLarge = BorderRadius.all(Radius.circular(MCThemeData.radiusXLarge));
+  static const BorderRadius xLarge = BorderRadius.all(
+    Radius.circular(MCThemeData.radiusXLarge),
+  );
 
   /// 圆形圆角
-  static const BorderRadius circle = BorderRadius.all(Radius.circular(MCThemeData.radiusCircle));
+  static const BorderRadius circle = BorderRadius.all(
+    Radius.circular(MCThemeData.radiusCircle),
+  );
 }
 
 /// Minecraft 风格的间距常量

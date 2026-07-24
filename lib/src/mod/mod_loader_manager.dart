@@ -37,7 +37,7 @@ class ModLoaderManager {
     void Function(LoaderInstallationStatus status)? onStatusChange,
   }) async {
     final statusKey = '$instanceId-${loaderType.name}';
-    
+
     _updateStatus(statusKey, LoaderInstallationStatus.downloading);
     onStatusChange?.call(LoaderInstallationStatus.downloading);
     onProgress?.call(0.0, '正在下载${loaderType.displayName}...');
@@ -51,7 +51,9 @@ class ModLoaderManager {
         );
       }
 
-      _logger.info('Installing ${loaderType.displayName} ${loaderInfo.version} for game $gameVersion');
+      _logger.info(
+        'Installing ${loaderType.displayName} ${loaderInfo.version} for game $gameVersion',
+      );
 
       final installerPath = path.join(instancePath, '.loader', 'installer.jar');
       await _ensureDirectory(path.dirname(installerPath));
@@ -69,9 +71,15 @@ class ModLoaderManager {
       onStatusChange?.call(LoaderInstallationStatus.installed);
       onProgress?.call(1.0, '安装完成');
 
-      _logger.info('${loaderType.displayName} installation completed successfully');
+      _logger.info(
+        '${loaderType.displayName} installation completed successfully',
+      );
     } catch (e, stackTrace) {
-      _logger.error('Failed to install ${loaderType.displayName}', e, stackTrace);
+      _logger.error(
+        'Failed to install ${loaderType.displayName}',
+        e,
+        stackTrace,
+      );
       _updateStatus(statusKey, LoaderInstallationStatus.downloadFailed);
       onStatusChange?.call(LoaderInstallationStatus.downloadFailed);
       rethrow;
@@ -112,7 +120,10 @@ class ModLoaderManager {
     return await _detectLoaderStatus(instancePath, loaderType);
   }
 
-  Future<bool> isLoaderInstalled(String instancePath, LoaderType loaderType) async {
+  Future<bool> isLoaderInstalled(
+    String instancePath,
+    LoaderType loaderType,
+  ) async {
     final status = await _detectLoaderStatus(instancePath, loaderType);
     return status == LoaderInstallationStatus.installed;
   }
@@ -131,7 +142,10 @@ class ModLoaderManager {
     _installationStatus[key] = status;
   }
 
-  Future<LoaderInfo?> _getLoaderInfo(LoaderType loaderType, String gameVersion) async {
+  Future<LoaderInfo?> _getLoaderInfo(
+    LoaderType loaderType,
+    String gameVersion,
+  ) async {
     switch (loaderType) {
       case LoaderType.fabric:
         return _fetchFabricInfo(gameVersion);
@@ -148,11 +162,12 @@ class ModLoaderManager {
     try {
       final version = await _getLatestFabricVersion(gameVersion);
       if (version == null) return null;
-      
+
       return LoaderInfo(
         type: LoaderType.fabric,
         version: version,
-        installerUrl: '${ApiEndpoints.fabricMaven}/net/fabricmc/fabric-installer/$version/fabric-installer-$version.jar',
+        installerUrl:
+            '${ApiEndpoints.fabricMaven}/net/fabricmc/fabric-installer/$version/fabric-installer-$version.jar',
       );
     } catch (e) {
       _logger.debug('Failed to fetch Fabric info: $e');
@@ -164,11 +179,12 @@ class ModLoaderManager {
     try {
       final version = await _getLatestForgeVersion(gameVersion);
       if (version == null) return null;
-      
+
       return LoaderInfo(
         type: LoaderType.forge,
         version: version,
-        installerUrl: '${ApiEndpoints.forgeMaven}/net/minecraftforge/forge/$gameVersion-$version/forge-$gameVersion-$version-installer.jar',
+        installerUrl:
+            '${ApiEndpoints.forgeMaven}/net/minecraftforge/forge/$gameVersion-$version/forge-$gameVersion-$version-installer.jar',
       );
     } catch (e) {
       _logger.debug('Failed to fetch Forge info: $e');
@@ -180,11 +196,12 @@ class ModLoaderManager {
     try {
       final version = await _getLatestQuiltVersion(gameVersion);
       if (version == null) return null;
-      
+
       return LoaderInfo(
         type: LoaderType.quilt,
         version: version,
-        installerUrl: '${ApiEndpoints.quiltMaven}/org/quiltmc/quilt-installer/$version/quilt-installer-$version.jar',
+        installerUrl:
+            '${ApiEndpoints.quiltMaven}/org/quiltmc/quilt-installer/$version/quilt-installer-$version.jar',
       );
     } catch (e) {
       _logger.debug('Failed to fetch Quilt info: $e');
@@ -196,11 +213,12 @@ class ModLoaderManager {
     try {
       final version = await _getLatestNeoForgeVersion(gameVersion);
       if (version == null) return null;
-      
+
       return LoaderInfo(
         type: LoaderType.neoforge,
         version: version,
-        installerUrl: '${ApiEndpoints.neoforgeMaven}/net/neoforged/neoforge/$gameVersion-$version/neoforge-$gameVersion-$version-installer.jar',
+        installerUrl:
+            '${ApiEndpoints.neoforgeMaven}/net/neoforged/neoforge/$gameVersion-$version/neoforge-$gameVersion-$version-installer.jar',
       );
     } catch (e) {
       _logger.debug('Failed to fetch NeoForge info: $e');
@@ -226,7 +244,9 @@ class ModLoaderManager {
       }
       return null;
     } catch (e) {
-      _logger.debug('Failed to fetch latest Fabric version for $gameVersion: $e');
+      _logger.debug(
+        'Failed to fetch latest Fabric version for $gameVersion: $e',
+      );
       return null;
     }
   }
@@ -247,7 +267,9 @@ class ModLoaderManager {
       }
       return null;
     } catch (e) {
-      _logger.debug('Failed to fetch latest Forge version for $gameVersion: $e');
+      _logger.debug(
+        'Failed to fetch latest Forge version for $gameVersion: $e',
+      );
       return null;
     }
   }
@@ -276,7 +298,9 @@ class ModLoaderManager {
       }
       return null;
     } catch (e) {
-      _logger.debug('Failed to fetch latest Quilt version for $gameVersion: $e');
+      _logger.debug(
+        'Failed to fetch latest Quilt version for $gameVersion: $e',
+      );
       return null;
     }
   }
@@ -315,7 +339,9 @@ class ModLoaderManager {
       // 返回不含游戏版本前缀的 loader 版本号
       return latest.substring('$gameVersion-'.length);
     } catch (e) {
-      _logger.debug('Failed to fetch latest NeoForge version for $gameVersion: $e');
+      _logger.debug(
+        'Failed to fetch latest NeoForge version for $gameVersion: $e',
+      );
       return null;
     }
   }
@@ -327,12 +353,17 @@ class ModLoaderManager {
     LoaderType loaderType,
   ) async {
     final javaPath = await _findJava();
-    final args = _buildInstallerArgs(instancePath, gameVersion, installerPath, loaderType);
+    final args = _buildInstallerArgs(
+      instancePath,
+      gameVersion,
+      installerPath,
+      loaderType,
+    );
 
     _logger.info('Running installer: $javaPath ${args.join(' ')}');
 
     final process = await Process.start(javaPath, args);
-    
+
     await process.exitCode;
   }
 
@@ -367,7 +398,7 @@ class ModLoaderManager {
 
     final entities = await libsDir.list(recursive: true).toList();
     final files = entities.whereType<File>().toList();
-    
+
     for (final file in files) {
       final relativePath = path.relative(file.path, from: libsDir.path);
       if (loaderPrefixes.any((prefix) => relativePath.startsWith(prefix))) {
@@ -387,7 +418,7 @@ class ModLoaderManager {
 
     final entities = await modsDir.list().toList();
     final files = entities.whereType<File>().toList();
-    
+
     for (final file in files) {
       final fileName = path.basename(file.path).toLowerCase();
       if (loaderMods.any((mod) => fileName.contains(mod))) {
@@ -403,9 +434,12 @@ class ModLoaderManager {
     }
   }
 
-  Future<LoaderInstallationStatus> _detectLoaderStatus(String instancePath, LoaderType loaderType) async {
+  Future<LoaderInstallationStatus> _detectLoaderStatus(
+    String instancePath,
+    LoaderType loaderType,
+  ) async {
     final libsDir = Directory(path.join(instancePath, 'libraries'));
-    
+
     if (!await libsDir.exists()) {
       return LoaderInstallationStatus.notInstalled;
     }
@@ -419,13 +453,37 @@ class ModLoaderManager {
   String _getLoaderLibraryPath(String instancePath, LoaderType loaderType) {
     switch (loaderType) {
       case LoaderType.fabric:
-        return path.join(instancePath, 'libraries', 'net', 'fabricmc', 'fabric-loader');
+        return path.join(
+          instancePath,
+          'libraries',
+          'net',
+          'fabricmc',
+          'fabric-loader',
+        );
       case LoaderType.forge:
-        return path.join(instancePath, 'libraries', 'net', 'minecraftforge', 'forge');
+        return path.join(
+          instancePath,
+          'libraries',
+          'net',
+          'minecraftforge',
+          'forge',
+        );
       case LoaderType.quilt:
-        return path.join(instancePath, 'libraries', 'org', 'quiltmc', 'quilt-loader');
+        return path.join(
+          instancePath,
+          'libraries',
+          'org',
+          'quiltmc',
+          'quilt-loader',
+        );
       case LoaderType.neoforge:
-        return path.join(instancePath, 'libraries', 'net', 'neoforged', 'neoforge');
+        return path.join(
+          instancePath,
+          'libraries',
+          'net',
+          'neoforged',
+          'neoforge',
+        );
     }
   }
 }

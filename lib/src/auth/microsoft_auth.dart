@@ -105,7 +105,8 @@ class MicrosoftAuthService {
   ///
   /// 用户在此端点进行身份验证和授权。
   /// 使用 `/consumers` 路径支持所有 Microsoft 账户类型（个人和组织账户）。
-  static const String _authorizationEndpoint = ApiEndpoints.microsoftAuthAuthorize;
+  static const String _authorizationEndpoint =
+      ApiEndpoints.microsoftAuthAuthorize;
 
   /// OAuth2 令牌端点 URL
   ///
@@ -115,7 +116,8 @@ class MicrosoftAuthService {
   /// OAuth2 设备代码端点 URL
   ///
   /// 用于设备代码流，获取设备代码和用户验证信息。
-  static const String _deviceCodeEndpoint = ApiEndpoints.microsoftAuthDeviceCode;
+  static const String _deviceCodeEndpoint =
+      ApiEndpoints.microsoftAuthDeviceCode;
 
   /// 生成 PKCE 代码验证器（Code Verifier）
   ///
@@ -138,11 +140,15 @@ class MicrosoftAuthService {
   /// 参考 RFC 7636 Section 4.1: https://tools.ietf.org/html/rfc7636#section-4.1
   String _generateCodeVerifier() {
     // PKCE 规范定义的允许字符集（未保留字符）
-    const String chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~';
+    const String chars =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~';
     // 使用加密安全的随机数生成器
     final Random random = Random.secure();
     // 生成 128 个随机字符
-    return List.generate(128, (index) => chars[random.nextInt(chars.length)]).join();
+    return List.generate(
+      128,
+      (index) => chars[random.nextInt(chars.length)],
+    ).join();
   }
 
   /// 生成 PKCE 代码挑战（Code Challenge）
@@ -199,11 +205,15 @@ class MicrosoftAuthService {
   /// 4. 使用 [verifyState] 验证回调中的状态值是否匹配
   String _generateState() {
     // 使用字母和数字字符集
-    const String chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const String chars =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     // 使用加密安全的随机数生成器
     final Random random = Random.secure();
     // 生成 32 个随机字符
-    return List.generate(32, (index) => chars[random.nextInt(chars.length)]).join();
+    return List.generate(
+      32,
+      (index) => chars[random.nextInt(chars.length)],
+    ).join();
   }
 
   /// 生成 OAuth2 授权 URL 及相关验证参数
@@ -345,7 +355,10 @@ class MicrosoftAuthService {
         final errorDesc = errorData['error_description'] as String? ?? '';
         detail = '$error: $errorDesc';
         if (error == 'invalid_grant' && errorDesc.contains('AADSTS70000')) {
-          throw AppException.fromCode(ErrorCodes.authTokenExpired, detail: '凭据已过期，请重新登录');
+          throw AppException.fromCode(
+            ErrorCodes.authTokenExpired,
+            detail: '凭据已过期，请重新登录',
+          );
         }
       } catch (e) {
         if (e is AppException) rethrow;
@@ -437,7 +450,10 @@ class MicrosoftAuthService {
         final errorDesc = errorData['error_description'] as String? ?? '';
         detail = '$error: $errorDesc';
         if (error == 'invalid_grant' && errorDesc.contains('AADSTS70000')) {
-          throw AppException.fromCode(ErrorCodes.authTokenExpired, detail: '凭据已过期，请重新登录');
+          throw AppException.fromCode(
+            ErrorCodes.authTokenExpired,
+            detail: '凭据已过期，请重新登录',
+          );
         }
       } catch (e) {
         if (e is AppException) rethrow;
@@ -505,10 +521,7 @@ class MicrosoftAuthService {
 
     // 检查是否有错误
     if (error != null) {
-      throw AppException.fromCode(
-        ErrorCodes.authFailed,
-        detail: error,
-      );
+      throw AppException.fromCode(ErrorCodes.authFailed, detail: error);
     }
 
     return code;
@@ -614,10 +627,7 @@ class MicrosoftAuthService {
     final response = await networkClient.post(
       _deviceCodeEndpoint,
       headers: NetworkClient.microsoftHeaders,
-      body: {
-        'client_id': _clientId,
-        'scope': _scope,
-      },
+      body: {'client_id': _clientId, 'scope': _scope},
     );
 
     // 检查响应状态
@@ -700,10 +710,15 @@ class MicrosoftAuthService {
   /// - 这是一个阻塞方法，会持续运行直到成功或失败
   /// - 应在 UI 中显示取消选项，允许用户中止流程
   /// - 轮询间隔应遵循服务器建议
-  Future<OAuthToken> pollForToken(String deviceCode, {int expiresIn = 900}) async {
+  Future<OAuthToken> pollForToken(
+    String deviceCode, {
+    int expiresIn = 900,
+  }) async {
     final networkClient = NetworkClient();
     // 超时取 min(expiresIn, 900)，最多等15分钟
-    final deadline = DateTime.now().add(Duration(seconds: expiresIn.clamp(1, 900)));
+    final deadline = DateTime.now().add(
+      Duration(seconds: expiresIn.clamp(1, 900)),
+    );
     int intervalSeconds = 5;
 
     while (DateTime.now().isBefore(deadline)) {
@@ -747,7 +762,8 @@ class MicrosoftAuthService {
       } else if (error == 'expired_token') {
         // 设备代码已过期
         throw AppException.fromCode(ErrorCodes.authDeviceCodeExpired);
-      } else if (error == 'authorization_declined' || error == 'access_denied') {
+      } else if (error == 'authorization_declined' ||
+          error == 'access_denied') {
         // 用户拒绝授权
         throw AppException.fromCode(ErrorCodes.authUserDenied);
       } else {

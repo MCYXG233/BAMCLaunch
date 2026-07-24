@@ -174,15 +174,12 @@ class DownloadTask extends Task<String> {
   /// 获取文件大小
   Future<int> _getContentLength(String url) async {
     final networkClient = NetworkClient();
-    final response = await networkClient.get(
-      url,
-      timeoutSeconds: 30,
-    );
-    
+    final response = await networkClient.get(url, timeoutSeconds: 30);
+
     if (response.statusCode == 200) {
       return int.parse(response.headers['content-length'] ?? '0');
     }
-    
+
     throw AppException.fromCode(
       ErrorCodes.networkFileSizeError,
       detail: 'HTTP ${response.statusCode}',
@@ -197,13 +194,15 @@ class DownloadTask extends Task<String> {
   ) async {
     final file = File(filePath);
     final stream = file.openRead();
-    final digest = await stream.transform(
-      hashType == HashType.sha1
-          ? sha1
-          : hashType == HashType.sha256
+    final digest = await stream
+        .transform(
+          hashType == HashType.sha1
+              ? sha1
+              : hashType == HashType.sha256
               ? sha256
               : md5,
-    ).first;
+        )
+        .first;
     final actualHash = digest.bytes
         .map((b) => b.toRadixString(16).padLeft(2, '0'))
         .join();
@@ -313,9 +312,7 @@ class DownloadTask extends Task<String> {
 
         final response = await networkClient.get(
           data.url,
-          headers: {
-            'Range': 'bytes=$position-$actualEnd',
-          },
+          headers: {'Range': 'bytes=$position-$actualEnd'},
           timeoutSeconds: 60,
         );
 

@@ -63,7 +63,8 @@ class LogEntry {
   @override
   String toString() {
     final levelStr = level.name.toUpperCase().padRight(7);
-    final timeStr = '${timestamp.hour.toString().padLeft(2, '0')}:'
+    final timeStr =
+        '${timestamp.hour.toString().padLeft(2, '0')}:'
         '${timestamp.minute.toString().padLeft(2, '0')}:'
         '${timestamp.second.toString().padLeft(2, '0')}';
 
@@ -194,7 +195,8 @@ class LogManager {
     if (_initialized) return;
 
     try {
-      final supportDir = await _platformAdapter.getApplicationSupportDirectory();
+      final supportDir = await _platformAdapter
+          .getApplicationSupportDirectory();
       _logDir = Directory(path.join(supportDir, 'logs'));
 
       if (!await _logDir!.exists()) {
@@ -246,8 +248,9 @@ class LogManager {
 
     // 委托给 Logger：Logger 已处理控制台 / 文件输出 + 事件总线
     final coreLogger = Logger(logger);
-    final stackTraceObj =
-        stackTrace != null ? StackTrace.fromString(stackTrace) : null;
+    final stackTraceObj = stackTrace != null
+        ? StackTrace.fromString(stackTrace)
+        : null;
     switch (level) {
       case LogLevel.debug:
         coreLogger.debug(message, null, stackTraceObj);
@@ -300,7 +303,8 @@ class LogManager {
     if (_logDir == null) return;
 
     final today = DateTime.now();
-    final logFileName = 'bamc_${today.year}${today.month.toString().padLeft(2, '0')}${today.day.toString().padLeft(2, '0')}.log';
+    final logFileName =
+        'bamc_${today.year}${today.month.toString().padLeft(2, '0')}${today.day.toString().padLeft(2, '0')}.log';
     _currentLogFile = File(path.join(_logDir!.path, logFileName));
 
     if (!await _currentLogFile!.exists()) {
@@ -346,7 +350,9 @@ class LogManager {
       await for (final entity in _logDir!.list()) {
         if (entity is File && entity.path.contains('.log.')) {
           // 删除超过备份数量的轮转日志
-          final age = DateTime.now().difference(await entity.stat().then((s) => s.modified));
+          final age = DateTime.now().difference(
+            await entity.stat().then((s) => s.modified),
+          );
           if (age.inDays > _config.maxBackupFiles) {
             await entity.delete();
           }
@@ -361,7 +367,9 @@ class LogManager {
   Future<void> _cleanOldLogs() async {
     if (_logDir == null) return;
 
-    final cutoffDate = DateTime.now().subtract(Duration(days: _config.retentionDays));
+    final cutoffDate = DateTime.now().subtract(
+      Duration(days: _config.retentionDays),
+    );
 
     try {
       await for (final entity in _logDir!.list()) {
@@ -394,7 +402,9 @@ class LogManager {
     }
 
     // 按修改时间排序
-    files.sort((a, b) => b.statSync().modified.compareTo(a.statSync().modified));
+    files.sort(
+      (a, b) => b.statSync().modified.compareTo(a.statSync().modified),
+    );
     return files;
   }
 
@@ -422,8 +432,10 @@ class LogManager {
             if (entry == null) continue;
 
             // 应用过滤器
-            if (minLevel != null && entry.level.index < minLevel.index) continue;
-            if (startDate != null && entry.timestamp.isBefore(startDate)) continue;
+            if (minLevel != null && entry.level.index < minLevel.index)
+              continue;
+            if (startDate != null && entry.timestamp.isBefore(startDate))
+              continue;
             if (endDate != null && entry.timestamp.isAfter(endDate)) continue;
 
             entries.add(entry);
@@ -537,10 +549,7 @@ class LogManager {
     String? outputPath,
   }) async {
     try {
-      final entries = await readLogs(
-        startDate: startDate,
-        endDate: endDate,
-      );
+      final entries = await readLogs(startDate: startDate, endDate: endDate);
 
       if (entries.isEmpty) {
         return null;
@@ -557,7 +566,12 @@ class LogManager {
         buffer.writeln(entry.toString());
       }
 
-      final output = outputPath ?? path.join(_logDir!.path, 'export_${DateTime.now().millisecondsSinceEpoch}.log');
+      final output =
+          outputPath ??
+          path.join(
+            _logDir!.path,
+            'export_${DateTime.now().millisecondsSinceEpoch}.log',
+          );
       final file = File(output);
       await file.writeAsString(buffer.toString());
 

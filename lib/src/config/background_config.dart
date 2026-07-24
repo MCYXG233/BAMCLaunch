@@ -1,12 +1,6 @@
 import 'dart:convert';
 
-enum BackgroundType {
-  solid,
-  gradient,
-  image,
-  video,
-  blur,
-}
+enum BackgroundType { solid, gradient, image, video, blur }
 
 class BackgroundConfig {
   final BackgroundType type;
@@ -83,42 +77,42 @@ class BackgroundConfig {
   }
 
   static BackgroundConfig get classic => const BackgroundConfig(
-        type: BackgroundType.gradient,
-        gradientColors: [0xFFE0ECFF, 0xFFC9D8FF],
-        blur: 0,
-        opacity: 1.0,
-        alignment: 0,
-      );
+    type: BackgroundType.gradient,
+    gradientColors: [0xFFE0ECFF, 0xFFC9D8FF],
+    blur: 0,
+    opacity: 1.0,
+    alignment: 0,
+  );
 
   static BackgroundConfig get sakura => const BackgroundConfig(
-        type: BackgroundType.gradient,
-        gradientColors: [0xFFFFE0E6, 0xFFFFB3C1],
-        blur: 0,
-        opacity: 1.0,
-        alignment: 0,
-      );
+    type: BackgroundType.gradient,
+    gradientColors: [0xFFFFE0E6, 0xFFFFB3C1],
+    blur: 0,
+    opacity: 1.0,
+    alignment: 0,
+  );
 
   static BackgroundConfig get night => const BackgroundConfig(
-        type: BackgroundType.gradient,
-        gradientColors: [0xFF0D1B2A, 0xFF1B263B],
-        blur: 0,
-        opacity: 1.0,
-        alignment: 0,
-      );
+    type: BackgroundType.gradient,
+    gradientColors: [0xFF0D1B2A, 0xFF1B263B],
+    blur: 0,
+    opacity: 1.0,
+    alignment: 0,
+  );
 
   static BackgroundConfig get mint => const BackgroundConfig(
-        type: BackgroundType.gradient,
-        gradientColors: [0xFFB8E6C9, 0xFF81C784],
-        blur: 0,
-        opacity: 1.0,
-        alignment: 0,
-      );
+    type: BackgroundType.gradient,
+    gradientColors: [0xFFB8E6C9, 0xFF81C784],
+    blur: 0,
+    opacity: 1.0,
+    alignment: 0,
+  );
 
   static BackgroundConfig get sunset => const BackgroundConfig(
-        type: BackgroundType.gradient,
-        gradientColors: [0xFFFFCC80, 0xFFFF8A65],
-        blur: 0,
-        opacity: 1.0,
-        alignment: 0,
-      );
+    type: BackgroundType.gradient,
+    gradientColors: [0xFFFFCC80, 0xFFFF8A65],
+    blur: 0,
+    opacity: 1.0,
+    alignment: 0,
+  );
 }

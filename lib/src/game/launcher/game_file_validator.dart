@@ -26,12 +26,7 @@ class InvalidFile {
   });
 }
 
-enum InvalidFileType {
-  missing,
-  hashMismatch,
-  sizeMismatch,
-  corrupted,
-}
+enum InvalidFileType { missing, hashMismatch, sizeMismatch, corrupted }
 
 class ValidationProgress {
   final int totalFiles;
@@ -88,21 +83,14 @@ class GameFileValidator {
     );
     results.addAll(libraryFiles);
 
-    final assetFiles = await validateAssetFiles(
-      versionJson,
-      assetsDir,
-      policy,
-    );
+    final assetFiles = await validateAssetFiles(versionJson, assetsDir, policy);
     results.addAll(assetFiles);
 
     final clientJar = await validateClientJar(versionJson, gameDirectory);
     results.addAll(clientJar);
 
     if (policy == FileValidatePolicy.full) {
-      final natives = await validateNativeLibraries(
-        versionJson,
-        gameDirectory,
-      );
+      final natives = await validateNativeLibraries(versionJson, gameDirectory);
       results.addAll(natives);
     }
 
@@ -116,20 +104,45 @@ class GameFileValidator {
     return results;
   }
 
-  Future<List<InvalidFile>> validateQuick(VersionJson versionJson, String gameDirectory) async {
-    return await validateAll(versionJson, gameDirectory, FileValidatePolicy.normal);
+  Future<List<InvalidFile>> validateQuick(
+    VersionJson versionJson,
+    String gameDirectory,
+  ) async {
+    return await validateAll(
+      versionJson,
+      gameDirectory,
+      FileValidatePolicy.normal,
+    );
   }
 
-  Future<List<InvalidFile>> validateFull(VersionJson versionJson, String gameDirectory) async {
-    return await validateAll(versionJson, gameDirectory, FileValidatePolicy.full);
+  Future<List<InvalidFile>> validateFull(
+    VersionJson versionJson,
+    String gameDirectory,
+  ) async {
+    return await validateAll(
+      versionJson,
+      gameDirectory,
+      FileValidatePolicy.full,
+    );
   }
 
-  Future<bool> hasInvalidFiles(VersionJson versionJson, String gameDirectory) async {
-    final invalid = await validateAll(versionJson, gameDirectory, FileValidatePolicy.normal);
+  Future<bool> hasInvalidFiles(
+    VersionJson versionJson,
+    String gameDirectory,
+  ) async {
+    final invalid = await validateAll(
+      versionJson,
+      gameDirectory,
+      FileValidatePolicy.normal,
+    );
     return invalid.isNotEmpty;
   }
 
-  Future<int> countInvalidFiles(VersionJson versionJson, String gameDirectory, FileValidatePolicy policy) async {
+  Future<int> countInvalidFiles(
+    VersionJson versionJson,
+    String gameDirectory,
+    FileValidatePolicy policy,
+  ) async {
     final invalid = await validateAll(versionJson, gameDirectory, policy);
     return invalid.length;
   }
@@ -156,12 +169,14 @@ class GameFileValidator {
 
       if (!await file.exists()) {
         _logger.debug('Library file missing: $filePath');
-        invalidFiles.add(InvalidFile(
-          path: filePath,
-          expectedHash: artifact.sha1,
-          type: 'library',
-          url: artifact.url,
-        ));
+        invalidFiles.add(
+          InvalidFile(
+            path: filePath,
+            expectedHash: artifact.sha1,
+            type: 'library',
+            url: artifact.url,
+          ),
+        );
         continue;
       }
 
@@ -169,12 +184,14 @@ class GameFileValidator {
         final isValid = await _verifySha1(file, artifact.sha1);
         if (!isValid) {
           _logger.debug('Library file hash mismatch: $filePath');
-          invalidFiles.add(InvalidFile(
-            path: filePath,
-            expectedHash: artifact.sha1,
-            type: 'library',
-            url: artifact.url,
-          ));
+          invalidFiles.add(
+            InvalidFile(
+              path: filePath,
+              expectedHash: artifact.sha1,
+              type: 'library',
+              url: artifact.url,
+            ),
+          );
         }
       }
     }
@@ -200,12 +217,14 @@ class GameFileValidator {
 
     if (!await indexFile.exists()) {
       _logger.debug('Asset index file missing: $indexFilePath');
-      invalidFiles.add(InvalidFile(
-        path: indexFilePath,
-        expectedHash: assetIndex.sha1,
-        type: 'asset',
-        url: assetIndex.url,
-      ));
+      invalidFiles.add(
+        InvalidFile(
+          path: indexFilePath,
+          expectedHash: assetIndex.sha1,
+          type: 'asset',
+          url: assetIndex.url,
+        ),
+      );
       return invalidFiles;
     }
 
@@ -228,12 +247,14 @@ class GameFileValidator {
 
       if (!await objectFile.exists()) {
         _logger.debug('Asset file missing: $objectFilePath');
-        invalidFiles.add(InvalidFile(
-          path: objectFilePath,
-          expectedHash: hash,
-          type: 'asset',
-          url: null,
-        ));
+        invalidFiles.add(
+          InvalidFile(
+            path: objectFilePath,
+            expectedHash: hash,
+            type: 'asset',
+            url: null,
+          ),
+        );
         continue;
       }
 
@@ -241,12 +262,14 @@ class GameFileValidator {
         final isValid = await _verifySha1(objectFile, hash);
         if (!isValid) {
           _logger.debug('Asset file hash mismatch: $objectFilePath');
-          invalidFiles.add(InvalidFile(
-            path: objectFilePath,
-            expectedHash: hash,
-            type: 'asset',
-            url: null,
-          ));
+          invalidFiles.add(
+            InvalidFile(
+              path: objectFilePath,
+              expectedHash: hash,
+              type: 'asset',
+              url: null,
+            ),
+          );
         }
       }
 
@@ -260,12 +283,14 @@ class GameFileValidator {
 
       if (!await legacyFile.exists()) {
         _logger.debug('Legacy asset file missing: $legacyFilePath');
-        invalidFiles.add(InvalidFile(
-          path: legacyFilePath,
-          expectedHash: hash,
-          type: 'asset',
-          url: null,
-        ));
+        invalidFiles.add(
+          InvalidFile(
+            path: legacyFilePath,
+            expectedHash: hash,
+            type: 'asset',
+            url: null,
+          ),
+        );
         continue;
       }
 
@@ -273,12 +298,14 @@ class GameFileValidator {
         final isValid = await _verifySha1(legacyFile, hash);
         if (!isValid) {
           _logger.debug('Legacy asset file hash mismatch: $legacyFilePath');
-          invalidFiles.add(InvalidFile(
-            path: legacyFilePath,
-            expectedHash: hash,
-            type: 'asset',
-            url: null,
-          ));
+          invalidFiles.add(
+            InvalidFile(
+              path: legacyFilePath,
+              expectedHash: hash,
+              type: 'asset',
+              url: null,
+            ),
+          );
         }
       }
     }
@@ -328,7 +355,9 @@ class GameFileValidator {
     final indexFile = File(indexFilePath);
 
     if (!await indexFile.exists()) {
-      _logger.warn('Asset index file not found for legacy copy: $indexFilePath');
+      _logger.warn(
+        'Asset index file not found for legacy copy: $indexFilePath',
+      );
       return;
     }
 
@@ -370,7 +399,9 @@ class GameFileValidator {
             await Link(destPath).create(sourcePath);
           }
         } catch (e) {
-          _logger.debug('Failed to create legacy asset link, falling back to copy: $destPath');
+          _logger.debug(
+            'Failed to create legacy asset link, falling back to copy: $destPath',
+          );
           await sourceFile.copy(destPath);
         }
       }
@@ -419,7 +450,12 @@ class GameFileValidator {
     String gameDirectory,
   ) async {
     final invalidFiles = <InvalidFile>[];
-    final nativesDir = path.join(gameDirectory, 'versions', versionJson.id, 'natives');
+    final nativesDir = path.join(
+      gameDirectory,
+      'versions',
+      versionJson.id,
+      'natives',
+    );
 
     if (!await Directory(nativesDir).exists()) {
       _logger.debug('Native libraries directory not found: $nativesDir');
@@ -428,7 +464,8 @@ class GameFileValidator {
 
     for (final library in versionJson.libraries) {
       if (!_isAllowedByRules(library.rules)) continue;
-      if (library.natives == null || library.downloads?.classifiers == null) continue;
+      if (library.natives == null || library.downloads?.classifiers == null)
+        continue;
 
       String nativeClassifier;
       if (_platformAdapter.isWindows) {
@@ -444,31 +481,38 @@ class GameFileValidator {
       final nativeArtifact = library.downloads!.classifiers![nativeClassifier];
       if (nativeArtifact == null) continue;
 
-      final nativeFilePath = path.join(nativesDir, path.basename(nativeArtifact.path));
+      final nativeFilePath = path.join(
+        nativesDir,
+        path.basename(nativeArtifact.path),
+      );
       final file = File(nativeFilePath);
 
       if (!await file.exists()) {
         _logger.debug('Native library missing: $nativeFilePath');
-        invalidFiles.add(InvalidFile(
-          path: nativeFilePath,
-          expectedHash: nativeArtifact.sha1,
-          type: 'native',
-          url: nativeArtifact.url,
-          invalidType: InvalidFileType.missing,
-        ));
+        invalidFiles.add(
+          InvalidFile(
+            path: nativeFilePath,
+            expectedHash: nativeArtifact.sha1,
+            type: 'native',
+            url: nativeArtifact.url,
+            invalidType: InvalidFileType.missing,
+          ),
+        );
         continue;
       }
 
       final isValid = await _verifySha1(file, nativeArtifact.sha1);
       if (!isValid) {
         _logger.debug('Native library hash mismatch: $nativeFilePath');
-        invalidFiles.add(InvalidFile(
-          path: nativeFilePath,
-          expectedHash: nativeArtifact.sha1,
-          type: 'native',
-          url: nativeArtifact.url,
-          invalidType: InvalidFileType.hashMismatch,
-        ));
+        invalidFiles.add(
+          InvalidFile(
+            path: nativeFilePath,
+            expectedHash: nativeArtifact.sha1,
+            type: 'native',
+            url: nativeArtifact.url,
+            invalidType: InvalidFileType.hashMismatch,
+          ),
+        );
       }
     }
 

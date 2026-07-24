@@ -46,7 +46,7 @@ class AuthManager {
 
     try {
       OAuthToken microsoftToken;
-      
+
       if (accessToken != null && refreshToken != null) {
         // 直接使用令牌
         microsoftToken = OAuthToken(
@@ -68,11 +68,13 @@ class AuthManager {
           detail: '必须提供授权码或访问令牌',
         );
       }
-      
+
       credentials = credentials.copyWith(microsoftToken: microsoftToken);
 
       onProgress?.call('Authenticating with Xbox Live...');
-      final xboxToken = await _xboxAuth.authenticateUser(microsoftToken.accessToken);
+      final xboxToken = await _xboxAuth.authenticateUser(
+        microsoftToken.accessToken,
+      );
       credentials = credentials.copyWith(xboxLiveToken: xboxToken);
 
       onProgress?.call('Acquiring XSTS token...');
@@ -81,7 +83,10 @@ class AuthManager {
 
       // 验证 Xbox UHS 一致性
       if (xboxToken.userHash != xstsToken.userHash) {
-        throw AppException.fromCode(ErrorCodes.authXboxFailed, detail: 'Xbox UHS mismatch: security verification failed');
+        throw AppException.fromCode(
+          ErrorCodes.authXboxFailed,
+          detail: 'Xbox UHS mismatch: security verification failed',
+        );
       }
 
       onProgress?.call('Logging into Minecraft...');
@@ -89,12 +94,20 @@ class AuthManager {
         userHash: xstsToken.userHash,
         xstsToken: xstsToken.token,
       );
-      credentials = credentials.copyWith(minecraftToken: loginResult.token, minecraftProfile: loginResult.profile);
+      credentials = credentials.copyWith(
+        minecraftToken: loginResult.token,
+        minecraftProfile: loginResult.profile,
+      );
 
       onProgress?.call('Checking game ownership...');
-      final hasOwnership = await _minecraftAuth.checkGameOwnership(loginResult.token.accessToken);
+      final hasOwnership = await _minecraftAuth.checkGameOwnership(
+        loginResult.token.accessToken,
+      );
       if (!hasOwnership) {
-        throw AppException.fromCode(ErrorCodes.authOwnershipCheckFailed, detail: 'Account does not own Minecraft');
+        throw AppException.fromCode(
+          ErrorCodes.authOwnershipCheckFailed,
+          detail: 'Account does not own Minecraft',
+        );
       }
 
       // 保存凭据
@@ -113,7 +126,10 @@ class AuthManager {
   }) async {
     try {
       if (credentials.microsoftToken?.refreshToken == null) {
-        throw AppException.fromCode(ErrorCodes.authRefreshFailed, detail: 'No refresh token available');
+        throw AppException.fromCode(
+          ErrorCodes.authRefreshFailed,
+          detail: 'No refresh token available',
+        );
       }
 
       onProgress?.call('Refreshing Microsoft token...');
@@ -123,7 +139,9 @@ class AuthManager {
       credentials = credentials.copyWith(microsoftToken: microsoftToken);
 
       onProgress?.call('Authenticating with Xbox Live...');
-      final xboxToken = await _xboxAuth.authenticateUser(microsoftToken.accessToken);
+      final xboxToken = await _xboxAuth.authenticateUser(
+        microsoftToken.accessToken,
+      );
       credentials = credentials.copyWith(xboxLiveToken: xboxToken);
 
       onProgress?.call('Acquiring XSTS token...');
@@ -132,7 +150,10 @@ class AuthManager {
 
       // 验证 Xbox UHS 一致性
       if (xboxToken.userHash != xstsToken.userHash) {
-        throw AppException.fromCode(ErrorCodes.authXboxFailed, detail: 'Xbox UHS mismatch: security verification failed');
+        throw AppException.fromCode(
+          ErrorCodes.authXboxFailed,
+          detail: 'Xbox UHS mismatch: security verification failed',
+        );
       }
 
       onProgress?.call('Logging into Minecraft...');
@@ -140,12 +161,20 @@ class AuthManager {
         userHash: xstsToken.userHash,
         xstsToken: xstsToken.token,
       );
-      credentials = credentials.copyWith(minecraftToken: loginResult.token, minecraftProfile: loginResult.profile);
+      credentials = credentials.copyWith(
+        minecraftToken: loginResult.token,
+        minecraftProfile: loginResult.profile,
+      );
 
       onProgress?.call('Checking game ownership...');
-      final hasOwnership = await _minecraftAuth.checkGameOwnership(loginResult.token.accessToken);
+      final hasOwnership = await _minecraftAuth.checkGameOwnership(
+        loginResult.token.accessToken,
+      );
       if (!hasOwnership) {
-        throw AppException.fromCode(ErrorCodes.authOwnershipCheckFailed, detail: 'Account does not own Minecraft');
+        throw AppException.fromCode(
+          ErrorCodes.authOwnershipCheckFailed,
+          detail: 'Account does not own Minecraft',
+        );
       }
 
       // 保存凭据
@@ -210,7 +239,8 @@ class AuthManager {
     final credentials = await loadCredentials();
     if (credentials == null) return true;
     if (credentials.microsoftToken == null) return true;
-    return credentials.microsoftToken!.isNearExpiry || credentials.microsoftToken!.isExpired;
+    return credentials.microsoftToken!.isNearExpiry ||
+        credentials.microsoftToken!.isExpired;
   }
 
   /// 设备代码流 - 获取设备代码
@@ -235,7 +265,9 @@ class AuthManager {
       credentials = credentials.copyWith(microsoftToken: microsoftToken);
 
       onProgress?.call('Xbox Live认证...');
-      final xboxToken = await _xboxAuth.authenticateUser(microsoftToken.accessToken);
+      final xboxToken = await _xboxAuth.authenticateUser(
+        microsoftToken.accessToken,
+      );
       credentials = credentials.copyWith(xboxLiveToken: xboxToken);
 
       onProgress?.call('获取XSTS令牌...');
@@ -244,7 +276,10 @@ class AuthManager {
 
       // 验证 Xbox UHS 一致性
       if (xboxToken.userHash != xstsToken.userHash) {
-        throw AppException.fromCode(ErrorCodes.authXboxFailed, detail: 'Xbox UHS mismatch: security verification failed');
+        throw AppException.fromCode(
+          ErrorCodes.authXboxFailed,
+          detail: 'Xbox UHS mismatch: security verification failed',
+        );
       }
 
       onProgress?.call('登录Minecraft...');
@@ -252,12 +287,20 @@ class AuthManager {
         userHash: xstsToken.userHash,
         xstsToken: xstsToken.token,
       );
-      credentials = credentials.copyWith(minecraftToken: loginResult.token, minecraftProfile: loginResult.profile);
+      credentials = credentials.copyWith(
+        minecraftToken: loginResult.token,
+        minecraftProfile: loginResult.profile,
+      );
 
       onProgress?.call('检查游戏所有权...');
-      final hasOwnership = await _minecraftAuth.checkGameOwnership(loginResult.token.accessToken);
+      final hasOwnership = await _minecraftAuth.checkGameOwnership(
+        loginResult.token.accessToken,
+      );
       if (!hasOwnership) {
-        throw AppException.fromCode(ErrorCodes.authOwnershipCheckFailed, detail: 'Account does not own Minecraft');
+        throw AppException.fromCode(
+          ErrorCodes.authOwnershipCheckFailed,
+          detail: 'Account does not own Minecraft',
+        );
       }
 
       // 保存凭据

@@ -28,8 +28,7 @@ void main() {
       expect(container.read(selectedInstanceIndexProvider), 3);
     });
 
-    testWidgets('ConsumerWidget 可读取 themeManagerProvider',
-        (tester) async {
+    testWidgets('ConsumerWidget 可读取 themeManagerProvider', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(

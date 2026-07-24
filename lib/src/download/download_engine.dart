@@ -301,17 +301,24 @@ class DownloadEngine implements IDownloadEngine {
             // 转换哈希类型枚举，从本地枚举映射到多源下载器的枚举
             hashType: hashType != null ? HashType.values[hashType.index] : null,
             // 进度回调：将进度信息发送到进度流
-            onProgress: (progress, downloaded, total, {int speed = 0, int remainingSeconds = 0}) {
-              _progressController.add(
-                DownloadProgress(
-                  downloadedBytes: downloaded,
-                  totalBytes: total,
-                  progress: progress,
-                  speed: speed,
-                  remainingTime: remainingSeconds,
-                ),
-              );
-            },
+            onProgress:
+                (
+                  progress,
+                  downloaded,
+                  total, {
+                  int speed = 0,
+                  int remainingSeconds = 0,
+                }) {
+                  _progressController.add(
+                    DownloadProgress(
+                      downloadedBytes: downloaded,
+                      totalBytes: total,
+                      progress: progress,
+                      speed: speed,
+                      remainingTime: remainingSeconds,
+                    ),
+                  );
+                },
             // 镜像源切换回调：发布切换通知事件
             onSourceSwitch: (sourceName) {
               _eventBus.publish(
@@ -345,7 +352,9 @@ class DownloadEngine implements IDownloadEngine {
         if (_autoSwitchMirror && attemptCount < maxAttempts) {
           _downloadSource = _mirrorManager.switchToNextMirror();
           _eventBus.publish(
-            DownloadInfoEvent(message: '镜像源不可用，正在切换到 ${_downloadSource.name}...'),
+            DownloadInfoEvent(
+              message: '镜像源不可用，正在切换到 ${_downloadSource.name}...',
+            ),
           );
         }
       }

@@ -6,12 +6,7 @@ import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/app_theme.dart';
 
-enum BANotificationType {
-  success,
-  error,
-  warning,
-  info,
-}
+enum BANotificationType { success, error, warning, info }
 
 class BANotification extends StatelessWidget {
   final BANotificationType type;
@@ -81,10 +76,7 @@ class BANotification extends StatelessWidget {
                   left: 0,
                   top: 0,
                   bottom: 0,
-                  child: Container(
-                    width: 4,
-                    color: accentColor,
-                  ),
+                  child: Container(width: 4, color: accentColor),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 4),
@@ -92,11 +84,7 @@ class BANotification extends StatelessWidget {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(12),
-                        child: Icon(
-                          _icon,
-                          color: accentColor,
-                          size: 24,
-                        ),
+                        child: Icon(_icon, color: accentColor, size: 24),
                       ),
                       Expanded(
                         child: Padding(
@@ -134,7 +122,9 @@ class BANotification extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.5),
+                              color: BAColors.surfaceVariantOf(
+                                context,
+                              ).withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Icon(
@@ -190,13 +180,10 @@ class _AnimatedNotificationState extends State<_AnimatedNotification>
       duration: const Duration(milliseconds: 250),
       vsync: this,
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
 
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 300),
@@ -205,10 +192,7 @@ class _AnimatedNotificationState extends State<_AnimatedNotification>
     _fadeAnimation = Tween<double>(
       begin: 1.0,
       end: 0.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeOut,
-    ));
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
 
     _slideController.forward();
 
@@ -294,11 +278,7 @@ class NotificationManager {
 
     // 根据 retryable 标志决定通知类型
     final subtitle = exception.retryable ? '可重试' : null;
-    _show(
-      BANotificationType.error,
-      exception.message,
-      message: subtitle,
-    );
+    _show(BANotificationType.error, exception.message, message: subtitle);
   }
 
   void _show(BANotificationType type, String title, {String? message}) {

@@ -14,7 +14,7 @@ class ProcessMonitor {
   StreamController<GameLog>? _logController;
   StreamController<GameProcessStatus>? _statusController;
   IOSink? _logSink;
-  
+
   DateTime? _readyTime;
   DateTime? _stopTime;
   bool _isReady = false;
@@ -27,8 +27,10 @@ class ProcessMonitor {
     _initLogFile();
   }
 
-  Stream<GameLog> get logStream => _logController?.stream ?? const Stream.empty();
-  Stream<GameProcessStatus> get statusStream => _statusController?.stream ?? const Stream.empty();
+  Stream<GameLog> get logStream =>
+      _logController?.stream ?? const Stream.empty();
+  Stream<GameProcessStatus> get statusStream =>
+      _statusController?.stream ?? const Stream.empty();
 
   bool get isReady => _isReady;
   DateTime? get readyTime => _readyTime;
@@ -36,7 +38,7 @@ class ProcessMonitor {
   void start() {
     _logController = StreamController<GameLog>.broadcast();
     _statusController = StreamController<GameProcessStatus>.broadcast();
-    
+
     _listenToOutput();
     _listenToExit();
   }
@@ -49,7 +51,9 @@ class ProcessMonitor {
       }
       final logFile = File('$gameDirectory/logs/minecraft_${processId}.log');
       _logSink = logFile.openWrite(mode: FileMode.append);
-      _logSink?.writeln('=== Process Monitor Log - ${DateTime.now().toIso8601String()} ===');
+      _logSink?.writeln(
+        '=== Process Monitor Log - ${DateTime.now().toIso8601String()} ===',
+      );
     } catch (e) {
       _logger.warn('Failed to initialize log file: $e');
     }
@@ -91,7 +95,7 @@ class ProcessMonitor {
       );
 
       _logController?.add(log);
-      
+
       if (_logSink != null) {
         try {
           _logSink?.writeln(log.format());
@@ -164,9 +168,11 @@ class ProcessMonitor {
   }
 
   void _cleanup() {
-    _logSink?.writeln('=== Log ended - ${DateTime.now().toIso8601String()} ===');
+    _logSink?.writeln(
+      '=== Log ended - ${DateTime.now().toIso8601String()} ===',
+    );
     _logSink?.close();
-    
+
     _logController?.close();
     _statusController?.close();
   }

@@ -120,7 +120,8 @@ class ModParser {
       final String? author = contributors?.keys.firstOrNull;
 
       final depends = loader['depends'] as List<dynamic>?;
-      final dependencies = depends
+      final dependencies =
+          depends
               ?.map((d) {
                 if (d is Map<String, dynamic>) {
                   return d['id'] as String?;
@@ -148,7 +149,10 @@ class ModParser {
     }
   }
 
-  static ModInfo? _tryParseForgeToml(archive.Archive zipArchive, String fileName) {
+  static ModInfo? _tryParseForgeToml(
+    archive.Archive zipArchive,
+    String fileName,
+  ) {
     try {
       final modsToml = zipArchive.findFile('META-INF/mods.toml');
       if (modsToml == null) return null;
@@ -194,7 +198,10 @@ class ModParser {
     }
   }
 
-  static ModInfo? _tryParseLegacyForge(archive.Archive zipArchive, String fileName) {
+  static ModInfo? _tryParseLegacyForge(
+    archive.Archive zipArchive,
+    String fileName,
+  ) {
     try {
       final mcmod = zipArchive.findFile('mcmod.info');
       if (mcmod == null) return null;
@@ -218,8 +225,9 @@ class ModParser {
       final version = mod['version'] as String?;
       final description = mod['description'] as String?;
       final authorList = mod['authorList'] as List<dynamic>?;
-      final String? author =
-          authorList?.isNotEmpty == true ? authorList!.first as String? : null;
+      final String? author = authorList?.isNotEmpty == true
+          ? authorList!.first as String?
+          : null;
 
       return ModInfo(
         id: '',
@@ -238,7 +246,10 @@ class ModParser {
     }
   }
 
-  static String? _extractAuthor(List<dynamic>? authors, Map<String, dynamic>? contact) {
+  static String? _extractAuthor(
+    List<dynamic>? authors,
+    Map<String, dynamic>? contact,
+  ) {
     if (authors != null && authors.isNotEmpty) {
       final first = authors.first;
       if (first is String) return first;

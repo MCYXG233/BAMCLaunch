@@ -46,7 +46,8 @@ class LoaderDownloadService {
   /// 获取 Forge 可用版本列表
   Future<List<String>> getForgeVersions(String mcVersion) async {
     try {
-      final url = '${ApiEndpoints.forgeMaven}/net/minecraftforge/forge/maven-metadata.xml';
+      final url =
+          '${ApiEndpoints.forgeMaven}/net/minecraftforge/forge/maven-metadata.xml';
 
       _logger.info('Fetching Forge versions for Minecraft $mcVersion...');
 
@@ -63,7 +64,7 @@ class LoaderDownloadService {
             .where((v) => v.startsWith('$mcVersion-'))
             .toList();
         versions.addAll(allVersions);
-        
+
         _logger.info('Found ${versions.length} Forge versions');
         return versions;
       } else {
@@ -85,12 +86,13 @@ class LoaderDownloadService {
       // Forge 版本格式: 1.20.1-47.2.20 -> mcVersion-loaderVersion
       final parts = version.split('-');
       if (parts.length < 2) return null;
-      
+
       final mcVersion = parts[0];
       final forgeVersion = parts[1];
-      
-      final url = '${ApiEndpoints.forgeMaven}/net/minecraftforge/forge/$mcVersion-$forgeVersion/forge-$mcVersion-$forgeVersion-installer.jar';
-      
+
+      final url =
+          '${ApiEndpoints.forgeMaven}/net/minecraftforge/forge/$mcVersion-$forgeVersion/forge-$mcVersion-$forgeVersion-installer.jar';
+
       _logger.info('Forge download URL: $url');
       return url;
     } catch (e, stackTrace) {
@@ -102,16 +104,17 @@ class LoaderDownloadService {
   /// 获取 Fabric 可用版本列表
   Future<List<String>> getFabricVersions(String mcVersion) async {
     try {
-      final url = 'https://maven.fabricmc.net/net/fabricmc/fabric-loader/maven-metadata.json';
-      
+      final url =
+          'https://maven.fabricmc.net/net/fabricmc/fabric-loader/maven-metadata.json';
+
       _logger.info('Fetching Fabric versions for Minecraft $mcVersion...');
-      
+
       final response = await _networkClient.get(url);
-      
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final versions = <String>[];
-        
+
         // 过滤出匹配 Minecraft 版本的 Fabric
         final allVersions = data['versions'] as List<dynamic>? ?? [];
         for (final v in allVersions) {
@@ -120,7 +123,7 @@ class LoaderDownloadService {
             versions.add(version);
           }
         }
-        
+
         _logger.info('Found ${versions.length} Fabric versions');
         return versions;
       } else {
@@ -141,9 +144,10 @@ class LoaderDownloadService {
     try {
       final mcVersion = version.split('-').first;
       final loaderVersion = version.split('-').last;
-      
-      final url = 'https://maven.fabricmc.net/net/fabricmc/fabric-loader/$loaderVersion/fabric-loader-$loaderVersion.jar';
-      
+
+      final url =
+          'https://maven.fabricmc.net/net/fabricmc/fabric-loader/$loaderVersion/fabric-loader-$loaderVersion.jar';
+
       _logger.info('Fabric download URL: $url');
       return url;
     } catch (e, stackTrace) {
@@ -165,13 +169,15 @@ class LoaderDownloadService {
     String? oldStatus;
     try {
       onStatus?.call('正在获取下载链接...');
-      
-      _eventBus.publish(LoaderInstallStartedEvent(
-        instanceId: instanceId,
-        loaderType: loaderType.name,
-        loaderVersion: version,
-      ));
-      
+
+      _eventBus.publish(
+        LoaderInstallStartedEvent(
+          instanceId: instanceId,
+          loaderType: loaderType.name,
+          loaderVersion: version,
+        ),
+      );
+
       _updateLoaderStatus(instanceId, 'downloading', oldStatus);
       oldStatus = 'downloading';
 
@@ -189,13 +195,15 @@ class LoaderDownloadService {
           break;
         case LoaderType.neoforge:
           final neoforgeVersion = '$mcVersion-$version';
-          downloadUrl = '${ApiEndpoints.neoforgeMaven}/net/neoforged/neoforge/$neoforgeVersion/neoforge-$neoforgeVersion-installer.jar';
+          downloadUrl =
+              '${ApiEndpoints.neoforgeMaven}/net/neoforged/neoforge/$neoforgeVersion/neoforge-$neoforgeVersion-installer.jar';
           fileName = 'neoforge-${mcVersion}-$version-installer.jar';
           break;
         case LoaderType.quilt:
           // Quilt 使用类似 Fabric 的结构
           final quiltVersion = version.split('-').last;
-          downloadUrl = 'https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-loader/$quiltVersion/quilt-loader-$quiltVersion.jar';
+          downloadUrl =
+              'https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-loader/$quiltVersion/quilt-loader-$quiltVersion.jar';
           fileName = 'quilt-loader-${quiltVersion}.jar';
           break;
       }
@@ -244,32 +252,41 @@ class LoaderDownloadService {
 
       _logger.info('$loaderType installation completed');
       onStatus?.call('$loaderType 安装完成!');
-      
+
       _updateLoaderStatus(instanceId, 'installed', oldStatus);
-      _eventBus.publish(LoaderInstallCompletedEvent(
-        instanceId: instanceId,
-        loaderType: loaderType.name,
-        loaderVersion: version,
-      ));
+      _eventBus.publish(
+        LoaderInstallCompletedEvent(
+          instanceId: instanceId,
+          loaderType: loaderType.name,
+          loaderVersion: version,
+        ),
+      );
     } catch (e, stackTrace) {
       _logger.error('Failed to install loader', e, stackTrace);
       _updateLoaderStatus(instanceId, 'downloadFailed', oldStatus);
-      _eventBus.publish(LoaderInstallFailedEvent(
-        instanceId: instanceId,
-        error: e,
-      ));
+      _eventBus.publish(
+        LoaderInstallFailedEvent(instanceId: instanceId, error: e),
+      );
       rethrow;
     }
   }
-  
+
   /// 更新加载器状态
-  void _updateLoaderStatus(String instanceId, String newStatus, String? oldStatus) {
-    _eventBus.publish(LoaderStatusChangedEvent(
-      instanceId: instanceId,
-      newStatus: newStatus,
-      oldStatus: oldStatus,
-    ));
-    _logger.info('Loader status changed for instance $instanceId: $oldStatus -> $newStatus');
+  void _updateLoaderStatus(
+    String instanceId,
+    String newStatus,
+    String? oldStatus,
+  ) {
+    _eventBus.publish(
+      LoaderStatusChangedEvent(
+        instanceId: instanceId,
+        newStatus: newStatus,
+        oldStatus: oldStatus,
+      ),
+    );
+    _logger.info(
+      'Loader status changed for instance $instanceId: $oldStatus -> $newStatus',
+    );
   }
 
   /// 安装加载器文件到游戏目录
@@ -285,7 +302,9 @@ class LoaderDownloadService {
       onStatus?.call('正在安装加载器...');
 
       // 创建必要的目录
-      final versionsDir = Directory(path.join(gameDirectory, 'versions', '$mcVersion-$version'));
+      final versionsDir = Directory(
+        path.join(gameDirectory, 'versions', '$mcVersion-$version'),
+      );
       if (!await versionsDir.exists()) {
         await versionsDir.create(recursive: true);
       }
@@ -300,12 +319,24 @@ class LoaderDownloadService {
         case LoaderType.forge:
         case LoaderType.neoforge:
           // Forge 需要运行安装器
-          await _runForgeInstaller(installerPath, gameDirectory, mcVersion, version, loaderType);
+          await _runForgeInstaller(
+            installerPath,
+            gameDirectory,
+            mcVersion,
+            version,
+            loaderType,
+          );
           break;
         case LoaderType.fabric:
         case LoaderType.quilt:
           // Fabric/Quilt 直接复制 jar 文件
-          await _installFabricLikeLoader(installerPath, gameDirectory, mcVersion, version, loaderType);
+          await _installFabricLikeLoader(
+            installerPath,
+            gameDirectory,
+            mcVersion,
+            version,
+            loaderType,
+          );
           // 创建版本 json 文件
           await _createVersionJson(
             loaderType: loaderType,
@@ -335,17 +366,13 @@ class LoaderDownloadService {
       _logger.info('Running ${loaderType.name} installer...');
 
       // 使用 Java 运行安装器
-      final result = await Process.run(
-        'java',
-        [
-          '-jar',
-          installerPath,
-          '--installClient',
-          '--installDir',
-          gameDirectory,
-        ],
-        workingDirectory: gameDirectory,
-      );
+      final result = await Process.run('java', [
+        '-jar',
+        installerPath,
+        '--installClient',
+        '--installDir',
+        gameDirectory,
+      ], workingDirectory: gameDirectory);
 
       if (result.exitCode != 0) {
         _logger.warning('Installer output: ${result.stdout}');
@@ -362,12 +389,9 @@ class LoaderDownloadService {
       final id = loaderType == LoaderType.neoforge
           ? '$mcVersion-neoforge-$loaderVersion'
           : '$mcVersion-forge-$loaderVersion';
-      final generatedJson = File(path.join(
-        gameDirectory,
-        'versions',
-        id,
-        '$id.json',
-      ));
+      final generatedJson = File(
+        path.join(gameDirectory, 'versions', id, '$id.json'),
+      );
       if (!await generatedJson.exists()) {
         // 安装器未生成 JSON，手动创建
         await _createVersionJson(
@@ -377,7 +401,9 @@ class LoaderDownloadService {
           gameDirectory: gameDirectory,
         );
       } else {
-        _logger.info('Installer already generated version JSON at: ${generatedJson.path}');
+        _logger.info(
+          'Installer already generated version JSON at: ${generatedJson.path}',
+        );
       }
     } catch (e, stackTrace) {
       _logger.error('Failed to run Forge/NeoForge installer', e, stackTrace);
@@ -403,7 +429,9 @@ class LoaderDownloadService {
         targetPath = path.join(
           gameDirectory,
           'libraries',
-          'net', 'fabricmc', 'fabric-loader',
+          'net',
+          'fabricmc',
+          'fabric-loader',
           loaderVersion,
           'fabric-loader-$loaderVersion.jar',
         );
@@ -411,7 +439,9 @@ class LoaderDownloadService {
         targetPath = path.join(
           gameDirectory,
           'libraries',
-          'org', 'quiltmc', 'quilt-loader',
+          'org',
+          'quiltmc',
+          'quilt-loader',
           loaderVersion,
           'quilt-loader-$loaderVersion.jar',
         );
@@ -493,13 +523,14 @@ class LoaderDownloadService {
           'name': '$loaderGroup:$loaderName:$loaderVersion',
           'downloads': {
             'artifact': {
-              'path': '$loaderGroupPath/$loaderName/$loaderVersion/$loaderName-$loaderVersion.jar',
+              'path':
+                  '$loaderGroupPath/$loaderName/$loaderVersion/$loaderName-$loaderVersion.jar',
               'url': loaderDownloadUrl,
               'sha1': '',
               'size': 0,
-            }
-          }
-        }
+            },
+          },
+        },
       ];
 
       // Fabric/Quilt 需要额外的 libraries
@@ -509,38 +540,50 @@ class LoaderDownloadService {
           'name': 'net.fabricmc:fabric-loader:$fabricLoaderVersion',
           'downloads': {
             'artifact': {
-              'path': 'net/fabricmc/fabric-loader/$fabricLoaderVersion/fabric-loader-$fabricLoaderVersion.jar',
-              'url': '${ApiEndpoints.fabricMaven}/net/fabricmc/fabric-loader/$fabricLoaderVersion/fabric-loader-$fabricLoaderVersion.jar',
+              'path':
+                  'net/fabricmc/fabric-loader/$fabricLoaderVersion/fabric-loader-$fabricLoaderVersion.jar',
+              'url':
+                  '${ApiEndpoints.fabricMaven}/net/fabricmc/fabric-loader/$fabricLoaderVersion/fabric-loader-$fabricLoaderVersion.jar',
               'sha1': '',
               'size': 0,
-            }
-          }
+            },
+          },
         });
         libraries.add({
           'name': 'net.fabricmc:intermediary:$mcVersion',
           'downloads': {
             'artifact': {
-              'path': 'net/fabricmc/intermediary/$mcVersion/intermediary-$mcVersion.jar',
-              'url': '${ApiEndpoints.fabricMaven}/net/fabricmc/intermediary/$mcVersion/intermediary-$mcVersion.jar',
+              'path':
+                  'net/fabricmc/intermediary/$mcVersion/intermediary-$mcVersion.jar',
+              'url':
+                  '${ApiEndpoints.fabricMaven}/net/fabricmc/intermediary/$mcVersion/intermediary-$mcVersion.jar',
               'sha1': '',
               'size': 0,
-            }
-          }
+            },
+          },
         });
         // 从 Fabric Meta API 获取 launcherMeta libraries
         try {
-          final metaUrl = 'https://meta.fabricmc.net/v2/versions/loader/$mcVersion/$fabricLoaderVersion';
+          final metaUrl =
+              'https://meta.fabricmc.net/v2/versions/loader/$mcVersion/$fabricLoaderVersion';
           final metaResponse = await _networkClient.get(metaUrl);
           if (metaResponse.statusCode == 200) {
-            final metaData = jsonDecode(metaResponse.body) as Map<String, dynamic>;
-            final launcherMeta = metaData['launcherMeta'] as Map<String, dynamic>?;
+            final metaData =
+                jsonDecode(metaResponse.body) as Map<String, dynamic>;
+            final launcherMeta =
+                metaData['launcherMeta'] as Map<String, dynamic>?;
             if (launcherMeta != null) {
-              final commonLibs = (launcherMeta['libraries']?['common'] as List<dynamic>?) ?? [];
-              final clientLibs = (launcherMeta['libraries']?['client'] as List<dynamic>?) ?? [];
+              final commonLibs =
+                  (launcherMeta['libraries']?['common'] as List<dynamic>?) ??
+                  [];
+              final clientLibs =
+                  (launcherMeta['libraries']?['client'] as List<dynamic>?) ??
+                  [];
               for (final lib in [...commonLibs, ...clientLibs]) {
                 final libMap = lib as Map<String, dynamic>;
                 final libName = libMap['name'] as String;
-                final libUrl = (libMap['url'] as String?) ?? 'https://maven.fabricmc.net/';
+                final libUrl =
+                    (libMap['url'] as String?) ?? 'https://maven.fabricmc.net/';
                 final libPath = _nameToPath(libName, libUrl);
                 libraries.add({
                   'name': libName,
@@ -550,8 +593,8 @@ class LoaderDownloadService {
                       'url': '$libUrl$libPath',
                       'sha1': '',
                       'size': 0,
-                    }
-                  }
+                    },
+                  },
                 });
               }
             }
@@ -565,12 +608,14 @@ class LoaderDownloadService {
           'name': 'org.quiltmc:quilt-loader:$quiltLoaderVersion',
           'downloads': {
             'artifact': {
-              'path': 'org/quiltmc/quilt-loader/$quiltLoaderVersion/quilt-loader-$quiltLoaderVersion.jar',
-              'url': '${ApiEndpoints.quiltMaven}/org/quiltmc/quilt-loader/$quiltLoaderVersion/quilt-loader-$quiltLoaderVersion.jar',
+              'path':
+                  'org/quiltmc/quilt-loader/$quiltLoaderVersion/quilt-loader-$quiltLoaderVersion.jar',
+              'url':
+                  '${ApiEndpoints.quiltMaven}/org/quiltmc/quilt-loader/$quiltLoaderVersion/quilt-loader-$quiltLoaderVersion.jar',
               'sha1': '',
               'size': 0,
-            }
-          }
+            },
+          },
         });
       }
 
@@ -582,7 +627,9 @@ class LoaderDownloadService {
         'type': 'release',
         'mainClass': mainClass,
         'arguments': {
-          'game': loaderType == LoaderType.forge || loaderType == LoaderType.neoforge
+          'game':
+              loaderType == LoaderType.forge ||
+                  loaderType == LoaderType.neoforge
               ? [
                   '--fml.forgeVersion',
                   loaderVersion,
@@ -595,12 +642,7 @@ class LoaderDownloadService {
         'libraries': libraries,
       };
 
-      final jsonPath = path.join(
-        gameDirectory,
-        'versions',
-        id,
-        '$id.json',
-      );
+      final jsonPath = path.join(gameDirectory, 'versions', id, '$id.json');
 
       final jsonFile = File(jsonPath);
       final jsonDir = jsonFile.parent;

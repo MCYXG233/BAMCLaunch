@@ -24,7 +24,7 @@ class ConfigManagerImpl implements IConfigManager {
   bool _initialized = false;
   bool _autoSave = true;
   File? _configFile;
-  
+
   /// 缓存的完整配置对象
   LauncherConfig? _cachedConfig;
 
@@ -179,7 +179,9 @@ class ConfigManagerImpl implements IConfigManager {
           '${_configFile!.path}.corrupted.${DateTime.now().millisecondsSinceEpoch}';
       try {
         await _configFile!.rename(backupPath);
-        Logger.instance.warning('Config file corrupted, backed up to $backupPath');
+        Logger.instance.warning(
+          'Config file corrupted, backed up to $backupPath',
+        );
       } catch (_) {
         Logger.instance.warning('Failed to backup corrupted config');
       }
@@ -343,13 +345,19 @@ class ConfigManagerImpl implements IConfigManager {
     } else {
       dirs.add(dir);
     }
-    await set(ConfigKeys.localGameDirectories, dirs.map((d) => d.toJson()).toList());
+    await set(
+      ConfigKeys.localGameDirectories,
+      dirs.map((d) => d.toJson()).toList(),
+    );
   }
 
   /// 移除本地游戏目录
   Future<void> removeLocalGameDirectory(String dirPath) async {
     final dirs = getLocalGameDirectories();
     dirs.removeWhere((d) => d.dir == dirPath);
-    await set(ConfigKeys.localGameDirectories, dirs.map((d) => d.toJson()).toList());
+    await set(
+      ConfigKeys.localGameDirectories,
+      dirs.map((d) => d.toJson()).toList(),
+    );
   }
 }

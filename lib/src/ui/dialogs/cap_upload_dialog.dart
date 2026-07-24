@@ -110,7 +110,10 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
       final imageData = await file.readAsBytes();
 
       // 验证披风
-      final validation = await _capeManager.validateCape(imageData, path.basename(filePath));
+      final validation = await _capeManager.validateCape(
+        imageData,
+        path.basename(filePath),
+      );
 
       if (!validation.isValid) {
         setState(() {
@@ -409,9 +412,7 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
                                 ),
                                 const SizedBox(height: 12),
                                 Text(
-                                  _isDragging
-                                      ? '释放以上传'
-                                      : '拖拽PNG文件到此处',
+                                  _isDragging ? '释放以上传' : '拖拽PNG文件到此处',
                                   style: TextStyle(
                                     color: _isDragging
                                         ? BAColors.primaryOf(context)
@@ -458,16 +459,11 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
                     height: 32,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: BAColors.borderOf(context),
-                      ),
+                      border: Border.all(color: BAColors.borderOf(context)),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(3),
-                      child: Image.memory(
-                        _previewImage!,
-                        fit: BoxFit.cover,
-                      ),
+                      child: Image.memory(_previewImage!, fit: BoxFit.cover),
                     ),
                   ),
                   const SizedBox(width: 12),

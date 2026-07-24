@@ -7,17 +7,10 @@ import '../core/logger.dart';
 import '../instance/instance_manager.dart';
 import '../instance/models.dart';
 
-typedef ExportProgressCallback = void Function(
-  int completed,
-  int total,
-  String? currentTask,
-);
+typedef ExportProgressCallback =
+    void Function(int completed, int total, String? currentTask);
 
-enum ModpackExportFormat {
-  curseforge,
-  modrinth,
-  bamc,
-}
+enum ModpackExportFormat { curseforge, modrinth, bamc }
 
 class ModpackExportOptions {
   final String name;
@@ -92,20 +85,15 @@ class ModpackExporter {
           manifestName = 'instance.json';
       }
 
-      zipArchive.addFile(archive.ArchiveFile(
-        manifestName,
-        manifestBytes.length,
-        manifestBytes,
-      ));
+      zipArchive.addFile(
+        archive.ArchiveFile(manifestName, manifestBytes.length, manifestBytes),
+      );
 
       onProgress?.call(0, 1, '正在压缩文件...');
 
       final encodedArchive = archive.ZipEncoder().encode(zipArchive);
       if (encodedArchive == null) {
-        throw AppException.fromCode(
-          ErrorCodes.fileNotFound,
-          detail: 'ZIP编码失败',
-        );
+        throw AppException.fromCode(ErrorCodes.fileNotFound, detail: 'ZIP编码失败');
       }
 
       final outputFile = File(outputPath);
@@ -163,11 +151,9 @@ class ModpackExporter {
             final relativePath = path.relative(entity.path, from: instancePath);
             final archivePath = relativePath.replaceAll('\\', '/');
             final content = await entity.readAsBytes();
-            zipArchive.addFile(archive.ArchiveFile(
-              archivePath,
-              content.length,
-              content,
-            ));
+            zipArchive.addFile(
+              archive.ArchiveFile(archivePath, content.length, content),
+            );
             collected++;
             fileCount++;
           }
@@ -176,11 +162,7 @@ class ModpackExporter {
       }
 
       processedFolders++;
-      onProgress?.call(
-        processedFolders,
-        totalFolders,
-        '正在收集 ${entry.key}...',
-      );
+      onProgress?.call(processedFolders, totalFolders, '正在收集 ${entry.key}...');
     }
 
     _logger.info('Total files collected: $collected');
@@ -218,10 +200,7 @@ class ModpackExporter {
       'minecraft': {
         'version': instance.version,
         'modLoaders': [
-          {
-            'id': loaderId ?? '',
-            'primary': true,
-          },
+          {'id': loaderId ?? '', 'primary': true},
         ],
       },
       'manifestType': 'minecraftModpack',
@@ -239,9 +218,7 @@ class ModpackExporter {
     GameInstance instance,
     ModpackExportOptions options,
   ) {
-    final Map<String, dynamic> dependencies = {
-      'minecraft': instance.version,
-    };
+    final Map<String, dynamic> dependencies = {'minecraft': instance.version};
 
     if (instance.loader != null) {
       switch (instance.loader!.toLowerCase()) {

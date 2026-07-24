@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../../resource_center/models.dart';
 import '../../resource_center/download_manager.dart';
@@ -78,10 +78,10 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
     final isLight = Theme.of(context).brightness == Brightness.light;
 
     return Dialog(
-      backgroundColor: isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1E2A44),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-      ),
+      backgroundColor: isLight
+          ? const Color(0xFFFFFFFF)
+          : const Color(0xFF1E2A44),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: Container(
         width: 420,
         padding: const EdgeInsets.all(24),
@@ -118,7 +118,9 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
                       Text(
                         '安装 ${widget.resource.name}',
                         style: TextStyle(
-                          color: isLight ? const Color(0xFF1A2744) : Colors.white,
+                          color: isLight
+                              ? const Color(0xFF1A2744)
+                              : Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -127,8 +129,9 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
                       Text(
                         '选择版本和目标实例',
                         style: TextStyle(
-                          color:
-                              isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
+                          color: isLight
+                              ? const Color(0xFF8899B5)
+                              : const Color(0xFFA0B0C8),
                           fontSize: 12,
                         ),
                       ),
@@ -139,7 +142,9 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
                   onPressed: () => Navigator.pop(context),
                   icon: Icon(
                     Icons.close,
-                    color: isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
+                    color: isLight
+                        ? const Color(0xFF8899B5)
+                        : const Color(0xFFA0B0C8),
                   ),
                   iconSize: 20,
                   padding: EdgeInsets.zero,
@@ -160,10 +165,14 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                color: isLight ? const Color(0xFFF0F5FF) : const Color(0xFF2A3A5A),
+                color: isLight
+                    ? const Color(0xFFF0F5FF)
+                    : const Color(0xFF2A3A5A),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A),
+                  color: isLight
+                      ? const Color(0xFFD0D8EE)
+                      : const Color(0xFF3A4D7A),
                 ),
               ),
               child: DropdownButtonHideUnderline(
@@ -173,11 +182,15 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
                   hint: Text(
                     '请选择版本',
                     style: TextStyle(
-                      color: isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
+                      color: isLight
+                          ? const Color(0xFF8899B5)
+                          : const Color(0xFFA0B0C8),
                       fontSize: 13,
                     ),
                   ),
-                  dropdownColor: isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1E2A44),
+                  dropdownColor: isLight
+                      ? const Color(0xFFFFFFFF)
+                      : const Color(0xFF1E2A44),
                   style: TextStyle(
                     color: isLight ? const Color(0xFF1A2744) : Colors.white,
                     fontSize: 13,
@@ -193,7 +206,9 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
                           Text(
                             'v${version.versionNumber}',
                             style: TextStyle(
-                              color: isLight ? const Color(0xFF1A2744) : Colors.white,
+                              color: isLight
+                                  ? const Color(0xFF1A2744)
+                                  : Colors.white,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -201,7 +216,9 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
                           Text(
                             '${version.gameVersions.take(2).join(', ')} · ${version.releaseType}',
                             style: TextStyle(
-                              color: isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
+                              color: isLight
+                                  ? const Color(0xFF8899B5)
+                                  : const Color(0xFFA0B0C8),
                               fontSize: 11,
                             ),
                           ),
@@ -230,17 +247,23 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                color: isLight ? const Color(0xFFF0F5FF) : const Color(0xFF2A3A5A),
+                color: isLight
+                    ? const Color(0xFFF0F5FF)
+                    : const Color(0xFF2A3A5A),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A),
+                  color: isLight
+                      ? const Color(0xFFD0D8EE)
+                      : const Color(0xFF3A4D7A),
                 ),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: _selectedInstance,
                   isExpanded: true,
-                  dropdownColor: isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1E2A44),
+                  dropdownColor: isLight
+                      ? const Color(0xFFFFFFFF)
+                      : const Color(0xFF1E2A44),
                   style: TextStyle(
                     color: isLight ? const Color(0xFF1A2744) : Colors.white,
                     fontSize: 13,
@@ -282,9 +305,13 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: isLight ? const Color(0xFF1A2744) : Colors.white,
+                      foregroundColor: isLight
+                          ? const Color(0xFF1A2744)
+                          : Colors.white,
                       side: BorderSide(
-                        color: isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A),
+                        color: isLight
+                            ? const Color(0xFFD0D8EE)
+                            : const Color(0xFF3A4D7A),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
@@ -298,7 +325,9 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
                 Expanded(
                   flex: 2,
                   child: ElevatedButton.icon(
-                    onPressed: _selectedVersionIndex != null && _selectedInstance != null
+                    onPressed:
+                        _selectedVersionIndex != null &&
+                            _selectedInstance != null
                         ? () {
                             final result = InstanceSelectResult(
                               version: widget.versions[_selectedVersionIndex!],
@@ -319,10 +348,12 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      disabledBackgroundColor:
-                          isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A),
-                      disabledForegroundColor:
-                          isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
+                      disabledBackgroundColor: isLight
+                          ? const Color(0xFFD0D8EE)
+                          : const Color(0xFF3A4D7A),
+                      disabledForegroundColor: isLight
+                          ? const Color(0xFF8899B5)
+                          : const Color(0xFFA0B0C8),
                     ),
                   ),
                 ),
@@ -363,7 +394,9 @@ class _InstanceSelectDialogState extends State<InstanceSelectDialog> {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
+                    color: isLight
+                        ? const Color(0xFF8899B5)
+                        : const Color(0xFFA0B0C8),
                     fontSize: 11,
                   ),
                 ),

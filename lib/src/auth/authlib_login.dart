@@ -24,10 +24,10 @@ class AuthlibInjectorServer {
   });
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'url': url,
-        'apiRoot': apiRoot,
-      };
+    'name': name,
+    'url': url,
+    'apiRoot': apiRoot,
+  };
 
   factory AuthlibInjectorServer.fromJson(Map<String, dynamic> json) {
     return AuthlibInjectorServer(
@@ -63,9 +63,9 @@ class AuthlibAccount {
   static String _generateAccountId() {
     final random = Random();
     String hexChars(int count) => List.generate(
-          count,
-          (_) => '0123456789abcdef'[random.nextInt(16)],
-        ).join();
+      count,
+      (_) => '0123456789abcdef'[random.nextInt(16)],
+    ).join();
     return '${hexChars(8)}-${hexChars(4)}-4${hexChars(3)}-'
         '${'89ab'[random.nextInt(4)]}${hexChars(3)}-${hexChars(12)}';
   }
@@ -75,15 +75,15 @@ class AuthlibAccount {
   String get fullAvatarUrl => 'https://mc-heads.net/avatar/$uuid';
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'username': username,
-        'uuid': uuid,
-        'accessToken': accessToken,
-        'serverName': serverName,
-        'serverUrl': serverUrl,
-        'createdAt': createdAt.toIso8601String(),
-        'lastUsedAt': lastUsedAt.toIso8601String(),
-      };
+    'id': id,
+    'username': username,
+    'uuid': uuid,
+    'accessToken': accessToken,
+    'serverName': serverName,
+    'serverUrl': serverUrl,
+    'createdAt': createdAt.toIso8601String(),
+    'lastUsedAt': lastUsedAt.toIso8601String(),
+  };
 
   factory AuthlibAccount.fromJson(Map<String, dynamic> json) {
     return AuthlibAccount(
@@ -93,8 +93,12 @@ class AuthlibAccount {
       accessToken: JsonUtils.getStringOrDefault(json['accessToken']),
       serverName: JsonUtils.getStringOrDefault(json['serverName']),
       serverUrl: JsonUtils.getStringOrDefault(json['serverUrl']),
-      createdAt: DateTime.tryParse(JsonUtils.getString(json['createdAt']) ?? '') ?? DateTime.now(),
-      lastUsedAt: DateTime.tryParse(JsonUtils.getString(json['lastUsedAt']) ?? '') ?? DateTime.now(),
+      createdAt:
+          DateTime.tryParse(JsonUtils.getString(json['createdAt']) ?? '') ??
+          DateTime.now(),
+      lastUsedAt:
+          DateTime.tryParse(JsonUtils.getString(json['lastUsedAt']) ?? '') ??
+          DateTime.now(),
     );
   }
 
@@ -122,12 +126,7 @@ class AuthlibAccount {
 }
 
 /// authlib-injector 下载状态
-enum AuthlibDownloadStatus {
-  notDownloaded,
-  downloading,
-  downloaded,
-  failed,
-}
+enum AuthlibDownloadStatus { notDownloaded, downloading, downloaded, failed }
 
 /// authlib-injector 状态
 class AuthlibInjectorStatus {
@@ -143,7 +142,8 @@ class AuthlibInjectorStatus {
     this.localPath,
   });
 
-  bool get isReady => downloadStatus == AuthlibDownloadStatus.downloaded && localPath != null;
+  bool get isReady =>
+      downloadStatus == AuthlibDownloadStatus.downloaded && localPath != null;
 }
 
 /// 外置登录管理器
@@ -178,7 +178,8 @@ class AuthlibLoginManager {
   final StreamController<List<AuthlibInjectorServer>> _serversController =
       StreamController<List<AuthlibInjectorServer>>.broadcast();
 
-  Stream<List<AuthlibInjectorServer>> get serversStream => _serversController.stream;
+  Stream<List<AuthlibInjectorServer>> get serversStream =>
+      _serversController.stream;
 
   List<AuthlibInjectorServer> get servers => _servers;
 
@@ -201,7 +202,10 @@ class AuthlibLoginManager {
       try {
         final List<dynamic> serversList = jsonDecode(serversJson);
         _servers = serversList
-            .map((json) => AuthlibInjectorServer.fromJson(json as Map<String, dynamic>))
+            .map(
+              (json) =>
+                  AuthlibInjectorServer.fromJson(json as Map<String, dynamic>),
+            )
             .toList();
         _serversController.add(_servers);
       } catch (e) {
@@ -225,7 +229,8 @@ class AuthlibLoginManager {
       ),
       AuthlibInjectorServer(
         name: 'TiaoWu',
-        url: 'https://tiaowu.jfrog.io/artifactory/mirrors/authlib-injector/authlib-injector-1.1.47.jar',
+        url:
+            'https://tiaowu.jfrog.io/artifactory/mirrors/authlib-injector/authlib-injector-1.1.47.jar',
         apiRoot: 'https://mc.tiaowu.cn/api',
       ),
       AuthlibInjectorServer(
@@ -267,10 +272,14 @@ class AuthlibLoginManager {
   }
 
   Future<void> _loadSelectedServer() async {
-    final serverJson = _configManager.getString(ConfigKeys.authlibSelectedServer);
+    final serverJson = _configManager.getString(
+      ConfigKeys.authlibSelectedServer,
+    );
     if (serverJson != null) {
       try {
-        _selectedServer = AuthlibInjectorServer.fromJson(jsonDecode(serverJson));
+        _selectedServer = AuthlibInjectorServer.fromJson(
+          jsonDecode(serverJson),
+        );
       } catch (e) {
         _logger.error('Failed to load selected server', e);
       }
@@ -356,25 +365,26 @@ class AuthlibLoginManager {
       );
     }
 
-    final apiRoot = _selectedServer!.apiRoot ?? '${Uri.parse(_selectedServer!.url).origin}/api';
+    final apiRoot =
+        _selectedServer!.apiRoot ??
+        '${Uri.parse(_selectedServer!.url).origin}/api';
 
     try {
       _logger.info('Authlib login to: $apiRoot');
 
-      final response = await _networkClient.postJson(
-        '$apiRoot/auth/login',
-        {
-          'username': username,
-          'password': password,
-        },
-      );
+      final response = await _networkClient.postJson('$apiRoot/auth/login', {
+        'username': username,
+        'password': password,
+      });
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
         final account = AuthlibAccount(
           id: AuthlibAccount._generateAccountId(),
-          username: JsonUtils.getStringOrDefault(data['selectedProfile']['name']),
+          username: JsonUtils.getStringOrDefault(
+            data['selectedProfile']['name'],
+          ),
           uuid: JsonUtils.getStringOrDefault(data['selectedProfile']['id']),
           accessToken: JsonUtils.getStringOrDefault(data['accessToken']),
           serverName: _selectedServer!.name,
@@ -407,7 +417,9 @@ class AuthlibLoginManager {
       try {
         final List<dynamic> accountsList = jsonDecode(accountsJson);
         accounts = accountsList
-            .map((json) => AuthlibAccount.fromJson(json as Map<String, dynamic>))
+            .map(
+              (json) => AuthlibAccount.fromJson(json as Map<String, dynamic>),
+            )
             .toList();
       } catch (e) {
         _logger.error('Failed to load authlib accounts', e);
@@ -421,7 +433,9 @@ class AuthlibLoginManager {
       accounts.add(account);
     }
 
-    final newAccountsJson = jsonEncode(accounts.map((a) => a.toJson()).toList());
+    final newAccountsJson = jsonEncode(
+      accounts.map((a) => a.toJson()).toList(),
+    );
     await _configManager.setString(ConfigKeys.authlibAccounts, newAccountsJson);
   }
 
@@ -450,18 +464,15 @@ class AuthlibLoginManager {
   Future<void> refreshAccount(AuthlibAccount account) async {
     if (_selectedServer == null) return;
 
-    final apiRoot = _selectedServer!.apiRoot ?? '${Uri.parse(_selectedServer!.url).origin}/api';
+    final apiRoot =
+        _selectedServer!.apiRoot ??
+        '${Uri.parse(_selectedServer!.url).origin}/api';
 
     try {
       final response = await _networkClient.postJson(
         '$apiRoot/auth/refresh',
-        {
-          'accessToken': account.accessToken,
-          'clientToken': account.id,
-        },
-        headers: {
-          'Authorization': 'Bearer ${account.accessToken}',
-        },
+        {'accessToken': account.accessToken, 'clientToken': account.id},
+        headers: {'Authorization': 'Bearer ${account.accessToken}'},
       );
 
       if (response.statusCode == 200) {
@@ -479,7 +490,8 @@ class AuthlibLoginManager {
   }
 
   Future<String> _getSupportDirectory() async {
-    final homeDir = Platform.environment['HOME'] ??
+    final homeDir =
+        Platform.environment['HOME'] ??
         Platform.environment['USERPROFILE'] ??
         '.';
     final supportDir = path.join(homeDir, '.bamclaunch');

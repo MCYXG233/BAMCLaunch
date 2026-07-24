@@ -98,11 +98,7 @@ class BAStatusBar extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          icon,
-          size: 14,
-          color: color ?? BAColors.textSecondaryOf(context),
-        ),
+        Icon(icon, size: 14, color: color ?? BAColors.textSecondaryOf(context)),
         const SizedBox(width: 4),
         Text(
           text,
@@ -116,7 +112,9 @@ class BAStatusBar extends StatelessWidget {
   }
 
   Widget _buildMemoryIndicator(BuildContext context, bool isLight) {
-    final usagePercent = memoryTotalMB > 0 ? (memoryUsedMB / memoryTotalMB * 100).round() : 0;
+    final usagePercent = memoryTotalMB > 0
+        ? (memoryUsedMB / memoryTotalMB * 100).round()
+        : 0;
     final isHighUsage = usagePercent > 80;
 
     return Row(

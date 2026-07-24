@@ -91,7 +91,8 @@ class ModInfo {
       isEnabled: json['isEnabled'] as bool? ?? true,
       modLoader: json['modLoader'] as String?,
       modId: json['modId'] as String?,
-      dependencies: (json['dependencies'] as List<dynamic>?)
+      dependencies:
+          (json['dependencies'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],

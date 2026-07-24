@@ -281,9 +281,7 @@ void main() {
       accountManager = AccountManager();
       configManager = MockConfigManager();
       eventBus = EventBus();
-      accountManager.initialize(
-        eventBus: eventBus,
-      );
+      accountManager.initialize(eventBus: eventBus);
     });
 
     tearDown(() {

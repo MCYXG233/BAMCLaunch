@@ -139,7 +139,9 @@ class NativeExtractor {
       }
 
       if (library.name.contains('org.lwjgl:lwjgl-glfw') && !useNativeGlfw) {
-        _logger.info('Skipping GLFW native (using system GLFW): ${library.name}');
+        _logger.info(
+          'Skipping GLFW native (using system GLFW): ${library.name}',
+        );
         skippedCount++;
         continue;
       }
@@ -177,7 +179,11 @@ class NativeExtractor {
           skippedCount++;
         }
       } catch (e, stackTrace) {
-        _logger.error('Failed to extract native library: ${library.name}', e, stackTrace);
+        _logger.error(
+          'Failed to extract native library: ${library.name}',
+          e,
+          stackTrace,
+        );
         failedCount++;
         failedLibraries.add(library.name);
         errors[library.name] = e.toString();
@@ -265,8 +271,10 @@ class NativeExtractor {
         return true;
       }
       // 如果不包含任何架构标识，假设通用
-      if (!lowerName.contains('x64') && !lowerName.contains('amd64') &&
-          !lowerName.contains('x86') && !lowerName.contains('i386')) {
+      if (!lowerName.contains('x64') &&
+          !lowerName.contains('amd64') &&
+          !lowerName.contains('x86') &&
+          !lowerName.contains('i386')) {
         return true;
       }
       return false;
@@ -274,13 +282,16 @@ class NativeExtractor {
 
     // x64架构检查
     if (arch == 'x64') {
-      if (lowerName.contains('x64') || lowerName.contains('amd64') ||
+      if (lowerName.contains('x64') ||
+          lowerName.contains('amd64') ||
           lowerName.contains('x86_64')) {
         return true;
       }
       // 如果不包含任何架构标识，假设通用
-      if (!lowerName.contains('arm64') && !lowerName.contains('aarch64') &&
-          !lowerName.contains('x86') && !lowerName.contains('i386')) {
+      if (!lowerName.contains('arm64') &&
+          !lowerName.contains('aarch64') &&
+          !lowerName.contains('x86') &&
+          !lowerName.contains('i386')) {
         return true;
       }
       return false;
@@ -308,11 +319,13 @@ class NativeExtractor {
   /// 获取架构
   String _getArchitecture() {
     // 检测系统架构
-    final arch = Platform.environment['PROCESSOR_ARCHITECTURE'] ??
-                 Platform.environment['HOSTTYPE'] ??
-                 'x64';
+    final arch =
+        Platform.environment['PROCESSOR_ARCHITECTURE'] ??
+        Platform.environment['HOSTTYPE'] ??
+        'x64';
 
-    if (arch.toLowerCase().contains('arm64') || arch.toLowerCase().contains('aarch64')) {
+    if (arch.toLowerCase().contains('arm64') ||
+        arch.toLowerCase().contains('aarch64')) {
       return 'arm64';
     }
     return 'x64';

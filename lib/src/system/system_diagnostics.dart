@@ -49,12 +49,7 @@ class SystemInfo {
 }
 
 /// 诊断项目状态
-enum DiagnosticStatus {
-  passed,
-  warning,
-  error,
-  skipped,
-}
+enum DiagnosticStatus { passed, warning, error, skipped }
 
 /// 诊断结果
 class DiagnosticResult {
@@ -102,11 +97,20 @@ class SystemDiagnostics {
     try {
       if (Platform.isWindows) {
         // Windows: 使用wmic命令
-        final result = await Process.run('wmic', ['OS', 'get', 'TotalVisibleMemorySize,FreePhysicalMemory', '/format:list']);
+        final result = await Process.run('wmic', [
+          'OS',
+          'get',
+          'TotalVisibleMemorySize,FreePhysicalMemory',
+          '/format:list',
+        ]);
         final output = result.stdout.toString();
 
-        final totalMatch = RegExp(r'TotalVisibleMemorySize=(\d+)').firstMatch(output);
-        final freeMatch = RegExp(r'FreePhysicalMemory=(\d+)').firstMatch(output);
+        final totalMatch = RegExp(
+          r'TotalVisibleMemorySize=(\d+)',
+        ).firstMatch(output);
+        final freeMatch = RegExp(
+          r'FreePhysicalMemory=(\d+)',
+        ).firstMatch(output);
 
         if (totalMatch != null) {
           totalMemory = (int.parse(totalMatch.group(1)!) * 1024); // KB to bytes
@@ -136,7 +140,13 @@ class SystemDiagnostics {
     String? gpuInfo;
     try {
       if (Platform.isWindows) {
-        final result = await Process.run('wmic', ['path', 'win32_VideoController', 'get', 'name', '/format:value']);
+        final result = await Process.run('wmic', [
+          'path',
+          'win32_VideoController',
+          'get',
+          'name',
+          '/format:value',
+        ]);
         final output = result.stdout.toString();
         final gpuMatch = RegExp(r'Name=(.+)').firstMatch(output);
         gpuInfo = gpuMatch?.group(1)?.trim();
@@ -212,7 +222,9 @@ class SystemDiagnostics {
       }
 
       final result = await Process.run(javaPath, ['-version']);
-      final versionMatch = RegExp(r'version\s+"([^"]+)"').firstMatch('${result.stderr}${result.stdout}');
+      final versionMatch = RegExp(
+        r'version\s+"([^"]+)"',
+      ).firstMatch('${result.stderr}${result.stdout}');
 
       if (versionMatch != null) {
         return DiagnosticResult(
@@ -305,7 +317,9 @@ class SystemDiagnostics {
   Future<DiagnosticResult> _checkNetwork() async {
     try {
       // 尝试连接Mojang服务器
-      final addresses = await InternetAddress.lookup('sessionserver.mojang.com');
+      final addresses = await InternetAddress.lookup(
+        'sessionserver.mojang.com',
+      );
       if (addresses.isNotEmpty) {
         return DiagnosticResult(
           name: '网络连接',
@@ -335,11 +349,20 @@ class SystemDiagnostics {
   Future<DiagnosticResult> _checkMemory() async {
     try {
       if (Platform.isWindows) {
-        final result = await Process.run('wmic', ['OS', 'get', 'FreePhysicalMemory,TotalVisibleMemorySize', '/format:list']);
+        final result = await Process.run('wmic', [
+          'OS',
+          'get',
+          'FreePhysicalMemory,TotalVisibleMemorySize',
+          '/format:list',
+        ]);
         final output = result.stdout.toString();
 
-        final totalMatch = RegExp(r'TotalVisibleMemorySize=(\d+)').firstMatch(output);
-        final freeMatch = RegExp(r'FreePhysicalMemory=(\d+)').firstMatch(output);
+        final totalMatch = RegExp(
+          r'TotalVisibleMemorySize=(\d+)',
+        ).firstMatch(output);
+        final freeMatch = RegExp(
+          r'FreePhysicalMemory=(\d+)',
+        ).firstMatch(output);
 
         if (totalMatch != null && freeMatch != null) {
           final totalMB = int.parse(totalMatch.group(1)!) ~/ 1024;
@@ -352,7 +375,11 @@ class SystemDiagnostics {
               description: '检查系统内存使用情况',
               status: DiagnosticStatus.warning,
               message: '内存使用率较高 ($usedPercent%)',
-              details: {'total': '$totalMB MB', 'free': '$freeMB MB', 'used': '$usedPercent%'},
+              details: {
+                'total': '$totalMB MB',
+                'free': '$freeMB MB',
+                'used': '$usedPercent%',
+              },
             );
           }
 
@@ -361,7 +388,11 @@ class SystemDiagnostics {
             description: '检查系统内存使用情况',
             status: DiagnosticStatus.passed,
             message: '内存使用正常',
-            details: {'total': '$totalMB MB', 'free': '$freeMB MB', 'used': '$usedPercent%'},
+            details: {
+              'total': '$totalMB MB',
+              'free': '$freeMB MB',
+              'used': '$usedPercent%',
+            },
           );
         }
       }
@@ -434,7 +465,9 @@ class SystemDiagnostics {
     buffer.writeln('操作系统: ${systemInfo.osName} ${systemInfo.osVersion}');
     buffer.writeln('架构: ${systemInfo.arch}');
     buffer.writeln('CPU核心数: ${systemInfo.cpuCount}');
-    buffer.writeln('总内存: ${(systemInfo.totalMemory / 1024 / 1024 / 1024).toStringAsFixed(2)} GB');
+    buffer.writeln(
+      '总内存: ${(systemInfo.totalMemory / 1024 / 1024 / 1024).toStringAsFixed(2)} GB',
+    );
     buffer.writeln('Java版本: ${systemInfo.javaVersion ?? "未安装"}');
     buffer.writeln('Java路径: ${systemInfo.javaPath ?? "未配置"}');
     buffer.writeln('GPU: ${systemInfo.gpuInfo ?? "未知"}');
@@ -445,10 +478,10 @@ class SystemDiagnostics {
       final statusIcon = diag.status == DiagnosticStatus.passed
           ? '✅'
           : diag.status == DiagnosticStatus.warning
-              ? '⚠️'
-              : diag.status == DiagnosticStatus.error
-                  ? '❌'
-                  : '⏭️';
+          ? '⚠️'
+          : diag.status == DiagnosticStatus.error
+          ? '❌'
+          : '⏭️';
       buffer.writeln('$statusIcon ${diag.name}: ${diag.message}');
     }
 

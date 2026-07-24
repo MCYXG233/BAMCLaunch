@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../resource_center/models.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
@@ -38,12 +38,7 @@ class _ResourceFilterState extends State<ResourceFilter> {
     '1.16.5',
     '1.12.2',
   ];
-  final List<String> _loaders = [
-    'Fabric',
-    'Forge',
-    'Quilt',
-    'NeoForge',
-  ];
+  final List<String> _loaders = ['Fabric', 'Forge', 'Quilt', 'NeoForge'];
   final List<String> _sortOptions = [
     'relevance',
     'downloads',
@@ -80,9 +75,7 @@ class _ResourceFilterState extends State<ResourceFilter> {
             children: [
               Text(
                 '筛选选项',
-                style: BATypography.headlineSmall.copyWith(
-                  color: textPrimary,
-                ),
+                style: BATypography.headlineSmall.copyWith(color: textPrimary),
               ),
               TextButton(
                 onPressed: _resetFilters,
@@ -126,19 +119,24 @@ class _ResourceFilterState extends State<ResourceFilter> {
           spacing: 8,
           runSpacing: 8,
           children: _gameVersions.map((version) {
-            final isSelected = _currentParams.gameVersions?.contains(version) ?? false;
+            final isSelected =
+                _currentParams.gameVersions?.contains(version) ?? false;
             return FilterChip(
               label: Text(version),
               selected: isSelected,
               onSelected: (selected) {
                 setState(() {
                   if (selected) {
-                    final newVersions = List<String>.from(_currentParams.gameVersions ?? [])
-                      ..add(version);
-                    _currentParams = _currentParams.copyWith(gameVersions: newVersions);
+                    final newVersions = List<String>.from(
+                      _currentParams.gameVersions ?? [],
+                    )..add(version);
+                    _currentParams = _currentParams.copyWith(
+                      gameVersions: newVersions,
+                    );
                   } else {
-                    final newVersions = List<String>.from(_currentParams.gameVersions ?? [])
-                      ..remove(version);
+                    final newVersions = List<String>.from(
+                      _currentParams.gameVersions ?? [],
+                    )..remove(version);
                     _currentParams = _currentParams.copyWith(
                       gameVersions: newVersions.isEmpty ? null : newVersions,
                     );
@@ -149,11 +147,15 @@ class _ResourceFilterState extends State<ResourceFilter> {
               selectedColor: BAColors.primaryOf(context).withOpacity(0.2),
               checkmarkColor: BAColors.primaryOf(context),
               backgroundColor: BAColors.surfaceVariantOf(context),
-              labelStyle: TextStyle(color: isSelected ? BAColors.primaryOf(context) : textSecondary),
+              labelStyle: TextStyle(
+                color: isSelected ? BAColors.primaryOf(context) : textSecondary,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
                 side: BorderSide(
-                  color: isSelected ? BAColors.primaryOf(context) : BAColors.borderOf(context),
+                  color: isSelected
+                      ? BAColors.primaryOf(context)
+                      : BAColors.borderOf(context),
                 ),
               ),
             );
@@ -183,19 +185,24 @@ class _ResourceFilterState extends State<ResourceFilter> {
           spacing: 8,
           runSpacing: 8,
           children: _loaders.map((loader) {
-            final isSelected = _currentParams.loaders?.contains(loader) ?? false;
+            final isSelected =
+                _currentParams.loaders?.contains(loader) ?? false;
             return FilterChip(
               label: Text(loader),
               selected: isSelected,
               onSelected: (selected) {
                 setState(() {
                   if (selected) {
-                    final newLoaders = List<String>.from(_currentParams.loaders ?? [])
-                      ..add(loader);
-                    _currentParams = _currentParams.copyWith(loaders: newLoaders);
+                    final newLoaders = List<String>.from(
+                      _currentParams.loaders ?? [],
+                    )..add(loader);
+                    _currentParams = _currentParams.copyWith(
+                      loaders: newLoaders,
+                    );
                   } else {
-                    final newLoaders = List<String>.from(_currentParams.loaders ?? [])
-                      ..remove(loader);
+                    final newLoaders = List<String>.from(
+                      _currentParams.loaders ?? [],
+                    )..remove(loader);
                     _currentParams = _currentParams.copyWith(
                       loaders: newLoaders.isEmpty ? null : newLoaders,
                     );
@@ -206,11 +213,17 @@ class _ResourceFilterState extends State<ResourceFilter> {
               selectedColor: BAColors.secondaryOf(context).withOpacity(0.2),
               checkmarkColor: BAColors.secondaryOf(context),
               backgroundColor: BAColors.surfaceVariantOf(context),
-              labelStyle: TextStyle(color: isSelected ? BAColors.secondaryOf(context) : textSecondary),
+              labelStyle: TextStyle(
+                color: isSelected
+                    ? BAColors.secondaryOf(context)
+                    : textSecondary,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
                 side: BorderSide(
-                  color: isSelected ? BAColors.secondaryOf(context) : BAColors.borderOf(context),
+                  color: isSelected
+                      ? BAColors.secondaryOf(context)
+                      : BAColors.borderOf(context),
                 ),
               ),
             );

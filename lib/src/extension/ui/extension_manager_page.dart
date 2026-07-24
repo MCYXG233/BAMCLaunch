@@ -43,10 +43,7 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
       title: '安装扩展',
       width: 500,
       actions: [
-        BASecondaryButton(
-          text: '取消',
-          onPressed: () => Navigator.pop(context),
-        ),
+        BASecondaryButton(text: '取消', onPressed: () => Navigator.pop(context)),
         const SizedBox(width: 12),
         BAPrimaryButton(
           text: '选择文件',
@@ -59,7 +56,9 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
         children: [
           Text(
             '扩展路径',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodyMedium.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -77,25 +76,40 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                borderSide: BorderSide(
+                  color: BAColors.primaryOf(context),
+                  width: 2,
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              prefixIcon: Icon(Icons.folder_open, color: BAColors.textSecondaryOf(context)),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              prefixIcon: Icon(
+                Icons.folder_open,
+                color: BAColors.textSecondaryOf(context),
+              ),
             ),
           ),
           const SizedBox(height: 16),
           Text(
             '支持的格式',
-            style: BATypography.bodySmall.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodySmall.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             '• .zip 扩展包',
-            style: BATypography.bodySmall.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodySmall.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
           ),
           Text(
             '• 包含 manifest.json 的文件夹',
-            style: BATypography.bodySmall.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodySmall.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
           ),
         ],
       ),
@@ -160,22 +174,18 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
           children: [
             Text(
               extension.description,
-              style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+              style: BATypography.bodyMedium.copyWith(
+                color: BAColors.textSecondaryOf(context),
+              ),
             ),
             const SizedBox(height: 24),
             Row(
               children: [
                 Expanded(
-                  child: _DetailItem(
-                    label: '版本',
-                    value: extension.version,
-                  ),
+                  child: _DetailItem(label: '版本', value: extension.version),
                 ),
                 Expanded(
-                  child: _DetailItem(
-                    label: '作者',
-                    value: extension.author,
-                  ),
+                  child: _DetailItem(label: '作者', value: extension.author),
                 ),
               ],
             ),
@@ -183,27 +193,32 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Icon(Icons.link, color: BAColors.primaryOf(context), size: 20),
+                  Icon(
+                    Icons.link,
+                    color: BAColors.primaryOf(context),
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     extension.homepage!,
-                    style: BATypography.bodyMedium.copyWith(color: BAColors.primaryOf(context)),
+                    style: BATypography.bodyMedium.copyWith(
+                      color: BAColors.primaryOf(context),
+                    ),
                   ),
                 ],
               ),
             ],
             if (extension.license != null) ...[
               const SizedBox(height: 16),
-              _DetailItem(
-                label: '许可证',
-                value: extension.license!,
-              ),
+              _DetailItem(label: '许可证', value: extension.license!),
             ],
             if (extension.permissions.isNotEmpty) ...[
               const SizedBox(height: 16),
               Text(
                 '权限',
-                style: BATypography.titleSmall.copyWith(color: BAColors.textPrimaryOf(context)),
+                style: BATypography.titleSmall.copyWith(
+                  color: BAColors.textPrimaryOf(context),
+                ),
               ),
               const SizedBox(height: 8),
               Wrap(
@@ -259,7 +274,9 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
   Widget _buildContent() {
     var extensions = _extensionManager.extensions;
     if (_showOnlyEnabled) {
-      extensions = extensions.where((e) => e.status == ExtensionStatus.enabled).toList();
+      extensions = extensions
+          .where((e) => e.status == ExtensionStatus.enabled)
+          .toList();
     }
 
     return Column(
@@ -291,11 +308,15 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
               children: [
                 Text(
                   '扩展管理',
-                  style: BATypography.headlineMedium.copyWith(color: BAColors.textPrimaryOf(context)),
+                  style: BATypography.headlineMedium.copyWith(
+                    color: BAColors.textPrimaryOf(context),
+                  ),
                 ),
                 Text(
                   '管理和扩展启动器功能',
-                  style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+                  style: BATypography.bodyMedium.copyWith(
+                    color: BAColors.textSecondaryOf(context),
+                  ),
                 ),
               ],
             ),
@@ -303,7 +324,8 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
           FilterChip(
             selected: _showOnlyEnabled,
             label: const Text('仅显示已启用'),
-            onSelected: (selected) => setState(() => _showOnlyEnabled = selected),
+            onSelected: (selected) =>
+                setState(() => _showOnlyEnabled = selected),
             selectedColor: BAColors.primaryOf(context).withOpacity(0.2),
             checkmarkColor: BAColors.primaryOf(context),
             backgroundColor: BAColors.surfaceVariantOf(context),
@@ -335,10 +357,14 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: hasError ? BAColors.dangerOf(context).withOpacity(0.05) : BAColors.surfaceOf(context),
+        color: hasError
+            ? BAColors.dangerOf(context).withOpacity(0.05)
+            : BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: hasError ? BAColors.dangerOf(context).withOpacity(0.3) : BAColors.borderOf(context),
+          color: hasError
+              ? BAColors.dangerOf(context).withOpacity(0.3)
+              : BAColors.borderOf(context),
         ),
       ),
       child: Row(
@@ -355,7 +381,9 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
             child: Icon(
               Icons.extension,
               size: 32,
-              color: isEnabled ? BAColors.primaryOf(context) : BAColors.textDisabledOf(context),
+              color: isEnabled
+                  ? BAColors.primaryOf(context)
+                  : BAColors.textDisabledOf(context),
             ),
           ),
           const SizedBox(width: 16),
@@ -386,7 +414,9 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
                       child: Text(
                         isEnabled ? '已启用' : '已禁用',
                         style: BATypography.label.copyWith(
-                          color: isEnabled ? BAColors.successOf(context) : BAColors.textSecondaryOf(context),
+                          color: isEnabled
+                              ? BAColors.successOf(context)
+                              : BAColors.textSecondaryOf(context),
                         ),
                       ),
                     ),
@@ -435,7 +465,9 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
                   const SizedBox(height: 8),
                   Text(
                     extension.error!,
-                    style: BATypography.bodySmall.copyWith(color: BAColors.dangerOf(context)),
+                    style: BATypography.bodySmall.copyWith(
+                      color: BAColors.dangerOf(context),
+                    ),
                   ),
                 ],
               ],
@@ -455,10 +487,7 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
             activeColor: BAColors.primaryOf(context),
           ),
           IconButton(
-            icon: Icon(
-              Icons.delete_outline,
-              color: BAColors.dangerOf(context),
-            ),
+            icon: Icon(Icons.delete_outline, color: BAColors.dangerOf(context)),
             onPressed: () => _uninstallExtension(extension),
           ),
         ],
@@ -479,12 +508,16 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
           const SizedBox(height: 24),
           Text(
             '还没有安装扩展',
-            style: BATypography.headlineSmall.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.headlineSmall.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             '安装扩展来增强启动器功能',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodyMedium.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
           ),
           const SizedBox(height: 32),
           BAPrimaryButton(
@@ -502,10 +535,7 @@ class _DetailItem extends StatelessWidget {
   final String label;
   final String value;
 
-  const _DetailItem({
-    required this.label,
-    required this.value,
-  });
+  const _DetailItem({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -514,12 +544,16 @@ class _DetailItem extends StatelessWidget {
       children: [
         Text(
           label,
-          style: BATypography.bodySmall.copyWith(color: BAColors.textSecondaryOf(context)),
+          style: BATypography.bodySmall.copyWith(
+            color: BAColors.textSecondaryOf(context),
+          ),
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: BATypography.bodyMedium.copyWith(color: BAColors.textPrimaryOf(context)),
+          style: BATypography.bodyMedium.copyWith(
+            color: BAColors.textPrimaryOf(context),
+          ),
         ),
       ],
     );

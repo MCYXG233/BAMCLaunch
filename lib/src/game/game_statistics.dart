@@ -264,7 +264,8 @@ class GameStatisticsManager {
     if (_initialized) return;
 
     try {
-      final supportDir = await _platformAdapter.getApplicationSupportDirectory();
+      final supportDir = await _platformAdapter
+          .getApplicationSupportDirectory();
       final dataPath = path.join(supportDir, 'statistics');
       final dataDir = Directory(dataPath);
 
@@ -278,7 +279,9 @@ class GameStatisticsManager {
         await _loadData();
       }
 
-      _logger.info('Game statistics manager initialized, ${_sessions.length} sessions loaded');
+      _logger.info(
+        'Game statistics manager initialized, ${_sessions.length} sessions loaded',
+      );
       _initialized = true;
     } catch (e, stackTrace) {
       _logger.error('Failed to initialize statistics manager', e, stackTrace);
@@ -465,7 +468,9 @@ class GameStatisticsManager {
     stats.lastPlayTimeSeconds = updatedSession.playTimeSeconds;
 
     _activeSession = null;
-    _logger.info('Ended session: ${updatedSession.id}, played ${updatedSession.playTimeSeconds}s');
+    _logger.info(
+      'Ended session: ${updatedSession.id}, played ${updatedSession.playTimeSeconds}s',
+    );
 
     await _saveData();
     return updatedSession;
@@ -479,10 +484,11 @@ class GameStatisticsManager {
   }
 
   /// 获取特定实例的会话
-  List<GameSession> getSessionsForInstance(String instanceId, {int limit = 100}) {
-    final filtered = _sessions
-        .where((s) => s.instanceId == instanceId)
-        .toList()
+  List<GameSession> getSessionsForInstance(
+    String instanceId, {
+    int limit = 100,
+  }) {
+    final filtered = _sessions.where((s) => s.instanceId == instanceId).toList()
       ..sort((a, b) => b.startTime.compareTo(a.startTime));
     return filtered.take(limit).toList();
   }
@@ -501,12 +507,11 @@ class GameStatisticsManager {
 
   /// 获取所有实例统计
   List<InstanceStatistics> getAllInstanceStatistics() {
-    return _instanceStats.values.toList()
-      ..sort((a, b) {
-        if (a.lastLaunchTime == null) return 1;
-        if (b.lastLaunchTime == null) return -1;
-        return b.lastLaunchTime!.compareTo(a.lastLaunchTime!);
-      });
+    return _instanceStats.values.toList()..sort((a, b) {
+      if (a.lastLaunchTime == null) return 1;
+      if (b.lastLaunchTime == null) return -1;
+      return b.lastLaunchTime!.compareTo(a.lastLaunchTime!);
+    });
   }
 
   /// 获取总游戏时长
@@ -558,7 +563,9 @@ class GameStatisticsManager {
     if (_instanceStats.isEmpty) return null;
 
     final sorted = _instanceStats.values.toList()
-      ..sort((a, b) => b.totalPlayTimeSeconds.compareTo(a.totalPlayTimeSeconds));
+      ..sort(
+        (a, b) => b.totalPlayTimeSeconds.compareTo(a.totalPlayTimeSeconds),
+      );
     return sorted.first;
   }
 
@@ -572,7 +579,9 @@ class GameStatisticsManager {
   }
 
   /// 删除旧的会话记录
-  Future<void> cleanOldSessions({Duration keepDuration = const Duration(days: 90)}) async {
+  Future<void> cleanOldSessions({
+    Duration keepDuration = const Duration(days: 90),
+  }) async {
     final cutoff = DateTime.now().subtract(keepDuration);
     final beforeCount = _sessions.length;
 

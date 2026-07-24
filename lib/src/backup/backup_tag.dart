@@ -14,11 +14,7 @@ class BackupTag {
   /// 标签颜色（ARGB值）
   final int colorValue;
 
-  BackupTag({
-    required this.id,
-    required this.name,
-    required this.colorValue,
-  });
+  BackupTag({required this.id, required this.name, required this.colorValue});
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -34,11 +30,7 @@ class BackupTag {
     );
   }
 
-  BackupTag copyWith({
-    String? id,
-    String? name,
-    int? colorValue,
-  }) {
+  BackupTag copyWith({String? id, String? name, int? colorValue}) {
     return BackupTag(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -74,7 +66,8 @@ class BackupTagColors {
   ];
 
   static int getRandomColor() {
-    return predefined[DateTime.now().millisecondsSinceEpoch % predefined.length];
+    return predefined[DateTime.now().millisecondsSinceEpoch %
+        predefined.length];
   }
 }
 
@@ -140,10 +133,7 @@ class BackupTagManager {
   }
 
   /// 创建标签
-  Future<BackupTag> createTag({
-    required String name,
-    int? colorValue,
-  }) async {
+  Future<BackupTag> createTag({required String name, int? colorValue}) async {
     final id = 'tag_${DateTime.now().millisecondsSinceEpoch}';
     final tag = BackupTag(
       id: id,

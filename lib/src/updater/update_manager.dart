@@ -59,13 +59,14 @@ class ReleaseInfo {
   factory ReleaseInfo.fromJson(Map<String, dynamic> json) {
     String? downloadUrl;
     try {
-      downloadUrl = (json['assets'] as List<dynamic>?)
-          ?.firstWhere(
-            (asset) =>
-                (asset['name'] as String?)?.endsWith('.exe') == true ||
-                (asset['name'] as String?)?.endsWith('.zip') == true,
-            orElse: () => null,
-          )?['browser_download_url'] as String?;
+      downloadUrl =
+          (json['assets'] as List<dynamic>?)?.firstWhere(
+                (asset) =>
+                    (asset['name'] as String?)?.endsWith('.exe') == true ||
+                    (asset['name'] as String?)?.endsWith('.zip') == true,
+                orElse: () => null,
+              )?['browser_download_url']
+              as String?;
     } catch (_) {
       downloadUrl = null;
     }
@@ -249,10 +250,7 @@ class UpdateManager {
       // 如果已经是 AppException 则直接重新抛出
       if (e is AppException) rethrow;
       // 其他错误包装为 AppException
-      throw AppException.fromCode(
-        ErrorCodes.unknown,
-        detail: e.toString(),
-      );
+      throw AppException.fromCode(ErrorCodes.unknown, detail: e.toString());
     } finally {
       // 无论成功或失败，都重置检查标志
       _isChecking = false;
@@ -597,7 +595,9 @@ class UpdateManager {
   Future<void> cleanup() async {
     try {
       // 删除更新临时目录
-      final tempDir = Directory(path.join(Directory.systemTemp.path, 'bamclaunch_update'));
+      final tempDir = Directory(
+        path.join(Directory.systemTemp.path, 'bamclaunch_update'),
+      );
       if (await tempDir.exists()) {
         await tempDir.delete(recursive: true);
         _logger.info('Cleaned up update temp directory');

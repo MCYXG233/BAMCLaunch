@@ -6,7 +6,7 @@ class BALaunchAnimation extends StatefulWidget {
   final String gameVersion;
   final String playerName;
   final VoidCallback onComplete;
-  
+
   const BALaunchAnimation({
     super.key,
     required this.gameVersion,
@@ -18,12 +18,13 @@ class BALaunchAnimation extends StatefulWidget {
   State<BALaunchAnimation> createState() => _BALaunchAnimationState();
 }
 
-class _BALaunchAnimationState extends State<BALaunchAnimation> with SingleTickerProviderStateMixin {
+class _BALaunchAnimationState extends State<BALaunchAnimation>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   bool _isAnimating = true;
   List<StarParticle> _stars = [];
   List<SparkleParticle> _sparkles = [];
-  
+
   @override
   void initState() {
     super.initState();
@@ -58,15 +59,15 @@ class _BALaunchAnimationState extends State<BALaunchAnimation> with SingleTicker
 
   Future<void> _startAnimation() async {
     await Future.delayed(const Duration(milliseconds: 300));
-    
+
     await _animationController.forward();
-    
+
     _generateSparkles();
-    
+
     await Future.delayed(const Duration(milliseconds: 800));
-    
+
     setState(() => _isAnimating = false);
-    
+
     await Future.delayed(const Duration(milliseconds: 500));
     widget.onComplete();
   }
@@ -76,11 +77,7 @@ class _BALaunchAnimationState extends State<BALaunchAnimation> with SingleTicker
       _sparkles = List.generate(30, (index) {
         final angle = (index / 30) * 2 * pi;
         final speed = Random().nextDouble() * 4 + 2;
-        return SparkleParticle(
-          id: index,
-          angle: angle,
-          speed: speed,
-        );
+        return SparkleParticle(id: index, angle: angle, speed: speed);
       });
     });
   }
@@ -105,11 +102,7 @@ class _BALaunchAnimationState extends State<BALaunchAnimation> with SingleTicker
       child: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Color(0xFF0A0A1A),
-              Color(0xFF1A1A3A),
-              Color(0xFF0A0A1A),
-            ],
+            colors: [Color(0xFF0A0A1A), Color(0xFF1A1A3A), Color(0xFF0A0A1A)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -139,16 +132,11 @@ class _BALaunchAnimationState extends State<BALaunchAnimation> with SingleTicker
               fontSize: 48,
               fontWeight: FontWeight.bold,
               letterSpacing: 8,
-              shadows: [
-                Shadow(
-                  color: Color(0xFF7EB5F6),
-                  blurRadius: 20,
-                ),
-              ],
+              shadows: [Shadow(color: Color(0xFF7EB5F6), blurRadius: 20)],
             ),
           ),
           const SizedBox(height: 8),
-          
+
           Text(
             'Version ${widget.gameVersion}',
             style: TextStyle(
@@ -158,7 +146,7 @@ class _BALaunchAnimationState extends State<BALaunchAnimation> with SingleTicker
             ),
           ),
           const SizedBox(height: 40),
-          
+
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             decoration: BoxDecoration(
@@ -170,11 +158,7 @@ class _BALaunchAnimationState extends State<BALaunchAnimation> with SingleTicker
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.person,
-                  color: Color(0xFF7EB5F6),
-                  size: 24,
-                ),
+                const Icon(Icons.person, color: Color(0xFF7EB5F6), size: 24),
                 const SizedBox(width: 12),
                 Text(
                   widget.playerName,
@@ -188,7 +172,7 @@ class _BALaunchAnimationState extends State<BALaunchAnimation> with SingleTicker
             ),
           ),
           const SizedBox(height: 40),
-          
+
           SizedBox(
             width: 200,
             height: 200,
@@ -202,13 +186,13 @@ class _BALaunchAnimationState extends State<BALaunchAnimation> with SingleTicker
             ),
           ),
           const SizedBox(height: 30),
-          
+
           AnimatedBuilder(
             animation: _animationController,
             builder: (context, child) {
               final progress = _animationController.value;
               String status = '';
-              
+
               if (progress < 0.3) {
                 status = '正在准备游戏...';
               } else if (progress < 0.6) {
@@ -218,7 +202,7 @@ class _BALaunchAnimationState extends State<BALaunchAnimation> with SingleTicker
               } else {
                 status = '启动成功！';
               }
-              
+
               return Text(
                 status,
                 style: TextStyle(
@@ -258,9 +242,7 @@ class _BALaunchAnimationState extends State<BALaunchAnimation> with SingleTicker
       child: AnimatedOpacity(
         opacity: _isAnimating ? 0 : 1,
         duration: const Duration(milliseconds: 500),
-        child: Container(
-          color: Colors.black,
-        ),
+        child: Container(color: Colors.black),
       ),
     );
   }
@@ -273,7 +255,7 @@ class StarParticle {
   final double size;
   final double delay;
   final double duration;
-  
+
   StarParticle({
     required this.id,
     required this.x,
@@ -286,17 +268,18 @@ class StarParticle {
 
 class StarWidget extends StatefulWidget {
   final StarParticle star;
-  
+
   const StarWidget({super.key, required this.star});
-  
+
   @override
   State<StarWidget> createState() => _StarWidgetState();
 }
 
-class _StarWidgetState extends State<StarWidget> with SingleTickerProviderStateMixin {
+class _StarWidgetState extends State<StarWidget>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -304,22 +287,26 @@ class _StarWidgetState extends State<StarWidget> with SingleTickerProviderStateM
       vsync: this,
       duration: Duration(milliseconds: (widget.star.duration * 1000).round()),
     );
-    
-    Future.delayed(Duration(milliseconds: (widget.star.delay * 1000).round()), () {
-      _controller.forward();
-    });
-    
-    _animation = Tween<double>(begin: 0.3, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+
+    Future.delayed(
+      Duration(milliseconds: (widget.star.delay * 1000).round()),
+      () {
+        _controller.forward();
+      },
     );
+
+    _animation = Tween<double>(
+      begin: 0.3,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
-  
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -351,27 +338,24 @@ class SparkleParticle {
   final int id;
   final double angle;
   final double speed;
-  
-  SparkleParticle({
-    required this.id,
-    required this.angle,
-    required this.speed,
-  });
+
+  SparkleParticle({required this.id, required this.angle, required this.speed});
 }
 
 class SparkleWidget extends StatefulWidget {
   final SparkleParticle sparkle;
-  
+
   const SparkleWidget({super.key, required this.sparkle});
-  
+
   @override
   State<SparkleWidget> createState() => _SparkleWidgetState();
 }
 
-class _SparkleWidgetState extends State<SparkleWidget> with SingleTickerProviderStateMixin {
+class _SparkleWidgetState extends State<SparkleWidget>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -379,16 +363,16 @@ class _SparkleWidgetState extends State<SparkleWidget> with SingleTickerProvider
       vsync: this,
       duration: Duration(milliseconds: (1500 / widget.sparkle.speed).round()),
     )..forward();
-    
+
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
   }
-  
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -397,13 +381,15 @@ class _SparkleWidgetState extends State<SparkleWidget> with SingleTickerProvider
         final value = _animation.value;
         final screenWidth = MediaQuery.of(context).size.width;
         final screenHeight = MediaQuery.of(context).size.height;
-        final maxDistance = sqrt(screenWidth * screenWidth + screenHeight * screenHeight);
+        final maxDistance = sqrt(
+          screenWidth * screenWidth + screenHeight * screenHeight,
+        );
         final distance = value * maxDistance * 0.5 * widget.sparkle.speed;
         final x = cos(widget.sparkle.angle) * distance;
         final y = sin(widget.sparkle.angle) * distance;
         final opacity = 1.0 - value;
         final size = (20 * (1 - value * 0.8)).toDouble();
-        
+
         return Transform.translate(
           offset: Offset(x.toDouble(), y.toDouble()),
           child: Opacity(
@@ -413,14 +399,15 @@ class _SparkleWidgetState extends State<SparkleWidget> with SingleTickerProvider
               height: size,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF7EB5F6), Color(0xFFFFB4C2), Color(0xFFB8A4FF)],
+                  colors: [
+                    Color(0xFF7EB5F6),
+                    Color(0xFFFFB4C2),
+                    Color(0xFFB8A4FF),
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(size / 2),
                 boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF7EB5F6),
-                    blurRadius: 20,
-                  ),
+                  BoxShadow(color: const Color(0xFF7EB5F6), blurRadius: 20),
                 ],
               ),
             ),

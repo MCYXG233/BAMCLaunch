@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../account/account.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
@@ -58,8 +58,8 @@ class _AccountCardState extends State<AccountCard> {
               color: widget.isSelected
                   ? BAColors.primaryOf(context)
                   : (_isHovered
-                      ? BAColors.borderOf(context)
-                      : BAColors.borderOf(context)),
+                        ? BAColors.borderOf(context)
+                        : BAColors.borderOf(context)),
               width: widget.isSelected ? 2 : 1,
             ),
             boxShadow: _isHovered
@@ -103,7 +103,9 @@ class _AccountCardState extends State<AccountCard> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: BAColors.primaryOf(context).withOpacity(0.2),
+                                  color: BAColors.primaryOf(
+                                    context,
+                                  ).withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
@@ -141,7 +143,9 @@ class _AccountCardState extends State<AccountCard> {
                   children: [
                     if (widget.onLogout != null)
                       BASecondaryButton(
-                        text: widget.account.type == AccountType.microsoft ? '登出' : '退出登录',
+                        text: widget.account.type == AccountType.microsoft
+                            ? '登出'
+                            : '退出登录',
                         onPressed: widget.onLogout,
                         height: 36,
                         trailingIcon: Icon(
@@ -150,8 +154,7 @@ class _AccountCardState extends State<AccountCard> {
                           color: BAColors.secondaryOf(context),
                         ),
                       ),
-                    if (widget.onLogout != null)
-                      const SizedBox(width: 8),
+                    if (widget.onLogout != null) const SizedBox(width: 8),
                     if (widget.onDelete != null)
                       BADangerButton(
                         text: '删除',
@@ -182,7 +185,9 @@ class _AccountCardState extends State<AccountCard> {
         color: BAColors.surfaceVariantOf(context),
         borderRadius: BorderRadius.circular(32),
         border: Border.all(
-          color: widget.isSelected ? BAColors.primaryOf(context) : BAColors.borderOf(context),
+          color: widget.isSelected
+              ? BAColors.primaryOf(context)
+              : BAColors.borderOf(context),
           width: 2,
         ),
       ),

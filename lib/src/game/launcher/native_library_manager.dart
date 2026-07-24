@@ -65,9 +65,7 @@ class NativeLibraryManager {
         }
 
         if (library.name.contains('org.lwjgl:lwjgl-glfw') && !useNativeGlfw) {
-          _logger.info(
-            'Using system GLFW instead of native: ${library.name}',
-          );
+          _logger.info('Using system GLFW instead of native: ${library.name}');
         }
 
         if (library.downloads?.classifiers == null) continue;
@@ -155,8 +153,10 @@ class NativeLibraryManager {
     }
     // 检查环境变量
     try {
-      final arch = Platform.environment['PROCESSOR_ARCHITECTURE'] ??
-          Platform.environment['HOSTTYPE'] ?? '';
+      final arch =
+          Platform.environment['PROCESSOR_ARCHITECTURE'] ??
+          Platform.environment['HOSTTYPE'] ??
+          '';
       if (arch.toLowerCase().contains('arm64') ||
           arch.toLowerCase().contains('aarch64')) {
         return true;

@@ -58,8 +58,7 @@ void main() {
       expect(identical(a, b), isTrue);
     });
 
-    test('ServiceRegistry 未初始化时 ConfigManager 回退到 ConfigManagerImpl',
-        () async {
+    test('ServiceRegistry 未初始化时 ConfigManager 回退到 ConfigManagerImpl', () async {
       // 不调用 ServiceRegistry.initialize()
       final config = ConfigManager.instance;
       expect(config, isA<IConfigManager>());

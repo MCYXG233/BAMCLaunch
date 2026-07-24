@@ -57,21 +57,13 @@ class BAPageTransitionBuilder {
     Offset beginOffset = const Offset(0.0, 0.1),
   }) {
     return FadeTransition(
-      opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(
-          parent: animation,
-          curve: BAAnimations.smooth,
-        ),
-      ),
+      opacity: Tween<double>(
+        begin: 0.0,
+        end: 1.0,
+      ).animate(CurvedAnimation(parent: animation, curve: BAAnimations.smooth)),
       child: SlideTransition(
-        position: Tween<Offset>(
-          begin: beginOffset,
-          end: Offset.zero,
-        ).animate(
-          CurvedAnimation(
-            parent: animation,
-            curve: BAAnimations.elasticOut,
-          ),
+        position: Tween<Offset>(begin: beginOffset, end: Offset.zero).animate(
+          CurvedAnimation(parent: animation, curve: BAAnimations.elasticOut),
         ),
         child: child,
       ),
@@ -92,10 +84,7 @@ class BAPageTransitionBuilder {
       ),
       child: ScaleTransition(
         scale: Tween<double>(begin: 0.8, end: 1.0).animate(
-          CurvedAnimation(
-            parent: animation,
-            curve: BAAnimations.elasticOut,
-          ),
+          CurvedAnimation(parent: animation, curve: BAAnimations.elasticOut),
         ),
         child: child,
       ),
@@ -108,25 +97,17 @@ class BAPageTransitionBuilder {
     required Widget child,
   }) {
     return FadeTransition(
-      opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeOut,
-        ),
-      ),
+      opacity: Tween<double>(
+        begin: 0.0,
+        end: 1.0,
+      ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
       child: RotationTransition(
         turns: Tween<double>(begin: 0.1, end: 0.0).animate(
-          CurvedAnimation(
-            parent: animation,
-            curve: BAAnimations.bounceOut,
-          ),
+          CurvedAnimation(parent: animation, curve: BAAnimations.bounceOut),
         ),
         child: ScaleTransition(
           scale: Tween<double>(begin: 0.9, end: 1.0).animate(
-            CurvedAnimation(
-              parent: animation,
-              curve: BAAnimations.elasticOut,
-            ),
+            CurvedAnimation(parent: animation, curve: BAAnimations.elasticOut),
           ),
           child: child,
         ),
@@ -138,34 +119,24 @@ class BAPageTransitionBuilder {
 /// 动画扩展类
 extension AnimationExtensions on Animation<double> {
   /// 添加弹性效果
-  Animation<double> get elastic => CurvedAnimation(
-        parent: this,
-        curve: BAAnimations.elasticOut,
-      );
+  Animation<double> get elastic =>
+      CurvedAnimation(parent: this, curve: BAAnimations.elasticOut);
 
   /// 添加回弹效果
-  Animation<double> get bounce => CurvedAnimation(
-        parent: this,
-        curve: BAAnimations.bounceOut,
-      );
+  Animation<double> get bounce =>
+      CurvedAnimation(parent: this, curve: BAAnimations.bounceOut);
 
   /// 添加平滑效果
-  Animation<double> get smooth => CurvedAnimation(
-        parent: this,
-        curve: BAAnimations.smooth,
-      );
+  Animation<double> get smooth =>
+      CurvedAnimation(parent: this, curve: BAAnimations.smooth);
 
   /// 添加快速效果
-  Animation<double> get fast => CurvedAnimation(
-        parent: this,
-        curve: BAAnimations.fast,
-      );
+  Animation<double> get fast =>
+      CurvedAnimation(parent: this, curve: BAAnimations.fast);
 
   /// 添加慢速效果
-  Animation<double> get slow => CurvedAnimation(
-        parent: this,
-        curve: BAAnimations.slow,
-      );
+  Animation<double> get slow =>
+      CurvedAnimation(parent: this, curve: BAAnimations.slow);
 }
 
 /// 动画控制器状态管理器
@@ -196,7 +167,8 @@ class BAAnimationManager {
 
 /// 动画构建器
 class BAAnimationBuilder extends StatefulWidget {
-  final Widget Function(BuildContext context, Animation<double> animation) builder;
+  final Widget Function(BuildContext context, Animation<double> animation)
+  builder;
   final Duration duration;
   final Duration? delay;
   final Curve curve;
@@ -225,15 +197,9 @@ class _BAAnimationBuilderState extends State<BAAnimationBuilder>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: widget.curve,
-    );
+    _animation = CurvedAnimation(parent: _controller, curve: widget.curve);
 
     BAAnimationManager().registerController(hashCode.toString(), _controller);
 
@@ -301,16 +267,10 @@ class _BAFloatBuilderState extends State<BAFloatBuilder>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
     _animation = Tween<double>(begin: -1.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: BAAnimations.breathing,
-      ),
+      CurvedAnimation(parent: _controller, curve: BAAnimations.breathing),
     );
 
     if (widget.enabled) {
@@ -369,16 +329,10 @@ class _BAPulseBuilderState extends State<BAPulseBuilder>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
     _animation = Tween<double>(begin: 1.0, end: widget.scaleFactor).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: BAAnimations.breathing,
-      ),
+      CurvedAnimation(parent: _controller, curve: BAAnimations.breathing),
     );
 
     if (widget.enabled) {
@@ -401,10 +355,7 @@ class _BAPulseBuilderState extends State<BAPulseBuilder>
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
-        return Transform.scale(
-          scale: _animation.value,
-          child: widget.child,
-        );
+        return Transform.scale(scale: _animation.value, child: widget.child);
       },
     );
   }
@@ -439,16 +390,10 @@ class _BAGlowBuilderState extends State<BAGlowBuilder>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: BAAnimations.breathing,
-      ),
+      CurvedAnimation(parent: _controller, curve: BAAnimations.breathing),
     );
 
     if (widget.enabled) {

@@ -186,7 +186,10 @@ class AutoBackupService {
 
   /// 保存配置
   Future<void> _saveConfig() async {
-    await _configManager.setString('autoBackupConfig', jsonEncode(_config.toJson()));
+    await _configManager.setString(
+      'autoBackupConfig',
+      jsonEncode(_config.toJson()),
+    );
   }
 
   /// 获取当前配置
@@ -244,10 +247,10 @@ class AutoBackupService {
   /// 调度每日备份
   void _scheduleDailyBackup() {
     _dailyTimer?.cancel();
-    
+
     final now = DateTime.now();
     var nextRun = DateTime(now.year, now.month, now.day, 3, 0, 0);
-    
+
     if (nextRun.isBefore(now)) {
       nextRun = nextRun.add(const Duration(days: 1));
     }
@@ -267,7 +270,14 @@ class AutoBackupService {
 
     final now = DateTime.now();
     var nextMonday = now.add(Duration(days: (8 - now.weekday) % 7));
-    nextMonday = DateTime(nextMonday.year, nextMonday.month, nextMonday.day, 3, 0, 0);
+    nextMonday = DateTime(
+      nextMonday.year,
+      nextMonday.month,
+      nextMonday.day,
+      3,
+      0,
+      0,
+    );
 
     if (nextMonday.isBefore(now)) {
       nextMonday = nextMonday.add(const Duration(days: 7));
@@ -302,7 +312,8 @@ class AutoBackupService {
 
   /// 启动前备份
   Future<void> backupBeforeLaunch(String instanceId) async {
-    if (!_config.enabled || _config.schedule != AutoBackupSchedule.beforeLaunch) {
+    if (!_config.enabled ||
+        _config.schedule != AutoBackupSchedule.beforeLaunch) {
       return;
     }
 
@@ -315,15 +326,22 @@ class AutoBackupService {
 
       await _backupInstance(instance, AutoBackupSchedule.beforeLaunch);
     } catch (e, stackTrace) {
-      _logger.error('Before launch backup failed for $instanceId', e, stackTrace);
+      _logger.error(
+        'Before launch backup failed for $instanceId',
+        e,
+        stackTrace,
+      );
     }
   }
 
   /// 备份单个实例
-  Future<void> _backupInstance(GameInstance instance, AutoBackupSchedule schedule) async {
+  Future<void> _backupInstance(
+    GameInstance instance,
+    AutoBackupSchedule schedule,
+  ) async {
     final instanceManager = InstanceManager();
     GameDirectory? directory;
-    
+
     try {
       directory = instanceManager.directories.firstWhere(
         (d) => d.id == instance.directoryId,
@@ -333,11 +351,13 @@ class AutoBackupService {
       return;
     }
 
-    _eventBus.publish(AutoBackupStartedEvent(
-      instanceId: instance.id,
-      instanceName: instance.name,
-      schedule: schedule,
-    ));
+    _eventBus.publish(
+      AutoBackupStartedEvent(
+        instanceId: instance.id,
+        instanceName: instance.name,
+        schedule: schedule,
+      ),
+    );
 
     final startTime = DateTime.now();
 
@@ -355,12 +375,14 @@ class AutoBackupService {
       if (backup != null) {
         await _enforceKeepCount(instance.id);
 
-        _eventBus.publish(AutoBackupCompletedEvent(
-          instanceId: instance.id,
-          instanceName: instance.name,
-          backupId: backup.id,
-          duration: DateTime.now().difference(startTime),
-        ));
+        _eventBus.publish(
+          AutoBackupCompletedEvent(
+            instanceId: instance.id,
+            instanceName: instance.name,
+            backupId: backup.id,
+            duration: DateTime.now().difference(startTime),
+          ),
+        );
 
         await _updateLastBackupTime(schedule);
         _logger.info('Auto backup completed for ${instance.name}');
@@ -368,12 +390,14 @@ class AutoBackupService {
         throw AppException.fromCode(ErrorCodes.backupCreateFailed);
       }
     } catch (e, stackTrace) {
-      _eventBus.publish(AutoBackupFailedEvent(
-        instanceId: instance.id,
-        instanceName: instance.name,
-        error: e.toString(),
-        schedule: schedule,
-      ));
+      _eventBus.publish(
+        AutoBackupFailedEvent(
+          instanceId: instance.id,
+          instanceName: instance.name,
+          error: e.toString(),
+          schedule: schedule,
+        ),
+      );
       _logger.error('Auto backup failed for ${instance.name}', e, stackTrace);
     }
   }
@@ -400,7 +424,9 @@ class AutoBackupService {
       for (final backup in toDelete) {
         await backupManager.deleteBackup(backup.id);
       }
-      _logger.info('Cleaned old backups for $instanceId, kept ${_config.keepCount}');
+      _logger.info(
+        'Cleaned old backups for $instanceId, kept ${_config.keepCount}',
+      );
     }
   }
 

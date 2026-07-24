@@ -72,14 +72,8 @@ class LayoutConfigItem {
     return {
       'element': element.name,
       'visible': visible,
-      'position': {
-        'dx': position.dx,
-        'dy': position.dy,
-      },
-      'size': {
-        'width': size.width,
-        'height': size.height,
-      },
+      'position': {'dx': position.dx, 'dy': position.dy},
+      'size': {'width': size.width, 'height': size.height},
       'opacity': opacity,
       'anchor': anchor.name,
     };
@@ -225,10 +219,7 @@ class LayoutManager extends ChangeNotifier {
         json[entry.key.name] = entry.value.toJson();
       }
 
-      await _configManager.setString(
-        ConfigKeys.layoutConfig,
-        jsonEncode(json),
-      );
+      await _configManager.setString(ConfigKeys.layoutConfig, jsonEncode(json));
 
       _logger.info('Layout saved successfully');
     } catch (e) {
@@ -298,8 +289,7 @@ class DraggableLayoutElement extends StatefulWidget {
   });
 
   @override
-  State<DraggableLayoutElement> createState() =>
-      _DraggableLayoutElementState();
+  State<DraggableLayoutElement> createState() => _DraggableLayoutElementState();
 }
 
 class _DraggableLayoutElementState extends State<DraggableLayoutElement> {
@@ -370,10 +360,7 @@ class _DraggableLayoutElementState extends State<DraggableLayoutElement> {
             if (isEditMode && _isDragging)
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.blue,
-                    width: 2,
-                  ),
+                  border: Border.all(color: Colors.blue, width: 2),
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
@@ -388,10 +375,7 @@ class _DraggableLayoutElementState extends State<DraggableLayoutElement> {
 class LayoutEditorControls extends StatelessWidget {
   final LayoutManager layoutManager;
 
-  const LayoutEditorControls({
-    super.key,
-    required this.layoutManager,
-  });
+  const LayoutEditorControls({super.key, required this.layoutManager});
 
   @override
   Widget build(BuildContext context) {
@@ -437,10 +421,7 @@ class LayoutEditorControls extends StatelessWidget {
 class ElementVisibilityPanel extends StatelessWidget {
   final LayoutManager layoutManager;
 
-  const ElementVisibilityPanel({
-    super.key,
-    required this.layoutManager,
-  });
+  const ElementVisibilityPanel({super.key, required this.layoutManager});
 
   @override
   Widget build(BuildContext context) {
@@ -486,10 +467,7 @@ class ElementVisibilityPanel extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            name,
-            style: const TextStyle(color: Colors.white),
-          ),
+          Text(name, style: const TextStyle(color: Colors.white)),
           Switch(
             value: config?.visible ?? true,
             onChanged: (value) => layoutManager.toggleVisibility(element),

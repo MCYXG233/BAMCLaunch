@@ -11,13 +11,11 @@ class RetryAfterException implements Exception {
   final int delaySeconds;
   final int statusCode;
 
-  RetryAfterException({
-    required this.delaySeconds,
-    this.statusCode = 429,
-  });
+  RetryAfterException({required this.delaySeconds, this.statusCode = 429});
 
   @override
-  String toString() => 'RetryAfterException: HTTP $statusCode, retry after ${delaySeconds}s';
+  String toString() =>
+      'RetryAfterException: HTTP $statusCode, retry after ${delaySeconds}s';
 }
 
 /// 重试策略配置
@@ -67,7 +65,9 @@ class RetryConfig {
   /// attempt=1 → 1000ms, attempt=2 → 2000ms, attempt=3 → 4000ms
   Duration getDelay(int attempt) {
     final delayMs = initialDelayMs * pow(backoffMultiplier, attempt - 1);
-    return Duration(milliseconds: delayMs.clamp(initialDelayMs, maxDelayMs).toInt());
+    return Duration(
+      milliseconds: delayMs.clamp(initialDelayMs, maxDelayMs).toInt(),
+    );
   }
 }
 
@@ -91,7 +91,9 @@ class RetryHelper {
     while (attempt <= config.maxRetries) {
       attempt++;
       try {
-        _logger.debug('Executing operation, attempt $attempt/${config.maxRetries + 1}');
+        _logger.debug(
+          'Executing operation, attempt $attempt/${config.maxRetries + 1}',
+        );
         final result = await operation();
         if (attempt > 1) {
           _logger.info('Operation succeeded on attempt $attempt');
@@ -99,10 +101,15 @@ class RetryHelper {
         return result;
       } catch (e, stackTrace) {
         lastError = e;
-        _logger.warning('Operation failed on attempt $attempt: $e', e, stackTrace);
+        _logger.warning(
+          'Operation failed on attempt $attempt: $e',
+          e,
+          stackTrace,
+        );
 
         // 判断是否需要重试
-        final shouldRetry = config.shouldRetry?.call(e) ?? _defaultShouldRetry(e);
+        final shouldRetry =
+            config.shouldRetry?.call(e) ?? _defaultShouldRetry(e);
 
         if (attempt <= config.maxRetries && shouldRetry) {
           // 优先使用 Retry-After 指定的延迟（HTTP 429）

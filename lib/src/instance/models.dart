@@ -1,10 +1,5 @@
 /// 实例状态
-enum InstanceStatus {
-  idle,
-  launching,
-  running,
-  crashed,
-}
+enum InstanceStatus { idle, launching, running, crashed }
 
 /// 加载器状态
 enum LoaderStatus {
@@ -205,8 +200,16 @@ class GameInstance {
           ? InstanceConfig.fromJson(json['config'] as Map<String, dynamic>)
           : InstanceConfig(),
       resources: json['resources'] is Map<String, dynamic>
-          ? InstanceResources.fromJson(json['resources'] as Map<String, dynamic>)
-          : InstanceResources(mods: [], resourcePacks: [], shaderPacks: [], worlds: [], screenshots: []),
+          ? InstanceResources.fromJson(
+              json['resources'] as Map<String, dynamic>,
+            )
+          : InstanceResources(
+              mods: [],
+              resourcePacks: [],
+              shaderPacks: [],
+              worlds: [],
+              screenshots: [],
+            ),
       createdAt: json['createdAt'] is String
           ? DateTime.tryParse(json['createdAt'] as String) ?? DateTime.now()
           : DateTime.now(),
@@ -365,23 +368,26 @@ class InstanceResources {
 
   factory InstanceResources.fromJson(Map<String, dynamic> json) {
     return InstanceResources(
-      mods: (json['mods'] as List<dynamic>?)
+      mods:
+          (json['mods'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+          [],
+      resourcePacks:
+          (json['resourcePacks'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],
-      resourcePacks: (json['resourcePacks'] as List<dynamic>?)
+      shaderPacks:
+          (json['shaderPacks'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],
-      shaderPacks: (json['shaderPacks'] as List<dynamic>?)
+      worlds:
+          (json['worlds'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],
-      worlds: (json['worlds'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          [],
-      screenshots: (json['screenshots'] as List<dynamic>?)
+      screenshots:
+          (json['screenshots'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],
@@ -479,10 +485,13 @@ class ResourceItem {
 class CopyOptions {
   /// 是否复制版本目录
   final bool copyVersionDir;
+
   /// 排除的目录列表
   final Set<String> excludeDirs;
+
   /// 排除的文件列表
   final Set<String> excludeFiles;
+
   /// 是否覆盖已存在的文件
   final bool overwriteExisting;
 
@@ -512,10 +521,13 @@ class CopyOptions {
 enum InstanceSortOption {
   /// 按名称排序
   name,
+
   /// 按最近启动时间排序
   lastPlayed,
+
   /// 按创建时间排序
   createdAt,
+
   /// 按大小排序
   size,
 }
@@ -524,6 +536,7 @@ enum InstanceSortOption {
 enum SortDirection {
   /// 升序
   ascending,
+
   /// 降序
   descending,
 }
@@ -532,8 +545,10 @@ enum SortDirection {
 class InstanceFilter {
   /// 搜索关键词
   final String? searchQuery;
+
   /// 排序选项
   final InstanceSortOption sortOption;
+
   /// 排序方向
   final SortDirection sortDirection;
 
@@ -555,4 +570,3 @@ class InstanceFilter {
     );
   }
 }
-

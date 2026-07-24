@@ -72,10 +72,7 @@ class _InstancePageState extends State<InstancePage> {
       title: '创建游戏实例',
       width: 500,
       actions: [
-        BASecondaryButton(
-          text: '取消',
-          onPressed: () => Navigator.pop(context),
-        ),
+        BASecondaryButton(text: '取消', onPressed: () => Navigator.pop(context)),
         const SizedBox(width: 12),
         BAPrimaryButton(
           text: '创建',
@@ -92,7 +89,9 @@ class _InstancePageState extends State<InstancePage> {
         children: [
           Text(
             '实例名称',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodyMedium.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -111,15 +110,23 @@ class _InstancePageState extends State<InstancePage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                borderSide: BorderSide(
+                  color: BAColors.primaryOf(context),
+                  width: 2,
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
           ),
           const SizedBox(height: 16),
           Text(
             '游戏版本',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodyMedium.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -138,9 +145,15 @@ class _InstancePageState extends State<InstancePage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                borderSide: BorderSide(
+                  color: BAColors.primaryOf(context),
+                  width: 2,
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
           ),
         ],
@@ -181,15 +194,13 @@ class _InstancePageState extends State<InstancePage> {
       title: '创建游戏目录',
       width: 500,
       actions: [
-        BASecondaryButton(
-          text: '取消',
-          onPressed: () => Navigator.pop(context),
-        ),
+        BASecondaryButton(text: '取消', onPressed: () => Navigator.pop(context)),
         const SizedBox(width: 12),
         BAPrimaryButton(
           text: '创建',
           onPressed: () {
-            if (nameController.text.trim().isNotEmpty && pathController.text.trim().isNotEmpty) {
+            if (nameController.text.trim().isNotEmpty &&
+                pathController.text.trim().isNotEmpty) {
               Navigator.pop(context, {
                 'name': nameController.text.trim(),
                 'path': pathController.text.trim(),
@@ -204,7 +215,9 @@ class _InstancePageState extends State<InstancePage> {
         children: [
           Text(
             '目录名称',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodyMedium.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -223,15 +236,23 @@ class _InstancePageState extends State<InstancePage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                borderSide: BorderSide(
+                  color: BAColors.primaryOf(context),
+                  width: 2,
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
           ),
           const SizedBox(height: 16),
           Text(
             '目录路径',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodyMedium.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -250,9 +271,15 @@ class _InstancePageState extends State<InstancePage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                borderSide: BorderSide(
+                  color: BAColors.primaryOf(context),
+                  width: 2,
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
           ),
         ],
@@ -307,7 +334,9 @@ class _InstancePageState extends State<InstancePage> {
   }
 
   Widget _buildInstanceCard(GameInstance instance, bool isSelected) {
-    final instanceResources = _resourceManager.getInstanceResources(instance.id);
+    final instanceResources = _resourceManager.getInstanceResources(
+      instance.id,
+    );
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -315,10 +344,14 @@ class _InstancePageState extends State<InstancePage> {
         duration: const Duration(milliseconds: 200),
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: isSelected ? BAColors.primaryOf(context).withOpacity(0.1) : BAColors.surfaceOf(context),
+          color: isSelected
+              ? BAColors.primaryOf(context).withOpacity(0.1)
+              : BAColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? BAColors.primaryOf(context) : BAColors.borderOf(context),
+            color: isSelected
+                ? BAColors.primaryOf(context)
+                : BAColors.borderOf(context),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
@@ -375,9 +408,14 @@ class _InstancePageState extends State<InstancePage> {
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
-                                color: BAColors.secondaryOf(context).withOpacity(0.1),
+                                color: BAColors.secondaryOf(
+                                  context,
+                                ).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -403,7 +441,10 @@ class _InstancePageState extends State<InstancePage> {
                   ),
                   if (!isSelected)
                     IconButton(
-                      icon: Icon(Icons.delete_outline, color: BAColors.dangerOf(context)),
+                      icon: Icon(
+                        Icons.delete_outline,
+                        color: BAColors.dangerOf(context),
+                      ),
                       onPressed: () => _deleteInstance(instance),
                     ),
                 ],
@@ -433,7 +474,8 @@ class _InstancePageState extends State<InstancePage> {
               spacing: 8,
               runSpacing: 8,
               children: _instanceManager.directories.map((dir) {
-                final isSelected = _instanceManager.selectedDirectoryId == dir.id;
+                final isSelected =
+                    _instanceManager.selectedDirectoryId == dir.id;
                 return FilterChip(
                   selected: isSelected,
                   label: Text(dir.name),
@@ -473,7 +515,11 @@ class _InstancePageState extends State<InstancePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.folder_open, size: 64, color: BAColors.textDisabledOf(context)),
+            Icon(
+              Icons.folder_open,
+              size: 64,
+              color: BAColors.textDisabledOf(context),
+            ),
             const SizedBox(height: 16),
             Text(
               '还没有游戏目录',
@@ -500,7 +546,9 @@ class _InstancePageState extends State<InstancePage> {
     }
 
     final directoryInstances = _instanceManager.selectedDirectoryId != null
-        ? _instanceManager.getDirectoryInstances(_instanceManager.selectedDirectoryId!)
+        ? _instanceManager.getDirectoryInstances(
+            _instanceManager.selectedDirectoryId!,
+          )
         : <GameInstance>[];
 
     if (directoryInstances.isEmpty) {
@@ -508,7 +556,11 @@ class _InstancePageState extends State<InstancePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.gamepad, size: 64, color: BAColors.textDisabledOf(context)),
+            Icon(
+              Icons.gamepad,
+              size: 64,
+              color: BAColors.textDisabledOf(context),
+            ),
             const SizedBox(height: 16),
             Text(
               '还没有游戏实例',
@@ -553,11 +605,17 @@ class _InstancePageState extends State<InstancePage> {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: BAColors.surfaceOf(context),
-              border: Border(bottom: BorderSide(color: BAColors.borderOf(context))),
+              border: Border(
+                bottom: BorderSide(color: BAColors.borderOf(context)),
+              ),
             ),
             child: Row(
               children: [
-                Icon(Icons.folder, size: 32, color: BAColors.primaryOf(context)),
+                Icon(
+                  Icons.folder,
+                  size: 32,
+                  color: BAColors.primaryOf(context),
+                ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -598,4 +656,3 @@ class _InstancePageState extends State<InstancePage> {
 String _formatDate(DateTime date) {
   return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 }
-

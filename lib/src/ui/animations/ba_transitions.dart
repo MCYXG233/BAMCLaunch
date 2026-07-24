@@ -228,10 +228,7 @@ class BATransitions {
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(
-          opacity: CurvedAnimation(
-            parent: animation,
-            curve: curve,
-          ),
+          opacity: CurvedAnimation(parent: animation, curve: curve),
           child: child,
         );
       },
@@ -251,7 +248,8 @@ class BATransitions {
       Animation<double> animation,
       Animation<double> secondaryAnimation,
       Widget child,
-    ) transitionBuilder,
+    )
+    transitionBuilder,
   }) {
     return PageRouteBuilder<T>(
       transitionDuration: duration,

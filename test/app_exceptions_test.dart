@@ -56,17 +56,11 @@ void main() {
   group('recordException 顶级函数验证', () {
     test('处理 BAMCException 不抛异常', () {
       // 未初始化的 Logger 会跳过输出（_initialized=false），不应崩溃
-      expect(
-        () => recordException(TokenExpiredException()),
-        returnsNormally,
-      );
+      expect(() => recordException(TokenExpiredException()), returnsNormally);
     });
 
     test('处理普通 Exception 不抛异常', () {
-      expect(
-        () => recordException(Exception('普通异常')),
-        returnsNormally,
-      );
+      expect(() => recordException(Exception('普通异常')), returnsNormally);
     });
 
     test('处理任意 Object 不抛异常', () {
@@ -77,10 +71,7 @@ void main() {
 
     test('处理带 stackTrace 的异常', () {
       expect(
-        () => recordException(
-          TokenExpiredException(),
-          StackTrace.current,
-        ),
+        () => recordException(TokenExpiredException(), StackTrace.current),
         returnsNormally,
       );
     });

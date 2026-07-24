@@ -488,10 +488,7 @@ class MirrorManager implements IMirrorManager {
       }
 
       // 发送HTTP请求，超时时间10秒
-      final response = await networkClient.get(
-        testUrl,
-        timeoutSeconds: 10,
-      );
+      final response = await networkClient.get(testUrl, timeoutSeconds: 10);
 
       stopwatch.stop();
 
@@ -534,9 +531,7 @@ class MirrorManager implements IMirrorManager {
     final results = await speedTestAllMirrors();
 
     // 筛选可用的镜像，并按延迟排序
-    final availableMirrors = results
-        .where((r) => r.isAvailable)
-        .toList()
+    final availableMirrors = results.where((r) => r.isAvailable).toList()
       // 按延迟从小到大排序
       ..sort((a, b) => a.latencyMs.compareTo(b.latencyMs));
 
@@ -627,7 +622,10 @@ class MirrorManager implements IMirrorManager {
       jsonEncode(customMirrorsJson),
     );
     // 保存当前选中的镜像ID
-    await _configManager.setString(ConfigKeys.selectedMirror, _selectedMirrorId);
+    await _configManager.setString(
+      ConfigKeys.selectedMirror,
+      _selectedMirrorId,
+    );
   }
 
   /// 从持久化存储加载镜像配置
@@ -641,7 +639,9 @@ class MirrorManager implements IMirrorManager {
   Future<void> loadConfig() async {
     try {
       // 加载自定义镜像列表
-      final customMirrorsStr = _configManager.getString(ConfigKeys.customMirrors);
+      final customMirrorsStr = _configManager.getString(
+        ConfigKeys.customMirrors,
+      );
       if (customMirrorsStr != null && customMirrorsStr.isNotEmpty) {
         try {
           // 解析JSON数据
@@ -665,9 +665,12 @@ class MirrorManager implements IMirrorManager {
       }
 
       // 加载当前选中的镜像ID
-      final selectedMirror = _configManager.getString(ConfigKeys.selectedMirror);
+      final selectedMirror = _configManager.getString(
+        ConfigKeys.selectedMirror,
+      );
       // 验证镜像ID是否有效
-      if (selectedMirror != null && allMirrors.any((m) => m.id == selectedMirror)) {
+      if (selectedMirror != null &&
+          allMirrors.any((m) => m.id == selectedMirror)) {
         _selectedMirrorId = selectedMirror;
       }
     } catch (e) {

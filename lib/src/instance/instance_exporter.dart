@@ -8,11 +8,8 @@ import 'instance_manager.dart';
 import 'models.dart';
 
 /// 导出进度回调
-typedef ExportProgressCallback = void Function(
-  int completed,
-  int total,
-  String? currentTask,
-);
+typedef ExportProgressCallback =
+    void Function(int completed, int total, String? currentTask);
 
 /// 导出选项
 class InstanceExportOptions {
@@ -49,8 +46,10 @@ class InstanceExportOptions {
 enum InstanceExportFormat {
   /// BAMC自有格式（ZIP + instance.json）
   bamc,
+
   /// Modrinth mrpack格式
   modrinth,
+
   /// 标准ZIP格式（仅包含文件）
   zip,
 }
@@ -103,15 +102,19 @@ class InstanceExporter {
 
       // 添加元数据文件
       if (metadata != null) {
-        final metadataJson = const JsonEncoder.withIndent('  ').convert(metadata);
+        final metadataJson = const JsonEncoder.withIndent(
+          '  ',
+        ).convert(metadata);
         final metadataName = format == InstanceExportFormat.modrinth
             ? 'modrinth.index.json'
             : 'instance.json';
-        archive.addFile(ArchiveFile(
-          metadataName,
-          metadataJson.length,
-          utf8.encode(metadataJson),
-        ));
+        archive.addFile(
+          ArchiveFile(
+            metadataName,
+            metadataJson.length,
+            utf8.encode(metadataJson),
+          ),
+        );
       }
 
       onProgress?.call(0, 1, '正在压缩文件...');
@@ -119,10 +122,7 @@ class InstanceExporter {
       // 编码为ZIP
       final encodedArchive = ZipEncoder().encode(archive);
       if (encodedArchive == null) {
-        throw AppException.fromCode(
-          ErrorCodes.fileNotFound,
-          detail: 'ZIP编码失败',
-        );
+        throw AppException.fromCode(ErrorCodes.fileNotFound, detail: 'ZIP编码失败');
       }
 
       // 写入文件
@@ -175,7 +175,9 @@ class InstanceExporter {
       final optionsFile = File(path.join(instancePath, 'options.txt'));
       if (await optionsFile.exists()) {
         final content = await optionsFile.readAsBytes();
-        zipArchive.addFile(ArchiveFile('instances/options.txt', content.length, content));
+        zipArchive.addFile(
+          ArchiveFile('instances/options.txt', content.length, content),
+        );
         collected++;
       }
     }
@@ -193,11 +195,9 @@ class InstanceExporter {
             final relativePath = path.relative(entity.path, from: instancePath);
             final archivePath = 'instances/$relativePath'.replaceAll('\\', '/');
             final content = await entity.readAsBytes();
-            zipArchive.addFile(ArchiveFile(
-              archivePath,
-              content.length,
-              content,
-            ));
+            zipArchive.addFile(
+              ArchiveFile(archivePath, content.length, content),
+            );
             collected++;
             fileCount++;
           }
@@ -206,11 +206,7 @@ class InstanceExporter {
       }
 
       processedFolders++;
-      onProgress?.call(
-        processedFolders,
-        totalFolders,
-        '正在收集 ${entry.key}...',
-      );
+      onProgress?.call(processedFolders, totalFolders, '正在收集 ${entry.key}...');
     }
 
     _logger.info('Total files collected: $collected');
@@ -242,9 +238,7 @@ class InstanceExporter {
     GameInstance instance,
     InstanceExportOptions options,
   ) {
-    final Map<String, dynamic> dependencies = {
-      'minecraft': instance.version,
-    };
+    final Map<String, dynamic> dependencies = {'minecraft': instance.version};
 
     if (instance.loader != null) {
       switch (instance.loader!.toLowerCase()) {
@@ -271,9 +265,18 @@ class InstanceExporter {
   }
 
   /// 获取导出文件默认名称
-  static String getDefaultExportFileName(GameInstance instance, InstanceExportFormat format) {
-    final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.').first;
-    final safeName = instance.name.replaceAll(RegExp(r'[^\w\s-]'), '').replaceAll(' ', '_');
+  static String getDefaultExportFileName(
+    GameInstance instance,
+    InstanceExportFormat format,
+  ) {
+    final timestamp = DateTime.now()
+        .toIso8601String()
+        .replaceAll(':', '-')
+        .split('.')
+        .first;
+    final safeName = instance.name
+        .replaceAll(RegExp(r'[^\w\s-]'), '')
+        .replaceAll(' ', '_');
 
     String extension;
     switch (format) {

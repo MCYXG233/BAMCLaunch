@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../pages/ba_settings_page.dart';
 
@@ -14,9 +14,7 @@ class BASettingsOverlay {
 
     _isVisible = true;
     _overlayEntry = OverlayEntry(
-      builder: (context) => _SettingsPanel(
-        onClose: () => hide(),
-      ),
+      builder: (context) => _SettingsPanel(onClose: () => hide()),
     );
 
     Overlay.of(context).insert(_overlayEntry!);
@@ -71,18 +69,12 @@ class _SettingsPanelState extends State<_SettingsPanel>
     _slideAnimation = Tween<Offset>(
       begin: const Offset(1.0, 0.0),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
   }
@@ -114,9 +106,7 @@ class _SettingsPanelState extends State<_SettingsPanel>
               onTap: _close,
               child: FadeTransition(
                 opacity: _fadeAnimation,
-                child: Container(
-                  color: Colors.black.withValues(alpha: 0.3),
-                ),
+                child: Container(color: Colors.black.withValues(alpha: 0.3)),
               ),
             ),
             // 设置面板
@@ -145,9 +135,7 @@ class _SettingsPanelState extends State<_SettingsPanel>
                       // 顶部栏
                       _buildHeader(),
                       // 设置内容
-                      Expanded(
-                        child: BASettingsPage(),
-                      ),
+                      Expanded(child: BASettingsPage()),
                     ],
                   ),
                 ),
@@ -176,18 +164,16 @@ class _SettingsPanelState extends State<_SettingsPanel>
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.settings,
-            color: BAColors.primaryOf(context),
-            size: 24,
-          ),
+          Icon(Icons.settings, color: BAColors.primaryOf(context), size: 24),
           const SizedBox(width: 12),
           Text(
             '设置',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: isLight ? BAColors.textPrimaryOf(context) : BAColors.textPrimaryOf(context),
+              color: isLight
+                  ? BAColors.textPrimaryOf(context)
+                  : BAColors.textPrimaryOf(context),
             ),
           ),
           const Spacer(),
@@ -195,7 +181,9 @@ class _SettingsPanelState extends State<_SettingsPanel>
           IconButton(
             icon: Icon(
               Icons.close,
-              color: isLight ? BAColors.textSecondaryOf(context) : BAColors.textSecondaryOf(context),
+              color: isLight
+                  ? BAColors.textSecondaryOf(context)
+                  : BAColors.textSecondaryOf(context),
             ),
             onPressed: _close,
           ),

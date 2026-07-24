@@ -743,7 +743,8 @@ class ConfigManager implements IConfigManager {
   ///
   /// 委托给内部实现移除 Java 路径。
   @override
-  Future<void> removeExtraJavaPath(String path) => _impl.removeExtraJavaPath(path);
+  Future<void> removeExtraJavaPath(String path) =>
+      _impl.removeExtraJavaPath(path);
 
   /// 获取被抑制的对话框列表
   ///
@@ -755,19 +756,22 @@ class ConfigManager implements IConfigManager {
   ///
   /// 委托给内部实现抑制对话框。
   @override
-  Future<void> suppressDialog(String dialogId) => _impl.suppressDialog(dialogId);
+  Future<void> suppressDialog(String dialogId) =>
+      _impl.suppressDialog(dialogId);
 
   /// 检查对话框是否被抑制
   ///
   /// 委托给内部实现检查对话框抑制状态。
   @override
-  bool isDialogSuppressed(String dialogId) => _impl.isDialogSuppressed(dialogId);
+  bool isDialogSuppressed(String dialogId) =>
+      _impl.isDialogSuppressed(dialogId);
 
   /// 获取本地游戏目录列表
   ///
   /// 委托给内部实现获取游戏目录列表。
   @override
-  List<GameDirectory> getLocalGameDirectories() => _impl.getLocalGameDirectories();
+  List<GameDirectory> getLocalGameDirectories() =>
+      _impl.getLocalGameDirectories();
 
   /// 添加本地游戏目录
   ///

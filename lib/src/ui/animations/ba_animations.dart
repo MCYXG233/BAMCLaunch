@@ -188,18 +188,12 @@ class _BAPulseWidgetState extends State<_BAPulseWidget>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
-    _scaleAnimation = Tween<double>(
-      begin: widget.scaleBegin,
-      end: widget.scaleEnd,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOutSine,
-    ));
+    _scaleAnimation =
+        Tween<double>(begin: widget.scaleBegin, end: widget.scaleEnd).animate(
+          CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
+        );
 
     _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
@@ -239,8 +233,9 @@ class _BAPulseWidgetState extends State<_BAPulseWidget>
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: widget.glowColor!
-                          .withValues(alpha: 0.4 * _glowAnimation.value),
+                      color: widget.glowColor!.withValues(
+                        alpha: 0.4 * _glowAnimation.value,
+                      ),
                       blurRadius: widget.glowRadius * _glowAnimation.value,
                       spreadRadius:
                           widget.glowRadius * 0.5 * _glowAnimation.value,
@@ -248,10 +243,7 @@ class _BAPulseWidgetState extends State<_BAPulseWidget>
                   ],
                 )
               : null,
-          child: Transform.scale(
-            scale: _scaleAnimation.value,
-            child: child,
-          ),
+          child: Transform.scale(scale: _scaleAnimation.value, child: child),
         );
       },
       child: widget.child,
@@ -295,18 +287,12 @@ class _BABreatheWidgetState extends State<_BABreatheWidget>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
-    _opacityAnimation = Tween<double>(
-      begin: widget.minOpacity,
-      end: widget.maxOpacity,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOutSine,
-    ));
+    _opacityAnimation =
+        Tween<double>(begin: widget.minOpacity, end: widget.maxOpacity).animate(
+          CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
+        );
 
     _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
@@ -344,17 +330,15 @@ class _BABreatheWidgetState extends State<_BABreatheWidget>
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: widget.glowColor
-                    .withValues(alpha: 0.3 * _glowAnimation.value),
+                color: widget.glowColor.withValues(
+                  alpha: 0.3 * _glowAnimation.value,
+                ),
                 blurRadius: widget.glowRadius * _glowAnimation.value,
                 spreadRadius: widget.glowRadius * 0.3 * _glowAnimation.value,
               ),
             ],
           ),
-          child: FadeTransition(
-            opacity: _opacityAnimation,
-            child: child,
-          ),
+          child: FadeTransition(opacity: _opacityAnimation, child: child),
         );
       },
       child: widget.child,
@@ -406,16 +390,14 @@ class _BAStaggeredEntryWidgetState extends State<_BAStaggeredEntryWidget>
   void _buildAnimations() {
     final itemCount = widget.children.length;
     if (itemCount == 0) {
-      _controller = AnimationController(
-        vsync: this,
-        duration: Duration.zero,
-      );
+      _controller = AnimationController(vsync: this, duration: Duration.zero);
       _fadeAnimations = [];
       _slideAnimations = [];
       return;
     }
 
-    final totalDuration = widget.itemDuration.inMilliseconds +
+    final totalDuration =
+        widget.itemDuration.inMilliseconds +
         widget.staggerDelay.inMilliseconds * (itemCount - 1);
     _controller = AnimationController(
       vsync: this,
@@ -425,7 +407,8 @@ class _BAStaggeredEntryWidgetState extends State<_BAStaggeredEntryWidget>
     _fadeAnimations = List.generate(itemCount, (index) {
       final start =
           (widget.staggerDelay.inMilliseconds * index) / totalDuration;
-      final end = (widget.staggerDelay.inMilliseconds * index +
+      final end =
+          (widget.staggerDelay.inMilliseconds * index +
               widget.itemDuration.inMilliseconds) /
           totalDuration;
       return Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -439,7 +422,8 @@ class _BAStaggeredEntryWidgetState extends State<_BAStaggeredEntryWidget>
     _slideAnimations = List.generate(itemCount, (index) {
       final start =
           (widget.staggerDelay.inMilliseconds * index) / totalDuration;
-      final end = (widget.staggerDelay.inMilliseconds * index +
+      final end =
+          (widget.staggerDelay.inMilliseconds * index +
               widget.itemDuration.inMilliseconds) /
           totalDuration;
       return Tween<Offset>(
@@ -528,18 +512,12 @@ class _BAElasticScaleWidgetState extends State<_BAElasticScaleWidget>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
     _scaleAnimation = Tween<double>(
       begin: widget.initialScale,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     if (widget.isActive) {
       _controller.forward();
@@ -570,10 +548,7 @@ class _BAElasticScaleWidgetState extends State<_BAElasticScaleWidget>
     return AnimatedBuilder(
       animation: _scaleAnimation,
       builder: (context, child) {
-        return Transform.scale(
-          scale: _scaleAnimation.value,
-          child: child,
-        );
+        return Transform.scale(scale: _scaleAnimation.value, child: child);
       },
       child: widget.child,
     );
@@ -613,10 +588,7 @@ class _BAGradientBorderWidgetState extends State<_BAGradientBorderWidget>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
     if (widget.isActive) {
       _controller.repeat();
@@ -657,8 +629,9 @@ class _BAGradientBorderWidgetState extends State<_BAGradientBorderWidget>
             margin: EdgeInsets.all(widget.borderWidth),
             decoration: BoxDecoration(
               color: Theme.of(context).scaffoldBackgroundColor,
-              borderRadius:
-                  BorderRadius.circular(widget.borderRadius - widget.borderWidth),
+              borderRadius: BorderRadius.circular(
+                widget.borderRadius - widget.borderWidth,
+              ),
             ),
             child: child,
           ),
@@ -746,10 +719,7 @@ class _BAGlowWidgetState extends State<_BAGlowWidget>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
     _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),

@@ -7,12 +7,7 @@ import '../core/logger.dart';
 import '../di/service_locator.dart';
 
 /// 扩展状态
-enum ExtensionStatus {
-  loaded,
-  enabled,
-  disabled,
-  error,
-}
+enum ExtensionStatus { loaded, enabled, disabled, error }
 
 /// 扩展信息
 class ExtensionInfo {
@@ -121,8 +116,16 @@ class ExtensionInfo {
       authorUrl: json['authorUrl'] as String?,
       homepage: json['homepage'] as String?,
       license: json['license'] as String?,
-      dependencies: (json['dependencies'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
-      permissions: (json['permissions'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      dependencies:
+          (json['dependencies'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      permissions:
+          (json['permissions'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       entryPoint: json['entryPoint'] as String,
       icon: json['icon'] as String?,
       status: ExtensionStatus.values.firstWhere(
@@ -131,7 +134,9 @@ class ExtensionInfo {
       ),
       error: json['error'] as String?,
       installedAt: DateTime.parse(json['installedAt'] as String),
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt'] as String) : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : null,
     );
   }
 }
@@ -176,8 +181,16 @@ class ExtensionManifest {
       authorUrl: json['authorUrl'] as String?,
       homepage: json['homepage'] as String?,
       license: json['license'] as String?,
-      dependencies: (json['dependencies'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
-      permissions: (json['permissions'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      dependencies:
+          (json['dependencies'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      permissions:
+          (json['permissions'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       entryPoint: json['entryPoint'] as String,
       icon: json['icon'] as String?,
     );
@@ -236,7 +249,9 @@ class ExtensionManager {
       final raw = _configManager.get<List<dynamic>>(_extensionsKey);
       if (raw != null) {
         _extensions.clear();
-        _extensions.addAll(raw.map((e) => ExtensionInfo.fromJson(e as Map<String, dynamic>)));
+        _extensions.addAll(
+          raw.map((e) => ExtensionInfo.fromJson(e as Map<String, dynamic>)),
+        );
       } else {
         _extensions.clear();
       }
@@ -249,12 +264,16 @@ class ExtensionManager {
   /// 加载已启用的扩展
   Future<void> _loadEnabledExtensions() async {
     try {
-      final enabledIds = _configManager.get<List<dynamic>>(_enabledExtensionsKey);
+      final enabledIds = _configManager.get<List<dynamic>>(
+        _enabledExtensionsKey,
+      );
       if (enabledIds != null) {
         for (final id in enabledIds) {
           final index = _extensions.indexWhere((e) => e.id == id);
           if (index != -1) {
-            _extensions[index] = _extensions[index].copyWith(status: ExtensionStatus.enabled);
+            _extensions[index] = _extensions[index].copyWith(
+              status: ExtensionStatus.enabled,
+            );
           }
         }
       }
@@ -266,13 +285,19 @@ class ExtensionManager {
   /// 保存扩展数据
   Future<void> save() async {
     try {
-      await _configManager.set<List<dynamic>>(_extensionsKey, _extensions.map((e) => e.toJson()).toList());
+      await _configManager.set<List<dynamic>>(
+        _extensionsKey,
+        _extensions.map((e) => e.toJson()).toList(),
+      );
 
       final enabledIds = _extensions
           .where((e) => e.status == ExtensionStatus.enabled)
           .map((e) => e.id)
           .toList();
-      await _configManager.set<List<dynamic>>(_enabledExtensionsKey, enabledIds);
+      await _configManager.set<List<dynamic>>(
+        _enabledExtensionsKey,
+        enabledIds,
+      );
 
       await _configManager.save();
       _logger.info('Extension data saved successfully');
@@ -295,7 +320,9 @@ class ExtensionManager {
     }
 
     final manifestContent = await manifestFile.readAsString();
-    final manifest = ExtensionManifest.fromJson(json.decode(manifestContent) as Map<String, dynamic>);
+    final manifest = ExtensionManifest.fromJson(
+      json.decode(manifestContent) as Map<String, dynamic>,
+    );
 
     final extensionInfo = ExtensionInfo(
       id: manifest.id,
@@ -309,7 +336,9 @@ class ExtensionManager {
       dependencies: manifest.dependencies,
       permissions: manifest.permissions,
       entryPoint: path.join(extensionPath, manifest.entryPoint),
-      icon: manifest.icon != null ? path.join(extensionPath, manifest.icon!) : null,
+      icon: manifest.icon != null
+          ? path.join(extensionPath, manifest.icon!)
+          : null,
       status: ExtensionStatus.disabled,
       installedAt: DateTime.now(),
     );
@@ -360,7 +389,11 @@ class ExtensionManager {
 
       _logger.info('Enabled extension: ${extension.name}');
     } catch (e, stackTrace) {
-      _logger.error('Failed to enable extension ${extension.name}', e, stackTrace);
+      _logger.error(
+        'Failed to enable extension ${extension.name}',
+        e,
+        stackTrace,
+      );
       _extensions[index] = extension.copyWith(
         status: ExtensionStatus.error,
         error: e.toString(),
@@ -383,7 +416,10 @@ class ExtensionManager {
       await _unloadExtension(extensionId);
     }
 
-    _extensions[index] = extension.copyWith(status: ExtensionStatus.disabled, error: null);
+    _extensions[index] = extension.copyWith(
+      status: ExtensionStatus.disabled,
+      error: null,
+    );
     await save();
 
     _logger.info('Disabled extension: ${extension.name}');
@@ -394,14 +430,15 @@ class ExtensionManager {
     try {
       _logger.info('Loading extension: ${extension.name}');
 
-      _loadedExtensions[extension.id] = {
-        'info': extension,
-        'loaded': true,
-      };
+      _loadedExtensions[extension.id] = {'info': extension, 'loaded': true};
 
       _logger.info('Extension loaded: ${extension.name}');
     } catch (e, stackTrace) {
-      _logger.error('Failed to load extension ${extension.name}', e, stackTrace);
+      _logger.error(
+        'Failed to load extension ${extension.name}',
+        e,
+        stackTrace,
+      );
       throw e;
     }
   }
@@ -435,7 +472,9 @@ class ExtensionManager {
 
   /// 获取已启用的扩展
   List<ExtensionInfo> getEnabledExtensions() {
-    return _extensions.where((e) => e.status == ExtensionStatus.enabled).toList();
+    return _extensions
+        .where((e) => e.status == ExtensionStatus.enabled)
+        .toList();
   }
 
   /// 获取有错误的扩展
@@ -462,4 +501,3 @@ class ExtensionManager {
     return _loadedExtensions[extensionId];
   }
 }
-

@@ -112,10 +112,30 @@ class _BAMorePageState extends State<BAMorePage> {
 
   Widget _buildStatsRow(BuildContext context) {
     final stats = [
-      {'icon': Icons.folder, 'label': '游戏实例', 'value': '9', 'color': BAColors.primaryOf(context)},
-      {'icon': Icons.extension, 'label': '已装 Mod', 'value': '24', 'color': BAColors.secondaryOf(context)},
-      {'icon': Icons.palette, 'label': '资源包', 'value': '6', 'color': BAColors.accentPinkOf(context)},
-      {'icon': Icons.save, 'label': '游戏存档', 'value': '12', 'color': BAColors.accentPinkOf(context)},
+      {
+        'icon': Icons.folder,
+        'label': '游戏实例',
+        'value': '9',
+        'color': BAColors.primaryOf(context),
+      },
+      {
+        'icon': Icons.extension,
+        'label': '已装 Mod',
+        'value': '24',
+        'color': BAColors.secondaryOf(context),
+      },
+      {
+        'icon': Icons.palette,
+        'label': '资源包',
+        'value': '6',
+        'color': BAColors.accentPinkOf(context),
+      },
+      {
+        'icon': Icons.save,
+        'label': '游戏存档',
+        'value': '12',
+        'color': BAColors.accentPinkOf(context),
+      },
     ];
 
     return Row(
@@ -190,11 +210,7 @@ class _BAMorePageState extends State<BAMorePage> {
   Widget _buildSectionTitle(String title, IconData icon, BuildContext context) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 18,
-          color: BAColors.textSecondaryOf(context),
-        ),
+        Icon(icon, size: 18, color: BAColors.textSecondaryOf(context)),
         const SizedBox(width: 8),
         Text(
           title,
@@ -212,10 +228,30 @@ class _BAMorePageState extends State<BAMorePage> {
 
   Widget _buildGameManagementRow(BuildContext context) {
     final items = [
-      {'icon': Icons.save, 'title': '存档管理', 'subtitle': '导入导出备份', 'color': BAColors.primaryOf(context)},
-      {'icon': Icons.upload_file, 'title': '版本隔离', 'subtitle': '独立版本目录', 'color': BAColors.successOf(context)},
-      {'icon': Icons.wifi, 'title': '联机大厅', 'subtitle': '与朋友联机', 'color': const Color(0xFF7AA5D6)},
-      {'icon': Icons.smart_display, 'title': '直播模式', 'subtitle': '直播优化设置', 'color': BAColors.accentPinkOf(context)},
+      {
+        'icon': Icons.save,
+        'title': '存档管理',
+        'subtitle': '导入导出备份',
+        'color': BAColors.primaryOf(context),
+      },
+      {
+        'icon': Icons.upload_file,
+        'title': '版本隔离',
+        'subtitle': '独立版本目录',
+        'color': BAColors.successOf(context),
+      },
+      {
+        'icon': Icons.wifi,
+        'title': '联机大厅',
+        'subtitle': '与朋友联机',
+        'color': const Color(0xFF7AA5D6),
+      },
+      {
+        'icon': Icons.smart_display,
+        'title': '直播模式',
+        'subtitle': '直播优化设置',
+        'color': BAColors.accentPinkOf(context),
+      },
     ];
 
     return Row(
@@ -293,11 +329,7 @@ class _BAMorePageState extends State<BAMorePage> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 10,
-                    color: color,
-                  ),
+                  Icon(Icons.arrow_forward_ios, size: 10, color: color),
                 ],
               ),
             ],
@@ -311,12 +343,42 @@ class _BAMorePageState extends State<BAMorePage> {
 
   Widget _buildResourceManagementGrid(BuildContext context) {
     final items = [
-      {'icon': Icons.extension, 'title': 'Mod 管理', 'subtitle': '安装启用禁用', 'color': BAColors.secondaryOf(context)},
-      {'icon': Icons.palette, 'title': '资源包', 'subtitle': '材质包管理', 'color': BAColors.accentPinkOf(context)},
-      {'icon': Icons.lightbulb, 'title': '光影包', 'subtitle': '光影效果', 'color': const Color(0xFFE6C46A)},
-      {'icon': Icons.inventory_2, 'title': '整合包', 'subtitle': '一键安装', 'color': BAColors.primaryOf(context)},
-      {'icon': Icons.map, 'title': '地图', 'subtitle': '地图存档', 'color': BAColors.accentPinkOf(context)},
-      {'icon': Icons.dataset, 'title': '数据包', 'subtitle': '数据包管理', 'color': const Color(0xFF7AA5D6)},
+      {
+        'icon': Icons.extension,
+        'title': 'Mod 管理',
+        'subtitle': '安装启用禁用',
+        'color': BAColors.secondaryOf(context),
+      },
+      {
+        'icon': Icons.palette,
+        'title': '资源包',
+        'subtitle': '材质包管理',
+        'color': BAColors.accentPinkOf(context),
+      },
+      {
+        'icon': Icons.lightbulb,
+        'title': '光影包',
+        'subtitle': '光影效果',
+        'color': const Color(0xFFE6C46A),
+      },
+      {
+        'icon': Icons.inventory_2,
+        'title': '整合包',
+        'subtitle': '一键安装',
+        'color': BAColors.primaryOf(context),
+      },
+      {
+        'icon': Icons.map,
+        'title': '地图',
+        'subtitle': '地图存档',
+        'color': BAColors.accentPinkOf(context),
+      },
+      {
+        'icon': Icons.dataset,
+        'title': '数据包',
+        'subtitle': '数据包管理',
+        'color': const Color(0xFF7AA5D6),
+      },
     ];
 
     return GridView.builder(
@@ -402,11 +464,36 @@ class _BAMorePageState extends State<BAMorePage> {
 
   Widget _buildToolsAndSettingsRow(BuildContext context) {
     final items = [
-      {'icon': Icons.terminal, 'title': '游戏日志', 'subtitle': '查看启动日志', 'color': BAColors.textSecondaryOf(context)},
-      {'icon': Icons.build, 'title': '诊断工具', 'subtitle': '问题排查', 'color': BAColors.warningOf(context)},
-      {'icon': Icons.folder_open, 'title': '游戏目录', 'subtitle': '打开 .minecraft', 'color': BAColors.successOf(context)},
-      {'icon': Icons.info_outline, 'title': '关于启动器', 'subtitle': '版本信息', 'color': BAColors.primaryOf(context)},
-      {'icon': Icons.settings, 'title': '设置', 'subtitle': '应用设置', 'color': BAColors.textSecondaryOf(context)},
+      {
+        'icon': Icons.terminal,
+        'title': '游戏日志',
+        'subtitle': '查看启动日志',
+        'color': BAColors.textSecondaryOf(context),
+      },
+      {
+        'icon': Icons.build,
+        'title': '诊断工具',
+        'subtitle': '问题排查',
+        'color': BAColors.warningOf(context),
+      },
+      {
+        'icon': Icons.folder_open,
+        'title': '游戏目录',
+        'subtitle': '打开 .minecraft',
+        'color': BAColors.successOf(context),
+      },
+      {
+        'icon': Icons.info_outline,
+        'title': '关于启动器',
+        'subtitle': '版本信息',
+        'color': BAColors.primaryOf(context),
+      },
+      {
+        'icon': Icons.settings,
+        'title': '设置',
+        'subtitle': '应用设置',
+        'color': BAColors.textSecondaryOf(context),
+      },
     ];
 
     return Row(
@@ -419,7 +506,9 @@ class _BAMorePageState extends State<BAMorePage> {
               items[i]['subtitle'] as String,
               items[i]['color'] as Color,
               context,
-              items[i]['title'] == '设置' ? _openSettings : () => _showComingSoon(items[i]['title'] as String),
+              items[i]['title'] == '设置'
+                  ? _openSettings
+                  : () => _showComingSoon(items[i]['title'] as String),
             ),
           ),
           if (i < items.length - 1) const SizedBox(width: 12),
@@ -498,9 +587,6 @@ class _BAMorePageState extends State<BAMorePage> {
   }
 
   void _showComingSoon(String feature) {
-    NotificationManager().showInfo(
-      '功能开发中',
-      message: '$feature 即将上线',
-    );
+    NotificationManager().showInfo('功能开发中', message: '$feature 即将上线');
   }
 }

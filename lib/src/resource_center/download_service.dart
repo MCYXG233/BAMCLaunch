@@ -124,7 +124,9 @@ class DownloadService {
 
     await _resourceManager.initialize();
 
-    _taskUpdateSubscription = _manager.onTaskUpdate.listen(_onManagerTaskUpdate);
+    _taskUpdateSubscription = _manager.onTaskUpdate.listen(
+      _onManagerTaskUpdate,
+    );
     _initialized = true;
     _logger.info('DownloadService initialized (delegating to DownloadManager)');
   }
@@ -153,16 +155,18 @@ class DownloadService {
     }
 
     // 触发旧 API 的进度事件（使用第一个 taskId 的旧格式）
-    _eventBus.publish(ResourceDownloadProgressEvent(
-      resourceId: legacy.resource.id,
-      versionId: legacy.version.id,
-      progress: DownloadProgress(
-        downloadedBytes: task.downloadedBytes,
-        totalBytes: task.totalBytes,
-        progress: task.progress,
-        speed: task.downloadSpeed,
+    _eventBus.publish(
+      ResourceDownloadProgressEvent(
+        resourceId: legacy.resource.id,
+        versionId: legacy.version.id,
+        progress: DownloadProgress(
+          downloadedBytes: task.downloadedBytes,
+          totalBytes: task.totalBytes,
+          progress: task.progress,
+          speed: task.downloadSpeed,
+        ),
       ),
-    ));
+    );
 
     if (task.status == DownloadTaskStatus.completed ||
         task.status == DownloadTaskStatus.failed ||
@@ -172,17 +176,21 @@ class DownloadService {
         _completedTasks.add(legacy);
       }
       if (task.status == DownloadTaskStatus.completed) {
-        _eventBus.publish(ResourceDownloadCompletedEvent(
-          resourceId: legacy.resource.id,
-          versionId: legacy.version.id,
-          savePath: legacy.savePath ?? '',
-        ));
+        _eventBus.publish(
+          ResourceDownloadCompletedEvent(
+            resourceId: legacy.resource.id,
+            versionId: legacy.version.id,
+            savePath: legacy.savePath ?? '',
+          ),
+        );
       } else if (task.status == DownloadTaskStatus.failed) {
-        _eventBus.publish(ResourceDownloadFailedEvent(
-          resourceId: legacy.resource.id,
-          versionId: legacy.version.id,
-          error: task.errorMessage ?? 'Unknown error',
-        ));
+        _eventBus.publish(
+          ResourceDownloadFailedEvent(
+            resourceId: legacy.resource.id,
+            versionId: legacy.version.id,
+            error: task.errorMessage ?? 'Unknown error',
+          ),
+        );
       }
     }
   }
@@ -211,14 +219,20 @@ class DownloadService {
     );
     _activeTasks[taskId] = legacyTask;
 
-    _eventBus.publish(DownloadResourceEvent(resource: resource, version: version));
-    _eventBus.publish(ResourceDownloadStartedEvent(
-      resourceId: resource.id,
-      versionId: version.id,
-      taskId: taskId,
-    ));
+    _eventBus.publish(
+      DownloadResourceEvent(resource: resource, version: version),
+    );
+    _eventBus.publish(
+      ResourceDownloadStartedEvent(
+        resourceId: resource.id,
+        versionId: version.id,
+        taskId: taskId,
+      ),
+    );
 
-    _logger.info('Starting download (legacy): ${resource.name} v${version.versionNumber}');
+    _logger.info(
+      'Starting download (legacy): ${resource.name} v${version.versionNumber}',
+    );
 
     // DownloadManager 需要 targetInstance 和 targetGameVersion，
     // 这里使用占位值，由调用方改用 downloadAndInstallToInstance 传递真实值
@@ -253,8 +267,10 @@ class DownloadService {
   }
 
   /// 等待任务完成（轮询 DownloadManager 状态）
-  Future<void> _waitForCompletion(DownloadTask managerTask,
-      {Duration timeout = const Duration(hours: 24)}) async {
+  Future<void> _waitForCompletion(
+    DownloadTask managerTask, {
+    Duration timeout = const Duration(hours: 24),
+  }) async {
     final deadline = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(deadline)) {
       final current = _manager.getTask(managerTask.id);
@@ -354,12 +370,16 @@ class DownloadService {
     );
     _activeTasks[taskId] = legacyTask;
 
-    _eventBus.publish(DownloadResourceEvent(resource: resource, version: version));
-    _eventBus.publish(ResourceDownloadStartedEvent(
-      resourceId: resource.id,
-      versionId: version.id,
-      taskId: taskId,
-    ));
+    _eventBus.publish(
+      DownloadResourceEvent(resource: resource, version: version),
+    );
+    _eventBus.publish(
+      ResourceDownloadStartedEvent(
+        resourceId: resource.id,
+        versionId: version.id,
+        taskId: taskId,
+      ),
+    );
 
     final instance = _instanceManager.instances.firstWhere(
       (i) => i.id == instanceId,
@@ -399,7 +419,10 @@ class DownloadService {
   }
 
   /// 将资源链接到实例
-  Future<void> _linkResourceToInstance(Resource resource, String instanceId) async {
+  Future<void> _linkResourceToInstance(
+    Resource resource,
+    String instanceId,
+  ) async {
     switch (resource.type) {
       case ResourceType.mod:
         await _instanceManager.addResourceToInstance(
@@ -416,7 +439,11 @@ class DownloadService {
         );
         break;
       case ResourceType.modpack:
-        await _installModpackToInstance(resource, versionId: '', instanceId: instanceId);
+        await _installModpackToInstance(
+          resource,
+          versionId: '',
+          instanceId: instanceId,
+        );
         break;
       case ResourceType.shaderPack:
         await _instanceManager.addResourceToInstance(
@@ -498,7 +525,8 @@ class DownloadService {
 
     final instance = _instanceManager.instances.firstWhere(
       (i) => i.id == targetInstanceId,
-      orElse: () => throw ArgumentError('Instance not found: $targetInstanceId'),
+      orElse: () =>
+          throw ArgumentError('Instance not found: $targetInstanceId'),
     );
 
     final managerTask = await _manager.download(
@@ -528,10 +556,7 @@ class DownloadService {
   }
 
   /// 下载游戏版本（保留接口，无实际实现）
-  Future<void> downloadGameVersion(
-    String version,
-    String instanceId,
-  ) async {
+  Future<void> downloadGameVersion(String version, String instanceId) async {
     await initialize();
     await _instanceManager.initialize();
     _logger.warning('downloadGameVersion is not implemented in legacy adapter');

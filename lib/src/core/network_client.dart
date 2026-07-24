@@ -230,7 +230,10 @@ class NetworkClient {
             : Uri.parse(url);
 
         // 合并默认请求头和自定义请求头，自定义请求头优先级更高
-        final finalHeaders = {...defaultHeaders, if (headers != null) ...headers};
+        final finalHeaders = {
+          ...defaultHeaders,
+          if (headers != null) ...headers,
+        };
 
         try {
           // 发送GET请求并设置超时
@@ -241,7 +244,9 @@ class NetworkClient {
           // 处理 HTTP 429 (Too Many Requests)
           if (response.statusCode == 429) {
             final retryAfter = response.headers['retry-after'];
-            final delay = retryAfter != null ? int.tryParse(retryAfter) ?? 60 : 60;
+            final delay = retryAfter != null
+                ? int.tryParse(retryAfter) ?? 60
+                : 60;
             throw RetryAfterException(delaySeconds: delay);
           }
 
@@ -337,7 +342,10 @@ class NetworkClient {
         // 解析URL
         final uri = Uri.parse(url);
         // 合并默认请求头和自定义请求头，自定义请求头优先级更高
-        final finalHeaders = {...defaultHeaders, if (headers != null) ...headers};
+        final finalHeaders = {
+          ...defaultHeaders,
+          if (headers != null) ...headers,
+        };
 
         try {
           // 发送POST请求并设置超时
@@ -348,7 +356,9 @@ class NetworkClient {
           // 处理 HTTP 429 (Too Many Requests)
           if (response.statusCode == 429) {
             final retryAfter = response.headers['retry-after'];
-            final delay = retryAfter != null ? int.tryParse(retryAfter) ?? 60 : 60;
+            final delay = retryAfter != null
+                ? int.tryParse(retryAfter) ?? 60
+                : 60;
             throw RetryAfterException(delaySeconds: delay);
           }
 
@@ -456,17 +466,15 @@ class NetworkClient {
         try {
           // 发送POST请求，将请求体序列化为JSON字符串
           final response = await _client
-              .post(
-                uri,
-                headers: finalHeaders,
-                body: jsonEncode(body),
-              )
+              .post(uri, headers: finalHeaders, body: jsonEncode(body))
               .timeout(Duration(seconds: timeoutSeconds));
 
           // 处理 HTTP 429 (Too Many Requests)
           if (response.statusCode == 429) {
             final retryAfter = response.headers['retry-after'];
-            final delay = retryAfter != null ? int.tryParse(retryAfter) ?? 60 : 60;
+            final delay = retryAfter != null
+                ? int.tryParse(retryAfter) ?? 60
+                : 60;
             throw RetryAfterException(delaySeconds: delay);
           }
 
@@ -567,21 +575,27 @@ class NetworkClient {
       operation: () async {
         // 检查取消状态
         if (cancellationToken?.isCancelled == true) {
-          throw const DownloadCancelledException('Download cancelled before start');
+          throw const DownloadCancelledException(
+            'Download cancelled before start',
+          );
         }
 
         // 解析URL
         final uri = Uri.parse(url);
         // 合并默认请求头和自定义请求头
-        final finalHeaders = {...defaultHeaders, if (headers != null) ...headers};
+        final finalHeaders = {
+          ...defaultHeaders,
+          if (headers != null) ...headers,
+        };
 
         try {
           // 创建HTTP GET请求
-          final request = http.Request('GET', uri)..headers.addAll(finalHeaders);
+          final request = http.Request('GET', uri)
+            ..headers.addAll(finalHeaders);
           // 发送请求并获取响应流，设置超时
-          final response = await _client.send(request).timeout(
-                Duration(seconds: timeoutSeconds),
-              );
+          final response = await _client
+              .send(request)
+              .timeout(Duration(seconds: timeoutSeconds));
 
           // 检查响应状态码，非200表示下载失败
           if (response.statusCode != 200) {
@@ -606,7 +620,9 @@ class NetworkClient {
             await for (final chunk in response.stream) {
               // 每个 chunk 写入前检查取消状态
               if (cancellationToken?.isCancelled == true) {
-                throw const DownloadCancelledException('Download cancelled during transfer');
+                throw const DownloadCancelledException(
+                  'Download cancelled during transfer',
+                );
               }
 
               // 将数据块写入文件
@@ -623,7 +639,9 @@ class NetworkClient {
             await sink.close();
           } catch (e) {
             // 关闭 sink 并清理不完整的下载文件
-            try { await sink.close(); } catch (_) {}
+            try {
+              await sink.close();
+            } catch (_) {}
             try {
               if (await file.exists()) {
                 await file.delete();

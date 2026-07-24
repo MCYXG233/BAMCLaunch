@@ -21,7 +21,7 @@ enum FixCategory {
   gameFiles,
 
   /// 配置问题（如内存分配不当、参数错误等）
-  config
+  config,
 }
 
 /// 问题严重程度枚举
@@ -38,7 +38,7 @@ enum FixSeverity {
   high,
 
   /// 关键优先级 - 阻止核心功能运行，必须立即处理
-  critical
+  critical,
 }
 
 /// 检测到的问题模型
@@ -248,26 +248,31 @@ class AutoFixer {
 
     // 情况1：Java 未安装
     if (!javaResult.isAvailable) {
-      issues.add(const FixIssue(
-        id: 'java_not_found',
-        title: 'Java 未安装',
-        description: '系统中未检测到 Java 安装，无法启动游戏',
-        category: FixCategory.java,
-        severity: FixSeverity.critical,
-        canAutoFix: false,
-      ));
+      issues.add(
+        const FixIssue(
+          id: 'java_not_found',
+          title: 'Java 未安装',
+          description: '系统中未检测到 Java 安装，无法启动游戏',
+          category: FixCategory.java,
+          severity: FixSeverity.critical,
+          canAutoFix: false,
+        ),
+      );
     }
     // 情况2：Java 版本过低（低于 Java 8）
     else if (javaResult.majorVersion != null && javaResult.majorVersion! < 8) {
-      issues.add(FixIssue(
-        id: 'java_version_too_low',
-        title: 'Java 版本过低',
-        description: '当前 Java 版本 ${javaResult.javaVersion} 过低，建议升级到 Java 17+',
-        category: FixCategory.java,
-        severity: FixSeverity.high,
-        canAutoFix: false,
-        autoFixDescription: '请从 Eclipse Adoptium (adoptium.net) 下载 Java 17 或 21',
-      ));
+      issues.add(
+        FixIssue(
+          id: 'java_version_too_low',
+          title: 'Java 版本过低',
+          description: '当前 Java 版本 ${javaResult.javaVersion} 过低，建议升级到 Java 17+',
+          category: FixCategory.java,
+          severity: FixSeverity.high,
+          canAutoFix: false,
+          autoFixDescription:
+              '请从 Eclipse Adoptium (adoptium.net) 下载 Java 17 或 21',
+        ),
+      );
     }
 
     // 检查用户配置的 Java 路径是否有效
@@ -277,15 +282,17 @@ class AutoFixer {
       final javaFile = File(configuredJavaPath);
       // 配置的路径不存在
       if (!javaFile.existsSync()) {
-        issues.add(FixIssue(
-          id: 'java_path_invalid',
-          title: 'Java 路径无效',
-          description: '配置的 Java 路径不存在: $configuredJavaPath',
-          category: FixCategory.java,
-          severity: FixSeverity.high,
-          canAutoFix: true,
-          autoFixDescription: '自动清除无效的 Java 路径配置',
-        ));
+        issues.add(
+          FixIssue(
+            id: 'java_path_invalid',
+            title: 'Java 路径无效',
+            description: '配置的 Java 路径不存在: $configuredJavaPath',
+            category: FixCategory.java,
+            severity: FixSeverity.high,
+            canAutoFix: true,
+            autoFixDescription: '自动清除无效的 Java 路径配置',
+          ),
+        );
       }
     }
 
@@ -305,31 +312,39 @@ class AutoFixer {
     try {
       // 测试所有下载节点的连通性
       final pingResults = await NetworkDiagnostic.pingAllNodes();
-      final unreachableNodes = pingResults.where((r) => !r.isReachable).toList();
+      final unreachableNodes = pingResults
+          .where((r) => !r.isReachable)
+          .toList();
 
       // 情况1：所有节点都不可达
       if (unreachableNodes.length == pingResults.length) {
-        issues.add(const FixIssue(
-          id: 'network_all_unreachable',
-          title: '网络完全不可用',
-          description: '所有下载节点都无法访问，请检查网络连接',
-          category: FixCategory.network,
-          severity: FixSeverity.critical,
-          canAutoFix: false,
-        ));
+        issues.add(
+          const FixIssue(
+            id: 'network_all_unreachable',
+            title: '网络完全不可用',
+            description: '所有下载节点都无法访问，请检查网络连接',
+            category: FixCategory.network,
+            severity: FixSeverity.critical,
+            canAutoFix: false,
+          ),
+        );
       }
       // 情况2：部分节点不可达
       else if (unreachableNodes.isNotEmpty) {
-        final unreachableNames = unreachableNodes.map((r) => r.nodeName).join(', ');
-        issues.add(FixIssue(
-          id: 'network_partial_unreachable',
-          title: '部分节点不可用',
-          description: '以下节点无法访问: $unreachableNames',
-          category: FixCategory.network,
-          severity: FixSeverity.medium,
-          canAutoFix: true,
-          autoFixDescription: '自动切换到可用的镜像源',
-        ));
+        final unreachableNames = unreachableNodes
+            .map((r) => r.nodeName)
+            .join(', ');
+        issues.add(
+          FixIssue(
+            id: 'network_partial_unreachable',
+            title: '部分节点不可用',
+            description: '以下节点无法访问: $unreachableNames',
+            category: FixCategory.network,
+            severity: FixSeverity.medium,
+            canAutoFix: true,
+            autoFixDescription: '自动切换到可用的镜像源',
+          ),
+        );
       }
 
       // 检查 DNS 解析
@@ -337,14 +352,16 @@ class AutoFixer {
       final failedDns = dnsResults.where((r) => !r.isSuccess).toList();
       if (failedDns.isNotEmpty) {
         final failedHosts = failedDns.map((r) => r.hostname).join(', ');
-        issues.add(FixIssue(
-          id: 'dns_resolution_failed',
-          title: 'DNS 解析失败',
-          description: '以下主机名解析失败: $failedHosts',
-          category: FixCategory.network,
-          severity: FixSeverity.medium,
-          canAutoFix: false,
-        ));
+        issues.add(
+          FixIssue(
+            id: 'dns_resolution_failed',
+            title: 'DNS 解析失败',
+            description: '以下主机名解析失败: $failedHosts',
+            category: FixCategory.network,
+            severity: FixSeverity.medium,
+            canAutoFix: false,
+          ),
+        );
       }
     } catch (e) {
       _log('网络检测失败: $e');
@@ -368,41 +385,47 @@ class AutoFixer {
 
     // 情况1：游戏目录未配置
     if (gameDir.isEmpty) {
-      issues.add(const FixIssue(
-        id: 'game_dir_not_set',
-        title: '游戏目录未配置',
-        description: '未设置游戏目录，请先配置游戏目录路径',
-        category: FixCategory.gameFiles,
-        severity: FixSeverity.high,
-        canAutoFix: false,
-      ));
+      issues.add(
+        const FixIssue(
+          id: 'game_dir_not_set',
+          title: '游戏目录未配置',
+          description: '未设置游戏目录，请先配置游戏目录路径',
+          category: FixCategory.gameFiles,
+          severity: FixSeverity.high,
+          canAutoFix: false,
+        ),
+      );
     } else {
       final directory = Directory(gameDir);
 
       // 情况2：游戏目录不存在
       if (!await directory.exists()) {
-        issues.add(FixIssue(
-          id: 'game_dir_not_exist',
-          title: '游戏目录不存在',
-          description: '配置的游戏目录不存在: $gameDir',
-          category: FixCategory.gameFiles,
-          severity: FixSeverity.high,
-          canAutoFix: true,
-          autoFixDescription: '创建缺失的游戏目录',
-        ));
+        issues.add(
+          FixIssue(
+            id: 'game_dir_not_exist',
+            title: '游戏目录不存在',
+            description: '配置的游戏目录不存在: $gameDir',
+            category: FixCategory.gameFiles,
+            severity: FixSeverity.high,
+            canAutoFix: true,
+            autoFixDescription: '创建缺失的游戏目录',
+          ),
+        );
       } else {
         // 情况3：versions 目录缺失
         final versionsDir = Directory(p.join(gameDir, 'versions'));
         if (!await versionsDir.exists()) {
-          issues.add(FixIssue(
-            id: 'versions_dir_missing',
-            title: '游戏版本目录缺失',
-            description: 'versions 目录不存在，游戏可能无法正常运行',
-            category: FixCategory.gameFiles,
-            severity: FixSeverity.medium,
-            canAutoFix: true,
-            autoFixDescription: '创建 versions 目录',
-          ));
+          issues.add(
+            FixIssue(
+              id: 'versions_dir_missing',
+              title: '游戏版本目录缺失',
+              description: 'versions 目录不存在，游戏可能无法正常运行',
+              category: FixCategory.gameFiles,
+              severity: FixSeverity.medium,
+              canAutoFix: true,
+              autoFixDescription: '创建 versions 目录',
+            ),
+          );
         }
       }
     }
@@ -426,27 +449,31 @@ class AutoFixer {
 
     // 情况1：内存分配过低
     if (memoryMB < 1024) {
-      issues.add(const FixIssue(
-        id: 'memory_too_low',
-        title: '内存分配过低',
-        description: '游戏内存分配低于 1024 MB，可能导致游戏无法启动',
-        category: FixCategory.config,
-        severity: FixSeverity.high,
-        canAutoFix: true,
-        autoFixDescription: '自动将内存调整为 2048 MB',
-      ));
+      issues.add(
+        const FixIssue(
+          id: 'memory_too_low',
+          title: '内存分配过低',
+          description: '游戏内存分配低于 1024 MB，可能导致游戏无法启动',
+          category: FixCategory.config,
+          severity: FixSeverity.high,
+          canAutoFix: true,
+          autoFixDescription: '自动将内存调整为 2048 MB',
+        ),
+      );
     }
     // 情况2：内存分配过高（超过 12 GB 可能导致 GC 停顿）
     else if (memoryMB > 12288) {
-      issues.add(const FixIssue(
-        id: 'memory_too_high',
-        title: '内存分配过高',
-        description: '内存分配超过 12 GB 可能导致 GC 停顿',
-        category: FixCategory.config,
-        severity: FixSeverity.low,
-        canAutoFix: true,
-        autoFixDescription: '自动将内存调整为 8192 MB',
-      ));
+      issues.add(
+        const FixIssue(
+          id: 'memory_too_high',
+          title: '内存分配过高',
+          description: '内存分配超过 12 GB 可能导致 GC 停顿',
+          category: FixCategory.config,
+          severity: FixSeverity.low,
+          canAutoFix: true,
+          autoFixDescription: '自动将内存调整为 8192 MB',
+        ),
+      );
     }
 
     return issues;
@@ -743,7 +770,10 @@ class AutoFixer {
     _log('正在调整内存分配...');
 
     final config = ConfigManager();
-    await config.setInt(ConfigKeys.memoryAllocation, BAMCConstants.defaultMaxMemoryMB);
+    await config.setInt(
+      ConfigKeys.memoryAllocation,
+      BAMCConstants.defaultMaxMemoryMB,
+    );
     _log('内存已调整为 2048 MB');
 
     return FixResult(

@@ -59,9 +59,7 @@ class _ColorPickerPanelState extends State<ColorPickerPanel> {
               Icon(Icons.palette, color: BAColors.primaryOf(context), size: 20),
               const SizedBox(width: 8),
               Text(
-                widget.themeKey == 'minecraft'
-                    ? 'Minecraft 主题色'
-                    : '蔚蓝档案主题色',
+                widget.themeKey == 'minecraft' ? 'Minecraft 主题色' : '蔚蓝档案主题色',
                 style: TextStyle(
                   color: BAColors.textPrimaryOf(context),
                   fontSize: 14,
@@ -234,8 +232,10 @@ class _CustomColorDialogState extends State<_CustomColorDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: BAColors.surfaceOf(context),
-      title: Text('自定义颜色',
-          style: TextStyle(color: BAColors.textPrimaryOf(context))),
+      title: Text(
+        '自定义颜色',
+        style: TextStyle(color: BAColors.textPrimaryOf(context)),
+      ),
       content: SizedBox(
         width: 320,
         child: Column(
@@ -276,12 +276,10 @@ class _CustomColorDialogState extends State<_CustomColorDialog> {
               style: TextStyle(color: BAColors.textPrimaryOf(context)),
               decoration: InputDecoration(
                 labelText: '十六进制值',
-                labelStyle:
-                    TextStyle(color: BAColors.textSecondaryOf(context)),
+                labelStyle: TextStyle(color: BAColors.textSecondaryOf(context)),
                 border: const OutlineInputBorder(),
                 enabledBorder: OutlineInputBorder(
-                  borderSide:
-                      BorderSide(color: BAColors.borderOf(context)),
+                  borderSide: BorderSide(color: BAColors.borderOf(context)),
                 ),
                 prefixText: '#',
               ),
@@ -298,10 +296,13 @@ class _CustomColorDialogState extends State<_CustomColorDialog> {
         ElevatedButton(
           onPressed: () {
             final c = _currentColor;
-            Navigator.pop(context, (c.a * 255).toInt() << 24 |
-                (c.r * 255).toInt() << 16 |
-                (c.g * 255).toInt() << 8 |
-                (c.b * 255).toInt());
+            Navigator.pop(
+              context,
+              (c.a * 255).toInt() << 24 |
+                  (c.r * 255).toInt() << 16 |
+                  (c.g * 255).toInt() << 8 |
+                  (c.b * 255).toInt(),
+            );
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: BAColors.primaryOf(context),
@@ -337,8 +338,10 @@ class _CustomColorDialogState extends State<_CustomColorDialog> {
       children: [
         SizedBox(
           width: 60,
-          child: Text(label,
-              style: TextStyle(color: BAColors.textSecondaryOf(context))),
+          child: Text(
+            label,
+            style: TextStyle(color: BAColors.textSecondaryOf(context)),
+          ),
         ),
         Expanded(
           child: Slider(

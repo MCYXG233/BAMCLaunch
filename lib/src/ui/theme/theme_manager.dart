@@ -118,9 +118,7 @@ class ThemeManager extends ChangeNotifier {
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -134,17 +132,11 @@ class ThemeManager extends ChangeNotifier {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4),
-          borderSide: const BorderSide(
-            color: Color(0xFF8B7355),
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: Color(0xFF8B7355), width: 2),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4),
-          borderSide: const BorderSide(
-            color: Color(0xFF4A752C),
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: Color(0xFF4A752C), width: 2),
         ),
       ),
     );
