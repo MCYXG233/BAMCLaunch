@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:archive/archive.dart' as archive;
+import '../download/multi_source_downloader.dart' show CancellationToken;
 import 'error_codes.dart';
 import 'retry_helper.dart';
 import 'logger.dart';
@@ -558,11 +559,17 @@ class NetworkClient {
     void Function(int, int)? onProgress,
     int timeoutSeconds = 120,
     RetryConfig? retryConfig,
+    CancellationToken? cancellationToken,
   }) async {
     // 使用重试助手执行下载操作，支持自动重试机制
     return RetryHelper.execute(
       config: retryConfig ?? RetryConfig.network,
       operation: () async {
+        // 检查取消状态
+        if (cancellationToken?.isCancelled == true) {
+          throw const DownloadCancelledException('Download cancelled before start');
+        }
+
         // 解析URL
         final uri = Uri.parse(url);
         // 合并默认请求头和自定义请求头
@@ -597,6 +604,11 @@ class NetworkClient {
           try {
             // 流式读取响应数据并写入文件
             await for (final chunk in response.stream) {
+              // 每个 chunk 写入前检查取消状态
+              if (cancellationToken?.isCancelled == true) {
+                throw const DownloadCancelledException('Download cancelled during transfer');
+              }
+
               // 将数据块写入文件
               sink.add(chunk);
               // 更新已下载字节数
@@ -621,6 +633,9 @@ class NetworkClient {
           }
           // 记录下载完成日志
           _logger.info('Download completed: $destinationPath');
+        } on DownloadCancelledException {
+          // 取消操作不重试，直接向上抛出
+          rethrow;
         } on TimeoutException catch (e, stackTrace) {
           // 处理请求超时异常
           throw AppException.fromCode(
@@ -757,6 +772,18 @@ class NetworkClient {
   void close() {
     _client.close();
   }
+}
+
+/// 下载取消异常
+///
+/// 当下载操作被用户或系统取消时抛出。
+/// 与网络错误不同，取消操作不应触发自动重试。
+class DownloadCancelledException implements Exception {
+  final String message;
+  const DownloadCancelledException(this.message);
+
+  @override
+  String toString() => 'DownloadCancelledException: $message';
 }
 
 // NetworkException 已统一到 error_codes.dart 中
