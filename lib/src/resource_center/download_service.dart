@@ -10,6 +10,7 @@ import '../event/event.dart';
 import '../event/event_bus.dart';
 import '../instance/models.dart' as instance_models;
 import '../instance/instance_manager.dart';
+import '../instance/models.dart' show ResourceType;
 import 'models.dart';
 import 'resource_manager.dart';
 
@@ -314,8 +315,18 @@ class DownloadService {
       case ResourceType.modpack:
         await _installModpackToInstance(resource, versionId: '', instanceId: instanceId);
         break;
-      case ResourceType.shader:
+      case ResourceType.shaderPack:
+        await _instanceManager.addResourceToInstance(
+          instanceId,
+          resource.id,
+          instance_models.ResourceType.shaderPack,
+        );
+        break;
       case ResourceType.dataPack:
+        break;
+      case ResourceType.world:
+      case ResourceType.screenshot:
+        // 世界/截图不在实例资源列表中
         break;
     }
   }

@@ -1,6 +1,7 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
+import '../../instance/models.dart';
 import '../../resource_center/models.dart';
 import '../../resource_center/download_manager.dart';
 import 'ba_common_widgets.dart';
@@ -472,12 +473,15 @@ class _DownloadPanelState extends State<DownloadPanel> {
         return Icons.extension;
       case ResourceType.resourcePack:
         return Icons.palette;
-      case ResourceType.shader:
+      case ResourceType.shaderPack:
         return Icons.lightbulb;
       case ResourceType.modpack:
         return Icons.inventory_2;
       case ResourceType.dataPack:
         return Icons.folder;
+      case ResourceType.world:
+      case ResourceType.screenshot:
+        return Icons.help_outline;
     }
   }
 
@@ -487,12 +491,15 @@ class _DownloadPanelState extends State<DownloadPanel> {
         return BAColors.accentPinkOf(context);
       case ResourceType.resourcePack:
         return BAColors.successOf(context);
-      case ResourceType.shader:
+      case ResourceType.shaderPack:
         return BAColors.warningOf(context);
       case ResourceType.modpack:
         return BAColors.primaryOf(context);
       case ResourceType.dataPack:
         return const Color(0xFF8B7DD9);
+      case ResourceType.world:
+      case ResourceType.screenshot:
+        return BAColors.textSecondaryOf(context);
     }
   }
 }

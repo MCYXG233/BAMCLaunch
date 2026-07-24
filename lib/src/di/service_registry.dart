@@ -22,6 +22,7 @@ import '../auth/local_yggdrasil_server.dart';
 
 // 账户 & 皮肤
 import '../account/account_manager.dart';
+import '../account/account_store.dart';
 import '../account/skin_manager.dart';
 import '../features/skin/cape_manager.dart';
 import '../features/skin/skin_preview_3d.dart';

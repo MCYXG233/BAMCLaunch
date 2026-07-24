@@ -2,6 +2,7 @@ import 'dart:convert';
 import '../core/logger.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
+import '../instance/models.dart' show ResourceType;
 import 'models.dart';
 
 /// Modrinth API 客户端
@@ -361,7 +362,8 @@ class ModrinthClient {
       case 'modpack':
         return ResourceType.modpack;
       case 'shader':
-        return ResourceType.shader;
+      case 'shaderpack':
+        return ResourceType.shaderPack;
       case 'datapack':
         return ResourceType.dataPack;
       default:
@@ -377,10 +379,14 @@ class ModrinthClient {
         return 'resourcepack';
       case ResourceType.modpack:
         return 'modpack';
-      case ResourceType.shader:
+      case ResourceType.shaderPack:
         return 'shader';
       case ResourceType.dataPack:
         return 'datapack';
+      case ResourceType.world:
+      case ResourceType.screenshot:
+        // 不支持的在线资源类型
+        return 'mod';
     }
   }
 

@@ -7,6 +7,7 @@ import '../core/logger.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
 import '../di/service_locator.dart';
+import '../instance/models.dart' show ResourceType;
 import 'models.dart';
 import 'modrinth_client.dart';
 
@@ -501,12 +502,19 @@ class DownloadManager {
       case ResourceType.resourcePack:
         targetDir = await getResourcePacksDirectory(task.targetInstance);
         break;
-      case ResourceType.shader:
+      case ResourceType.shaderPack:
         targetDir = await getShaderPacksDirectory(task.targetInstance);
         break;
       case ResourceType.modpack:
         targetDir = await getModsDirectory(task.targetInstance);
         break;
+      case ResourceType.world:
+      case ResourceType.screenshot:
+        targetDir = await getModsDirectory(task.targetInstance);
+        break;
+      // modpack 已在上方单独处理；其他值留 default 处理
+      default:
+        targetDir = await getModsDirectory(task.targetInstance);
     }
 
     final fileName = task.version.fileName ?? path.basename(sourceFile.path);

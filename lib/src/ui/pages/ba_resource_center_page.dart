@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
+import '../../instance/models.dart';
 import '../../resource_center/search_service.dart';
 import '../../resource_center/models.dart';
 import '../components/ba_notification.dart';
@@ -59,7 +60,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
     MapEntry('模组', ResourceType.mod),
     MapEntry('资源包', ResourceType.resourcePack),
     MapEntry('整合包', ResourceType.modpack),
-    MapEntry('光影包', ResourceType.shader),
+    MapEntry('光影包', ResourceType.shaderPack),
     MapEntry('数据包', ResourceType.dataPack),
   ];
 
@@ -87,7 +88,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
     ResourceType.mod: Icons.extension,
     ResourceType.resourcePack: Icons.palette,
     ResourceType.modpack: Icons.inventory_2,
-    ResourceType.shader: Icons.lightbulb,
+    ResourceType.shaderPack: Icons.lightbulb,
     ResourceType.dataPack: Icons.folder_copy,
   };
 
@@ -96,7 +97,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
     ResourceType.mod: BAColors.accentPinkOf(context),
     ResourceType.resourcePack: BAColors.successOf(context),
     ResourceType.modpack: BAColors.warningOf(context),
-    ResourceType.shader: const Color(0xFFE6C46A),
+    ResourceType.shaderPack: const Color(0xFFE6C46A),
     ResourceType.dataPack: const Color(0xFF7AA5D6),
   };
 

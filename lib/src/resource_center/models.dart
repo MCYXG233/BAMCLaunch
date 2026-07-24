@@ -1,20 +1,8 @@
-/// 资源类型枚举
-enum ResourceType {
-  /// 模组
-  mod,
-
-  /// 资源包
-  resourcePack,
-
-  /// 整合包
-  modpack,
-
-  /// 光影包
-  shader,
-
-  /// 数据包
-  dataPack,
-}
+/// 资源类型枚举：别名 import 实例域权威定义
+///
+/// 实际定义在 instance/models.dart，这里只是 import 引用，
+/// 保证全应用只有一个权威 ResourceType。
+import '../instance/models.dart' show ResourceType;
 
 /// 作者信息
 class Author {
@@ -450,8 +438,9 @@ class Resource {
       case 'modpack':
         return ResourceType.modpack;
       case 'shader':
+      case 'shaderPack':
       case 'shaderpack':
-        return ResourceType.shader;
+        return ResourceType.shaderPack;
       case 'dataPack':
       case 'data_pack':
       case 'datapack':

@@ -4,6 +4,7 @@ import '../theme/colors.dart';
 import '../components/ba_common_widgets.dart';
 import '../components/ba_notification.dart';
 import '../components/ba_instance_select_dialog.dart';
+import '../../instance/models.dart';
 import '../../resource_center/models.dart';
 import '../../resource_center/favorite_manager.dart';
 import '../../resource_center/modrinth_client.dart';
@@ -758,12 +759,15 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
         return Icons.extension;
       case ResourceType.resourcePack:
         return Icons.palette;
-      case ResourceType.shader:
+      case ResourceType.shaderPack:
         return Icons.lightbulb;
       case ResourceType.modpack:
         return Icons.inventory_2;
       case ResourceType.dataPack:
         return Icons.folder;
+      case ResourceType.world:
+      case ResourceType.screenshot:
+        return Icons.help_outline;
     }
   }
 
@@ -773,12 +777,15 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
         return BAColors.accentPinkOf(context);
       case ResourceType.resourcePack:
         return BAColors.successOf(context);
-      case ResourceType.shader:
+      case ResourceType.shaderPack:
         return BAColors.warningOf(context);
       case ResourceType.modpack:
         return BAColors.primaryOf(context);
       case ResourceType.dataPack:
         return BAColors.primaryLightOf(context);
+      case ResourceType.world:
+      case ResourceType.screenshot:
+        return BAColors.textSecondaryOf(context);
     }
   }
 
@@ -788,12 +795,16 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
         return '模组 (Mod)';
       case ResourceType.resourcePack:
         return '资源包';
-      case ResourceType.shader:
+      case ResourceType.shaderPack:
         return '光影包';
       case ResourceType.modpack:
         return '整合包';
       case ResourceType.dataPack:
         return '数据包';
+      case ResourceType.world:
+        return '世界';
+      case ResourceType.screenshot:
+        return '截图';
     }
   }
 

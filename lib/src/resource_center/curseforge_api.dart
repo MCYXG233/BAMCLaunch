@@ -2,6 +2,7 @@ import 'dart:convert';
 import '../core/api_endpoints.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
+import '../instance/models.dart' show ResourceType;
 import 'models.dart';
 import 'api_interface.dart';
 
@@ -300,9 +301,12 @@ class CurseForgeApi implements ResourceApi {
         return resourcePackCategoryId;
       case ResourceType.modpack:
         return modpackCategoryId;
-      case ResourceType.shader:
+      case ResourceType.shaderPack:
         return modCategoryId;
       case ResourceType.dataPack:
+        return modCategoryId;
+      case ResourceType.world:
+      case ResourceType.screenshot:
         return modCategoryId;
     }
   }

@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../core/api_endpoints.dart';
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
+import '../instance/models.dart' show ResourceType;
 import 'models.dart';
 import 'api_interface.dart';
 import 'package:archive/archive.dart' as archive;
@@ -352,10 +353,14 @@ class ModrinthApi implements ResourceApi {
         return 'resourcepack';
       case ResourceType.modpack:
         return 'modpack';
-      case ResourceType.shader:
+      case ResourceType.shaderPack:
         return 'shader';
       case ResourceType.dataPack:
         return 'datapack';
+      case ResourceType.world:
+      case ResourceType.screenshot:
+        // 不支持的在线资源类型
+        return 'mod';
     }
   }
 
@@ -365,6 +370,11 @@ class ModrinthApi implements ResourceApi {
         return ResourceType.resourcePack;
       case 'modpack':
         return ResourceType.modpack;
+      case 'shader':
+      case 'shaderpack':
+        return ResourceType.shaderPack;
+      case 'datapack':
+        return ResourceType.dataPack;
       default:
         return ResourceType.mod;
     }

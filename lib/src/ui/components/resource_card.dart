@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/utils.dart';
+import '../../instance/models.dart';
 import '../../resource_center/models.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
@@ -117,14 +118,18 @@ class ResourceCard extends StatelessWidget {
       case ResourceType.modpack:
         iconData = Icons.folder;
         break;
-      case ResourceType.shader:
+      case ResourceType.shaderPack:
         iconData = Icons.lightbulb;
         break;
       case ResourceType.dataPack:
         iconData = Icons.folder_zip;
         break;
+      case ResourceType.world:
+      case ResourceType.screenshot:
+        iconData = Icons.help_outline;
+        break;
     }
-    
+
     return Icon(
       iconData,
       color: primaryColor,
@@ -401,11 +406,15 @@ class InstalledResourceCard extends StatelessWidget {
       case ResourceType.modpack:
         iconData = Icons.folder;
         break;
-      case ResourceType.shader:
+      case ResourceType.shaderPack:
         iconData = Icons.lightbulb;
         break;
       case ResourceType.dataPack:
         iconData = Icons.folder_zip;
+        break;
+      case ResourceType.world:
+      case ResourceType.screenshot:
+        iconData = Icons.help_outline;
         break;
     }
 

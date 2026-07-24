@@ -1041,6 +1041,10 @@ class InstanceManager {
           updatedResources.screenshots.add(resourceId);
         }
         break;
+      case ResourceType.modpack:
+      case ResourceType.dataPack:
+        // modpack/dataPack 不直接挂载到实例资源列表，由整合包/数据安装器处理
+        break;
     }
 
     // 更新实例
@@ -1102,6 +1106,10 @@ class InstanceManager {
         break;
       case ResourceType.screenshot:
         updatedResources.screenshots.remove(resourceId);
+        break;
+      case ResourceType.modpack:
+      case ResourceType.dataPack:
+        // modpack/dataPack 没有挂载到实例资源列表，无需移除
         break;
     }
 

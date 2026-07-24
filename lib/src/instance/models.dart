@@ -16,12 +16,17 @@ enum LoaderStatus {
 }
 
 /// 资源类型
+///
+/// 权威枚举，涵盖实例内资源（mod/resourcePack/shaderPack/world/screenshot）
+/// 与在线资源（modpack/dataPack）。其他模块应统一引用此处。
 enum ResourceType {
   mod,
   resourcePack,
   shaderPack,
   world,
   screenshot,
+  modpack,
+  dataPack,
 }
 
 /// 游戏目录

@@ -8,6 +8,7 @@ import '../event/event.dart';
 import '../event/event_bus.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
+import '../instance/models.dart' show ResourceType;
 import 'models.dart';
 
 /// 资源管理器
@@ -90,7 +91,7 @@ class ResourceManager {
       case ResourceType.resourcePack:
         typeDir = 'resourcepacks';
         break;
-      case ResourceType.shader:
+      case ResourceType.shaderPack:
         typeDir = 'shaderpacks';
         break;
       case ResourceType.dataPack:
@@ -98,6 +99,10 @@ class ResourceManager {
         break;
       case ResourceType.modpack:
         typeDir = 'modpacks';
+        break;
+      case ResourceType.world:
+      case ResourceType.screenshot:
+        typeDir = 'others';
         break;
     }
     final dir = Directory(path.join(supportDir, 'resources', typeDir));
