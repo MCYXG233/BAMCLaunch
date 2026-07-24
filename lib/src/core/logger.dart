@@ -861,3 +861,13 @@ class Logger {
     _initialized = false;
   }
 }
+
+/// 记录异常到 Logger（顶级辅助函数）
+///
+/// 注意：使用顶级函数而非扩展方法，避免调用方 import BAMCException 后
+/// 还要重新导入 Logger 才能看到扩展。统一通过 `Logger` 单例记录。
+void recordException(Object error, [StackTrace? stackTrace]) {
+  final message = error.toString().isNotEmpty ? error.toString() : '未知错误';
+  final originalError = error is Exception ? error : null;
+  Logger.instance.error(message, originalError, stackTrace);
+}

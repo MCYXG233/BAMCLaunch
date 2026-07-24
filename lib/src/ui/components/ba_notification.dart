@@ -1,5 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../core/app_exceptions.dart';
+import '../../core/logger.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/app_theme.dart';
@@ -280,6 +282,23 @@ class NotificationManager {
 
   void showInfo(String title, {String? message}) {
     _show(BANotificationType.info, title, message: message);
+  }
+
+  /// 显示 BAMCException 对应的错误通知
+  ///
+  /// 将异常的 message 作为标题，retryable 标志作为副标题提示。
+  /// 异常会被自动记录到 Logger。
+  void showException(BAMCException exception) {
+    // 记录异常到日志
+    recordException(exception);
+
+    // 根据 retryable 标志决定通知类型
+    final subtitle = exception.retryable ? '可重试' : null;
+    _show(
+      BANotificationType.error,
+      exception.message,
+      message: subtitle,
+    );
   }
 
   void _show(BANotificationType type, String title, {String? message}) {
