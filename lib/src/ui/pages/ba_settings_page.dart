@@ -6,6 +6,7 @@ import '../theme/colors.dart';
 import '../../config/config_manager.dart';
 import '../../config/config_keys.dart';
 import '../../core/constants.dart';
+import '../../core/logger.dart';
 import '../../updater/update_manager.dart';
 import '../../platform/platform_adapter.dart';
 import '../../platform/platform_adapter_factory.dart';
@@ -849,8 +850,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
           try {
             await entity.delete(recursive: true);
             count++;
-          } catch (e) {
-            debugPrint('删除临时文件失败: $e');
+          } catch (e, st) {
+            Logger.instance.error('删除临时文件失败', e, st);
           }
         }
         if (mounted) {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
 import '../../core/utils.dart';
+import '../../core/logger.dart';
 import '../../instance/instance_manager.dart';
 import '../../instance/models.dart';
 import '../../event/event_bus.dart';
@@ -2233,8 +2234,8 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
       final stat = entity.statSync();
       size = stat.size;
       modified = stat.modified;
-    } catch (e) {
-      debugPrint('获取文件信息失败: $e');
+    } catch (e, st) {
+      Logger.instance.error('获取文件信息失败', e, st);
     }
 
     IconData fileIcon;

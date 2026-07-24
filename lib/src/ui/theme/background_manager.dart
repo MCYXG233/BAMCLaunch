@@ -6,6 +6,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import '../../config/config_manager.dart';
 import '../../config/config_keys.dart';
 import '../../config/background_config.dart';
+import '../../core/logger.dart';
 import '../../di/service_locator.dart';
 
 /// 背景管理器
@@ -145,8 +146,8 @@ class BackgroundManager extends ChangeNotifier {
 
       // 通知监听者配置已更新
       notifyListeners();
-    } catch (e) {
-      debugPrint('Failed to save background config: $e');
+    } catch (e, st) {
+      Logger.instance.error('Failed to save background config', e, st);
     }
   }
 
@@ -190,9 +191,8 @@ class BackgroundManager extends ChangeNotifier {
 
         // 开始播放
         await _player!.play();
-      } catch (e) {
-        debugPrint('Failed to load video: $e');
-        debugPrint('Video path: ${_currentConfig.videoPath}');
+      } catch (e, st) {
+        Logger.instance.error('Failed to load video: ${_currentConfig.videoPath}', e, st);
         // 加载失败时清理状态
         await _disposeVideo();
       }
@@ -304,9 +304,9 @@ class BackgroundManager extends ChangeNotifier {
             ),
           );
       }
-    } catch (e) {
+    } catch (e, st) {
       // 背景渲染失败时返回默认渐变兜底
-      debugPrint('Background render failed: $e');
+      Logger.instance.error('Background render failed', e, st);
       return Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(

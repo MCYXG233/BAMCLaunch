@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import '../../account/account_manager.dart';
 import '../../account/account.dart';
+import '../../core/logger.dart';
 import '../../instance/instance_manager.dart';
 import '../../instance/models.dart';
 import '../../game/launcher/game_launcher.dart';
@@ -97,8 +98,8 @@ class _BAMainPageState extends State<BAMainPage> {
           _instanceCount = _instances.length;
         });
       }
-    } catch (e) {
-      debugPrint('初始化实例管理器失败: $e');
+    } catch (e, st) {
+      Logger.instance.error('初始化实例管理器失败', e, st);
     }
   }
 
