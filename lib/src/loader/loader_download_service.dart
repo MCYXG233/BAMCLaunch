@@ -8,14 +8,7 @@ import '../core/logger.dart';
 import '../di/service_locator.dart';
 import '../event/event_bus.dart';
 import '../event/event.dart';
-
-/// Mod 加载器类型
-enum LoaderType {
-  forge,
-  fabric,
-  neoforge,
-  quilt,
-}
+import 'loader_type.dart';
 
 /// Mod 加载器信息
 class ModLoaderInfo {

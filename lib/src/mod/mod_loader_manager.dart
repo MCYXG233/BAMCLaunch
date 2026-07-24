@@ -7,6 +7,7 @@ import '../core/error_codes.dart';
 import '../core/network_client.dart';
 import '../di/service_locator.dart';
 import '../download/download_engine.dart';
+import '../loader/loader_type.dart';
 
 class ModLoaderManager {
   static ModLoaderManager? _instance;
@@ -427,17 +428,6 @@ class ModLoaderManager {
         return path.join(instancePath, 'libraries', 'net', 'neoforged', 'neoforge');
     }
   }
-}
-
-enum LoaderType {
-  fabric('Fabric'),
-  forge('Forge'),
-  quilt('Quilt'),
-  neoforge('NeoForge');
-
-  final String displayName;
-
-  const LoaderType(this.displayName);
 }
 
 enum LoaderInstallationStatus {

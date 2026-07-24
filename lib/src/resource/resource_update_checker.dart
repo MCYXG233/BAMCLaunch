@@ -5,8 +5,14 @@ import 'package:path/path.dart' as path;
 import '../core/logger.dart';
 import '../core/network_client.dart';
 import '../di/service_locator.dart';
+import '../mod/mod_info.dart' as full_mod;
 
-/// Mod信息
+/// Mod信息（更新检查场景的轻量视图）
+///
+/// 与 mod/mod_info.dart 的 ModInfo 共享概念，但字段更精简。
+/// 更新检查时通常无法拿到完整元数据，因此这里只暴露必要字段。
+///
+/// 完整信息请使用 mod/mod_info.dart 中的 ModInfo。
 class ModInfo {
   final String name;
   final String version;
@@ -15,7 +21,7 @@ class ModInfo {
   final String? filePath;
   final DateTime? installedAt;
 
-  ModInfo({
+  const ModInfo({
     required this.name,
     required this.version,
     this.modId,
@@ -23,6 +29,20 @@ class ModInfo {
     this.filePath,
     this.installedAt,
   });
+
+  /// 转换为完整 ModInfo（要求必填字段已知，否则会使用占位值）
+  full_mod.ModInfo toFullModInfo() {
+    return full_mod.ModInfo(
+      id: modId ?? name,
+      name: name,
+      version: version,
+      modId: modId,
+      fileName: fileName ?? '',
+      filePath: filePath ?? '',
+      fileSize: 0,
+      lastModified: installedAt,
+    );
+  }
 }
 
 /// Mod版本信息（来自API）

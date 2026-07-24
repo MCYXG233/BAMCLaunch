@@ -5,9 +5,10 @@ import 'package:path/path.dart' as path;
 import '../core/logger.dart';
 import '../core/utils.dart';
 import '../di/service_locator.dart';
+import '../mod/mod_info.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
-import 'resource_update_checker.dart';
+import 'resource_update_checker.dart' hide ModInfo;
 
 /// Mod状态
 enum ModStatus {
@@ -17,38 +18,43 @@ enum ModStatus {
   incompatible,
 }
 
-/// Mod元数据
-class ModMetadata {
-  final String id;
-  final String name;
-  final String version;
-  final String? description;
+/// Mod元数据（继承 ModInfo，补充额外字段）
+///
+/// 基础字段（id/name/version/dependencies/fileName/filePath/fileSize 等）
+/// 来自 ModInfo。ModMetadata 仅在其基础上扩展：
+/// - 多个作者（authors）
+/// - 项目 website
+/// - 兼容的游戏版本列表（gameVersions）
+/// - 安装/更新时间戳（installedAt/updatedAt）
+/// - 当前 mod 状态（status）
+class ModMetadata extends ModInfo {
   final List<String>? authors;
   final String? website;
   final List<String>? gameVersions;
-  final List<String>? dependencies;
   final DateTime? installedAt;
   final DateTime? updatedAt;
   final ModStatus status;
-  final String fileName;
-  final String filePath;
-  final int fileSize;
 
   ModMetadata({
-    required this.id,
-    required this.name,
-    required this.version,
-    this.description,
+    required super.id,
+    required super.name,
+    required super.version,
+    super.description,
+    super.author,
     this.authors,
     this.website,
+    super.modLoader,
+    super.modId,
+    super.isEnabled,
     this.gameVersions,
-    this.dependencies,
+    super.dependencies,
     this.installedAt,
+    super.lastModified,
     this.updatedAt,
     this.status = ModStatus.enabled,
-    required this.fileName,
-    required this.filePath,
-    required this.fileSize,
+    required super.fileName,
+    required super.filePath,
+    required super.fileSize,
   });
 
   Map<String, dynamic> toJson() {
@@ -57,11 +63,16 @@ class ModMetadata {
       'name': name,
       'version': version,
       'description': description,
+      'author': author,
       'authors': authors,
       'website': website,
+      'modLoader': modLoader,
+      'modId': modId,
+      'isEnabled': isEnabled,
       'gameVersions': gameVersions,
       'dependencies': dependencies,
       'installedAt': installedAt?.toIso8601String(),
+      'lastModified': lastModified?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
       'status': status.name,
       'fileName': fileName,
@@ -76,12 +87,19 @@ class ModMetadata {
       name: json['name'] as String,
       version: json['version'] as String,
       description: json['description'] as String?,
+      author: json['author'] as String?,
       authors: (json['authors'] as List<dynamic>?)?.cast<String>(),
       website: json['website'] as String?,
+      modLoader: json['modLoader'] as String?,
+      modId: json['modId'] as String?,
+      isEnabled: json['isEnabled'] as bool? ?? true,
       gameVersions: (json['gameVersions'] as List<dynamic>?)?.cast<String>(),
-      dependencies: (json['dependencies'] as List<dynamic>?)?.cast<String>(),
+      dependencies: (json['dependencies'] as List<dynamic>?)?.cast<String>() ?? const [],
       installedAt: json['installedAt'] != null
           ? DateTime.parse(json['installedAt'] as String)
+          : null,
+      lastModified: json['lastModified'] != null
+          ? DateTime.parse(json['lastModified'] as String)
           : null,
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'] as String)
@@ -101,11 +119,16 @@ class ModMetadata {
     String? name,
     String? version,
     String? description,
+    String? author,
     List<String>? authors,
     String? website,
+    String? modLoader,
+    String? modId,
+    bool? isEnabled,
     List<String>? gameVersions,
     List<String>? dependencies,
     DateTime? installedAt,
+    DateTime? lastModified,
     DateTime? updatedAt,
     ModStatus? status,
     String? fileName,
@@ -117,11 +140,16 @@ class ModMetadata {
       name: name ?? this.name,
       version: version ?? this.version,
       description: description ?? this.description,
+      author: author ?? this.author,
       authors: authors ?? this.authors,
       website: website ?? this.website,
+      modLoader: modLoader ?? this.modLoader,
+      modId: modId ?? this.modId,
+      isEnabled: isEnabled ?? this.isEnabled,
       gameVersions: gameVersions ?? this.gameVersions,
       dependencies: dependencies ?? this.dependencies,
       installedAt: installedAt ?? this.installedAt,
+      lastModified: lastModified ?? this.lastModified,
       updatedAt: updatedAt ?? this.updatedAt,
       status: status ?? this.status,
       fileName: fileName ?? this.fileName,
