@@ -206,7 +206,9 @@ class ServiceRegistry {
     locator.registerLazySingleton<AuthManager>(() => AuthManager.instance);
 
     // AccountManager - 账户管理器
-    locator.registerLazySingleton<AccountManager>(() => AccountManager.instance);
+    locator.registerLazySingleton<AccountManager>(
+      () => AccountManager.instance,
+    );
 
     // SkinManager - 皮肤管理器
     locator.registerLazySingleton<SkinManager>(() => SkinManager.instance);
@@ -215,7 +217,9 @@ class ServiceRegistry {
     locator.registerLazySingleton<CapeManager>(() => CapeManager.instance);
 
     // AuthlibInjector - Authlib 注入器
-    locator.registerLazySingleton<AuthlibInjector>(() => AuthlibInjector.instance);
+    locator.registerLazySingleton<AuthlibInjector>(
+      () => AuthlibInjector.instance,
+    );
 
     // AuthlibLoginManager - Authlib 登录管理器
     locator.registerLazySingleton<AuthlibLoginManager>(
@@ -261,18 +265,22 @@ class ServiceRegistry {
     locator.registerLazySingleton<JavaManager>(() => JavaManager.instance);
 
     // JavaDownloader - Java 下载器
-    locator.registerLazySingleton<JavaDownloader>(() => JavaDownloader.instance);
-
-    // VersionManager - 版本管理器
-    locator.registerLazySingleton<VersionManager>(() => VersionManager.instance);
-
-    // OptiFineInstaller - OptiFine 安装器
-    locator.registerLazySingleton<OptiFineInstaller>(
-      () => OptiFineInstaller(),
+    locator.registerLazySingleton<JavaDownloader>(
+      () => JavaDownloader.instance,
     );
 
+    // VersionManager - 版本管理器
+    locator.registerLazySingleton<VersionManager>(
+      () => VersionManager.instance,
+    );
+
+    // OptiFineInstaller - OptiFine 安装器
+    locator.registerLazySingleton<OptiFineInstaller>(() => OptiFineInstaller());
+
     // QuiltInstaller - Quilt 安装器
-    locator.registerLazySingleton<QuiltInstaller>(() => QuiltInstaller.instance);
+    locator.registerLazySingleton<QuiltInstaller>(
+      () => QuiltInstaller.instance,
+    );
 
     // BackupManager - 备份管理器
     locator.registerLazySingleton<BackupManager>(() => BackupManager.instance);
@@ -290,7 +298,9 @@ class ServiceRegistry {
 
   static void _registerDownloadAndResource(ServiceLocator locator) {
     // DownloadEngine - 下载引擎
-    locator.registerLazySingleton<DownloadEngine>(() => DownloadEngine.instance);
+    locator.registerLazySingleton<DownloadEngine>(
+      () => DownloadEngine.instance,
+    );
 
     // DownloadQueueManager - 下载队列管理器
     locator.registerLazySingleton<DownloadQueueManager>(
@@ -330,7 +340,9 @@ class ServiceRegistry {
     locator.registerLazySingleton<SearchService>(() => SearchService.instance);
 
     // ModManager (mod/) - Mod 管理器
-    locator.registerLazySingleton<mod.ModManager>(() => mod.ModManager.instance);
+    locator.registerLazySingleton<mod.ModManager>(
+      () => mod.ModManager.instance,
+    );
 
     // ModManager (resource/) - 资源 Mod 管理器
     locator.registerLazySingleton<res_mod.ModManager>(
@@ -393,9 +405,7 @@ class ServiceRegistry {
     );
 
     // TerracottaManager - 网络管理器
-    locator.registerLazySingleton<TerracottaManager>(
-      () => TerracottaManager(),
-    );
+    locator.registerLazySingleton<TerracottaManager>(() => TerracottaManager());
 
     // LogManager - 日志管理器
     locator.registerLazySingleton<LogManager>(() => LogManager.instance);
