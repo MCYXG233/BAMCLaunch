@@ -7,6 +7,7 @@ import 'package:path/path.dart' as path;
 import 'package:archive/archive.dart';
 import '../core/logger.dart';
 import '../core/error_codes.dart';
+import '../core/safe_archive_extractor.dart';
 import '../di/service_locator.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
@@ -884,38 +885,32 @@ class BackupManager {
     final archiveFile = File(archivePath);
     final bytes = await archiveFile.readAsBytes();
 
-    // 解析 ZIP 文件结构
+    // 先做一次解码以获取总条目数（仅用于进度展示，不写入磁盘）
     final archive = ZipDecoder().decodeBytes(bytes);
-
-    // 获取文件总数用于进度计算
     final totalFiles = archive.files.length;
     var processedFiles = 0;
 
-    // 遍历归档中的所有条目
-    for (final file in archive.files) {
-      // 构建输出路径
-      final outputPath = path.join(outputDir, file.name);
+    // 报告 0 进度
+    onProgress?.call(0, '');
 
-      if (file.isFile) {
-        // 处理文件：创建父目录并写入内容
-        final outputFile = File(outputPath);
-        // 确保父目录存在
-        await outputFile.parent.create(recursive: true);
-        // 写入文件内容
-        await outputFile.writeAsBytes(file.content as List<int>);
-      } else {
-        // 处理目录：创建目录结构
-        await Directory(outputPath).create(recursive: true);
-      }
-
-      // 更新进度并回调
-      processedFiles++;
-      if (onProgress != null) {
-        onProgress(
-          totalFiles > 0 ? processedFiles / totalFiles : 0,
-          file.name,
+    // 使用 SafeArchiveExtractor 安全解压（防 Zip Slip）
+    final result = await SafeArchiveExtractor.extractZip(
+      bytes: bytes,
+      targetDir: outputDir,
+      onUnsafePath: (entryName, resolvedPath) {
+        _logger.warning(
+          'Skipping unsafe backup entry: $entryName (resolved: $resolvedPath)',
         );
-      }
+      },
+    );
+
+    // 由于 SafeArchiveExtractor 内部已处理所有条目，这里按已处理数简单报告进度
+    processedFiles = result.filesExtracted + result.directoriesCreated;
+    if (onProgress != null) {
+      onProgress(
+        totalFiles > 0 ? processedFiles / totalFiles : 0,
+        '完成',
+      );
     }
   }
 

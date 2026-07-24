@@ -6,6 +6,7 @@ import '../core/api_endpoints.dart';
 import '../core/error_codes.dart';
 import '../core/logger.dart';
 import '../core/network_client.dart';
+import '../core/safe_archive_extractor.dart';
 import '../di/service_locator.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
@@ -206,22 +207,14 @@ class ModpackManager {
       }
 
       if (filePath.endsWith('.mrpack') || filePath.endsWith('.zip')) {
-        // 解压 ZIP 到临时目录
+        // 解压 ZIP 到临时目录（使用 SafeArchiveExtractor 防止 Zip Slip）
         final tempDir = await Directory.systemTemp.createTemp('bamclaunch_modpack_');
         try {
           final bytes = await file.readAsBytes();
-          final archive = ZipDecoder().decodeBytes(bytes);
-
-          for (final entry in archive) {
-            final entryPath = path.join(tempDir.path, entry.name);
-            if (entry.isFile) {
-              final entryFile = File(entryPath);
-              await entryFile.parent.create(recursive: true);
-              await entryFile.writeAsBytes(entry.content as List<int>);
-            } else {
-              await Directory(entryPath).create(recursive: true);
-            }
-          }
+          await SafeArchiveExtractor.extractZip(
+            bytes: bytes,
+            targetDir: tempDir.path,
+          );
 
           // 检测格式
           final modrinthIndex = File(path.join(tempDir.path, 'modrinth.index.json'));

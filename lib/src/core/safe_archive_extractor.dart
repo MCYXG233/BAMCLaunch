@@ -10,6 +10,12 @@ import 'logger.dart';
 /// [resolvedPath] 是尝试在 [targetDir] 下解析后的目标路径
 typedef OnUnsafePath = void Function(String entryName, String resolvedPath);
 
+/// 条目名变换器：用于在路径安全校验前重写 entry name
+///
+/// 例如整合包 overrides 提取时，可以把 `overrides/...` 改写为 `...`。
+/// 返回 null 表示跳过该条目。
+typedef EntryNameTransformer = String? Function(String entryName);
+
 /// 解压结果统计
 class ExtractResult {
   /// 成功提取的文件数
@@ -65,12 +71,15 @@ class SafeArchiveExtractor {
   ///
   /// [verify] 是否让 archive 包校验 CRC（默认 true；modpack 等已知损坏时可传 false）
   /// [onUnsafePath] 不安全条目处理回调；传 null 时默认记录 warning 并跳过
+  /// [nameTransformer] 在路径安全校验前对 entry name 进行重写；
+  ///                  典型用例：modpack overrides 解压时去掉 `overrides/` 前缀
   /// [maxFileSize]/[maxEntries]/[maxTotalBytes] 防止 zip 炸弹
   static Future<ExtractResult> extractZip({
     required List<int> bytes,
     required String targetDir,
     bool verify = true,
     OnUnsafePath? onUnsafePath,
+    EntryNameTransformer? nameTransformer,
     int maxFileSize = defaultMaxFileSize,
     int maxEntries = defaultMaxEntries,
     int maxTotalBytes = defaultMaxTotalBytes,
@@ -80,6 +89,7 @@ class SafeArchiveExtractor {
       archive: archive,
       targetDir: targetDir,
       onUnsafePath: onUnsafePath,
+      nameTransformer: nameTransformer,
       maxFileSize: maxFileSize,
       maxEntries: maxEntries,
       maxTotalBytes: maxTotalBytes,
@@ -91,6 +101,7 @@ class SafeArchiveExtractor {
     required List<int> bytes,
     required String targetDir,
     OnUnsafePath? onUnsafePath,
+    EntryNameTransformer? nameTransformer,
     int maxFileSize = defaultMaxFileSize,
     int maxEntries = defaultMaxEntries,
     int maxTotalBytes = defaultMaxTotalBytes,
@@ -101,6 +112,7 @@ class SafeArchiveExtractor {
       archive: tarArchive,
       targetDir: targetDir,
       onUnsafePath: onUnsafePath,
+      nameTransformer: nameTransformer,
       maxFileSize: maxFileSize,
       maxEntries: maxEntries,
       maxTotalBytes: maxTotalBytes,
@@ -112,6 +124,7 @@ class SafeArchiveExtractor {
     required List<int> bytes,
     required String targetDir,
     OnUnsafePath? onUnsafePath,
+    EntryNameTransformer? nameTransformer,
     int maxFileSize = defaultMaxFileSize,
     int maxEntries = defaultMaxEntries,
     int maxTotalBytes = defaultMaxTotalBytes,
@@ -121,6 +134,7 @@ class SafeArchiveExtractor {
       archive: tarArchive,
       targetDir: targetDir,
       onUnsafePath: onUnsafePath,
+      nameTransformer: nameTransformer,
       maxFileSize: maxFileSize,
       maxEntries: maxEntries,
       maxTotalBytes: maxTotalBytes,
@@ -132,6 +146,7 @@ class SafeArchiveExtractor {
     required Archive archive,
     required String targetDir,
     OnUnsafePath? onUnsafePath,
+    EntryNameTransformer? nameTransformer,
     required int maxFileSize,
     required int maxEntries,
     required int maxTotalBytes,
@@ -160,6 +175,7 @@ class SafeArchiveExtractor {
       final resolvedPath = _resolveSafePath(
         entryName: entry.name,
         targetDir: normalizedTarget,
+        nameTransformer: nameTransformer,
       );
 
       if (resolvedPath == null) {
@@ -225,34 +241,42 @@ class SafeArchiveExtractor {
   static String? _resolveSafePath({
     required String entryName,
     required String targetDir,
+    EntryNameTransformer? nameTransformer,
   }) {
     // 1. 拒绝空名
     if (entryName.isEmpty) return null;
 
-    // 2. 拒绝 Windows 风格的绝对路径（如 `C:\foo`）
-    if (_isAbsolutePathLike(entryName)) {
-      _logger.warning('Absolute path in archive entry: $entryName');
+    // 2. 应用 nameTransformer（如果提供）
+    String effectiveName = entryName;
+    if (nameTransformer != null) {
+      final transformed = nameTransformer(entryName);
+      if (transformed == null) {
+        // 变换器显式拒绝该条目
+        return null;
+      }
+      effectiveName = transformed;
+    }
+
+    // 3. 拒绝 Windows 风格的绝对路径（如 `C:\foo`）
+    if (_isAbsolutePathLike(effectiveName)) {
+      _logger.warning('Absolute path in archive entry: $effectiveName');
       return null;
     }
 
-    // 3. 拼接 + 规范化
-    final joined = p.normalize(p.join(targetDir, entryName));
+    // 4. 拼接 + 规范化
+    final joined = p.normalize(p.join(targetDir, effectiveName));
     final absolute = p.absolute(joined);
 
-    // 4. 验证规范化后的路径仍在 targetDir 之下
+    // 5. 验证规范化后的路径仍在 targetDir 之下
     final targetWithSep = targetDir.endsWith(p.separator)
         ? targetDir
         : '$targetDir${p.separator}';
     if (absolute != targetDir && !absolute.startsWith(targetWithSep)) {
       _logger.warning(
-        'Path traversal detected: entry "$entryName" -> "$absolute"',
+        'Path traversal detected: entry "$effectiveName" -> "$absolute"',
       );
       return null;
     }
-
-    // 5. 拒绝符号链接条目（archive 包的 ArchiveFile 字段）
-    // 注：archive 包的 ArchiveFile.isFile 表示"是文件还是目录"，
-    // 不直接区分符号链接。Symlink 防护在更上层做（本类只防 Zip Slip）。
 
     return absolute;
   }

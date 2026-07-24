@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
-import 'package:archive/archive.dart' as archive;
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
 import '../core/logger.dart';
 import '../core/retry_helper.dart';
+import '../core/safe_archive_extractor.dart';
 import '../instance/instance_manager.dart';
 import '../instance/models.dart';
 import '../loader/loader_download_service.dart';
@@ -117,6 +117,8 @@ class ModpackInstaller {
   }
 
   /// 提取整合包中的覆盖文件
+  ///
+  /// 使用 SafeArchiveExtractor 防止 Zip Slip 路径穿越漏洞。
   static Future<void> _extractOverrides(
     String zipPath,
     String instanceId,
@@ -125,37 +127,38 @@ class ModpackInstaller {
   ) async {
     try {
       final bytes = await File(zipPath).readAsBytes();
-      final zipArchive = archive.ZipDecoder().decodeBytes(bytes);
+      final instanceRoot = path.join(directory.path, 'instances', instanceId);
 
-      // 提取 overrides 文件夹
-      final overrides = zipArchive.files
-          .where((f) => f.name.startsWith('overrides/'))
-          .toList();
-
-      for (int i = 0; i < overrides.length; i++) {
-        final file = overrides[i];
-
-        // 移除 'overrides/' 前缀
-        final subPath = file.name.substring('overrides/'.length);
-        final destPath = path.join(directory.path, 'instances', instanceId, subPath);
-
-        if (file.isFile) {
-          // 创建目标目录
-          final destDir = Directory(path.dirname(destPath));
-          if (!await destDir.exists()) {
-            await destDir.create(recursive: true);
+      int processed = 0;
+      final result = await SafeArchiveExtractor.extractZip(
+        bytes: bytes,
+        targetDir: instanceRoot,
+        // 仅处理 overrides/ 前缀条目，去掉前缀后写入 instanceRoot
+        nameTransformer: (entryName) {
+          if (entryName == 'overrides/') {
+            // 目录占位条目，跳过写入
+            return null;
           }
-
-          // 写入文件
-          if (file.content is List<int>) {
-            await File(destPath).writeAsBytes(file.content as List<int>);
+          if (entryName.startsWith('overrides/')) {
+            final sub = entryName.substring('overrides/'.length);
+            if (sub.isEmpty) return null; // 防御性
+            processed++;
+            onProgress?.call(processed);
+            return sub;
           }
-        }
+          return null; // 跳过非 overrides 条目
+        },
+        onUnsafePath: (entryName, resolvedPath) {
+          _logger.warning(
+            'Skipping unsafe override entry: $entryName (resolved: $resolvedPath)',
+          );
+        },
+      );
 
-        onProgress?.call(i + 1);
-      }
-
-      _logger.info('Extracted ${overrides.length} override files');
+      _logger.info(
+        'Extracted ${result.filesExtracted} override files from $zipPath '
+        '(skipped ${result.skippedUnsafePaths.length} unsafe entries)',
+      );
     } catch (e, stackTrace) {
       _logger.warning('Failed to extract overrides', e, stackTrace);
       // 继续，不阻止安装
