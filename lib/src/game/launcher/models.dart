@@ -1,4 +1,5 @@
 import '../../account/account.dart';
+import '../../config/config_models.dart' as config;
 import '../../core/constants.dart';
 
 /// 游戏进程状态枚举
@@ -472,11 +473,9 @@ class LaunchingState {
   }
 }
 
-enum FileValidatePolicy {
-  disable,
-  normal,
-  full,
-}
+// FileValidatePolicy 已迁移到 config/config_models.dart 统一管理
+// 通过 typedef 别名指向权威版本，避免破坏现有 API
+typedef FileValidatePolicy = config.FileValidatePolicy;
 
 class GameConfig {
   final int memory;

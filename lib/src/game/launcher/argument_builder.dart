@@ -6,18 +6,14 @@ import '../../account/account.dart';
 import '../../account/skin_manager.dart';
 import '../java/models.dart';
 import '../../version/models.dart';
-import 'models.dart';
+import '../../config/config_models.dart' as config;
 import 'argument_rule.dart';
 import '../../core/error_codes.dart';
+import 'models.dart';
 
-enum GarbageCollector {
-  auto,
-  g1gc,
-  zgc,
-  shenandoah,
-  parallel,
-  serial,
-}
+// GarbageCollector 已迁移至 config/config_models.dart 统一管理
+// 保留 typedef 别名以保持向后兼容
+typedef GarbageCollector = config.GarbageCollector;
 
 class LaunchTemplateArguments {
   final String gameAssets;

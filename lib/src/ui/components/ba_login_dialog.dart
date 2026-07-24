@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../auth/auth_manager.dart';
+import '../../auth/auth_manager.dart' hide LoginState;
 import '../../auth/microsoft_auth.dart';
 import '../../account/account_manager.dart';
 import '../../account/account.dart';
@@ -11,7 +11,11 @@ import '../theme/app_theme.dart';
 import 'ba_dialog.dart';
 import 'ba_authlib_login_dialog.dart';
 
-/// 登录状态枚举
+/// 登录对话框状态枚举（UI 层内部使用）
+///
+/// 与 auth 域的 LoginState（OAuth2 流程状态）不同，
+/// 这里描述的是 UI 状态机的"显示阶段"，
+/// 多了一个 `success` 终态。
 enum LoginState {
   initial,
   gettingDeviceCode,
