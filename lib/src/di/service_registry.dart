@@ -194,11 +194,8 @@ class ServiceRegistry {
   }
 
   static void _registerConfig(ServiceLocator locator) {
-    // ConfigManager - 配置管理器
-    locator.registerLazySingleton<ConfigManager>(() => ConfigManager.instance);
-
-    // ConfigManagerImpl - 配置管理器实现
-    locator.registerLazySingleton<ConfigManagerImpl>(() => ConfigManagerImpl());
+    // IConfigManager - 配置管理器（唯一注册，ConfigManagerImpl 为实现类）
+    locator.registerLazySingleton<IConfigManager>(() => ConfigManagerImpl());
   }
 
   static void _registerAuth(ServiceLocator locator) {
