@@ -53,8 +53,11 @@ app.*.map.json
 .trae/
 .trae-skills/
 
-# Design documentation
-docs/
+# Design documentation（ADR 和 baseline 文件除外）
+docs/*
+!docs/adr/
+!docs/adr/**
+!docs/baseline-*.txt
 
 # Additional build artifacts
 **/*.symbols
