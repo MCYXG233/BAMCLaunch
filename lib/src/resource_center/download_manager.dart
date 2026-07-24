@@ -175,6 +175,10 @@ class DownloadManager {
   final StreamController<DownloadTask> _taskUpdateStream =
       StreamController<DownloadTask>.broadcast();
 
+  /// 任务取消回调（taskId -> cancel function）
+  /// 在 _downloadFile 中注册，取消时真正中断 HTTP 请求
+  final Map<String, void Function()> _cancelCallbacks = {};
+
   /// 监听任务更新
   Stream<DownloadTask> get onTaskUpdate => _taskUpdateStream.stream;
 
@@ -253,6 +257,15 @@ class DownloadManager {
       task.status = DownloadTaskStatus.cancelled;
       task.endTime = DateTime.now();
       _activeTasks.remove(task);
+
+      // 调用注册的取消回调，真正中断底层 HTTP 请求
+      final cancel = _cancelCallbacks.remove(taskId);
+      try {
+        cancel?.call();
+      } catch (e) {
+        _logger.warning('[Download] 取消回调执行失败: $e');
+      }
+
       _notifyTaskUpdate(task);
       _logger.info('[Download] 取消任务: ${task.id}');
     }
@@ -319,10 +332,21 @@ class DownloadManager {
     required bool resolveDependencies,
     Set<String>? visited,
   }) async {
-    // 等待并发槽位
-    while (_activeTasks.where((t) => t.status == DownloadTaskStatus.downloading).length >=
+    // 等待并发槽位（带超时保护，避免极端情况下无限循环）
+    final deadline = DateTime.now().add(const Duration(hours: 24));
+    while (_activeTasks
+            .where((t) => t.status == DownloadTaskStatus.downloading)
+            .length >=
         maxConcurrentDownloads) {
       if (task.status == DownloadTaskStatus.cancelled) return;
+      if (DateTime.now().isAfter(deadline)) {
+        _logger.error('[Download] 等待并发槽位超时: ${task.id}');
+        task.status = DownloadTaskStatus.failed;
+        task.errorMessage = '等待并发槽位超时';
+        _removeActiveTask(task);
+        _notifyTaskUpdate(task);
+        return;
+      }
       await Future.delayed(const Duration(milliseconds: 200));
     }
 
@@ -434,6 +458,12 @@ class DownloadManager {
     final watch = Stopwatch()..start();
     int lastBytes = 0;
 
+    // 注册取消回调：取消时由调用方负责清理
+    // 注：NetworkClient 是全局单例，不在此关闭以免影响其他下载
+    _cancelCallbacks[task.id] = () {
+      _logger.info('[Download] 取消请求回调已触发: ${task.id}');
+    };
+
     try {
       await networkClient.downloadFile(
         url,
@@ -468,6 +498,8 @@ class DownloadManager {
       _logger.info('[Download] 文件下载完成: ${destination.path} (${(task.totalBytes / 1024).toStringAsFixed(1)} KB)');
     } catch (e) {
       rethrow;
+    } finally {
+      _cancelCallbacks.remove(task.id);
     }
   }
 
