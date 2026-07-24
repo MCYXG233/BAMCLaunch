@@ -8,10 +8,13 @@
 // 您应该已经收到了 GNU 通用公共许可证的副本连同本程序。如果没有，请参见 <https://www.gnu.org/licenses/>.
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+// 显式使用前缀，避免与 Riverpod 同名类冲突（ChangeNotifierProvider、Consumer）
+import 'package:provider/provider.dart' as legacy_provider;
 import 'package:window_manager/window_manager.dart';
 import 'src/core/index.dart';
 import 'src/di/index.dart';
+import 'src/di/providers.dart';
 import 'src/config/index.dart';
 import 'src/platform/index.dart';
 import 'src/ui/theme/index.dart';
@@ -56,9 +59,14 @@ void main() {
     await themeManager.initialize();
 
     runApp(
-      ChangeNotifierProvider.value(
-        value: themeManager,
-        child: const MyApp(),
+      // Riverpod ProviderScope：作为全局状态容器
+      // 内层保留 Provider 兼容旧代码（ThemeManager 等 ChangeNotifier）
+      ProviderScope(
+        overrides: [themeManagerProvider.overrideWith((ref) => themeManager)],
+        child: legacy_provider.ChangeNotifierProvider.value(
+          value: themeManager,
+          child: const MyApp(),
+        ),
       ),
     );
   });
@@ -69,7 +77,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeManager>(
+    return legacy_provider.Consumer<ThemeManager>(
       builder: (context, themeManager, child) {
         return MaterialApp(
           title: 'BAMC Launcher',
