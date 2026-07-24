@@ -1,7 +1,7 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../auth/auth_manager.dart' hide LoginState;
+import '../../auth/auth_manager.dart';
 import '../../auth/microsoft_auth.dart';
 import '../../account/account_manager.dart';
 import '../../account/account.dart';
@@ -16,7 +16,7 @@ import 'ba_authlib_login_dialog.dart';
 /// 与 auth 域的 LoginState（OAuth2 流程状态）不同，
 /// 这里描述的是 UI 状态机的"显示阶段"，
 /// 多了一个 `success` 终态。
-enum LoginState {
+enum LoginDialogPhase {
   initial,
   gettingDeviceCode,
   waitingForUser,
@@ -40,8 +40,8 @@ class _BALoginDialogState extends State<BALoginDialog> {
   final AccountManager _accountManager = AccountManager();
   final MicrosoftAuthService _microsoftAuth = MicrosoftAuthService();
 
-  /// 当前登录状态
-  LoginState _loginState = LoginState.initial;
+  /// 当前登录状态（UI 显示阶段）
+  LoginDialogPhase _loginDialogPhase = LoginDialogPhase.initial;
   
   /// 当前登录选项卡
   _LoginTab _currentTab = _LoginTab.microsoft;
@@ -104,14 +104,14 @@ class _BALoginDialogState extends State<BALoginDialog> {
   /// 开始设备代码流登录
   Future<void> _startDeviceCodeLogin() async {
     setState(() {
-      _loginState = LoginState.gettingDeviceCode;
+      _loginDialogPhase = LoginDialogPhase.gettingDeviceCode;
       _errorMessage = null;
     });
 
     try {
       final deviceCode = await _microsoftAuth.getDeviceCode();
       setState(() {
-        _loginState = LoginState.waitingForUser;
+        _loginDialogPhase = LoginDialogPhase.waitingForUser;
         _deviceCodeResponse = deviceCode;
         _remainingSeconds = deviceCode.expiresIn;
       });
@@ -131,7 +131,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
       Logger.instance.error('获取设备代码失败', e);
       if (mounted) {
         setState(() {
-          _loginState = LoginState.error;
+          _loginDialogPhase = LoginDialogPhase.error;
           _errorMessage = e.toString();
         });
       }
@@ -153,7 +153,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
       timer.cancel();
       if (mounted) {
         setState(() {
-          _loginState = LoginState.error;
+          _loginDialogPhase = LoginDialogPhase.error;
           _errorMessage = '设备代码已过期';
         });
       }
@@ -170,7 +170,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
       if (!mounted) return;
 
       setState(() {
-        _loginState = LoginState.authenticating;
+        _loginDialogPhase = LoginDialogPhase.authenticating;
       });
 
       // 保存账户
@@ -178,7 +178,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
       if (profile == null) {
         if (mounted) {
           setState(() {
-            _loginState = LoginState.error;
+            _loginDialogPhase = LoginDialogPhase.error;
             _errorMessage = '无法获取Minecraft档案';
           });
         }
@@ -193,7 +193,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
       await _accountManager.selectAccount(account.id);
 
       setState(() {
-        _loginState = LoginState.success;
+        _loginDialogPhase = LoginDialogPhase.success;
       });
 
       // 延迟关闭并返回账户
@@ -214,7 +214,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
       
       if (mounted) {
         setState(() {
-          _loginState = LoginState.error;
+          _loginDialogPhase = LoginDialogPhase.error;
           _errorMessage = e.toString();
         });
       }
@@ -225,7 +225,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
   void _resetLoginState() {
     _pollingTimer?.cancel();
     setState(() {
-      _loginState = LoginState.initial;
+      _loginDialogPhase = LoginDialogPhase.initial;
       _errorMessage = null;
       _deviceCodeResponse = null;
       _remainingSeconds = 0;
@@ -411,19 +411,19 @@ class _BALoginDialogState extends State<BALoginDialog> {
           ),
           const SizedBox(height: 20),
           
-          if (_loginState == LoginState.initial) ...[
+          if (_loginDialogPhase == LoginDialogPhase.initial) ...[
             _buildLoginTabs(),
             const SizedBox(height: 16),
             _buildCurrentTabContent(),
-          ] else if (_loginState == LoginState.gettingDeviceCode) ...[
+          ] else if (_loginDialogPhase == LoginDialogPhase.gettingDeviceCode) ...[
             _buildLoadingState('正在获取设备代码...'),
-          ] else if (_loginState == LoginState.waitingForUser) ...[
+          ] else if (_loginDialogPhase == LoginDialogPhase.waitingForUser) ...[
             _buildDeviceCodeWaitingState(),
-          ] else if (_loginState == LoginState.authenticating) ...[
+          ] else if (_loginDialogPhase == LoginDialogPhase.authenticating) ...[
             _buildLoadingState('正在完成认证...'),
-          ] else if (_loginState == LoginState.success) ...[
+          ] else if (_loginDialogPhase == LoginDialogPhase.success) ...[
             _buildSuccessState(),
-          ] else if (_loginState == LoginState.error) ...[
+          ] else if (_loginDialogPhase == LoginDialogPhase.error) ...[
             _buildErrorState(),
           ],
         ],

@@ -53,7 +53,7 @@ import '../download/mirror_manager.dart';
 import '../download/queue_manager.dart';
 
 // 资源中心
-import '../resource_center/resource_manager.dart';
+import '../resource_center/resource_manager.dart' as online_res;
 import '../resource_center/download_manager.dart';
 import '../resource_center/download_service.dart';
 import '../resource_center/favorite_manager.dart';
@@ -305,9 +305,10 @@ class ServiceRegistry {
     // MirrorManager - 镜像管理器
     locator.registerLazySingleton<MirrorManager>(() => MirrorManager.instance);
 
-    // ResourceManager (resource_center/) - 资源中心管理器
-    locator.registerLazySingleton<ResourceManager>(
-      () => ResourceManager.instance,
+    // ResourceManager (resource_center/) - 在线资源管理器
+    // 注意：与 instance/resource_manager.dart 的 ResourceManager 同名，通过 alias 区分
+    locator.registerLazySingleton<online_res.ResourceManager>(
+      () => online_res.ResourceManager.instance,
     );
 
     // DownloadManager (resource_center/) - 资源下载管理器
