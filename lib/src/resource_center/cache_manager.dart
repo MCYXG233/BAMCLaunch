@@ -1,4 +1,4 @@
-import '../instance/models.dart' show ResourceType;
+﻿import '../instance/models.dart' show ResourceType;
 import 'models.dart';
 import 'api_interface.dart';
 

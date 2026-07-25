@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
@@ -259,15 +259,15 @@ class BackgroundManager extends ChangeNotifier {
               color: _currentConfig.solidColor != null
                   ? Color(
                       _currentConfig.solidColor!,
-                    ).withOpacity(_currentConfig.opacity)
-                  : Colors.white.withOpacity(_currentConfig.opacity),
+                    ).withValues(alpha: _currentConfig.opacity)
+                  : Colors.white.withValues(alpha: _currentConfig.opacity),
             ),
           );
 
         case BackgroundType.gradient:
           final colors =
               _currentConfig.gradientColors
-                  ?.map((c) => Color(c).withOpacity(_currentConfig.opacity))
+                  ?.map((c) => Color(c).withValues(alpha: _currentConfig.opacity))
                   .toList() ??
               [Colors.white, Colors.grey.shade200];
           return Container(
@@ -308,7 +308,7 @@ class BackgroundManager extends ChangeNotifier {
         case BackgroundType.blur:
           return Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(_currentConfig.opacity * 0.5),
+              color: Colors.white.withValues(alpha: _currentConfig.opacity * 0.5),
             ),
           );
       }

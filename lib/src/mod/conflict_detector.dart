@@ -1,4 +1,4 @@
-import '../core/logger.dart';
+﻿import '../core/logger.dart';
 import 'mod_info.dart';
 
 class ConflictDetector {

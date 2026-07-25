@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'dart:convert';
 import '../../config/config_manager.dart';
 import '../../config/config_keys.dart';
@@ -388,7 +388,7 @@ class LayoutEditorControls extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.8),
+            color: Colors.black.withValues(alpha: 0.8),
             borderRadius: const BorderRadius.all(Radius.circular(12)),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -433,7 +433,7 @@ class ElementVisibilityPanel extends StatelessWidget {
         return Container(
           width: 280,
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.9),
+            color: Colors.black.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.all(16),

@@ -1,4 +1,4 @@
-export 'models.dart';
+﻿export 'models.dart';
 export 'instance_manager.dart';
 export 'resource_manager.dart';
 export 'instance_importer.dart';

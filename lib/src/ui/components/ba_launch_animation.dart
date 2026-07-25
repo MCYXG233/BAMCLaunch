@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'dart:math';
 
@@ -151,7 +151,7 @@ class _BALaunchAnimationState extends State<BALaunchAnimation>
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             decoration: BoxDecoration(
               border: Border.all(
-                color: const Color(0xFF7EB5F6).withOpacity(0.5),
+                color: const Color(0xFF7EB5F6).withValues(alpha: 0.5),
               ),
               borderRadius: BorderRadius.circular(12),
             ),

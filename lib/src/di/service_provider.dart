@@ -1,4 +1,4 @@
-// Riverpod 与 ServiceLocator 桥接
+﻿// Riverpod 与 ServiceLocator 桥接
 //
 // 本文件提供 Riverpod Provider 与 ServiceLocator 的适配层，使得：
 // 1. 业务逻辑仍通过 ServiceLocator 注册/获取（保留现有 56+ 调用点）

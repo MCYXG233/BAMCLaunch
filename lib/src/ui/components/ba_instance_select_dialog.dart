@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../../resource_center/models.dart';
 import '../../resource_center/download_manager.dart';

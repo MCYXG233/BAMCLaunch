@@ -1,4 +1,4 @@
-import 'logger.dart';
+﻿import 'logger.dart';
 
 /// 通用任务基类
 ///

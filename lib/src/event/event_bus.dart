@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'event.dart';
 import '../di/service_locator.dart';

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../extension_manager.dart';
 import '../../ui/theme/colors.dart';
 import '../../ui/theme/typography.dart';
@@ -326,7 +326,7 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
             label: const Text('仅显示已启用'),
             onSelected: (selected) =>
                 setState(() => _showOnlyEnabled = selected),
-            selectedColor: BAColors.primaryOf(context).withOpacity(0.2),
+            selectedColor: BAColors.primaryOf(context).withValues(alpha: 0.2),
             checkmarkColor: BAColors.primaryOf(context),
             backgroundColor: BAColors.surfaceVariantOf(context),
           ),
@@ -358,12 +358,12 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: hasError
-            ? BAColors.dangerOf(context).withOpacity(0.05)
+            ? BAColors.dangerOf(context).withValues(alpha: 0.05)
             : BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: hasError
-              ? BAColors.dangerOf(context).withOpacity(0.3)
+              ? BAColors.dangerOf(context).withValues(alpha: 0.3)
               : BAColors.borderOf(context),
         ),
       ),
@@ -374,7 +374,7 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
             height: 64,
             decoration: BoxDecoration(
               color: isEnabled
-                  ? BAColors.primaryOf(context).withOpacity(0.15)
+                  ? BAColors.primaryOf(context).withValues(alpha: 0.15)
                   : BAColors.surfaceVariantOf(context),
               borderRadius: BorderRadius.circular(12),
             ),
@@ -407,7 +407,7 @@ class _ExtensionManagerPageState extends State<ExtensionManagerPage> {
                       ),
                       decoration: BoxDecoration(
                         color: isEnabled
-                            ? BAColors.successOf(context).withOpacity(0.1)
+                            ? BAColors.successOf(context).withValues(alpha: 0.1)
                             : BAColors.surfaceVariantOf(context),
                         borderRadius: BorderRadius.circular(4),
                       ),

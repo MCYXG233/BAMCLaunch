@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:ui';
 import '../config/config_manager.dart';
 import '../di/service_locator.dart';

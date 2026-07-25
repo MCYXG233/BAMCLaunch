@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/material.dart';
 import '../ui/theme/colors.dart';
 import '../ui/theme/typography.dart';
@@ -205,7 +205,7 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: BAColors.primaryOf(context).withOpacity(0.1),
+        color: BAColors.primaryOf(context).withValues(alpha: 0.1),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(12),
           topRight: Radius.circular(12),
@@ -337,10 +337,10 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: BAColors.primaryOf(context).withOpacity(0.1),
+                color: BAColors.primaryOf(context).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: BAColors.primaryOf(context).withOpacity(0.3),
+                  color: BAColors.primaryOf(context).withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
@@ -416,7 +416,7 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
 
         return Card(
           color: isSelected
-              ? BAColors.primaryOf(context).withOpacity(0.1)
+              ? BAColors.primaryOf(context).withValues(alpha: 0.1)
               : BAColors.surfaceOf(context),
           child: ListTile(
             leading: Icon(
@@ -461,7 +461,7 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: BAColors.successOf(context).withOpacity(0.2),
+                      color: BAColors.successOf(context).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -479,7 +479,7 @@ class _JavaSelectorDialogState extends State<JavaSelectorDialog> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: BAColors.primaryOf(context).withOpacity(0.2),
+                      color: BAColors.primaryOf(context).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(

@@ -1,4 +1,4 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../core/error_codes.dart';
 import '../../instance/instance_manager.dart';
@@ -20,7 +20,7 @@ class BACreateInstanceDialog extends StatefulWidget {
     return showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.3),
+      barrierColor: Colors.black.withValues(alpha: 0.3),
       builder: (context) => const BACreateInstanceDialog(),
     );
   }
@@ -874,9 +874,9 @@ class _VersionTileState extends State<_VersionTile> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: widget.isSelected
-                ? BAColors.primaryOf(context).withOpacity(0.15)
+                ? BAColors.primaryOf(context).withValues(alpha: 0.15)
                 : _isHovered
-                ? BAColors.surfaceTertiaryOf(context).withOpacity(0.5)
+                ? BAColors.surfaceTertiaryOf(context).withValues(alpha: 0.5)
                 : Colors.transparent,
             borderRadius: BATheme.borderRadiusSmall,
           ),
@@ -907,9 +907,9 @@ class _VersionTileState extends State<_VersionTile> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: _typeColor().withOpacity(0.1),
+                  color: _typeColor().withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: _typeColor().withOpacity(0.3)),
+                  border: Border.all(color: _typeColor().withValues(alpha: 0.3)),
                 ),
                 child: Text(
                   _typeLabel(),
@@ -988,14 +988,14 @@ class _LoaderRadioTileState extends State<_LoaderRadioTile> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: isSelected
-                ? BAColors.primaryOf(context).withOpacity(0.15)
+                ? BAColors.primaryOf(context).withValues(alpha: 0.15)
                 : _isHovered
-                ? BAColors.surfaceTertiaryOf(context).withOpacity(0.5)
+                ? BAColors.surfaceTertiaryOf(context).withValues(alpha: 0.5)
                 : Colors.transparent,
             borderRadius: BATheme.borderRadiusSmall,
             border: Border.all(
               color: isSelected
-                  ? BAColors.primaryOf(context).withOpacity(0.4)
+                  ? BAColors.primaryOf(context).withValues(alpha: 0.4)
                   : Colors.transparent,
               width: 1,
             ),

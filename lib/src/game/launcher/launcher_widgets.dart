@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'models.dart';
 import 'game_launcher.dart';
 
@@ -219,7 +219,7 @@ class GameProcessCard extends StatelessWidget {
                 ),
                 Chip(
                   label: Text(_getStatusText()),
-                  backgroundColor: _getStatusColor().withOpacity(0.1),
+                  backgroundColor: _getStatusColor().withValues(alpha: 0.1),
                   labelStyle: TextStyle(color: _getStatusColor()),
                 ),
               ],

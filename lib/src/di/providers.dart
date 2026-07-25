@@ -1,4 +1,4 @@
-// BAMCLaunch 核心 Provider 定义
+﻿// BAMCLaunch 核心 Provider 定义
 //
 // 本文件集中定义全局 Provider，配合 ServiceLocator 形成完整的 DI 体系：
 // - ServiceLocator：服务（单例、副作用、长生命周期对象）

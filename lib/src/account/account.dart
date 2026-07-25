@@ -1,4 +1,4 @@
-import 'dart:math';
+﻿import 'dart:math';
 import 'skin_manager.dart';
 
 /// 账户类型枚举

@@ -1,4 +1,4 @@
-import 'service_locator.dart';
+﻿import 'service_locator.dart';
 
 // Core 基础设施
 import '../core/logger.dart';

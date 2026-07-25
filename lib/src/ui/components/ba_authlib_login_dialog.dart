@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../components/ba_buttons.dart';
@@ -14,7 +14,7 @@ class BAAuthlibLoginDialog extends StatefulWidget {
   static Future<Account?> show(BuildContext context) {
     return showDialog<Account>(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.4),
+      barrierColor: Colors.black.withValues(alpha: 0.4),
       builder: (context) => const BAAuthlibLoginDialog(),
     );
   }
@@ -258,9 +258,9 @@ class _BAAuthlibLoginDialogState extends State<BAAuthlibLoginDialog> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: BAColors.dangerOf(context).withOpacity(0.1),
+        color: BAColors.dangerOf(context).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BAColors.dangerOf(context).withOpacity(0.3)),
+        border: Border.all(color: BAColors.dangerOf(context).withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [

@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import '../core/logger.dart';
 import '../core/network_client.dart';
 import '../resource_center/models.dart';

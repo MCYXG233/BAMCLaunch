@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:window_manager/window_manager.dart';

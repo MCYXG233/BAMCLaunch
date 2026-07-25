@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 
 enum BackgroundType { solid, gradient, image, video, blur }
 

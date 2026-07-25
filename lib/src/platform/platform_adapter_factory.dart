@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'platform_adapter.dart';
 import 'windows_adapter.dart';
 import 'macos_adapter.dart';

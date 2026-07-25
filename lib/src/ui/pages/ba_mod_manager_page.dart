@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../../mod/mod_manager.dart';
 import '../../mod/mod_info.dart';
@@ -343,7 +343,7 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
             borderRadius: BorderRadius.circular(14),
             boxShadow: [
               BoxShadow(
-                color: BAColors.secondaryOf(context).withOpacity(0.3),
+                color: BAColors.secondaryOf(context).withValues(alpha: 0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -370,10 +370,10 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: BAColors.surfaceVariantOf(context).withOpacity(0.8),
+            color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: BAColors.borderOf(context).withOpacity(0.5),
+              color: BAColors.borderOf(context).withValues(alpha: 0.5),
             ),
           ),
           child: Row(
@@ -425,9 +425,9 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
       margin: const EdgeInsets.only(left: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -452,9 +452,9 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: BAColors.dangerOf(context).withOpacity(0.1),
+        color: BAColors.dangerOf(context).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: BAColors.dangerOf(context).withOpacity(0.3)),
+        border: Border.all(color: BAColors.dangerOf(context).withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -500,7 +500,7 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: BAColors.primaryOf(context).withOpacity(0.05),
+                    color: BAColors.primaryOf(context).withValues(alpha: 0.05),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -650,9 +650,9 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: BAColors.primaryOf(context).withOpacity(0.1),
+        color: BAColors.primaryOf(context).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: BAColors.primaryOf(context).withOpacity(0.3)),
+        border: Border.all(color: BAColors.primaryOf(context).withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -796,7 +796,7 @@ class _ModItem extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: isSelected
-                ? BAColors.primaryOf(context).withOpacity(0.1)
+                ? BAColors.primaryOf(context).withValues(alpha: 0.1)
                 : BAColors.surfaceOf(context),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
@@ -1254,11 +1254,11 @@ class _ConflictCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: (conflict.isError ? BAColors.dangerOf(context) : Colors.orange)
-            .withOpacity(0.1),
+            .withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: (conflict.isError ? BAColors.dangerOf(context) : Colors.orange)
-              .withOpacity(0.3),
+              .withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -1316,9 +1316,9 @@ class _MissingDependencyCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.orange.withOpacity(0.1),
+        color: Colors.orange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.orange.withOpacity(0.3)),
+        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -1429,7 +1429,7 @@ class _UpdatesDialog extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: BAColors.primaryOf(context).withOpacity(0.1),
+                  color: BAColors.primaryOf(context).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(

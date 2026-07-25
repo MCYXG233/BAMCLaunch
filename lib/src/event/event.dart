@@ -1,4 +1,4 @@
-import '../resource_center/index.dart';
+﻿import '../resource_center/index.dart';
 import '../download/index.dart';
 import '../core/logger.dart' show LogLevel;
 

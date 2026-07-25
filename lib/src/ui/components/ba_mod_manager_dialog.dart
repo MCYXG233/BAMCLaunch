@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../pages/ba_mod_manager_page.dart';
 import 'ba_dialog.dart';
 
@@ -20,7 +20,7 @@ class BAModManagerDialog extends StatelessWidget {
   }) {
     return showDialog<void>(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.4),
+      barrierColor: Colors.black.withValues(alpha: 0.4),
       builder: (context) => BAModManagerDialog(
         instanceId: instanceId,
         instanceName: instanceName,

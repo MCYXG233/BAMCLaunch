@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -49,7 +49,7 @@ class CapeUploadDialog extends StatefulWidget {
   }) {
     return showDialog<void>(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.4),
+      barrierColor: Colors.black.withValues(alpha: 0.4),
       builder: (context) => CapeUploadDialog(
         accountId: accountId,
         accountName: accountName,
@@ -219,7 +219,7 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
               color: BAColors.glassOf(context),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: BAColors.borderOf(context).withOpacity(0.6),
+                color: BAColors.borderOf(context).withValues(alpha: 0.6),
                 width: 1,
               ),
               boxShadow: [
@@ -253,13 +253,13 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            BAColors.primaryOf(context).withOpacity(0.2),
-            BAColors.primaryOf(context).withOpacity(0.05),
+            BAColors.primaryOf(context).withValues(alpha: 0.2),
+            BAColors.primaryOf(context).withValues(alpha: 0.05),
           ],
         ),
         border: Border(
           bottom: BorderSide(
-            color: BAColors.borderOf(context).withOpacity(0.4),
+            color: BAColors.borderOf(context).withValues(alpha: 0.4),
             width: 1,
           ),
         ),
@@ -296,7 +296,7 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
             child: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: BAColors.surfaceVariantOf(context).withOpacity(0.5),
+                color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
@@ -322,10 +322,10 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: BAColors.primaryOf(context).withOpacity(0.1),
+              color: BAColors.primaryOf(context).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: BAColors.primaryOf(context).withOpacity(0.3),
+                color: BAColors.primaryOf(context).withValues(alpha: 0.3),
               ),
             ),
             child: Row(
@@ -374,13 +374,13 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
                     height: 160,
                     decoration: BoxDecoration(
                       color: _isDragging
-                          ? BAColors.primaryOf(context).withOpacity(0.1)
-                          : BAColors.surfaceVariantOf(context).withOpacity(0.5),
+                          ? BAColors.primaryOf(context).withValues(alpha: 0.1)
+                          : BAColors.surfaceVariantOf(context).withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: _isDragging
                             ? BAColors.primaryOf(context)
-                            : BAColors.borderOf(context).withOpacity(0.6),
+                            : BAColors.borderOf(context).withValues(alpha: 0.6),
                         width: _isDragging ? 2 : 1,
                         style: BorderStyle.solid,
                       ),
@@ -446,10 +446,10 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: BAColors.surfaceVariantOf(context).withOpacity(0.3),
+                color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: BAColors.borderOf(context).withOpacity(0.4),
+                  color: BAColors.borderOf(context).withValues(alpha: 0.4),
                 ),
               ),
               child: Row(
@@ -501,10 +501,10 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: BAColors.dangerOf(context).withOpacity(0.1),
+                color: BAColors.dangerOf(context).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: BAColors.dangerOf(context).withOpacity(0.3),
+                  color: BAColors.dangerOf(context).withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
@@ -535,10 +535,10 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: BAColors.successOf(context).withOpacity(0.1),
+                color: BAColors.successOf(context).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: BAColors.successOf(context).withOpacity(0.3),
+                  color: BAColors.successOf(context).withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
@@ -573,7 +573,7 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: BAColors.borderOf(context).withOpacity(0.4),
+            color: BAColors.borderOf(context).withValues(alpha: 0.4),
             width: 1,
           ),
         ),

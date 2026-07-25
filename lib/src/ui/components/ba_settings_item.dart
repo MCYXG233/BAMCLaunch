@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 
 class BASettingsItem extends StatelessWidget {
@@ -28,7 +28,7 @@ class BASettingsItem extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: BAColors.primaryOf(context).withOpacity(0.15),
+              color: BAColors.primaryOf(context).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: BAColors.primaryOf(context), size: 18),

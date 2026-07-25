@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 /// 动画缓动曲线集合（学习 PCL2）
 class BAAnimations {
@@ -420,7 +420,7 @@ class _BAGlowBuilderState extends State<BAGlowBuilder>
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: widget.glowColor.withOpacity(0.5 * _animation.value),
+                color: widget.glowColor.withValues(alpha: 0.5 * _animation.value),
                 blurRadius: widget.maxGlowRadius * _animation.value,
                 spreadRadius: widget.maxGlowRadius * _animation.value * 0.5,
               ),

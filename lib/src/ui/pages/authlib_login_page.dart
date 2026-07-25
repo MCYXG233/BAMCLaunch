@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../components/ba_buttons.dart';
@@ -99,7 +99,7 @@ class _AuthlibLoginPageState extends State<AuthlibLoginPage> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -257,9 +257,9 @@ class _AuthlibLoginPageState extends State<AuthlibLoginPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: BAColors.dangerOf(context).withOpacity(0.1),
+        color: BAColors.dangerOf(context).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BAColors.dangerOf(context).withOpacity(0.3)),
+        border: Border.all(color: BAColors.dangerOf(context).withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [

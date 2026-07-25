@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../account/account.dart';
 import '../../account/account_manager.dart';
 import '../../auth/auth_manager.dart';

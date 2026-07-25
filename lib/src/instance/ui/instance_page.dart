@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../models.dart';
 import '../instance_manager.dart';
 import '../resource_manager.dart';
@@ -345,7 +345,7 @@ class _InstancePageState extends State<InstancePage> {
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: isSelected
-              ? BAColors.primaryOf(context).withOpacity(0.1)
+              ? BAColors.primaryOf(context).withValues(alpha: 0.1)
               : BAColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
@@ -357,7 +357,7 @@ class _InstancePageState extends State<InstancePage> {
           boxShadow: [
             if (isSelected)
               BoxShadow(
-                color: BAColors.primaryOf(context).withOpacity(0.2),
+                color: BAColors.primaryOf(context).withValues(alpha: 0.2),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -377,7 +377,7 @@ class _InstancePageState extends State<InstancePage> {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      color: BAColors.primaryOf(context).withOpacity(0.1),
+                      color: BAColors.primaryOf(context).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
@@ -415,7 +415,7 @@ class _InstancePageState extends State<InstancePage> {
                               decoration: BoxDecoration(
                                 color: BAColors.secondaryOf(
                                   context,
-                                ).withOpacity(0.1),
+                                ).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -487,7 +487,7 @@ class _InstancePageState extends State<InstancePage> {
                       _showError('切换目录失败: $e');
                     }
                   },
-                  selectedColor: BAColors.primaryOf(context).withOpacity(0.2),
+                  selectedColor: BAColors.primaryOf(context).withValues(alpha: 0.2),
                   checkmarkColor: BAColors.primaryOf(context),
                   backgroundColor: BAColors.surfaceVariantOf(context),
                 );

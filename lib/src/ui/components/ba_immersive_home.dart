@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
@@ -175,7 +175,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: BAColors.primaryOf(context).withOpacity(0.2),
+                  color: BAColors.primaryOf(context).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -195,13 +195,13 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                   Icon(
                     Icons.play_circle_outline,
                     size: 12,
-                    color: BAColors.textPrimaryOf(context).withOpacity(0.6),
+                    color: BAColors.textPrimaryOf(context).withValues(alpha: 0.6),
                   ),
                   const SizedBox(width: 4),
                   Text(
                     '${widget.instances.length} 个实例',
                     style: TextStyle(
-                      color: BAColors.textPrimaryOf(context).withOpacity(0.6),
+                      color: BAColors.textPrimaryOf(context).withValues(alpha: 0.6),
                       fontSize: 11,
                     ),
                   ),
@@ -221,12 +221,12 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: BAColors.primaryOf(context).withOpacity(0.4),
+          color: BAColors.primaryOf(context).withValues(alpha: 0.4),
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: BAColors.primaryOf(context).withOpacity(0.3),
+            color: BAColors.primaryOf(context).withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 3),
           ),
@@ -253,7 +253,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
 
   Widget _buildDefaultAvatar(BuildContext context) {
     return Container(
-      color: BAColors.primaryOf(context).withOpacity(0.15),
+      color: BAColors.primaryOf(context).withValues(alpha: 0.15),
       child: Icon(Icons.person, size: 28, color: BAColors.primaryOf(context)),
     );
   }
@@ -346,9 +346,9 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.18),
+        color: color.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -379,9 +379,9 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.2),
+          color: Colors.black.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -425,8 +425,8 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                       ? _getVersionColor(
                           context,
                           instance.version,
-                        ).withOpacity(0.2)
-                      : BAColors.primaryOf(context).withOpacity(0.2),
+                        ).withValues(alpha: 0.2)
+                      : BAColors.primaryOf(context).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -489,7 +489,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withValues(alpha: 0.3),
                   blurRadius: 30,
                   offset: const Offset(0, 10),
                 ),
@@ -527,7 +527,7 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                         color: _getVersionColor(
                           context,
                           inst.version,
-                        ).withOpacity(0.15),
+                        ).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
@@ -609,20 +609,20 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                       BoxShadow(
                         color: BAColors.primaryOf(
                           context,
-                        ).withOpacity(0.4 + (_pulseAnimation.value * 0.25)),
+                        ).withValues(alpha: 0.4 + (_pulseAnimation.value * 0.25)),
                         blurRadius: 20 + (_pulseAnimation.value * 12),
                         spreadRadius: _isHoveringLaunch ? 3 : 0,
                         offset: const Offset(0, 6),
                       ),
                     BoxShadow(
-                      color: BAColors.surfaceOf(context).withOpacity(0.25),
+                      color: BAColors.surfaceOf(context).withValues(alpha: 0.25),
                       blurRadius: 0,
                       offset: const Offset(0, -2),
                       spreadRadius: -1,
                     ),
                   ],
                   border: Border.all(
-                    color: BAColors.surfaceOf(context).withOpacity(0.35),
+                    color: BAColors.surfaceOf(context).withValues(alpha: 0.35),
                     width: 1.5,
                   ),
                 ),
@@ -640,9 +640,9 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                               colors: [
                                 BAColors.surfaceOf(
                                   context,
-                                ).withOpacity(_isHoveringLaunch ? 0.3 : 0.18),
+                                ).withValues(alpha: _isHoveringLaunch ? 0.3 : 0.18),
                                 Colors.transparent,
-                                Colors.black.withOpacity(0.12),
+                                Colors.black.withValues(alpha: 0.12),
                               ],
                             ),
                           ),

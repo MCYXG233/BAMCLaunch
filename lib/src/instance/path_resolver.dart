@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:path/path.dart' as path;
 
 /// Minecraft 游戏目录路径解析器

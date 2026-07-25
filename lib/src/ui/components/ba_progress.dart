@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/app_theme.dart';
@@ -112,7 +112,7 @@ class _BAExperienceProgressBarState extends State<BAExperienceProgressBar>
             border: Border.all(color: BAColors.borderOf(context), width: 2),
             boxShadow: [
               BoxShadow(
-                color: BAColors.shadowOf(context).withOpacity(0.3),
+                color: BAColors.shadowOf(context).withValues(alpha: 0.3),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -184,17 +184,17 @@ class _PixelProgress extends StatelessWidget {
                 margin: const EdgeInsets.all(0.5),
                 decoration: BoxDecoration(
                   color: isFilled
-                      ? (isPartial ? color.withOpacity(0.9) : color)
+                      ? (isPartial ? color.withValues(alpha: 0.9) : color)
                       : Colors.transparent,
                   border: isFilled
                       ? Border(
-                          top: BorderSide(color: color.withOpacity(0.3)),
-                          left: BorderSide(color: color.withOpacity(0.3)),
+                          top: BorderSide(color: color.withValues(alpha: 0.3)),
+                          left: BorderSide(color: color.withValues(alpha: 0.3)),
                           bottom: BorderSide(
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withValues(alpha: 0.2),
                           ),
                           right: BorderSide(
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withValues(alpha: 0.2),
                           ),
                         )
                       : null,

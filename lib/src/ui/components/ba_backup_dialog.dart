@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../game/backup_manager.dart';
 import '../../instance/instance_manager.dart';
 import '../../instance/models.dart';
@@ -190,10 +190,10 @@ class _BABackupDialogState extends State<BABackupDialog> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: BAColors.surfaceOf(context).withOpacity(0.5),
+                    color: BAColors.surfaceOf(context).withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: BAColors.borderOf(context).withOpacity(0.4),
+                      color: BAColors.borderOf(context).withValues(alpha: 0.4),
                     ),
                   ),
                   child: Column(
@@ -225,7 +225,7 @@ class _BABackupDialogState extends State<BABackupDialog> {
                             borderSide: BorderSide(
                               color: BAColors.borderOf(
                                 context,
-                              ).withOpacity(0.5),
+                              ).withValues(alpha: 0.5),
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
@@ -233,7 +233,7 @@ class _BABackupDialogState extends State<BABackupDialog> {
                             borderSide: BorderSide(
                               color: BAColors.borderOf(
                                 context,
-                              ).withOpacity(0.5),
+                              ).withValues(alpha: 0.5),
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
@@ -321,12 +321,12 @@ class _BABackupDialogState extends State<BABackupDialog> {
                               decoration: BoxDecoration(
                                 color: BAColors.surfaceOf(
                                   context,
-                                ).withOpacity(0.5),
+                                ).withValues(alpha: 0.5),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                   color: BAColors.borderOf(
                                     context,
-                                  ).withOpacity(0.4),
+                                  ).withValues(alpha: 0.4),
                                 ),
                               ),
                               child: Row(

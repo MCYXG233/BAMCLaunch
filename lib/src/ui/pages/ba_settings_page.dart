@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -941,7 +941,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               gradient: BAColors.primaryGradient,
               boxShadow: [
                 BoxShadow(
-                  color: BAColors.primaryOf(context).withOpacity(0.3),
+                  color: BAColors.primaryOf(context).withValues(alpha: 0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -1085,14 +1085,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
                             BoxShadow(
                               color: BAColors.primaryOf(
                                 context,
-                              ).withOpacity(0.2),
+                              ).withValues(alpha: 0.2),
                               blurRadius: 12,
                               spreadRadius: 1,
                             ),
                             BoxShadow(
                               color: BAColors.primaryOf(
                                 context,
-                              ).withOpacity(0.1),
+                              ).withValues(alpha: 0.1),
                               blurRadius: 24,
                               spreadRadius: 2,
                             ),
@@ -1125,7 +1125,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                     BoxShadow(
                                       color: BAColors.primaryOf(
                                         context,
-                                      ).withOpacity(0.5),
+                                      ).withValues(alpha: 0.5),
                                       blurRadius: 8,
                                       spreadRadius: 1,
                                     ),
@@ -1226,7 +1226,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF000000).withOpacity(shadowOpacity),
+            color: const Color(0xFF000000).withValues(alpha: shadowOpacity),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -1310,19 +1310,19 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    effectiveIconColor.withOpacity(0.3),
-                    effectiveIconColor.withOpacity(0.15),
+                    effectiveIconColor.withValues(alpha: 0.3),
+                    effectiveIconColor.withValues(alpha: 0.15),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: effectiveIconColor.withOpacity(0.25),
+                    color: effectiveIconColor.withValues(alpha: 0.25),
                     blurRadius: 8,
                     spreadRadius: 0.5,
                   ),
                   BoxShadow(
-                    color: effectiveIconColor.withOpacity(0.1),
+                    color: effectiveIconColor.withValues(alpha: 0.1),
                     blurRadius: 16,
                     spreadRadius: 1,
                   ),
@@ -1388,7 +1388,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
           boxShadow: value
               ? [
                   BoxShadow(
-                    color: BAColors.primaryOf(context).withOpacity(0.4),
+                    color: BAColors.primaryOf(context).withValues(alpha: 0.4),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -1406,7 +1406,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 4,
                   offset: const Offset(0, 1),
                 ),
@@ -1562,7 +1562,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: (color ?? BAColors.primaryOf(context)).withOpacity(0.3),
+                color: (color ?? BAColors.primaryOf(context)).withValues(alpha: 0.3),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -1906,14 +1906,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                BAColors.primaryOf(context).withOpacity(0.3),
-                                accentBlue.withOpacity(0.15),
+                                BAColors.primaryOf(context).withValues(alpha: 0.3),
+                                accentBlue.withValues(alpha: 0.15),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: [
                               BoxShadow(
-                                color: accentBlue.withOpacity(0.25),
+                                color: accentBlue.withValues(alpha: 0.25),
                                 blurRadius: 8,
                                 spreadRadius: 0.5,
                               ),
@@ -1959,7 +1959,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                 ),
                                 overlayColor: BAColors.primaryOf(
                                   context,
-                                ).withOpacity(0.2),
+                                ).withValues(alpha: 0.2),
                               ),
                               child: Slider(
                                 value: _memoryAllocation,
@@ -2109,14 +2109,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                BAColors.primaryOf(context).withOpacity(0.3),
-                                accentBlue.withOpacity(0.15),
+                                BAColors.primaryOf(context).withValues(alpha: 0.3),
+                                accentBlue.withValues(alpha: 0.15),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: [
                               BoxShadow(
-                                color: accentBlue.withOpacity(0.25),
+                                color: accentBlue.withValues(alpha: 0.25),
                                 blurRadius: 8,
                                 spreadRadius: 0.5,
                               ),
@@ -2158,7 +2158,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                 ),
                                 overlayColor: BAColors.primaryOf(
                                   context,
-                                ).withOpacity(0.2),
+                                ).withValues(alpha: 0.2),
                               ),
                               child: Slider(
                                 value: _concurrentDownloads.toDouble(),
@@ -2224,14 +2224,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  BAColors.primaryOf(context).withOpacity(0.3),
-                                  accentBlue.withOpacity(0.15),
+                                  BAColors.primaryOf(context).withValues(alpha: 0.3),
+                                  accentBlue.withValues(alpha: 0.15),
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(10),
                               boxShadow: [
                                 BoxShadow(
-                                  color: accentBlue.withOpacity(0.25),
+                                  color: accentBlue.withValues(alpha: 0.25),
                                   blurRadius: 8,
                                   spreadRadius: 0.5,
                                 ),
@@ -2277,7 +2277,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                   ),
                                   overlayColor: BAColors.primaryOf(
                                     context,
-                                  ).withOpacity(0.2),
+                                  ).withValues(alpha: 0.2),
                                 ),
                                 child: Slider(
                                   value: _speedLimitValue,
@@ -2549,7 +2549,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                     decoration: BoxDecoration(
                                       color: BAColors.primaryOf(
                                         context,
-                                      ).withOpacity(0.2),
+                                      ).withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
@@ -2572,7 +2572,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                     decoration: BoxDecoration(
                                       color: BAColors.accentPinkDarkOf(
                                         context,
-                                      ).withOpacity(0.2),
+                                      ).withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
@@ -2612,7 +2612,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                             decoration: BoxDecoration(
                               color: BAColors.successOf(
                                 context,
-                              ).withOpacity(0.2),
+                              ).withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -2633,7 +2633,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                             decoration: BoxDecoration(
                               color: BAColors.accentPinkDarkOf(
                                 context,
-                              ).withOpacity(0.2),
+                              ).withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -2657,7 +2657,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                               decoration: BoxDecoration(
                                 color: BAColors.accentPinkDarkOf(
                                   context,
-                                ).withOpacity(0.15),
+                                ).withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Icon(

@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import '../event/event.dart';
 import '../event/event_bus.dart';
 import '../core/logger.dart';

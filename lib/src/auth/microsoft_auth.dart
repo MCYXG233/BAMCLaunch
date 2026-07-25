@@ -1,4 +1,4 @@
-/// Microsoft OAuth2 认证服务模块
+﻿/// Microsoft OAuth2 认证服务模块
 ///
 /// 本文件实现了 Microsoft 账户的 OAuth2 认证流程，支持两种认证方式：
 /// 1. **授权码流程（Authorization Code Flow）with PKCE**：适用于有浏览器的环境

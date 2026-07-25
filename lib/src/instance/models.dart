@@ -1,4 +1,4 @@
-/// 实例状态
+﻿/// 实例状态
 enum InstanceStatus { idle, launching, running, crashed }
 
 /// 加载器状态

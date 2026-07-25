@@ -862,7 +862,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                   selected: isSelected,
                   label: Text(dir.name),
                   onSelected: (_) => _selectDirectory(dir),
-                  selectedColor: BAColors.primaryOf(context).withOpacity(0.2),
+                  selectedColor: BAColors.primaryOf(context).withValues(alpha: 0.2),
                   checkmarkColor: BAColors.primaryOf(context),
                   backgroundColor: BAColors.surfaceOf(context),
                   deleteIcon: isSelected
@@ -918,7 +918,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
           color: isSelected
-              ? BAColors.primaryOf(context).withOpacity(0.1)
+              ? BAColors.primaryOf(context).withValues(alpha: 0.1)
               : BAColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
@@ -930,7 +930,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
           boxShadow: [
             if (isSelected)
               BoxShadow(
-                color: BAColors.primaryOf(context).withOpacity(0.2),
+                color: BAColors.primaryOf(context).withValues(alpha: 0.2),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -950,7 +950,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: BAColors.primaryOf(context).withOpacity(0.15),
+                        color: BAColors.primaryOf(context).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Center(
@@ -1088,7 +1088,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: isSelected
-              ? BAColors.primaryOf(context).withOpacity(0.1)
+              ? BAColors.primaryOf(context).withValues(alpha: 0.1)
               : BAColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
@@ -1112,7 +1112,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      color: BAColors.primaryOf(context).withOpacity(0.15),
+                      color: BAColors.primaryOf(context).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(

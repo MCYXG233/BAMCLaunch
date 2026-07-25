@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/animations.dart';
@@ -116,21 +116,21 @@ class _BAAnimatedCardState extends State<BAAnimatedCard>
               border: Border.all(
                 color: _isHovered
                     ? (widget.borderColor ??
-                          BAColors.primaryOf(context).withOpacity(0.4))
+                          BAColors.primaryOf(context).withValues(alpha: 0.4))
                     : (widget.borderColor ??
-                          BAColors.borderOf(context).withOpacity(0.5)),
+                          BAColors.borderOf(context).withValues(alpha: 0.5)),
                 width: _isHovered ? 1.5 : 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(_isHovered ? 0.08 : 0.04),
+                  color: Colors.black.withValues(alpha: _isHovered ? 0.08 : 0.04),
                   blurRadius: _elevationAnimation.value * 3,
                   offset: Offset(0, _elevationAnimation.value),
                 ),
                 if (widget.enableGlowEffect && _isHovered)
                   BoxShadow(
                     color: (widget.glowColor ?? BAColors.primaryOf(context))
-                        .withOpacity(0.25),
+                        .withValues(alpha: 0.25),
                     blurRadius: 24,
                     spreadRadius: 4,
                   ),
@@ -252,7 +252,7 @@ class _BAHoverCardState extends State<BAHoverCard>
                     decoration: BoxDecoration(
                       color:
                           widget.backgroundColor ??
-                          BAColors.surfaceVariantOf(context).withOpacity(0.8),
+                          BAColors.surfaceVariantOf(context).withValues(alpha: 0.8),
                       borderRadius: const BorderRadius.only(
                         bottomLeft: Radius.circular(12),
                         bottomRight: Radius.circular(12),

@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
 import 'mod_info.dart';
