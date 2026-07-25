@@ -1,6 +1,6 @@
 import 'config_manager_impl.dart';
 import 'config_models.dart';
-import '../di/service_locator.dart';
+import '../di/service_locator.dart' as di;
 
 /// 配置管理器统一接口
 ///
@@ -512,52 +512,24 @@ abstract class IConfigManager {
   Future<void> removeLocalGameDirectory(String dirPath);
 }
 
-/// 配置管理器（单例模式）
+/// 配置管理器（单例包装器）— 已废弃
 ///
-/// 这是 [IConfigManager] 接口的具体实现类，采用单例模式设计。
-/// 内部委托给 [ConfigManagerImpl] 实例进行实际的配置操作。
+/// **@Deprecated**: 使用 `ServiceRegistry.get<IConfigManager>()` 替代。
+/// 此类内部转发到 ServiceRegistry 中注册的 IConfigManager 实例，
+/// 确保 `ConfigManager.instance` 与 `ServiceLocator.get<IConfigManager>()` 返回同一对象。
+/// 下个版本将删除此类。
 ///
-/// ## 设计模式
-///
-/// 使用单例模式确保整个应用只有一个配置管理器实例，
-/// 避免配置状态不一致的问题。
-///
-/// ## 使用方式
+/// ## 迁移指南
 ///
 /// ```dart
-/// // 方式一：通过静态属性访问（推荐）
+/// // 旧方式（已废弃）
 /// final config = ConfigManager.instance;
-///
-/// // 方式二：通过工厂构造函数访问
 /// final config = ConfigManager();
 ///
-/// // 初始化
-/// await config.initialize();
-///
-/// // 使用配置
-/// final theme = config.getString('theme', defaultValue: 'light');
-/// await config.setString('theme', 'dark');
-/// await config.save();
+/// // 新方式（推荐）
+/// final config = ServiceRegistry.get<IConfigManager>();
 /// ```
-///
-/// ## 测试支持
-///
-/// 在单元测试中，可以使用 [reset] 方法重置单例状态，
-/// 以便在每个测试用例之间隔离状态。
-///
-/// ```dart
-/// setUp(() {
-///   ConfigManager.reset();
-/// });
-/// ```
-///
-/// ## 实现委托
-///
-/// 此类是一个代理/装饰器，所有方法调用都委托给内部的 [ConfigManagerImpl] 实例。
-/// 这种设计允许：
-/// - 保持单例的便利性
-/// - 实现细节可以独立变化
-/// - 便于测试时替换实现
+@Deprecated('使用 ServiceRegistry.get<IConfigManager>() 替代，将在下个版本删除')
 class ConfigManager implements IConfigManager {
   /// 单例实例
   ///
@@ -567,20 +539,23 @@ class ConfigManager implements IConfigManager {
 
   /// 内部实现实例
   ///
-  /// 委托给 [ConfigManagerImpl] 进行实际的配置操作。
-  /// 在构造时创建，确保每次单例重置后都能获得新的实现实例。
-  final IConfigManager _impl = ConfigManagerImpl();
+  /// 优先通过 ServiceRegistry 获取注册的 IConfigManager 实例，
+  /// 确保 ConfigManager.instance 与 ServiceLocator.get<IConfigManager>() 返回同一对象。
+  /// 若 ServiceRegistry 未初始化（如测试环境），回退到直接创建 ConfigManagerImpl。
+  IConfigManager get _impl =>
+      di.ServiceLocator.instance.tryGet<IConfigManager>() ??
+      ConfigManagerImpl();
 
   /// 获取单例实例
   ///
-  /// 如果实例不存在则创建新实例。
-  /// 使用空值合并赋值运算符确保只创建一次实例。
+  /// 优先从 ServiceLocator 获取（确保与 DI 容器一致），
+  /// 回退到本地单例（兼容过渡期）。
   ///
   /// ## 返回值
   ///
   /// 返回 [ConfigManager] 的唯一实例。
   static ConfigManager get instance {
-    return ServiceLocator.instance.tryGet<ConfigManager>() ??
+    return di.ServiceLocator.instance.tryGet<ConfigManager>() ??
         (_instance ??= ConfigManager._internal());
   }
 
@@ -768,7 +743,8 @@ class ConfigManager implements IConfigManager {
   ///
   /// 委托给内部实现移除 Java 路径。
   @override
-  Future<void> removeExtraJavaPath(String path) => _impl.removeExtraJavaPath(path);
+  Future<void> removeExtraJavaPath(String path) =>
+      _impl.removeExtraJavaPath(path);
 
   /// 获取被抑制的对话框列表
   ///
@@ -780,19 +756,22 @@ class ConfigManager implements IConfigManager {
   ///
   /// 委托给内部实现抑制对话框。
   @override
-  Future<void> suppressDialog(String dialogId) => _impl.suppressDialog(dialogId);
+  Future<void> suppressDialog(String dialogId) =>
+      _impl.suppressDialog(dialogId);
 
   /// 检查对话框是否被抑制
   ///
   /// 委托给内部实现检查对话框抑制状态。
   @override
-  bool isDialogSuppressed(String dialogId) => _impl.isDialogSuppressed(dialogId);
+  bool isDialogSuppressed(String dialogId) =>
+      _impl.isDialogSuppressed(dialogId);
 
   /// 获取本地游戏目录列表
   ///
   /// 委托给内部实现获取游戏目录列表。
   @override
-  List<GameDirectory> getLocalGameDirectories() => _impl.getLocalGameDirectories();
+  List<GameDirectory> getLocalGameDirectories() =>
+      _impl.getLocalGameDirectories();
 
   /// 添加本地游戏目录
   ///

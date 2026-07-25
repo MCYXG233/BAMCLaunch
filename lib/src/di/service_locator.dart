@@ -23,7 +23,8 @@ class ServiceLocator {
   final Map<Type, Object> _singletons = <Type, Object>{};
 
   /// 懒加载工厂（首次 get 时调用并缓存结果）
-  final Map<Type, Object Function()> _lazyFactories = <Type, Object Function()>{};
+  final Map<Type, Object Function()> _lazyFactories =
+      <Type, Object Function()>{};
 
   /// 工厂（每次 get 都创建新实例）
   final Map<Type, Object Function()> _factories = <Type, Object Function()>{};

@@ -135,7 +135,8 @@ class PlayTimeTracker {
   final IPlatformAdapter _platformAdapter = PlatformAdapterFactory.create();
 
   /// 游戏统计管理器，用于同步会话数据
-  final GameStatisticsManager _statisticsManager = GameStatisticsManager.instance;
+  final GameStatisticsManager _statisticsManager =
+      GameStatisticsManager.instance;
 
   /// 数据文件，用于持久化存储时长数据
   File? _dataFile;
@@ -207,7 +208,8 @@ class PlayTimeTracker {
 
     try {
       // 获取应用支持目录（用于存储应用数据）
-      final supportDir = await _platformAdapter.getApplicationSupportDirectory();
+      final supportDir = await _platformAdapter
+          .getApplicationSupportDirectory();
 
       // 构建统计数据目录路径
       final dataPath = path.join(supportDir, 'statistics');
@@ -226,7 +228,9 @@ class PlayTimeTracker {
         await _loadData();
       }
 
-      _logger.info('Play time tracker initialized, ${_instancePlayTimes.length} entries loaded');
+      _logger.info(
+        'Play time tracker initialized, ${_instancePlayTimes.length} entries loaded',
+      );
       _initialized = true;
     } catch (e, stackTrace) {
       // 初始化失败时记录错误，但标记为已初始化以避免重复尝试
@@ -324,7 +328,9 @@ class PlayTimeTracker {
     // 启动定时器
     _startTimer();
 
-    _logger.info('Started tracking play time for instance: $instanceName ($instanceId)');
+    _logger.info(
+      'Started tracking play time for instance: $instanceName ($instanceId)',
+    );
   }
 
   /// 暂停计时
@@ -383,7 +389,9 @@ class PlayTimeTracker {
     // 如果有正在计时的实例，计算并保存时长
     if (_currentTrackingInstanceId != null && _sessionStartTime != null) {
       // 计算本次会话时长
-      final sessionDuration = DateTime.now().difference(_sessionStartTime!).inSeconds;
+      final sessionDuration = DateTime.now()
+          .difference(_sessionStartTime!)
+          .inSeconds;
 
       // 计算总时长（包括暂停前已累计的时长）
       final totalDuration = _accumulatedSeconds + sessionDuration;
@@ -420,7 +428,10 @@ class PlayTimeTracker {
   ///
   /// [instanceId] 实例唯一标识符
   /// [additionalSeconds] 本次会话新增的时长（秒）
-  Future<void> _updateInstancePlayTime(String instanceId, int additionalSeconds) async {
+  Future<void> _updateInstancePlayTime(
+    String instanceId,
+    int additionalSeconds,
+  ) async {
     final existing = _instancePlayTimes[instanceId];
 
     if (existing != null) {
@@ -496,7 +507,8 @@ class PlayTimeTracker {
   int get currentSessionSeconds {
     if (_state == PlayTimeTrackerState.running && _sessionStartTime != null) {
       // 运行状态：累计时长 + 当前会话时长
-      return _accumulatedSeconds + DateTime.now().difference(_sessionStartTime!).inSeconds;
+      return _accumulatedSeconds +
+          DateTime.now().difference(_sessionStartTime!).inSeconds;
     }
     // 暂停或空闲状态：返回已累计时长
     return _accumulatedSeconds;
@@ -599,7 +611,11 @@ class PlayTimeTracker {
     // 计算本周一0点的时间
     // weekday: 1=周一, 7=周日
     final weekStart = now.subtract(Duration(days: now.weekday - 1));
-    final weekStartDate = DateTime(weekStart.year, weekStart.month, weekStart.day);
+    final weekStartDate = DateTime(
+      weekStart.year,
+      weekStart.month,
+      weekStart.day,
+    );
 
     int total = 0;
     // 获取所有会话并筛选本周会话
@@ -650,7 +666,11 @@ class PlayTimeTracker {
 
     // 初始化最近N天的数据，默认值为0
     for (var i = days - 1; i >= 0; i--) {
-      final date = DateTime(now.year, now.month, now.day).subtract(Duration(days: i));
+      final date = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: i));
       result[date] = 0;
     }
 

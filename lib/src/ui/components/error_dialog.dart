@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/app_theme.dart';
@@ -135,7 +135,11 @@ class ErrorDialog extends StatelessWidget {
               Navigator.of(context).pop();
               onRetry!();
             },
-            leadingIcon: const Icon(Icons.refresh, color: Colors.white, size: 18),
+            leadingIcon: const Icon(
+              Icons.refresh,
+              color: Colors.white,
+              size: 18,
+            ),
           ),
         if (showRetryButton && onRetry != null) const SizedBox(width: 12),
         BASecondaryButton(
@@ -213,10 +217,7 @@ class ErrorSnackBar {
             Icon(Icons.error_outline, color: BAColors.dangerOf(context)),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(color: Colors.white),
-              ),
+              child: Text(message, style: const TextStyle(color: Colors.white)),
             ),
           ],
         ),

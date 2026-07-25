@@ -15,16 +15,8 @@ class _BALanguageSelectorState extends State<BALanguageSelector> {
   bool _isHovered = false;
 
   static const List<_LanguageOption> _languages = [
-    _LanguageOption(
-      locale: Locale('zh', 'CN'),
-      label: '简体中文',
-      flag: '🇨🇳',
-    ),
-    _LanguageOption(
-      locale: Locale('en', 'US'),
-      label: 'English',
-      flag: '🇺🇸',
-    ),
+    _LanguageOption(locale: Locale('zh', 'CN'), label: '简体中文', flag: '🇨🇳'),
+    _LanguageOption(locale: Locale('en', 'US'), label: 'English', flag: '🇺🇸'),
   ];
 
   _LanguageOption get _current {
@@ -69,12 +61,14 @@ class _BALanguageSelectorState extends State<BALanguageSelector> {
                     Text(
                       option.label,
                       style: TextStyle(
-                        color: option.locale.languageCode ==
+                        color:
+                            option.locale.languageCode ==
                                 current.locale.languageCode
                             ? BAColors.primaryOf(context)
                             : BAColors.textPrimaryOf(context),
                         fontSize: 13,
-                        fontWeight: option.locale.languageCode ==
+                        fontWeight:
+                            option.locale.languageCode ==
                                 current.locale.languageCode
                             ? FontWeight.w600
                             : FontWeight.w400,

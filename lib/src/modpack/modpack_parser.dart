@@ -111,7 +111,8 @@ class ModpackResource {
       if (downloadUrl != null) 'downloadUrl': downloadUrl,
       if (fileHash != null) 'fileHash': fileHash,
       if (fileSize != null) 'fileSize': fileSize,
-      if (requiredDependencies != null) 'requiredDependencies': requiredDependencies,
+      if (requiredDependencies != null)
+        'requiredDependencies': requiredDependencies,
     };
   }
 }
@@ -154,12 +155,12 @@ class ModpackInfo {
 
   /// 获取所有资源
   List<ModpackResource> get allResources => [
-        ...mods,
-        ...resourcePacks,
-        ...shaderPacks,
-        ...dataPacks,
-        ...otherResources,
-      ];
+    ...mods,
+    ...resourcePacks,
+    ...shaderPacks,
+    ...dataPacks,
+    ...otherResources,
+  ];
 }
 
 /// 整合包解析器
@@ -225,13 +226,16 @@ class ModpackParser {
 
       _logger.info('Found CurseForge format manifest');
 
-      final manifestJson = jsonDecode(utf8.decode(manifestFile.content as List<int>));
+      final manifestJson = jsonDecode(
+        utf8.decode(manifestFile.content as List<int>),
+      );
 
       // 解析 manifest
       final name = manifestJson['name'] as String?;
       final version = manifestJson['version'] as String?;
       final mcVersion = manifestJson['minecraft']?['version'] as String?;
-      final modLoaders = manifestJson['minecraft']?['modLoaders'] as List<dynamic>?;
+      final modLoaders =
+          manifestJson['minecraft']?['modLoaders'] as List<dynamic>?;
       final files = manifestJson['files'] as List<dynamic>? ?? [];
 
       if (name == null || mcVersion == null) {
@@ -259,13 +263,15 @@ class ModpackParser {
         final projectId = file['projectID']?.toString();
         final fileId = file['fileID']?.toString();
         if (projectId != null && fileId != null) {
-          mods.add(ModpackResource(
-            name: 'Mod $projectId',
-            type: ModpackResourceType.mod,
-            projectId: projectId,
-            fileId: fileId,
-            requiredDependencies: [],
-          ));
+          mods.add(
+            ModpackResource(
+              name: 'Mod $projectId',
+              type: ModpackResourceType.mod,
+              projectId: projectId,
+              fileId: fileId,
+              requiredDependencies: [],
+            ),
+          );
         }
       }
 
@@ -346,49 +352,59 @@ class ModpackParser {
           ModpackResourceType type;
           if (pathValue.startsWith('mods/')) {
             type = ModpackResourceType.mod;
-            mods.add(ModpackResource(
-              name: fileName,
-              type: type,
-              downloadUrl: url,
-              fileHash: hashes?['sha1'] as String?,
-              fileSize: file['fileSize'] as int?,
-            ));
+            mods.add(
+              ModpackResource(
+                name: fileName,
+                type: type,
+                downloadUrl: url,
+                fileHash: hashes?['sha1'] as String?,
+                fileSize: file['fileSize'] as int?,
+              ),
+            );
           } else if (pathValue.startsWith('resourcepacks/')) {
             type = ModpackResourceType.resourcePack;
-            resourcePacks.add(ModpackResource(
-              name: fileName,
-              type: type,
-              downloadUrl: url,
-              fileHash: hashes?['sha1'] as String?,
-              fileSize: file['fileSize'] as int?,
-            ));
+            resourcePacks.add(
+              ModpackResource(
+                name: fileName,
+                type: type,
+                downloadUrl: url,
+                fileHash: hashes?['sha1'] as String?,
+                fileSize: file['fileSize'] as int?,
+              ),
+            );
           } else if (pathValue.startsWith('shaderpacks/')) {
             type = ModpackResourceType.shaderPack;
-            shaderPacks.add(ModpackResource(
-              name: fileName,
-              type: type,
-              downloadUrl: url,
-              fileHash: hashes?['sha1'] as String?,
-              fileSize: file['fileSize'] as int?,
-            ));
+            shaderPacks.add(
+              ModpackResource(
+                name: fileName,
+                type: type,
+                downloadUrl: url,
+                fileHash: hashes?['sha1'] as String?,
+                fileSize: file['fileSize'] as int?,
+              ),
+            );
           } else if (pathValue.startsWith('datapacks/')) {
             type = ModpackResourceType.dataPack;
-            dataPacks.add(ModpackResource(
-              name: fileName,
-              type: type,
-              downloadUrl: url,
-              fileHash: hashes?['sha1'] as String?,
-              fileSize: file['fileSize'] as int?,
-            ));
+            dataPacks.add(
+              ModpackResource(
+                name: fileName,
+                type: type,
+                downloadUrl: url,
+                fileHash: hashes?['sha1'] as String?,
+                fileSize: file['fileSize'] as int?,
+              ),
+            );
           } else {
             type = ModpackResourceType.other;
-            otherResources.add(ModpackResource(
-              name: fileName,
-              type: type,
-              downloadUrl: url,
-              fileHash: hashes?['sha1'] as String?,
-              fileSize: file['fileSize'] as int?,
-            ));
+            otherResources.add(
+              ModpackResource(
+                name: fileName,
+                type: type,
+                downloadUrl: url,
+                fileHash: hashes?['sha1'] as String?,
+                fileSize: file['fileSize'] as int?,
+              ),
+            );
           }
         }
       }
@@ -423,7 +439,9 @@ class ModpackParser {
 
       _logger.info('Found generic modpack.json');
 
-      final modpackJson = jsonDecode(utf8.decode(modpackFile.content as List<int>));
+      final modpackJson = jsonDecode(
+        utf8.decode(modpackFile.content as List<int>),
+      );
 
       final name = modpackJson['name'] as String?;
       final version = modpackJson['version'] as String?;

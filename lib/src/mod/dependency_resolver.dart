@@ -135,11 +135,13 @@ class DependencyResolver {
 
       for (final depId in mod.dependencies) {
         if (!_modMap.containsKey(depId)) {
-          missing.add(MissingDependency(
-            dependentModId: modId,
-            dependentModName: mod.name,
-            missingModId: depId,
-          ));
+          missing.add(
+            MissingDependency(
+              dependentModId: modId,
+              dependentModName: mod.name,
+              missingModId: depId,
+            ),
+          );
         }
       }
     }
@@ -157,7 +159,10 @@ class DependencyResolver {
       return [];
     }
 
-    final uniqueMissingIds = missingDeps.map((d) => d.missingModId).toSet().toList();
+    final uniqueMissingIds = missingDeps
+        .map((d) => d.missingModId)
+        .toSet()
+        .toList();
     final downloaded = <String>[];
 
     for (var i = 0; i < uniqueMissingIds.length; i++) {

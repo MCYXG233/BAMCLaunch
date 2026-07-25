@@ -138,7 +138,9 @@ class MirrorSourceManager {
 
   /// 设置当前选中的镜像源索引
   void setSelectedMirrorIndex(int index) {
-    final nonOfficial = _mirrorManager.allMirrors.where((m) => !m.isOfficial).toList();
+    final nonOfficial = _mirrorManager.allMirrors
+        .where((m) => !m.isOfficial)
+        .toList();
     if (index >= 0 && index < nonOfficial.length) {
       _mirrorManager.setCurrentMirror(nonOfficial[index].id);
       _cachedMirrorSources = null; // 清除缓存
@@ -148,7 +150,9 @@ class MirrorSourceManager {
   /// 获取当前选中的镜像源索引
   int get selectedMirrorIndex {
     final currentId = _mirrorManager.currentMirror.id;
-    final nonOfficial = _mirrorManager.allMirrors.where((m) => !m.isOfficial).toList();
+    final nonOfficial = _mirrorManager.allMirrors
+        .where((m) => !m.isOfficial)
+        .toList();
     return nonOfficial.indexWhere((m) => m.id == currentId);
   }
 
@@ -176,12 +180,17 @@ class MirrorSourceManager {
 
   /// 切换到下一个镜像源
   BMCLApiDownloadSource switchToNextMirror() {
-    final nonOfficial = _mirrorManager.allMirrors.where((m) => !m.isOfficial).toList();
+    final nonOfficial = _mirrorManager.allMirrors
+        .where((m) => !m.isOfficial)
+        .toList();
     final currentId = _mirrorManager.currentMirror.id;
     int currentIndex = nonOfficial.indexWhere((m) => m.id == currentId);
     final nextIndex = (currentIndex + 1) % nonOfficial.length;
     _mirrorManager.setCurrentMirror(nonOfficial[nextIndex].id);
     _cachedMirrorSources = null;
-    return BMCLApiDownloadSource(nonOfficial[nextIndex].url, nonOfficial[nextIndex].name);
+    return BMCLApiDownloadSource(
+      nonOfficial[nextIndex].url,
+      nonOfficial[nextIndex].name,
+    );
   }
 }

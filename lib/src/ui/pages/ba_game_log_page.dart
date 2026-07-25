@@ -84,14 +84,15 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
 
     try {
       final files = logDir.listSync()
-        ..sort((a, b) => b.statSync().modified.compareTo(a.statSync().modified));
-      
+        ..sort(
+          (a, b) => b.statSync().modified.compareTo(a.statSync().modified),
+        );
+
       if (files.isNotEmpty && files.first is File) {
         _logFile = files.first as File;
         _lastFileLength = _logFile!.lengthSync();
       }
-    } catch (e) {
-    }
+    } catch (e) {}
 
     _fileWatcherTimer = Timer.periodic(
       const Duration(milliseconds: 500),
@@ -109,10 +110,12 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
         raf.setPositionSync(_lastFileLength);
         final bytes = raf.readSync(currentLength - _lastFileLength);
         raf.closeSync();
-        
+
         final newContent = String.fromCharCodes(bytes);
-        final newLines = newContent.split('\n').where((l) => l.trim().isNotEmpty);
-        
+        final newLines = newContent
+            .split('\n')
+            .where((l) => l.trim().isNotEmpty);
+
         for (final line in newLines) {
           final log = GameLog(
             timestamp: DateTime.now(),
@@ -122,11 +125,10 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
           );
           _onLogReceived(log);
         }
-        
+
         _lastFileLength = currentLength;
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   GameLogLevel _parseLogLevel(String line) {
@@ -220,7 +222,8 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
     );
     if (path == null) return;
 
-    final header = 'BAMCLaunch 游戏日志\n'
+    final header =
+        'BAMCLaunch 游戏日志\n'
         '进程ID: ${widget.processId}\n'
         '版本: ${_processInfo?.arguments.gameVersion ?? "未知"}\n'
         '时间: ${DateTime.now().toIso8601String()}\n';
@@ -442,7 +445,8 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
 
   int get _infoCount => _logs.where((l) => l.level == GameLogLevel.info).length;
   int get _warnCount => _logs.where((l) => l.level == GameLogLevel.warn).length;
-  int get _errorCount => _logs.where((l) => l.level == GameLogLevel.error).length;
+  int get _errorCount =>
+      _logs.where((l) => l.level == GameLogLevel.error).length;
 
   @override
   Widget build(BuildContext context) {
@@ -503,7 +507,9 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         border: Border(
-          bottom: BorderSide(color: BAColors.borderOf(context).withOpacity(0.4)),
+          bottom: BorderSide(
+            color: BAColors.borderOf(context).withOpacity(0.4),
+          ),
         ),
         boxShadow: [
           BoxShadow(
@@ -519,7 +525,10 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [BAColors.primaryOf(context), BAColors.primaryLightOf(context)],
+                colors: [
+                  BAColors.primaryOf(context),
+                  BAColors.primaryLightOf(context),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -597,9 +606,7 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
           foregroundColor: BAColors.textPrimaryOf(context),
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
     );
@@ -611,7 +618,9 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context).withOpacity(0.6),
         border: Border(
-          bottom: BorderSide(color: BAColors.borderOf(context).withOpacity(0.3)),
+          bottom: BorderSide(
+            color: BAColors.borderOf(context).withOpacity(0.3),
+          ),
         ),
       ),
       child: Row(
@@ -624,29 +633,52 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
             ),
           ),
           const SizedBox(width: 10),
-          _buildFilterChip(context, '全部', _visibleLevels.length == GameLogLevel.values.length, () {
-            setState(() {
-              _visibleLevels = GameLogLevel.values.toSet();
-            });
-          }),
+          _buildFilterChip(
+            context,
+            '全部',
+            _visibleLevels.length == GameLogLevel.values.length,
+            () {
+              setState(() {
+                _visibleLevels = GameLogLevel.values.toSet();
+              });
+            },
+          ),
           const SizedBox(width: 6),
-          _buildFilterChip(context, 'INFO', _visibleLevels.contains(GameLogLevel.info) && _visibleLevels.length == 1, () {
-            setState(() {
-              _visibleLevels = {GameLogLevel.info};
-            });
-          }),
+          _buildFilterChip(
+            context,
+            'INFO',
+            _visibleLevels.contains(GameLogLevel.info) &&
+                _visibleLevels.length == 1,
+            () {
+              setState(() {
+                _visibleLevels = {GameLogLevel.info};
+              });
+            },
+          ),
           const SizedBox(width: 6),
-          _buildFilterChip(context, 'WARN', _visibleLevels.contains(GameLogLevel.warn) && _visibleLevels.length == 1, () {
-            setState(() {
-              _visibleLevels = {GameLogLevel.warn};
-            });
-          }),
+          _buildFilterChip(
+            context,
+            'WARN',
+            _visibleLevels.contains(GameLogLevel.warn) &&
+                _visibleLevels.length == 1,
+            () {
+              setState(() {
+                _visibleLevels = {GameLogLevel.warn};
+              });
+            },
+          ),
           const SizedBox(width: 6),
-          _buildFilterChip(context, 'ERROR', _visibleLevels.contains(GameLogLevel.error) && _visibleLevels.length == 1, () {
-            setState(() {
-              _visibleLevels = {GameLogLevel.error};
-            });
-          }),
+          _buildFilterChip(
+            context,
+            'ERROR',
+            _visibleLevels.contains(GameLogLevel.error) &&
+                _visibleLevels.length == 1,
+            () {
+              setState(() {
+                _visibleLevels = {GameLogLevel.error};
+              });
+            },
+          ),
           const Spacer(),
           Row(
             children: [
@@ -698,7 +730,12 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
     );
   }
 
-  Widget _buildFilterChip(BuildContext context, String label, bool isSelected, VoidCallback onTap) {
+  Widget _buildFilterChip(
+    BuildContext context,
+    String label,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -781,11 +818,7 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
         padding: const EdgeInsets.symmetric(vertical: 1),
         child: RichText(
           text: TextSpan(
-            style: TextStyle(
-              fontFamily: 'Consolas',
-              fontSize: 13,
-              height: 1.5,
-            ),
+            style: TextStyle(fontFamily: 'Consolas', fontSize: 13, height: 1.5),
             children: [
               TextSpan(
                 text: '[${_formatTime(log.timestamp)}] ',
@@ -793,10 +826,7 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
               ),
               TextSpan(
                 text: '[$levelStr] ',
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(color: color, fontWeight: FontWeight.w600),
               ),
               TextSpan(
                 text: log.message,
@@ -820,7 +850,11 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
       ),
       child: Row(
         children: [
-          Icon(Icons.article_outlined, size: 16, color: BAColors.textDisabledOf(context)),
+          Icon(
+            Icons.article_outlined,
+            size: 16,
+            color: BAColors.textDisabledOf(context),
+          ),
           const SizedBox(width: 6),
           Text(
             '共 ${_filteredLogs.length} 条日志',
@@ -830,7 +864,11 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
             ),
           ),
           const SizedBox(width: 20),
-          Icon(Icons.timer_outlined, size: 16, color: BAColors.textDisabledOf(context)),
+          Icon(
+            Icons.timer_outlined,
+            size: 16,
+            color: BAColors.textDisabledOf(context),
+          ),
           const SizedBox(width: 6),
           Text(
             '运行 ${_formatDuration(_elapsed)}',

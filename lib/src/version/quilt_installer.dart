@@ -94,10 +94,7 @@ class QuiltInstallFailedEvent extends Event {
   final String instanceId;
   final String error;
 
-  QuiltInstallFailedEvent({
-    required this.instanceId,
-    required this.error,
-  });
+  QuiltInstallFailedEvent({required this.instanceId, required this.error});
 }
 
 /// Quilt加载器安装服务
@@ -153,11 +150,11 @@ class QuiltInstaller {
   }
 
   /// 获取特定Minecraft版本的Quilt版本列表
-  Future<List<QuiltVersion>> getQuiltVersionsForMinecraft(String mcVersion) async {
+  Future<List<QuiltVersion>> getQuiltVersionsForMinecraft(
+    String mcVersion,
+  ) async {
     final allVersions = await getQuiltVersions();
-    return allVersions
-        .where((v) => v.minecraftVersion == mcVersion)
-        .toList()
+    return allVersions.where((v) => v.minecraftVersion == mcVersion).toList()
       ..sort((a, b) => b.build.compareTo(a.build));
   }
 
@@ -176,22 +173,24 @@ class QuiltInstaller {
     void Function(int received, int total)? onProgress,
   }) async {
     final installerVersion = loaderVersion;
-    final url = '${ApiEndpoints.quiltMaven}/org/quiltmc/quilt-installer/$installerVersion/quilt-installer-$installerVersion.jar';
+    final url =
+        '${ApiEndpoints.quiltMaven}/org/quiltmc/quilt-installer/$installerVersion/quilt-installer-$installerVersion.jar';
 
     _logger.info('Downloading Quilt installer from: $url');
 
-    final downloadDir = Directory(path.join(gameDirectory, 'libraries', 'quilt-installer'));
+    final downloadDir = Directory(
+      path.join(gameDirectory, 'libraries', 'quilt-installer'),
+    );
     if (!await downloadDir.exists()) {
       await downloadDir.create(recursive: true);
     }
 
-    final filePath = path.join(downloadDir.path, 'quilt-installer-$installerVersion.jar');
-
-    await _networkClient.downloadFile(
-      url,
-      filePath,
-      onProgress: onProgress,
+    final filePath = path.join(
+      downloadDir.path,
+      'quilt-installer-$installerVersion.jar',
     );
+
+    await _networkClient.downloadFile(url, filePath, onProgress: onProgress);
 
     _logger.info('Quilt installer downloaded to: $filePath');
     return filePath;
@@ -204,29 +203,31 @@ class QuiltInstaller {
     required String gameDirectory,
     void Function(int received, int total)? onProgress,
   }) async {
-    final url = '${ApiEndpoints.quiltMaven}/org/quiltmc/quilt-loader/$loaderVersion/quilt-loader-$loaderVersion.jar';
+    final url =
+        '${ApiEndpoints.quiltMaven}/org/quiltmc/quilt-loader/$loaderVersion/quilt-loader-$loaderVersion.jar';
 
     _logger.info('Downloading Quilt loader from: $url');
 
-    final downloadDir = Directory(path.join(
-      gameDirectory,
-      'libraries',
-      'org',
-      'quiltmc',
-      'quilt-loader',
-      loaderVersion,
-    ));
+    final downloadDir = Directory(
+      path.join(
+        gameDirectory,
+        'libraries',
+        'org',
+        'quiltmc',
+        'quilt-loader',
+        loaderVersion,
+      ),
+    );
     if (!await downloadDir.exists()) {
       await downloadDir.create(recursive: true);
     }
 
-    final filePath = path.join(downloadDir.path, 'quilt-loader-$loaderVersion.jar');
-
-    await _networkClient.downloadFile(
-      url,
-      filePath,
-      onProgress: onProgress,
+    final filePath = path.join(
+      downloadDir.path,
+      'quilt-loader-$loaderVersion.jar',
     );
+
+    await _networkClient.downloadFile(url, filePath, onProgress: onProgress);
 
     _logger.info('Quilt loader downloaded to: $filePath');
     return filePath;
@@ -238,26 +239,35 @@ class QuiltInstaller {
     required String mcVersion,
     required String loaderVersion,
     required String gameDirectory,
-    void Function(double progress, String stage, String? currentFile)? onProgress,
+    void Function(double progress, String stage, String? currentFile)?
+    onProgress,
   }) async {
     try {
       _logger.info('Installing Quilt $loaderVersion for Minecraft $mcVersion');
 
       onProgress?.call(0.1, '正在获取下载链接...', null);
-      _eventBus.publish(QuiltInstallProgressEvent(
-        instanceId: instanceId,
-        progress: 0.1,
-        stage: '正在获取下载链接...',
-      ));
+      _eventBus.publish(
+        QuiltInstallProgressEvent(
+          instanceId: instanceId,
+          progress: 0.1,
+          stage: '正在获取下载链接...',
+        ),
+      );
 
       // 下载Quilt Loader
-      onProgress?.call(0.2, '正在下载Quilt Loader...', 'quilt-loader-$loaderVersion.jar');
-      _eventBus.publish(QuiltInstallProgressEvent(
-        instanceId: instanceId,
-        progress: 0.2,
-        stage: '正在下载Quilt Loader...',
-        currentFile: 'quilt-loader-$loaderVersion.jar',
-      ));
+      onProgress?.call(
+        0.2,
+        '正在下载Quilt Loader...',
+        'quilt-loader-$loaderVersion.jar',
+      );
+      _eventBus.publish(
+        QuiltInstallProgressEvent(
+          instanceId: instanceId,
+          progress: 0.2,
+          stage: '正在下载Quilt Loader...',
+          currentFile: 'quilt-loader-$loaderVersion.jar',
+        ),
+      );
 
       final loaderPath = await _downloadQuiltLoader(
         mcVersion: mcVersion,
@@ -265,17 +275,27 @@ class QuiltInstaller {
         gameDirectory: gameDirectory,
         onProgress: (received, total) {
           final fileProgress = received / total;
-          onProgress?.call(0.2 + fileProgress * 0.3, '正在下载Quilt Loader...', 'quilt-loader-$loaderVersion.jar');
+          onProgress?.call(
+            0.2 + fileProgress * 0.3,
+            '正在下载Quilt Loader...',
+            'quilt-loader-$loaderVersion.jar',
+          );
         },
       );
 
-      onProgress?.call(0.5, '正在下载Quilt安装器...', 'quilt-installer-$loaderVersion.jar');
-      _eventBus.publish(QuiltInstallProgressEvent(
-        instanceId: instanceId,
-        progress: 0.5,
-        stage: '正在下载Quilt安装器...',
-        currentFile: 'quilt-installer-$loaderVersion.jar',
-      ));
+      onProgress?.call(
+        0.5,
+        '正在下载Quilt安装器...',
+        'quilt-installer-$loaderVersion.jar',
+      );
+      _eventBus.publish(
+        QuiltInstallProgressEvent(
+          instanceId: instanceId,
+          progress: 0.5,
+          stage: '正在下载Quilt安装器...',
+          currentFile: 'quilt-installer-$loaderVersion.jar',
+        ),
+      );
 
       // 下载Quilt安装器
       final installerPath = await _downloadQuiltInstaller(
@@ -284,16 +304,22 @@ class QuiltInstaller {
         gameDirectory: gameDirectory,
         onProgress: (received, total) {
           final fileProgress = received / total;
-          onProgress?.call(0.5 + fileProgress * 0.3, '正在下载Quilt安装器...', 'quilt-installer-$loaderVersion.jar');
+          onProgress?.call(
+            0.5 + fileProgress * 0.3,
+            '正在下载Quilt安装器...',
+            'quilt-installer-$loaderVersion.jar',
+          );
         },
       );
 
       onProgress?.call(0.8, '正在安装Quilt...', null);
-      _eventBus.publish(QuiltInstallProgressEvent(
-        instanceId: instanceId,
-        progress: 0.8,
-        stage: '正在安装Quilt...',
-      ));
+      _eventBus.publish(
+        QuiltInstallProgressEvent(
+          instanceId: instanceId,
+          progress: 0.8,
+          stage: '正在安装Quilt...',
+        ),
+      );
 
       // 运行安装器
       await _runQuiltInstaller(
@@ -312,11 +338,13 @@ class QuiltInstaller {
       );
 
       onProgress?.call(1.0, '安装完成', null);
-      _eventBus.publish(QuiltInstallCompletedEvent(
-        instanceId: instanceId,
-        version: loaderVersion,
-        minecraftVersion: mcVersion,
-      ));
+      _eventBus.publish(
+        QuiltInstallCompletedEvent(
+          instanceId: instanceId,
+          version: loaderVersion,
+          minecraftVersion: mcVersion,
+        ),
+      );
 
       _logger.info('Quilt installation completed successfully');
 
@@ -328,10 +356,9 @@ class QuiltInstaller {
       }
     } catch (e, stackTrace) {
       _logger.error('Failed to install Quilt', e, stackTrace);
-      _eventBus.publish(QuiltInstallFailedEvent(
-        instanceId: instanceId,
-        error: e.toString(),
-      ));
+      _eventBus.publish(
+        QuiltInstallFailedEvent(instanceId: instanceId, error: e.toString()),
+      );
       rethrow;
     }
   }
@@ -346,19 +373,15 @@ class QuiltInstaller {
     try {
       _logger.info('Running Quilt installer...');
 
-      final result = await Process.run(
-        'java',
-        [
-          '-jar',
-          installerPath,
-          'install',
-          'client',
-          mcVersion,
-          '--install-dir',
-          gameDirectory,
-        ],
-        workingDirectory: gameDirectory,
-      );
+      final result = await Process.run('java', [
+        '-jar',
+        installerPath,
+        'install',
+        'client',
+        mcVersion,
+        '--install-dir',
+        gameDirectory,
+      ], workingDirectory: gameDirectory);
 
       if (result.exitCode != 0) {
         _logger.warning('Quilt installer output: ${result.stdout}');
@@ -397,7 +420,9 @@ class QuiltInstaller {
         'releaseTime': DateTime.now().toIso8601String(),
         'time': DateTime.now().toIso8601String(),
         'type': 'release',
-        'mainClass': baseVersionJson['mainClass'] ?? 'org.quiltmc.loader.impl.launch.knot.KnotClient',
+        'mainClass':
+            baseVersionJson['mainClass'] ??
+            'org.quiltmc.loader.impl.launch.knot.KnotClient',
         'arguments': {
           'game': [
             '--fml.quilt.accessWidener',
@@ -410,13 +435,15 @@ class QuiltInstaller {
             'name': 'org.quiltmc:quilt-loader:$loaderVersion',
             'downloads': {
               'artifact': {
-                'path': 'org/quiltmc/quilt-loader/$loaderVersion/quilt-loader-$loaderVersion.jar',
-                'sha1': '',  // 实际应该计算SHA1
-                'size': 0,  // 实际应该获取文件大小
-                'url': '${ApiEndpoints.quiltMaven}/org/quiltmc/quilt-loader/$loaderVersion/quilt-loader-$loaderVersion.jar',
-              }
-            }
-          }
+                'path':
+                    'org/quiltmc/quilt-loader/$loaderVersion/quilt-loader-$loaderVersion.jar',
+                'sha1': '', // 实际应该计算SHA1
+                'size': 0, // 实际应该获取文件大小
+                'url':
+                    '${ApiEndpoints.quiltMaven}/org/quiltmc/quilt-loader/$loaderVersion/quilt-loader-$loaderVersion.jar',
+              },
+            },
+          },
         ],
       };
 

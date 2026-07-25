@@ -10,10 +10,7 @@ import '../components/ba_notification.dart';
 class BAModpackExportPage extends StatefulWidget {
   final String instanceId;
 
-  const BAModpackExportPage({
-    super.key,
-    required this.instanceId,
-  });
+  const BAModpackExportPage({super.key, required this.instanceId});
 
   @override
   State<BAModpackExportPage> createState() => _BAModpackExportPageState();
@@ -199,7 +196,9 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
         color: BAColors.backgroundOf(context),
         child: Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(BAColors.primaryOf(context)),
+            valueColor: AlwaysStoppedAnimation<Color>(
+              BAColors.primaryOf(context),
+            ),
           ),
         ),
       );
@@ -307,7 +306,11 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
                     color: BAColors.primaryOf(context).withOpacity(0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: BAColors.primaryOf(context), size: 18),
+                  child: Icon(
+                    icon,
+                    color: BAColors.primaryOf(context),
+                    size: 18,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Text(
@@ -493,7 +496,9 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
                             ? BAColors.textPrimaryOf(context)
                             : BAColors.textSecondaryOf(context),
                         fontSize: 14,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.normal,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -596,7 +601,9 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
       width: double.infinity,
       height: 48,
       child: MouseRegion(
-        cursor: _isExporting ? SystemMouseCursors.basic : SystemMouseCursors.click,
+        cursor: _isExporting
+            ? SystemMouseCursors.basic
+            : SystemMouseCursors.click,
         child: GestureDetector(
           onTap: _isExporting ? null : _startExport,
           child: Container(
@@ -687,7 +694,9 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
             child: LinearProgressIndicator(
               value: _exportProgress,
               backgroundColor: BAColors.surfaceVariantOf(context),
-              valueColor: AlwaysStoppedAnimation<Color>(BAColors.primaryOf(context)),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                BAColors.primaryOf(context),
+              ),
               minHeight: 6,
             ),
           ),
@@ -739,7 +748,10 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
               color: BAColors.textDisabledOf(context),
               fontSize: 14,
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
             filled: true,
             fillColor: BAColors.surfaceVariantOf(context).withOpacity(0.7),
             border: OutlineInputBorder(

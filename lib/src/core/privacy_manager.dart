@@ -38,7 +38,8 @@ class PrivacyConfig {
     return PrivacyConfig(
       disableChatReporting: disableChatReporting ?? this.disableChatReporting,
       disableTelemetry: disableTelemetry ?? this.disableTelemetry,
-      disableCrashReporting: disableCrashReporting ?? this.disableCrashReporting,
+      disableCrashReporting:
+          disableCrashReporting ?? this.disableCrashReporting,
       disableAnalytics: disableAnalytics ?? this.disableAnalytics,
       disableAutoUpdate: disableAutoUpdate ?? this.disableAutoUpdate,
     );
@@ -82,13 +83,9 @@ class PrivacyManager {
   /// 获取当前隐私配置
   PrivacyConfig get config {
     try {
-      final json = _configManager.get<String>(
-        ConfigKeys.privacyConfig,
-      );
+      final json = _configManager.get<String>(ConfigKeys.privacyConfig);
       if (json != null) {
-        return PrivacyConfig.fromJson(
-          jsonDecode(json) as Map<String, dynamic>,
-        );
+        return PrivacyConfig.fromJson(jsonDecode(json) as Map<String, dynamic>);
       }
     } catch (e) {
       _logger.warn('Failed to load privacy config: $e');
@@ -100,10 +97,7 @@ class PrivacyManager {
   Future<void> setConfig(PrivacyConfig config) async {
     try {
       final jsonString = jsonEncode(config.toJson());
-      await _configManager.set(
-        ConfigKeys.privacyConfig,
-        jsonString,
-      );
+      await _configManager.set(ConfigKeys.privacyConfig, jsonString);
       _logger.info('Privacy config saved');
     } catch (e) {
       _logger.error('Failed to save privacy config', e);
@@ -146,15 +140,11 @@ class PrivacyManager {
 
   /// 获取所有隐私保护参数
   Map<String, List<String>> getAllPrivacyArgs() {
-    return {
-      'jvm': getPrivacyJvmArgs(),
-      'game': getPrivacyGameArgs(),
-    };
+    return {'jvm': getPrivacyJvmArgs(), 'game': getPrivacyGameArgs()};
   }
 
   /// 重置为默认配置
   Future<void> resetToDefault() async {
     await setConfig(const PrivacyConfig());
   }
-
 }

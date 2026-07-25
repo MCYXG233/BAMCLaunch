@@ -54,7 +54,9 @@ class ResourceManager {
     try {
       final raw = _config.get<List<dynamic>>(_resourcesKey);
       if (raw != null) {
-        _resources = raw.map((e) => ResourceItem.fromJson(e as Map<String, dynamic>)).toList();
+        _resources = raw
+            .map((e) => ResourceItem.fromJson(e as Map<String, dynamic>))
+            .toList();
       } else {
         _resources = [];
       }
@@ -67,7 +69,10 @@ class ResourceManager {
   /// 保存资源数据
   Future<void> save() async {
     try {
-      await _config.set<List<dynamic>>(_resourcesKey, _resources.map((r) => r.toJson()).toList());
+      await _config.set<List<dynamic>>(
+        _resourcesKey,
+        _resources.map((r) => r.toJson()).toList(),
+      );
       await _config.save();
       _logger.info('Resource data saved successfully');
     } catch (e, stackTrace) {
@@ -162,7 +167,10 @@ class ResourceManager {
   }
 
   /// 将资源链接到实例
-  Future<void> linkResourceToInstance(String resourceId, String instanceId) async {
+  Future<void> linkResourceToInstance(
+    String resourceId,
+    String instanceId,
+  ) async {
     final resourceIndex = _resources.indexWhere((r) => r.id == resourceId);
     if (resourceIndex == -1) {
       throw ArgumentError('Resource not found: $resourceId');
@@ -186,7 +194,10 @@ class ResourceManager {
   }
 
   /// 取消资源与实例的链接
-  Future<void> unlinkResourceFromInstance(String resourceId, String instanceId) async {
+  Future<void> unlinkResourceFromInstance(
+    String resourceId,
+    String instanceId,
+  ) async {
     final resourceIndex = _resources.indexWhere((r) => r.id == resourceId);
     if (resourceIndex == -1) {
       throw ArgumentError('Resource not found: $resourceId');
@@ -204,8 +215,13 @@ class ResourceManager {
   }
 
   /// 获取实例链接的资源
-  List<ResourceItem> getInstanceResources(String instanceId, [ResourceType? type]) {
-    final instanceResources = _resources.where((r) => r.linkedInstances?.contains(instanceId) == true).toList();
+  List<ResourceItem> getInstanceResources(
+    String instanceId, [
+    ResourceType? type,
+  ]) {
+    final instanceResources = _resources
+        .where((r) => r.linkedInstances?.contains(instanceId) == true)
+        .toList();
     if (type != null) {
       return instanceResources.where((r) => r.type == type).toList();
     }
@@ -214,7 +230,9 @@ class ResourceManager {
 
   /// 搜索资源
   List<ResourceItem> searchResources(String query, [ResourceType? type]) {
-    final results = _resources.where((r) => r.name.toLowerCase().contains(query.toLowerCase())).toList();
+    final results = _resources
+        .where((r) => r.name.toLowerCase().contains(query.toLowerCase()))
+        .toList();
     if (type != null) {
       return results.where((r) => r.type == type).toList();
     }
@@ -242,7 +260,10 @@ class ResourceManager {
   }
 
   /// 复制资源
-  Future<ResourceItem> duplicateResource(String resourceId, String newName) async {
+  Future<ResourceItem> duplicateResource(
+    String resourceId,
+    String newName,
+  ) async {
     final resource = _resources.firstWhere(
       (r) => r.id == resourceId,
       orElse: () => throw ArgumentError('Resource not found: $resourceId'),
@@ -267,7 +288,9 @@ class ResourceManager {
   }
 
   /// 批量导入资源
-  Future<List<ResourceItem>> importResources(List<Map<String, dynamic>> resourceData) async {
+  Future<List<ResourceItem>> importResources(
+    List<Map<String, dynamic>> resourceData,
+  ) async {
     final imported = <ResourceItem>[];
 
     for (final data in resourceData) {
@@ -294,4 +317,3 @@ class ResourceManager {
     return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
   }
 }
-

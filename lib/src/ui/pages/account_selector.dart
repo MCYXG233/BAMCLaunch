@@ -85,7 +85,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
 
     try {
       await _accountManager.removeAccount(account.id);
-      
+
       // 如果是Microsoft账户，也清除凭据
       if (account.type == AccountType.microsoft) {
         await _authManager.clearCredentials();
@@ -115,7 +115,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
     try {
       // 清除凭据
       await _authManager.clearCredentials();
-      
+
       if (mounted) {
         _showSuccessSnackBar('已登出');
         // 跳转到登录页面
@@ -166,16 +166,13 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
       backgroundColor: BAColors.backgroundOf(context),
       body: Column(
         children: [
-          CustomTitleBar(
-            title: '账户管理',
-            showWindowControls: true,
-          ),
+          CustomTitleBar(title: '账户管理', showWindowControls: true),
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _accounts.isEmpty
-                    ? _buildEmptyState()
-                    : _buildAccountList(),
+                ? _buildEmptyState()
+                : _buildAccountList(),
           ),
         ],
       ),
@@ -212,10 +209,7 @@ class _AccountSelectorPageState extends State<AccountSelectorPage> {
             text: '添加账户',
             onPressed: () => AppRouter.navigateToLogin(context),
             height: 48,
-            leadingIcon: const Icon(
-              Icons.add,
-              color: Colors.white,
-            ),
+            leadingIcon: const Icon(Icons.add, color: Colors.white),
           ),
         ],
       ),

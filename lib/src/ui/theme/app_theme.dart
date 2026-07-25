@@ -40,9 +40,7 @@ class BATheme {
       cardTheme: CardThemeData(
         color: BAColors.darkSurface,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: EdgeInsets.zero,
       ),
       switchTheme: SwitchThemeData(
@@ -74,18 +72,13 @@ class BATheme {
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: primary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         ),
       ),
@@ -102,9 +95,7 @@ class BATheme {
       dialogTheme: DialogThemeData(
         backgroundColor: BAColors.darkSurface,
         elevation: 8,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
@@ -118,9 +109,7 @@ class BATheme {
         backgroundColor: BAColors.darkSurfaceVariant,
         selectedColor: primary.withValues(alpha: 0.2),
         labelStyle: const TextStyle(fontSize: 13),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         side: const BorderSide(color: BAColors.darkBorder),
       ),
       checkboxTheme: CheckboxThemeData(
@@ -131,9 +120,7 @@ class BATheme {
           return null;
         }),
         checkColor: WidgetStateProperty.all(Colors.white),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       ),
       radioTheme: RadioThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
@@ -151,9 +138,7 @@ class BATheme {
       popupMenuTheme: PopupMenuThemeData(
         color: BAColors.darkSurface,
         elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       dataTableTheme: DataTableThemeData(
         headingTextStyle: const TextStyle(
@@ -173,9 +158,7 @@ class BATheme {
         contentTextStyle: BATypography.bodyMedium.copyWith(
           color: BAColors.darkTextPrimary,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: BAColors.darkSurface,
@@ -196,7 +179,10 @@ class BATheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: BAColors.darkSurfaceVariant,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: BAColors.darkBorder, width: 1),
@@ -217,8 +203,14 @@ class BATheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: BAColors.danger, width: 2),
         ),
-        hintStyle: const TextStyle(color: BAColors.darkTextDisabled, fontSize: 14),
-        labelStyle: const TextStyle(color: BAColors.darkTextSecondary, fontSize: 14),
+        hintStyle: const TextStyle(
+          color: BAColors.darkTextDisabled,
+          fontSize: 14,
+        ),
+        labelStyle: const TextStyle(
+          color: BAColors.darkTextSecondary,
+          fontSize: 14,
+        ),
         errorStyle: const TextStyle(color: BAColors.danger, fontSize: 12),
       ),
     );
@@ -240,9 +232,7 @@ class BATheme {
       cardTheme: CardThemeData(
         color: BAColors.lightSurface,
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: EdgeInsets.zero,
       ),
       switchTheme: SwitchThemeData(
@@ -274,18 +264,13 @@ class BATheme {
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: primary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         ),
       ),
@@ -302,9 +287,7 @@ class BATheme {
       dialogTheme: DialogThemeData(
         backgroundColor: BAColors.lightSurface,
         elevation: 8,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
@@ -318,9 +301,7 @@ class BATheme {
         backgroundColor: BAColors.lightSurfaceVariant,
         selectedColor: primary.withValues(alpha: 0.2),
         labelStyle: const TextStyle(fontSize: 13),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         side: const BorderSide(color: BAColors.lightBorder),
       ),
       checkboxTheme: CheckboxThemeData(
@@ -331,9 +312,7 @@ class BATheme {
           return null;
         }),
         checkColor: WidgetStateProperty.all(Colors.white),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       ),
       radioTheme: RadioThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
@@ -351,9 +330,7 @@ class BATheme {
       popupMenuTheme: PopupMenuThemeData(
         color: BAColors.lightSurface,
         elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       dataTableTheme: DataTableThemeData(
         headingTextStyle: const TextStyle(
@@ -373,9 +350,7 @@ class BATheme {
         contentTextStyle: BATypography.bodyMedium.copyWith(
           color: BAColors.lightTextPrimary,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: BAColors.lightSurface,
@@ -396,7 +371,10 @@ class BATheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: BAColors.lightSurfaceVariant,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: BAColors.lightBorder, width: 1),
@@ -417,8 +395,14 @@ class BATheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: BAColors.danger, width: 2),
         ),
-        hintStyle: const TextStyle(color: BAColors.lightTextDisabled, fontSize: 14),
-        labelStyle: const TextStyle(color: BAColors.lightTextSecondary, fontSize: 14),
+        hintStyle: const TextStyle(
+          color: BAColors.lightTextDisabled,
+          fontSize: 14,
+        ),
+        labelStyle: const TextStyle(
+          color: BAColors.lightTextSecondary,
+          fontSize: 14,
+        ),
         errorStyle: const TextStyle(color: BAColors.danger, fontSize: 12),
       ),
     );
@@ -450,20 +434,29 @@ class BATheme {
   ///
   /// 如果提供 [seedColor]，则使用 Material You 的动态颜色方案生成。
   /// 否则使用蔚蓝档案的默认固定配色。
-  static ColorScheme _buildColorScheme(Brightness brightness, Color? seedColor) {
+  static ColorScheme _buildColorScheme(
+    Brightness brightness,
+    Color? seedColor,
+  ) {
     final basePrimary = seedColor ?? BAColors.primary;
     final isDark = brightness == Brightness.dark;
 
     // 生成基于 seed 的柔和配色（莫奈取色风格）
     final hsl = HSLColor.fromColor(basePrimary);
     final primary = basePrimary;
-    final primaryLight = hsl.withLightness((hsl.lightness + 0.2).clamp(0.0, 1.0)).toColor();
-    final primaryDark = hsl.withLightness((hsl.lightness - 0.15).clamp(0.0, 1.0)).toColor();
+    final primaryLight = hsl
+        .withLightness((hsl.lightness + 0.2).clamp(0.0, 1.0))
+        .toColor();
+    final primaryDark = hsl
+        .withLightness((hsl.lightness - 0.15).clamp(0.0, 1.0))
+        .toColor();
 
     // 辅助色（粉色系，蔚蓝档案风格）
     final secondaryHsl = HSLColor.fromColor(const Color(0xFFFFB4C2));
     final secondary = secondaryHsl.toColor();
-    final secondaryDark = secondaryHsl.withLightness((secondaryHsl.lightness - 0.15).toDouble()).toColor();
+    final secondaryDark = secondaryHsl
+        .withLightness((secondaryHsl.lightness - 0.15).toDouble())
+        .toColor();
 
     if (isDark) {
       return ColorScheme.dark(
@@ -609,12 +602,12 @@ class BATheme {
   /// 深色阴影采用较深的阴影色，配合较大的模糊半径，
   /// 在深色背景上呈现明显的浮起效果。
   static List<BoxShadow> get darkShadows => [
-        BoxShadow(
-          color: BAColors.darkShadow.withValues(alpha: 0.25),
-          blurRadius: 16,
-          offset: const Offset(0, 6),
-        ),
-      ];
+    BoxShadow(
+      color: BAColors.darkShadow.withValues(alpha: 0.25),
+      blurRadius: 16,
+      offset: const Offset(0, 6),
+    ),
+  ];
 
   /// 获取浅色主题标准阴影
   ///
@@ -624,48 +617,48 @@ class BATheme {
   /// - 大模糊半径（16像素），营造柔和的浮起效果
   /// - 向下偏移（4像素），模拟自然光照
   static List<BoxShadow> get lightShadows => [
-        BoxShadow(
-          color: const Color(0xFF000000).withValues(alpha: 0.06),
-          blurRadius: 16,
-          offset: const Offset(0, 4),
-        ),
-      ];
+    BoxShadow(
+      color: const Color(0xFF000000).withValues(alpha: 0.06),
+      blurRadius: 16,
+      offset: const Offset(0, 4),
+    ),
+  ];
 
   /// 获取深色主题小阴影
   ///
   /// 返回深色主题下组件的小型阴影效果。
   /// 用于需要轻微浮起效果的小型组件。
   static List<BoxShadow> get darkShadowsSmall => [
-        BoxShadow(
-          color: BAColors.darkShadow.withValues(alpha: 0.18),
-          blurRadius: 8,
-          offset: const Offset(0, 2),
-        ),
-      ];
+    BoxShadow(
+      color: BAColors.darkShadow.withValues(alpha: 0.18),
+      blurRadius: 8,
+      offset: const Offset(0, 2),
+    ),
+  ];
 
   /// 获取浅色主题小阴影
   ///
   /// 返回浅色主题下组件的小型阴影效果。
   /// 用于小型卡片、按钮等需要轻微浮起效果的组件。
   static List<BoxShadow> get lightShadowsSmall => [
-        BoxShadow(
-          color: const Color(0xFF000000).withValues(alpha: 0.04),
-          blurRadius: 8,
-          offset: const Offset(0, 2),
-        ),
-      ];
+    BoxShadow(
+      color: const Color(0xFF000000).withValues(alpha: 0.04),
+      blurRadius: 8,
+      offset: const Offset(0, 2),
+    ),
+  ];
 
   /// 获取深色主题大阴影
   ///
   /// 返回深色主题下组件的大型阴影效果。
   /// 用于对话框、底部弹窗等需要明显浮起效果的大型组件。
   static List<BoxShadow> get darkShadowsLarge => [
-        BoxShadow(
-          color: BAColors.darkShadow.withValues(alpha: 0.35),
-          blurRadius: 24,
-          offset: const Offset(0, 10),
-        ),
-      ];
+    BoxShadow(
+      color: BAColors.darkShadow.withValues(alpha: 0.35),
+      blurRadius: 24,
+      offset: const Offset(0, 10),
+    ),
+  ];
 
   /// 获取浅色主题大阴影
   ///
@@ -673,12 +666,12 @@ class BATheme {
   /// 用于对话框、底部弹窗等需要明显浮起效果的大型组件。
   /// 阴影参数更大，营造更强的层次感。
   static List<BoxShadow> get lightShadowsLarge => [
-        BoxShadow(
-          color: const Color(0xFF000000).withValues(alpha: 0.08),
-          blurRadius: 24,
-          offset: const Offset(0, 8),
-        ),
-      ];
+    BoxShadow(
+      color: const Color(0xFF000000).withValues(alpha: 0.08),
+      blurRadius: 24,
+      offset: const Offset(0, 8),
+    ),
+  ];
 
   /// 根据当前主题获取标准阴影
   ///
@@ -718,7 +711,9 @@ class BATheme {
   /// - 深色主题时返回 [darkShadowsSmall]
   static List<BoxShadow> shadowsSmallOf(BuildContext context) {
     final brightness = Theme.of(context).brightness;
-    return brightness == Brightness.light ? lightShadowsSmall : darkShadowsSmall;
+    return brightness == Brightness.light
+        ? lightShadowsSmall
+        : darkShadowsSmall;
   }
 
   /// 根据当前主题获取大阴影
@@ -734,7 +729,9 @@ class BATheme {
   /// - 深色主题时返回 [darkShadowsLarge]
   static List<BoxShadow> shadowsLargeOf(BuildContext context) {
     final brightness = Theme.of(context).brightness;
-    return brightness == Brightness.light ? lightShadowsLarge : darkShadowsLarge;
+    return brightness == Brightness.light
+        ? lightShadowsLarge
+        : darkShadowsLarge;
   }
 
   // ==================== 毛玻璃效果 ====================

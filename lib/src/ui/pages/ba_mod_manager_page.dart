@@ -11,10 +11,7 @@ import '../components/ba_dialog.dart';
 class BAModManagerPage extends StatefulWidget {
   final String instanceId;
 
-  const BAModManagerPage({
-    super.key,
-    required this.instanceId,
-  });
+  const BAModManagerPage({super.key, required this.instanceId});
 
   @override
   State<BAModManagerPage> createState() => _BAModManagerPageState();
@@ -25,9 +22,9 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
   final DependencyResolver _dependencyResolver = DependencyResolver();
   final ModUpdateChecker _updateChecker = ModUpdateChecker();
   final ConflictDetector _conflictDetector = ConflictDetector();
-  
+
   bool _notificationInitialized = false;
-  
+
   List<ModInfo> _mods = [];
   bool _isLoading = true;
   String? _errorMessage;
@@ -230,7 +227,9 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
   }
 
   Future<void> _batchEnable() async {
-    final selectedMods = _mods.where((m) => _selectedModIds.contains(m.id) && !m.isEnabled).toList();
+    final selectedMods = _mods
+        .where((m) => _selectedModIds.contains(m.id) && !m.isEnabled)
+        .toList();
     for (final mod in selectedMods) {
       await _modManager.toggleMod(mod);
     }
@@ -241,7 +240,9 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
   }
 
   Future<void> _batchDisable() async {
-    final selectedMods = _mods.where((m) => _selectedModIds.contains(m.id) && m.isEnabled).toList();
+    final selectedMods = _mods
+        .where((m) => _selectedModIds.contains(m.id) && m.isEnabled)
+        .toList();
     for (final mod in selectedMods) {
       await _modManager.toggleMod(mod);
     }
@@ -252,7 +253,9 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
   }
 
   Future<void> _batchDelete() async {
-    final selectedMods = _mods.where((m) => _selectedModIds.contains(m.id)).toList();
+    final selectedMods = _mods
+        .where((m) => _selectedModIds.contains(m.id))
+        .toList();
     final confirmed = await BAConfirmDialog.show(
       context: context,
       title: '批量删除模组',
@@ -273,17 +276,20 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
 
   List<ModInfo> _getFilteredMods() {
     var list = _mods;
-    
+
     if (!_showDisabled) {
       list = list.where((m) => m.isEnabled).toList();
     }
-    
+
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
-      list = list.where((m) => 
-        m.name.toLowerCase().contains(query) ||
-        m.modId?.toLowerCase().contains(query) == true
-      ).toList();
+      list = list
+          .where(
+            (m) =>
+                m.name.toLowerCase().contains(query) ||
+                m.modId?.toLowerCase().contains(query) == true,
+          )
+          .toList();
     }
 
     switch (_sortBy) {
@@ -294,7 +300,11 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
         list.sort((a, b) => (b.version ?? '').compareTo(a.version ?? ''));
         break;
       case 'date':
-        list.sort((a, b) => (b.lastModified ?? DateTime.now()).compareTo(a.lastModified ?? DateTime.now()));
+        list.sort(
+          (a, b) => (b.lastModified ?? DateTime.now()).compareTo(
+            a.lastModified ?? DateTime.now(),
+          ),
+        );
         break;
     }
 
@@ -342,11 +352,7 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.extension,
-                color: Colors.white,
-                size: 24,
-              ),
+              Icon(Icons.extension, color: Colors.white, size: 24),
               const SizedBox(width: 12),
               Text(
                 '模组管理',
@@ -399,9 +405,17 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
         ),
         const Spacer(),
         if (_conflicts.isNotEmpty)
-          _buildWarningBadge(context, '${_conflicts.length} 冲突', BAColors.dangerOf(context)),
+          _buildWarningBadge(
+            context,
+            '${_conflicts.length} 冲突',
+            BAColors.dangerOf(context),
+          ),
         if (_missingDependencies.isNotEmpty)
-          _buildWarningBadge(context, '${_missingDependencies.length} 缺失依赖', Colors.orange),
+          _buildWarningBadge(
+            context,
+            '${_missingDependencies.length} 缺失依赖',
+            Colors.orange,
+          ),
       ],
     );
   }
@@ -422,7 +436,11 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
           const SizedBox(width: 4),
           Text(
             text,
-            style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
@@ -448,10 +466,7 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
               style: TextStyle(color: BAColors.textPrimaryOf(context)),
             ),
           ),
-          TextButton(
-            onPressed: _showConflictsDialog,
-            child: Text('查看详情'),
-          ),
+          TextButton(onPressed: _showConflictsDialog, child: Text('查看详情')),
         ],
       ),
     );
@@ -480,7 +495,9 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
               decoration: BoxDecoration(
                 color: BAColors.surfaceOf(context).withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: BAColors.borderOf(context).withValues(alpha: 0.6)),
+                border: Border.all(
+                  color: BAColors.borderOf(context).withValues(alpha: 0.6),
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: BAColors.primaryOf(context).withOpacity(0.05),
@@ -588,7 +605,10 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
               color: BAColors.textPrimaryOf(context),
               fontSize: 13,
             ),
-            icon: Icon(Icons.arrow_drop_down, color: BAColors.textSecondaryOf(context)),
+            icon: Icon(
+              Icons.arrow_drop_down,
+              color: BAColors.textSecondaryOf(context),
+            ),
             items: const [
               DropdownMenuItem(value: 'name', child: Text('按名称')),
               DropdownMenuItem(value: 'version', child: Text('按版本')),
@@ -644,10 +664,7 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
             ),
           ),
           const SizedBox(width: 16),
-          TextButton(
-            onPressed: _toggleSelectAll,
-            child: Text('全选'),
-          ),
+          TextButton(onPressed: _toggleSelectAll, child: Text('全选')),
           const Spacer(),
           ElevatedButton.icon(
             onPressed: _selectedModIds.isEmpty ? null : _batchEnable,
@@ -700,10 +717,7 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
               style: TextStyle(color: BAColors.textSecondaryOf(context)),
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadMods,
-              child: const Text('重试'),
-            ),
+            ElevatedButton(onPressed: _loadMods, child: const Text('重试')),
           ],
         ),
       );
@@ -789,8 +803,8 @@ class _ModItem extends StatelessWidget {
               color: isSelected
                   ? BAColors.primaryOf(context)
                   : mod.isEnabled
-                      ? BAColors.borderOf(context)
-                      : BAColors.textDisabledOf(context).withValues(alpha: 0.3),
+                  ? BAColors.borderOf(context)
+                  : BAColors.textDisabledOf(context).withValues(alpha: 0.3),
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -856,7 +870,12 @@ class _ModItem extends StatelessWidget {
                               ),
                             ),
                           if (mod.modId != null) ...[
-                            Text(' · ', style: TextStyle(color: BAColors.textDisabledOf(context))),
+                            Text(
+                              ' · ',
+                              style: TextStyle(
+                                color: BAColors.textDisabledOf(context),
+                              ),
+                            ),
                             Flexible(
                               child: Text(
                                 mod.modId!,
@@ -878,7 +897,10 @@ class _ModItem extends StatelessWidget {
               if (!isMultiSelectMode) ...[
                 const SizedBox(width: 12),
                 IconButton(
-                  icon: Icon(Icons.delete_outline, color: BAColors.textDisabledOf(context)),
+                  icon: Icon(
+                    Icons.delete_outline,
+                    color: BAColors.textDisabledOf(context),
+                  ),
                   onPressed: onDelete,
                 ),
               ],
@@ -928,7 +950,11 @@ class _ModDetailDialog extends StatelessWidget {
               color: BAColors.primaryOf(context).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(Icons.extension, color: BAColors.primaryOf(context), size: 28),
+            child: Icon(
+              Icons.extension,
+              color: BAColors.primaryOf(context),
+              size: 28,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -994,11 +1020,19 @@ class _ModDetailDialog extends StatelessWidget {
           _InfoRow(label: '模组ID', value: mod.modId ?? '未知', context: context),
           _InfoRow(label: '作者', value: mod.author ?? '未知', context: context),
           _InfoRow(label: '文件名', value: mod.fileName, context: context),
-          _InfoRow(label: '文件大小', value: _formatSize(mod.fileSize), context: context),
+          _InfoRow(
+            label: '文件大小',
+            value: _formatSize(mod.fileSize),
+            context: context,
+          ),
           if (mod.modLoader != null)
             _InfoRow(label: '加载器', value: mod.modLoader!, context: context),
           if (mod.lastModified != null)
-            _InfoRow(label: '更新日期', value: mod.lastModified!.toString().split(' ')[0], context: context),
+            _InfoRow(
+              label: '更新日期',
+              value: mod.lastModified!.toString().split(' ')[0],
+              context: context,
+            ),
           if (mod.dependencies.isNotEmpty) ...[
             const SizedBox(height: 16),
             Text(
@@ -1013,10 +1047,14 @@ class _ModDetailDialog extends StatelessWidget {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: mod.dependencies.map((dep) => Chip(
-                label: Text(dep, style: TextStyle(fontSize: 12)),
-                backgroundColor: BAColors.surfaceVariantOf(context),
-              )).toList(),
+              children: mod.dependencies
+                  .map(
+                    (dep) => Chip(
+                      label: Text(dep, style: TextStyle(fontSize: 12)),
+                      backgroundColor: BAColors.surfaceVariantOf(context),
+                    ),
+                  )
+                  .toList(),
             ),
           ],
         ],
@@ -1053,7 +1091,11 @@ class _InfoRow extends StatelessWidget {
   final String value;
   final BuildContext context;
 
-  const _InfoRow({required this.label, required this.value, required this.context});
+  const _InfoRow({
+    required this.label,
+    required this.value,
+    required this.context,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1131,7 +1173,10 @@ class _ConflictsDialog extends StatelessWidget {
                 ),
                 Text(
                   '${conflicts.length} 个冲突，${missingDependencies.length} 个缺失依赖',
-                  style: TextStyle(color: BAColors.textSecondaryOf(context), fontSize: 14),
+                  style: TextStyle(
+                    color: BAColors.textSecondaryOf(context),
+                    fontSize: 14,
+                  ),
                 ),
               ],
             ),
@@ -1208,10 +1253,12 @@ class _ConflictCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: (conflict.isError ? BAColors.dangerOf(context) : Colors.orange).withOpacity(0.1),
+        color: (conflict.isError ? BAColors.dangerOf(context) : Colors.orange)
+            .withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: (conflict.isError ? BAColors.dangerOf(context) : Colors.orange).withOpacity(0.3),
+          color: (conflict.isError ? BAColors.dangerOf(context) : Colors.orange)
+              .withOpacity(0.3),
         ),
       ),
       child: Column(
@@ -1221,7 +1268,9 @@ class _ConflictCard extends StatelessWidget {
             children: [
               Icon(
                 conflict.isError ? Icons.error : Icons.warning,
-                color: conflict.isError ? BAColors.dangerOf(context) : Colors.orange,
+                color: conflict.isError
+                    ? BAColors.dangerOf(context)
+                    : Colors.orange,
                 size: 18,
               ),
               const SizedBox(width: 8),
@@ -1237,12 +1286,18 @@ class _ConflictCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             conflict.description,
-            style: TextStyle(color: BAColors.textSecondaryOf(context), fontSize: 13),
+            style: TextStyle(
+              color: BAColors.textSecondaryOf(context),
+              fontSize: 13,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             '建议: ${conflict.suggestion}',
-            style: TextStyle(color: BAColors.textSecondaryOf(context), fontSize: 12),
+            style: TextStyle(
+              color: BAColors.textSecondaryOf(context),
+              fontSize: 12,
+            ),
           ),
         ],
       ),
@@ -1318,7 +1373,11 @@ class _UpdatesDialog extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          Icon(Icons.system_update, color: BAColors.primaryOf(context), size: 28),
+          Icon(
+            Icons.system_update,
+            color: BAColors.primaryOf(context),
+            size: 28,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -1334,7 +1393,10 @@ class _UpdatesDialog extends StatelessWidget {
                 ),
                 Text(
                   '发现 ${updates.length} 个可用更新',
-                  style: TextStyle(color: BAColors.textSecondaryOf(context), fontSize: 14),
+                  style: TextStyle(
+                    color: BAColors.textSecondaryOf(context),
+                    fontSize: 14,
+                  ),
                 ),
               ],
             ),
@@ -1370,7 +1432,11 @@ class _UpdatesDialog extends StatelessWidget {
                   color: BAColors.primaryOf(context).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(Icons.extension, color: BAColors.primaryOf(context), size: 20),
+                child: Icon(
+                  Icons.extension,
+                  color: BAColors.primaryOf(context),
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1386,7 +1452,10 @@ class _UpdatesDialog extends StatelessWidget {
                     ),
                     Text(
                       '${update.currentVersion} → ${update.latestVersion}',
-                      style: TextStyle(color: BAColors.textSecondaryOf(context), fontSize: 13),
+                      style: TextStyle(
+                        color: BAColors.textSecondaryOf(context),
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),

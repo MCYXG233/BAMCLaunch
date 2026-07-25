@@ -159,8 +159,7 @@ class _BAGlassMorphismWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final radius =
-        borderRadiusGeometry ?? BorderRadius.circular(borderRadius);
+    final radius = borderRadiusGeometry ?? BorderRadius.circular(borderRadius);
     return ClipRRect(
       borderRadius: radius,
       child: BackdropFilter(
@@ -169,10 +168,7 @@ class _BAGlassMorphismWidget extends StatelessWidget {
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: radius,
-            border: Border.all(
-              color: borderColor,
-              width: borderWidth,
-            ),
+            border: Border.all(color: borderColor, width: borderWidth),
           ),
           child: child,
         ),
@@ -235,10 +231,7 @@ class _BAParticlesWidgetState extends State<_BAParticlesWidget>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
     _particles = List.generate(widget.particleCount, (_) {
       return _createParticle();
@@ -253,7 +246,8 @@ class _BAParticlesWidgetState extends State<_BAParticlesWidget>
     return _ParticleData(
       x: _random.nextDouble(),
       y: _random.nextDouble(),
-      radius: widget.minRadius +
+      radius:
+          widget.minRadius +
           _random.nextDouble() * (widget.maxRadius - widget.minRadius),
       speedX: (_random.nextDouble() - 0.5) * 0.002,
       speedY: -_random.nextDouble() * 0.003 - 0.001,
@@ -320,10 +314,7 @@ class _ParticlesPainter extends CustomPainter {
   final List<_ParticleData> particles;
   final Color color;
 
-  _ParticlesPainter({
-    required this.particles,
-    required this.color,
-  });
+  _ParticlesPainter({required this.particles, required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -375,10 +366,7 @@ class _BANeonGlowWidgetState extends State<_BANeonGlowWidget>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
     if (widget.isActive) {
       _controller.repeat(reverse: true);
@@ -467,10 +455,7 @@ class _BAShimmerWidgetState extends State<_BAShimmerWidget>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
     if (widget.isActive) {
       _controller.repeat();
@@ -532,7 +517,11 @@ class _SlidingGradientTransform extends GradientTransform {
 
   @override
   Matrix4? transform(Rect bounds, {TextDirection? textDirection}) {
-    return Matrix4.translationValues(bounds.width * (slidePercent * 2 - 1), 0, 0);
+    return Matrix4.translationValues(
+      bounds.width * (slidePercent * 2 - 1),
+      0,
+      0,
+    );
   }
 }
 
@@ -570,10 +559,7 @@ class _BARippleWidgetState extends State<_BARippleWidget>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
     if (widget.isActive) {
       _controller.repeat();

@@ -422,11 +422,9 @@ class RetryResult<T> {
   final int attempts;
   final bool success;
 
-  RetryResult.success(this.value, this.attempts)
-      : success = true,
-        error = null;
+  RetryResult.success(this.value, this.attempts) : success = true, error = null;
 
   RetryResult.failure(this.error, this.attempts)
-      : success = false,
-        value = null;
+    : success = false,
+      value = null;
 }

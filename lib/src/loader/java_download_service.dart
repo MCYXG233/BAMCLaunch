@@ -62,7 +62,8 @@ class JavaDownloadService {
     String imageType = 'jdk',
   }) async {
     try {
-      final url = '$_adoptiumApiBase/assets/featured'
+      final url =
+          '$_adoptiumApiBase/assets/featured'
           '?architecture=$architecture'
           '&image_type=$imageType'
           '&os=$os'
@@ -82,7 +83,9 @@ class JavaDownloadService {
           final version = item['version'] as String?;
           if (version == null) return false;
           // 检查版本号是否匹配（例如 "17.0.2+12" 中的 17）
-          final major = int.tryParse(version.split('.').first.split('+').first.split('-').first);
+          final major = int.tryParse(
+            version.split('.').first.split('+').first.split('-').first,
+          );
           return major == majorVersion;
         }).toList();
 
@@ -131,7 +134,9 @@ class JavaDownloadService {
       }
 
       // 如果还是没有，尝试查找最新版本
-      _logger.warning('No exact match for Java $majorVersion, finding latest...');
+      _logger.warning(
+        'No exact match for Java $majorVersion, finding latest...',
+      );
       final latestReleases = await getAvailableJava(
         majorVersion: majorVersion,
         architecture: 'x64',
@@ -156,9 +161,7 @@ class JavaDownloadService {
     try {
       onStatus?.call('正在获取下载链接...');
 
-      final release = await getRecommendedDownload(
-        majorVersion: majorVersion,
-      );
+      final release = await getRecommendedDownload(majorVersion: majorVersion);
 
       if (release == null || release.downloadUrl.isEmpty) {
         throw AppException.fromCode(
@@ -229,18 +232,15 @@ class JavaDownloadService {
       // 使用系统解压命令
       if (Platform.isWindows) {
         // Windows: 使用 PowerShell 的 Expand-Archive
-        final result = await Process.run(
-          'powershell',
-          [
-            '-Command',
-            'Expand-Archive',
-            '-Path',
-            zipPath,
-            '-DestinationPath',
-            destinationPath,
-            '-Force',
-          ],
-        );
+        final result = await Process.run('powershell', [
+          '-Command',
+          'Expand-Archive',
+          '-Path',
+          zipPath,
+          '-DestinationPath',
+          destinationPath,
+          '-Force',
+        ]);
 
         if (result.exitCode != 0) {
           throw AppException.fromCode(
@@ -251,10 +251,12 @@ class JavaDownloadService {
         }
       } else {
         // 其他平台: 尝试使用 unzip
-        final result = await Process.run(
-          'unzip',
-          ['-o', zipPath, '-d', destinationPath],
-        );
+        final result = await Process.run('unzip', [
+          '-o',
+          zipPath,
+          '-d',
+          destinationPath,
+        ]);
 
         if (result.exitCode != 0) {
           throw AppException.fromCode(

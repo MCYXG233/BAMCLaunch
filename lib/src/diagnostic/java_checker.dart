@@ -48,10 +48,7 @@ class JavaCheckResult {
   ///
   /// [message] 错误信息，描述 Java 不可用的原因
   factory JavaCheckResult.unavailable(String message) {
-    return JavaCheckResult(
-      isAvailable: false,
-      errorMessage: message,
-    );
+    return JavaCheckResult(isAvailable: false, errorMessage: message);
   }
 
   /// 创建一个表示 Java 可用的结果
@@ -164,7 +161,8 @@ class JavaChecker {
         // 提取主版本号
         final majorVersion = _parseMajorVersion(version);
         // 检测是否为 64 位 JVM
-        final is64Bit = output.contains('64-Bit') ||
+        final is64Bit =
+            output.contains('64-Bit') ||
             output.contains('amd64') ||
             output.contains('x86_64');
 
@@ -203,7 +201,9 @@ class JavaChecker {
 
     // 检查可执行文件是否存在
     if (!await File(javaExe).exists()) {
-      return JavaCheckResult.unavailable('JAVA_HOME 路径下未找到 java 可执行文件: $javaHome');
+      return JavaCheckResult.unavailable(
+        'JAVA_HOME 路径下未找到 java 可执行文件: $javaHome',
+      );
     }
 
     // 获取 Java 信息
@@ -276,7 +276,12 @@ class JavaChecker {
     } else {
       // 非 Windows 平台（Linux、macOS 等）
       // 定义常见的 Java 安装路径
-      for (final basePath in ['/usr/lib/jvm', '/usr/java', '/opt/java', '/opt/jdk']) {
+      for (final basePath in [
+        '/usr/lib/jvm',
+        '/usr/java',
+        '/opt/java',
+        '/opt/jdk',
+      ]) {
         final dir = Directory(basePath);
         if (!await dir.exists()) continue;
 
@@ -341,7 +346,8 @@ class JavaChecker {
       // 提取主版本号
       final majorVersion = _parseMajorVersion(version);
       // 检测是否为 64 位 JVM
-      final is64Bit = output.contains('64-Bit') ||
+      final is64Bit =
+          output.contains('64-Bit') ||
           output.contains('amd64') ||
           output.contains('x86_64');
 
@@ -371,7 +377,9 @@ class JavaChecker {
     // - 1.8.0_301（Java 8 及更早版本）
     // - 17.0.1（Java 9 及更高版本）
     // - 11.0.12+7（包含构建号的版本）
-    final match = RegExp(r'"(\d+(?:\.\d+)*(?:[_.][^"]*)?)"').firstMatch(versionOutput);
+    final match = RegExp(
+      r'"(\d+(?:\.\d+)*(?:[_.][^"]*)?)"',
+    ).firstMatch(versionOutput);
     return match?.group(1);
   }
 

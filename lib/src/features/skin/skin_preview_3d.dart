@@ -578,7 +578,12 @@ class _SkinPainter extends CustomPainter {
     );
     // 右臂外侧
     canvas.drawRect(
-      Rect.fromLTWH(pixelSize * 8 + armWidth - pixelSize, armY, pixelSize, armHeight),
+      Rect.fromLTWH(
+        pixelSize * 8 + armWidth - pixelSize,
+        armY,
+        pixelSize,
+        armHeight,
+      ),
       armPaint,
     );
   }
@@ -633,7 +638,12 @@ class _SkinPainter extends CustomPainter {
     );
     // 右腿外侧
     canvas.drawRect(
-      Rect.fromLTWH(pixelSize * 4 + legWidth - pixelSize, legY, pixelSize, legHeight),
+      Rect.fromLTWH(
+        pixelSize * 4 + legWidth - pixelSize,
+        legY,
+        pixelSize,
+        legHeight,
+      ),
       legPaint,
     );
   }
@@ -685,7 +695,12 @@ class _SkinPainter extends CustomPainter {
     );
     // 右边缘
     canvas.drawRect(
-      Rect.fromLTWH(capeWidth / 2 - pixelSize + waveOffset, capeY, pixelSize, capeHeight),
+      Rect.fromLTWH(
+        capeWidth / 2 - pixelSize + waveOffset,
+        capeY,
+        pixelSize,
+        capeHeight,
+      ),
       capePaint,
     );
   }
@@ -721,7 +736,8 @@ class _SkinPainter extends CustomPainter {
     // 将旋转角度归一化到[-2π, 2π]范围
     final normalizedRotation = rotationY % (2 * math.pi);
     // 判断当前视角是否朝向前面
-    final facingFront = normalizedRotation > -math.pi / 2 && normalizedRotation < math.pi / 2;
+    final facingFront =
+        normalizedRotation > -math.pi / 2 && normalizedRotation < math.pi / 2;
 
     // 如果部位朝向与视角一致，或者该部位始终显示，则绘制
     if (isFront == facingFront || isFront) {
@@ -808,7 +824,8 @@ class SkinPreviewManager {
 
     try {
       // 获取应用支持目录，创建皮肤缓存子目录
-      final supportDir = await _platformAdapter.getApplicationSupportDirectory();
+      final supportDir = await _platformAdapter
+          .getApplicationSupportDirectory();
       _cacheDir = Directory(path.join(supportDir, 'skins'));
 
       // 如果目录不存在，创建它
@@ -845,7 +862,9 @@ class SkinPreviewManager {
 
     // 尝试从本地缓存文件加载
     if (_cacheDir != null) {
-      final skinFile = File(path.join(_cacheDir!.path, '${account.id}_skin.png'));
+      final skinFile = File(
+        path.join(_cacheDir!.path, '${account.id}_skin.png'),
+      );
       if (await skinFile.exists()) {
         return await skinFile.readAsBytes();
       }
@@ -878,7 +897,9 @@ class SkinPreviewManager {
 
     // 尝试从本地缓存文件加载
     if (_cacheDir != null) {
-      final capeFile = File(path.join(_cacheDir!.path, '${account.id}_cape.png'));
+      final capeFile = File(
+        path.join(_cacheDir!.path, '${account.id}_cape.png'),
+      );
       if (await capeFile.exists()) {
         return await capeFile.readAsBytes();
       }
@@ -935,10 +956,11 @@ class SkinPreviewManager {
   Future<String> getLocalSkinDirectory() async {
     await initialize();
     // 获取用户主目录
-    final homeDir = Platform.environment['USERPROFILE'] ??
-                    Platform.environment['HOME'] ??
-                    _cacheDir?.path ??
-                    '';
+    final homeDir =
+        Platform.environment['USERPROFILE'] ??
+        Platform.environment['HOME'] ??
+        _cacheDir?.path ??
+        '';
     return path.join(homeDir, '.minecraft', 'skins');
   }
 
@@ -951,10 +973,11 @@ class SkinPreviewManager {
   Future<String> getLocalCapeDirectory() async {
     await initialize();
     // 获取用户主目录
-    final homeDir = Platform.environment['USERPROFILE'] ??
-                    Platform.environment['HOME'] ??
-                    _cacheDir?.path ??
-                    '';
+    final homeDir =
+        Platform.environment['USERPROFILE'] ??
+        Platform.environment['HOME'] ??
+        _cacheDir?.path ??
+        '';
     return path.join(homeDir, '.minecraft', 'capes');
   }
 

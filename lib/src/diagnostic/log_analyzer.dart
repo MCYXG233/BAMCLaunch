@@ -42,7 +42,10 @@ class LogAnalyzer {
       suggestion: 'Java 版本不兼容，请安装正确版本的 Java',
     ),
     _KeywordRule(
-      keywords: ['ModResolutionException', 'Missing or unsupported mandatory dependencies'],
+      keywords: [
+        'ModResolutionException',
+        'Missing or unsupported mandatory dependencies',
+      ],
       severity: 'error',
       suggestion: '缺少模组前置依赖，请安装缺失的模组',
     ),
@@ -106,12 +109,16 @@ class LogAnalyzer {
           if (seenMessages.contains(normalized)) continue;
           seenMessages.add(normalized);
 
-          issues.add(LogIssue(
-            severity: rule.severity,
-            message: line.length > 200 ? '${line.substring(0, 200)}...' : line,
-            suggestion: rule.suggestion,
-            lineNumber: i + 1,
-          ));
+          issues.add(
+            LogIssue(
+              severity: rule.severity,
+              message: line.length > 200
+                  ? '${line.substring(0, 200)}...'
+                  : line,
+              suggestion: rule.suggestion,
+              lineNumber: i + 1,
+            ),
+          );
           break;
         }
       }
@@ -120,7 +127,12 @@ class LogAnalyzer {
     final errorCount = issues.where((i) => i.severity == 'error').length;
     final warningCount = issues.where((i) => i.severity == 'warning').length;
 
-    final summary = _buildSummary(errorCount, warningCount, issues.length, logLines.length);
+    final summary = _buildSummary(
+      errorCount,
+      warningCount,
+      issues.length,
+      logLines.length,
+    );
 
     return LogAnalysisResult(
       summary: summary,
@@ -148,7 +160,12 @@ class LogAnalyzer {
     return normalized;
   }
 
-  static String _buildSummary(int errors, int warnings, int totalIssues, int totalLines) {
+  static String _buildSummary(
+    int errors,
+    int warnings,
+    int totalIssues,
+    int totalLines,
+  ) {
     if (totalIssues == 0) {
       return '扫描了 $totalLines 行日志，未发现明显问题';
     }

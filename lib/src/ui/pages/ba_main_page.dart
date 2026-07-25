@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import '../../account/account_manager.dart';
 import '../../account/account.dart';
+import '../../core/logger.dart';
 import '../../instance/instance_manager.dart';
 import '../../instance/models.dart';
 import '../../game/launcher/game_launcher.dart';
@@ -97,8 +98,8 @@ class _BAMainPageState extends State<BAMainPage> {
           _instanceCount = _instances.length;
         });
       }
-    } catch (e) {
-      debugPrint('初始化实例管理器失败: $e');
+    } catch (e, st) {
+      Logger.instance.error('初始化实例管理器失败', e, st);
     }
   }
 
@@ -137,10 +138,12 @@ class _BAMainPageState extends State<BAMainPage> {
 
       // 获取配置
       final config = ConfigManager.instance;
-      final javaPath = instance.config.javaPath ??
+      final javaPath =
+          instance.config.javaPath ??
           config.get<String>(ConfigKeys.javaPath) ??
           'java';
-      final memory = instance.config.maxMemory ??
+      final memory =
+          instance.config.maxMemory ??
           config.get<int>(ConfigKeys.memory) ??
           2048;
       final jvmArgs = instance.config.jvmArgs ?? [];
@@ -177,7 +180,9 @@ class _BAMainPageState extends State<BAMainPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? BAColors.dangerOf(context) : BAColors.successOf(context),
+        backgroundColor: isError
+            ? BAColors.dangerOf(context)
+            : BAColors.successOf(context),
         duration: const Duration(seconds: 3),
         behavior: SnackBarBehavior.floating,
       ),
@@ -207,10 +212,7 @@ class _BAMainPageState extends State<BAMainPage> {
                     switchInCurve: Curves.easeOut,
                     switchOutCurve: Curves.easeIn,
                     transitionBuilder: (child, animation) {
-                      return FadeTransition(
-                        opacity: animation,
-                        child: child,
-                      );
+                      return FadeTransition(opacity: animation, child: child);
                     },
                     child: _buildCurrentPage(),
                   ),
@@ -276,7 +278,11 @@ class _BAMainPageState extends State<BAMainPage> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.sports_esports, color: BAColors.primaryOf(context), size: 20),
+                Icon(
+                  Icons.sports_esports,
+                  color: BAColors.primaryOf(context),
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'BAMCLaunch',
@@ -288,7 +294,10 @@ class _BAMainPageState extends State<BAMainPage> {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: BAColors.primaryOf(context).withValues(alpha: 0.25),
                     borderRadius: BorderRadius.circular(6),
@@ -323,9 +332,14 @@ class _BAMainPageState extends State<BAMainPage> {
             child: MouseRegion(
               cursor: SystemMouseCursors.click,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.85),
+                  color: BAColors.surfaceVariantOf(
+                    context,
+                  ).withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: BAColors.borderOf(context).withValues(alpha: 0.5),
@@ -334,18 +348,32 @@ class _BAMainPageState extends State<BAMainPage> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.person_outline, color: BAColors.textPrimaryOf(context).withValues(alpha: 0.85), size: 16),
+                    Icon(
+                      Icons.person_outline,
+                      color: BAColors.textPrimaryOf(
+                        context,
+                      ).withValues(alpha: 0.85),
+                      size: 16,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       _selectedAccountName ?? '加载中...',
                       style: TextStyle(
-                        color: BAColors.textPrimaryOf(context).withValues(alpha: 0.9),
+                        color: BAColors.textPrimaryOf(
+                          context,
+                        ).withValues(alpha: 0.9),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(width: 4),
-                    Icon(Icons.arrow_forward_ios, color: BAColors.textPrimaryOf(context).withValues(alpha: 0.5), size: 12),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      color: BAColors.textPrimaryOf(
+                        context,
+                      ).withValues(alpha: 0.5),
+                      size: 12,
+                    ),
                   ],
                 ),
               ),
@@ -367,12 +395,20 @@ class _BAMainPageState extends State<BAMainPage> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.folder_outlined, color: BAColors.textPrimaryOf(context).withValues(alpha: 0.85), size: 16),
+                Icon(
+                  Icons.folder_outlined,
+                  color: BAColors.textPrimaryOf(
+                    context,
+                  ).withValues(alpha: 0.85),
+                  size: 16,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   '$_instanceCount 个实例',
                   style: TextStyle(
-                    color: BAColors.textPrimaryOf(context).withValues(alpha: 0.9),
+                    color: BAColors.textPrimaryOf(
+                      context,
+                    ).withValues(alpha: 0.9),
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -481,7 +517,9 @@ class _BAMainPageState extends State<BAMainPage> {
                 duration: BAAnimationDurations.micro,
                 child: Icon(
                   icon,
-                  color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
+                  color: isSelected
+                      ? BAColors.primaryOf(context)
+                      : BAColors.textSecondaryOf(context),
                   size: 22,
                 ),
               ),
@@ -489,7 +527,9 @@ class _BAMainPageState extends State<BAMainPage> {
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
+                  color: isSelected
+                      ? BAColors.primaryOf(context)
+                      : BAColors.textSecondaryOf(context),
                   fontSize: 11,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 ),

@@ -60,25 +60,17 @@ class _BAAnimatedCardState extends State<BAAnimatedCard>
       duration: BAAnimation.normal,
     );
 
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.02,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: BAAnimation.defaultCurve,
-      ),
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.02).animate(
+      CurvedAnimation(parent: _controller, curve: BAAnimation.defaultCurve),
     );
 
-    _elevationAnimation = Tween<double>(
-      begin: widget.elevation,
-      end: widget.elevation * 2,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: BAAnimation.defaultCurve,
-      ),
-    );
+    _elevationAnimation =
+        Tween<double>(
+          begin: widget.elevation,
+          end: widget.elevation * 2,
+        ).animate(
+          CurvedAnimation(parent: _controller, curve: BAAnimation.defaultCurve),
+        );
   }
 
   @override
@@ -123,15 +115,15 @@ class _BAAnimatedCardState extends State<BAAnimatedCard>
               borderRadius: BorderRadius.circular(BAThemeData.radiusLarge),
               border: Border.all(
                 color: _isHovered
-                    ? (widget.borderColor ?? BAColors.primaryOf(context).withOpacity(0.4))
-                    : (widget.borderColor ?? BAColors.borderOf(context).withOpacity(0.5)),
+                    ? (widget.borderColor ??
+                          BAColors.primaryOf(context).withOpacity(0.4))
+                    : (widget.borderColor ??
+                          BAColors.borderOf(context).withOpacity(0.5)),
                 width: _isHovered ? 1.5 : 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(
-                    _isHovered ? 0.08 : 0.04,
-                  ),
+                  color: Colors.black.withOpacity(_isHovered ? 0.08 : 0.04),
                   blurRadius: _elevationAnimation.value * 3,
                   offset: Offset(0, _elevationAnimation.value),
                 ),
@@ -152,7 +144,9 @@ class _BAAnimatedCardState extends State<BAAnimatedCard>
                 onLongPress: widget.onLongPress,
                 onHighlightChanged: _onPress,
                 child: Padding(
-                  padding: widget.padding ?? const EdgeInsets.all(BAThemeData.spacingMedium),
+                  padding:
+                      widget.padding ??
+                      const EdgeInsets.all(BAThemeData.spacingMedium),
                   child: widget.child,
                 ),
               ),
@@ -214,17 +208,9 @@ class _BAHoverCardState extends State<BAHoverCard>
     _heightAnimation = Tween<double>(
       begin: 0.0,
       end: widget.hoverHeight,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: BAAnimations.smooth,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: BAAnimations.smooth));
 
-    _opacityAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
         curve: const Interval(0.3, 1.0, curve: Curves.easeIn),
@@ -264,7 +250,8 @@ class _BAHoverCardState extends State<BAHoverCard>
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: widget.backgroundColor ??
+                      color:
+                          widget.backgroundColor ??
                           BAColors.surfaceVariantOf(context).withOpacity(0.8),
                       borderRadius: const BorderRadius.only(
                         bottomLeft: Radius.circular(12),
@@ -322,12 +309,7 @@ class _BAExpandableCardState extends State<BAExpandableCard>
     _iconTurns = Tween<double>(
       begin: 0.0,
       end: 0.5,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: BAAnimations.smooth,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: BAAnimations.smooth));
 
     if (_isExpanded) {
       _controller.value = 1.0;
@@ -382,8 +364,9 @@ class _BAExpandableCardState extends State<BAExpandableCard>
           ),
           AnimatedCrossFade(
             duration: const Duration(milliseconds: 300),
-            crossFadeState:
-                _isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            crossFadeState: _isExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
             firstChild: const SizedBox.shrink(),
             secondChild: widget.content,
           ),
@@ -446,7 +429,10 @@ class _BAGradientBorderCardState extends State<BAGradientBorderCard>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        final defaultColors = [BAColors.primaryOf(context), BAColors.secondaryOf(context)];
+        final defaultColors = [
+          BAColors.primaryOf(context),
+          BAColors.secondaryOf(context),
+        ];
         final colors = widget.animateGradient
             ? [
                 Color.lerp(

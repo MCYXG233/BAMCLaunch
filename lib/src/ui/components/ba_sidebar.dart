@@ -65,35 +65,18 @@ class _BASidebarState extends State<BASidebar>
       duration: const Duration(milliseconds: 300),
     );
 
-    _widthAnimation = Tween<double>(
-      begin: 72.0,
-      end: 240.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: BAAnimations.elasticInOut,
-      ),
+    _widthAnimation = Tween<double>(begin: 72.0, end: 240.0).animate(
+      CurvedAnimation(parent: _controller, curve: BAAnimations.elasticInOut),
     );
 
-    _iconAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOutCubic,
-      ),
+    _iconAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic),
     );
 
     _textAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: BAAnimations.smooth,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: BAAnimations.smooth));
 
     if (_isExpanded) {
       _controller.value = 1.0;
@@ -187,15 +170,15 @@ class _BASidebarState extends State<BASidebar>
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 border: isSelected
-                    ? Border.all(color: BAColors.primaryOf(context).withOpacity(0.3))
+                    ? Border.all(
+                        color: BAColors.primaryOf(context).withOpacity(0.3),
+                      )
                     : null,
               ),
               child: Row(
                 children: [
                   Icon(
-                    isSelected
-                        ? (item.selectedIcon ?? item.icon)
-                        : item.icon,
+                    isSelected ? (item.selectedIcon ?? item.icon) : item.icon,
                     color: isSelected
                         ? BAColors.primaryOf(context)
                         : BAColors.textSecondaryOf(context),
@@ -353,45 +336,30 @@ class _BAAnimatedSidebarState extends State<BAAnimatedSidebar>
       duration: widget.animationDuration,
     );
 
-    _widthAnimation = Tween<double>(
-      begin: widget.collapsedWidth,
-      end: widget.expandedWidth,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: BAAnimations.elasticInOut,
-      ),
-    );
+    _widthAnimation =
+        Tween<double>(
+          begin: widget.collapsedWidth,
+          end: widget.expandedWidth,
+        ).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: BAAnimations.elasticInOut,
+          ),
+        );
 
-    _iconAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOutCubic,
-      ),
+    _iconAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic),
     );
 
     _textAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: BAAnimations.smooth,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: BAAnimations.smooth));
 
     _rotateAnimation = Tween<double>(
       begin: 0.0,
       end: 0.5,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: BAAnimations.smooth,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: BAAnimations.smooth));
 
     if (_isExpanded) {
       _controller.value = 1.0;
@@ -491,15 +459,15 @@ class _BAAnimatedSidebarState extends State<BAAnimatedSidebar>
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 border: isSelected
-                    ? Border.all(color: BAColors.primaryOf(context).withOpacity(0.3))
+                    ? Border.all(
+                        color: BAColors.primaryOf(context).withOpacity(0.3),
+                      )
                     : null,
               ),
               child: Row(
                 children: [
                   Icon(
-                    isSelected
-                        ? (item.selectedIcon ?? item.icon)
-                        : item.icon,
+                    isSelected ? (item.selectedIcon ?? item.icon) : item.icon,
                     color: isSelected
                         ? BAColors.primaryOf(context)
                         : BAColors.textSecondaryOf(context),

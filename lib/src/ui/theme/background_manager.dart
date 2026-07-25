@@ -6,6 +6,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import '../../config/config_manager.dart';
 import '../../config/config_keys.dart';
 import '../../config/background_config.dart';
+import '../../core/logger.dart';
 import '../../di/service_locator.dart';
 
 /// 背景管理器
@@ -145,8 +146,8 @@ class BackgroundManager extends ChangeNotifier {
 
       // 通知监听者配置已更新
       notifyListeners();
-    } catch (e) {
-      debugPrint('Failed to save background config: $e');
+    } catch (e, st) {
+      Logger.instance.error('Failed to save background config', e, st);
     }
   }
 
@@ -168,7 +169,8 @@ class BackgroundManager extends ChangeNotifier {
     await _disposeVideo();
 
     // 仅在视频背景类型且有视频路径时初始化
-    if (_currentConfig.type == BackgroundType.video && _currentConfig.videoPath != null) {
+    if (_currentConfig.type == BackgroundType.video &&
+        _currentConfig.videoPath != null) {
       try {
         // 创建新的播放器实例
         _player = Player();
@@ -190,9 +192,12 @@ class BackgroundManager extends ChangeNotifier {
 
         // 开始播放
         await _player!.play();
-      } catch (e) {
-        debugPrint('Failed to load video: $e');
-        debugPrint('Video path: ${_currentConfig.videoPath}');
+      } catch (e, st) {
+        Logger.instance.error(
+          'Failed to load video: ${_currentConfig.videoPath}',
+          e,
+          st,
+        );
         // 加载失败时清理状态
         await _disposeVideo();
       }
@@ -252,13 +257,16 @@ class BackgroundManager extends ChangeNotifier {
           return Container(
             decoration: BoxDecoration(
               color: _currentConfig.solidColor != null
-                  ? Color(_currentConfig.solidColor!).withOpacity(_currentConfig.opacity)
+                  ? Color(
+                      _currentConfig.solidColor!,
+                    ).withOpacity(_currentConfig.opacity)
                   : Colors.white.withOpacity(_currentConfig.opacity),
             ),
           );
 
         case BackgroundType.gradient:
-          final colors = _currentConfig.gradientColors
+          final colors =
+              _currentConfig.gradientColors
                   ?.map((c) => Color(c).withOpacity(_currentConfig.opacity))
                   .toList() ??
               [Colors.white, Colors.grey.shade200];
@@ -304,9 +312,9 @@ class BackgroundManager extends ChangeNotifier {
             ),
           );
       }
-    } catch (e) {
+    } catch (e, st) {
       // 背景渲染失败时返回默认渐变兜底
-      debugPrint('Background render failed: $e');
+      Logger.instance.error('Background render failed', e, st);
       return Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(

@@ -37,53 +37,61 @@ abstract class AuthException extends BAMCException {
 
 class TokenExpiredException extends AuthException {
   const TokenExpiredException({Object? originalError, StackTrace? stackTrace})
-      : super(
-          message: 'Token 已过期，请重新登录',
-          i18nKey: 'error.auth.token_expired',
-          originalError: originalError,
-          stackTrace: stackTrace,
-        );
+    : super(
+        message: 'Token 已过期，请重新登录',
+        i18nKey: 'error.auth.token_expired',
+        originalError: originalError,
+        stackTrace: stackTrace,
+      );
 }
 
 class CredentialInvalidException extends AuthException {
-  const CredentialInvalidException({Object? originalError, StackTrace? stackTrace})
-      : super(
-          message: '凭证无效，请重新登录',
-          i18nKey: 'error.auth.credential_invalid',
-          originalError: originalError,
-          stackTrace: stackTrace,
-        );
+  const CredentialInvalidException({
+    Object? originalError,
+    StackTrace? stackTrace,
+  }) : super(
+         message: '凭证无效，请重新登录',
+         i18nKey: 'error.auth.credential_invalid',
+         originalError: originalError,
+         stackTrace: stackTrace,
+       );
 }
 
 class CharacterDeletedException extends AuthException {
-  const CharacterDeletedException({Object? originalError, StackTrace? stackTrace})
-      : super(
-          message: '角色已被删除',
-          i18nKey: 'error.auth.character_deleted',
-          originalError: originalError,
-          stackTrace: stackTrace,
-        );
+  const CharacterDeletedException({
+    Object? originalError,
+    StackTrace? stackTrace,
+  }) : super(
+         message: '角色已被删除',
+         i18nKey: 'error.auth.character_deleted',
+         originalError: originalError,
+         stackTrace: stackTrace,
+       );
 }
 
 class ServerUnreachableException extends AuthException {
-  const ServerUnreachableException({Object? originalError, StackTrace? stackTrace})
-      : super(
-          message: '认证服务器不可达',
-          i18nKey: 'error.auth.server_unreachable',
-          originalError: originalError,
-          stackTrace: stackTrace,
-          retryable: true,
-        );
+  const ServerUnreachableException({
+    Object? originalError,
+    StackTrace? stackTrace,
+  }) : super(
+         message: '认证服务器不可达',
+         i18nKey: 'error.auth.server_unreachable',
+         originalError: originalError,
+         stackTrace: stackTrace,
+         retryable: true,
+       );
 }
 
 class AuthServerResponseMalformedException extends AuthException {
-  const AuthServerResponseMalformedException({Object? originalError, StackTrace? stackTrace})
-      : super(
-          message: '认证服务器返回了无法解析的响应',
-          i18nKey: 'error.auth.response_malformed',
-          originalError: originalError,
-          stackTrace: stackTrace,
-        );
+  const AuthServerResponseMalformedException({
+    Object? originalError,
+    StackTrace? stackTrace,
+  }) : super(
+         message: '认证服务器返回了无法解析的响应',
+         i18nKey: 'error.auth.response_malformed',
+         originalError: originalError,
+         stackTrace: stackTrace,
+       );
 }
 
 /// 下载相关异常
@@ -107,23 +115,25 @@ class HashMismatchException extends DownloadException {
     Object? originalError,
     StackTrace? stackTrace,
   }) : super(
-          message: '文件校验失败: 期望 $expectedHash, 实际 $actualHash',
-          i18nKey: 'error.download.hash_mismatch',
-          originalError: originalError,
-          stackTrace: stackTrace,
-          retryable: true,
-        );
+         message: '文件校验失败: 期望 $expectedHash, 实际 $actualHash',
+         i18nKey: 'error.download.hash_mismatch',
+         originalError: originalError,
+         stackTrace: stackTrace,
+         retryable: true,
+       );
 }
 
 class DownloadSourceUnavailableException extends DownloadException {
-  const DownloadSourceUnavailableException({Object? originalError, StackTrace? stackTrace})
-      : super(
-          message: '所有下载源均不可用',
-          i18nKey: 'error.download.source_unavailable',
-          originalError: originalError,
-          stackTrace: stackTrace,
-          retryable: true,
-        );
+  const DownloadSourceUnavailableException({
+    Object? originalError,
+    StackTrace? stackTrace,
+  }) : super(
+         message: '所有下载源均不可用',
+         i18nKey: 'error.download.source_unavailable',
+         originalError: originalError,
+         stackTrace: stackTrace,
+         retryable: true,
+       );
 }
 
 /// 游戏启动相关异常
@@ -138,22 +148,25 @@ abstract class LaunchException extends BAMCException {
 
 class JavaNotFoundException extends LaunchException {
   const JavaNotFoundException({Object? originalError, StackTrace? stackTrace})
-      : super(
-          message: '未找到可用的 Java 运行时',
-          i18nKey: 'error.launch.java_not_found',
-          originalError: originalError,
-          stackTrace: stackTrace,
-        );
+    : super(
+        message: '未找到可用的 Java 运行时',
+        i18nKey: 'error.launch.java_not_found',
+        originalError: originalError,
+        stackTrace: stackTrace,
+      );
 }
 
 class GameFileCorruptedException extends LaunchException {
-  const GameFileCorruptedException({required String filePath, Object? originalError, StackTrace? stackTrace})
-      : super(
-          message: '游戏文件损坏: $filePath',
-          i18nKey: 'error.launch.file_corrupted',
-          originalError: originalError,
-          stackTrace: stackTrace,
-        );
+  const GameFileCorruptedException({
+    required String filePath,
+    Object? originalError,
+    StackTrace? stackTrace,
+  }) : super(
+         message: '游戏文件损坏: $filePath',
+         i18nKey: 'error.launch.file_corrupted',
+         originalError: originalError,
+         stackTrace: stackTrace,
+       );
 }
 
 class CrashException extends LaunchException {
@@ -166,9 +179,9 @@ class CrashException extends LaunchException {
     Object? originalError,
     StackTrace? stackTrace,
   }) : super(
-          message: '游戏崩溃 (exit code: $exitCode)',
-          i18nKey: 'error.launch.crash',
-          originalError: originalError,
-          stackTrace: stackTrace,
-        );
+         message: '游戏崩溃 (exit code: $exitCode)',
+         i18nKey: 'error.launch.crash',
+         originalError: originalError,
+         stackTrace: stackTrace,
+       );
 }

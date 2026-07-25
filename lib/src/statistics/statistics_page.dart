@@ -16,7 +16,8 @@ class StatisticsPage extends StatefulWidget {
 
 class _StatisticsPageState extends State<StatisticsPage> {
   final PlayTimeTracker _playTimeTracker = PlayTimeTracker.instance;
-  final GameStatisticsManager _statisticsManager = GameStatisticsManager.instance;
+  final GameStatisticsManager _statisticsManager =
+      GameStatisticsManager.instance;
 
   TimeRange _selectedTimeRange = TimeRange.week;
   bool _isInitialized = false;
@@ -105,7 +106,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
         ? _playTimeTracker.getWeekPlayTime()
         : _playTimeTracker.getMonthPlayTime();
     final totalLaunchCount = _statisticsManager.getTotalLaunchCount();
-    final topInstance = _playTimeTracker.getTopPlayTimeEntries(limit: 1).firstOrNull;
+    final topInstance = _playTimeTracker
+        .getTopPlayTimeEntries(limit: 1)
+        .firstOrNull;
 
     return Row(
       children: [
@@ -144,7 +147,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
             title: '最常玩实例',
             value: topInstance?.instanceName ?? '-',
             subtitle: topInstance != null
-                ? _formatDuration(Duration(seconds: topInstance.playTimeSeconds))
+                ? _formatDuration(
+                    Duration(seconds: topInstance.playTimeSeconds),
+                  )
                 : '暂无数据',
             icon: Icons.star,
             iconColor: const Color(0xFFFFE66D),
@@ -163,9 +168,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: BAColors.borderOf(context).withOpacity(0.5),
-        ),
+        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,9 +218,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: BAColors.borderOf(context).withOpacity(0.5),
-        ),
+        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,9 +259,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: BAColors.borderOf(context).withOpacity(0.5),
-        ),
+        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

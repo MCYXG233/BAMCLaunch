@@ -404,10 +404,7 @@ class PlayTimeRecordedEvent extends GameLaunchEvent {
   /// 游玩时长
   final Duration playTime;
 
-  PlayTimeRecordedEvent({
-    required this.version,
-    required this.playTime,
-  });
+  PlayTimeRecordedEvent({required this.version, required this.playTime});
 }
 
 /// 实例相关事件基类
@@ -737,10 +734,7 @@ class LoaderInstallFailedEvent extends LoaderEvent {
   /// 错误信息
   final Object error;
 
-  LoaderInstallFailedEvent({
-    required this.instanceId,
-    required this.error,
-  });
+  LoaderInstallFailedEvent({required this.instanceId, required this.error});
 }
 
 /// 导航到主页事件

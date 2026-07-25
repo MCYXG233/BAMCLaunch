@@ -132,7 +132,9 @@ class _LogPanelState extends State<LogPanel> {
     // 按文本过滤
     if (_filterText.isNotEmpty) {
       final lowerFilter = _filterText.toLowerCase();
-      logs = logs.where((log) => log.message.toLowerCase().contains(lowerFilter)).toList();
+      logs = logs
+          .where((log) => log.message.toLowerCase().contains(lowerFilter))
+          .toList();
     }
 
     return logs;
@@ -171,7 +173,8 @@ class _LogPanelState extends State<LogPanel> {
 
   int get _infoCount => _logs.where((l) => l.level == GameLogLevel.info).length;
   int get _warnCount => _logs.where((l) => l.level == GameLogLevel.warn).length;
-  int get _errorCount => _logs.where((l) => l.level == GameLogLevel.error).length;
+  int get _errorCount =>
+      _logs.where((l) => l.level == GameLogLevel.error).length;
 
   String _formatTime(DateTime dt) {
     final local = dt.toLocal();
@@ -237,16 +240,14 @@ class _LogPanelState extends State<LogPanel> {
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         border: Border(
-          bottom: BorderSide(color: BAColors.borderOf(context).withOpacity(0.3)),
+          bottom: BorderSide(
+            color: BAColors.borderOf(context).withOpacity(0.3),
+          ),
         ),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.terminal,
-            size: 18,
-            color: BAColors.primaryOf(context),
-          ),
+          Icon(Icons.terminal, size: 18, color: BAColors.primaryOf(context)),
           const SizedBox(width: 8),
           Text(
             '日志',
@@ -267,7 +268,11 @@ class _LogPanelState extends State<LogPanel> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.pause, size: 14, color: BAColors.warningOf(context)),
+                  Icon(
+                    Icons.pause,
+                    size: 14,
+                    color: BAColors.warningOf(context),
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     '已暂停',
@@ -316,11 +321,7 @@ class _LogPanelState extends State<LogPanel> {
         borderRadius: BorderRadius.circular(4),
         child: Container(
           padding: const EdgeInsets.all(6),
-          child: Icon(
-            icon,
-            size: 18,
-            color: BAColors.textSecondaryOf(context),
-          ),
+          child: Icon(icon, size: 18, color: BAColors.textSecondaryOf(context)),
         ),
       ),
     );
@@ -332,7 +333,9 @@ class _LogPanelState extends State<LogPanel> {
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context).withOpacity(0.5),
         border: Border(
-          bottom: BorderSide(color: BAColors.borderOf(context).withOpacity(0.2)),
+          bottom: BorderSide(
+            color: BAColors.borderOf(context).withOpacity(0.2),
+          ),
         ),
       ),
       child: Row(
@@ -343,7 +346,9 @@ class _LogPanelState extends State<LogPanel> {
               decoration: BoxDecoration(
                 color: BAColors.surfaceVariantOf(context),
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: BAColors.borderOf(context).withOpacity(0.3)),
+                border: Border.all(
+                  color: BAColors.borderOf(context).withOpacity(0.3),
+                ),
               ),
               child: TextField(
                 controller: _filterController,
@@ -379,8 +384,13 @@ class _LogPanelState extends State<LogPanel> {
     );
   }
 
-  Widget _buildLevelFilterChip(BuildContext context, String label, Set<GameLogLevel> levels) {
-    final isSelected = _visibleLevels.length == levels.length ||
+  Widget _buildLevelFilterChip(
+    BuildContext context,
+    String label,
+    Set<GameLogLevel> levels,
+  ) {
+    final isSelected =
+        _visibleLevels.length == levels.length ||
         (levels.length == 1 && _visibleLevels.contains(levels.first));
 
     return GestureDetector(
@@ -479,10 +489,7 @@ class _LogPanelState extends State<LogPanel> {
             ),
             TextSpan(
               text: '[$levelStr] ',
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(color: color, fontWeight: FontWeight.w600),
             ),
             TextSpan(
               text: log.message,
@@ -505,11 +512,29 @@ class _LogPanelState extends State<LogPanel> {
       ),
       child: Row(
         children: [
-          _buildStatusItem(context, Icons.info_outline, 'INFO', _infoCount, BAColors.successOf(context)),
+          _buildStatusItem(
+            context,
+            Icons.info_outline,
+            'INFO',
+            _infoCount,
+            BAColors.successOf(context),
+          ),
           const SizedBox(width: 16),
-          _buildStatusItem(context, Icons.warning_amber_outlined, 'WARN', _warnCount, BAColors.warningOf(context)),
+          _buildStatusItem(
+            context,
+            Icons.warning_amber_outlined,
+            'WARN',
+            _warnCount,
+            BAColors.warningOf(context),
+          ),
           const SizedBox(width: 16),
-          _buildStatusItem(context, Icons.error_outline, 'ERROR', _errorCount, BAColors.dangerOf(context)),
+          _buildStatusItem(
+            context,
+            Icons.error_outline,
+            'ERROR',
+            _errorCount,
+            BAColors.dangerOf(context),
+          ),
           const Spacer(),
           Text(
             '共 ${_filteredLogs.length} 条日志',
@@ -540,7 +565,13 @@ class _LogPanelState extends State<LogPanel> {
     );
   }
 
-  Widget _buildStatusItem(BuildContext context, IconData icon, String label, int count, Color color) {
+  Widget _buildStatusItem(
+    BuildContext context,
+    IconData icon,
+    String label,
+    int count,
+    Color color,
+  ) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -591,8 +622,10 @@ class LogExporter {
   /// 获取导出文件名
   static String generateFileName({String? prefix}) {
     final now = DateTime.now();
-    final date = '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
-    final time = '${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}';
+    final date =
+        '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+    final time =
+        '${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}';
     final name = prefix ?? 'game_log';
     return '${name}_${date}_$time.log';
   }

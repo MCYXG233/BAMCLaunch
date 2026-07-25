@@ -160,7 +160,9 @@ class AccountStore {
   }
 
   /// 加密保存敏感凭据
-  Future<void> _saveCredentials(Map<String, Map<String, String?>> credentialsMap) async {
+  Future<void> _saveCredentials(
+    Map<String, Map<String, String?>> credentialsMap,
+  ) async {
     try {
       final jsonStr = jsonEncode(credentialsMap);
       final encrypted = CryptoUtil.encryptString(jsonStr);

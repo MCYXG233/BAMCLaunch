@@ -73,10 +73,7 @@ class VersionFilterBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border(
-          bottom: BorderSide(
-            color: Theme.of(context).dividerColor,
-            width: 1,
-          ),
+          bottom: BorderSide(color: Theme.of(context).dividerColor, width: 1),
         ),
       ),
       child: Column(
@@ -89,14 +86,10 @@ class VersionFilterBar extends StatelessWidget {
           Row(
             children: [
               // 版本类型筛选
-              Expanded(
-                child: _buildVersionTypeFilter(context),
-              ),
+              Expanded(child: _buildVersionTypeFilter(context)),
               const SizedBox(width: 16),
               // ModLoader筛选
-              Expanded(
-                child: _buildLoaderTypeFilter(context),
-              ),
+              Expanded(child: _buildLoaderTypeFilter(context)),
             ],
           ),
         ],
@@ -118,10 +111,11 @@ class VersionFilterBar extends StatelessWidget {
                 },
               )
             : null,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
       onChanged: (value) {
         onFilterChanged(filterState.copyWith(searchQuery: value));
@@ -137,8 +131,8 @@ class VersionFilterBar extends StatelessWidget {
         Text(
           '版本类型',
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 8),
         SingleChildScrollView(
@@ -152,11 +146,15 @@ class VersionFilterBar extends StatelessWidget {
                   label: Text(type.label),
                   selected: isSelected,
                   onSelected: (selected) {
-                    onFilterChanged(filterState.copyWith(
-                      versionType: selected ? type : VersionFilterType.all,
-                    ));
+                    onFilterChanged(
+                      filterState.copyWith(
+                        versionType: selected ? type : VersionFilterType.all,
+                      ),
+                    );
                   },
-                  backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest,
                   selectedColor: Theme.of(context).colorScheme.primaryContainer,
                 ),
               );
@@ -175,8 +173,8 @@ class VersionFilterBar extends StatelessWidget {
         Text(
           'Mod加载器',
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 8),
         SingleChildScrollView(
@@ -190,11 +188,15 @@ class VersionFilterBar extends StatelessWidget {
                   label: Text(type.label),
                   selected: isSelected,
                   onSelected: (selected) {
-                    onFilterChanged(filterState.copyWith(
-                      loaderType: selected ? type : LoaderFilterType.all,
-                    ));
+                    onFilterChanged(
+                      filterState.copyWith(
+                        loaderType: selected ? type : LoaderFilterType.all,
+                      ),
+                    );
                   },
-                  backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest,
                   selectedColor: _getLoaderChipColor(type),
                 ),
               );
@@ -285,10 +287,7 @@ class FilteredVersionList extends StatelessWidget {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: 16),
-            Text(
-              '没有找到匹配的版本',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
+            Text('没有找到匹配的版本', style: Theme.of(context).textTheme.bodyLarge),
             if (filterState.searchQuery.isNotEmpty ||
                 filterState.versionType != VersionFilterType.all ||
                 filterState.loaderType != LoaderFilterType.all) ...[

@@ -57,7 +57,8 @@ class _BAButtonState extends State<BAButton> {
           curve: Curves.easeOutCubic,
           height: widget.height ?? 48,
           width: widget.width,
-          padding: widget.padding ??
+          padding:
+              widget.padding ??
               const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           decoration: _getDecoration(context, isDisabled),
           child: AnimatedScale(
@@ -112,7 +113,9 @@ class _BAButtonState extends State<BAButton> {
       case BAButtonStyle.primary:
         backgroundColor = isDisabled
             ? BAColors.primaryOf(context).withValues(alpha: 0.4)
-            : (_isHovered ? BAColors.primaryDarkOf(context) : BAColors.primaryOf(context));
+            : (_isHovered
+                  ? BAColors.primaryDarkOf(context)
+                  : BAColors.primaryOf(context));
         borderColor = Colors.transparent;
         shadows = isDisabled ? [] : BATheme.shadowsSmallOf(context);
         break;
@@ -123,8 +126,8 @@ class _BAButtonState extends State<BAButton> {
         borderColor = isDisabled
             ? BAColors.borderOf(context)
             : (_isHovered
-                ? BAColors.primaryOf(context).withValues(alpha: 0.5)
-                : BAColors.borderOf(context));
+                  ? BAColors.primaryOf(context).withValues(alpha: 0.5)
+                  : BAColors.borderOf(context));
         shadows = isDisabled ? [] : BATheme.shadowsSmallOf(context);
         break;
       case BAButtonStyle.text:
@@ -136,15 +139,17 @@ class _BAButtonState extends State<BAButton> {
         backgroundColor = Colors.transparent;
         borderColor = isDisabled
             ? BAColors.borderOf(context)
-            : (_isHovered ? BAColors.primaryOf(context) : BAColors.borderOf(context));
+            : (_isHovered
+                  ? BAColors.primaryOf(context)
+                  : BAColors.borderOf(context));
         shadows = [];
         break;
       case BAButtonStyle.danger:
         backgroundColor = isDisabled
             ? BAColors.dangerOf(context).withValues(alpha: 0.4)
             : (_isHovered
-                ? BAColors.dangerOf(context).withValues(alpha: 0.8)
-                : BAColors.dangerOf(context));
+                  ? BAColors.dangerOf(context).withValues(alpha: 0.8)
+                  : BAColors.dangerOf(context));
         borderColor = Colors.transparent;
         shadows = isDisabled ? [] : BATheme.shadowsSmallOf(context);
         break;
@@ -152,8 +157,8 @@ class _BAButtonState extends State<BAButton> {
         backgroundColor = isDisabled
             ? BAColors.successOf(context).withValues(alpha: 0.4)
             : (_isHovered
-                ? BAColors.successOf(context).withValues(alpha: 0.8)
-                : BAColors.successOf(context));
+                  ? BAColors.successOf(context).withValues(alpha: 0.8)
+                  : BAColors.successOf(context));
         borderColor = Colors.transparent;
         shadows = isDisabled ? [] : BATheme.shadowsSmallOf(context);
         break;
@@ -187,7 +192,9 @@ class _BAButtonState extends State<BAButton> {
       case BAButtonStyle.outline:
         textColor = isDisabled
             ? BAColors.textDisabledOf(context)
-            : (_isHovered ? BAColors.primaryOf(context) : BAColors.textPrimaryOf(context));
+            : (_isHovered
+                  ? BAColors.primaryOf(context)
+                  : BAColors.textPrimaryOf(context));
         break;
     }
 
@@ -211,14 +218,7 @@ class _BAButtonState extends State<BAButton> {
 }
 
 /// 蔚蓝档案按钮样式
-enum BAButtonStyle {
-  primary,
-  secondary,
-  text,
-  outline,
-  danger,
-  success,
-}
+enum BAButtonStyle { primary, secondary, text, outline, danger, success }
 
 /// 蔚蓝档案风格主按钮
 class BAPrimaryButton extends StatelessWidget {
@@ -385,7 +385,8 @@ class _BAIconButtonState extends State<BAIconButton> {
           duration: BAAnimation.fast,
           curve: Curves.easeOutCubic,
           decoration: BoxDecoration(
-            color: widget.backgroundColor ??
+            color:
+                widget.backgroundColor ??
                 (_isHovered
                     ? BAColors.surfaceVariantOf(context)
                     : Colors.transparent),
@@ -412,10 +413,7 @@ class _BAIconButtonState extends State<BAIconButton> {
     );
 
     if (widget.tooltip != null) {
-      button = Tooltip(
-        message: widget.tooltip!,
-        child: button,
-      );
+      button = Tooltip(message: widget.tooltip!, child: button);
     }
 
     return button;

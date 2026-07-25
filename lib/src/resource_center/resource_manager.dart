@@ -41,22 +41,24 @@ class ResourceManager {
   bool get initialized => _initialized;
 
   /// 已安装的资源列表
-  List<InstalledResource> get installedResources => List.unmodifiable(_installedResources);
+  List<InstalledResource> get installedResources =>
+      List.unmodifiable(_installedResources);
 
   /// 初始化资源管理器
   Future<void> initialize() async {
     if (_initialized) return;
 
     try {
-      final supportDir = await _platformAdapter.getApplicationSupportDirectory();
+      final supportDir = await _platformAdapter
+          .getApplicationSupportDirectory();
       final resourcesDir = Directory(path.join(supportDir, 'resources'));
-      
+
       if (!await resourcesDir.exists()) {
         await resourcesDir.create(recursive: true);
       }
 
       _storageFile = File(path.join(resourcesDir.path, 'installed.json'));
-      
+
       if (await _storageFile!.exists()) {
         final content = await _storageFile!.readAsString();
         final data = jsonDecode(content) as List<dynamic>;
@@ -73,7 +75,9 @@ class ResourceManager {
       }
 
       _initialized = true;
-      _logger.info('ResourceManager initialized with ${_installedResources.length} resources');
+      _logger.info(
+        'ResourceManager initialized with ${_installedResources.length} resources',
+      );
     } catch (e, stackTrace) {
       _logger.error('Failed to initialize ResourceManager', e, stackTrace);
       rethrow;
@@ -146,7 +150,7 @@ class ResourceManager {
     if (index == -1) return;
 
     final resource = _installedResources.removeAt(index);
-    
+
     try {
       final file = File(resource.filePath);
       if (await file.exists()) {
@@ -167,10 +171,14 @@ class ResourceManager {
     final index = _installedResources.indexWhere((r) => r.localId == localId);
     if (index == -1) return;
 
-    _installedResources[index] = _installedResources[index].copyWith(enabled: enabled);
+    _installedResources[index] = _installedResources[index].copyWith(
+      enabled: enabled,
+    );
     await _save();
     _eventBus.publish(ResourceToggledEvent(localId: localId, enabled: enabled));
-    _logger.info('${enabled ? 'Enabled' : 'Disabled'} resource: ${_installedResources[index].name}');
+    _logger.info(
+      '${enabled ? 'Enabled' : 'Disabled'} resource: ${_installedResources[index].name}',
+    );
   }
 
   /// 根据localId获取已安装资源
@@ -194,7 +202,10 @@ class ResourceManager {
   }
 
   /// 获取已安装资源（通过source和resourceId）
-  InstalledResource? getInstalledResourceBySource(String source, String resourceId) {
+  InstalledResource? getInstalledResourceBySource(
+    String source,
+    String resourceId,
+  ) {
     final localId = InstalledResource.generateLocalId(source, resourceId);
     return getInstalledResource(localId);
   }

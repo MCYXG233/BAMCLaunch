@@ -30,10 +30,13 @@ class CustomThemeColors {
 
   /// 蔚蓝档案 - 浅色模式的主色调（hex value）
   final int blueArchiveLight;
+
   /// 蔚蓝档案 - 深色模式的主色调
   final int blueArchiveDark;
+
   /// Minecraft - 浅色模式的主色调
   final int minecraftLight;
+
   /// Minecraft - 深色模式的主色调
   final int minecraftDark;
 
@@ -129,10 +132,7 @@ class PresetColor {
   final String name;
   final int primaryValue;
 
-  const PresetColor({
-    required this.name,
-    required this.primaryValue,
-  });
+  const PresetColor({required this.name, required this.primaryValue});
 
   Color get color => Color(primaryValue);
 }

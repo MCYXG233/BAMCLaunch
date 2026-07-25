@@ -6,7 +6,11 @@ import '../di/service_locator.dart';
 import '../platform/platform_adapter.dart';
 import '../platform/platform_adapter_factory.dart';
 
-/// 日志条目
+/// 日志条目（LogRecord 轻量视图，用于历史日志读取与导出）
+///
+/// 复用 [LogRecord] 作为底层数据结构，提供历史日志的 JSON 序列化、
+/// 解析和格式化输出。注意：此类型仅作为历史日志读取时的转换容器，
+/// 新的日志记录应直接使用 [Logger] / [LogRecord]。
 class LogEntry {
   final DateTime timestamp;
   final LogLevel level;
@@ -21,6 +25,17 @@ class LogEntry {
     required this.message,
     this.stackTrace,
   });
+
+  /// 从 [LogRecord] 创建历史日志条目
+  factory LogEntry.fromRecord(LogRecord record, {required String loggerName}) {
+    return LogEntry(
+      timestamp: record.timestamp,
+      level: record.level,
+      logger: loggerName,
+      message: record.message,
+      stackTrace: record.stackTrace?.toString(),
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -48,16 +63,17 @@ class LogEntry {
   @override
   String toString() {
     final levelStr = level.name.toUpperCase().padRight(7);
-    final timeStr = '${timestamp.hour.toString().padLeft(2, '0')}:'
+    final timeStr =
+        '${timestamp.hour.toString().padLeft(2, '0')}:'
         '${timestamp.minute.toString().padLeft(2, '0')}:'
         '${timestamp.second.toString().padLeft(2, '0')}';
-    
+
     var result = '[$timeStr] [$levelStr] [$logger] $message';
-    
+
     if (stackTrace != null && stackTrace!.isNotEmpty) {
       result += '\n$stackTrace';
     }
-    
+
     return result;
   }
 }
@@ -179,7 +195,8 @@ class LogManager {
     if (_initialized) return;
 
     try {
-      final supportDir = await _platformAdapter.getApplicationSupportDirectory();
+      final supportDir = await _platformAdapter
+          .getApplicationSupportDirectory();
       _logDir = Directory(path.join(supportDir, 'logs'));
 
       if (!await _logDir!.exists()) {
@@ -202,6 +219,10 @@ class LogManager {
   }
 
   /// 记录日志
+  ///
+  /// 已废弃：直接使用 `Logger.instance.info/warn/error/fatal` 替代。
+  /// 此方法仅作为兼容入口保留，内部委托给 [Logger]。
+  @Deprecated('使用 Logger.instance.info/warn/error/fatal 直接记录')
   Future<void> log(
     LogLevel level,
     String logger,
@@ -210,26 +231,45 @@ class LogManager {
   }) async {
     if (level.index < _config.minLevel.index) return;
 
+    final timestamp = DateTime.now();
     final entry = LogEntry(
-      timestamp: DateTime.now(),
+      timestamp: timestamp,
       level: level,
       logger: logger,
       message: message,
       stackTrace: stackTrace,
     );
 
-    // 添加到缓存
+    // 添加到缓存（仅用于历史日志读取 / 诊断导出）
     _logCache.add(entry);
     if (_logCache.length > _maxCacheSize) {
       _logCache.removeAt(0);
     }
 
-    // 写入控制台
-    if (_config.enableConsoleLogging) {
-      _printToConsole(entry);
+    // 委托给 Logger：Logger 已处理控制台 / 文件输出 + 事件总线
+    final coreLogger = Logger(logger);
+    final stackTraceObj = stackTrace != null
+        ? StackTrace.fromString(stackTrace)
+        : null;
+    switch (level) {
+      case LogLevel.debug:
+        coreLogger.debug(message, null, stackTraceObj);
+        break;
+      case LogLevel.info:
+        coreLogger.info(message, null, stackTraceObj);
+        break;
+      case LogLevel.warn:
+        coreLogger.warn(message, null, stackTraceObj);
+        break;
+      case LogLevel.error:
+        coreLogger.error(message, null, stackTraceObj);
+        break;
+      case LogLevel.fatal:
+        coreLogger.fatal(message, null, stackTraceObj);
+        break;
     }
 
-    // 写入文件
+    // 自定义文件日志（按日期命名 + 过期清理，Logger 的轮转是大小策略）
     if (_config.enableFileLogging) {
       await _writeToFile(entry);
     }
@@ -263,7 +303,8 @@ class LogManager {
     if (_logDir == null) return;
 
     final today = DateTime.now();
-    final logFileName = 'bamc_${today.year}${today.month.toString().padLeft(2, '0')}${today.day.toString().padLeft(2, '0')}.log';
+    final logFileName =
+        'bamc_${today.year}${today.month.toString().padLeft(2, '0')}${today.day.toString().padLeft(2, '0')}.log';
     _currentLogFile = File(path.join(_logDir!.path, logFileName));
 
     if (!await _currentLogFile!.exists()) {
@@ -309,7 +350,9 @@ class LogManager {
       await for (final entity in _logDir!.list()) {
         if (entity is File && entity.path.contains('.log.')) {
           // 删除超过备份数量的轮转日志
-          final age = DateTime.now().difference(await entity.stat().then((s) => s.modified));
+          final age = DateTime.now().difference(
+            await entity.stat().then((s) => s.modified),
+          );
           if (age.inDays > _config.maxBackupFiles) {
             await entity.delete();
           }
@@ -324,7 +367,9 @@ class LogManager {
   Future<void> _cleanOldLogs() async {
     if (_logDir == null) return;
 
-    final cutoffDate = DateTime.now().subtract(Duration(days: _config.retentionDays));
+    final cutoffDate = DateTime.now().subtract(
+      Duration(days: _config.retentionDays),
+    );
 
     try {
       await for (final entity in _logDir!.list()) {
@@ -357,7 +402,9 @@ class LogManager {
     }
 
     // 按修改时间排序
-    files.sort((a, b) => b.statSync().modified.compareTo(a.statSync().modified));
+    files.sort(
+      (a, b) => b.statSync().modified.compareTo(a.statSync().modified),
+    );
     return files;
   }
 
@@ -385,8 +432,10 @@ class LogManager {
             if (entry == null) continue;
 
             // 应用过滤器
-            if (minLevel != null && entry.level.index < minLevel.index) continue;
-            if (startDate != null && entry.timestamp.isBefore(startDate)) continue;
+            if (minLevel != null && entry.level.index < minLevel.index)
+              continue;
+            if (startDate != null && entry.timestamp.isBefore(startDate))
+              continue;
             if (endDate != null && entry.timestamp.isAfter(endDate)) continue;
 
             entries.add(entry);
@@ -500,10 +549,7 @@ class LogManager {
     String? outputPath,
   }) async {
     try {
-      final entries = await readLogs(
-        startDate: startDate,
-        endDate: endDate,
-      );
+      final entries = await readLogs(startDate: startDate, endDate: endDate);
 
       if (entries.isEmpty) {
         return null;
@@ -520,7 +566,12 @@ class LogManager {
         buffer.writeln(entry.toString());
       }
 
-      final output = outputPath ?? path.join(_logDir!.path, 'export_${DateTime.now().millisecondsSinceEpoch}.log');
+      final output =
+          outputPath ??
+          path.join(
+            _logDir!.path,
+            'export_${DateTime.now().millisecondsSinceEpoch}.log',
+          );
       final file = File(output);
       await file.writeAsString(buffer.toString());
 

@@ -1,17 +1,13 @@
 // Re-export canonical types from download/models.dart
 // HashType, DownloadRequest, and DownloadProgress are defined there.
-export '../../download/models.dart' show HashType, DownloadRequest, DownloadProgress;
+export '../../download/models.dart'
+    show HashType, DownloadRequest, DownloadProgress;
 
-import '../../download/models.dart' show HashType, DownloadRequest, DownloadProgress;
+import '../../download/models.dart'
+    show HashType, DownloadRequest, DownloadProgress;
 
 /// 下载任务状态
-enum DownloadStatus {
-  pending,
-  downloading,
-  paused,
-  completed,
-  failed,
-}
+enum DownloadStatus { pending, downloading, paused, completed, failed }
 
 /// 下载任务
 class DownloadTask {

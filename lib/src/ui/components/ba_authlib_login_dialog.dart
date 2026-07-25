@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../components/ba_buttons.dart';
@@ -53,7 +53,9 @@ class _BAAuthlibLoginDialogState extends State<BAAuthlibLoginDialog> {
 
     try {
       final accountManager = AccountManager();
-      final account = await accountManager.addOfflineAccount(_usernameController.text);
+      final account = await accountManager.addOfflineAccount(
+        _usernameController.text,
+      );
       await accountManager.selectAccount(account.id);
 
       if (mounted) {
@@ -132,9 +134,7 @@ class _BAAuthlibLoginDialogState extends State<BAAuthlibLoginDialog> {
             filled: true,
             fillColor: BAColors.surfaceOf(context),
             hintText: '留空使用默认服务器',
-            hintStyle: TextStyle(
-              color: BAColors.textDisabledOf(context),
-            ),
+            hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(color: BAColors.borderOf(context)),
@@ -145,16 +145,17 @@ class _BAAuthlibLoginDialogState extends State<BAAuthlibLoginDialog> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+              borderSide: BorderSide(
+                color: BAColors.primaryOf(context),
+                width: 2,
+              ),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
               vertical: 10,
             ),
           ),
-          style: TextStyle(
-            color: BAColors.textPrimaryOf(context),
-          ),
+          style: TextStyle(color: BAColors.textPrimaryOf(context)),
         ),
       ],
     );
@@ -179,9 +180,7 @@ class _BAAuthlibLoginDialogState extends State<BAAuthlibLoginDialog> {
             filled: true,
             fillColor: BAColors.surfaceOf(context),
             hintText: '请输入用户名',
-            hintStyle: TextStyle(
-              color: BAColors.textDisabledOf(context),
-            ),
+            hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(color: BAColors.borderOf(context)),
@@ -192,16 +191,17 @@ class _BAAuthlibLoginDialogState extends State<BAAuthlibLoginDialog> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+              borderSide: BorderSide(
+                color: BAColors.primaryOf(context),
+                width: 2,
+              ),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
               vertical: 10,
             ),
           ),
-          style: TextStyle(
-            color: BAColors.textPrimaryOf(context),
-          ),
+          style: TextStyle(color: BAColors.textPrimaryOf(context)),
         ),
       ],
     );
@@ -227,9 +227,7 @@ class _BAAuthlibLoginDialogState extends State<BAAuthlibLoginDialog> {
             filled: true,
             fillColor: BAColors.surfaceOf(context),
             hintText: '请输入密码',
-            hintStyle: TextStyle(
-              color: BAColors.textDisabledOf(context),
-            ),
+            hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(color: BAColors.borderOf(context)),
@@ -240,16 +238,17 @@ class _BAAuthlibLoginDialogState extends State<BAAuthlibLoginDialog> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+              borderSide: BorderSide(
+                color: BAColors.primaryOf(context),
+                width: 2,
+              ),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
               vertical: 10,
             ),
           ),
-          style: TextStyle(
-            color: BAColors.textPrimaryOf(context),
-          ),
+          style: TextStyle(color: BAColors.textPrimaryOf(context)),
         ),
       ],
     );
@@ -265,15 +264,16 @@ class _BAAuthlibLoginDialogState extends State<BAAuthlibLoginDialog> {
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: BAColors.dangerOf(context), size: 18),
+          Icon(
+            Icons.error_outline,
+            color: BAColors.dangerOf(context),
+            size: 18,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               _errorMessage!,
-              style: TextStyle(
-                color: BAColors.dangerOf(context),
-                fontSize: 13,
-              ),
+              style: TextStyle(color: BAColors.dangerOf(context), fontSize: 13),
             ),
           ),
         ],

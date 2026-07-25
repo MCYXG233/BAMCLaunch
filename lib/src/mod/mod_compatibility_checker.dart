@@ -32,37 +32,58 @@ class ModCompatibilityChecker {
     String loaderType,
     String loaderVersion,
   ) {
-    return mods.map((mod) => checkCompatibility(mod, gameVersion, loaderType, loaderVersion)).toList();
+    return mods
+        .map(
+          (mod) =>
+              checkCompatibility(mod, gameVersion, loaderType, loaderVersion),
+        )
+        .toList();
   }
 
-  static void _checkLoaderCompatibility(ModInfo mod, String loaderType, List<CompatibilityIssue> issues) {
+  static void _checkLoaderCompatibility(
+    ModInfo mod,
+    String loaderType,
+    List<CompatibilityIssue> issues,
+  ) {
     if (mod.modLoader != null && mod.modLoader!.isNotEmpty) {
       final modLoader = mod.modLoader!.toLowerCase();
       final targetLoader = loaderType.toLowerCase();
 
       if (modLoader != targetLoader) {
         if (_isCompatibleLoader(modLoader, targetLoader)) {
-          issues.add(CompatibilityIssue(
-            type: CompatibilityIssueType.loaderWarning,
-            message: '模组设计用于 ${_getLoaderDisplayName(modLoader)}，当前使用 ${_getLoaderDisplayName(targetLoader)}',
-          ));
+          issues.add(
+            CompatibilityIssue(
+              type: CompatibilityIssueType.loaderWarning,
+              message:
+                  '模组设计用于 ${_getLoaderDisplayName(modLoader)}，当前使用 ${_getLoaderDisplayName(targetLoader)}',
+            ),
+          );
         } else {
-          issues.add(CompatibilityIssue(
-            type: CompatibilityIssueType.loaderIncompatible,
-            message: '模组设计用于 ${_getLoaderDisplayName(modLoader)}，无法在 ${_getLoaderDisplayName(targetLoader)} 上运行',
-          ));
+          issues.add(
+            CompatibilityIssue(
+              type: CompatibilityIssueType.loaderIncompatible,
+              message:
+                  '模组设计用于 ${_getLoaderDisplayName(modLoader)}，无法在 ${_getLoaderDisplayName(targetLoader)} 上运行',
+            ),
+          );
         }
       }
     }
   }
 
-  static void _checkGameVersionCompatibility(ModInfo mod, String gameVersion, List<CompatibilityIssue> issues) {
+  static void _checkGameVersionCompatibility(
+    ModInfo mod,
+    String gameVersion,
+    List<CompatibilityIssue> issues,
+  ) {
     final mcVersions = _extractMcVersions(mod);
     if (mcVersions.isEmpty) {
-      issues.add(CompatibilityIssue(
-        type: CompatibilityIssueType.versionUnknown,
-        message: '无法确定模组支持的游戏版本',
-      ));
+      issues.add(
+        CompatibilityIssue(
+          type: CompatibilityIssueType.versionUnknown,
+          message: '无法确定模组支持的游戏版本',
+        ),
+      );
       return;
     }
 
@@ -78,10 +99,12 @@ class ModCompatibilityChecker {
     }
 
     if (!isCompatible) {
-      issues.add(CompatibilityIssue(
-        type: CompatibilityIssueType.versionIncompatible,
-        message: '模组支持版本: $supportedVersions，当前游戏版本: $gameVersion',
-      ));
+      issues.add(
+        CompatibilityIssue(
+          type: CompatibilityIssueType.versionIncompatible,
+          message: '模组支持版本: $supportedVersions，当前游戏版本: $gameVersion',
+        ),
+      );
     }
   }
 
@@ -118,10 +141,13 @@ class ModCompatibilityChecker {
     }
 
     if (!isCompatible) {
-      issues.add(CompatibilityIssue(
-        type: CompatibilityIssueType.loaderVersionIncompatible,
-        message: '模组需要 ${_getLoaderDisplayName(loaderType)} 版本: $supportedVersions，当前版本: $loaderVersion',
-      ));
+      issues.add(
+        CompatibilityIssue(
+          type: CompatibilityIssueType.loaderVersionIncompatible,
+          message:
+              '模组需要 ${_getLoaderDisplayName(loaderType)} 版本: $supportedVersions，当前版本: $loaderVersion',
+        ),
+      );
     }
   }
 
@@ -147,35 +173,41 @@ class ModCompatibilityChecker {
 
   static bool _isCompatibleLoader(String modLoader, String targetLoader) {
     return (modLoader == 'fabric' && targetLoader == 'quilt') ||
-           (modLoader == 'quilt' && targetLoader == 'fabric');
+        (modLoader == 'quilt' && targetLoader == 'fabric');
   }
 
   static bool _versionMatches(String version, String range) {
     if (range.contains(version)) {
       return true;
     }
-    
-    if (range.contains('>=') && _compareVersions(version, range.replaceAll('>=', '')) >= 0) {
+
+    if (range.contains('>=') &&
+        _compareVersions(version, range.replaceAll('>=', '')) >= 0) {
       return true;
     }
-    if (range.contains('<=') && _compareVersions(version, range.replaceAll('<=', '')) <= 0) {
+    if (range.contains('<=') &&
+        _compareVersions(version, range.replaceAll('<=', '')) <= 0) {
       return true;
     }
-    if (range.contains('>') && _compareVersions(version, range.replaceAll('>', '')) > 0) {
+    if (range.contains('>') &&
+        _compareVersions(version, range.replaceAll('>', '')) > 0) {
       return true;
     }
-    if (range.contains('<') && _compareVersions(version, range.replaceAll('<', '')) < 0) {
+    if (range.contains('<') &&
+        _compareVersions(version, range.replaceAll('<', '')) < 0) {
       return true;
     }
-    
+
     return false;
   }
 
   static int _compareVersions(String v1, String v2) {
     final parts1 = v1.split('.').map((e) => int.tryParse(e) ?? 0).toList();
     final parts2 = v2.split('.').map((e) => int.tryParse(e) ?? 0).toList();
-    
-    final maxLen = parts1.length > parts2.length ? parts1.length : parts2.length;
+
+    final maxLen = parts1.length > parts2.length
+        ? parts1.length
+        : parts2.length;
     for (var i = 0; i < maxLen; i++) {
       final p1 = i < parts1.length ? parts1[i] : 0;
       final p2 = i < parts2.length ? parts2[i] : 0;
@@ -187,8 +219,13 @@ class ModCompatibilityChecker {
 
   static int? _parseVersion(String version) {
     try {
-      final parts = version.split('.').map((p) => int.tryParse(p) ?? 0).toList();
-      return parts[0] * 1000000 + (parts.length > 1 ? parts[1] * 1000 : 0) + (parts.length > 2 ? parts[2] : 0);
+      final parts = version
+          .split('.')
+          .map((p) => int.tryParse(p) ?? 0)
+          .toList();
+      return parts[0] * 1000000 +
+          (parts.length > 1 ? parts[1] * 1000 : 0) +
+          (parts.length > 2 ? parts[2] : 0);
     } catch (e) {
       return null;
     }
@@ -200,7 +237,7 @@ class ModCompatibilityChecker {
       for (final part in parts) {
         final otherValue = _parseVersion(part);
         if (otherValue == null) return false;
-        
+
         if (part.startsWith('>=')) {
           if (versionValue < otherValue) return false;
         } else if (part.startsWith('>')) {
@@ -249,11 +286,7 @@ class CompatibilityResult {
   });
 }
 
-enum CompatibilityStatus {
-  compatible,
-  warning,
-  incompatible,
-}
+enum CompatibilityStatus { compatible, warning, incompatible }
 
 enum CompatibilityIssueType {
   loaderIncompatible,
@@ -288,10 +321,7 @@ class CompatibilityIssue {
   final CompatibilityIssueType type;
   final String message;
 
-  CompatibilityIssue({
-    required this.type,
-    required this.message,
-  });
+  CompatibilityIssue({required this.type, required this.message});
 }
 
 class ModDependencyInfo {

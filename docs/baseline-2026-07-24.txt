@@ -1,0 +1,21 @@
+# BAMCLaunch 基线测试存档
+# 日期: 2026-07-24
+# Git Commit: (当前 main 分支)
+
+## flutter analyze --no-pub
+- 总 issues: 844
+- error: 1（logger_test.dart:66 undefined_prefixed_name）
+- warning: 4（unused_local_variable + unnecessary_type_check）
+- info: 839（主要是 deprecated_member_use / withOpacity）
+
+## flutter test --no-pub
+- 通过: 96
+- 失败: 5
+- 失败列表:
+  - test/account_manager_test.dart: accountsStream should emit updates when accounts change
+  - test/account_manager_test.dart: removeAccount should remove an account
+  - test/account_manager_test.dart: should handle multiple accounts correctly
+  - test/logger_test.dart: 加载失败（undefined_prefixed_name）
+  - test/widget_test.dart: App initializes with ThemeManager
+
+## 后续阶段对比基线，确保不退化

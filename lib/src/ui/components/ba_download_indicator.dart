@@ -35,8 +35,7 @@ class DownloadManager extends ChangeNotifier {
 
   List<DownloadTaskInfo> get tasks => List.unmodifiable(_tasks);
 
-  int get activeCount =>
-      _tasks.where((t) => t.status == 'downloading').length;
+  int get activeCount => _tasks.where((t) => t.status == 'downloading').length;
 
   bool get hasActiveTasks => activeCount > 0;
 
@@ -74,7 +73,10 @@ class DownloadManager extends ChangeNotifier {
 
   void clearCompleted() {
     _tasks.removeWhere(
-      (t) => t.status == 'completed' || t.status == 'failed' || t.status == 'cancelled',
+      (t) =>
+          t.status == 'completed' ||
+          t.status == 'failed' ||
+          t.status == 'cancelled',
     );
     onUpdate?.call();
     notifyListeners();
@@ -94,10 +96,7 @@ class DownloadManager extends ChangeNotifier {
 class BADownloadIndicator extends StatefulWidget {
   final bool hideWhenEmpty;
 
-  const BADownloadIndicator({
-    super.key,
-    this.hideWhenEmpty = true,
-  });
+  const BADownloadIndicator({super.key, this.hideWhenEmpty = true});
 
   @override
   State<BADownloadIndicator> createState() => _BADownloadIndicatorState();
@@ -150,7 +149,9 @@ class _BADownloadIndicatorState extends State<BADownloadIndicator>
     return ListenableBuilder(
       listenable: _manager,
       builder: (context, _) {
-        if (widget.hideWhenEmpty && !_manager.hasActiveTasks && _manager.tasks.isEmpty) {
+        if (widget.hideWhenEmpty &&
+            !_manager.hasActiveTasks &&
+            _manager.tasks.isEmpty) {
           return const SizedBox.shrink();
         }
 
@@ -181,15 +182,14 @@ class _BADownloadIndicatorState extends State<BADownloadIndicator>
         downloadingCount++;
       }
     }
-    final avgProgress = downloadingCount > 0 ? totalProgress / downloadingCount : 0.0;
+    final avgProgress = downloadingCount > 0
+        ? totalProgress / downloadingCount
+        : 0.0;
 
     return AnimatedBuilder(
       animation: _pulseAnimation,
       builder: (context, child) {
-        return Transform.scale(
-          scale: _pulseAnimation.value,
-          child: child,
-        );
+        return Transform.scale(scale: _pulseAnimation.value, child: child);
       },
       child: Container(
         width: 40,
@@ -208,7 +208,9 @@ class _BADownloadIndicatorState extends State<BADownloadIndicator>
                 value: avgProgress,
                 strokeWidth: 3,
                 backgroundColor: BAColors.borderOf(context),
-                valueColor: AlwaysStoppedAnimation<Color>(BAColors.primaryOf(context)),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  BAColors.primaryOf(context),
+                ),
               ),
             ),
             Column(
@@ -310,7 +312,10 @@ class _DownloadListPanel extends StatelessWidget {
               final activeCount = DownloadManager().activeCount;
               if (activeCount > 0) {
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: BAColors.primaryOf(context).withOpacity(0.15),
                     borderRadius: BorderRadius.circular(10),
@@ -458,10 +463,7 @@ class _DownloadListPanel extends StatelessWidget {
             children: [
               Icon(icon, color: color, size: 14),
               const SizedBox(width: 6),
-              Text(
-                label,
-                style: BATypography.label.copyWith(color: color),
-              ),
+              Text(label, style: BATypography.label.copyWith(color: color)),
             ],
           ),
         ),
@@ -482,10 +484,7 @@ class _DownloadTaskItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: BAColors.surfaceVariantOf(context),
         borderRadius: BATheme.borderRadiusSmall,
-        border: Border.all(
-          color: _getStatusBorderColor(context),
-          width: 1,
-        ),
+        border: Border.all(color: _getStatusBorderColor(context), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -531,7 +530,9 @@ class _DownloadTaskItem extends StatelessWidget {
                     ),
                   ),
                 ),
-              if (task.status == 'completed' || task.status == 'failed' || task.status == 'cancelled')
+              if (task.status == 'completed' ||
+                  task.status == 'failed' ||
+                  task.status == 'cancelled')
                 GestureDetector(
                   onTap: () {
                     DownloadManager().removeTask(task.id);

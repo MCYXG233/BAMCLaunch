@@ -16,13 +16,10 @@ void main() {
   testWidgets('App initializes with ThemeManager', (WidgetTester tester) async {
     // Create a mock ThemeManager for testing
     final themeManager = ThemeManager();
-    
+
     // Build our app with proper Provider context
     await tester.pumpWidget(
-      ChangeNotifierProvider.value(
-        value: themeManager,
-        child: const MyApp(),
-      ),
+      ChangeNotifierProvider.value(value: themeManager, child: const MyApp()),
     );
 
     // Verify the app starts correctly

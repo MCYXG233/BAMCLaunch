@@ -14,14 +14,14 @@ class BAMainPageViewModel extends ChangeNotifier {
   bool _isLoading = true;
   int _instanceCount = 0;
   int _activeDownloads = 0;
-  
+
   // 资源数据（从配置获取或使用默认值）
   int _stamina = 100;
   int _maxStamina = 132;
   int _credits = 0;
   int _pyroxene = 0;
   double _expProgress = 0.72;
-  
+
   // 任务和通知数据
   int _missionProgress = 0;
   int _missionTotal = 8;
@@ -31,9 +31,9 @@ class BAMainPageViewModel extends ChangeNotifier {
     required AccountManager accountManager,
     required InstanceManager instanceManager,
     required BackgroundManager backgroundManager,
-  })  : _accountManager = accountManager,
-        _instanceManager = instanceManager,
-        _backgroundManager = backgroundManager {
+  }) : _accountManager = accountManager,
+       _instanceManager = instanceManager,
+       _backgroundManager = backgroundManager {
     _loadData();
   }
 
@@ -95,8 +95,7 @@ class BAMainPageViewModel extends ChangeNotifier {
       _missionProgress = _accountManager.getResource('missionProgress') ?? 2;
       _missionTotal = _accountManager.getResource('missionTotal') ?? 8;
       _mailCount = _accountManager.getResource('mailCount') ?? 6;
-    } catch (e) {
-    }
+    } catch (e) {}
     notifyListeners();
   }
 

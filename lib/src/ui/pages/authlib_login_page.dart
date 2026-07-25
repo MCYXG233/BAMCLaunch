@@ -40,7 +40,7 @@ class _AuthlibLoginPageState extends State<AuthlibLoginPage> {
     try {
       // 模拟登录过程
       await Future.delayed(const Duration(seconds: 1));
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -181,9 +181,7 @@ class _AuthlibLoginPageState extends State<AuthlibLoginPage> {
             filled: true,
             fillColor: BAColors.surfaceVariantOf(context),
             hintText: '请输入用户名',
-            hintStyle: TextStyle(
-              color: BAColors.textDisabledOf(context),
-            ),
+            hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: BAColors.borderOf(context)),
@@ -194,16 +192,17 @@ class _AuthlibLoginPageState extends State<AuthlibLoginPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+              borderSide: BorderSide(
+                color: BAColors.primaryOf(context),
+                width: 2,
+              ),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 14,
             ),
           ),
-          style: TextStyle(
-            color: BAColors.textPrimaryOf(context),
-          ),
+          style: TextStyle(color: BAColors.textPrimaryOf(context)),
         ),
       ],
     );
@@ -227,9 +226,7 @@ class _AuthlibLoginPageState extends State<AuthlibLoginPage> {
             filled: true,
             fillColor: BAColors.surfaceVariantOf(context),
             hintText: '请输入密码',
-            hintStyle: TextStyle(
-              color: BAColors.textDisabledOf(context),
-            ),
+            hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: BAColors.borderOf(context)),
@@ -240,16 +237,17 @@ class _AuthlibLoginPageState extends State<AuthlibLoginPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+              borderSide: BorderSide(
+                color: BAColors.primaryOf(context),
+                width: 2,
+              ),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 14,
             ),
           ),
-          style: TextStyle(
-            color: BAColors.textPrimaryOf(context),
-          ),
+          style: TextStyle(color: BAColors.textPrimaryOf(context)),
         ),
       ],
     );

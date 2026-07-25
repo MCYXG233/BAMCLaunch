@@ -49,10 +49,7 @@ class BASettingsItem extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   description,
-                  style: TextStyle(
-                    color: textSecondary,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: textSecondary, fontSize: 12),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

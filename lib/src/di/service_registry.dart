@@ -53,7 +53,7 @@ import '../download/mirror_manager.dart';
 import '../download/queue_manager.dart';
 
 // 资源中心
-import '../resource_center/resource_manager.dart';
+import '../resource_center/resource_manager.dart' as online_res;
 import '../resource_center/download_manager.dart';
 import '../resource_center/download_service.dart';
 import '../resource_center/favorite_manager.dart';
@@ -194,11 +194,8 @@ class ServiceRegistry {
   }
 
   static void _registerConfig(ServiceLocator locator) {
-    // ConfigManager - 配置管理器
-    locator.registerLazySingleton<ConfigManager>(() => ConfigManager.instance);
-
-    // ConfigManagerImpl - 配置管理器实现
-    locator.registerLazySingleton<ConfigManagerImpl>(() => ConfigManagerImpl());
+    // IConfigManager - 配置管理器（唯一注册，ConfigManagerImpl 为实现类）
+    locator.registerLazySingleton<IConfigManager>(() => ConfigManagerImpl());
   }
 
   static void _registerAuth(ServiceLocator locator) {
@@ -209,7 +206,9 @@ class ServiceRegistry {
     locator.registerLazySingleton<AuthManager>(() => AuthManager.instance);
 
     // AccountManager - 账户管理器
-    locator.registerLazySingleton<AccountManager>(() => AccountManager.instance);
+    locator.registerLazySingleton<AccountManager>(
+      () => AccountManager.instance,
+    );
 
     // SkinManager - 皮肤管理器
     locator.registerLazySingleton<SkinManager>(() => SkinManager.instance);
@@ -218,7 +217,9 @@ class ServiceRegistry {
     locator.registerLazySingleton<CapeManager>(() => CapeManager.instance);
 
     // AuthlibInjector - Authlib 注入器
-    locator.registerLazySingleton<AuthlibInjector>(() => AuthlibInjector.instance);
+    locator.registerLazySingleton<AuthlibInjector>(
+      () => AuthlibInjector.instance,
+    );
 
     // AuthlibLoginManager - Authlib 登录管理器
     locator.registerLazySingleton<AuthlibLoginManager>(
@@ -264,18 +265,22 @@ class ServiceRegistry {
     locator.registerLazySingleton<JavaManager>(() => JavaManager.instance);
 
     // JavaDownloader - Java 下载器
-    locator.registerLazySingleton<JavaDownloader>(() => JavaDownloader.instance);
-
-    // VersionManager - 版本管理器
-    locator.registerLazySingleton<VersionManager>(() => VersionManager.instance);
-
-    // OptiFineInstaller - OptiFine 安装器
-    locator.registerLazySingleton<OptiFineInstaller>(
-      () => OptiFineInstaller(),
+    locator.registerLazySingleton<JavaDownloader>(
+      () => JavaDownloader.instance,
     );
 
+    // VersionManager - 版本管理器
+    locator.registerLazySingleton<VersionManager>(
+      () => VersionManager.instance,
+    );
+
+    // OptiFineInstaller - OptiFine 安装器
+    locator.registerLazySingleton<OptiFineInstaller>(() => OptiFineInstaller());
+
     // QuiltInstaller - Quilt 安装器
-    locator.registerLazySingleton<QuiltInstaller>(() => QuiltInstaller.instance);
+    locator.registerLazySingleton<QuiltInstaller>(
+      () => QuiltInstaller.instance,
+    );
 
     // BackupManager - 备份管理器
     locator.registerLazySingleton<BackupManager>(() => BackupManager.instance);
@@ -293,7 +298,9 @@ class ServiceRegistry {
 
   static void _registerDownloadAndResource(ServiceLocator locator) {
     // DownloadEngine - 下载引擎
-    locator.registerLazySingleton<DownloadEngine>(() => DownloadEngine.instance);
+    locator.registerLazySingleton<DownloadEngine>(
+      () => DownloadEngine.instance,
+    );
 
     // DownloadQueueManager - 下载队列管理器
     locator.registerLazySingleton<DownloadQueueManager>(
@@ -308,9 +315,10 @@ class ServiceRegistry {
     // MirrorManager - 镜像管理器
     locator.registerLazySingleton<MirrorManager>(() => MirrorManager.instance);
 
-    // ResourceManager (resource_center/) - 资源中心管理器
-    locator.registerLazySingleton<ResourceManager>(
-      () => ResourceManager.instance,
+    // ResourceManager (resource_center/) - 在线资源管理器
+    // 注意：与 instance/resource_manager.dart 的 ResourceManager 同名，通过 alias 区分
+    locator.registerLazySingleton<online_res.ResourceManager>(
+      () => online_res.ResourceManager.instance,
     );
 
     // DownloadManager (resource_center/) - 资源下载管理器
@@ -332,7 +340,9 @@ class ServiceRegistry {
     locator.registerLazySingleton<SearchService>(() => SearchService.instance);
 
     // ModManager (mod/) - Mod 管理器
-    locator.registerLazySingleton<mod.ModManager>(() => mod.ModManager.instance);
+    locator.registerLazySingleton<mod.ModManager>(
+      () => mod.ModManager.instance,
+    );
 
     // ModManager (resource/) - 资源 Mod 管理器
     locator.registerLazySingleton<res_mod.ModManager>(
@@ -395,9 +405,7 @@ class ServiceRegistry {
     );
 
     // TerracottaManager - 网络管理器
-    locator.registerLazySingleton<TerracottaManager>(
-      () => TerracottaManager(),
-    );
+    locator.registerLazySingleton<TerracottaManager>(() => TerracottaManager());
 
     // LogManager - 日志管理器
     locator.registerLazySingleton<LogManager>(() => LogManager.instance);

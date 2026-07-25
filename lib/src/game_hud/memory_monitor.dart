@@ -6,31 +6,31 @@ import '../core/utils.dart';
 
 class MemoryMonitor {
   static const int _sampleSize = 60;
-  
+
   final Queue<MemorySnapshot> _snapshots = Queue<MemorySnapshot>();
   Timer? _monitorTimer;
-  
+
   final _memoryController = StreamController<MemoryData>.broadcast();
-  
+
   int _currentUsedMemory = 0;
   int _peakUsedMemory = 0;
   int _averageUsedMemory = 0;
   int _totalMemory = 0;
-  
+
   Stream<MemoryData> get memoryStream => _memoryController.stream;
-  
+
   int get currentUsedMemory => _currentUsedMemory;
   int get peakUsedMemory => _peakUsedMemory;
   int get averageUsedMemory => _averageUsedMemory;
   int get totalMemory => _totalMemory;
-  
+
   bool _isMonitoring = false;
   bool get isMonitoring => _isMonitoring;
-  
+
   void start() {
     if (_isMonitoring) return;
     _isMonitoring = true;
-    
+
     _updateMemoryInfo();
     _monitorTimer?.cancel();
     _monitorTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
@@ -38,47 +38,52 @@ class MemoryMonitor {
       _emitMemoryData();
     });
   }
-  
+
   void stop() {
     _monitorTimer?.cancel();
     _monitorTimer = null;
     _isMonitoring = false;
   }
-  
+
   Future<void> _updateMemoryInfo() async {
     try {
       final snapshot = await _getMemorySnapshot();
       _snapshots.add(snapshot);
-      
+
       if (_snapshots.length > _sampleSize) {
         _snapshots.removeFirst();
       }
-      
+
       _currentUsedMemory = snapshot.usedMemory;
       if (snapshot.usedMemory > _peakUsedMemory) {
         _peakUsedMemory = snapshot.usedMemory;
       }
       _totalMemory = snapshot.totalMemory;
-      
+
       int totalUsed = 0;
       for (final s in _snapshots) {
         totalUsed += s.usedMemory;
       }
-      _averageUsedMemory = _snapshots.isNotEmpty 
-          ? (totalUsed / _snapshots.length).round() 
+      _averageUsedMemory = _snapshots.isNotEmpty
+          ? (totalUsed / _snapshots.length).round()
           : 0;
     } catch (e) {
       _currentUsedMemory = 0;
       _totalMemory = 0;
     }
   }
-  
+
   Future<MemorySnapshot> _getMemorySnapshot() async {
     int totalMemory = 0;
     int usedMemory = 0;
-    
+
     try {
-      final process = await ProcessResultEx.run('wmic', ['OS', 'get', 'TotalVisibleMemorySize,FreePhysicalMemory', '/value']);
+      final process = await ProcessResultEx.run('wmic', [
+        'OS',
+        'get',
+        'TotalVisibleMemorySize,FreePhysicalMemory',
+        '/value',
+      ]);
       if (process.exitCode == 0) {
         final lines = process.stdout.toString().split('\n');
         for (final line in lines) {
@@ -94,27 +99,29 @@ class MemoryMonitor {
       totalMemory = 8192 * 1024;
       usedMemory = (totalMemory * 0.6).round();
     }
-    
+
     return MemorySnapshot(
       usedMemory: usedMemory,
       totalMemory: totalMemory,
       timestamp: DateTime.now(),
     );
   }
-  
+
   void _emitMemoryData() {
-    _memoryController.add(MemoryData(
-      usedMemory: _currentUsedMemory,
-      totalMemory: _totalMemory,
-      peakUsedMemory: _peakUsedMemory,
-      averageUsedMemory: _averageUsedMemory,
-      usagePercentage: _totalMemory > 0 
-          ? (_currentUsedMemory / _totalMemory * 100) 
-          : 0.0,
-      timestamp: DateTime.now(),
-    ));
+    _memoryController.add(
+      MemoryData(
+        usedMemory: _currentUsedMemory,
+        totalMemory: _totalMemory,
+        peakUsedMemory: _peakUsedMemory,
+        averageUsedMemory: _averageUsedMemory,
+        usagePercentage: _totalMemory > 0
+            ? (_currentUsedMemory / _totalMemory * 100)
+            : 0.0,
+        timestamp: DateTime.now(),
+      ),
+    );
   }
-  
+
   void dispose() {
     stop();
     _memoryController.close();
@@ -125,7 +132,7 @@ class MemorySnapshot {
   final int usedMemory;
   final int totalMemory;
   final DateTime timestamp;
-  
+
   MemorySnapshot({
     required this.usedMemory,
     required this.totalMemory,
@@ -140,7 +147,7 @@ class MemoryData {
   final int averageUsedMemory;
   final double usagePercentage;
   final DateTime timestamp;
-  
+
   MemoryData({
     required this.usedMemory,
     required this.totalMemory,
@@ -149,12 +156,12 @@ class MemoryData {
     required this.usagePercentage,
     required this.timestamp,
   });
-  
+
   String get usedMemoryFormatted => formatBytes(usedMemory);
   String get totalMemoryFormatted => formatBytes(totalMemory);
   String get peakUsedMemoryFormatted => formatBytes(peakUsedMemory);
   String get averageUsedMemoryFormatted => formatBytes(averageUsedMemory);
-  
+
   Map<String, dynamic> toJson() => {
     'usedMemory': usedMemory,
     'totalMemory': totalMemory,

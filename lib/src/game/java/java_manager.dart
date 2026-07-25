@@ -470,9 +470,13 @@ class JavaManager implements IJavaManager {
 
       // 获取该游戏版本推荐的Java版本列表
       // 返回的列表按优先级排序，第一个是最推荐的版本
-      final requiredJavaVersions = JavaVersion.getRecommendedForGameVersion(gameVersion);
+      final requiredJavaVersions = JavaVersion.getRecommendedForGameVersion(
+        gameVersion,
+      );
 
-      _logger.debug('Game version $gameVersion requires Java versions: $requiredJavaVersions');
+      _logger.debug(
+        'Game version $gameVersion requires Java versions: $requiredJavaVersions',
+      );
 
       // 按优先级遍历推荐的Java版本，查找匹配的安装
       for (final requiredVersion in requiredJavaVersions) {
@@ -501,7 +505,11 @@ class JavaManager implements IJavaManager {
       );
       return fallback;
     } catch (e, stackTrace) {
-      _logger.error('Failed to get Java for game version $gameVersion', e, stackTrace);
+      _logger.error(
+        'Failed to get Java for game version $gameVersion',
+        e,
+        stackTrace,
+      );
       // 发生异常时，回退到通用推荐的Java版本
       return await getRecommendedJava();
     }
@@ -527,10 +535,12 @@ class JavaManager implements IJavaManager {
     // 解析Java主版本号
     final javaMajor = JavaVersion.parseMajorVersion(javaVersion);
     // 获取游戏推荐的Java版本列表
-    final requiredVersions = JavaVersion.getRecommendedForGameVersion(gameVersion);
+    final requiredVersions = JavaVersion.getRecommendedForGameVersion(
+      gameVersion,
+    );
     // 检查Java版本是否在推荐列表中，或者是已知的兼容版本
     return requiredVersions.contains(javaMajor) ||
-           JavaVersion.isCompatible(javaMajor);
+        JavaVersion.isCompatible(javaMajor);
   }
 
   /// 获取当前用户选中的Java
@@ -699,18 +709,19 @@ class JavaManager implements IJavaManager {
 
       // 运行 java -version 获取版本信息
       // 注意：java -version 的输出在 stderr 中，而不是 stdout
-      final result = await Process.run(
-        javaPath,
-        ['-version'],
-        stdoutEncoding: SystemEncoding(),
-        stderrEncoding: SystemEncoding(),
-      ).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          _logger.debug('Java version check timed out: $javaPath');
-          throw TimeoutException('Java -version timed out');
-        },
-      );
+      final result =
+          await Process.run(
+            javaPath,
+            ['-version'],
+            stdoutEncoding: SystemEncoding(),
+            stderrEncoding: SystemEncoding(),
+          ).timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              _logger.debug('Java version check timed out: $javaPath');
+              throw TimeoutException('Java -version timed out');
+            },
+          );
 
       // java -version 输出到 stderr
       // 这是Java的历史遗留问题，版本信息输出到标准错误流

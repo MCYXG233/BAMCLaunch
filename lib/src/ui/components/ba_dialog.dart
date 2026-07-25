@@ -72,17 +72,11 @@ class BADialog extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: 10,
-            sigmaY: 10,
-          ),
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
             width: width,
             height: height,
-            constraints: BoxConstraints(
-              maxWidth: width ?? 1200,
-              minWidth: 360,
-            ),
+            constraints: BoxConstraints(maxWidth: width ?? 1200, minWidth: 360),
             decoration: BoxDecoration(
               color: BAColors.glassOf(context),
               borderRadius: BorderRadius.circular(20),
@@ -116,7 +110,9 @@ class BADialog extends StatelessWidget {
                     ),
                     border: Border(
                       bottom: BorderSide(
-                        color: BAColors.borderOf(context).withValues(alpha: 0.4),
+                        color: BAColors.borderOf(
+                          context,
+                        ).withValues(alpha: 0.4),
                         width: 1,
                       ),
                     ),
@@ -141,7 +137,9 @@ class BADialog extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.5),
+                              color: BAColors.surfaceVariantOf(
+                                context,
+                              ).withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Icon(
@@ -168,7 +166,9 @@ class BADialog extends StatelessWidget {
                     decoration: BoxDecoration(
                       border: Border(
                         top: BorderSide(
-                          color: BAColors.borderOf(context).withValues(alpha: 0.4),
+                          color: BAColors.borderOf(
+                            context,
+                          ).withValues(alpha: 0.4),
                           width: 1,
                         ),
                       ),
@@ -179,9 +179,7 @@ class BADialog extends StatelessWidget {
                         final index = entry.key;
                         final action = entry.value;
                         return Padding(
-                          padding: EdgeInsets.only(
-                            left: index > 0 ? 12 : 0,
-                          ),
+                          padding: EdgeInsets.only(left: index > 0 ? 12 : 0),
                           child: action,
                         );
                       }).toList(),
@@ -231,9 +229,7 @@ class BAConfirmDialog {
         ],
         child: Text(
           content,
-          style: TextStyle(
-            color: BAColors.textPrimaryOf(context),
-          ),
+          style: TextStyle(color: BAColors.textPrimaryOf(context)),
         ),
       ),
     );

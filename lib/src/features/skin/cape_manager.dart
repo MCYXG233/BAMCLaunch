@@ -115,7 +115,8 @@ class CapeManager {
     if (_capeDir != null) return;
 
     try {
-      final supportDir = await _platformAdapter.getApplicationSupportDirectory();
+      final supportDir = await _platformAdapter
+          .getApplicationSupportDirectory();
       _capeDir = Directory(path.join(supportDir, 'capes'));
 
       if (!await _capeDir!.exists()) {
@@ -126,7 +127,7 @@ class CapeManager {
       await _loadMetadata();
 
       _logger.info('Cape manager initialized, cape dir: ${_capeDir!.path}');
-    } catch ( e, stackTrace) {
+    } catch (e, stackTrace) {
       _logger.error('Failed to initialize cape manager', e, stackTrace);
     }
   }
@@ -171,13 +172,13 @@ class CapeManager {
   /// 验证披风图像
   /// [imageData] 披风图像数据
   /// [fileName] 文件名（用于错误信息）
-  Future<CapeValidationResult> validateCape(Uint8List imageData, String fileName) async {
+  Future<CapeValidationResult> validateCape(
+    Uint8List imageData,
+    String fileName,
+  ) async {
     // 检查文件大小
     if (imageData.isEmpty) {
-      return CapeValidationResult(
-        isValid: false,
-        errorMessage: '披风文件为空',
-      );
+      return CapeValidationResult(isValid: false, errorMessage: '披风文件为空');
     }
 
     // 检查文件大小限制（最大100KB）
@@ -190,20 +191,14 @@ class CapeManager {
 
     // 检查是否为PNG格式
     if (imageData.length < 8) {
-      return CapeValidationResult(
-        isValid: false,
-        errorMessage: '文件格式无效',
-      );
+      return CapeValidationResult(isValid: false, errorMessage: '文件格式无效');
     }
 
     // PNG文件签名检查
     final pngSignature = [137, 80, 78, 71, 13, 10, 26, 10];
     for (int i = 0; i < 8; i++) {
       if (imageData[i] != pngSignature[i]) {
-        return CapeValidationResult(
-          isValid: false,
-          errorMessage: '仅支持PNG格式',
-        );
+        return CapeValidationResult(isValid: false, errorMessage: '仅支持PNG格式');
       }
     }
 
@@ -212,7 +207,8 @@ class CapeManager {
       final dimensions = _parsePngDimensions(imageData);
 
       // 验证尺寸
-      if (dimensions['width'] != requiredWidth || dimensions['height'] != requiredHeight) {
+      if (dimensions['width'] != requiredWidth ||
+          dimensions['height'] != requiredHeight) {
         return CapeValidationResult(
           isValid: false,
           errorMessage: '披风尺寸必须为 ${requiredWidth}x$requiredHeight 像素',
@@ -227,10 +223,7 @@ class CapeManager {
         height: dimensions['height']!,
       );
     } catch (e) {
-      return CapeValidationResult(
-        isValid: false,
-        errorMessage: '无法读取PNG图像信息',
-      );
+      return CapeValidationResult(isValid: false, errorMessage: '无法读取PNG图像信息');
     }
   }
 
@@ -239,8 +232,10 @@ class CapeManager {
     // PNG尺寸在IHDR chunk中，位于签名后的第16-23字节
     // width: 4 bytes (big-endian)
     // height: 4 bytes (big-endian)
-    final width = (data[16] << 24) | (data[17] << 16) | (data[18] << 8) | data[19];
-    final height = (data[20] << 24) | (data[21] << 16) | (data[22] << 8) | data[23];
+    final width =
+        (data[16] << 24) | (data[17] << 16) | (data[18] << 8) | data[19];
+    final height =
+        (data[20] << 24) | (data[21] << 16) | (data[22] << 8) | data[23];
 
     return {'width': width, 'height': height};
   }
@@ -249,7 +244,11 @@ class CapeManager {
   /// [accountId] 账户ID
   /// [imageData] 披风图像数据
   /// [fileName] 原始文件名
-  Future<CapeData?> uploadCape(String accountId, Uint8List imageData, String fileName) async {
+  Future<CapeData?> uploadCape(
+    String accountId,
+    Uint8List imageData,
+    String fileName,
+  ) async {
     await initialize();
 
     // 验证披风
@@ -297,7 +296,10 @@ class CapeManager {
   /// 从文件上传披风
   /// [accountId] 账户ID
   /// [filePath] 文件路径
-  Future<CapeData?> uploadCapeFromFile(String accountId, String filePath) async {
+  Future<CapeData?> uploadCapeFromFile(
+    String accountId,
+    String filePath,
+  ) async {
     try {
       final file = File(filePath);
       if (!await file.exists()) {
@@ -402,10 +404,11 @@ class CapeManager {
   /// 获取披风存储目录
   Future<String> getCapeDirectory() async {
     await initialize();
-    final homeDir = Platform.environment['USERPROFILE'] ??
-                    Platform.environment['HOME'] ??
-                    _capeDir?.path ??
-                    '';
+    final homeDir =
+        Platform.environment['USERPROFILE'] ??
+        Platform.environment['HOME'] ??
+        _capeDir?.path ??
+        '';
     return path.join(homeDir, '.minecraft', 'capes');
   }
 
@@ -484,6 +487,10 @@ class CapeManager {
   /// [accountId] 要设置披风的账户ID
   /// [capeData] 披风图像的字节数据
   Future<void> setCustomCape(String accountId, Uint8List capeData) async {
-    await uploadCape(accountId, capeData, 'custom_cape_${DateTime.now().millisecondsSinceEpoch}.png');
+    await uploadCape(
+      accountId,
+      capeData,
+      'custom_cape_${DateTime.now().millisecondsSinceEpoch}.png',
+    );
   }
 }

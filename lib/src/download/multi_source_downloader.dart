@@ -36,7 +36,14 @@ class MultiSourceDownloader {
     HashType? hashType,
     int chunkSize = defaultChunkSize,
     int threadCount = defaultThreadCount,
-    void Function(double progress, int downloaded, int total, {int speed, int remainingSeconds})? onProgress,
+    void Function(
+      double progress,
+      int downloaded,
+      int total, {
+      int speed,
+      int remainingSeconds,
+    })?
+    onProgress,
     void Function(String source)? onSourceSwitch,
     CancellationToken? cancellationToken,
   }) async {
@@ -53,16 +60,23 @@ class MultiSourceDownloader {
     int startByte = 0;
     if (resumeInfo.canResume && await tempFile.exists()) {
       startByte = resumeInfo.downloadedBytes;
-      onProgress?.call(resumeInfo.progress, resumeInfo.downloadedBytes, totalSize);
+      onProgress?.call(
+        resumeInfo.progress,
+        resumeInfo.downloadedBytes,
+        totalSize,
+      );
     }
 
-    await resumeManager.saveMetadata(savePath, resume.DownloadMetadata(
-      filePath: savePath,
-      url: url,
-      expectedHash: expectedHash,
-      hashType: hashType?.name,
-      startTime: DateTime.now(),
-    ));
+    await resumeManager.saveMetadata(
+      savePath,
+      resume.DownloadMetadata(
+        filePath: savePath,
+        url: url,
+        expectedHash: expectedHash,
+        hashType: hashType?.name,
+        startTime: DateTime.now(),
+      ),
+    );
 
     try {
       final downloadedBytes = await _downloadConcurrently(
@@ -77,16 +91,22 @@ class MultiSourceDownloader {
         cancellationToken: cancellationToken,
       );
 
-      await resumeManager.saveProgress(resume.DownloadProgress(
-        filePath: savePath,
-        url: url,
-        downloadedBytes: downloadedBytes,
-        totalBytes: totalSize,
-        lastUpdate: DateTime.now(),
-      ));
+      await resumeManager.saveProgress(
+        resume.DownloadProgress(
+          filePath: savePath,
+          url: url,
+          downloadedBytes: downloadedBytes,
+          totalBytes: totalSize,
+          lastUpdate: DateTime.now(),
+        ),
+      );
 
       if (expectedHash != null && hashType != null) {
-        final isValid = await _verifyHashStream(tempFile.path, expectedHash, hashType);
+        final isValid = await _verifyHashStream(
+          tempFile.path,
+          expectedHash,
+          hashType,
+        );
         if (!isValid) {
           await tempFile.delete();
           await resumeManager.removeProgress(savePath);
@@ -95,7 +115,9 @@ class MultiSourceDownloader {
       }
 
       // ZIP/JAR 完整性校验
-      if (savePath.endsWith('.jar') || savePath.endsWith('.zip') || savePath.endsWith('.mrpack')) {
+      if (savePath.endsWith('.jar') ||
+          savePath.endsWith('.zip') ||
+          savePath.endsWith('.mrpack')) {
         try {
           final bytes = await tempFile.readAsBytes();
           archive.ZipDecoder().decodeBytes(bytes);
@@ -118,7 +140,7 @@ class MultiSourceDownloader {
       rethrow;
     }
   }
-  
+
   Future<int> _downloadConcurrently({
     required String url,
     required File tempFile,
@@ -126,7 +148,14 @@ class MultiSourceDownloader {
     required int startByte,
     required int chunkSize,
     required int threadCount,
-    void Function(double progress, int downloaded, int total, {int speed, int remainingSeconds})? onProgress,
+    void Function(
+      double progress,
+      int downloaded,
+      int total, {
+      int speed,
+      int remainingSeconds,
+    })?
+    onProgress,
     void Function(String source)? onSourceSwitch,
     CancellationToken? cancellationToken,
   }) async {
@@ -148,7 +177,8 @@ class MultiSourceDownloader {
     }
 
     final actualThreadCount = (remainingBytes < chunkSize) ? 1 : threadCount;
-    final bytesPerThread = (remainingBytes + actualThreadCount - 1) ~/ actualThreadCount;
+    final bytesPerThread =
+        (remainingBytes + actualThreadCount - 1) ~/ actualThreadCount;
     final chunkFiles = <int, String>{};
     final futures = <Future<void>>[];
 
@@ -165,29 +195,39 @@ class MultiSourceDownloader {
       final chunkPath = '${tempFile.path}.chunk.$threadStart';
       chunkFiles[threadStart] = chunkPath;
 
-      futures.add(_downloadChunkToFile(
-        url: url,
-        chunkPath: chunkPath,
-        startByte: threadStart,
-        endByte: threadEnd,
-        cancellationToken: cancellationToken,
-        onBytesDownloaded: (bytes) {
-          currentDownloaded += bytes;
-          final now = DateTime.now();
-          final elapsed = now.difference(lastTime).inMilliseconds;
-          if (elapsed > 500) {
-            final speed = ((currentDownloaded - lastBytes) * 1000 ~/ elapsed);
-            final remaining = speed > 0 ? ((totalSize - currentDownloaded) ~/ speed) : 0;
-            final progress = currentDownloaded / totalSize;
-            onProgress?.call(progress, currentDownloaded, totalSize, speed: speed, remainingSeconds: remaining);
-            lastBytes = currentDownloaded;
-            lastTime = now;
-          } else {
-            final progress = currentDownloaded / totalSize;
-            onProgress?.call(progress, currentDownloaded, totalSize);
-          }
-        },
-      ));
+      futures.add(
+        _downloadChunkToFile(
+          url: url,
+          chunkPath: chunkPath,
+          startByte: threadStart,
+          endByte: threadEnd,
+          cancellationToken: cancellationToken,
+          onBytesDownloaded: (bytes) {
+            currentDownloaded += bytes;
+            final now = DateTime.now();
+            final elapsed = now.difference(lastTime).inMilliseconds;
+            if (elapsed > 500) {
+              final speed = ((currentDownloaded - lastBytes) * 1000 ~/ elapsed);
+              final remaining = speed > 0
+                  ? ((totalSize - currentDownloaded) ~/ speed)
+                  : 0;
+              final progress = currentDownloaded / totalSize;
+              onProgress?.call(
+                progress,
+                currentDownloaded,
+                totalSize,
+                speed: speed,
+                remainingSeconds: remaining,
+              );
+              lastBytes = currentDownloaded;
+              lastTime = now;
+            } else {
+              final progress = currentDownloaded / totalSize;
+              onProgress?.call(progress, currentDownloaded, totalSize);
+            }
+          },
+        ),
+      );
     }
 
     await Future.wait(futures);
@@ -230,7 +270,10 @@ class MultiSourceDownloader {
 
     if (response.statusCode == 416) {
       // Range 不满足，清除续传信息重新下载
-      throw AppException.fromCode(ErrorCodes.networkUnsupportedDownload, detail: 'HTTP 416: Range not satisfiable');
+      throw AppException.fromCode(
+        ErrorCodes.networkUnsupportedDownload,
+        detail: 'HTTP 416: Range not satisfiable',
+      );
     }
 
     if (response.statusCode == 206 || response.statusCode == 200) {
@@ -242,7 +285,7 @@ class MultiSourceDownloader {
       throw AppException.fromCode(ErrorCodes.networkUnsupportedDownload);
     }
   }
-  
+
   Future<int> _getContentLength(String url) async {
     for (final source in sources) {
       try {
@@ -259,7 +302,7 @@ class MultiSourceDownloader {
         continue;
       }
     }
-    
+
     final networkClient = NetworkClient();
     final response = await networkClient.get(
       url,
@@ -270,16 +313,20 @@ class MultiSourceDownloader {
     }
     throw AppException.fromCode(ErrorCodes.networkFileSizeError);
   }
-  
-  Future<bool> _verifyHashStream(String filePath, String expectedHash, HashType hashType) async {
+
+  Future<bool> _verifyHashStream(
+    String filePath,
+    String expectedHash,
+    HashType hashType,
+  ) async {
     final file = File(filePath);
     final inputStream = file.openRead();
     final hashStream = inputStream.transform(
       hashType == HashType.sha1
           ? crypto.sha1
           : hashType == HashType.sha256
-              ? crypto.sha256
-              : crypto.md5,
+          ? crypto.sha256
+          : crypto.md5,
     );
     final digest = await hashStream.first;
     final actualHash = digest.bytes
@@ -293,17 +340,17 @@ class DownloadSource {
   final String name;
   final Future<String> Function(String path) urlResolver;
   final Future<bool> Function()? availabilityChecker;
-  
+
   const DownloadSource({
     required this.name,
     required this.urlResolver,
     this.availabilityChecker,
   });
-  
+
   Future<String> getUrl(String path) async {
     return await urlResolver(path);
   }
-  
+
   Future<bool> isAvailable() async {
     if (availabilityChecker != null) {
       return await availabilityChecker!();
@@ -314,13 +361,13 @@ class DownloadSource {
 
 class CancellationToken {
   bool _isCancelled = false;
-  
+
   bool get isCancelled => _isCancelled;
-  
+
   void cancel() {
     _isCancelled = true;
   }
-  
+
   void reset() {
     _isCancelled = false;
   }

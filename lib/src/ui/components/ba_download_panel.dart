@@ -13,9 +13,7 @@ import 'ba_common_widgets.dart';
 /// - 点击可展开/收起
 /// - 显示每个任务的进度条、状态图标、资源名、目标实例
 class DownloadPanel extends StatefulWidget {
-  const DownloadPanel({
-    super.key,
-  });
+  const DownloadPanel({super.key});
 
   @override
   State<DownloadPanel> createState() => _DownloadPanelState();
@@ -125,10 +123,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
           gradient: LinearGradient(
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
-            colors: [
-              BAColors.accentPinkOf(context),
-              const Color(0xFF6A7FD9),
-            ],
+            colors: [BAColors.accentPinkOf(context), const Color(0xFF6A7FD9)],
           ),
         ),
         child: Row(
@@ -197,8 +192,9 @@ class _DownloadPanelState extends State<DownloadPanel> {
             Text(
               '点击展开',
               style: TextStyle(
-                color:
-                    isLight ? const Color(0xFF8899B5) : const Color(0xFFA0B0C8),
+                color: isLight
+                    ? const Color(0xFF8899B5)
+                    : const Color(0xFFA0B0C8),
                 fontSize: 11,
               ),
             ),
@@ -245,9 +241,12 @@ class _DownloadPanelState extends State<DownloadPanel> {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: overallProgress.clamp(0.0, 1.0),
-              backgroundColor:
-                  isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A),
-              valueColor: AlwaysStoppedAnimation<Color>(BAColors.primaryOf(context)),
+              backgroundColor: isLight
+                  ? const Color(0xFFD0D8EE)
+                  : const Color(0xFF3A4D7A),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                BAColors.primaryOf(context),
+              ),
               minHeight: 4,
             ),
           ),
@@ -280,7 +279,8 @@ class _DownloadPanelState extends State<DownloadPanel> {
           if (_completedTasks.isNotEmpty) {
             final completedIndex =
                 index - _activeTasks.length - (_activeTasks.isNotEmpty ? 2 : 1);
-            if (completedIndex >= 0 && completedIndex < _completedTasks.length) {
+            if (completedIndex >= 0 &&
+                completedIndex < _completedTasks.length) {
               return _buildTaskTile(_completedTasks[completedIndex], isLight);
             }
           }
@@ -305,11 +305,13 @@ class _DownloadPanelState extends State<DownloadPanel> {
   }
 
   Widget _buildTaskTile(DownloadTask task, bool isLight) {
-    final isActive = task.status == DownloadTaskStatus.downloading ||
+    final isActive =
+        task.status == DownloadTaskStatus.downloading ||
         task.status == DownloadTaskStatus.pending;
     final titleColor = isLight ? const Color(0xFF1A2744) : Colors.white;
-    final subtitleColor =
-        isLight ? const Color(0xFF6A7BA5) : const Color(0xFFA0B0C8);
+    final subtitleColor = isLight
+        ? const Color(0xFF6A7BA5)
+        : const Color(0xFFA0B0C8);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -364,10 +366,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
                     const SizedBox(height: 2),
                     Text(
                       'v${task.version.versionNumber} · ${task.targetInstance}',
-                      style: TextStyle(
-                        color: subtitleColor,
-                        fontSize: 10,
-                      ),
+                      style: TextStyle(color: subtitleColor, fontSize: 10),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -376,11 +375,19 @@ class _DownloadPanelState extends State<DownloadPanel> {
               ),
               const SizedBox(width: 8),
               if (task.status == DownloadTaskStatus.completed)
-                Icon(Icons.check_circle, color: BAColors.successOf(context), size: 20)
+                Icon(
+                  Icons.check_circle,
+                  color: BAColors.successOf(context),
+                  size: 20,
+                )
               else if (task.status == DownloadTaskStatus.failed)
                 Tooltip(
                   message: task.errorMessage ?? '下载失败',
-                  child: Icon(Icons.error, color: BAColors.dangerOf(context), size: 20),
+                  child: Icon(
+                    Icons.error,
+                    color: BAColors.dangerOf(context),
+                    size: 20,
+                  ),
                 )
               else if (task.status == DownloadTaskStatus.cancelled)
                 Icon(Icons.cancel, color: subtitleColor, size: 20)
@@ -396,11 +403,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
               else
                 GestureDetector(
                   onTap: () => _manager.cancelTask(task.id),
-                  child: Icon(
-                    Icons.close,
-                    color: subtitleColor,
-                    size: 20,
-                  ),
+                  child: Icon(Icons.close, color: subtitleColor, size: 20),
                 ),
             ],
           ),
@@ -410,9 +413,12 @@ class _DownloadPanelState extends State<DownloadPanel> {
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: task.progress.clamp(0.0, 1.0),
-                backgroundColor:
-                    isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A),
-                valueColor: AlwaysStoppedAnimation<Color>(BAColors.primaryOf(context)),
+                backgroundColor: isLight
+                    ? const Color(0xFFD0D8EE)
+                    : const Color(0xFF3A4D7A),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  BAColors.primaryOf(context),
+                ),
                 minHeight: 4,
               ),
             ),
@@ -422,10 +428,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
               children: [
                 Text(
                   '${task.progress * 100 >= 10 ? (task.downloadedBytes / 1024 / 1024).toStringAsFixed(1) : (task.downloadedBytes / 1024).toStringAsFixed(1)} MB / ${(task.totalBytes / 1024 / 1024).toStringAsFixed(1)} MB',
-                  style: TextStyle(
-                    color: subtitleColor,
-                    fontSize: 10,
-                  ),
+                  style: TextStyle(color: subtitleColor, fontSize: 10),
                 ),
                 Text(
                   '${(task.progress * 100).toStringAsFixed(0)}%',
@@ -442,8 +445,9 @@ class _DownloadPanelState extends State<DownloadPanel> {
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 color: BAColors.primaryOf(context),
-                backgroundColor:
-                    isLight ? const Color(0xFFD0D8EE) : const Color(0xFF3A4D7A),
+                backgroundColor: isLight
+                    ? const Color(0xFFD0D8EE)
+                    : const Color(0xFF3A4D7A),
                 minHeight: 4,
               ),
             ),

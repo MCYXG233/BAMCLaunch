@@ -16,11 +16,7 @@ class Author {
   final String? avatarUrl;
 
   /// 创建作者信息
-  Author({
-    required this.id,
-    required this.name,
-    this.avatarUrl,
-  });
+  Author({required this.id, required this.name, this.avatarUrl});
 
   /// 从JSON创建
   factory Author.fromJson(Map<String, dynamic> json) {
@@ -33,11 +29,7 @@ class Author {
 
   /// 转换为JSON
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'avatarUrl': avatarUrl,
-    };
+    return {'id': id, 'name': name, 'avatarUrl': avatarUrl};
   }
 }
 
@@ -53,11 +45,7 @@ class Category {
   final String? iconUrl;
 
   /// 创建分类
-  Category({
-    required this.id,
-    required this.name,
-    this.iconUrl,
-  });
+  Category({required this.id, required this.name, this.iconUrl});
 
   /// 从JSON创建
   factory Category.fromJson(Map<String, dynamic> json) {
@@ -70,11 +58,7 @@ class Category {
 
   /// 转换为JSON
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'iconUrl': iconUrl,
-    };
+    return {'id': id, 'name': name, 'iconUrl': iconUrl};
   }
 }
 
@@ -213,23 +197,30 @@ class ResourceVersion {
           ? DateTime.tryParse(json['publishedDate'] as String)
           : null,
       changelog: json['changelog'] as String?,
-      gameVersions: (json['gameVersions'] as List<dynamic>?)
+      gameVersions:
+          (json['gameVersions'] as List<dynamic>?)
               ?.map((v) => v as String)
               .toList() ??
           [],
-      loaders: (json['loaders'] as List<dynamic>?)
+      loaders:
+          (json['loaders'] as List<dynamic>?)
               ?.map((l) => l as String)
               .toList() ??
           [],
-      dependencies: (json['dependencies'] as List<dynamic>?)
-              ?.map((d) => VersionDependency.fromJson(d as Map<String, dynamic>))
+      dependencies:
+          (json['dependencies'] as List<dynamic>?)
+              ?.map(
+                (d) => VersionDependency.fromJson(d as Map<String, dynamic>),
+              )
               .toList() ??
           [],
       downloadUrl: json['downloadUrl'] as String?,
       fileName: json['fileName'] as String?,
       fileSize: json['fileSize'] as int? ?? 0,
-      fileHashes: (json['fileHashes'] as Map<String, dynamic>?)
-              ?.map((key, value) => MapEntry(key, value as String)) ??
+      fileHashes:
+          (json['fileHashes'] as Map<String, dynamic>?)?.map(
+            (key, value) => MapEntry(key, value as String),
+          ) ??
           {},
       downloads: json['downloads'] as int? ?? 0,
       releaseType: json['releaseType'] as String? ?? 'release',
@@ -362,24 +353,29 @@ class Resource {
       body: json['body'] as String?,
       summary: json['summary'] as String?,
       slug: json['slug'] as String?,
-      authors: (json['authors'] as List<dynamic>?)
+      authors:
+          (json['authors'] as List<dynamic>?)
               ?.map((a) => Author.fromJson(a as Map<String, dynamic>))
               .toList() ??
           [],
-      categories: (json['categories'] as List<dynamic>?)
+      categories:
+          (json['categories'] as List<dynamic>?)
               ?.map((c) => c as String)
               .toList() ??
           [],
       iconUrl: json['iconUrl'] as String?,
-      screenshotUrls: (json['screenshotUrls'] as List<dynamic>?)
+      screenshotUrls:
+          (json['screenshotUrls'] as List<dynamic>?)
               ?.map((s) => s as String)
               .toList() ??
           [],
-      supportedGameVersions: (json['supportedGameVersions'] as List<dynamic>?)
+      supportedGameVersions:
+          (json['supportedGameVersions'] as List<dynamic>?)
               ?.map((v) => v as String)
               .toList() ??
           [],
-      supportedLoaders: (json['supportedLoaders'] as List<dynamic>?)
+      supportedLoaders:
+          (json['supportedLoaders'] as List<dynamic>?)
               ?.map((l) => l as String)
               .toList() ??
           [],
@@ -756,4 +752,3 @@ class VersionDependency {
   @override
   String toString() => 'VersionDependency($projectId, $dependencyType)';
 }
-

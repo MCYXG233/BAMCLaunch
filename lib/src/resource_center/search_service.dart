@@ -57,10 +57,7 @@ class SearchService {
       return result;
     } catch (e, stackTrace) {
       // 网络错误时提供友好提示
-      Error.throwWithStackTrace(
-        Exception('搜索失败，请检查网络连接: $e'),
-        stackTrace,
-      );
+      Error.throwWithStackTrace(Exception('搜索失败，请检查网络连接: $e'), stackTrace);
     }
   }
 
@@ -72,40 +69,38 @@ class SearchService {
       }
       return await _modrinthApi.getResource(id);
     } catch (e, stackTrace) {
-      Error.throwWithStackTrace(
-        Exception('获取资源详情失败: $e'),
-        stackTrace,
-      );
+      Error.throwWithStackTrace(Exception('获取资源详情失败: $e'), stackTrace);
     }
   }
 
   /// 获取资源版本列表
-  Future<List<ResourceVersion>> getVersions(String id, {String source = 'modrinth'}) async {
+  Future<List<ResourceVersion>> getVersions(
+    String id, {
+    String source = 'modrinth',
+  }) async {
     try {
       if (source == 'curseforge' && _curseforgeApi != null) {
         return await _curseforgeApi!.getVersions(id);
       }
       return await _modrinthApi.getVersions(id);
     } catch (e, stackTrace) {
-      Error.throwWithStackTrace(
-        Exception('获取版本列表失败: $e'),
-        stackTrace,
-      );
+      Error.throwWithStackTrace(Exception('获取版本列表失败: $e'), stackTrace);
     }
   }
 
   /// 获取单个版本信息
-  Future<ResourceVersion> getVersion(String resourceId, String versionId, {String source = 'modrinth'}) async {
+  Future<ResourceVersion> getVersion(
+    String resourceId,
+    String versionId, {
+    String source = 'modrinth',
+  }) async {
     try {
       if (source == 'curseforge' && _curseforgeApi != null) {
         return await _curseforgeApi!.getVersion(resourceId, versionId);
       }
       return await _modrinthApi.getVersion(resourceId, versionId);
     } catch (e, stackTrace) {
-      Error.throwWithStackTrace(
-        Exception('获取版本信息失败: $e'),
-        stackTrace,
-      );
+      Error.throwWithStackTrace(Exception('获取版本信息失败: $e'), stackTrace);
     }
   }
 }

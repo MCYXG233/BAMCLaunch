@@ -97,7 +97,8 @@ class _BAExperienceProgressBarState extends State<BAExperienceProgressBar>
   @override
   Widget build(BuildContext context) {
     final progressColor = widget.color ?? BAColors.successOf(context);
-    final bgColor = widget.backgroundColor ?? BAColors.surfaceVariantOf(context);
+    final bgColor =
+        widget.backgroundColor ?? BAColors.surfaceVariantOf(context);
     final clampedValue = _currentValue.clamp(0.0, 1.0);
 
     return Column(

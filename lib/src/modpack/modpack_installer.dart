@@ -11,11 +11,8 @@ import '../loader/loader_download_service.dart';
 import 'modpack_parser.dart';
 
 /// 安装进度回调
-typedef InstallProgressCallback = void Function(
-  int completed,
-  int total,
-  String? currentTask,
-);
+typedef InstallProgressCallback =
+    void Function(int completed, int total, String? currentTask);
 
 /// 整合包安装器
 class ModpackInstaller {
@@ -211,15 +208,16 @@ class ModpackInstaller {
       // 下载
       await RetryHelper.execute(
         config: const RetryConfig(maxRetries: 2),
-        operation: () => _network.downloadFile(
-          resource.downloadUrl!,
-          savePath,
-        ),
+        operation: () => _network.downloadFile(resource.downloadUrl!, savePath),
       );
 
       _logger.info('Downloaded resource: ${resource.name}');
     } catch (e, stackTrace) {
-      _logger.warning('Failed to download resource ${resource.name}', e, stackTrace);
+      _logger.warning(
+        'Failed to download resource ${resource.name}',
+        e,
+        stackTrace,
+      );
       rethrow;
     }
   }

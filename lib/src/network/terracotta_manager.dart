@@ -372,7 +372,8 @@ class TerracottaManager {
   /// ```
   Future<void> initialize() async {
     // 获取应用数据目录（使用 dart:io 默认目录，回退到 userDir）
-    final appDir = Platform.environment['APPDATA'] ??
+    final appDir =
+        Platform.environment['APPDATA'] ??
         Platform.environment['HOME'] ??
         Directory.current.path;
     // 构建 Terracotta 专用目录路径
@@ -571,7 +572,10 @@ class TerracottaManager {
     }
 
     // 遍历完整个目录都没找到二进制文件
-    throw AppException.fromCode(ErrorCodes.fileNotFound, detail: 'Binary file not found');
+    throw AppException.fromCode(
+      ErrorCodes.fileNotFound,
+      detail: 'Binary file not found',
+    );
   }
 
   /// 启动 Terracotta 服务
@@ -612,9 +616,7 @@ class TerracottaManager {
   /// - 如果服务已经在运行，直接返回 true
   /// - 如果 [_binaryPath] 未设置，会自动调用 [initialize]
   /// - 方法会等待 3 秒确认服务启动成功
-  Future<bool> startService({
-    void Function(String message)? onMessage,
-  }) async {
+  Future<bool> startService({void Function(String message)? onMessage}) async {
     // 如果服务已经在运行，直接返回成功
     if (_status == TerracottaServiceStatus.running) {
       return true;
@@ -633,7 +635,8 @@ class TerracottaManager {
       // TODO: 实现动态端口分配，避免端口冲突
       _apiPort = 8080;
       // 生成基于时间戳的唯一令牌
-      _apiToken = 'bamclaunch_' + DateTime.now().millisecondsSinceEpoch.toString();
+      _apiToken =
+          'bamclaunch_' + DateTime.now().millisecondsSinceEpoch.toString();
 
       // 构建启动参数
       final args = [

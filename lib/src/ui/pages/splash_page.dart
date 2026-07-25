@@ -56,7 +56,10 @@ class _BAMCSplashPageState extends State<BAMCSplashPage>
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: const Interval(0.3, 1.0)),
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.3, 1.0),
+      ),
     );
 
     _animationController.forward();
@@ -83,9 +86,7 @@ class _BAMCSplashPageState extends State<BAMCSplashPage>
       logger.info('配置管理器初始化完成');
 
       final accountManager = AccountManager();
-      await accountManager.initialize(
-        eventBus: EventBus(),
-      );
+      await accountManager.initialize(eventBus: EventBus());
       logger.info('账户管理器初始化完成');
 
       final gameLauncher = GameLauncher();
@@ -120,11 +121,7 @@ class _BAMCSplashPageState extends State<BAMCSplashPage>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF0A0E27),
-              Color(0xFF161B3A),
-              Color(0xFF1E2447),
-            ],
+            colors: [Color(0xFF0A0E27), Color(0xFF161B3A), Color(0xFF1E2447)],
           ),
         ),
         child: Center(
@@ -180,10 +177,7 @@ class _BAMCSplashPageState extends State<BAMCSplashPage>
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF2A3456),
-              Color(0xFF1E2747),
-            ],
+            colors: [Color(0xFF2A3456), Color(0xFF1E2747)],
           ),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(

@@ -282,48 +282,48 @@ class BAThemeColors {
   /// 蔚蓝档案风格的阴影特点是：低透明度、大模糊半径、柔和的偏移。
   /// 用于卡片、面板等组件的浮起效果。
   static List<BoxShadow> get cardShadow => [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.04),
-          blurRadius: 24,
-          offset: const Offset(0, 6),
-        ),
-      ];
+    BoxShadow(
+      color: Colors.black.withOpacity(0.04),
+      blurRadius: 24,
+      offset: const Offset(0, 6),
+    ),
+  ];
 
   /// 卡片悬停阴影
   ///
   /// 卡片悬停状态的增强阴影效果。
   /// 当用户悬停在卡片上时，阴影会变得更明显，提供交互反馈。
   static List<BoxShadow> get cardShadowHover => [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.08),
-          blurRadius: 32,
-          offset: const Offset(0, 10),
-        ),
-      ];
+    BoxShadow(
+      color: Colors.black.withOpacity(0.08),
+      blurRadius: 32,
+      offset: const Offset(0, 10),
+    ),
+  ];
 
   /// 发光阴影（蓝色）
   ///
   /// 带有主色调的发光阴影效果。
   /// 用于需要强调或突出显示的元素，如选中项、焦点元素等。
   static List<BoxShadow> get glowShadow => [
-        BoxShadow(
-          color: primary.withOpacity(0.25),
-          blurRadius: 20,
-          offset: const Offset(0, 4),
-        ),
-      ];
+    BoxShadow(
+      color: primary.withOpacity(0.25),
+      blurRadius: 20,
+      offset: const Offset(0, 4),
+    ),
+  ];
 
   /// 发光阴影（粉色）
   ///
   /// 带有次色调的发光阴影效果。
   /// 用于需要粉色强调的特殊元素。
   static List<BoxShadow> get glowShadowPink => [
-        BoxShadow(
-          color: secondary.withOpacity(0.25),
-          blurRadius: 20,
-          offset: const Offset(0, 4),
-        ),
-      ];
+    BoxShadow(
+      color: secondary.withOpacity(0.25),
+      blurRadius: 20,
+      offset: const Offset(0, 4),
+    ),
+  ];
 
   static Color surfaceOf(BuildContext context) {
     return Theme.of(context).brightness == Brightness.light
@@ -458,19 +458,29 @@ class BAThemeData {
 /// ```
 class BARadius {
   /// 小圆角
-  static const BorderRadius small = BorderRadius.all(Radius.circular(BAThemeData.radiusSmall));
+  static const BorderRadius small = BorderRadius.all(
+    Radius.circular(BAThemeData.radiusSmall),
+  );
 
   /// 标准圆角
-  static const BorderRadius normal = BorderRadius.all(Radius.circular(BAThemeData.radius));
+  static const BorderRadius normal = BorderRadius.all(
+    Radius.circular(BAThemeData.radius),
+  );
 
   /// 大圆角
-  static const BorderRadius large = BorderRadius.all(Radius.circular(BAThemeData.radiusLarge));
+  static const BorderRadius large = BorderRadius.all(
+    Radius.circular(BAThemeData.radiusLarge),
+  );
 
   /// 超大圆角
-  static const BorderRadius xLarge = BorderRadius.all(Radius.circular(BAThemeData.radiusXLarge));
+  static const BorderRadius xLarge = BorderRadius.all(
+    Radius.circular(BAThemeData.radiusXLarge),
+  );
 
   /// 圆形圆角
-  static const BorderRadius circle = BorderRadius.all(Radius.circular(BAThemeData.radiusCircle));
+  static const BorderRadius circle = BorderRadius.all(
+    Radius.circular(BAThemeData.radiusCircle),
+  );
 }
 
 /// 蔚蓝档案风格间距常量
@@ -560,12 +570,14 @@ class BACardStyle {
   /// 卡片内容内边距
   ///
   /// 卡片内部内容的标准内边距。
-  static EdgeInsets get contentPadding => const EdgeInsets.all(BAThemeData.spacingMedium);
+  static EdgeInsets get contentPadding =>
+      const EdgeInsets.all(BAThemeData.spacingMedium);
 
   /// 卡片区块内边距
   ///
   /// 卡片内部区块之间的垂直内边距。
-  static EdgeInsets get sectionPadding => const EdgeInsets.symmetric(vertical: BAThemeData.spacingSmall);
+  static EdgeInsets get sectionPadding =>
+      const EdgeInsets.symmetric(vertical: BAThemeData.spacingSmall);
 
   /// 列表项间距
   ///
@@ -577,12 +589,10 @@ class BACardStyle {
   /// 返回一个带有毛玻璃效果的 [BoxDecoration]。
   /// 包含半透明背景、圆角和细边框。
   static BoxDecoration get frostedGlass => BoxDecoration(
-        color: BAThemeColors.surface.withOpacity(0.25),
-        borderRadius: BorderRadius.circular(BAThemeData.radiusLarge),
-        border: Border.all(
-          color: BAThemeColors.border.withOpacity(0.15),
-        ),
-      );
+    color: BAThemeColors.surface.withOpacity(0.25),
+    borderRadius: BorderRadius.circular(BAThemeData.radiusLarge),
+    border: Border.all(color: BAThemeColors.border.withOpacity(0.15)),
+  );
 
   /// 卡片装饰
   ///
@@ -593,13 +603,10 @@ class BACardStyle {
   ///
   /// 返回：包含背景色、圆角和边框的装饰对象
   static BoxDecoration cardDecoration({double? opacity}) => BoxDecoration(
-        color: BAThemeColors.surface.withOpacity(opacity ?? 0.35),
-        borderRadius: BorderRadius.circular(BAThemeData.radiusLarge),
-        border: Border.all(
-          color: BAThemeColors.border.withOpacity(0.15),
-          width: 1,
-        ),
-      );
+    color: BAThemeColors.surface.withOpacity(opacity ?? 0.35),
+    borderRadius: BorderRadius.circular(BAThemeData.radiusLarge),
+    border: Border.all(color: BAThemeColors.border.withOpacity(0.15), width: 1),
+  );
 }
 
 /// 蔚蓝档案风格输入框样式
@@ -630,9 +637,7 @@ class BAInputStyle {
       contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(BAThemeData.radius),
-        borderSide: BorderSide(
-          color: BAThemeColors.border.withOpacity(0.4),
-        ),
+        borderSide: BorderSide(color: BAThemeColors.border.withOpacity(0.4)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(BAThemeData.radius),

@@ -1,18 +1,10 @@
 import 'dart:io';
 
 /// 操作系统类型
-enum OSType {
-  windows,
-  linux,
-  osx,
-}
+enum OSType { windows, linux, osx }
 
 /// 架构类型
-enum ArchType {
-  x64,
-  arm64,
-  x86,
-}
+enum ArchType { x64, arm64, x86 }
 
 /// 平台信息
 class PlatformInfo {
@@ -62,11 +54,13 @@ class PlatformInfo {
     }
 
     // 检测架构 - 通过环境变量或路径推断
-    ArchType arch = ArchType.x64;  // 默认值
+    ArchType arch = ArchType.x64; // 默认值
 
     // 尝试通过环境变量检测
-    final archEnv = Platform.environment['PROCESSOR_ARCHITECTURE'] ??
-                     Platform.environment['HOSTNAME'] ?? '';
+    final archEnv =
+        Platform.environment['PROCESSOR_ARCHITECTURE'] ??
+        Platform.environment['HOSTNAME'] ??
+        '';
 
     if (archEnv.contains('arm64') || archEnv.contains('aarch64')) {
       arch = ArchType.arm64;
@@ -115,9 +109,7 @@ class PlatformInfo {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is PlatformInfo &&
-        other.os == os &&
-        other.arch == arch;
+    return other is PlatformInfo && other.os == os && other.arch == arch;
   }
 
   @override
@@ -125,10 +117,7 @@ class PlatformInfo {
 }
 
 /// 规则动作类型
-enum RuleAction {
-  allow,
-  disallow,
-}
+enum RuleAction { allow, disallow }
 
 /// 平台规则
 class PlatformRule {
@@ -145,20 +134,23 @@ class PlatformRule {
   final VersionConstraint? version;
 
   /// 创建平台规则
-  const PlatformRule({
-    required this.action,
-    this.os,
-    this.arch,
-    this.version,
-  });
+  const PlatformRule({required this.action, this.os, this.arch, this.version});
 
   /// 从JSON创建
   factory PlatformRule.fromJson(Map<String, dynamic> json) {
     return PlatformRule(
-      action: json['action'] == 'allow' ? RuleAction.allow : RuleAction.disallow,
-      os: json['os'] != null ? OSConstraint.fromJson(json['os'] as Map<String, dynamic>) : null,
-      arch: json['arch'] != null ? ArchConstraint.fromJson(json['arch'] as Map<String, dynamic>) : null,
-      version: json['version'] != null ? VersionConstraint.fromJson(json['version'] as Map<String, dynamic>) : null,
+      action: json['action'] == 'allow'
+          ? RuleAction.allow
+          : RuleAction.disallow,
+      os: json['os'] != null
+          ? OSConstraint.fromJson(json['os'] as Map<String, dynamic>)
+          : null,
+      arch: json['arch'] != null
+          ? ArchConstraint.fromJson(json['arch'] as Map<String, dynamic>)
+          : null,
+      version: json['version'] != null
+          ? VersionConstraint.fromJson(json['version'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -182,10 +174,7 @@ class OSConstraint {
   final String? version;
 
   /// 创建操作系统约束
-  const OSConstraint({
-    this.name,
-    this.version,
-  });
+  const OSConstraint({this.name, this.version});
 
   /// 从JSON创建
   factory OSConstraint.fromJson(Map<String, dynamic> json) {
@@ -240,22 +229,16 @@ class ArchConstraint {
   final String? name;
 
   /// 创建架构约束
-  const ArchConstraint({
-    this.name,
-  });
+  const ArchConstraint({this.name});
 
   /// 从JSON创建
   factory ArchConstraint.fromJson(Map<String, dynamic> json) {
-    return ArchConstraint(
-      name: json['name'] as String?,
-    );
+    return ArchConstraint(name: json['name'] as String?);
   }
 
   /// 转换为JSON
   Map<String, dynamic> toJson() {
-    return {
-      if (name != null) 'name': name,
-    };
+    return {if (name != null) 'name': name};
   }
 
   /// 检查是否匹配给定架构
@@ -284,15 +267,11 @@ class VersionConstraint {
   final String version;
 
   /// 创建版本约束
-  const VersionConstraint({
-    required this.version,
-  });
+  const VersionConstraint({required this.version});
 
   /// 从JSON创建
   factory VersionConstraint.fromJson(Map<String, dynamic> json) {
-    return VersionConstraint(
-      version: json['version'] as String,
-    );
+    return VersionConstraint(version: json['version'] as String);
   }
 
   /// 转换为JSON
@@ -314,9 +293,7 @@ class LaunchArgumentRule {
   final List<PlatformRule> rules;
 
   /// 创建启动参数规则
-  const LaunchArgumentRule({
-    required this.rules,
-  });
+  const LaunchArgumentRule({required this.rules});
 
   /// 从JSON数组创建
   factory LaunchArgumentRule.fromJsonList(List<dynamic> jsonList) {
@@ -392,10 +369,7 @@ class ConditionalArgument {
   final List<PlatformRule> rules;
 
   /// 创建条件参数
-  const ConditionalArgument({
-    required this.value,
-    required this.rules,
-  });
+  const ConditionalArgument({required this.value, required this.rules});
 
   /// 从JSON创建
   factory ConditionalArgument.fromJson(Map<String, dynamic> json) {

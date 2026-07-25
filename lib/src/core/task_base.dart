@@ -69,8 +69,11 @@ class TaskGroup<T> extends Task<List<T>> {
   final List<Task<T>> tasks;
   final int maxConcurrency;
 
-  TaskGroup({required String name, required this.tasks, this.maxConcurrency = 3})
-      : super(name: name);
+  TaskGroup({
+    required String name,
+    required this.tasks,
+    this.maxConcurrency = 3,
+  }) : super(name: name);
 
   @override
   Future<List<T>> execute(TaskContext context) async {

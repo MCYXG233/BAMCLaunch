@@ -72,9 +72,12 @@ class ConfigKeys {
   static const String resourceCenterGameVersion = 'resourceCenterGameVersion';
   static const String resourceCenterModLoader = 'resourceCenterModLoader';
   static const String resourceCenterEnableCache = 'resourceCenterEnableCache';
-  static const String resourceCenterCacheDuration = 'resourceCenterCacheDuration';
-  static const String resourceCenterShowInstalledOnly = 'resourceCenterShowInstalledOnly';
-  static const String resourceCenterAutoUpdateResources = 'resourceCenterAutoUpdateResources';
+  static const String resourceCenterCacheDuration =
+      'resourceCenterCacheDuration';
+  static const String resourceCenterShowInstalledOnly =
+      'resourceCenterShowInstalledOnly';
+  static const String resourceCenterAutoUpdateResources =
+      'resourceCenterAutoUpdateResources';
 
   static const String gameWindowSize = 'gameWindowSize';
   static const String autoRetryDownload = 'autoRetryDownload';

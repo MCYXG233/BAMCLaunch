@@ -87,11 +87,7 @@ class BATopBar extends StatelessWidget {
           ],
 
           // 分隔线
-          Container(
-            width: 1,
-            height: 32,
-            color: BAColors.borderOf(context),
-          ),
+          Container(width: 1, height: 32, color: BAColors.borderOf(context)),
           const SizedBox(width: 16),
 
           // 账户信息
@@ -101,7 +97,9 @@ class BATopBar extends StatelessWidget {
 
           // 通知按钮
           _buildIconButton(
-            icon: hasNotification ? Icons.notifications : Icons.notifications_outlined,
+            icon: hasNotification
+                ? Icons.notifications
+                : Icons.notifications_outlined,
             hasNotification: hasNotification,
             onTap: onNotificationTap,
             context: context,

@@ -5,24 +5,21 @@ import 'dart:math';
 class BACharacterDisplay extends StatefulWidget {
   final double? width;
   final double? height;
-  
-  const BACharacterDisplay({
-    super.key,
-    this.width,
-    this.height,
-  });
+
+  const BACharacterDisplay({super.key, this.width, this.height});
 
   @override
   State<BACharacterDisplay> createState() => _BACharacterDisplayState();
 }
 
-class _BACharacterDisplayState extends State<BACharacterDisplay> with SingleTickerProviderStateMixin {
+class _BACharacterDisplayState extends State<BACharacterDisplay>
+    with SingleTickerProviderStateMixin {
   String _currentAnimation = 'idle';
   bool _isPlayingOneShot = false;
   late AnimationController _animationController;
   List<Particle> _particles = [];
   Offset? _mousePosition;
-  
+
   @override
   void initState() {
     super.initState();
@@ -40,12 +37,12 @@ class _BACharacterDisplayState extends State<BACharacterDisplay> with SingleTick
 
   Future<void> _playTapAnimation() async {
     if (_isPlayingOneShot) return;
-    
+
     setState(() {
       _isPlayingOneShot = true;
       _currentAnimation = 'tap';
     });
-    
+
     _animationController
       ..stop()
       ..duration = const Duration(milliseconds: 800)
@@ -85,7 +82,7 @@ class _BACharacterDisplayState extends State<BACharacterDisplay> with SingleTick
         );
       });
     });
-    
+
     Future.delayed(const Duration(seconds: 2), () {
       setState(() => _particles.clear());
     });
@@ -171,11 +168,7 @@ class _BACharacterDisplayState extends State<BACharacterDisplay> with SingleTick
                 ),
               ],
             ),
-            child: const Icon(
-              Icons.person,
-              size: 60,
-              color: Colors.white,
-            ),
+            child: const Icon(Icons.person, size: 60, color: Colors.white),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -194,7 +187,7 @@ class _BACharacterDisplayState extends State<BACharacterDisplay> with SingleTick
   List<Widget> _buildParticles() {
     final centerX = (widget.width ?? 320) / 2;
     final centerY = (widget.height ?? 350) / 2;
-    
+
     return _particles.map((particle) {
       return Positioned(
         top: centerY,
@@ -206,7 +199,7 @@ class _BACharacterDisplayState extends State<BACharacterDisplay> with SingleTick
 
   Widget _buildInteractionHint() {
     if (_currentAnimation != 'idle') return const SizedBox();
-    
+
     return Positioned(
       bottom: 20,
       child: const OpacityAnimation(
@@ -228,7 +221,7 @@ class Particle {
   final double angle;
   final double speed;
   final Color color;
-  
+
   Particle({
     required this.id,
     required this.angle,
@@ -239,17 +232,18 @@ class Particle {
 
 class ParticleWidget extends StatefulWidget {
   final Particle particle;
-  
+
   const ParticleWidget({super.key, required this.particle});
-  
+
   @override
   State<ParticleWidget> createState() => _ParticleWidgetState();
 }
 
-class _ParticleWidgetState extends State<ParticleWidget> with SingleTickerProviderStateMixin {
+class _ParticleWidgetState extends State<ParticleWidget>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -257,16 +251,16 @@ class _ParticleWidgetState extends State<ParticleWidget> with SingleTickerProvid
       vsync: this,
       duration: Duration(milliseconds: (2000 / widget.particle.speed).round()),
     )..forward();
-    
+
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
   }
-  
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -278,7 +272,7 @@ class _ParticleWidgetState extends State<ParticleWidget> with SingleTickerProvid
         final y = sin(widget.particle.angle) * radius - 50;
         final opacity = 1.0 - value;
         final size = (8 * (1 - value * 0.5)).toDouble();
-        
+
         return Transform.translate(
           offset: Offset(x.toDouble(), y.toDouble()),
           child: Opacity(
@@ -290,10 +284,7 @@ class _ParticleWidgetState extends State<ParticleWidget> with SingleTickerProvid
                 color: widget.particle.color,
                 borderRadius: BorderRadius.circular(size / 2),
                 boxShadow: [
-                  BoxShadow(
-                    color: widget.particle.color,
-                    blurRadius: 10,
-                  ),
+                  BoxShadow(color: widget.particle.color, blurRadius: 10),
                 ],
               ),
             ),
@@ -306,20 +297,18 @@ class _ParticleWidgetState extends State<ParticleWidget> with SingleTickerProvid
 
 class OpacityAnimation extends StatefulWidget {
   final Widget child;
-  
-  const OpacityAnimation({
-    super.key,
-    required this.child,
-  });
-  
+
+  const OpacityAnimation({super.key, required this.child});
+
   @override
   State<OpacityAnimation> createState() => _OpacityAnimationState();
 }
 
-class _OpacityAnimationState extends State<OpacityAnimation> with SingleTickerProviderStateMixin {
+class _OpacityAnimationState extends State<OpacityAnimation>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -327,27 +316,25 @@ class _OpacityAnimationState extends State<OpacityAnimation> with SingleTickerPr
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
-    
-    _animation = Tween<double>(begin: 0.3, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+
+    _animation = Tween<double>(
+      begin: 0.3,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
-  
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
-        return Opacity(
-          opacity: _animation.value,
-          child: widget.child,
-        );
+        return Opacity(opacity: _animation.value, child: widget.child);
       },
       child: widget.child,
     );

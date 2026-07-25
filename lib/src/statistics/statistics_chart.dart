@@ -3,16 +3,10 @@ import 'package:fl_chart/fl_chart.dart';
 import '../ui/theme/colors.dart';
 
 /// 统计图表类型
-enum StatisticsChartType {
-  dailyPlayTime,
-  instanceDistribution,
-}
+enum StatisticsChartType { dailyPlayTime, instanceDistribution }
 
 /// 时间范围选项
-enum TimeRange {
-  week,
-  month,
-}
+enum TimeRange { week, month }
 
 /// 每日游戏时长柱状图组件
 class DailyPlayTimeChart extends StatelessWidget {
@@ -33,10 +27,7 @@ class DailyPlayTimeChart extends StatelessWidget {
   Widget build(BuildContext context) {
     if (data.isEmpty) {
       return const Center(
-        child: Text(
-          '暂无数据',
-          style: TextStyle(color: Color(0xFF9E9E9E)),
-        ),
+        child: Text('暂无数据', style: TextStyle(color: Color(0xFF9E9E9E))),
       );
     }
 
@@ -83,10 +74,7 @@ class DailyPlayTimeChart extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
                     '${date.month}/${date.day}',
-                    style: TextStyle(
-                      color: labelColor,
-                      fontSize: 10,
-                    ),
+                    style: TextStyle(color: labelColor, fontSize: 10),
                   ),
                 );
               },
@@ -101,10 +89,7 @@ class DailyPlayTimeChart extends StatelessWidget {
               getTitlesWidget: (value, meta) {
                 return Text(
                   _formatDurationShort(value.toInt()),
-                  style: TextStyle(
-                    color: labelColor,
-                    fontSize: 10,
-                  ),
+                  style: TextStyle(color: labelColor, fontSize: 10),
                 );
               },
             ),
@@ -121,10 +106,7 @@ class DailyPlayTimeChart extends StatelessWidget {
           drawVerticalLine: false,
           horizontalInterval: maxY / 4,
           getDrawingHorizontalLine: (value) {
-            return FlLine(
-              color: labelColor.withOpacity(0.2),
-              strokeWidth: 1,
-            );
+            return FlLine(color: labelColor.withOpacity(0.2), strokeWidth: 1);
           },
         ),
         borderData: FlBorderData(show: false),
@@ -178,14 +160,11 @@ class InstanceDistributionChart extends StatefulWidget {
   final Map<String, int> data;
   final List<Color>? colors;
 
-  const InstanceDistributionChart({
-    super.key,
-    required this.data,
-    this.colors,
-  });
+  const InstanceDistributionChart({super.key, required this.data, this.colors});
 
   @override
-  State<InstanceDistributionChart> createState() => _InstanceDistributionChartState();
+  State<InstanceDistributionChart> createState() =>
+      _InstanceDistributionChartState();
 }
 
 class _InstanceDistributionChartState extends State<InstanceDistributionChart> {
@@ -208,10 +187,7 @@ class _InstanceDistributionChartState extends State<InstanceDistributionChart> {
   Widget build(BuildContext context) {
     if (widget.data.isEmpty) {
       return const Center(
-        child: Text(
-          '暂无数据',
-          style: TextStyle(color: Color(0xFF9E9E9E)),
-        ),
+        child: Text('暂无数据', style: TextStyle(color: Color(0xFF9E9E9E))),
       );
     }
 
@@ -233,23 +209,30 @@ class _InstanceDistributionChartState extends State<InstanceDistributionChart> {
                       _touchedIndex = -1;
                       return;
                     }
-                    _touchedIndex = response.touchedSection!.touchedSectionIndex;
+                    _touchedIndex =
+                        response.touchedSection!.touchedSectionIndex;
                   });
                 },
               ),
               borderData: FlBorderData(show: false),
               sectionsSpace: 2,
               centerSpaceRadius: 40,
-              sections: widget.data.entries.toList().asMap().entries.map((entry) {
+              sections: widget.data.entries.toList().asMap().entries.map((
+                entry,
+              ) {
                 final index = entry.key;
                 final mapEntry = entry.value;
                 final isTouched = index == _touchedIndex;
-                final percentage = total > 0 ? (mapEntry.value / total * 100) : 0;
+                final percentage = total > 0
+                    ? (mapEntry.value / total * 100)
+                    : 0;
 
                 return PieChartSectionData(
                   color: colors[index % colors.length],
                   value: mapEntry.value.toDouble(),
-                  title: percentage >= 5 ? '${percentage.toStringAsFixed(1)}%' : '',
+                  title: percentage >= 5
+                      ? '${percentage.toStringAsFixed(1)}%'
+                      : '',
                   radius: isTouched ? 60 : 50,
                   titleStyle: TextStyle(
                     fontSize: isTouched ? 14 : 12,
@@ -262,10 +245,7 @@ class _InstanceDistributionChartState extends State<InstanceDistributionChart> {
           ),
         ),
         const SizedBox(width: 16),
-        Expanded(
-          flex: 3,
-          child: _buildLegend(total),
-        ),
+        Expanded(flex: 3, child: _buildLegend(total)),
       ],
     );
   }
@@ -341,16 +321,8 @@ class TimeRangeSelector extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildOption(
-            context,
-            '本周',
-            TimeRange.week,
-          ),
-          _buildOption(
-            context,
-            '本月',
-            TimeRange.month,
-          ),
+          _buildOption(context, '本周', TimeRange.week),
+          _buildOption(context, '本月', TimeRange.month),
         ],
       ),
     );
@@ -371,7 +343,9 @@ class TimeRangeSelector extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : BAColors.textSecondaryOf(context),
+            color: isSelected
+                ? Colors.white
+                : BAColors.textSecondaryOf(context),
             fontSize: 13,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
@@ -405,9 +379,7 @@ class StatisticsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: BAColors.borderOf(context).withOpacity(0.5),
-        ),
+        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -421,11 +393,7 @@ class StatisticsCard extends StatelessWidget {
                   color: iconColor.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: 20,
-                ),
+                child: Icon(icon, color: iconColor, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(

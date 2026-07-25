@@ -27,7 +27,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
 
   bool _isLoading = true;
   bool _showGrid = true;
-  
+
   // 排序和搜索状态
   InstanceSortOption _sortOption = InstanceSortOption.lastPlayed;
   SortDirection _sortDirection = SortDirection.descending;
@@ -58,7 +58,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
         );
       }
 
-      final sortDirectionStr = _config.getString(ConfigKeys.instanceSortDirection);
+      final sortDirectionStr = _config.getString(
+        ConfigKeys.instanceSortDirection,
+      );
       if (sortDirectionStr != null) {
         _sortDirection = SortDirection.values.firstWhere(
           (e) => e.name == sortDirectionStr,
@@ -82,7 +84,10 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
   Future<void> _saveUserPreferences() async {
     try {
       await _config.setString(ConfigKeys.instanceSortOption, _sortOption.name);
-      await _config.setString(ConfigKeys.instanceSortDirection, _sortDirection.name);
+      await _config.setString(
+        ConfigKeys.instanceSortDirection,
+        _sortDirection.name,
+      );
       await _config.setString(ConfigKeys.instanceSearchQuery, _searchQuery);
       await _config.save();
     } catch (e, stackTrace) {
@@ -145,7 +150,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
           comparison = aSize.compareTo(bSize);
       }
 
-      return _sortDirection == SortDirection.ascending ? comparison : -comparison;
+      return _sortDirection == SortDirection.ascending
+          ? comparison
+          : -comparison;
     });
 
     return sorted;
@@ -154,7 +161,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
   /// 过滤和排序实例
   List<GameInstance> _filterAndSortInstances(List<GameInstance> instances) {
     // 先过滤
-    final filtered = instances.where((i) => _matchesSearch(i, _searchQuery)).toList();
+    final filtered = instances
+        .where((i) => _matchesSearch(i, _searchQuery))
+        .toList();
     // 再排序
     return _sortInstances(filtered);
   }
@@ -165,10 +174,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
       title: '创建新实例',
       width: 500,
       actions: [
-        BASecondaryButton(
-          text: '取消',
-          onPressed: () => Navigator.pop(context),
-        ),
+        BASecondaryButton(text: '取消', onPressed: () => Navigator.pop(context)),
         const SizedBox(width: 12),
         BAPrimaryButton(
           text: '创建',
@@ -183,7 +189,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
         children: [
           Text(
             '实例名称',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodyMedium.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -201,15 +209,23 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                borderSide: BorderSide(
+                  color: BAColors.primaryOf(context),
+                  width: 2,
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
           ),
           const SizedBox(height: 16),
           Text(
             '游戏版本',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodyMedium.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -227,9 +243,15 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                borderSide: BorderSide(
+                  color: BAColors.primaryOf(context),
+                  width: 2,
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
           ),
         ],
@@ -243,7 +265,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
           return;
         }
 
-        final directoryId = _instanceManager.selectedDirectoryId ?? _instanceManager.directories.first.id;
+        final directoryId =
+            _instanceManager.selectedDirectoryId ??
+            _instanceManager.directories.first.id;
         final instance = await _instanceManager.createInstance(
           name: 'New Instance',
           directoryId: directoryId,
@@ -264,10 +288,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
       title: '创建游戏目录',
       width: 500,
       actions: [
-        BASecondaryButton(
-          text: '取消',
-          onPressed: () => Navigator.pop(context),
-        ),
+        BASecondaryButton(text: '取消', onPressed: () => Navigator.pop(context)),
         const SizedBox(width: 12),
         BAPrimaryButton(
           text: '创建',
@@ -280,7 +301,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
         children: [
           Text(
             '目录名称',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodyMedium.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -298,15 +321,23 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                borderSide: BorderSide(
+                  color: BAColors.primaryOf(context),
+                  width: 2,
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
           ),
           const SizedBox(height: 16),
           Text(
             '目录路径',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodyMedium.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -324,9 +355,15 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                borderSide: BorderSide(
+                  color: BAColors.primaryOf(context),
+                  width: 2,
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
           ),
         ],
@@ -392,10 +429,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
       title: '复制实例',
       width: 500,
       actions: [
-        BASecondaryButton(
-          text: '取消',
-          onPressed: () => Navigator.pop(context),
-        ),
+        BASecondaryButton(text: '取消', onPressed: () => Navigator.pop(context)),
         const SizedBox(width: 12),
         BAPrimaryButton(
           text: '复制',
@@ -408,7 +442,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
         children: [
           Text(
             '新实例名称',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodyMedium.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -426,9 +462,15 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                borderSide: BorderSide(
+                  color: BAColors.primaryOf(context),
+                  width: 2,
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
           ),
         ],
@@ -606,7 +648,8 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
   String _formatSize(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    if (bytes < 1024 * 1024 * 1024)
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
     return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
   }
 
@@ -659,11 +702,15 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
               children: [
                 Text(
                   '实例管理',
-                  style: BATypography.headlineMedium.copyWith(color: BAColors.textPrimaryOf(context)),
+                  style: BATypography.headlineMedium.copyWith(
+                    color: BAColors.textPrimaryOf(context),
+                  ),
                 ),
                 Text(
                   '管理你的所有游戏实例',
-                  style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+                  style: BATypography.bodyMedium.copyWith(
+                    color: BAColors.textSecondaryOf(context),
+                  ),
                 ),
               ],
             ),
@@ -732,9 +779,15 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                    borderSide: BorderSide(
+                      color: BAColors.primaryOf(context),
+                      width: 2,
+                    ),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 0,
+                  ),
                 ),
                 onChanged: (value) {
                   setState(() => _searchQuery = value);
@@ -764,7 +817,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    border: Border(left: BorderSide(color: BAColors.borderOf(context))),
+                    border: Border(
+                      left: BorderSide(color: BAColors.borderOf(context)),
+                    ),
                   ),
                   child: IconButton(
                     icon: Icon(
@@ -774,7 +829,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                       size: 18,
                     ),
                     onPressed: _toggleSortDirection,
-                    tooltip: _sortDirection == SortDirection.ascending ? '升序' : '降序',
+                    tooltip: _sortDirection == SortDirection.ascending
+                        ? '升序'
+                        : '降序',
                   ),
                 ),
               ],
@@ -799,7 +856,8 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
               spacing: 8,
               runSpacing: 8,
               children: _instanceManager.directories.map((dir) {
-                final isSelected = _instanceManager.selectedDirectoryId == dir.id;
+                final isSelected =
+                    _instanceManager.selectedDirectoryId == dir.id;
                 return FilterChip(
                   selected: isSelected,
                   label: Text(dir.name),
@@ -809,7 +867,10 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                   backgroundColor: BAColors.surfaceOf(context),
                   deleteIcon: isSelected
                       ? null
-                      : Icon(Icons.close, color: BAColors.textDisabledOf(context)),
+                      : Icon(
+                          Icons.close,
+                          color: BAColors.textDisabledOf(context),
+                        ),
                   onDeleted: isSelected ? null : () => _deleteDirectory(dir),
                 );
               }).toList(),
@@ -856,10 +917,14 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: isSelected ? BAColors.primaryOf(context).withOpacity(0.1) : BAColors.surfaceOf(context),
+          color: isSelected
+              ? BAColors.primaryOf(context).withOpacity(0.1)
+              : BAColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? BAColors.primaryOf(context) : BAColors.borderOf(context),
+            color: isSelected
+                ? BAColors.primaryOf(context)
+                : BAColors.borderOf(context),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
@@ -900,7 +965,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                   const SizedBox(height: 16),
                   Text(
                     instance.name,
-                    style: BATypography.titleMedium.copyWith(color: BAColors.textPrimaryOf(context)),
+                    style: BATypography.titleMedium.copyWith(
+                      color: BAColors.textPrimaryOf(context),
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -910,7 +977,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                       Expanded(
                         child: Text(
                           '${instance.version}${instance.loader != null ? ' • ${instance.loader}' : ''}',
-                          style: BATypography.bodySmall.copyWith(color: BAColors.textSecondaryOf(context)),
+                          style: BATypography.bodySmall.copyWith(
+                            color: BAColors.textSecondaryOf(context),
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -918,7 +987,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                       if (size > 0)
                         Text(
                           _formatSize(size),
-                          style: BATypography.bodySmall.copyWith(color: BAColors.textDisabledOf(context)),
+                          style: BATypography.bodySmall.copyWith(
+                            color: BAColors.textDisabledOf(context),
+                          ),
                         ),
                     ],
                   ),
@@ -929,13 +1000,20 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                         child: BAPrimaryButton(
                           text: '启动',
                           onPressed: () => _launchInstance(instance),
-                          leadingIcon: const Icon(Icons.play_arrow, color: Colors.white, size: 18),
+                          leadingIcon: const Icon(
+                            Icons.play_arrow,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                           padding: const EdgeInsets.symmetric(vertical: 10),
                         ),
                       ),
                       const SizedBox(width: 8),
                       PopupMenuButton<String>(
-                        icon: Icon(Icons.more_vert, color: BAColors.textSecondaryOf(context)),
+                        icon: Icon(
+                          Icons.more_vert,
+                          color: BAColors.textSecondaryOf(context),
+                        ),
                         onSelected: (value) {
                           switch (value) {
                             case 'edit':
@@ -971,9 +1049,18 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                             value: 'delete',
                             child: Row(
                               children: [
-                                Icon(Icons.delete, size: 18, color: BAColors.dangerOf(context)),
+                                Icon(
+                                  Icons.delete,
+                                  size: 18,
+                                  color: BAColors.dangerOf(context),
+                                ),
                                 const SizedBox(width: 8),
-                                Text('删除', style: TextStyle(color: BAColors.dangerOf(context))),
+                                Text(
+                                  '删除',
+                                  style: TextStyle(
+                                    color: BAColors.dangerOf(context),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -1000,10 +1087,14 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
         duration: const Duration(milliseconds: 200),
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: isSelected ? BAColors.primaryOf(context).withOpacity(0.1) : BAColors.surfaceOf(context),
+          color: isSelected
+              ? BAColors.primaryOf(context).withOpacity(0.1)
+              : BAColors.surfaceOf(context),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? BAColors.primaryOf(context) : BAColors.borderOf(context),
+            color: isSelected
+                ? BAColors.primaryOf(context)
+                : BAColors.borderOf(context),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -1037,17 +1128,23 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                       children: [
                         Text(
                           instance.name,
-                          style: BATypography.titleMedium.copyWith(color: BAColors.textPrimaryOf(context)),
+                          style: BATypography.titleMedium.copyWith(
+                            color: BAColors.textPrimaryOf(context),
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${instance.version}${instance.loader != null ? ' • ${instance.loader}' : ''}',
-                          style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+                          style: BATypography.bodyMedium.copyWith(
+                            color: BAColors.textSecondaryOf(context),
+                          ),
                         ),
                         if (size > 0)
                           Text(
                             _formatSize(size),
-                            style: BATypography.bodySmall.copyWith(color: BAColors.textDisabledOf(context)),
+                            style: BATypography.bodySmall.copyWith(
+                              color: BAColors.textDisabledOf(context),
+                            ),
                           ),
                       ],
                     ),
@@ -1056,11 +1153,18 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                   BAPrimaryButton(
                     text: '启动',
                     onPressed: () => _launchInstance(instance),
-                    leadingIcon: const Icon(Icons.play_arrow, color: Colors.white, size: 18),
+                    leadingIcon: const Icon(
+                      Icons.play_arrow,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   PopupMenuButton<String>(
-                    icon: Icon(Icons.more_vert, color: BAColors.textSecondaryOf(context)),
+                    icon: Icon(
+                      Icons.more_vert,
+                      color: BAColors.textSecondaryOf(context),
+                    ),
                     onSelected: (value) {
                       switch (value) {
                         case 'edit':
@@ -1096,9 +1200,18 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete, size: 18, color: BAColors.dangerOf(context)),
+                            Icon(
+                              Icons.delete,
+                              size: 18,
+                              color: BAColors.dangerOf(context),
+                            ),
                             const SizedBox(width: 8),
-                            Text('删除', style: TextStyle(color: BAColors.dangerOf(context))),
+                            Text(
+                              '删除',
+                              style: TextStyle(
+                                color: BAColors.dangerOf(context),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -1115,7 +1228,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
 
   Widget _buildEmptyState() {
     final hasSearchQuery = _searchQuery.isNotEmpty;
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -1128,12 +1241,16 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
           const SizedBox(height: 24),
           Text(
             hasSearchQuery ? '没有找到匹配的实例' : '还没有游戏实例',
-            style: BATypography.headlineSmall.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.headlineSmall.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             hasSearchQuery ? '尝试修改搜索关键词' : '创建一个实例来开始游戏',
-            style: BATypography.bodyMedium.copyWith(color: BAColors.textSecondaryOf(context)),
+            style: BATypography.bodyMedium.copyWith(
+              color: BAColors.textSecondaryOf(context),
+            ),
           ),
           const SizedBox(height: 32),
           if (hasSearchQuery)

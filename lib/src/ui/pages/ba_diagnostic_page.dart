@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
+import '../../core/logger.dart';
 import '../../diagnostic/java_checker.dart';
 import '../../diagnostic/crash_analyzer.dart';
 import '../../diagnostic/log_analyzer.dart';
@@ -44,22 +45,10 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
   LogAnalysisResult? _logAnalysis;
 
   final List<_DiagnosticItem> _items = [
-    _DiagnosticItem(
-      title: 'Java 环境检查',
-      description: '检查 Java 是否安装及版本兼容性',
-    ),
-    _DiagnosticItem(
-      title: '内存配置检查',
-      description: '检查游戏内存分配是否合理',
-    ),
-    _DiagnosticItem(
-      title: '磁盘空间检查',
-      description: '检查游戏目录剩余空间',
-    ),
-    _DiagnosticItem(
-      title: '模组兼容性检查',
-      description: '分析游戏日志检查模组问题',
-    ),
+    _DiagnosticItem(title: 'Java 环境检查', description: '检查 Java 是否安装及版本兼容性'),
+    _DiagnosticItem(title: '内存配置检查', description: '检查游戏内存分配是否合理'),
+    _DiagnosticItem(title: '磁盘空间检查', description: '检查游戏目录剩余空间'),
+    _DiagnosticItem(title: '模组兼容性检查', description: '分析游戏日志检查模组问题'),
   ];
 
   final Map<int, bool> _expanded = {};
@@ -130,8 +119,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
           final pathInfo = result.javaPath ?? '';
 
           _items[0].status = DiagnosticStatus.passed;
-          _items[0].detail =
-              'Java $versionInfo ($bitInfo)\n路径: $pathInfo';
+          _items[0].detail = 'Java $versionInfo ($bitInfo)\n路径: $pathInfo';
 
           if (result.majorVersion != null && result.majorVersion! < 8) {
             _items[0].status = DiagnosticStatus.warning;
@@ -181,7 +169,8 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
           status = DiagnosticStatus.warning;
           detail += '\n内存分配占比过高 (${(ratio * 100).toStringAsFixed(0)}%)';
           suggestions.add(
-              '内存分配不应超过系统总内存的 75%，建议设置为 ${(systemMemoryMB * 0.6).toInt()} MB');
+            '内存分配不应超过系统总内存的 75%，建议设置为 ${(systemMemoryMB * 0.6).toInt()} MB',
+          );
         }
       }
 
@@ -218,15 +207,20 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
 
   int _getSystemMemoryMB() {
     try {
-      final info = Process.runSync('wmic', ['OS', 'get', 'TotalVisibleMemorySize', '/Value']);
+      final info = Process.runSync('wmic', [
+        'OS',
+        'get',
+        'TotalVisibleMemorySize',
+        '/Value',
+      ]);
       final output = info.stdout.toString();
       final match = RegExp(r'TotalVisibleMemorySize=(\d+)').firstMatch(output);
       if (match != null) {
         final kb = int.parse(match.group(1)!);
         return (kb / 1024).round();
       }
-    } catch (e) {
-      debugPrint('获取系统内存信息失败: $e');
+    } catch (e, st) {
+      Logger.instance.error('获取系统内存信息失败', e, st);
     }
     return 0;
   }
@@ -314,8 +308,8 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
         final bytes = int.parse(match.group(1)!);
         return bytes / (1024 * 1024 * 1024);
       }
-    } catch (e) {
-      debugPrint('获取磁盘空间失败: $e');
+    } catch (e, st) {
+      Logger.instance.error('获取磁盘空间失败', e, st);
     }
     return -1;
   }
@@ -368,13 +362,15 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
 
       if (_crashAnalysis != null) {
         status = DiagnosticStatus.failed;
-        detail = '崩溃类型: ${_crashAnalysis!.title}\n${_crashAnalysis!.description}';
+        detail =
+            '崩溃类型: ${_crashAnalysis!.title}\n${_crashAnalysis!.description}';
         suggestions = _crashAnalysis!.suggestions;
       } else if (analysis.hasErrors) {
         status = DiagnosticStatus.warning;
         detail = '${analysis.summary}\n发现 ${analysis.errorCount} 个错误';
-        final errorIssues =
-            analysis.issues.where((i) => i.severity == 'error').take(3);
+        final errorIssues = analysis.issues
+            .where((i) => i.severity == 'error')
+            .take(3);
         for (final issue in errorIssues) {
           detail += '\n  · ${issue.message}';
           if (issue.suggestion != null) {
@@ -384,7 +380,8 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
       } else if (analysis.hasIssues) {
         status = DiagnosticStatus.warning;
         detail = analysis.summary;
-        for (final issue in analysis.issues.where((i) => i.suggestion != null).take(3)) {
+        for (final issue
+            in analysis.issues.where((i) => i.suggestion != null).take(3)) {
           suggestions.add(issue.suggestion!);
         }
       } else {
@@ -413,9 +410,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
       body: Column(
         children: [
           _buildHeader(context),
-          Expanded(
-            child: _buildBody(context),
-          ),
+          Expanded(child: _buildBody(context)),
         ],
       ),
     );
@@ -443,8 +438,11 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
       child: Row(
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back_ios_new_rounded,
-                color: BAColors.textSecondaryOf(context), size: 18),
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: BAColors.textSecondaryOf(context),
+              size: 18,
+            ),
             onPressed: () => Navigator.of(context).pop(),
           ),
           const SizedBox(width: 8),
@@ -452,7 +450,10 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [BAColors.primaryOf(context), BAColors.primaryLightOf(context)],
+                colors: [
+                  BAColors.primaryOf(context),
+                  BAColors.primaryLightOf(context),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -465,7 +466,11 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                 ),
               ],
             ),
-            child: const Icon(Icons.build_rounded, color: Colors.white, size: 22),
+            child: const Icon(
+              Icons.build_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
           ),
           const SizedBox(width: 12),
           Text(
@@ -511,7 +516,10 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
             gradient: _isRunning
                 ? null
                 : LinearGradient(
-                    colors: [BAColors.primaryOf(context), BAColors.primaryLightOf(context)],
+                    colors: [
+                      BAColors.primaryOf(context),
+                      BAColors.primaryLightOf(context),
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -536,7 +544,11 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                   ),
                 )
               else
-                const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 18),
+                const Icon(
+                  Icons.play_arrow_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
               const SizedBox(width: 8),
               Text(
                 _isRunning ? '诊断中...' : '开始诊断',
@@ -561,11 +573,11 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ...List.generate(_items.length, (index) => _buildDiagnosticCard(context, index)),
-          if (_isDone) ...[
-            const SizedBox(height: 24),
-            _buildSummary(context),
-          ],
+          ...List.generate(
+            _items.length,
+            (index) => _buildDiagnosticCard(context, index),
+          ),
+          if (_isDone) ...[const SizedBox(height: 24), _buildSummary(context)],
           const SizedBox(height: 24),
         ],
       ),
@@ -684,7 +696,10 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Divider(color: BAColors.borderOf(context).withOpacity(0.5), height: 1),
+          Divider(
+            color: BAColors.borderOf(context).withOpacity(0.5),
+            height: 1,
+          ),
           const SizedBox(height: 12),
           Container(
             width: double.infinity,
@@ -717,33 +732,35 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
               ),
             ),
             const SizedBox(height: 8),
-            ...item.suggestions.map((s) => Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 5),
-                        child: Icon(
-                          Icons.circle,
-                          size: 5,
-                          color: BAColors.primaryOf(context),
+            ...item.suggestions.map(
+              (s) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 5),
+                      child: Icon(
+                        Icons.circle,
+                        size: 5,
+                        color: BAColors.primaryOf(context),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        s,
+                        style: TextStyle(
+                          color: BAColors.textSecondaryOf(context),
+                          fontSize: 13,
+                          height: 1.4,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          s,
-                          style: TextStyle(
-                            color: BAColors.textSecondaryOf(context),
-                            fontSize: 13,
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ],
       ),
@@ -846,9 +863,15 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
   }
 
   Widget _buildSummary(BuildContext context) {
-    final passed = _items.where((i) => i.status == DiagnosticStatus.passed).length;
-    final warnings = _items.where((i) => i.status == DiagnosticStatus.warning).length;
-    final failed = _items.where((i) => i.status == DiagnosticStatus.failed).length;
+    final passed = _items
+        .where((i) => i.status == DiagnosticStatus.passed)
+        .length;
+    final warnings = _items
+        .where((i) => i.status == DiagnosticStatus.warning)
+        .length;
+    final failed = _items
+        .where((i) => i.status == DiagnosticStatus.failed)
+        .length;
 
     Color overallColor;
     String overallText;
@@ -881,9 +904,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: overallColor.withOpacity(0.25),
-        ),
+        border: Border.all(color: overallColor.withOpacity(0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -938,7 +959,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                   Text(
                     '崩溃分析: ${_crashAnalysis!.title}',
                     style: TextStyle(
-              color: BAColors.textPrimaryOf(context),
+                      color: BAColors.textPrimaryOf(context),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -947,7 +968,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                   Text(
                     _crashAnalysis!.description,
                     style: TextStyle(
-              color: BAColors.textPrimaryOf(context),
+                      color: BAColors.textPrimaryOf(context),
                       fontSize: 13,
                       height: 1.4,
                     ),
@@ -994,5 +1015,3 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
     );
   }
 }
-
-

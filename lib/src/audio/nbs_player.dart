@@ -64,11 +64,7 @@ class LoopHeader {
   final int endTick;
   final int totalLoops;
 
-  LoopHeader({
-    this.startTick = 0,
-    this.endTick = 0,
-    this.totalLoops = 0,
-  });
+  LoopHeader({this.startTick = 0, this.endTick = 0, this.totalLoops = 0});
 }
 
 /// NBS 文件
@@ -123,9 +119,8 @@ class NbsFile {
     required this.notes,
   });
 
-  Duration get totalDuration => Duration(
-    milliseconds: (songLength * 1000 / tempo * 60).round(),
-  );
+  Duration get totalDuration =>
+      Duration(milliseconds: (songLength * 1000 / tempo * 60).round());
 }
 
 /// NBS 文件解析器
@@ -283,15 +278,17 @@ class NbsParser {
             offset += 2;
           }
 
-          notes.add(Note(
-            tick: tick,
-            layer: layer,
-            instrument: instrument,
-            key: key,
-            velocity: velocity,
-            panning: panning,
-            pitch: pitch,
-          ));
+          notes.add(
+            Note(
+              tick: tick,
+              layer: layer,
+              instrument: instrument,
+              key: key,
+              velocity: velocity,
+              panning: panning,
+              pitch: pitch,
+            ),
+          );
         }
       }
 
@@ -311,13 +308,15 @@ class NbsParser {
           final panning = _readByte(reader, offset);
           offset += 1;
 
-          layers.add(NoteLayer(
-            id: i,
-            name: name,
-            locked: locked,
-            volume: volume,
-            panning: panning,
-          ));
+          layers.add(
+            NoteLayer(
+              id: i,
+              name: name,
+              locked: locked,
+              volume: volume,
+              panning: panning,
+            ),
+          );
         } else {
           layers.add(NoteLayer(id: i, name: name));
         }
@@ -341,12 +340,14 @@ class NbsParser {
         final pressKey = _readByte(reader, offset) == 1;
         offset += 1;
 
-        customInstruments.add(CustomInstrument(
-          name: name,
-          soundFile: soundFile,
-          pitch: pitch,
-          pressKey: pressKey,
-        ));
+        customInstruments.add(
+          CustomInstrument(
+            name: name,
+            soundFile: soundFile,
+            pitch: pitch,
+            pressKey: pressKey,
+          ),
+        );
       }
 
       return NbsFile(
@@ -380,8 +381,7 @@ class NbsParser {
     }
   }
 
-  static int _readByte(ByteData data, int offset) =>
-      data.getUint8(offset);
+  static int _readByte(ByteData data, int offset) => data.getUint8(offset);
 
   static int _readShort(ByteData data, int offset) =>
       data.getInt16(offset, Endian.little);
@@ -399,11 +399,7 @@ class NbsParser {
 }
 
 /// NBS 播放器状态
-enum NbsPlayerState {
-  stopped,
-  playing,
-  paused,
-}
+enum NbsPlayerState { stopped, playing, paused }
 
 /// NBS 音乐播放器
 class NbsPlayer extends ChangeNotifier {
@@ -424,7 +420,9 @@ class NbsPlayer extends ChangeNotifier {
   bool get looping => _looping;
 
   Duration get position => _currentFile != null
-      ? Duration(milliseconds: (_currentTick / _currentFile!.tempo * 1000).round())
+      ? Duration(
+          milliseconds: (_currentTick / _currentFile!.tempo * 1000).round(),
+        )
       : Duration.zero;
 
   Duration get totalDuration => _currentFile?.totalDuration ?? Duration.zero;
@@ -494,7 +492,9 @@ class NbsPlayer extends ChangeNotifier {
     _stopTimer();
     if (_currentFile == null) return;
 
-    final interval = Duration(milliseconds: (1000 / _currentFile!.tempo).round());
+    final interval = Duration(
+      milliseconds: (1000 / _currentFile!.tempo).round(),
+    );
     _timer = Timer.periodic(interval, _onTick);
   }
 
@@ -544,7 +544,9 @@ class NbsPlayer extends ChangeNotifier {
     // 如 just_audio 或 audioplayers
     // 现在作为占位
     _activeNotes[note.tick * 1000 + note.layer] = note;
-    _logger.debug('Playing note: tick=${note.tick}, inst=${note.instrument}, key=${note.key}');
+    _logger.debug(
+      'Playing note: tick=${note.tick}, inst=${note.instrument}, key=${note.key}',
+    );
   }
 
   /// 释放所有音符

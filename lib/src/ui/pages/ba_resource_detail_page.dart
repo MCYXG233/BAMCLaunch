@@ -33,7 +33,8 @@ class ResourceDetailPage extends StatefulWidget {
   State<ResourceDetailPage> createState() => _ResourceDetailPageState();
 }
 
-class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowListener {
+class _ResourceDetailPageState extends State<ResourceDetailPage>
+    with WindowListener {
   bool _isMaximized = false;
   bool _isFavorite = false;
   bool _isLoadingVersions = false;
@@ -310,7 +311,9 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: _getTypeColor(widget.resource.type).withValues(alpha: 0.3),
+                  color: _getTypeColor(
+                    widget.resource.type,
+                  ).withValues(alpha: 0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -331,9 +334,14 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
               children: [
                 // 类型标签
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: _getTypeColor(widget.resource.type).withValues(alpha: 0.15),
+                    color: _getTypeColor(
+                      widget.resource.type,
+                    ).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -361,12 +369,17 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
                 // 作者
                 Row(
                   children: [
-                    Icon(Icons.person_outline, size: 16,
-                        color: BAColors.textSecondaryOf(context)),
+                    Icon(
+                      Icons.person_outline,
+                      size: 16,
+                      color: BAColors.textSecondaryOf(context),
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       widget.resource.authors.isNotEmpty
-                          ? widget.resource.authors.map((a) => a.name).join(', ')
+                          ? widget.resource.authors
+                                .map((a) => a.name)
+                                .join(', ')
                           : '未知作者',
                       style: TextStyle(
                         color: BAColors.textSecondaryOf(context),
@@ -382,12 +395,14 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
                   spacing: 6,
                   runSpacing: 6,
                   children: [
-                    ...widget.resource.supportedGameVersions.take(4).map(
-                      (v) => _buildChip(v, BAColors.primaryOf(context)),
-                    ),
-                    ...widget.resource.supportedLoaders.take(3).map(
-                      (l) => _buildChip(l, BAColors.accentPinkOf(context)),
-                    ),
+                    ...widget.resource.supportedGameVersions
+                        .take(4)
+                        .map((v) => _buildChip(v, BAColors.primaryOf(context))),
+                    ...widget.resource.supportedLoaders
+                        .take(3)
+                        .map(
+                          (l) => _buildChip(l, BAColors.accentPinkOf(context)),
+                        ),
                   ],
                 ),
               ],
@@ -425,7 +440,11 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
         children: [
           Row(
             children: [
-              Icon(Icons.description_outlined, size: 18, color: BAColors.primaryOf(context)),
+              Icon(
+                Icons.description_outlined,
+                size: 18,
+                color: BAColors.primaryOf(context),
+              ),
               const SizedBox(width: 8),
               Text(
                 '简介',
@@ -495,7 +514,9 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
               ),
             )
           else
-            ..._versions.take(5).map((version) => _buildVersionTile(version, isLight)),
+            ..._versions
+                .take(5)
+                .map((version) => _buildVersionTile(version, isLight)),
         ],
       ),
     );
@@ -528,24 +549,28 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
                   spacing: 6,
                   runSpacing: 4,
                   children: [
-                    ...version.gameVersions.take(2).map(
-                      (v) => Text(
-                        v,
-                        style: TextStyle(
-                          color: BAColors.textSecondaryOf(context),
-                          fontSize: 11,
+                    ...version.gameVersions
+                        .take(2)
+                        .map(
+                          (v) => Text(
+                            v,
+                            style: TextStyle(
+                              color: BAColors.textSecondaryOf(context),
+                              fontSize: 11,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    ...version.loaders.take(2).map(
-                      (l) => Text(
-                        l,
-                        style: TextStyle(
-                          color: BAColors.accentPinkOf(context),
-                          fontSize: 11,
+                    ...version.loaders
+                        .take(2)
+                        .map(
+                          (l) => Text(
+                            l,
+                            style: TextStyle(
+                              color: BAColors.accentPinkOf(context),
+                              fontSize: 11,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
                   ],
                 ),
               ],
@@ -579,7 +604,11 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
         children: [
           Row(
             children: [
-              Icon(Icons.system_update_alt, size: 18, color: BAColors.accentPinkOf(context)),
+              Icon(
+                Icons.system_update_alt,
+                size: 18,
+                color: BAColors.accentPinkOf(context),
+              ),
               const SizedBox(width: 8),
               Text(
                 '兼容性',
@@ -602,7 +631,11 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
                   BAColors.primaryOf(context),
                 ),
               ),
-              Container(width: 1, height: 40, color: BAColors.borderOf(context)),
+              Container(
+                width: 1,
+                height: 40,
+                color: BAColors.borderOf(context),
+              ),
               Expanded(
                 child: _buildStatBlock(
                   context,
@@ -631,11 +664,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
               BAColors.primaryOf(context),
             ),
           ),
-          Container(
-            width: 1,
-            height: 40,
-            color: BAColors.borderOf(context),
-          ),
+          Container(width: 1, height: 40, color: BAColors.borderOf(context)),
           Expanded(
             child: _buildStatBlock(
               context,
@@ -644,11 +673,7 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
               BAColors.dangerOf(context),
             ),
           ),
-          Container(
-            width: 1,
-            height: 40,
-            color: BAColors.borderOf(context),
-          ),
+          Container(width: 1, height: 40, color: BAColors.borderOf(context)),
           Expanded(
             child: _buildStatBlock(
               context,
@@ -664,7 +689,12 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
     );
   }
 
-  Widget _buildStatBlock(BuildContext context, String label, String value, Color color) {
+  Widget _buildStatBlock(
+    BuildContext context,
+    String label,
+    String value,
+    Color color,
+  ) {
     return Column(
       children: [
         Text(
@@ -708,9 +738,14 @@ class _ResourceDetailPageState extends State<ResourceDetailPage> with WindowList
               style: OutlinedButton.styleFrom(
                 foregroundColor: BAColors.textPrimaryOf(context),
                 side: BorderSide(
-                  color: _isFavorite ? BAColors.dangerOf(context) : BAColors.borderOf(context),
+                  color: _isFavorite
+                      ? BAColors.dangerOf(context)
+                      : BAColors.borderOf(context),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 14,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),

@@ -62,7 +62,8 @@ class ModpackManifest {
       gameVersion: json['gameVersion'] as String,
       modLoader: json['modLoader'] as String?,
       loaderVersion: json['loaderVersion'] as String?,
-      mods: (json['mods'] as List<dynamic>?)
+      mods:
+          (json['mods'] as List<dynamic>?)
               ?.map((e) => ModpackMod.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
@@ -184,7 +185,8 @@ class ModpackManager {
   /// 初始化整合包管理器
   Future<void> initialize() async {
     try {
-      final supportDir = await _platformAdapter.getApplicationSupportDirectory();
+      final supportDir = await _platformAdapter
+          .getApplicationSupportDirectory();
       _modpackDir = Directory(path.join(supportDir, 'modpacks'));
 
       if (!await _modpackDir!.exists()) {
@@ -208,7 +210,9 @@ class ModpackManager {
 
       if (filePath.endsWith('.mrpack') || filePath.endsWith('.zip')) {
         // 解压 ZIP 到临时目录（使用 SafeArchiveExtractor 防止 Zip Slip）
-        final tempDir = await Directory.systemTemp.createTemp('bamclaunch_modpack_');
+        final tempDir = await Directory.systemTemp.createTemp(
+          'bamclaunch_modpack_',
+        );
         try {
           final bytes = await file.readAsBytes();
           await SafeArchiveExtractor.extractZip(
@@ -217,7 +221,9 @@ class ModpackManager {
           );
 
           // 检测格式
-          final modrinthIndex = File(path.join(tempDir.path, 'modrinth.index.json'));
+          final modrinthIndex = File(
+            path.join(tempDir.path, 'modrinth.index.json'),
+          );
           final curseManifest = File(path.join(tempDir.path, 'manifest.json'));
           final mmcPack = File(path.join(tempDir.path, 'mmc-pack.json'));
 
@@ -263,11 +269,13 @@ class ModpackManager {
   /// 解析 Modrinth mrpack（modrinth.index.json）
   ModpackManifest _parseModrinthMrpack(String tempDirPath) {
     final indexFile = File(path.join(tempDirPath, 'modrinth.index.json'));
-    final data = jsonDecode(indexFile.readAsStringSync()) as Map<String, dynamic>;
+    final data =
+        jsonDecode(indexFile.readAsStringSync()) as Map<String, dynamic>;
 
     final name = data['name'] as String? ?? 'Unknown';
     final versionId = data['versionId'] as String? ?? '1.0.0';
-    final gameVersion = (data['gameVersions'] as List<dynamic>?)?.first as String? ?? 'unknown';
+    final gameVersion =
+        (data['gameVersions'] as List<dynamic>?)?.first as String? ?? 'unknown';
     final dependencies = data['dependencies'] as Map<String, dynamic>? ?? {};
 
     String? modLoader;
@@ -315,7 +323,8 @@ class ModpackManager {
   /// 解析 CurseForge 整合包（manifest.json）
   ModpackManifest _parseCurseForgeModpack(String tempDirPath) {
     final manifestFile = File(path.join(tempDirPath, 'manifest.json'));
-    final data = jsonDecode(manifestFile.readAsStringSync()) as Map<String, dynamic>;
+    final data =
+        jsonDecode(manifestFile.readAsStringSync()) as Map<String, dynamic>;
     return _parseCurseForgeManifest(data);
   }
 
@@ -323,7 +332,8 @@ class ModpackManager {
   ModpackManifest _parseModrinthIndex(Map<String, dynamic> data) {
     final name = data['name'] as String? ?? 'Unknown';
     final versionId = data['versionId'] as String? ?? '1.0.0';
-    final gameVersion = (data['gameVersions'] as List<dynamic>?)?.first as String? ?? 'unknown';
+    final gameVersion =
+        (data['gameVersions'] as List<dynamic>?)?.first as String? ?? 'unknown';
 
     final files = data['files'] as List<dynamic>? ?? [];
     final mods = files.map((f) {
@@ -358,7 +368,8 @@ class ModpackManager {
     String? modLoader;
     String? loaderVersion;
     if (modLoaders.isNotEmpty) {
-      final loaderId = (modLoaders.first as Map<String, dynamic>)['id'] as String? ?? '';
+      final loaderId =
+          (modLoaders.first as Map<String, dynamic>)['id'] as String? ?? '';
       if (loaderId.contains('forge')) {
         modLoader = 'forge';
         loaderVersion = loaderId.replaceAll('forge-', '');
@@ -472,11 +483,13 @@ class ModpackManager {
 
       // 下载Mod
       if (manifest.mods.isNotEmpty) {
-        _emitProgress(ModpackInstallProgress(
-          status: ModpackInstallStatus.downloadingMods,
-          progress: 0,
-          totalMods: manifest.mods.length,
-        ));
+        _emitProgress(
+          ModpackInstallProgress(
+            status: ModpackInstallStatus.downloadingMods,
+            progress: 0,
+            totalMods: manifest.mods.length,
+          ),
+        );
 
         final instanceDir = Directory(targetPath);
 
@@ -492,13 +505,15 @@ class ModpackManager {
           // 跳过可选Mod
           if (mod.optional) continue;
 
-          _emitProgress(ModpackInstallProgress(
-            status: ModpackInstallStatus.downloadingMods,
-            progress: i / manifest.mods.length,
-            currentMod: i + 1,
-            totalMods: manifest.mods.length,
-            currentFile: mod.name,
-          ));
+          _emitProgress(
+            ModpackInstallProgress(
+              status: ModpackInstallStatus.downloadingMods,
+              progress: i / manifest.mods.length,
+              currentMod: i + 1,
+              totalMods: manifest.mods.length,
+              currentFile: mod.name,
+            ),
+          );
 
           try {
             String? downloadUrl;
@@ -508,7 +523,10 @@ class ModpackManager {
               downloadUrl = mod.downloadUrl;
             } else if (mod.projectId != null && mod.fileId != null) {
               // CurseForge 格式：通过 API 获取下载 URL
-              downloadUrl = await _getCurseForgeDownloadUrl(mod.projectId!, mod.fileId!);
+              downloadUrl = await _getCurseForgeDownloadUrl(
+                mod.projectId!,
+                mod.fileId!,
+              );
             }
 
             if (downloadUrl != null) {
@@ -530,13 +548,17 @@ class ModpackManager {
 
       // 应用覆盖文件
       if (manifest.overrides != null && manifest.overrides!.isNotEmpty) {
-        _emitProgress(ModpackInstallProgress(
-          status: ModpackInstallStatus.downloadingOverrides,
-          progress: 0,
-        ));
+        _emitProgress(
+          ModpackInstallProgress(
+            status: ModpackInstallStatus.downloadingOverrides,
+            progress: 0,
+          ),
+        );
 
         // 从解压的临时目录中找到 overrides 目录
-        final sourceOverridesDir = Directory(path.join(targetPath, manifest.overrides!));
+        final sourceOverridesDir = Directory(
+          path.join(targetPath, manifest.overrides!),
+        );
         if (await sourceOverridesDir.exists()) {
           await _copyDirectory(sourceOverridesDir, Directory(targetPath));
           _logger.info('Applied overrides from: ${manifest.overrides}');
@@ -544,33 +566,41 @@ class ModpackManager {
       }
 
       // 设置实例
-      _emitProgress(ModpackInstallProgress(
-        status: ModpackInstallStatus.settingUp,
-        progress: 0.8,
-      ));
+      _emitProgress(
+        ModpackInstallProgress(
+          status: ModpackInstallStatus.settingUp,
+          progress: 0.8,
+        ),
+      );
 
       // 创建实例配置
       final configFile = File(path.join(targetPath, 'modpack.json'));
-      await configFile.writeAsString(jsonEncode({
-        'name': manifest.name,
-        'version': manifest.version,
-        'gameVersion': manifest.gameVersion,
-        'installedAt': DateTime.now().toIso8601String(),
-      }));
+      await configFile.writeAsString(
+        jsonEncode({
+          'name': manifest.name,
+          'version': manifest.version,
+          'gameVersion': manifest.gameVersion,
+          'installedAt': DateTime.now().toIso8601String(),
+        }),
+      );
 
-      _emitProgress(ModpackInstallProgress(
-        status: ModpackInstallStatus.completed,
-        progress: 1,
-      ));
+      _emitProgress(
+        ModpackInstallProgress(
+          status: ModpackInstallStatus.completed,
+          progress: 1,
+        ),
+      );
 
       _logger.info('Successfully installed modpack: ${manifest.name}');
       return true;
     } catch (e, stackTrace) {
       _logger.error('Failed to install modpack', e, stackTrace);
-      _emitProgress(ModpackInstallProgress(
-        status: ModpackInstallStatus.error,
-        error: e.toString(),
-      ));
+      _emitProgress(
+        ModpackInstallProgress(
+          status: ModpackInstallStatus.error,
+          error: e.toString(),
+        ),
+      );
       return false;
     } finally {
       _isInstalling = false;
@@ -592,13 +622,15 @@ class ModpackManager {
             final content = await configFile.readAsString();
             final json = jsonDecode(content) as Map<String, dynamic>;
 
-            modpacks.add(InstalledModpack(
-              name: json['name'] as String,
-              version: json['version'] as String,
-              gameVersion: json['gameVersion'] as String,
-              path: entity.path,
-              installedAt: DateTime.parse(json['installedAt'] as String),
-            ));
+            modpacks.add(
+              InstalledModpack(
+                name: json['name'] as String,
+                version: json['version'] as String,
+                gameVersion: json['gameVersion'] as String,
+                path: entity.path,
+                installedAt: DateTime.parse(json['installedAt'] as String),
+              ),
+            );
           } catch (e) {
             // 忽略无效的整合包
           }
@@ -663,7 +695,9 @@ class ModpackManager {
       );
 
       // 创建临时目录用于打包
-      final tempDir = await Directory.systemTemp.createTemp('bamclaunch_export_');
+      final tempDir = await Directory.systemTemp.createTemp(
+        'bamclaunch_export_',
+      );
       try {
         // 写入 manifest.json
         final manifestFile = File(path.join(tempDir.path, 'manifest.json'));
@@ -694,7 +728,10 @@ class ModpackManager {
   }
 
   /// 复制实例文件到 overrides 目录
-  Future<void> _copyInstanceFiles(String instancePath, String overridesPath) async {
+  Future<void> _copyInstanceFiles(
+    String instancePath,
+    String overridesPath,
+  ) async {
     final overridesToCopy = ['mods', 'config', 'resourcepacks', 'shaderpacks'];
     for (final dirName in overridesToCopy) {
       final sourceDir = Directory(path.join(instancePath, dirName));
@@ -762,15 +799,16 @@ class ModpackManager {
   }
 
   /// 通过 CurseForge API 获取 Mod 文件的下载 URL
-  Future<String?> _getCurseForgeDownloadUrl(String projectId, String fileId) async {
+  Future<String?> _getCurseForgeDownloadUrl(
+    String projectId,
+    String fileId,
+  ) async {
     try {
       final networkClient = NetworkClient();
       final url = '${ApiEndpoints.curseforgeApi}/mods/$projectId/files/$fileId';
       final response = await networkClient.get(
         url,
-        headers: {
-          'Accept': 'application/json',
-        },
+        headers: {'Accept': 'application/json'},
       );
 
       if (response.statusCode == 200) {
@@ -778,10 +816,14 @@ class ModpackManager {
         final fileData = data['data'] as Map<String, dynamic>?;
         return fileData?['downloadUrl'] as String?;
       }
-      _logger.warn('CurseForge API returned ${response.statusCode} for mod $projectId file $fileId');
+      _logger.warn(
+        'CurseForge API returned ${response.statusCode} for mod $projectId file $fileId',
+      );
       return null;
     } catch (e) {
-      _logger.warn('Failed to get CurseForge download URL for $projectId/$fileId: $e');
+      _logger.warn(
+        'Failed to get CurseForge download URL for $projectId/$fileId: $e',
+      );
       return null;
     }
   }

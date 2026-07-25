@@ -492,7 +492,7 @@ class VersionManager implements IVersionManager {
       );
 
       _logger.info('Fetching version JSON for $versionId');
-      
+
       // 下载版本JSON配置
       final networkClient = NetworkClient();
       final response = await networkClient.get(
@@ -934,24 +934,24 @@ class VersionManager implements IVersionManager {
   @override
   Future<List<InvalidFile>> repairVersionFiles(String versionId) async {
     _logger.info('Repairing files for version $versionId');
-    
+
     // 获取版本配置
     final versionJson = await fetchVersionJson(versionId);
     final gameDir = await getGameDir();
-    
+
     // 使用全量验证策略检查所有文件
     final invalidFiles = await GameFileValidator.instance.validateAll(
-      versionJson, 
-      gameDir, 
+      versionJson,
+      gameDir,
       FileValidatePolicy.full,
     );
-    
+
     // 如果没有无效文件，直接返回
     if (invalidFiles.isEmpty) {
       _logger.info('All files are valid, no repair needed');
       return [];
     }
-    
+
     // 逐个下载无效文件进行修复
     _logger.info('Found ${invalidFiles.length} invalid files, starting repair');
     for (final file in invalidFiles) {
@@ -959,7 +959,7 @@ class VersionManager implements IVersionManager {
         await _downloadEngine.download(file.url!, file.path);
       }
     }
-    
+
     _logger.info('Repair completed for version $versionId');
     return invalidFiles;
   }

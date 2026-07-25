@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../game/backup_manager.dart';
 import '../../instance/instance_manager.dart';
 import '../../instance/models.dart';
@@ -11,10 +11,7 @@ import 'ba_notification.dart';
 class BABackupDialog extends StatefulWidget {
   final GameInstance instance;
 
-  const BABackupDialog({
-    super.key,
-    required this.instance,
-  });
+  const BABackupDialog({super.key, required this.instance});
 
   static Future<void> show({
     required BuildContext context,
@@ -87,7 +84,9 @@ class _BABackupDialogState extends State<BABackupDialog> {
         instanceName: widget.instance.name,
         instancePath: directory.path,
         type: type,
-        description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text,
+        description: _descriptionController.text.trim().isEmpty
+            ? null
+            : _descriptionController.text,
         gameVersion: widget.instance.version,
       );
 
@@ -211,22 +210,30 @@ class _BABackupDialogState extends State<BABackupDialog> {
                       const SizedBox(height: 8),
                       TextField(
                         controller: _descriptionController,
-                        style: TextStyle(color: BAColors.textPrimaryOf(context)),
+                        style: TextStyle(
+                          color: BAColors.textPrimaryOf(context),
+                        ),
                         decoration: InputDecoration(
                           hintText: '添加备份描述（可选）',
-                          hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
+                          hintStyle: TextStyle(
+                            color: BAColors.textDisabledOf(context),
+                          ),
                           filled: true,
                           fillColor: BAColors.surfaceOf(context),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide(
-                              color: BAColors.borderOf(context).withOpacity(0.5),
+                              color: BAColors.borderOf(
+                                context,
+                              ).withOpacity(0.5),
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide(
-                              color: BAColors.borderOf(context).withOpacity(0.5),
+                              color: BAColors.borderOf(
+                                context,
+                              ).withOpacity(0.5),
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
@@ -312,10 +319,14 @@ class _BABackupDialogState extends State<BABackupDialog> {
                               margin: const EdgeInsets.only(bottom: 8),
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: BAColors.surfaceOf(context).withOpacity(0.5),
+                                color: BAColors.surfaceOf(
+                                  context,
+                                ).withOpacity(0.5),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: BAColors.borderOf(context).withOpacity(0.4),
+                                  color: BAColors.borderOf(
+                                    context,
+                                  ).withOpacity(0.4),
                                 ),
                               ),
                               child: Row(
@@ -336,12 +347,15 @@ class _BABackupDialogState extends State<BABackupDialog> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           _getBackupTypeLabel(backup.type),
                                           style: TextStyle(
-                                            color: BAColors.textPrimaryOf(context),
+                                            color: BAColors.textPrimaryOf(
+                                              context,
+                                            ),
                                             fontSize: 14,
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -350,7 +364,9 @@ class _BABackupDialogState extends State<BABackupDialog> {
                                         Text(
                                           _formatDate(backup.createdAt),
                                           style: TextStyle(
-                                            color: BAColors.textSecondaryOf(context),
+                                            color: BAColors.textSecondaryOf(
+                                              context,
+                                            ),
                                             fontSize: 12,
                                           ),
                                         ),
@@ -359,7 +375,9 @@ class _BABackupDialogState extends State<BABackupDialog> {
                                           Text(
                                             backup.description!,
                                             style: TextStyle(
-                                              color: BAColors.textSecondaryOf(context),
+                                              color: BAColors.textSecondaryOf(
+                                                context,
+                                              ),
                                               fontSize: 11,
                                             ),
                                           ),
@@ -382,7 +400,10 @@ class _BABackupDialogState extends State<BABackupDialog> {
                                     tooltip: '恢复备份',
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.delete_outline, size: 18),
+                                    icon: const Icon(
+                                      Icons.delete_outline,
+                                      size: 18,
+                                    ),
                                     color: BAColors.primaryOf(context),
                                     onPressed: () => _deleteBackup(backup),
                                     tooltip: '删除备份',

@@ -8,7 +8,6 @@ import 'config_manager.dart';
 import 'config_keys.dart';
 import 'config_models.dart';
 import 'crypto_util.dart';
-import 'package:flutter/foundation.dart';
 
 import '../core/logger.dart';
 
@@ -25,7 +24,7 @@ class ConfigManagerImpl implements IConfigManager {
   bool _initialized = false;
   bool _autoSave = true;
   File? _configFile;
-  
+
   /// 缓存的完整配置对象
   LauncherConfig? _cachedConfig;
 
@@ -152,8 +151,8 @@ class ConfigManagerImpl implements IConfigManager {
         await _configFile!.delete();
       }
       await tempFile.rename(_configFile!.path);
-    } catch (e) {
-      debugPrint('[ConfigManager] Failed to save config: $e');
+    } catch (e, st) {
+      Logger.instance.error('Failed to save config', e, st);
     }
   }
 
@@ -164,7 +163,7 @@ class ConfigManagerImpl implements IConfigManager {
     try {
       final jsonString = await _configFile!.readAsString();
       if (jsonString.trim().isEmpty) {
-        debugPrint('[ConfigManager] Config file is empty, using defaults');
+        Logger.instance.info('Config file is empty, using defaults');
         return;
       }
 
@@ -180,15 +179,15 @@ class ConfigManagerImpl implements IConfigManager {
           '${_configFile!.path}.corrupted.${DateTime.now().millisecondsSinceEpoch}';
       try {
         await _configFile!.rename(backupPath);
-        debugPrint(
-            '[ConfigManager] Config file corrupted, backed up to $backupPath');
+        Logger.instance.warning(
+          'Config file corrupted, backed up to $backupPath',
+        );
       } catch (_) {
-        debugPrint('[ConfigManager] Failed to backup corrupted config');
+        Logger.instance.warning('Failed to backup corrupted config');
       }
-      debugPrint(
-          '[ConfigManager] Using default config due to corruption: $e');
-    } catch (e) {
-      debugPrint('[ConfigManager] Failed to load config: $e');
+      Logger.instance.error('Using default config due to corruption', e);
+    } catch (e, st) {
+      Logger.instance.error('Failed to load config', e, st);
     }
   }
 
@@ -346,13 +345,19 @@ class ConfigManagerImpl implements IConfigManager {
     } else {
       dirs.add(dir);
     }
-    await set(ConfigKeys.localGameDirectories, dirs.map((d) => d.toJson()).toList());
+    await set(
+      ConfigKeys.localGameDirectories,
+      dirs.map((d) => d.toJson()).toList(),
+    );
   }
 
   /// 移除本地游戏目录
   Future<void> removeLocalGameDirectory(String dirPath) async {
     final dirs = getLocalGameDirectories();
     dirs.removeWhere((d) => d.dir == dirPath);
-    await set(ConfigKeys.localGameDirectories, dirs.map((d) => d.toJson()).toList());
+    await set(
+      ConfigKeys.localGameDirectories,
+      dirs.map((d) => d.toJson()).toList(),
+    );
   }
 }

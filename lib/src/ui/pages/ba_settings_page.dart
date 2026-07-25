@@ -6,6 +6,7 @@ import '../theme/colors.dart';
 import '../../config/config_manager.dart';
 import '../../config/config_keys.dart';
 import '../../core/constants.dart';
+import '../../core/logger.dart';
 import '../../updater/update_manager.dart';
 import '../../platform/platform_adapter.dart';
 import '../../platform/platform_adapter_factory.dart';
@@ -37,8 +38,10 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
   /// 应用版本号(集中管理,与 pubspec.yaml 保持一致)
   static const String _appVersion = '1.0.0';
+
   /// 应用构建号
   static const String _appBuild = '1';
+
   /// 应用全版本显示
   String get _appVersionDisplay => 'v$_appVersion+$_appBuild';
 
@@ -46,7 +49,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
   final ThemeManager _themeManager = ThemeManager();
   final BackgroundManager _backgroundManager = BackgroundManager();
   final BackupManager _backupManager = BackupManager.instance;
-  final GameStatisticsManager _statisticsManager = GameStatisticsManager.instance;
+  final GameStatisticsManager _statisticsManager =
+      GameStatisticsManager.instance;
 
   String _selectedCategory = 'general';
   bool _notificationInitialized = false;
@@ -89,8 +93,10 @@ class _BASettingsPageState extends State<BASettingsPage> {
   bool _enableSpeedLimit = false;
   double _speedLimitValue = 1024;
   int _speedLimitUnit = 0;
-  final TextEditingController _customMirrorUrlController = TextEditingController();
-  final TextEditingController _customMirrorNameController = TextEditingController();
+  final TextEditingController _customMirrorUrlController =
+      TextEditingController();
+  final TextEditingController _customMirrorNameController =
+      TextEditingController();
   final FocusNode _customMirrorNameFocusNode = FocusNode();
   final FocusNode _customMirrorUrlFocusNode = FocusNode();
 
@@ -187,25 +193,40 @@ class _BASettingsPageState extends State<BASettingsPage> {
     try {
       final gameDir = _configManager.getString(ConfigKeys.gameDirectory) ?? '';
       final javaPath = _configManager.getString(ConfigKeys.javaPath) ?? '';
-      final memory = _configManager.getInt(ConfigKeys.memoryAllocation) ?? BAMCConstants.recommendedMaxMemoryMB;
+      final memory =
+          _configManager.getInt(ConfigKeys.memoryAllocation) ??
+          BAMCConstants.recommendedMaxMemoryMB;
       final autoUpdate = _configManager.getBool(ConfigKeys.autoUpdate) ?? true;
       final language = _configManager.getString(ConfigKeys.language) ?? '简体中文';
-      final downloadSource = _configManager.getString(ConfigKeys.downloadSource) ?? 'official';
-      final concurrentDownloads = _configManager.getInt(ConfigKeys.concurrentDownloads) ?? 3;
-      final downloadPath = _configManager.getString(ConfigKeys.downloadPath) ?? '';
-      final launchAtStartup = _configManager.getBool(ConfigKeys.launchAtStartup) ?? false;
-      final minimizeToTray = _configManager.getBool(ConfigKeys.minimizeToTray) ?? true;
-      final closeToTray = _configManager.getBool(ConfigKeys.closeToTray) ?? false;
-      final autoRetryDownload = _configManager.getBool(ConfigKeys.autoRetryDownload) ?? true;
+      final downloadSource =
+          _configManager.getString(ConfigKeys.downloadSource) ?? 'official';
+      final concurrentDownloads =
+          _configManager.getInt(ConfigKeys.concurrentDownloads) ?? 3;
+      final downloadPath =
+          _configManager.getString(ConfigKeys.downloadPath) ?? '';
+      final launchAtStartup =
+          _configManager.getBool(ConfigKeys.launchAtStartup) ?? false;
+      final minimizeToTray =
+          _configManager.getBool(ConfigKeys.minimizeToTray) ?? true;
+      final closeToTray =
+          _configManager.getBool(ConfigKeys.closeToTray) ?? false;
+      final autoRetryDownload =
+          _configManager.getBool(ConfigKeys.autoRetryDownload) ?? true;
       final proxyHost = _configManager.getString(ConfigKeys.proxyHost) ?? '';
       final proxyPort = _configManager.getInt(ConfigKeys.proxyPort) ?? 0;
-      final gameWindowSize = _configManager.getString(ConfigKeys.gameWindowSize) ?? '1280x720';
-      final jvmArguments = _configManager.getString(ConfigKeys.jvmArguments) ?? '';
-      final gameArguments = _configManager.getString(ConfigKeys.gameArguments) ?? '';
+      final gameWindowSize =
+          _configManager.getString(ConfigKeys.gameWindowSize) ?? '1280x720';
+      final jvmArguments =
+          _configManager.getString(ConfigKeys.jvmArguments) ?? '';
+      final gameArguments =
+          _configManager.getString(ConfigKeys.gameArguments) ?? '';
 
-      final autoSelectMirror = _configManager.getBool(ConfigKeys.autoSelectMirror) ?? true;
-      final enableSpeedLimit = _configManager.getBool(ConfigKeys.enableSpeedLimit) ?? false;
-      final speedLimitValue = _configManager.getInt(ConfigKeys.speedLimitValue) ?? 1024;
+      final autoSelectMirror =
+          _configManager.getBool(ConfigKeys.autoSelectMirror) ?? true;
+      final enableSpeedLimit =
+          _configManager.getBool(ConfigKeys.enableSpeedLimit) ?? false;
+      final speedLimitValue =
+          _configManager.getInt(ConfigKeys.speedLimitValue) ?? 1024;
       final speedLimitUnit = _configManager.getInt('speedLimitUnit') ?? 0;
 
       await _mirrorManager.loadConfig();
@@ -243,7 +264,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
           _proxyHost = proxyHost;
           _proxyPort = proxyPort;
           _proxyHostController.text = proxyHost;
-          _proxyPortController.text = proxyPort == 0 ? '' : proxyPort.toString();
+          _proxyPortController.text = proxyPort == 0
+              ? ''
+              : proxyPort.toString();
           _gameWindowSize = gameWindowSize;
           _jvmArgsController.text = jvmArguments;
           _gameArgsController.text = gameArguments;
@@ -599,7 +622,10 @@ class _BASettingsPageState extends State<BASettingsPage> {
       NotificationManager().showSuccess('关闭时最小化到托盘设置已保存');
     } catch (e) {
       if (mounted) {
-        NotificationManager().showError('保存关闭时最小化到托盘设置失败', message: e.toString());
+        NotificationManager().showError(
+          '保存关闭时最小化到托盘设置失败',
+          message: e.toString(),
+        );
       }
     }
   }
@@ -614,7 +640,10 @@ class _BASettingsPageState extends State<BASettingsPage> {
       NotificationManager().showSuccess('下载失败自动重试设置已保存');
     } catch (e) {
       if (mounted) {
-        NotificationManager().showError('保存下载失败自动重试设置失败', message: e.toString());
+        NotificationManager().showError(
+          '保存下载失败自动重试设置失败',
+          message: e.toString(),
+        );
       }
     }
   }
@@ -761,7 +790,10 @@ class _BASettingsPageState extends State<BASettingsPage> {
       final release = await UpdateManager.instance.checkForUpdates(force: true);
       if (mounted) {
         if (release != null) {
-          NotificationManager().showInfo('检查更新', message: '最新版本: ${release.version}');
+          NotificationManager().showInfo(
+            '检查更新',
+            message: '最新版本: ${release.version}',
+          );
         } else {
           NotificationManager().showSuccess('检查更新', message: '当前已是最新版本');
         }
@@ -816,8 +848,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('确认清除缓存'),
-        content: const Text(
-            '此操作将清理启动器临时文件（包括下载缓存、解压中间文件等）。\n\n确定要继续吗？'),
+        content: const Text('此操作将清理启动器临时文件（包括下载缓存、解压中间文件等）。\n\n确定要继续吗？'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -849,12 +880,15 @@ class _BASettingsPageState extends State<BASettingsPage> {
           try {
             await entity.delete(recursive: true);
             count++;
-          } catch (e) {
-            debugPrint('删除临时文件失败: $e');
+          } catch (e, st) {
+            Logger.instance.error('删除临时文件失败', e, st);
           }
         }
         if (mounted) {
-          NotificationManager().showSuccess('缓存已清除', message: '已清理 $count 个临时文件');
+          NotificationManager().showSuccess(
+            '缓存已清除',
+            message: '已清理 $count 个临时文件',
+          );
         }
       } else {
         if (mounted) {
@@ -878,9 +912,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
             child: Row(
               children: [
                 _buildCategoryList(),
-                Expanded(
-                  child: _buildSettingsList(),
-                ),
+                Expanded(child: _buildSettingsList()),
               ],
             ),
           ),
@@ -915,11 +947,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 ),
               ],
             ),
-            child: const Icon(
-              Icons.settings,
-              color: Colors.white,
-              size: 22,
-            ),
+            child: const Icon(Icons.settings, color: Colors.white, size: 22),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -938,10 +966,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 const SizedBox(height: 2),
                 Text(
                   '启动器参数与偏好设置',
-                  style: TextStyle(
-                    color: secondaryText,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: secondaryText, fontSize: 12),
                 ),
               ],
             ),
@@ -956,18 +981,11 @@ class _BASettingsPageState extends State<BASettingsPage> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.info_outline,
-                  color: accentBlue,
-                  size: 18,
-                ),
+                Icon(Icons.info_outline, color: accentBlue, size: 18),
                 const SizedBox(width: 6),
                 Text(
                   _appVersionDisplay,
-                  style: TextStyle(
-                    color: secondaryText,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: secondaryText, fontSize: 12),
                 ),
               ],
             ),
@@ -976,7 +994,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
       ),
     );
   }
-
 
   Widget _buildCategoryList() {
     final categoryNames = {
@@ -1050,11 +1067,12 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
                   curve: Curves.easeOutCubic,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? selectedBgColor
-                        : Colors.transparent,
+                    color: isSelected ? selectedBgColor : Colors.transparent,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: isSelected
@@ -1065,12 +1083,16 @@ class _BASettingsPageState extends State<BASettingsPage> {
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: BAColors.primaryOf(context).withOpacity(0.2),
+                              color: BAColors.primaryOf(
+                                context,
+                              ).withOpacity(0.2),
                               blurRadius: 12,
                               spreadRadius: 1,
                             ),
                             BoxShadow(
-                              color: BAColors.primaryOf(context).withOpacity(0.1),
+                              color: BAColors.primaryOf(
+                                context,
+                              ).withOpacity(0.1),
                               blurRadius: 24,
                               spreadRadius: 2,
                             ),
@@ -1101,17 +1123,19 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                   borderRadius: BorderRadius.circular(8),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: BAColors.primaryOf(context).withOpacity(0.5),
+                                      color: BAColors.primaryOf(
+                                        context,
+                                      ).withOpacity(0.5),
                                       blurRadius: 8,
                                       spreadRadius: 1,
                                     ),
                                   ],
                                 ),
                                 child: Icon(
-                                   icon,
-                                   color: Colors.white,
-                                   size: 16,
-                                 ),
+                                  icon,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
                               ),
                             )
                           : Container(
@@ -1121,16 +1145,15 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                 gradient: LinearGradient(
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
-                                  colors: [
-                                    unselectedBgA,
-                                    unselectedBgB,
-                                  ],
+                                  colors: [unselectedBgA, unselectedBgB],
                                 ),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
                                 icon,
-                                color: isSelected ? Colors.white : unselectedIcon,
+                                color: isSelected
+                                    ? Colors.white
+                                    : unselectedIcon,
                                 size: 16,
                               ),
                             ),
@@ -1138,11 +1161,11 @@ class _BASettingsPageState extends State<BASettingsPage> {
                       Text(
                         categoryName,
                         style: TextStyle(
-                          color: isSelected
-                            ? primaryText
-                            : unselectedText,
+                          color: isSelected ? primaryText : unselectedText,
                           fontSize: 14,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                         ),
                       ),
                     ],
@@ -1158,7 +1181,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
   Widget _buildSettingsList() {
     if (!_managersInitialized) {
-      return Center(child: CircularProgressIndicator(color: BAColors.primaryOf(context)));
+      return Center(
+        child: CircularProgressIndicator(color: BAColors.primaryOf(context)),
+      );
     }
 
     switch (_selectedCategory) {
@@ -1221,10 +1246,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [
-                        BAColors.primaryOf(context),
-                        accentBlue,
-                      ],
+                      colors: [BAColors.primaryOf(context), accentBlue],
                     ),
                     borderRadius: BorderRadius.circular(2),
                   ),
@@ -1245,10 +1267,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
             if (index.isOdd) {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  height: 1,
-                  color: borderColor,
-                ),
+                child: Container(height: 1, color: borderColor),
               );
             }
             return children[index ~/ 2];
@@ -1309,11 +1328,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   ),
                 ],
               ),
-              child: Icon(
-                icon,
-                color: effectiveIconColor,
-                size: 18,
-              ),
+              child: Icon(icon, color: effectiveIconColor, size: 18),
             ),
           ),
           const SizedBox(width: 14),
@@ -1333,10 +1348,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   const SizedBox(height: 3),
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      color: secondaryText,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: secondaryText, fontSize: 12),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1367,21 +1379,12 @@ class _BASettingsPageState extends State<BASettingsPage> {
         decoration: BoxDecoration(
           gradient: value
               ? LinearGradient(
-                  colors: [
-                    BAColors.primaryOf(context),
-                    accentBlueDyn,
-                  ],
+                  colors: [BAColors.primaryOf(context), accentBlueDyn],
                 )
               : null,
-          color: value
-              ? null
-              : offBgDyn,
+          color: value ? null : offBgDyn,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: value
-                ? Colors.transparent
-                : offBorderDyn,
-          ),
+          border: Border.all(color: value ? Colors.transparent : offBorderDyn),
           boxShadow: value
               ? [
                   BoxShadow(
@@ -1421,7 +1424,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
     required ValueChanged<T?> onChanged,
   }) {
     final validValues = items.map((item) => item.value).toList();
-    final effectiveValue = validValues.contains(value) ? value : items.first.value;
+    final effectiveValue = validValues.contains(value)
+        ? value
+        : items.first.value;
     final isLight = Theme.of(context).brightness == Brightness.light;
     final fillBg = BAColors.surfaceVariantOf(context);
     final borderColor = BAColors.borderOf(context);
@@ -1440,10 +1445,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
         child: DropdownButton<T>(
           value: effectiveValue,
           icon: Icon(Icons.keyboard_arrow_down, color: secondaryText, size: 20),
-          style: TextStyle(
-            color: primaryText,
-            fontSize: 13,
-          ),
+          style: TextStyle(color: primaryText, fontSize: 13),
           dropdownColor: dropdownBg,
           items: items,
           onChanged: onChanged,
@@ -1473,7 +1475,10 @@ class _BASettingsPageState extends State<BASettingsPage> {
         decoration: InputDecoration(
           hintText: placeholder,
           hintStyle: TextStyle(color: secondaryText, fontSize: 13),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 10,
+          ),
           filled: true,
           fillColor: fillBg,
           border: OutlineInputBorder(
@@ -1528,10 +1533,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
           ),
         ),
         const SizedBox(width: 8),
-        _buildPrimaryButton(
-          text: buttonText,
-          onPressed: onBrowse,
-        ),
+        _buildPrimaryButton(text: buttonText, onPressed: onBrowse),
       ],
     );
   }
@@ -1555,10 +1557,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                color ?? BAColors.primaryOf(context),
-                effectiveColor,
-              ],
+              colors: [color ?? BAColors.primaryOf(context), effectiveColor],
             ),
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
@@ -1571,21 +1570,21 @@ class _BASettingsPageState extends State<BASettingsPage> {
           ),
           child: isLoading
               ? const SizedBox(
-                width: 14,
-                height: 14,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
               : Text(
-                text,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                  text,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
         ),
       ),
     );
@@ -1614,21 +1613,21 @@ class _BASettingsPageState extends State<BASettingsPage> {
           ),
           child: isLoading
               ? SizedBox(
-                width: 14,
-                height: 14,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(accentBlue),
-                ),
-              )
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(accentBlue),
+                  ),
+                )
               : Text(
-                text,
-                style: TextStyle(
-                  color: accentBlue,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                  text,
+                  style: TextStyle(
+                    color: accentBlue,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
         ),
       ),
     );
@@ -1667,7 +1666,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
                         blur: _backgroundConfig.blur,
                         opacity: _backgroundConfig.opacity,
                       );
-                      await _backgroundManager.saveBackgroundConfig(customConfig);
+                      await _backgroundManager.saveBackgroundConfig(
+                        customConfig,
+                      );
                       setState(() {
                         _backgroundConfig = customConfig;
                       });
@@ -1690,7 +1691,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
                         blur: _backgroundConfig.blur,
                         opacity: _backgroundConfig.opacity,
                       );
-                      await _backgroundManager.saveBackgroundConfig(customConfig);
+                      await _backgroundManager.saveBackgroundConfig(
+                        customConfig,
+                      );
                       setState(() {
                         _backgroundConfig = customConfig;
                       });
@@ -1753,18 +1756,17 @@ class _BASettingsPageState extends State<BASettingsPage> {
             _buildSettingsRow(
               icon: Icons.style,
               title: '主题风格',
-              subtitle: _themeManager.isBlueArchive
-                  ? '蔚蓝档案'
-                  : 'Minecraft',
+              subtitle: _themeManager.isBlueArchive ? '蔚蓝档案' : 'Minecraft',
               control: _buildDropdown<String>(
                 value: _themeManager.isBlueArchive
                     ? 'blue_archive'
                     : 'minecraft',
                 items: const [
+                  DropdownMenuItem(value: 'blue_archive', child: Text('蔚蓝档案')),
                   DropdownMenuItem(
-                      value: 'blue_archive', child: Text('蔚蓝档案')),
-                  DropdownMenuItem(
-                      value: 'minecraft', child: Text('Minecraft')),
+                    value: 'minecraft',
+                    child: Text('Minecraft'),
+                  ),
                 ],
                 onChanged: (value) async {
                   if (value == null) return;
@@ -1784,10 +1786,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 themeKey: _themeManager.isBlueArchive
                     ? 'blue_archive'
                     : 'minecraft',
-                brightness:
-                    Theme.of(context).brightness == Brightness.light
-                        ? Brightness.light
-                        : Brightness.dark,
+                brightness: Theme.of(context).brightness == Brightness.light
+                    ? Brightness.light
+                    : Brightness.dark,
               ),
             ),
             const SizedBox(height: 8),
@@ -1881,7 +1882,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               child: Builder(
                 builder: (context) {
-                  final isLight = Theme.of(context).brightness == Brightness.light;
+                  final isLight =
+                      Theme.of(context).brightness == Brightness.light;
                   final primaryText = BAColors.textPrimaryOf(context);
                   final secondaryText = BAColors.textSecondaryOf(context);
                   final accentBlue = BAColors.primaryLightOf(context);
@@ -1952,8 +1954,12 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                 inactiveTrackColor: inactiveTrack,
                                 thumbColor: Colors.white,
                                 trackHeight: 4,
-                                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                                overlayColor: BAColors.primaryOf(context).withOpacity(0.2),
+                                thumbShape: const RoundSliderThumbShape(
+                                  enabledThumbRadius: 8,
+                                ),
+                                overlayColor: BAColors.primaryOf(
+                                  context,
+                                ).withOpacity(0.2),
                               ),
                               child: Slider(
                                 value: _memoryAllocation,
@@ -1982,7 +1988,10 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 items: const [
                   DropdownMenuItem(value: '800x600', child: Text('800x600')),
                   DropdownMenuItem(value: '1280x720', child: Text('1280x720')),
-                  DropdownMenuItem(value: '1920x1080', child: Text('1920x1080')),
+                  DropdownMenuItem(
+                    value: '1920x1080',
+                    child: Text('1920x1080'),
+                  ),
                   DropdownMenuItem(value: '自定义', child: Text('自定义')),
                 ],
                 onChanged: (value) {
@@ -1999,7 +2008,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
             _buildSettingsRow(
               icon: Icons.code,
               title: 'JVM额外参数',
-              subtitle: _jvmArgsController.text.isEmpty ? '无' : _jvmArgsController.text,
+              subtitle: _jvmArgsController.text.isEmpty
+                  ? '无'
+                  : _jvmArgsController.text,
               control: _buildTextField(
                 controller: _jvmArgsController,
                 focusNode: _jvmArgsFocusNode,
@@ -2009,7 +2020,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
             _buildSettingsRow(
               icon: Icons.play_arrow,
               title: '游戏启动参数',
-              subtitle: _gameArgsController.text.isEmpty ? '无' : _gameArgsController.text,
+              subtitle: _gameArgsController.text.isEmpty
+                  ? '无'
+                  : _gameArgsController.text,
               control: _buildTextField(
                 controller: _gameArgsController,
                 focusNode: _gameArgsFocusNode,
@@ -2072,7 +2085,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               child: Builder(
                 builder: (context) {
-                  final isLight = Theme.of(context).brightness == Brightness.light;
+                  final isLight =
+                      Theme.of(context).brightness == Brightness.light;
                   final primaryText = BAColors.textPrimaryOf(context);
                   final secondaryText = BAColors.textSecondaryOf(context);
                   final accentBlue = BAColors.primaryLightOf(context);
@@ -2108,11 +2122,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                               ),
                             ],
                           ),
-                          child: Icon(
-                            Icons.speed,
-                            color: accentBlue,
-                            size: 18,
-                          ),
+                          child: Icon(Icons.speed, color: accentBlue, size: 18),
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -2143,8 +2153,12 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                 inactiveTrackColor: inactiveTrack,
                                 thumbColor: Colors.white,
                                 trackHeight: 4,
-                                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                                overlayColor: BAColors.primaryOf(context).withOpacity(0.2),
+                                thumbShape: const RoundSliderThumbShape(
+                                  enabledThumbRadius: 8,
+                                ),
+                                overlayColor: BAColors.primaryOf(
+                                  context,
+                                ).withOpacity(0.2),
                               ),
                               child: Slider(
                                 value: _concurrentDownloads.toDouble(),
@@ -2180,10 +2194,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
             ),
             if (_enableSpeedLimit) ...[
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
+                ),
                 child: Builder(
                   builder: (context) {
-                    final isLight = Theme.of(context).brightness == Brightness.light;
+                    final isLight =
+                        Theme.of(context).brightness == Brightness.light;
                     final primaryText = BAColors.textPrimaryOf(context);
                     final secondaryText = BAColors.textSecondaryOf(context);
                     final accentBlue = BAColors.primaryLightOf(context);
@@ -2254,8 +2272,12 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                   inactiveTrackColor: inactiveTrack,
                                   thumbColor: Colors.white,
                                   trackHeight: 4,
-                                  thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                                  overlayColor: BAColors.primaryOf(context).withOpacity(0.2),
+                                  thumbShape: const RoundSliderThumbShape(
+                                    enabledThumbRadius: 8,
+                                  ),
+                                  overlayColor: BAColors.primaryOf(
+                                    context,
+                                  ).withOpacity(0.2),
                                 ),
                                 child: Slider(
                                   value: _speedLimitValue,
@@ -2269,7 +2291,10 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                     });
                                   },
                                   onChangeEnd: (value) {
-                                    _saveSpeedLimitValue(value, _speedLimitUnit);
+                                    _saveSpeedLimitValue(
+                                      value,
+                                      _speedLimitUnit,
+                                    );
                                   },
                                 ),
                               ),
@@ -2439,7 +2464,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
     return mirrors.map((mirror) {
       final isSelected = mirror.id == currentMirrorId;
-      final speedResult = _speedTestResults.where((r) => r.mirror.id == mirror.id).firstOrNull;
+      final speedResult = _speedTestResults
+          .where((r) => r.mirror.id == mirror.id)
+          .firstOrNull;
 
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
@@ -2459,12 +2486,17 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 onTap: () => _selectMirror(mirror.id),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: isSelected ? selectedBg : defaultBg,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: isSelected ? BAColors.primaryOf(context) : borderColor,
+                      color: isSelected
+                          ? BAColors.primaryOf(context)
+                          : borderColor,
                     ),
                   ),
                   child: Row(
@@ -2475,10 +2507,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: isSelected ? BAColors.primaryOf(context) : secondaryText,
+                            color: isSelected
+                                ? BAColors.primaryOf(context)
+                                : secondaryText,
                             width: 2,
                           ),
-                          color: isSelected ? BAColors.primaryOf(context) : Colors.transparent,
+                          color: isSelected
+                              ? BAColors.primaryOf(context)
+                              : Colors.transparent,
                         ),
                         child: isSelected
                             ? const Icon(
@@ -2506,9 +2542,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                 if (mirror.isOfficial) ...[
                                   const SizedBox(width: 8),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: BAColors.primaryOf(context).withOpacity(0.2),
+                                      color: BAColors.primaryOf(
+                                        context,
+                                      ).withOpacity(0.2),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
@@ -2524,15 +2565,22 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                 if (mirror.isBuiltIn && !mirror.isOfficial) ...[
                                   const SizedBox(width: 8),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: BAColors.accentPinkDarkOf(context).withOpacity(0.2),
+                                      color: BAColors.accentPinkDarkOf(
+                                        context,
+                                      ).withOpacity(0.2),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
                                       '内置',
                                       style: TextStyle(
-                                        color: BAColors.accentPinkDarkOf(context),
+                                        color: BAColors.accentPinkDarkOf(
+                                          context,
+                                        ),
                                         fontSize: 10,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -2557,9 +2605,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
                       if (speedResult != null) ...[
                         if (speedResult.isAvailable)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: BAColors.successOf(context).withOpacity(0.2),
+                              color: BAColors.successOf(
+                                context,
+                              ).withOpacity(0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -2573,9 +2626,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
                           )
                         else
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: BAColors.accentPinkDarkOf(context).withOpacity(0.2),
+                              color: BAColors.accentPinkDarkOf(
+                                context,
+                              ).withOpacity(0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -2597,7 +2655,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
                             child: Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                color: BAColors.accentPinkDarkOf(context).withOpacity(0.15),
+                                color: BAColors.accentPinkDarkOf(
+                                  context,
+                                ).withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Icon(
@@ -2638,8 +2698,15 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   context: context,
                   builder: (context) => AlertDialog(
                     title: const Text('关于 BAMC Launch'),
-                    content: Text('版本 $_appVersionDisplay\n© 2024 BAMC Launch Team'),
-                    actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('关闭'))],
+                    content: Text(
+                      '版本 $_appVersionDisplay\n© 2024 BAMC Launch Team',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('关闭'),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -2650,7 +2717,8 @@ class _BASettingsPageState extends State<BASettingsPage> {
               subtitle: '访问源代码',
               control: _buildPrimaryButton(
                 text: '访问',
-                onPressed: () => _launchURL('https://github.com/TSSForsunshine/BAMCLaunch'),
+                onPressed: () =>
+                    _launchURL('https://github.com/TSSForsunshine/BAMCLaunch'),
               ),
             ),
             _buildSettingsRow(
@@ -2659,7 +2727,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
               subtitle: '提交 Bug 或建议',
               control: _buildPrimaryButton(
                 text: '反馈',
-                onPressed: () => _launchURL('https://github.com/TSSForsunshine/BAMCLaunch/issues'),
+                onPressed: () => _launchURL(
+                  'https://github.com/TSSForsunshine/BAMCLaunch/issues',
+                ),
               ),
             ),
           ],
@@ -2708,7 +2778,10 @@ class _BASettingsPageState extends State<BASettingsPage> {
                       instance: instanceManager.instances.first,
                     );
                   } else {
-                    NotificationManager().showInfo('暂无游戏实例', message: '请先创建一个游戏实例');
+                    NotificationManager().showInfo(
+                      '暂无游戏实例',
+                      message: '请先创建一个游戏实例',
+                    );
                   }
                 },
               ),
@@ -2824,4 +2897,3 @@ class _BASettingsPageState extends State<BASettingsPage> {
     );
   }
 }
-

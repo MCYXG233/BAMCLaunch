@@ -11,13 +11,13 @@ import '../theme/colors.dart';
 class BAAnimationDurations {
   /// 快速动画 - 150ms（微交互）
   static const Duration micro = Duration(milliseconds: 150);
-  
+
   /// 标准动画 - 300ms（页面切换、卡片展开）
   static const Duration standard = Duration(milliseconds: 300);
-  
+
   /// 慢速动画 - 500ms（大型过渡）
   static const Duration slow = Duration(milliseconds: 500);
-  
+
   /// 页面缩放动画 - 300ms
   static const Duration pageScale = Duration(milliseconds: 300);
 }
@@ -26,10 +26,10 @@ class BAAnimationDurations {
 class BAAnimationCurves {
   /// 标准缓出曲线
   static const Curve standard = Curves.easeOutCubic;
-  
+
   /// 弹性曲线（用于缩放效果）
   static const Curve elastic = Curves.elasticOut;
-  
+
   /// 平滑曲线
   static const Curve smooth = Curves.easeInOutCubic;
 }
@@ -97,16 +97,18 @@ class BAGlassContainer extends StatelessWidget {
           width: width,
           height: height,
           padding: padding,
-          decoration: decoration ?? BoxDecoration(
-            color: baseColor.withValues(alpha: opacity),
-            borderRadius: BorderRadius.circular(borderRadius),
-            border: showBorder
-                ? Border.all(
-                    color: borderColor.withValues(alpha: 0.5),
-                    width: 1,
-                  )
-                : null,
-          ),
+          decoration:
+              decoration ??
+              BoxDecoration(
+                color: baseColor.withValues(alpha: opacity),
+                borderRadius: BorderRadius.circular(borderRadius),
+                border: showBorder
+                    ? Border.all(
+                        color: borderColor.withValues(alpha: 0.5),
+                        width: 1,
+                      )
+                    : null,
+              ),
           child: child,
         ),
       ),
@@ -191,7 +193,9 @@ class _BASurfaceCardState extends State<BASurfaceCard> {
     Widget card = MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      cursor: widget.onTap != null ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      cursor: widget.onTap != null
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.basic,
       child: GestureDetector(
         onTap: widget.onTap,
         onTapDown: (_) => setState(() => _isPressed = true),
@@ -204,17 +208,25 @@ class _BASurfaceCardState extends State<BASurfaceCard> {
           height: widget.height,
           padding: widget.padding ?? const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: widget.backgroundColor ?? defaultBg.withValues(alpha: _isHovered ? hoverOpacity : baseOpacity),
+            color:
+                widget.backgroundColor ??
+                defaultBg.withValues(
+                  alpha: _isHovered ? hoverOpacity : baseOpacity,
+                ),
             borderRadius: BorderRadius.circular(widget.borderRadius),
             border: widget.showBorder
                 ? Border.all(
-                    color: widget.borderColor ?? defaultBorder.withValues(alpha: _isHovered ? 0.7 : 0.5),
+                    color:
+                        widget.borderColor ??
+                        defaultBorder.withValues(alpha: _isHovered ? 0.7 : 0.5),
                     width: 1,
                   )
                 : null,
             boxShadow: [
               BoxShadow(
-                color: widget.shadowColor ?? defaultShadow.withValues(alpha: _isHovered ? 0.15 : 0.08),
+                color:
+                    widget.shadowColor ??
+                    defaultShadow.withValues(alpha: _isHovered ? 0.15 : 0.08),
                 blurRadius: _isHovered ? 16 : 12,
                 offset: const Offset(0, 4),
               ),
@@ -288,19 +300,19 @@ class _BAWindowButtonState extends State<BAWindowButton> {
           decoration: BoxDecoration(
             color: _isHovered
                 ? (widget.isClose
-                    ? BAColors.dangerOf(context)
-                    : BAColors.surfaceHoverOf(context))
+                      ? BAColors.dangerOf(context)
+                      : BAColors.surfaceHoverOf(context))
                 : bgBase.withValues(alpha: 0.85),
             borderRadius: BorderRadius.circular(widget.size / 3),
-            border: Border.all(
-              color: borderColor.withValues(alpha: 0.5),
-            ),
+            border: Border.all(color: borderColor.withValues(alpha: 0.5)),
           ),
           child: Icon(
             widget.icon,
             color: _isHovered
                 ? Colors.white
-                : BAColors.textPrimaryOf(context).withValues(alpha: isLight ? 0.8 : 0.75),
+                : BAColors.textPrimaryOf(
+                    context,
+                  ).withValues(alpha: isLight ? 0.8 : 0.75),
             size: widget.size * 0.45,
           ),
         ),
@@ -314,40 +326,35 @@ class _BAWindowButtonState extends State<BAWindowButton> {
 /// 页面缩放过渡动画
 class BAScalePageRoute<T> extends PageRouteBuilder<T> {
   final Widget page;
-  
+
   BAScalePageRoute({required this.page})
-      : super(
-          pageBuilder: (context, animation, secondaryAnimation) => page,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            // 缩放动画：0.9 → 1.0
-            final scaleAnimation = Tween<double>(
-              begin: 0.9,
-              end: 1.0,
-            ).animate(CurvedAnimation(
+    : super(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          // 缩放动画：0.9 → 1.0
+          final scaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
+            CurvedAnimation(
               parent: animation,
               curve: BAAnimationCurves.standard,
-            ));
-            
-            // 淡入淡出动画
-            final fadeAnimation = Tween<double>(
-              begin: 0.0,
-              end: 1.0,
-            ).animate(CurvedAnimation(
+            ),
+          );
+
+          // 淡入淡出动画
+          final fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+            CurvedAnimation(
               parent: animation,
               curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
-            ));
-            
-            return ScaleTransition(
-              scale: scaleAnimation,
-              child: FadeTransition(
-                opacity: fadeAnimation,
-                child: child,
-              ),
-            );
-          },
-          transitionDuration: BAAnimationDurations.pageScale,
-          reverseTransitionDuration: const Duration(milliseconds: 250),
-        );
+            ),
+          );
+
+          return ScaleTransition(
+            scale: scaleAnimation,
+            child: FadeTransition(opacity: fadeAnimation, child: child),
+          );
+        },
+        transitionDuration: BAAnimationDurations.pageScale,
+        reverseTransitionDuration: const Duration(milliseconds: 250),
+      );
 }
 
 // ==================== 缩放切换动画包装器 ====================
@@ -356,7 +363,7 @@ class BAScalePageRoute<T> extends PageRouteBuilder<T> {
 class BAScaleContentSwitcher extends StatelessWidget {
   /// 当前显示的内容
   final Widget child;
-  
+
   /// 切换动画时长
   final Duration duration;
 
@@ -372,11 +379,7 @@ class BAScaleContentSwitcher extends StatelessWidget {
       scale: 1.0,
       duration: duration,
       curve: BAAnimationCurves.standard,
-      child: AnimatedOpacity(
-        opacity: 1.0,
-        duration: duration,
-        child: child,
-      ),
+      child: AnimatedOpacity(opacity: 1.0, duration: duration, child: child),
     );
   }
 }
@@ -439,7 +442,9 @@ class _BAIconButtonState extends State<BAIconButton> {
     Widget button = MouseRegion(
       onEnter: (_) => setState(() => _isHovered = widget.enabled),
       onExit: (_) => setState(() => _isHovered = false),
-      cursor: effectiveOnTap != null ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      cursor: effectiveOnTap != null
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.basic,
       child: GestureDetector(
         onTap: effectiveOnTap,
         onTapDown: (_) => setState(() => _isPressed = true),
@@ -450,7 +455,9 @@ class _BAIconButtonState extends State<BAIconButton> {
           width: widget.size,
           height: widget.size,
           decoration: BoxDecoration(
-            color: widget.backgroundColor ?? defaultBg.withValues(alpha: _isHovered ? 0.9 : 0.85),
+            color:
+                widget.backgroundColor ??
+                defaultBg.withValues(alpha: _isHovered ? 0.9 : 0.85),
             borderRadius: BorderRadius.circular(widget.size / 3),
             border: Border.all(
               color: borderColor.withValues(alpha: _isHovered ? 0.7 : 0.5),
@@ -461,22 +468,22 @@ class _BAIconButtonState extends State<BAIconButton> {
             duration: BAAnimationDurations.micro,
             child: Icon(
               widget.icon,
-              color: widget.iconColor ??
-                  BAColors.textPrimaryOf(context).withValues(alpha: widget.enabled ? 1.0 : 0.4),
+              color:
+                  widget.iconColor ??
+                  BAColors.textPrimaryOf(
+                    context,
+                  ).withValues(alpha: widget.enabled ? 1.0 : 0.4),
               size: widget.iconSize,
             ),
           ),
         ),
       ),
     );
-    
+
     if (widget.tooltip != null) {
-      button = Tooltip(
-        message: widget.tooltip!,
-        child: button,
-      );
+      button = Tooltip(message: widget.tooltip!, child: button);
     }
-    
+
     return button;
   }
 }
@@ -487,13 +494,13 @@ class _BAIconButtonState extends State<BAIconButton> {
 class BABadge extends StatelessWidget {
   /// 子组件
   final Widget child;
-  
+
   /// 是否显示红点
   final bool showBadge;
-  
+
   /// 红点大小
   final double badgeSize;
-  
+
   /// 红点颜色
   final Color badgeColor;
 
@@ -542,22 +549,22 @@ class BABadge extends StatelessWidget {
 class BAChip extends StatefulWidget {
   /// 标签文本
   final String label;
-  
+
   /// 图标（可选）
   final IconData? icon;
-  
+
   /// 点击回调
   final VoidCallback? onTap;
-  
+
   /// 是否选中
   final bool isSelected;
-  
+
   /// 颜色
   final Color? color;
-  
+
   /// 是否可关闭
   final bool showClose;
-  
+
   /// 关闭回调
   final VoidCallback? onClose;
 
@@ -586,7 +593,9 @@ class _BAChipState extends State<BAChip> {
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      cursor: widget.onTap != null ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      cursor: widget.onTap != null
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.basic,
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
@@ -598,18 +607,16 @@ class _BAChipState extends State<BAChip> {
                 : effectiveColor.withValues(alpha: _isHovered ? 0.2 : 0.15),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: effectiveColor.withValues(alpha: widget.isSelected ? 0.6 : 0.4),
+              color: effectiveColor.withValues(
+                alpha: widget.isSelected ? 0.6 : 0.4,
+              ),
             ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (widget.icon != null) ...[
-                Icon(
-                  widget.icon,
-                  color: effectiveColor,
-                  size: 12,
-                ),
+                Icon(widget.icon, color: effectiveColor, size: 12),
                 const SizedBox(width: 4),
               ],
               Text(
@@ -650,11 +657,7 @@ class BALoadingState extends StatelessWidget {
   /// 指示器大小
   final double size;
 
-  const BALoadingState({
-    super.key,
-    this.message,
-    this.size = 36.0,
-  });
+  const BALoadingState({super.key, this.message, this.size = 36.0});
 
   @override
   Widget build(BuildContext context) {
@@ -753,7 +756,10 @@ class BAEmptyState extends StatelessWidget {
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: BAColors.primaryOf(context),
                     borderRadius: BorderRadius.circular(10),
@@ -824,7 +830,9 @@ class BAErrorState extends StatelessWidget {
               child: Text(
                 message!,
                 style: TextStyle(
-                  color: BAColors.textSecondaryOf(context).withValues(alpha: 0.7),
+                  color: BAColors.textSecondaryOf(
+                    context,
+                  ).withValues(alpha: 0.7),
                   fontSize: 13,
                 ),
                 textAlign: TextAlign.center,
@@ -838,7 +846,10 @@ class BAErrorState extends StatelessWidget {
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: BAColors.primaryOf(context),
                     borderRadius: BorderRadius.circular(10),

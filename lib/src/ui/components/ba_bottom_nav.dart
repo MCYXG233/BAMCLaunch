@@ -45,7 +45,12 @@ class BABottomNav extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, int index, BuildContext context) {
+  Widget _buildNavItem(
+    IconData icon,
+    String label,
+    int index,
+    BuildContext context,
+  ) {
     bool isSelected = currentIndex == index;
     return Expanded(
       child: MouseRegion(
@@ -66,7 +71,9 @@ class BABottomNav extends StatelessWidget {
                   curve: Curves.easeOutCubic,
                   child: Icon(
                     icon,
-                    color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
+                    color: isSelected
+                        ? BAColors.primaryOf(context)
+                        : BAColors.textSecondaryOf(context),
                     size: isSelected ? 26 : 22,
                   ),
                 ),
@@ -75,7 +82,9 @@ class BABottomNav extends StatelessWidget {
                   duration: const Duration(milliseconds: 250),
                   child: Text(label),
                   style: TextStyle(
-                    color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
+                    color: isSelected
+                        ? BAColors.primaryOf(context)
+                        : BAColors.textSecondaryOf(context),
                     fontSize: isSelected ? 13 : 12,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   ),

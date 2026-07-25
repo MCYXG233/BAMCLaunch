@@ -300,9 +300,7 @@ class AccountManager implements IAccountManager {
   ///   eventBus: EventBus.instance,
   /// );
   /// ```
-  Future<void> initialize({
-    required EventBus eventBus,
-  }) async {
+  Future<void> initialize({required EventBus eventBus}) async {
     // 如果已初始化，直接返回，避免重复初始化
     if (_isInitialized) return;
 
@@ -754,7 +752,9 @@ class AccountManager implements IAccountManager {
         _logger.debug('Microsoft token validation failed: Unauthorized');
         return false;
       } else {
-        _logger.debug('Microsoft token validation failed with status: $statusCode');
+        _logger.debug(
+          'Microsoft token validation failed with status: $statusCode',
+        );
         return false;
       }
     } catch (e, stackTrace) {

@@ -117,7 +117,8 @@ class ModManager {
     // 查找实例所属的目录配置
     final directory = _instanceManager.directories.firstWhere(
       (d) => d.id == instance.directoryId,
-      orElse: () => throw ArgumentError('Directory not found for instance: $instanceId'),
+      orElse: () =>
+          throw ArgumentError('Directory not found for instance: $instanceId'),
     );
 
     // 拼接并返回实例的完整路径
@@ -154,7 +155,11 @@ class ModManager {
       return await _scanner.scanMods(instancePath);
     } catch (e, stackTrace) {
       // 记录错误日志，返回空列表以避免中断调用流程
-      _logger.error('Failed to get mods for instance: $instanceId', e, stackTrace);
+      _logger.error(
+        'Failed to get mods for instance: $instanceId',
+        e,
+        stackTrace,
+      );
       return [];
     }
   }

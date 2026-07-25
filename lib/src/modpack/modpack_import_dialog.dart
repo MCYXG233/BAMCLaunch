@@ -196,9 +196,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
             _buildHeader(context),
 
             // 内容
-            Expanded(
-              child: _buildContent(context),
-            ),
+            Expanded(child: _buildContent(context)),
 
             // 按钮
             _buildActions(context),
@@ -347,12 +345,16 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
                 _buildInfoRow('Minecraft', _modpack?.minecraftVersion),
                 _buildInfoRow(
                   'Mod 加载器',
-                  _modpack?.modLoader != null && _modpack?.modLoaderVersion != null
+                  _modpack?.modLoader != null &&
+                          _modpack?.modLoaderVersion != null
                       ? '${_modpack!.modLoader} ${_modpack!.modLoaderVersion}'
                       : null,
                 ),
                 _buildInfoRow('Mod数量', _modpack?.mods.length.toString()),
-                _buildInfoRow('资源包数量', _modpack?.resourcePacks.length.toString()),
+                _buildInfoRow(
+                  '资源包数量',
+                  _modpack?.resourcePacks.length.toString(),
+                ),
               ],
             ),
           ),
@@ -382,7 +384,10 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: BAColors.primaryOf(context), width: 2),
+                borderSide: BorderSide(
+                  color: BAColors.primaryOf(context),
+                  width: 2,
+                ),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -457,11 +462,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.downloading,
-            size: 80,
-            color: BAColors.primaryOf(context),
-          ),
+          Icon(Icons.downloading, size: 80, color: BAColors.primaryOf(context)),
           const SizedBox(height: 24),
           Text(
             _currentTask ?? '正在安装...',
@@ -535,9 +536,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: BAColors.borderOf(context)),
-        ),
+        border: Border(top: BorderSide(color: BAColors.borderOf(context))),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,

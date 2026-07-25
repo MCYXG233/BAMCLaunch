@@ -107,7 +107,8 @@ class DownloadTask {
   }
 
   @override
-  String toString() => 'DownloadTask($id, $status, ${(progress * 100).toStringAsFixed(0)}%)';
+  String toString() =>
+      'DownloadTask($id, $status, ${(progress * 100).toStringAsFixed(0)}%)';
 }
 
 /// 下载管理器
@@ -236,7 +237,9 @@ class DownloadManager {
     _tasks[task.id] = task;
     _activeTasks.add(task);
 
-    _logger.info('[Download] 创建任务: ${task.id} (${resource.name} v${version.versionNumber})');
+    _logger.info(
+      '[Download] 创建任务: ${task.id} (${resource.name} v${version.versionNumber})',
+    );
 
     // 异步执行下载
     _processTask(
@@ -300,7 +303,13 @@ class DownloadManager {
   Future<String> getResourcePacksDirectory(String instanceName) async {
     final dir = await getApplicationDocumentsDirectory();
     final packsDir = Directory(
-      path.join(dir.path, 'BAMCLaunch', 'instances', instanceName, 'resourcepacks'),
+      path.join(
+        dir.path,
+        'BAMCLaunch',
+        'instances',
+        instanceName,
+        'resourcepacks',
+      ),
     );
     await packsDir.create(recursive: true);
     return packsDir.path;
@@ -310,7 +319,13 @@ class DownloadManager {
   Future<String> getShaderPacksDirectory(String instanceName) async {
     final dir = await getApplicationDocumentsDirectory();
     final packsDir = Directory(
-      path.join(dir.path, 'BAMCLaunch', 'instances', instanceName, 'shaderpacks'),
+      path.join(
+        dir.path,
+        'BAMCLaunch',
+        'instances',
+        instanceName,
+        'shaderpacks',
+      ),
     );
     await packsDir.create(recursive: true);
     return packsDir.path;
@@ -409,7 +424,9 @@ class DownloadManager {
             task.installedPath = installPath;
             task.status = DownloadTaskStatus.completed;
             task.endTime = DateTime.now();
-            _logger.info('[Download] 安装完成: ${task.resource.name} -> $installPath');
+            _logger.info(
+              '[Download] 安装完成: ${task.resource.name} -> $installPath',
+            );
           } catch (e) {
             task.status = DownloadTaskStatus.failed;
             task.errorMessage = '安装失败: $e';
@@ -425,7 +442,8 @@ class DownloadManager {
         _completedTasks.add(task);
 
         // 依赖解析
-        if (resolveDependencies && task.status == DownloadTaskStatus.completed) {
+        if (resolveDependencies &&
+            task.status == DownloadTaskStatus.completed) {
           await _resolveDependencies(task, visited: visited);
         }
         return;
@@ -454,7 +472,11 @@ class DownloadManager {
   }
 
   /// 下载文件
-  Future<void> _downloadFile(String url, File destination, DownloadTask task) async {
+  Future<void> _downloadFile(
+    String url,
+    File destination,
+    DownloadTask task,
+  ) async {
     final networkClient = NetworkClient();
     final watch = Stopwatch()..start();
     int lastBytes = 0;
@@ -481,7 +503,8 @@ class DownloadManager {
           if (watch.elapsedMilliseconds > 200) {
             final elapsedSeconds = watch.elapsedMilliseconds / 1000;
             if (elapsedSeconds > 0) {
-              task.downloadSpeed = ((downloaded - lastBytes) / elapsedSeconds).round();
+              task.downloadSpeed = ((downloaded - lastBytes) / elapsedSeconds)
+                  .round();
             }
             lastBytes = downloaded;
             watch.reset();
@@ -496,7 +519,9 @@ class DownloadManager {
       if (task.totalBytes == 0) task.totalBytes = task.downloadedBytes;
       _notifyTaskUpdate(task);
 
-      _logger.info('[Download] 文件下载完成: ${destination.path} (${(task.totalBytes / 1024).toStringAsFixed(1)} KB)');
+      _logger.info(
+        '[Download] 文件下载完成: ${destination.path} (${(task.totalBytes / 1024).toStringAsFixed(1)} KB)',
+      );
     } catch (e) {
       rethrow;
     } finally {
@@ -517,7 +542,8 @@ class DownloadManager {
       } catch (e) {
         _logger.warning('[Download] 整合包解压失败，回退到复制文件: $e');
         final modsDir = await getModsDirectory(task.targetInstance);
-        final fileName = task.version.fileName ?? path.basename(sourceFile.path);
+        final fileName =
+            task.version.fileName ?? path.basename(sourceFile.path);
         final destFile = File(path.join(modsDir, fileName));
         await sourceFile.copy(destFile.path);
         _logger.info('[Download] 整合包复制到: ${destFile.path}');
@@ -592,7 +618,10 @@ class DownloadManager {
   /// 解析并下载依赖
   ///
   /// [visited] 用于循环依赖检测，记录当前解析链上已访问的资源ID。
-  Future<void> _resolveDependencies(DownloadTask task, {Set<String>? visited}) async {
+  Future<void> _resolveDependencies(
+    DownloadTask task, {
+    Set<String>? visited,
+  }) async {
     final dependencies = task.version.dependencies
         .where((d) => d.isRequired && d.projectId != null)
         .toList();
@@ -603,14 +632,18 @@ class DownloadManager {
     final currentVisited = visited ?? <String>{};
     currentVisited.add(task.resource.id);
 
-    _logger.info('[Download] 开始解析 ${dependencies.length} 个依赖 (来自 ${task.resource.name})');
+    _logger.info(
+      '[Download] 开始解析 ${dependencies.length} 个依赖 (来自 ${task.resource.name})',
+    );
 
     for (final dep in dependencies) {
       final depId = dep.projectId!;
 
       // 循环依赖检测
       if (currentVisited.contains(depId)) {
-        _logger.warning('[Download] 检测到循环依赖，跳过: $depId (链: ${currentVisited.join(' -> ')})');
+        _logger.warning(
+          '[Download] 检测到循环依赖，跳过: $depId (链: ${currentVisited.join(' -> ')})',
+        );
         continue;
       }
 
@@ -623,7 +656,9 @@ class DownloadManager {
           try {
             depVersion = await _modrinth.getVersion(depId, dep.versionId!);
           } catch (e) {
-            _logger.warning('[Download] 精确版本获取失败 ($depId/${dep.versionId})，回退到列表: $e');
+            _logger.warning(
+              '[Download] 精确版本获取失败 ($depId/${dep.versionId})，回退到列表: $e',
+            );
           }
         }
 

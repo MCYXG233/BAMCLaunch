@@ -145,7 +145,10 @@ class ModUpdateChecker {
 
     // 尝试解析文件名中的版本信息
     // 常见格式：modname-1.0.0.jar
-    final nameParts = fileName.replaceAll('.jar', '').replaceAll('.litemod', '').split('-');
+    final nameParts = fileName
+        .replaceAll('.jar', '')
+        .replaceAll('.litemod', '')
+        .split('-');
 
     String name = nameParts.first;
     String version = 'unknown';
@@ -194,11 +197,13 @@ class ModUpdateChecker {
         final networkClient = NetworkClient();
         // 搜索匹配的项目
         final searchUrl = Uri.parse('https://api.modrinth.com/v2/search')
-            .replace(queryParameters: {
-          'query': modInfo.name,
-          'limit': '5',
-          'index': 'relevance',
-        });
+            .replace(
+              queryParameters: {
+                'query': modInfo.name,
+                'limit': '5',
+                'index': 'relevance',
+              },
+            );
         final searchResponse = await networkClient.get(
           searchUrl.toString(),
           headers: {'Content-Type': 'application/json'},
@@ -206,11 +211,13 @@ class ModUpdateChecker {
         );
 
         if (searchResponse.statusCode == 200) {
-          final searchData = jsonDecode(searchResponse.body) as Map<String, dynamic>;
+          final searchData =
+              jsonDecode(searchResponse.body) as Map<String, dynamic>;
           final hits = searchData['hits'] as List<dynamic>? ?? [];
 
           if (hits.isNotEmpty) {
-            final projectId = (hits.first as Map<String, dynamic>)['project_id'] as String?;
+            final projectId =
+                (hits.first as Map<String, dynamic>)['project_id'] as String?;
 
             if (projectId != null) {
               // 获取项目最新版本
@@ -224,27 +231,40 @@ class ModUpdateChecker {
               );
 
               if (versionsResponse.statusCode == 200) {
-                final versions = jsonDecode(versionsResponse.body) as List<dynamic>;
+                final versions =
+                    jsonDecode(versionsResponse.body) as List<dynamic>;
                 if (versions.isNotEmpty) {
                   final latestVersion = versions.first as Map<String, dynamic>;
-                  final versionNumber = latestVersion['version_number'] as String? ?? '';
+                  final versionNumber =
+                      latestVersion['version_number'] as String? ?? '';
                   final files = latestVersion['files'] as List<dynamic>? ?? [];
-                  final primaryFile = files.isNotEmpty ? files.first as Map<String, dynamic> : null;
+                  final primaryFile = files.isNotEmpty
+                      ? files.first as Map<String, dynamic>
+                      : null;
 
-                  if (versionNumber.isNotEmpty && versionNumber != modInfo.version) {
+                  if (versionNumber.isNotEmpty &&
+                      versionNumber != modInfo.version) {
                     result = UpdateCheckResult(
                       modInfo: modInfo,
                       status: UpdateStatus.updateAvailable,
                       latestVersion: ModVersionInfo(
                         version: versionNumber,
                         downloadUrl: primaryFile?['url'] as String? ?? '',
-                        releaseDate: DateTime.tryParse(latestVersion['date_published'] as String? ?? '') ?? DateTime.now(),
+                        releaseDate:
+                            DateTime.tryParse(
+                              latestVersion['date_published'] as String? ?? '',
+                            ) ??
+                            DateTime.now(),
                         changelog: latestVersion['changelog'] as String?,
-                        gameVersions: (latestVersion['game_versions'] as List<dynamic>?)?.cast<String>(),
+                        gameVersions:
+                            (latestVersion['game_versions'] as List<dynamic>?)
+                                ?.cast<String>(),
                       ),
                     );
                     _checkCache[cacheKey] = (DateTime.now(), result);
-                    _logger.info('Checked update for ${modInfo.name}: ${result.status}');
+                    _logger.info(
+                      'Checked update for ${modInfo.name}: ${result.status}',
+                    );
                     return result;
                   }
                 }
@@ -267,7 +287,11 @@ class ModUpdateChecker {
 
       return result;
     } catch (e, stackTrace) {
-      _logger.error('Failed to check update for ${modInfo.name}', e, stackTrace);
+      _logger.error(
+        'Failed to check update for ${modInfo.name}',
+        e,
+        stackTrace,
+      );
 
       final result = UpdateCheckResult(
         modInfo: modInfo,

@@ -239,16 +239,10 @@ class MinecraftSkin {
   /// 皮肤变体（slim或classic）
   final String variant;
 
-  MinecraftSkin({
-    required this.url,
-    this.variant = 'classic',
-  });
+  MinecraftSkin({required this.url, this.variant = 'classic'});
 
   Map<String, dynamic> toJson() {
-    return {
-      'url': url,
-      'variant': variant,
-    };
+    return {'url': url, 'variant': variant};
   }
 
   factory MinecraftSkin.fromJson(Map<String, dynamic> json) {
@@ -264,20 +258,14 @@ class MinecraftCape {
   /// 披风URL
   final String url;
 
-  MinecraftCape({
-    required this.url,
-  });
+  MinecraftCape({required this.url});
 
   Map<String, dynamic> toJson() {
-    return {
-      'url': url,
-    };
+    return {'url': url};
   }
 
   factory MinecraftCape.fromJson(Map<String, dynamic> json) {
-    return MinecraftCape(
-      url: json['url'] as String,
-    );
+    return MinecraftCape(url: json['url'] as String);
   }
 }
 
@@ -342,16 +330,22 @@ class AuthCredentials {
           ? OAuthToken.fromJson(json['microsoftToken'] as Map<String, dynamic>)
           : null,
       xboxLiveToken: json['xboxLiveToken'] != null
-          ? XboxLiveToken.fromJson(json['xboxLiveToken'] as Map<String, dynamic>)
+          ? XboxLiveToken.fromJson(
+              json['xboxLiveToken'] as Map<String, dynamic>,
+            )
           : null,
       xstsToken: json['xstsToken'] != null
           ? XstsToken.fromJson(json['xstsToken'] as Map<String, dynamic>)
           : null,
       minecraftToken: json['minecraftToken'] != null
-          ? MinecraftToken.fromJson(json['minecraftToken'] as Map<String, dynamic>)
+          ? MinecraftToken.fromJson(
+              json['minecraftToken'] as Map<String, dynamic>,
+            )
           : null,
       minecraftProfile: json['minecraftProfile'] != null
-          ? MinecraftProfile.fromJson(json['minecraftProfile'] as Map<String, dynamic>)
+          ? MinecraftProfile.fromJson(
+              json['minecraftProfile'] as Map<String, dynamic>,
+            )
           : null,
     );
   }

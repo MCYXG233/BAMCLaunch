@@ -3,37 +3,16 @@ import 'dart:convert';
 import '../core/constants.dart';
 
 /// 垃圾回收器类型
-enum GarbageCollector {
-  g1gc,
-  zgc,
-  shenandoah,
-  parallel,
-  serial,
-  auto,
-}
+enum GarbageCollector { g1gc, zgc, shenandoah, parallel, serial, auto }
 
 /// 文件验证策略
-enum FileValidatePolicy {
-  disable,
-  full,
-  normal,
-}
+enum FileValidatePolicy { disable, full, normal }
 
 /// 启动器可见性
-enum LauncherVisibility {
-  startHidden,
-  runningHidden,
-  always,
-}
+enum LauncherVisibility { startHidden, runningHidden, always }
 
 /// 进程优先级
-enum ProcessPriority {
-  low,
-  belowNormal,
-  normal,
-  aboveNormal,
-  high,
-}
+enum ProcessPriority { low, belowNormal, normal, aboveNormal, high }
 
 /// 内存信息
 class MemoryInfo {
@@ -77,11 +56,7 @@ class Resolution {
   });
 
   Map<String, dynamic> toJson() {
-    return {
-      'width': width,
-      'height': height,
-      'fullscreen': fullscreen,
-    };
+    return {'width': width, 'height': height, 'fullscreen': fullscreen};
   }
 
   factory Resolution.fromJson(Map<String, dynamic> json) {
@@ -92,11 +67,7 @@ class Resolution {
     );
   }
 
-  Resolution copyWith({
-    int? width,
-    int? height,
-    bool? fullscreen,
-  }) {
+  Resolution copyWith({int? width, int? height, bool? fullscreen}) {
     return Resolution(
       width: width ?? this.width,
       height: height ?? this.height,
@@ -110,16 +81,10 @@ class JavaConfig {
   final bool auto;
   final String execPath;
 
-  JavaConfig({
-    this.auto = true,
-    this.execPath = '',
-  });
+  JavaConfig({this.auto = true, this.execPath = ''});
 
   Map<String, dynamic> toJson() {
-    return {
-      'auto': auto,
-      'execPath': execPath,
-    };
+    return {'auto': auto, 'execPath': execPath};
   }
 
   factory JavaConfig.fromJson(Map<String, dynamic> json) {
@@ -129,10 +94,7 @@ class JavaConfig {
     );
   }
 
-  JavaConfig copyWith({
-    bool? auto,
-    String? execPath,
-  }) {
+  JavaConfig copyWith({bool? auto, String? execPath}) {
     return JavaConfig(
       auto: auto ?? this.auto,
       execPath: execPath ?? this.execPath,
@@ -207,7 +169,9 @@ class PerformanceConfig {
     return PerformanceConfig(
       autoMemAllocation: json['autoMemAllocation'] as bool? ?? true,
       maxMemAllocation: json['maxMemAllocation'] as int? ?? 1024,
-      processPriority: _parseProcessPriority(json['processPriority'] as String?),
+      processPriority: _parseProcessPriority(
+        json['processPriority'] as String?,
+      ),
     );
   }
 
@@ -256,7 +220,8 @@ class GameServerConfig {
     return GameServerConfig(
       autoJoin: json['autoJoin'] as bool? ?? false,
       serverAddress: json['serverAddress'] as String? ?? '',
-      serverPort: json['serverPort'] as int? ?? BAMCConstants.defaultMinecraftPort,
+      serverPort:
+          json['serverPort'] as int? ?? BAMCConstants.defaultMinecraftPort,
     );
   }
 
@@ -299,7 +264,8 @@ class JVMConfig {
   factory JVMConfig.fromJson(Map<String, dynamic> json) {
     return JVMConfig(
       garbageCollector: _parseGC(json['garbageCollector'] as String?),
-      javaPermanentGenerationSpace: json['javaPermanentGenerationSpace'] as int? ?? 128,
+      javaPermanentGenerationSpace:
+          json['javaPermanentGenerationSpace'] as int? ?? 128,
       environmentVariable: json['environmentVariable'] as String? ?? '',
       args: json['args'] as String? ?? '',
     );
@@ -321,7 +287,8 @@ class JVMConfig {
   }) {
     return JVMConfig(
       garbageCollector: garbageCollector ?? this.garbageCollector,
-      javaPermanentGenerationSpace: javaPermanentGenerationSpace ?? this.javaPermanentGenerationSpace,
+      javaPermanentGenerationSpace:
+          javaPermanentGenerationSpace ?? this.javaPermanentGenerationSpace,
       environmentVariable: environmentVariable ?? this.environmentVariable,
       args: args ?? this.args,
     );
@@ -410,7 +377,9 @@ class GameWorkaroundConfig {
   factory GameWorkaroundConfig.fromJson(Map<String, dynamic> json) {
     return GameWorkaroundConfig(
       noJvmArgs: json['noJvmArgs'] as bool? ?? false,
-      fileValidatePolicy: _parseFileValidatePolicy(json['fileValidatePolicy'] as String?),
+      fileValidatePolicy: _parseFileValidatePolicy(
+        json['fileValidatePolicy'] as String?,
+      ),
       dontCheckJvmValidity: json['dontCheckJvmValidity'] as bool? ?? false,
       dontPatchNatives: json['dontPatchNatives'] as bool? ?? false,
       useLwjglUnsafeAgent: json['useLwjglUnsafeAgent'] as bool? ?? true,
@@ -474,13 +443,17 @@ class AdvancedConfig {
   factory AdvancedConfig.fromJson(Map<String, dynamic> json) {
     return AdvancedConfig(
       customCommands: json['customCommands'] != null
-          ? CustomCommands.fromJson(json['customCommands'] as Map<String, dynamic>)
+          ? CustomCommands.fromJson(
+              json['customCommands'] as Map<String, dynamic>,
+            )
           : CustomCommands(),
       jvm: json['jvm'] != null
           ? JVMConfig.fromJson(json['jvm'] as Map<String, dynamic>)
           : JVMConfig(),
       workaround: json['workaround'] != null
-          ? GameWorkaroundConfig.fromJson(json['workaround'] as Map<String, dynamic>)
+          ? GameWorkaroundConfig.fromJson(
+              json['workaround'] as Map<String, dynamic>,
+            )
           : GameWorkaroundConfig(),
       enabled: json['enabled'] as bool? ?? false,
     );
@@ -542,16 +515,24 @@ class GameConfig {
           ? JavaConfig.fromJson(json['gameJava'] as Map<String, dynamic>)
           : JavaConfig(),
       gameWindow: json['gameWindow'] != null
-          ? GameWindowConfig.fromJson(json['gameWindow'] as Map<String, dynamic>)
+          ? GameWindowConfig.fromJson(
+              json['gameWindow'] as Map<String, dynamic>,
+            )
           : GameWindowConfig(resolution: Resolution(width: 854, height: 480)),
       performance: json['performance'] != null
-          ? PerformanceConfig.fromJson(json['performance'] as Map<String, dynamic>)
+          ? PerformanceConfig.fromJson(
+              json['performance'] as Map<String, dynamic>,
+            )
           : PerformanceConfig(),
       gameServer: json['gameServer'] != null
-          ? GameServerConfig.fromJson(json['gameServer'] as Map<String, dynamic>)
+          ? GameServerConfig.fromJson(
+              json['gameServer'] as Map<String, dynamic>,
+            )
           : GameServerConfig(),
       versionIsolation: json['versionIsolation'] as bool? ?? true,
-      launcherVisibility: _parseLauncherVisibility(json['launcherVisibility'] as String?),
+      launcherVisibility: _parseLauncherVisibility(
+        json['launcherVisibility'] as String?,
+      ),
       displayGameLog: json['displayGameLog'] as bool? ?? true,
       advanced: json['advanced'] != null
           ? AdvancedConfig.fromJson(json['advanced'] as Map<String, dynamic>)
@@ -646,16 +627,10 @@ class FontConfig {
   final String fontFamily;
   final int fontSize;
 
-  FontConfig({
-    this.fontFamily = '%built-in',
-    this.fontSize = 100,
-  });
+  FontConfig({this.fontFamily = '%built-in', this.fontSize = 100});
 
   Map<String, dynamic> toJson() {
-    return {
-      'fontFamily': fontFamily,
-      'fontSize': fontSize,
-    };
+    return {'fontFamily': fontFamily, 'fontSize': fontSize};
   }
 
   factory FontConfig.fromJson(Map<String, dynamic> json) {
@@ -665,10 +640,7 @@ class FontConfig {
     );
   }
 
-  FontConfig copyWith({
-    String? fontFamily,
-    int? fontSize,
-  }) {
+  FontConfig copyWith({String? fontFamily, int? fontSize}) {
     return FontConfig(
       fontFamily: fontFamily ?? this.fontFamily,
       fontSize: fontSize ?? this.fontSize,
@@ -728,10 +700,7 @@ class AccessibilityConfig {
   });
 
   Map<String, dynamic> toJson() {
-    return {
-      'invertColors': invertColors,
-      'enhanceContrast': enhanceContrast,
-    };
+    return {'invertColors': invertColors, 'enhanceContrast': enhanceContrast};
   }
 
   factory AccessibilityConfig.fromJson(Map<String, dynamic> json) {
@@ -741,10 +710,7 @@ class AccessibilityConfig {
     );
   }
 
-  AccessibilityConfig copyWith({
-    bool? invertColors,
-    bool? enhanceContrast,
-  }) {
+  AccessibilityConfig copyWith({bool? invertColors, bool? enhanceContrast}) {
     return AccessibilityConfig(
       invertColors: invertColors ?? this.invertColors,
       enhanceContrast: enhanceContrast ?? this.enhanceContrast,
@@ -784,10 +750,14 @@ class AppearanceConfig {
           ? FontConfig.fromJson(json['font'] as Map<String, dynamic>)
           : FontConfig(),
       background: json['background'] != null
-          ? AppearanceBackgroundConfig.fromJson(json['background'] as Map<String, dynamic>)
+          ? AppearanceBackgroundConfig.fromJson(
+              json['background'] as Map<String, dynamic>,
+            )
           : AppearanceBackgroundConfig(),
       accessibility: json['accessibility'] != null
-          ? AccessibilityConfig.fromJson(json['accessibility'] as Map<String, dynamic>)
+          ? AccessibilityConfig.fromJson(
+              json['accessibility'] as Map<String, dynamic>,
+            )
           : AccessibilityConfig(),
     );
   }
@@ -811,28 +781,18 @@ class AppearanceConfig {
 class SourceConfig {
   final String strategy;
 
-  SourceConfig({
-    this.strategy = 'auto',
-  });
+  SourceConfig({this.strategy = 'auto'});
 
   Map<String, dynamic> toJson() {
-    return {
-      'strategy': strategy,
-    };
+    return {'strategy': strategy};
   }
 
   factory SourceConfig.fromJson(Map<String, dynamic> json) {
-    return SourceConfig(
-      strategy: json['strategy'] as String? ?? 'auto',
-    );
+    return SourceConfig(strategy: json['strategy'] as String? ?? 'auto');
   }
 
-  SourceConfig copyWith({
-    String? strategy,
-  }) {
-    return SourceConfig(
-      strategy: strategy ?? this.strategy,
-    );
+  SourceConfig copyWith({String? strategy}) {
+    return SourceConfig(strategy: strategy ?? this.strategy);
   }
 }
 
@@ -893,36 +853,23 @@ class TransmissionConfig {
 class CacheConfig {
   final String directory;
 
-  CacheConfig({
-    required this.directory,
-  });
+  CacheConfig({required this.directory});
 
   Map<String, dynamic> toJson() {
-    return {
-      'directory': directory,
-    };
+    return {'directory': directory};
   }
 
   factory CacheConfig.fromJson(Map<String, dynamic> json) {
-    return CacheConfig(
-      directory: json['directory'] as String? ?? '',
-    );
+    return CacheConfig(directory: json['directory'] as String? ?? '');
   }
 
-  CacheConfig copyWith({
-    String? directory,
-  }) {
-    return CacheConfig(
-      directory: directory ?? this.directory,
-    );
+  CacheConfig copyWith({String? directory}) {
+    return CacheConfig(directory: directory ?? this.directory);
   }
 }
 
 /// 代理类型
-enum ProxyType {
-  http,
-  socks,
-}
+enum ProxyType { http, socks }
 
 /// 代理配置
 class ProxyConfig {
@@ -1008,7 +955,9 @@ class DownloadConfig {
           ? SourceConfig.fromJson(json['source'] as Map<String, dynamic>)
           : SourceConfig(),
       transmission: json['transmission'] != null
-          ? TransmissionConfig.fromJson(json['transmission'] as Map<String, dynamic>)
+          ? TransmissionConfig.fromJson(
+              json['transmission'] as Map<String, dynamic>,
+            )
           : TransmissionConfig(),
       cache: json['cache'] != null
           ? CacheConfig.fromJson(json['cache'] as Map<String, dynamic>)
@@ -1038,28 +987,18 @@ class DownloadConfig {
 class GeneralSettings {
   final String language;
 
-  GeneralSettings({
-    this.language = 'zh-CN',
-  });
+  GeneralSettings({this.language = 'zh-CN'});
 
   Map<String, dynamic> toJson() {
-    return {
-      'language': language,
-    };
+    return {'language': language};
   }
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) {
-    return GeneralSettings(
-      language: json['language'] as String? ?? 'zh-CN',
-    );
+    return GeneralSettings(language: json['language'] as String? ?? 'zh-CN');
   }
 
-  GeneralSettings copyWith({
-    String? language,
-  }) {
-    return GeneralSettings(
-      language: language ?? this.language,
-    );
+  GeneralSettings copyWith({String? language}) {
+    return GeneralSettings(language: language ?? this.language);
   }
 }
 
@@ -1102,7 +1041,8 @@ class FunctionalityConfig {
       launchPageQuickSwitch: json['launchPageQuickSwitch'] as bool? ?? true,
       autoDownloadJava: json['autoDownloadJava'] as bool? ?? true,
       resourceTranslation: json['resourceTranslation'] as bool? ?? true,
-      translatedFilenamePrefix: json['translatedFilenamePrefix'] as bool? ?? true,
+      translatedFilenamePrefix:
+          json['translatedFilenamePrefix'] as bool? ?? true,
       skipFirstScreenOptions: json['skipFirstScreenOptions'] as bool? ?? true,
     );
   }
@@ -1119,11 +1059,14 @@ class FunctionalityConfig {
     return FunctionalityConfig(
       discoverPage: discoverPage ?? this.discoverPage,
       instancesNavType: instancesNavType ?? this.instancesNavType,
-      launchPageQuickSwitch: launchPageQuickSwitch ?? this.launchPageQuickSwitch,
+      launchPageQuickSwitch:
+          launchPageQuickSwitch ?? this.launchPageQuickSwitch,
       autoDownloadJava: autoDownloadJava ?? this.autoDownloadJava,
       resourceTranslation: resourceTranslation ?? this.resourceTranslation,
-      translatedFilenamePrefix: translatedFilenamePrefix ?? this.translatedFilenamePrefix,
-      skipFirstScreenOptions: skipFirstScreenOptions ?? this.skipFirstScreenOptions,
+      translatedFilenamePrefix:
+          translatedFilenamePrefix ?? this.translatedFilenamePrefix,
+      skipFirstScreenOptions:
+          skipFirstScreenOptions ?? this.skipFirstScreenOptions,
     );
   }
 }
@@ -1132,14 +1075,10 @@ class FunctionalityConfig {
 class GeneralConfigAdvanced {
   final bool autoPurgeLauncherLogs;
 
-  GeneralConfigAdvanced({
-    this.autoPurgeLauncherLogs = true,
-  });
+  GeneralConfigAdvanced({this.autoPurgeLauncherLogs = true});
 
   Map<String, dynamic> toJson() {
-    return {
-      'autoPurgeLauncherLogs': autoPurgeLauncherLogs,
-    };
+    return {'autoPurgeLauncherLogs': autoPurgeLauncherLogs};
   }
 
   factory GeneralConfigAdvanced.fromJson(Map<String, dynamic> json) {
@@ -1148,11 +1087,10 @@ class GeneralConfigAdvanced {
     );
   }
 
-  GeneralConfigAdvanced copyWith({
-    bool? autoPurgeLauncherLogs,
-  }) {
+  GeneralConfigAdvanced copyWith({bool? autoPurgeLauncherLogs}) {
     return GeneralConfigAdvanced(
-      autoPurgeLauncherLogs: autoPurgeLauncherLogs ?? this.autoPurgeLauncherLogs,
+      autoPurgeLauncherLogs:
+          autoPurgeLauncherLogs ?? this.autoPurgeLauncherLogs,
     );
   }
 }
@@ -1183,10 +1121,14 @@ class GeneralConfig {
           ? GeneralSettings.fromJson(json['general'] as Map<String, dynamic>)
           : GeneralSettings(),
       functionality: json['functionality'] != null
-          ? FunctionalityConfig.fromJson(json['functionality'] as Map<String, dynamic>)
+          ? FunctionalityConfig.fromJson(
+              json['functionality'] as Map<String, dynamic>,
+            )
           : FunctionalityConfig(),
       advanced: json['advanced'] != null
-          ? GeneralConfigAdvanced.fromJson(json['advanced'] as Map<String, dynamic>)
+          ? GeneralConfigAdvanced.fromJson(
+              json['advanced'] as Map<String, dynamic>,
+            )
           : GeneralConfigAdvanced(),
     );
   }
@@ -1209,16 +1151,10 @@ class LauncherMcpServerConfig {
   final bool enabled;
   final int port;
 
-  LauncherMcpServerConfig({
-    this.enabled = true,
-    this.port = 18970,
-  });
+  LauncherMcpServerConfig({this.enabled = true, this.port = 18970});
 
   Map<String, dynamic> toJson() {
-    return {
-      'enabled': enabled,
-      'port': port,
-    };
+    return {'enabled': enabled, 'port': port};
   }
 
   factory LauncherMcpServerConfig.fromJson(Map<String, dynamic> json) {
@@ -1228,10 +1164,7 @@ class LauncherMcpServerConfig {
     );
   }
 
-  LauncherMcpServerConfig copyWith({
-    bool? enabled,
-    int? port,
-  }) {
+  LauncherMcpServerConfig copyWith({bool? enabled, int? port}) {
     return LauncherMcpServerConfig(
       enabled: enabled ?? this.enabled,
       port: port ?? this.port,
@@ -1243,30 +1176,24 @@ class LauncherMcpServerConfig {
 class McpServerConfig {
   final LauncherMcpServerConfig launcher;
 
-  McpServerConfig({
-    required this.launcher,
-  });
+  McpServerConfig({required this.launcher});
 
   Map<String, dynamic> toJson() {
-    return {
-      'launcher': launcher.toJson(),
-    };
+    return {'launcher': launcher.toJson()};
   }
 
   factory McpServerConfig.fromJson(Map<String, dynamic> json) {
     return McpServerConfig(
       launcher: json['launcher'] != null
-          ? LauncherMcpServerConfig.fromJson(json['launcher'] as Map<String, dynamic>)
+          ? LauncherMcpServerConfig.fromJson(
+              json['launcher'] as Map<String, dynamic>,
+            )
           : LauncherMcpServerConfig(),
     );
   }
 
-  McpServerConfig copyWith({
-    LauncherMcpServerConfig? launcher,
-  }) {
-    return McpServerConfig(
-      launcher: launcher ?? this.launcher,
-    );
+  McpServerConfig copyWith({LauncherMcpServerConfig? launcher}) {
+    return McpServerConfig(launcher: launcher ?? this.launcher);
   }
 }
 
@@ -1274,14 +1201,10 @@ class McpServerConfig {
 class IntelligenceConfig {
   final McpServerConfig mcpServer;
 
-  IntelligenceConfig({
-    required this.mcpServer,
-  });
+  IntelligenceConfig({required this.mcpServer});
 
   Map<String, dynamic> toJson() {
-    return {
-      'mcpServer': mcpServer.toJson(),
-    };
+    return {'mcpServer': mcpServer.toJson()};
   }
 
   factory IntelligenceConfig.fromJson(Map<String, dynamic> json) {
@@ -1292,12 +1215,8 @@ class IntelligenceConfig {
     );
   }
 
-  IntelligenceConfig copyWith({
-    McpServerConfig? mcpServer,
-  }) {
-    return IntelligenceConfig(
-      mcpServer: mcpServer ?? this.mcpServer,
-    );
+  IntelligenceConfig copyWith({McpServerConfig? mcpServer}) {
+    return IntelligenceConfig(mcpServer: mcpServer ?? this.mcpServer);
   }
 }
 
@@ -1306,21 +1225,16 @@ class ExtensionConfig {
   final List<String> enabled;
   final Map<String, dynamic> homeWidgetState;
 
-  ExtensionConfig({
-    this.enabled = const [],
-    this.homeWidgetState = const {},
-  });
+  ExtensionConfig({this.enabled = const [], this.homeWidgetState = const {}});
 
   Map<String, dynamic> toJson() {
-    return {
-      'enabled': enabled,
-      'homeWidgetState': homeWidgetState,
-    };
+    return {'enabled': enabled, 'homeWidgetState': homeWidgetState};
   }
 
   factory ExtensionConfig.fromJson(Map<String, dynamic> json) {
     return ExtensionConfig(
-      enabled: (json['enabled'] as List<dynamic>?)
+      enabled:
+          (json['enabled'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],
@@ -1417,7 +1331,8 @@ class BasicInfo {
       isPortable: isPortable ?? this.isPortable,
       isExePathAvailable: isExePathAvailable ?? this.isExePathAvailable,
       isChinaMainlandIp: isChinaMainlandIp ?? this.isChinaMainlandIp,
-      allowFullLoginFeature: allowFullLoginFeature ?? this.allowFullLoginFeature,
+      allowFullLoginFeature:
+          allowFullLoginFeature ?? this.allowFullLoginFeature,
     );
   }
 }
@@ -1427,16 +1342,10 @@ class GameDirectory {
   final String dir;
   final String name;
 
-  GameDirectory({
-    required this.dir,
-    this.name = '',
-  });
+  GameDirectory({required this.dir, this.name = ''});
 
   Map<String, dynamic> toJson() {
-    return {
-      'dir': dir,
-      'name': name,
-    };
+    return {'dir': dir, 'name': name};
   }
 
   factory GameDirectory.fromJson(Map<String, dynamic> json) {
@@ -1446,14 +1355,8 @@ class GameDirectory {
     );
   }
 
-  GameDirectory copyWith({
-    String? dir,
-    String? name,
-  }) {
-    return GameDirectory(
-      dir: dir ?? this.dir,
-      name: name ?? this.name,
-    );
+  GameDirectory copyWith({String? dir, String? name}) {
+    return GameDirectory(dir: dir ?? this.dir, name: name ?? this.name);
   }
 }
 
@@ -1504,7 +1407,9 @@ class LauncherConfig {
       'intelligence': intelligence.toJson(),
       'extension': extension.toJson(),
       'globalGameConfig': globalGameConfig.toJson(),
-      'localGameDirectories': localGameDirectories.map((e) => e.toJson()).toList(),
+      'localGameDirectories': localGameDirectories
+          .map((e) => e.toJson())
+          .toList(),
       'extraJavaPaths': extraJavaPaths,
       'suppressedDialogs': suppressedDialogs,
     };
@@ -1523,7 +1428,9 @@ class LauncherConfig {
       runCount: json['runCount'] as int? ?? 0,
       lastRunExitedNormally: json['lastRunExitedNormally'] as bool? ?? true,
       appearance: json['appearance'] != null
-          ? AppearanceConfig.fromJson(json['appearance'] as Map<String, dynamic>)
+          ? AppearanceConfig.fromJson(
+              json['appearance'] as Map<String, dynamic>,
+            )
           : AppearanceConfig(
               theme: ThemeConfig(),
               font: FontConfig(),
@@ -1546,16 +1453,24 @@ class LauncherConfig {
               advanced: GeneralConfigAdvanced(),
             ),
       intelligence: json['intelligence'] != null
-          ? IntelligenceConfig.fromJson(json['intelligence'] as Map<String, dynamic>)
-          : IntelligenceConfig(mcpServer: McpServerConfig(launcher: LauncherMcpServerConfig())),
+          ? IntelligenceConfig.fromJson(
+              json['intelligence'] as Map<String, dynamic>,
+            )
+          : IntelligenceConfig(
+              mcpServer: McpServerConfig(launcher: LauncherMcpServerConfig()),
+            ),
       extension: json['extension'] != null
           ? ExtensionConfig.fromJson(json['extension'] as Map<String, dynamic>)
           : ExtensionConfig(),
       globalGameConfig: json['globalGameConfig'] != null
-          ? GameConfig.fromJson(json['globalGameConfig'] as Map<String, dynamic>)
+          ? GameConfig.fromJson(
+              json['globalGameConfig'] as Map<String, dynamic>,
+            )
           : GameConfig(
               gameJava: JavaConfig(),
-              gameWindow: GameWindowConfig(resolution: Resolution(width: 854, height: 480)),
+              gameWindow: GameWindowConfig(
+                resolution: Resolution(width: 854, height: 480),
+              ),
               performance: PerformanceConfig(),
               gameServer: GameServerConfig(),
               advanced: AdvancedConfig(
@@ -1564,22 +1479,28 @@ class LauncherConfig {
                 workaround: GameWorkaroundConfig(),
               ),
             ),
-      localGameDirectories: (json['localGameDirectories'] as List<dynamic>?)
+      localGameDirectories:
+          (json['localGameDirectories'] as List<dynamic>?)
               ?.map((e) => GameDirectory.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      extraJavaPaths: (json['extraJavaPaths'] as List<dynamic>?)
+      extraJavaPaths:
+          (json['extraJavaPaths'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],
-      suppressedDialogs: (json['suppressedDialogs'] as List<dynamic>?)
+      suppressedDialogs:
+          (json['suppressedDialogs'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],
     );
   }
 
-  static Map<String, dynamic> _migrate(Map<String, dynamic> json, {required int fromVersion}) {
+  static Map<String, dynamic> _migrate(
+    Map<String, dynamic> json, {
+    required int fromVersion,
+  }) {
     var migrated = Map<String, dynamic>.from(json);
 
     if (fromVersion < 1) {
@@ -1617,7 +1538,9 @@ class LauncherConfig {
       extension: ExtensionConfig(),
       globalGameConfig: GameConfig(
         gameJava: JavaConfig(),
-        gameWindow: GameWindowConfig(resolution: Resolution(width: 854, height: 480)),
+        gameWindow: GameWindowConfig(
+          resolution: Resolution(width: 854, height: 480),
+        ),
         performance: PerformanceConfig(),
         gameServer: GameServerConfig(),
         advanced: AdvancedConfig(
@@ -1649,7 +1572,8 @@ class LauncherConfig {
       basicInfo: basicInfo ?? this.basicInfo,
       mocked: mocked ?? this.mocked,
       runCount: runCount ?? this.runCount,
-      lastRunExitedNormally: lastRunExitedNormally ?? this.lastRunExitedNormally,
+      lastRunExitedNormally:
+          lastRunExitedNormally ?? this.lastRunExitedNormally,
       appearance: appearance ?? this.appearance,
       download: download ?? this.download,
       general: general ?? this.general,
@@ -1663,7 +1587,10 @@ class LauncherConfig {
   }
 
   /// 从当前配置创建新配置，保留某些字段
-  LauncherConfig replaceWithPreserved(LauncherConfig newConfig, List<String> preservedFields) {
+  LauncherConfig replaceWithPreserved(
+    LauncherConfig newConfig,
+    List<String> preservedFields,
+  ) {
     final Map<String, dynamic> currentJson = toJson();
     final Map<String, dynamic> newJson = newConfig.toJson();
 

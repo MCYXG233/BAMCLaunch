@@ -17,17 +17,15 @@ class CurseForgeApi implements ResourceApi {
   static const int resourcePackCategoryId = 12;
   static const int modpackCategoryId = 4471;
 
-  CurseForgeApi({
-    required this.apiKey,
-  });
+  CurseForgeApi({required this.apiKey});
 
   @override
   String get source => 'curseforge';
 
   Map<String, String> get _headers => {
-        'Accept': 'application/json',
-        'x-api-key': apiKey,
-      };
+    'Accept': 'application/json',
+    'x-api-key': apiKey,
+  };
 
   @override
   Future<SearchResult> search(SearchParams params) async {
@@ -49,8 +47,9 @@ class CurseForgeApi implements ResourceApi {
     final classId = _getClassId(params.type ?? ResourceType.mod);
     queryParams['classId'] = classId.toString();
 
-    final uri = Uri.parse('$baseUrl/mods/search')
-        .replace(queryParameters: queryParams);
+    final uri = Uri.parse(
+      '$baseUrl/mods/search',
+    ).replace(queryParameters: queryParams);
 
     final response = await _networkClient.get(
       uri.toString(),
@@ -78,7 +77,10 @@ class CurseForgeApi implements ResourceApi {
   @override
   Future<Resource> getResource(String id) async {
     final uri = Uri.parse('$baseUrl/mods/$id');
-    final response = await _networkClient.get(uri.toString(), headers: _headers);
+    final response = await _networkClient.get(
+      uri.toString(),
+      headers: _headers,
+    );
 
     if (response.statusCode != 200) {
       throw NetworkException.fromStatusCode(response.statusCode);
@@ -91,7 +93,10 @@ class CurseForgeApi implements ResourceApi {
   @override
   Future<List<ResourceVersion>> getVersions(String id) async {
     final uri = Uri.parse('$baseUrl/mods/$id/files');
-    final response = await _networkClient.get(uri.toString(), headers: _headers);
+    final response = await _networkClient.get(
+      uri.toString(),
+      headers: _headers,
+    );
 
     if (response.statusCode != 200) {
       throw NetworkException.fromStatusCode(response.statusCode);
@@ -106,9 +111,15 @@ class CurseForgeApi implements ResourceApi {
   }
 
   @override
-  Future<ResourceVersion> getVersion(String resourceId, String versionId) async {
+  Future<ResourceVersion> getVersion(
+    String resourceId,
+    String versionId,
+  ) async {
     final uri = Uri.parse('$baseUrl/mods/$resourceId/files/$versionId');
-    final response = await _networkClient.get(uri.toString(), headers: _headers);
+    final response = await _networkClient.get(
+      uri.toString(),
+      headers: _headers,
+    );
 
     if (response.statusCode != 200) {
       throw NetworkException.fromStatusCode(response.statusCode);
@@ -121,10 +132,14 @@ class CurseForgeApi implements ResourceApi {
   @override
   Future<List<Category>> getCategories(ResourceType type) async {
     final classId = _getClassId(type);
-    final uri = Uri.parse('$baseUrl/categories')
-        .replace(queryParameters: {'classId': classId.toString()});
+    final uri = Uri.parse(
+      '$baseUrl/categories',
+    ).replace(queryParameters: {'classId': classId.toString()});
 
-    final response = await _networkClient.get(uri.toString(), headers: _headers);
+    final response = await _networkClient.get(
+      uri.toString(),
+      headers: _headers,
+    );
 
     if (response.statusCode != 200) {
       throw NetworkException.fromStatusCode(response.statusCode);
@@ -134,25 +149,31 @@ class CurseForgeApi implements ResourceApi {
     final categories = data['data'] as List<dynamic>;
 
     return categories
-        .map((cat) => Category(
-              id: cat['id'].toString(),
-              name: cat['name'] as String,
-              iconUrl: cat['iconUrl'] as String?,
-            ))
+        .map(
+          (cat) => Category(
+            id: cat['id'].toString(),
+            name: cat['name'] as String,
+            iconUrl: cat['iconUrl'] as String?,
+          ),
+        )
         .toList();
   }
 
   Resource _parseMod(Map<String, dynamic> mod) {
-    final authors = (mod['authors'] as List<dynamic>?)
-            ?.map((a) => Author(
-                  id: a['id'].toString(),
-                  name: a['name'] as String,
-                  avatarUrl: a['url'] as String?,
-                ))
+    final authors =
+        (mod['authors'] as List<dynamic>?)
+            ?.map(
+              (a) => Author(
+                id: a['id'].toString(),
+                name: a['name'] as String,
+                avatarUrl: a['url'] as String?,
+              ),
+            )
             .toList() ??
         [];
 
-    final categories = (mod['categories'] as List<dynamic>?)
+    final categories =
+        (mod['categories'] as List<dynamic>?)
             ?.map((c) => c['name'] as String)
             .toList() ??
         [];
@@ -160,7 +181,8 @@ class CurseForgeApi implements ResourceApi {
     final classId = mod['classId'] as int?;
     final type = _parseResourceType(classId);
 
-    final screenshots = (mod['screenshots'] as List<dynamic>?)
+    final screenshots =
+        (mod['screenshots'] as List<dynamic>?)
             ?.map((s) => s['url'] as String)
             .toList() ??
         [];
@@ -214,7 +236,8 @@ class CurseForgeApi implements ResourceApi {
       supportedLoaders: loaders,
       downloads: mod['downloadCount'] as int,
       likes: mod['thumbsUpCount'] as int? ?? 0,
-      pageUrl: '${ApiEndpoints.curseforgeWebsite}/minecraft/mc-mods/${mod['slug']}',
+      pageUrl:
+          '${ApiEndpoints.curseforgeWebsite}/minecraft/mc-mods/${mod['slug']}',
       publishedDate: DateTime.tryParse(mod['dateCreated'] as String? ?? ''),
       updatedDate: DateTime.tryParse(mod['dateModified'] as String? ?? ''),
       license: mod['license']?['name'] as String?,
@@ -249,14 +272,20 @@ class CurseForgeApi implements ResourceApi {
       final fileId = file['id'] as int?;
       if (fileId != null && fileName != null) {
         final idStr = fileId.toString();
-        final prefix = idStr.length > 4 ? idStr.substring(0, idStr.length - 4) : idStr;
-        final suffix = idStr.length > 4 ? idStr.substring(idStr.length - 4) : '0';
-        downloadUrl = 'https://edge.forgecdn.net/files/$prefix/$suffix/$fileName';
+        final prefix = idStr.length > 4
+            ? idStr.substring(0, idStr.length - 4)
+            : idStr;
+        final suffix = idStr.length > 4
+            ? idStr.substring(idStr.length - 4)
+            : '0';
+        downloadUrl =
+            'https://edge.forgecdn.net/files/$prefix/$suffix/$fileName';
       }
     }
     final fileSize = file['fileLength'] as int? ?? 0;
 
-    final gameVersions = (file['gameVersions'] as List<dynamic>?)
+    final gameVersions =
+        (file['gameVersions'] as List<dynamic>?)
             ?.map((v) => v as String)
             .toList() ??
         [];

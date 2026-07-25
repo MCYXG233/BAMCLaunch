@@ -280,9 +280,11 @@ class WindowController {
 
   /// Windows API 函数类型
   late final DynamicLibrary _user32;
-  late final Pointer<NativeFunction<Int32 Function(IntPtr, Int32)>> _showWindowPtr;
+  late final Pointer<NativeFunction<Int32 Function(IntPtr, Int32)>>
+  _showWindowPtr;
   late final Pointer<NativeFunction<IntPtr Function()>> _getForegroundWindowPtr;
-  late final Pointer<NativeFunction<Bool Function(IntPtr)>> _setForegroundWindowPtr;
+  late final Pointer<NativeFunction<Bool Function(IntPtr)>>
+  _setForegroundWindowPtr;
   late final Pointer<NativeFunction<Bool Function(IntPtr)>> _showOwnedPopupsPtr;
 
   bool _initWindowsApi() {
@@ -320,7 +322,7 @@ class WindowController {
         if (\$hwnd -ne [IntPtr]::Zero) {
             [WindowHelper]::ShowWindow(\$hwnd, 5) | Out-Null
         }
-        '''
+        ''',
       ]);
 
       _currentState = _currentState.copyWith(isVisible: true);
@@ -349,7 +351,7 @@ class WindowController {
         if (\$hwnd -ne [IntPtr]::Zero) {
             [WindowHelper]::ShowWindow(\$hwnd, 0) | Out-Null
         }
-        '''
+        ''',
       ]);
 
       _currentState = _currentState.copyWith(isVisible: false);
@@ -381,7 +383,7 @@ class WindowController {
             [WindowHelper]::SetForegroundWindow(\$hwnd) | Out-Null
             [WindowHelper]::ShowOwnedPopups(\$hwnd, \$true) | Out-Null
         }
-        '''
+        ''',
       ]);
 
       _currentState = _currentState.copyWith(isFocused: true);
@@ -409,7 +411,7 @@ class WindowController {
         if (\$hwnd -ne [IntPtr]::Zero) {
             [WindowHelper]::ShowWindow(\$hwnd, 6) | Out-Null
         }
-        '''
+        ''',
       ]);
 
       _currentState = _currentState.copyWith(isMinimized: true);
@@ -437,10 +439,13 @@ class WindowController {
         if (\$hwnd -ne [IntPtr]::Zero) {
             [WindowHelper]::ShowWindow(\$hwnd, 3) | Out-Null
         }
-        '''
+        ''',
       ]);
 
-      _currentState = _currentState.copyWith(isMaximized: true, isMinimized: false);
+      _currentState = _currentState.copyWith(
+        isMaximized: true,
+        isMinimized: false,
+      );
       return result.exitCode == 0;
     } catch (e) {
       _logger.warn('Failed to maximize window: $e');
@@ -465,10 +470,13 @@ class WindowController {
         if (\$hwnd -ne [IntPtr]::Zero) {
             [WindowHelper]::ShowWindow(\$hwnd, 9) | Out-Null
         }
-        '''
+        ''',
       ]);
 
-      _currentState = _currentState.copyWith(isMaximized: false, isMinimized: false);
+      _currentState = _currentState.copyWith(
+        isMaximized: false,
+        isMinimized: false,
+      );
       return result.exitCode == 0;
     } catch (e) {
       _logger.warn('Failed to restore window: $e');
@@ -481,7 +489,12 @@ class WindowController {
   Future<bool> _showWindowLinux() async {
     try {
       // 使用 xdotool 或 wmctrl 显示窗口
-      final result = await Process.run('xdotool', ['search', '--name', 'BAMCLaunch', 'activate']);
+      final result = await Process.run('xdotool', [
+        'search',
+        '--name',
+        'BAMCLaunch',
+        'activate',
+      ]);
       _currentState = _currentState.copyWith(isVisible: true);
       return result.exitCode == 0;
     } catch (e) {
@@ -492,7 +505,12 @@ class WindowController {
 
   Future<bool> _hideWindowLinux() async {
     try {
-      final result = await Process.run('xdotool', ['search', '--name', 'BAMCLaunch', 'minimize']);
+      final result = await Process.run('xdotool', [
+        'search',
+        '--name',
+        'BAMCLaunch',
+        'minimize',
+      ]);
       _currentState = _currentState.copyWith(isVisible: false);
       return result.exitCode == 0;
     } catch (e) {
@@ -503,7 +521,12 @@ class WindowController {
 
   Future<bool> _focusWindowLinux() async {
     try {
-      final result = await Process.run('xdotool', ['search', '--name', 'BAMCLaunch', 'raise']);
+      final result = await Process.run('xdotool', [
+        'search',
+        '--name',
+        'BAMCLaunch',
+        'raise',
+      ]);
       _currentState = _currentState.copyWith(isFocused: true);
       return result.exitCode == 0;
     } catch (e) {
@@ -518,7 +541,7 @@ class WindowController {
     try {
       final result = await Process.run('osascript', [
         '-e',
-        'tell application "System Events" to set visible of process "BAMCLaunch" to true'
+        'tell application "System Events" to set visible of process "BAMCLaunch" to true',
       ]);
       _currentState = _currentState.copyWith(isVisible: true);
       return result.exitCode == 0;
@@ -532,7 +555,7 @@ class WindowController {
     try {
       final result = await Process.run('osascript', [
         '-e',
-        'tell application "System Events" to set visible of process "BAMCLaunch" to false'
+        'tell application "System Events" to set visible of process "BAMCLaunch" to false',
       ]);
       _currentState = _currentState.copyWith(isVisible: false);
       return result.exitCode == 0;
@@ -546,7 +569,7 @@ class WindowController {
     try {
       final result = await Process.run('osascript', [
         '-e',
-        'tell application "BAMCLaunch" to activate'
+        'tell application "BAMCLaunch" to activate',
       ]);
       _currentState = _currentState.copyWith(isFocused: true);
       return result.exitCode == 0;

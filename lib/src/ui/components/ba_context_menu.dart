@@ -213,10 +213,14 @@ class _BAContextMenuItemWidgetState extends State<_BAContextMenuItemWidget> {
   Widget build(BuildContext context) {
     final isEnabled = !widget.item.disabled;
     final textColor = isEnabled
-        ? (widget.item.danger ? BAColors.dangerOf(context) : BAColors.textPrimaryOf(context))
+        ? (widget.item.danger
+              ? BAColors.dangerOf(context)
+              : BAColors.textPrimaryOf(context))
         : BAColors.textDisabledOf(context);
     final iconColor = isEnabled
-        ? (widget.item.danger ? BAColors.dangerOf(context) : BAColors.textSecondaryOf(context))
+        ? (widget.item.danger
+              ? BAColors.dangerOf(context)
+              : BAColors.textSecondaryOf(context))
         : BAColors.textDisabledOf(context);
     final primaryColor = BAColors.primaryOf(context);
     final dangerColor = BAColors.dangerOf(context);

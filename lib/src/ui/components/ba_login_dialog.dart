@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../auth/auth_manager.dart' hide LoginState;
+import '../../auth/auth_manager.dart';
 import '../../auth/microsoft_auth.dart';
 import '../../account/account_manager.dart';
 import '../../account/account.dart';
@@ -16,7 +16,7 @@ import 'ba_authlib_login_dialog.dart';
 /// 与 auth 域的 LoginState（OAuth2 流程状态）不同，
 /// 这里描述的是 UI 状态机的"显示阶段"，
 /// 多了一个 `success` 终态。
-enum LoginState {
+enum LoginDialogPhase {
   initial,
   gettingDeviceCode,
   waitingForUser,
@@ -40,21 +40,21 @@ class _BALoginDialogState extends State<BALoginDialog> {
   final AccountManager _accountManager = AccountManager();
   final MicrosoftAuthService _microsoftAuth = MicrosoftAuthService();
 
-  /// 当前登录状态
-  LoginState _loginState = LoginState.initial;
-  
+  /// 当前登录状态（UI 显示阶段）
+  LoginDialogPhase _loginDialogPhase = LoginDialogPhase.initial;
+
   /// 当前登录选项卡
   _LoginTab _currentTab = _LoginTab.microsoft;
-  
+
   /// 错误信息
   String? _errorMessage;
-  
+
   /// 设备代码响应
   DeviceCodeResponse? _deviceCodeResponse;
-  
+
   /// 轮询定时器
   Timer? _pollingTimer;
-  
+
   /// 剩余时间（秒）
   int _remainingSeconds = 0;
 
@@ -62,12 +62,16 @@ class _BALoginDialogState extends State<BALoginDialog> {
   List<Account> _accounts = [];
 
   /// 离线登录控制器
-  final TextEditingController _offlineUsernameController = TextEditingController();
-  
+  final TextEditingController _offlineUsernameController =
+      TextEditingController();
+
   /// 外置登录控制器
-  final TextEditingController _authlibUsernameController = TextEditingController();
-  final TextEditingController _authlibPasswordController = TextEditingController();
-  final TextEditingController _authlibServerUrlController = TextEditingController();
+  final TextEditingController _authlibUsernameController =
+      TextEditingController();
+  final TextEditingController _authlibPasswordController =
+      TextEditingController();
+  final TextEditingController _authlibServerUrlController =
+      TextEditingController();
   bool _isAuthlibLoggingIn = false;
   String? _authlibErrorMessage;
 
@@ -104,14 +108,14 @@ class _BALoginDialogState extends State<BALoginDialog> {
   /// 开始设备代码流登录
   Future<void> _startDeviceCodeLogin() async {
     setState(() {
-      _loginState = LoginState.gettingDeviceCode;
+      _loginDialogPhase = LoginDialogPhase.gettingDeviceCode;
       _errorMessage = null;
     });
 
     try {
       final deviceCode = await _microsoftAuth.getDeviceCode();
       setState(() {
-        _loginState = LoginState.waitingForUser;
+        _loginDialogPhase = LoginDialogPhase.waitingForUser;
         _deviceCodeResponse = deviceCode;
         _remainingSeconds = deviceCode.expiresIn;
       });
@@ -123,15 +127,12 @@ class _BALoginDialogState extends State<BALoginDialog> {
       }
 
       // 开始轮询
-      _pollingTimer = Timer.periodic(
-        const Duration(seconds: 1),
-        _pollForToken,
-      );
+      _pollingTimer = Timer.periodic(const Duration(seconds: 1), _pollForToken);
     } catch (e) {
       Logger.instance.error('获取设备代码失败', e);
       if (mounted) {
         setState(() {
-          _loginState = LoginState.error;
+          _loginDialogPhase = LoginDialogPhase.error;
           _errorMessage = e.toString();
         });
       }
@@ -153,7 +154,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
       timer.cancel();
       if (mounted) {
         setState(() {
-          _loginState = LoginState.error;
+          _loginDialogPhase = LoginDialogPhase.error;
           _errorMessage = '设备代码已过期';
         });
       }
@@ -170,7 +171,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
       if (!mounted) return;
 
       setState(() {
-        _loginState = LoginState.authenticating;
+        _loginDialogPhase = LoginDialogPhase.authenticating;
       });
 
       // 保存账户
@@ -178,7 +179,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
       if (profile == null) {
         if (mounted) {
           setState(() {
-            _loginState = LoginState.error;
+            _loginDialogPhase = LoginDialogPhase.error;
             _errorMessage = '无法获取Minecraft档案';
           });
         }
@@ -193,7 +194,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
       await _accountManager.selectAccount(account.id);
 
       setState(() {
-        _loginState = LoginState.success;
+        _loginDialogPhase = LoginDialogPhase.success;
       });
 
       // 延迟关闭并返回账户
@@ -205,16 +206,16 @@ class _BALoginDialogState extends State<BALoginDialog> {
     } catch (e) {
       // 忽略未授权等待的错误
       final errorStr = e.toString().toLowerCase();
-      if (errorStr.contains('authorization_pending') || 
+      if (errorStr.contains('authorization_pending') ||
           errorStr.contains('slow_down')) {
         return;
       }
 
       timer.cancel();
-      
+
       if (mounted) {
         setState(() {
-          _loginState = LoginState.error;
+          _loginDialogPhase = LoginDialogPhase.error;
           _errorMessage = e.toString();
         });
       }
@@ -225,7 +226,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
   void _resetLoginState() {
     _pollingTimer?.cancel();
     setState(() {
-      _loginState = LoginState.initial;
+      _loginDialogPhase = LoginDialogPhase.initial;
       _errorMessage = null;
       _deviceCodeResponse = null;
       _remainingSeconds = 0;
@@ -259,10 +260,11 @@ class _BALoginDialogState extends State<BALoginDialog> {
       _currentTab = _LoginTab.authlib;
     });
   }
-  
+
   /// 外置登录
   Future<void> _loginWithAuthlib() async {
-    if (_authlibUsernameController.text.isEmpty || _authlibPasswordController.text.isEmpty) {
+    if (_authlibUsernameController.text.isEmpty ||
+        _authlibPasswordController.text.isEmpty) {
       setState(() {
         _authlibErrorMessage = '请输入用户名和密码';
       });
@@ -276,7 +278,9 @@ class _BALoginDialogState extends State<BALoginDialog> {
 
     try {
       final accountManager = AccountManager();
-      final account = await accountManager.addOfflineAccount(_authlibUsernameController.text);
+      final account = await accountManager.addOfflineAccount(
+        _authlibUsernameController.text,
+      );
       await accountManager.selectAccount(account.id);
 
       if (mounted) {
@@ -410,27 +414,28 @@ class _BALoginDialogState extends State<BALoginDialog> {
             ),
           ),
           const SizedBox(height: 20),
-          
-          if (_loginState == LoginState.initial) ...[
+
+          if (_loginDialogPhase == LoginDialogPhase.initial) ...[
             _buildLoginTabs(),
             const SizedBox(height: 16),
             _buildCurrentTabContent(),
-          ] else if (_loginState == LoginState.gettingDeviceCode) ...[
+          ] else if (_loginDialogPhase ==
+              LoginDialogPhase.gettingDeviceCode) ...[
             _buildLoadingState('正在获取设备代码...'),
-          ] else if (_loginState == LoginState.waitingForUser) ...[
+          ] else if (_loginDialogPhase == LoginDialogPhase.waitingForUser) ...[
             _buildDeviceCodeWaitingState(),
-          ] else if (_loginState == LoginState.authenticating) ...[
+          ] else if (_loginDialogPhase == LoginDialogPhase.authenticating) ...[
             _buildLoadingState('正在完成认证...'),
-          ] else if (_loginState == LoginState.success) ...[
+          ] else if (_loginDialogPhase == LoginDialogPhase.success) ...[
             _buildSuccessState(),
-          ] else if (_loginState == LoginState.error) ...[
+          ] else if (_loginDialogPhase == LoginDialogPhase.error) ...[
             _buildErrorState(),
           ],
         ],
       ),
     );
   }
-  
+
   Widget _buildLoginTabs() {
     return Row(
       children: [
@@ -442,7 +447,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
       ],
     );
   }
-  
+
   Widget _buildTabButton(_LoginTab tab, String label, IconData icon) {
     final isSelected = _currentTab == tab;
     return Expanded(
@@ -451,21 +456,33 @@ class _BALoginDialogState extends State<BALoginDialog> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? BAColors.primaryOf(context).withOpacity(0.2) : BAColors.surfaceVariantOf(context),
+            color: isSelected
+                ? BAColors.primaryOf(context).withOpacity(0.2)
+                : BAColors.surfaceVariantOf(context),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: isSelected ? BAColors.primaryOf(context) : BAColors.borderOf(context),
+              color: isSelected
+                  ? BAColors.primaryOf(context)
+                  : BAColors.borderOf(context),
             ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context), size: 16),
+              Icon(
+                icon,
+                color: isSelected
+                    ? BAColors.primaryOf(context)
+                    : BAColors.textSecondaryOf(context),
+                size: 16,
+              ),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? BAColors.primaryOf(context) : BAColors.textSecondaryOf(context),
+                  color: isSelected
+                      ? BAColors.primaryOf(context)
+                      : BAColors.textSecondaryOf(context),
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 ),
@@ -476,7 +493,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
       ),
     );
   }
-  
+
   Widget _buildCurrentTabContent() {
     switch (_currentTab) {
       case _LoginTab.microsoft:
@@ -487,7 +504,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
         return _buildAuthlibLoginForm();
     }
   }
-  
+
   Widget _buildMicrosoftLoginForm() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -505,7 +522,11 @@ class _BALoginDialogState extends State<BALoginDialog> {
               gradient: BAColors.primaryGradient,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.web, color: BAColors.textOnPrimary, size: 24),
+            child: const Icon(
+              Icons.web,
+              color: BAColors.textOnPrimary,
+              size: 24,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
@@ -537,14 +558,17 @@ class _BALoginDialogState extends State<BALoginDialog> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text('开始登录', style: TextStyle(fontWeight: FontWeight.w600)),
+              child: const Text(
+                '开始登录',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildOfflineLoginForm() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -565,7 +589,11 @@ class _BALoginDialogState extends State<BALoginDialog> {
                   color: BAColors.primaryOf(context).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(Icons.person_outline, color: BAColors.primaryOf(context), size: 20),
+                child: Icon(
+                  Icons.person_outline,
+                  color: BAColors.primaryOf(context),
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Column(
@@ -593,7 +621,10 @@ class _BALoginDialogState extends State<BALoginDialog> {
           const SizedBox(height: 16),
           TextField(
             controller: _offlineUsernameController,
-            style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 14),
+            style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
+              fontSize: 14,
+            ),
             decoration: InputDecoration(
               hintText: '输入用户名',
               hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
@@ -611,7 +642,10 @@ class _BALoginDialogState extends State<BALoginDialog> {
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: BAColors.primaryOf(context)),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -627,14 +661,17 @@ class _BALoginDialogState extends State<BALoginDialog> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text('离线登录', style: TextStyle(fontWeight: FontWeight.w600)),
+              child: const Text(
+                '离线登录',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildAuthlibLoginForm() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -655,7 +692,11 @@ class _BALoginDialogState extends State<BALoginDialog> {
                   color: BAColors.secondaryOf(context).withOpacity(0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(Icons.extension, color: BAColors.secondaryOf(context), size: 20),
+                child: Icon(
+                  Icons.extension,
+                  color: BAColors.secondaryOf(context),
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Column(
@@ -683,10 +724,16 @@ class _BALoginDialogState extends State<BALoginDialog> {
           const SizedBox(height: 16),
           TextField(
             controller: _authlibServerUrlController,
-            style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 14),
+            style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
+              fontSize: 14,
+            ),
             decoration: InputDecoration(
               labelText: '认证服务器',
-              labelStyle: TextStyle(color: BAColors.textSecondaryOf(context), fontSize: 12),
+              labelStyle: TextStyle(
+                color: BAColors.textSecondaryOf(context),
+                fontSize: 12,
+              ),
               hintText: '留空使用默认服务器',
               hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
               filled: true,
@@ -703,16 +750,25 @@ class _BALoginDialogState extends State<BALoginDialog> {
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: BAColors.primaryOf(context)),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
             ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _authlibUsernameController,
-            style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 14),
+            style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
+              fontSize: 14,
+            ),
             decoration: InputDecoration(
               labelText: '用户名',
-              labelStyle: TextStyle(color: BAColors.textSecondaryOf(context), fontSize: 12),
+              labelStyle: TextStyle(
+                color: BAColors.textSecondaryOf(context),
+                fontSize: 12,
+              ),
               hintText: '请输入用户名',
               hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
               filled: true,
@@ -729,17 +785,26 @@ class _BALoginDialogState extends State<BALoginDialog> {
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: BAColors.primaryOf(context)),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
             ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _authlibPasswordController,
             obscureText: true,
-            style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 14),
+            style: TextStyle(
+              color: BAColors.textPrimaryOf(context),
+              fontSize: 14,
+            ),
             decoration: InputDecoration(
               labelText: '密码',
-              labelStyle: TextStyle(color: BAColors.textSecondaryOf(context), fontSize: 12),
+              labelStyle: TextStyle(
+                color: BAColors.textSecondaryOf(context),
+                fontSize: 12,
+              ),
               hintText: '请输入密码',
               hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
               filled: true,
@@ -756,7 +821,10 @@ class _BALoginDialogState extends State<BALoginDialog> {
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: BAColors.primaryOf(context)),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
             ),
           ),
           if (_authlibErrorMessage != null) ...[
@@ -766,16 +834,25 @@ class _BALoginDialogState extends State<BALoginDialog> {
               decoration: BoxDecoration(
                 color: BAColors.dangerOf(context).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: BAColors.dangerOf(context).withOpacity(0.3)),
+                border: Border.all(
+                  color: BAColors.dangerOf(context).withOpacity(0.3),
+                ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.error_outline, color: BAColors.dangerOf(context), size: 16),
+                  Icon(
+                    Icons.error_outline,
+                    color: BAColors.dangerOf(context),
+                    size: 16,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       _authlibErrorMessage!,
-                      style: TextStyle(color: BAColors.dangerOf(context), fontSize: 12),
+                      style: TextStyle(
+                        color: BAColors.dangerOf(context),
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ],
@@ -795,9 +872,16 @@ class _BALoginDialogState extends State<BALoginDialog> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: _isAuthlibLoggingIn 
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white))
-                  : const Text('登录', style: TextStyle(fontWeight: FontWeight.w600)),
+              child: _isAuthlibLoggingIn
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(color: Colors.white),
+                    )
+                  : const Text(
+                      '登录',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
             ),
           ),
         ],
@@ -832,7 +916,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
               ),
               const SizedBox(height: 12),
               Text(
-                account.type == AccountType.microsoft 
+                account.type == AccountType.microsoft
                     ? '确定要登出账户 "${account.username}" 吗？'
                     : '确定要删除离线账户 "${account.username}" 吗？',
                 style: TextStyle(
@@ -977,7 +1061,10 @@ class _BALoginDialogState extends State<BALoginDialog> {
               ),
               const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: BAColors.surfaceOf(context),
                   borderRadius: BorderRadius.circular(12),
@@ -1132,8 +1219,12 @@ class _AccountTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
-                account.type == AccountType.microsoft ? Icons.account_circle : Icons.person,
-                color: account.type == AccountType.microsoft ? BAColors.primaryOf(context) : BAColors.secondaryOf(context),
+                account.type == AccountType.microsoft
+                    ? Icons.account_circle
+                    : Icons.person,
+                color: account.type == AccountType.microsoft
+                    ? BAColors.primaryOf(context)
+                    : BAColors.secondaryOf(context),
                 size: 22,
               ),
             ),
@@ -1164,11 +1255,19 @@ class _AccountTile extends StatelessWidget {
             if (onLogout != null) ...[
               IconButton(
                 onPressed: onLogout,
-                icon: Icon(Icons.logout, color: BAColors.dangerOf(context), size: 18),
+                icon: Icon(
+                  Icons.logout,
+                  color: BAColors.dangerOf(context),
+                  size: 18,
+                ),
                 padding: const EdgeInsets.all(4),
               ),
             ],
-            Icon(Icons.arrow_forward_ios, color: BAColors.textSecondaryOf(context), size: 14),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: BAColors.textSecondaryOf(context),
+              size: 14,
+            ),
           ],
         ),
       ),
