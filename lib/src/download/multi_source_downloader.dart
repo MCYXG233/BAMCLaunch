@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:io';
 import 'package:archive/archive.dart' as archive;
 import 'package:bamclaunch/src/download/resume_manager.dart' as resume;

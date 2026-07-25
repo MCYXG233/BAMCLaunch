@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 /// 自定义主题颜色模型
 /// 存储用户在设置中自定义的主色调

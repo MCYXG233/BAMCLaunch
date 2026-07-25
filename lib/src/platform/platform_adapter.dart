@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 /// 平台适配器统一接口
 ///

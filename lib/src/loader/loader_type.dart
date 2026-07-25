@@ -1,4 +1,4 @@
-/// Mod 加载器类型（权威枚举）
+﻿/// Mod 加载器类型（权威枚举）
 ///
 /// 统一全应用对 Mod 加载器（Forge/Fabric/Quilt/NeoForge）的枚举引用，
 /// 原 mod/mod_loader_manager.dart 与 loader/loader_download_service.dart

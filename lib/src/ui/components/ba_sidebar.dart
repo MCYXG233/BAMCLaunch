@@ -112,7 +112,7 @@ class _BASidebarState extends State<BASidebar>
             color: BAColors.surfaceOf(context),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 5,
                 offset: const Offset(2, 0),
               ),
@@ -166,12 +166,14 @@ class _BASidebarState extends State<BASidebar>
               ),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? BAColors.primaryOf(context).withOpacity(0.1)
+                    ? BAColors.primaryOf(context).withValues(alpha: 0.1)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 border: isSelected
                     ? Border.all(
-                        color: BAColors.primaryOf(context).withOpacity(0.3),
+                        color: BAColors.primaryOf(
+                          context,
+                        ).withValues(alpha: 0.3),
                       )
                     : null,
               ),
@@ -400,7 +402,9 @@ class _BAAnimatedSidebarState extends State<BAAnimatedSidebar>
               color: BAColors.surfaceOf(context),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(_isHovered ? 0.1 : 0.05),
+                  color: Colors.black.withValues(
+                    alpha: _isHovered ? 0.1 : 0.05,
+                  ),
                   blurRadius: _isHovered ? 10 : 5,
                   offset: const Offset(2, 0),
                 ),
@@ -455,12 +459,14 @@ class _BAAnimatedSidebarState extends State<BAAnimatedSidebar>
               ),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? BAColors.primaryOf(context).withOpacity(0.1)
+                    ? BAColors.primaryOf(context).withValues(alpha: 0.1)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 border: isSelected
                     ? Border.all(
-                        color: BAColors.primaryOf(context).withOpacity(0.3),
+                        color: BAColors.primaryOf(
+                          context,
+                        ).withValues(alpha: 0.3),
                       )
                     : null,
               ),

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 /// 蔚蓝档案UI设计规范的字体定义
 class BATypography {

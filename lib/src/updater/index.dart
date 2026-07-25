@@ -1,1 +1,1 @@
-export 'update_manager.dart';
+﻿export 'update_manager.dart';

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../instance/models.dart';
 import '../../resource_center/models.dart';
 import '../../resource_center/resource_manager.dart';

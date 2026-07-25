@@ -1,4 +1,4 @@
-/// 登录状态枚举
+﻿/// 登录状态枚举
 enum LoginState {
   initial,
   gettingDeviceCode,

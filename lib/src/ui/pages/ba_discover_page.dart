@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../components/ba_common_widgets.dart';
 
@@ -309,7 +309,7 @@ class _BADiscoverPageState extends State<BADiscoverPage>
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: BAColors.primaryOf(context).withOpacity(0.2),
+                color: BAColors.primaryOf(context).withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(

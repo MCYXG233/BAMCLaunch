@@ -1,4 +1,4 @@
-/// 资源类型枚举：别名 import 实例域权威定义
+﻿/// 资源类型枚举：别名 import 实例域权威定义
 ///
 /// 实际定义在 instance/models.dart，这里只是 import 引用，
 /// 保证全应用只有一个权威 ResourceType。

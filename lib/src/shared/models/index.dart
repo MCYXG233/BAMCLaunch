@@ -1,4 +1,4 @@
-/// Shared models exports
+﻿/// Shared models exports
 ///
 /// Contains core domain models used across multiple features.
 /// Note: Account 模型已迁移至 account/account.dart

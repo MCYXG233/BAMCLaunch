@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:path/path.dart' as path;
 import '../core/network_client.dart';
 import '../core/error_codes.dart';
@@ -119,7 +119,7 @@ class ModpackInstaller {
   static Future<void> _extractOverrides(
     String zipPath,
     String instanceId,
-    GameDirectory directory,
+    InstanceDirectory directory,
     void Function(int)? onProgress,
   ) async {
     try {

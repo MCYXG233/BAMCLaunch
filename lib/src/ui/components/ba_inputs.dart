@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/app_theme.dart';
@@ -164,7 +164,7 @@ class _BATextFieldState extends State<BATextField> {
                       BoxShadow(
                         color: BAColors.shadowOf(
                           context,
-                        ).withOpacity(shadowOpacity),
+                        ).withValues(alpha: shadowOpacity),
                         blurRadius: _isFocused ? 12 : 6,
                         offset: Offset(0, _isFocused ? 4 : 2),
                       ),
@@ -329,7 +329,7 @@ class _BASwitchState extends State<BASwitch> {
                         BoxShadow(
                           color: BAColors.shadowOf(
                             context,
-                          ).withOpacity(shadowOpacity),
+                          ).withValues(alpha: shadowOpacity),
                           blurRadius: 6,
                           offset: const Offset(0, 2),
                         ),
@@ -355,7 +355,7 @@ class _BASwitchState extends State<BASwitch> {
                                 BoxShadow(
                                   color: BAColors.shadowOf(
                                     context,
-                                  ).withOpacity(0.3),
+                                  ).withValues(alpha: 0.3),
                                   blurRadius: 4,
                                   offset: const Offset(0, 1),
                                 ),
@@ -456,7 +456,7 @@ class _BASliderState extends State<BASlider> {
               activeTrackColor: activeColor,
               inactiveTrackColor: inactiveColor,
               thumbColor: activeColor,
-              overlayColor: activeColor.withOpacity(0.1),
+              overlayColor: activeColor.withValues(alpha: 0.1),
               overlayShape: const RoundSliderOverlayShape(overlayRadius: 20),
               thumbShape: _BAThumbShape(
                 isHovered: _isHovered || _isDragging,
@@ -539,7 +539,7 @@ class _BAThumbShape extends SliderComponentShape {
     // 阴影
     if (!isDisabled) {
       final shadowPaint = Paint()
-        ..color = shadowColor.withOpacity(0.3)
+        ..color = shadowColor.withValues(alpha: 0.3)
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, shadowRadius);
       canvas.drawCircle(center.translate(0, 2), radius, shadowPaint);
     }
@@ -549,7 +549,7 @@ class _BAThumbShape extends SliderComponentShape {
     canvas.drawCircle(center, radius, thumbPaint);
 
     // 滑块内圈
-    final innerPaint = Paint()..color = Colors.white.withOpacity(0.3);
+    final innerPaint = Paint()..color = Colors.white.withValues(alpha: 0.3);
     canvas.drawCircle(center, radius * 0.4, innerPaint);
   }
 }

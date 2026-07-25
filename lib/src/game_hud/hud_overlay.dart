@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../ui/theme/colors.dart';
 import '../ui/theme/typography.dart';
@@ -302,7 +302,7 @@ class MiniFPSWidget extends StatelessWidget {
           Text(
             'Avg: ${fpsData.averageFPS.toStringAsFixed(1)}',
             style: TextStyle(
-              color: fpsColor.withOpacity(0.7),
+              color: fpsColor.withValues(alpha: 0.7),
               fontSize: 12,
               shadows: const [Shadow(color: Colors.black, blurRadius: 2)],
             ),
@@ -363,7 +363,7 @@ class MiniMemoryWidget extends StatelessWidget {
         Text(
           'Max: ${memoryData.totalMemoryFormatted}',
           style: TextStyle(
-            color: memoryColor.withOpacity(0.7),
+            color: memoryColor.withValues(alpha: 0.7),
             fontSize: 12,
             shadows: const [Shadow(color: Colors.black, blurRadius: 2)],
           ),

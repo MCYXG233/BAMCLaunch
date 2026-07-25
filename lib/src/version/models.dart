@@ -1,4 +1,4 @@
-/// 游戏版本类型枚举
+﻿/// 游戏版本类型枚举
 enum VersionType {
   /// 正式版
   release,

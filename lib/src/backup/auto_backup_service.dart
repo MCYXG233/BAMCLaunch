@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 import '../core/logger.dart';
 import '../core/error_codes.dart';
@@ -340,7 +340,7 @@ class AutoBackupService {
     AutoBackupSchedule schedule,
   ) async {
     final instanceManager = InstanceManager();
-    GameDirectory? directory;
+    InstanceDirectory? directory;
 
     try {
       directory = instanceManager.directories.firstWhere(

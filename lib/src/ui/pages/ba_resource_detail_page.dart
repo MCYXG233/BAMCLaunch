@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import '../theme/colors.dart';
 import '../components/ba_common_widgets.dart';

@@ -51,7 +51,7 @@ class _AccountCardState extends State<AccountCard> {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: widget.isSelected
-                ? BAColors.primaryOf(context).withOpacity(0.1)
+                ? BAColors.primaryOf(context).withValues(alpha: 0.1)
                 : BAColors.surfaceOf(context),
             borderRadius: BATheme.borderRadius,
             border: Border.all(
@@ -65,7 +65,7 @@ class _AccountCardState extends State<AccountCard> {
             boxShadow: _isHovered
                 ? [
                     BoxShadow(
-                      color: BAColors.shadowOf(context).withOpacity(0.2),
+                      color: BAColors.shadowOf(context).withValues(alpha: 0.2),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -105,7 +105,7 @@ class _AccountCardState extends State<AccountCard> {
                                 decoration: BoxDecoration(
                                   color: BAColors.primaryOf(
                                     context,
-                                  ).withOpacity(0.2),
+                                  ).withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
@@ -236,7 +236,7 @@ class _AccountCardState extends State<AccountCard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: badgeColor.withOpacity(0.15),
+        color: badgeColor.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

@@ -1,4 +1,4 @@
-export 'app_router.dart';
+﻿export 'app_router.dart';
 export 'splash_page.dart';
 export 'version_page.dart';
 export 'account_page.dart';

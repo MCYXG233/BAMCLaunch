@@ -423,13 +423,13 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
         color: BAColors.surfaceOf(context),
         border: Border(
           bottom: BorderSide(
-            color: BAColors.borderOf(context).withOpacity(0.5),
+            color: BAColors.borderOf(context).withValues(alpha: 0.5),
             width: 1,
           ),
         ),
         boxShadow: [
           BoxShadow(
-            color: BAColors.primaryOf(context).withOpacity(0.05),
+            color: BAColors.primaryOf(context).withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -460,7 +460,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: BAColors.primaryOf(context).withOpacity(0.3),
+                  color: BAColors.primaryOf(context).withValues(alpha: 0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -486,7 +486,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: BAColors.primaryOf(context).withOpacity(0.15),
+                color: BAColors.primaryOf(context).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -605,12 +605,18 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
               color: BAColors.surfaceOf(context),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: _getBorderColor(context, item.status).withOpacity(0.6),
+                color: _getBorderColor(
+                  context,
+                  item.status,
+                ).withValues(alpha: 0.6),
                 width: item.status == DiagnosticStatus.running ? 2 : 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: _getBorderColor(context, item.status).withOpacity(0.1),
+                  color: _getBorderColor(
+                    context,
+                    item.status,
+                  ).withValues(alpha: 0.1),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -697,7 +703,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Divider(
-            color: BAColors.borderOf(context).withOpacity(0.5),
+            color: BAColors.borderOf(context).withValues(alpha: 0.5),
             height: 1,
           ),
           const SizedBox(height: 12),
@@ -708,7 +714,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
               color: BAColors.surfaceVariantOf(context),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: BAColors.borderOf(context).withOpacity(0.4),
+                color: BAColors.borderOf(context).withValues(alpha: 0.4),
               ),
             ),
             child: Text(
@@ -788,7 +794,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: BAColors.infoOf(context).withOpacity(0.12),
+            color: BAColors.infoOf(context).withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(10),
           ),
           child: SizedBox(
@@ -807,7 +813,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: BAColors.successOf(context).withOpacity(0.12),
+            color: BAColors.successOf(context).withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(
@@ -821,7 +827,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: BAColors.warningOf(context).withOpacity(0.12),
+            color: BAColors.warningOf(context).withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(
@@ -835,7 +841,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: BAColors.dangerOf(context).withOpacity(0.12),
+            color: BAColors.dangerOf(context).withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(
@@ -850,15 +856,15 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
   Color _getBorderColor(BuildContext context, DiagnosticStatus status) {
     switch (status) {
       case DiagnosticStatus.pending:
-        return BAColors.borderOf(context).withOpacity(0.5);
+        return BAColors.borderOf(context).withValues(alpha: 0.5);
       case DiagnosticStatus.running:
-        return BAColors.infoOf(context).withOpacity(0.6);
+        return BAColors.infoOf(context).withValues(alpha: 0.6);
       case DiagnosticStatus.passed:
-        return BAColors.successOf(context).withOpacity(0.3);
+        return BAColors.successOf(context).withValues(alpha: 0.3);
       case DiagnosticStatus.warning:
-        return BAColors.warningOf(context).withOpacity(0.3);
+        return BAColors.warningOf(context).withValues(alpha: 0.3);
       case DiagnosticStatus.failed:
-        return BAColors.dangerOf(context).withOpacity(0.3);
+        return BAColors.dangerOf(context).withValues(alpha: 0.3);
     }
   }
 
@@ -897,14 +903,14 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            overallColor.withOpacity(0.08),
-            overallColor.withOpacity(0.03),
+            overallColor.withValues(alpha: 0.08),
+            overallColor.withValues(alpha: 0.03),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: overallColor.withOpacity(0.25)),
+        border: Border.all(color: overallColor.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -950,7 +956,7 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
                 color: BAColors.surfaceOf(context),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: BAColors.dangerOf(context).withOpacity(0.3),
+                  color: BAColors.dangerOf(context).withValues(alpha: 0.3),
                 ),
               ),
               child: Column(
@@ -986,9 +992,9 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

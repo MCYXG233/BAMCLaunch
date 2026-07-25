@@ -1,4 +1,4 @@
-/// 全局常量
+﻿/// 全局常量
 class BAMCConstants {
   BAMCConstants._();
 

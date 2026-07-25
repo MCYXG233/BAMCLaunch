@@ -569,7 +569,7 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: versionColor.withOpacity(0.15),
+                    color: versionColor.withValues(alpha: 0.15),
                     borderRadius: BATheme.borderRadiusSmall,
                   ),
                   child: Icon(versionIcon, color: versionColor, size: 28),
@@ -594,10 +594,10 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: versionColor.withOpacity(0.1),
+                              color: versionColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(
-                                color: versionColor.withOpacity(0.3),
+                                color: versionColor.withValues(alpha: 0.3),
                               ),
                             ),
                             child: Text(
@@ -615,10 +615,12 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: BAColors.success.withOpacity(0.1),
+                                color: BAColors.success.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
-                                  color: BAColors.success.withOpacity(0.3),
+                                  color: BAColors.success.withValues(
+                                    alpha: 0.3,
+                                  ),
                                 ),
                               ),
                               child: Text(
@@ -673,7 +675,7 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
         border: Border(top: BorderSide(color: BAColors.border, width: 1)),
         boxShadow: [
           BoxShadow(
-            color: BAColors.shadow.withOpacity(0.2),
+            color: BAColors.shadow.withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),

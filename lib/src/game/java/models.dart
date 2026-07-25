@@ -1,4 +1,4 @@
-/// Java安装信息模型
+﻿/// Java安装信息模型
 /// 包含Java版本的详细信息
 class JavaInstallation {
   /// Java可执行文件路径

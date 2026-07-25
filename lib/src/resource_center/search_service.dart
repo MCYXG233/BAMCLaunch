@@ -1,4 +1,4 @@
-import '../di/service_locator.dart';
+﻿import '../di/service_locator.dart';
 import 'models.dart';
 import 'modrinth_api.dart';
 import 'api_interface.dart';

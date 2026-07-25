@@ -144,7 +144,7 @@ class _ResourceFilterState extends State<ResourceFilter> {
                   widget.onFilterChanged(_currentParams);
                 });
               },
-              selectedColor: BAColors.primaryOf(context).withOpacity(0.2),
+              selectedColor: BAColors.primaryOf(context).withValues(alpha: 0.2),
               checkmarkColor: BAColors.primaryOf(context),
               backgroundColor: BAColors.surfaceVariantOf(context),
               labelStyle: TextStyle(
@@ -210,7 +210,9 @@ class _ResourceFilterState extends State<ResourceFilter> {
                   widget.onFilterChanged(_currentParams);
                 });
               },
-              selectedColor: BAColors.secondaryOf(context).withOpacity(0.2),
+              selectedColor: BAColors.secondaryOf(
+                context,
+              ).withValues(alpha: 0.2),
               checkmarkColor: BAColors.secondaryOf(context),
               backgroundColor: BAColors.surfaceVariantOf(context),
               labelStyle: TextStyle(

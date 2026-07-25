@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import '../../account/account_manager.dart';
 import '../../instance/instance_manager.dart';
 import '../theme/background_manager.dart';

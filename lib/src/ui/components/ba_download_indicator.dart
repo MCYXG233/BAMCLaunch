@@ -317,7 +317,7 @@ class _DownloadListPanel extends StatelessWidget {
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: BAColors.primaryOf(context).withOpacity(0.15),
+                    color: BAColors.primaryOf(context).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -454,9 +454,9 @@ class _DownloadListPanel extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BATheme.borderRadiusSmall,
-            border: Border.all(color: color.withOpacity(0.3), width: 1),
+            border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -520,7 +520,7 @@ class _DownloadTaskItem extends StatelessWidget {
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: BAColors.dangerOf(context).withOpacity(0.1),
+                      color: BAColors.dangerOf(context).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Icon(
@@ -541,7 +541,9 @@ class _DownloadTaskItem extends StatelessWidget {
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: BAColors.textSecondaryOf(context).withOpacity(0.1),
+                      color: BAColors.textSecondaryOf(
+                        context,
+                      ).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Icon(
@@ -653,11 +655,11 @@ class _DownloadTaskItem extends StatelessWidget {
   Color _getStatusBorderColor(BuildContext context) {
     switch (task.status) {
       case 'downloading':
-        return BAColors.primaryOf(context).withOpacity(0.3);
+        return BAColors.primaryOf(context).withValues(alpha: 0.3);
       case 'completed':
-        return BAColors.successOf(context).withOpacity(0.3);
+        return BAColors.successOf(context).withValues(alpha: 0.3);
       case 'failed':
-        return BAColors.dangerOf(context).withOpacity(0.3);
+        return BAColors.dangerOf(context).withValues(alpha: 0.3);
       default:
         return BAColors.borderOf(context);
     }

@@ -224,7 +224,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, color: color, size: 28),
@@ -647,12 +647,12 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
                               decoration: BoxDecoration(
                                 color: BAColors.primaryOf(
                                   context,
-                                ).withOpacity(0.1),
+                                ).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
                                   color: BAColors.primaryOf(
                                     context,
-                                  ).withOpacity(0.3),
+                                  ).withValues(alpha: 0.3),
                                 ),
                               ),
                               child: Text(
@@ -676,12 +676,12 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
                             decoration: BoxDecoration(
                               color: BAColors.secondaryOf(
                                 context,
-                              ).withOpacity(0.1),
+                              ).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(
                                 color: BAColors.secondaryOf(
                                   context,
-                                ).withOpacity(0.3),
+                                ).withValues(alpha: 0.3),
                               ),
                             ),
                             child: Text(
@@ -719,7 +719,7 @@ class _BAMCAccountPageState extends State<BAMCAccountPage> {
       width: 56,
       height: 56,
       decoration: BoxDecoration(
-        color: BAColors.primaryOf(context).withOpacity(0.15),
+        color: BAColors.primaryOf(context).withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Icon(Icons.person, color: BAColors.primaryOf(context), size: 32),
@@ -859,7 +859,7 @@ class _MicrosoftLoginWrapperState extends State<_MicrosoftLoginWrapper> {
                   width: 120,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: BAColors.primaryOf(context).withOpacity(0.1),
+                    color: BAColors.primaryOf(context).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(32),
                   ),
                   child: Icon(
@@ -1217,7 +1217,7 @@ class _AuthlibLoginWrapperState extends State<_AuthlibLoginWrapper> {
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: BAColors.successOf(context).withOpacity(0.1),
+                      color: BAColors.successOf(context).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(32),
                     ),
                     child: Icon(
@@ -1645,7 +1645,7 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
               height: 280,
               backgroundColor: BAColors.surfaceVariantOf(
                 context,
-              ).withOpacity(0.5),
+              ).withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 12),
@@ -1686,9 +1686,11 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: BAColors.surfaceVariantOf(context).withOpacity(0.5),
+        color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
+        border: Border.all(
+          color: BAColors.borderOf(context).withValues(alpha: 0.5),
+        ),
       ),
       child: Row(
         children: [
@@ -1788,10 +1790,10 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: BAColors.surfaceVariantOf(context).withOpacity(0.5),
+            color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: BAColors.borderOf(context).withOpacity(0.5),
+              color: BAColors.borderOf(context).withValues(alpha: 0.5),
             ),
           ),
           child: Row(
@@ -1844,10 +1846,10 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: BAColors.dangerOf(context).withOpacity(0.1),
+              color: BAColors.dangerOf(context).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: BAColors.dangerOf(context).withOpacity(0.3),
+                color: BAColors.dangerOf(context).withValues(alpha: 0.3),
               ),
             ),
             child: Row(
@@ -1907,9 +1909,11 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: BAColors.surfaceVariantOf(context).withOpacity(0.5),
+        color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
+        border: Border.all(
+          color: BAColors.borderOf(context).withValues(alpha: 0.5),
+        ),
       ),
       child: Row(
         children: [

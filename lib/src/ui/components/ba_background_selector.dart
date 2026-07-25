@@ -199,13 +199,15 @@ class _PresetCard extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? BAColors.primaryOf(context)
-                  : BAColors.borderOf(context).withOpacity(0.3),
+                  : BAColors.borderOf(context).withValues(alpha: 0.3),
               width: isSelected ? 2 : 1,
             ),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: BAColors.primaryOf(context).withOpacity(0.25),
+                      color: BAColors.primaryOf(
+                        context,
+                      ).withValues(alpha: 0.25),
                       blurRadius: 20,
                       offset: const Offset(0, 4),
                     ),
@@ -248,7 +250,7 @@ class _CustomImageButton extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? BAColors.primaryOf(context)
-                  : BAColors.borderOf(context).withOpacity(0.5),
+                  : BAColors.borderOf(context).withValues(alpha: 0.5),
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -303,7 +305,7 @@ class _CustomVideoButton extends StatelessWidget {
               border: Border.all(
                 color: isSelected
                     ? BAColors.primaryOf(context)
-                    : BAColors.borderOf(context).withOpacity(0.5),
+                    : BAColors.borderOf(context).withValues(alpha: 0.5),
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -382,7 +384,7 @@ class _SliderOption extends StatelessWidget {
             activeTrackColor: BAColors.primaryOf(context),
             inactiveTrackColor: BAColors.borderOf(context),
             thumbColor: BAColors.primaryOf(context),
-            overlayColor: BAColors.primaryOf(context).withOpacity(0.12),
+            overlayColor: BAColors.primaryOf(context).withValues(alpha: 0.12),
             trackHeight: 4,
             thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8),
           ),

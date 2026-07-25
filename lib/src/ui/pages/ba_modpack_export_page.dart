@@ -286,7 +286,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
         border: Border.all(color: BAColors.borderOf(context)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -303,7 +303,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: BAColors.primaryOf(context).withOpacity(0.15),
+                    color: BAColors.primaryOf(context).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -325,7 +325,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
             ),
           ),
           Divider(
-            color: BAColors.borderOf(context).withOpacity(0.5),
+            color: BAColors.borderOf(context).withValues(alpha: 0.5),
             height: 1,
             indent: 20,
             endIndent: 20,
@@ -443,7 +443,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: isSelected
-                ? BAColors.primaryOf(context).withOpacity(0.1)
+                ? BAColors.primaryOf(context).withValues(alpha: 0.1)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
@@ -472,7 +472,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
                 height: 36,
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? BAColors.primaryOf(context).withOpacity(0.2)
+                      ? BAColors.primaryOf(context).withValues(alpha: 0.2)
                       : BAColors.surfaceVariantOf(context),
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -533,7 +533,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
           onChanged: (value) => setState(() => _includeMods = value),
         ),
         Divider(
-          color: BAColors.borderOf(context).withOpacity(0.3),
+          color: BAColors.borderOf(context).withValues(alpha: 0.3),
           height: 1,
           indent: 48,
         ),
@@ -545,7 +545,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
           onChanged: (value) => setState(() => _includeConfig = value),
         ),
         Divider(
-          color: BAColors.borderOf(context).withOpacity(0.3),
+          color: BAColors.borderOf(context).withValues(alpha: 0.3),
           height: 1,
           indent: 48,
         ),
@@ -557,7 +557,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
           onChanged: (value) => setState(() => _includeSaves = value),
         ),
         Divider(
-          color: BAColors.borderOf(context).withOpacity(0.3),
+          color: BAColors.borderOf(context).withValues(alpha: 0.3),
           height: 1,
           indent: 48,
         ),
@@ -569,7 +569,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
           onChanged: (value) => setState(() => _includeResourcePacks = value),
         ),
         Divider(
-          color: BAColors.borderOf(context).withOpacity(0.3),
+          color: BAColors.borderOf(context).withValues(alpha: 0.3),
           height: 1,
           indent: 48,
         ),
@@ -581,7 +581,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
           onChanged: (value) => setState(() => _includeShaderPacks = value),
         ),
         Divider(
-          color: BAColors.borderOf(context).withOpacity(0.3),
+          color: BAColors.borderOf(context).withValues(alpha: 0.3),
           height: 1,
           indent: 48,
         ),
@@ -621,7 +621,9 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
                   ? []
                   : [
                       BoxShadow(
-                        color: BAColors.primaryOf(context).withOpacity(0.3),
+                        color: BAColors.primaryOf(
+                          context,
+                        ).withValues(alpha: 0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -753,17 +755,19 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
               vertical: 12,
             ),
             filled: true,
-            fillColor: BAColors.surfaceVariantOf(context).withOpacity(0.7),
+            fillColor: BAColors.surfaceVariantOf(
+              context,
+            ).withValues(alpha: 0.7),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(
-                color: BAColors.borderOf(context).withOpacity(0.5),
+                color: BAColors.borderOf(context).withValues(alpha: 0.5),
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(
-                color: BAColors.borderOf(context).withOpacity(0.5),
+                color: BAColors.borderOf(context).withValues(alpha: 0.5),
               ),
             ),
             focusedBorder: OutlineInputBorder(
@@ -795,7 +799,7 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
             height: 32,
             decoration: BoxDecoration(
               color: value
-                  ? BAColors.primaryOf(context).withOpacity(0.15)
+                  ? BAColors.primaryOf(context).withValues(alpha: 0.15)
                   : BAColors.surfaceVariantOf(context),
               borderRadius: BorderRadius.circular(8),
             ),

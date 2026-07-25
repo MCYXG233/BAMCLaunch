@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../auth/auth_manager.dart';
@@ -362,7 +362,7 @@ class _LoginPageState extends State<LoginPage> {
           width: 120,
           height: 120,
           decoration: BoxDecoration(
-            color: BAColors.primary.withOpacity(0.1),
+            color: BAColors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(32),
           ),
           child: Icon(Icons.sports_esports, size: 64, color: BAColors.primary),

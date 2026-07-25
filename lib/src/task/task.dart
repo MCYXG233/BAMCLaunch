@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'task_status.dart';
 import 'task_progress.dart';
 import 'task_context.dart';

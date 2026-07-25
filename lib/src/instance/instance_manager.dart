@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'dart:convert';
 import 'dart:math';
 import 'package:archive/archive.dart' as archive;
@@ -14,7 +14,7 @@ import '../di/service_locator.dart';
 ///
 /// 该类是一个单例类，负责管理 Minecraft 游戏的目录、实例和资源。
 /// 主要职责包括：
-/// - 管理游戏目录（GameDirectory）的增删改查
+/// - 管理游戏目录（InstanceDirectory）的增删改查
 /// - 管理游戏实例（GameInstance）的增删改查
 /// - 管理实例资源的导入导出
 /// - 自动检测系统中的 Minecraft 安装目录
@@ -69,7 +69,7 @@ class InstanceManager {
   final ConfigManager _config = ConfigManager.instance;
 
   /// 游戏目录列表
-  List<GameDirectory> _directories = [];
+  List<InstanceDirectory> _directories = [];
 
   /// 游戏实例列表
   List<GameInstance> _instances = [];
@@ -108,7 +108,7 @@ class InstanceManager {
   bool get isInitialized => _isInitialized;
 
   /// 获取所有游戏目录（不可修改的列表）
-  List<GameDirectory> get directories => List.unmodifiable(_directories);
+  List<InstanceDirectory> get directories => List.unmodifiable(_directories);
 
   /// 获取所有游戏实例（不可修改的列表）
   List<GameInstance> get instances => List.unmodifiable(_instances);
@@ -128,7 +128,7 @@ class InstanceManager {
   ///
   /// 异常：
   /// - [StateError]：当选中的目录ID无效且目录列表为空时抛出
-  GameDirectory? get selectedDirectory {
+  InstanceDirectory? get selectedDirectory {
     if (_selectedDirectoryId == null)
       return _directories.isNotEmpty ? _directories.first : null;
     try {
@@ -278,7 +278,7 @@ class InstanceManager {
           // 检查该目录是否已经存在
           final existingDir = _directories.firstWhere(
             (d) => d.path == candidatePath,
-            orElse: () => GameDirectory(
+            orElse: () => InstanceDirectory(
               id: '',
               name: '',
               path: '',
@@ -381,7 +381,7 @@ class InstanceManager {
   /// 从配置文件加载目录列表
   ///
   /// 该方法会从配置管理器中读取保存的目录数据，
-  /// 并将其反序列化为 [GameDirectory] 对象列表。
+  /// 并将其反序列化为 [InstanceDirectory] 对象列表。
   ///
   /// 如果加载失败，会清空目录列表并记录错误日志。
   Future<void> _loadDirectories() async {
@@ -389,7 +389,7 @@ class InstanceManager {
       final raw = _config.get<List<dynamic>>(_directoriesKey);
       if (raw != null) {
         _directories = raw
-            .map((e) => GameDirectory.fromJson(e as Map<String, dynamic>))
+            .map((e) => InstanceDirectory.fromJson(e as Map<String, dynamic>))
             .toList();
       } else {
         _directories = [];
@@ -492,7 +492,7 @@ class InstanceManager {
   /// - [path]：目录的文件系统路径
   ///
   /// 返回值：
-  /// - 返回新创建的 [GameDirectory] 对象
+  /// - 返回新创建的 [InstanceDirectory] 对象
   ///
   /// 注意：
   /// - 如果这是第一个创建的目录，会自动将其设为选中状态
@@ -506,7 +506,7 @@ class InstanceManager {
   /// );
   /// print('创建的目录ID: ${directory.id}');
   /// ```
-  Future<GameDirectory> createDirectory({
+  Future<InstanceDirectory> createDirectory({
     required String name,
     required String path,
   }) async {
@@ -515,7 +515,7 @@ class InstanceManager {
     final now = DateTime.now();
 
     // 创建目录对象
-    final directory = GameDirectory(
+    final directory = InstanceDirectory(
       id: id,
       name: name,
       path: path,
@@ -545,7 +545,7 @@ class InstanceManager {
   /// - [path]：新的目录路径（可选）
   ///
   /// 返回值：
-  /// - 返回更新后的 [GameDirectory] 对象
+  /// - 返回更新后的 [InstanceDirectory] 对象
   ///
   /// 异常：
   /// - [ArgumentError]：如果指定的目录ID不存在
@@ -557,7 +557,7 @@ class InstanceManager {
   ///   name: '新名称',
   /// );
   /// ```
-  Future<GameDirectory> updateDirectory({
+  Future<InstanceDirectory> updateDirectory({
     required String id,
     String? name,
     String? path,

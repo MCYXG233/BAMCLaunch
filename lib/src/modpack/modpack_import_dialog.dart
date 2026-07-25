@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../ui/theme/colors.dart';
@@ -182,7 +182,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
           borderRadius: const BorderRadius.all(Radius.circular(12)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               blurRadius: 12,
               spreadRadius: 2,
               offset: const Offset(0, 4),
@@ -210,7 +210,7 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: BAColors.primaryOf(context).withOpacity(0.1),
+        color: BAColors.primaryOf(context).withValues(alpha: 0.1),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(12),
           topRight: Radius.circular(12),
@@ -288,10 +288,10 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: BAColors.dangerOf(context).withOpacity(0.1),
+                color: BAColors.dangerOf(context).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: BAColors.dangerOf(context).withOpacity(0.3),
+                  color: BAColors.dangerOf(context).withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
@@ -400,10 +400,10 @@ class _ModpackImportDialogState extends State<ModpackImportDialog> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: BAColors.dangerOf(context).withOpacity(0.1),
+                color: BAColors.dangerOf(context).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: BAColors.dangerOf(context).withOpacity(0.3),
+                  color: BAColors.dangerOf(context).withValues(alpha: 0.3),
                 ),
               ),
               child: Row(

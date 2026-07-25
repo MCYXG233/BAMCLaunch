@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'dart:math';
 
@@ -139,8 +139,8 @@ class _BACharacterDisplayState extends State<BACharacterDisplay>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF7EB5F6).withOpacity(0.3),
-            const Color(0xFFB8A4FF).withOpacity(0.3),
+            const Color(0xFF7EB5F6).withValues(alpha: 0.3),
+            const Color(0xFFB8A4FF).withValues(alpha: 0.3),
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -162,7 +162,7 @@ class _BACharacterDisplayState extends State<BACharacterDisplay>
               borderRadius: BorderRadius.circular(60),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF7EB5F6).withOpacity(0.5),
+                  color: const Color(0xFF7EB5F6).withValues(alpha: 0.5),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),

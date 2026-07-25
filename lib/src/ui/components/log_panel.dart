@@ -221,7 +221,9 @@ class _LogPanelState extends State<LogPanel> {
       decoration: BoxDecoration(
         color: BAColors.backgroundSecondaryOf(context),
         borderRadius: BorderRadius.circular(BAThemeData.radius),
-        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.3)),
+        border: Border.all(
+          color: BAColors.borderOf(context).withValues(alpha: 0.3),
+        ),
       ),
       child: Column(
         children: [
@@ -241,7 +243,7 @@ class _LogPanelState extends State<LogPanel> {
         color: BAColors.surfaceOf(context),
         border: Border(
           bottom: BorderSide(
-            color: BAColors.borderOf(context).withOpacity(0.3),
+            color: BAColors.borderOf(context).withValues(alpha: 0.3),
           ),
         ),
       ),
@@ -262,7 +264,7 @@ class _LogPanelState extends State<LogPanel> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: BAColors.warningOf(context).withOpacity(0.15),
+                color: BAColors.warningOf(context).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Row(
@@ -331,10 +333,10 @@ class _LogPanelState extends State<LogPanel> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context).withOpacity(0.5),
+        color: BAColors.surfaceOf(context).withValues(alpha: 0.5),
         border: Border(
           bottom: BorderSide(
-            color: BAColors.borderOf(context).withOpacity(0.2),
+            color: BAColors.borderOf(context).withValues(alpha: 0.2),
           ),
         ),
       ),
@@ -347,7 +349,7 @@ class _LogPanelState extends State<LogPanel> {
                 color: BAColors.surfaceVariantOf(context),
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(
-                  color: BAColors.borderOf(context).withOpacity(0.3),
+                  color: BAColors.borderOf(context).withValues(alpha: 0.3),
                 ),
               ),
               child: TextField(
@@ -409,13 +411,13 @@ class _LogPanelState extends State<LogPanel> {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: isSelected
-              ? BAColors.primaryOf(context).withOpacity(0.15)
+              ? BAColors.primaryOf(context).withValues(alpha: 0.15)
               : BAColors.surfaceVariantOf(context),
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
             color: isSelected
-                ? BAColors.primaryOf(context).withOpacity(0.4)
-                : BAColors.borderOf(context).withOpacity(0.3),
+                ? BAColors.primaryOf(context).withValues(alpha: 0.4)
+                : BAColors.borderOf(context).withValues(alpha: 0.3),
           ),
         ),
         child: Text(
@@ -507,7 +509,9 @@ class _LogPanelState extends State<LogPanel> {
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         border: Border(
-          top: BorderSide(color: BAColors.borderOf(context).withOpacity(0.3)),
+          top: BorderSide(
+            color: BAColors.borderOf(context).withValues(alpha: 0.3),
+          ),
         ),
       ),
       child: Row(
@@ -548,7 +552,7 @@ class _LogPanelState extends State<LogPanel> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: BAColors.primaryOf(context).withOpacity(0.1),
+                color: BAColors.primaryOf(context).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(3),
               ),
               child: Text(

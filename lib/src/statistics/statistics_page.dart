@@ -168,7 +168,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
+        border: Border.all(
+          color: BAColors.borderOf(context).withValues(alpha: 0.5),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,7 +220,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
+        border: Border.all(
+          color: BAColors.borderOf(context).withValues(alpha: 0.5),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,7 +263,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: BAColors.borderOf(context).withOpacity(0.5)),
+        border: Border.all(
+          color: BAColors.borderOf(context).withValues(alpha: 0.5),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -348,11 +354,11 @@ class _StatisticsPageState extends State<StatisticsPage> {
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: rank <= 3
-            ? rankColor.withOpacity(0.1)
-            : BAColors.surfaceVariantOf(context).withOpacity(0.3),
+            ? rankColor.withValues(alpha: 0.1)
+            : BAColors.surfaceVariantOf(context).withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(8),
         border: rank <= 3
-            ? Border.all(color: rankColor.withOpacity(0.3))
+            ? Border.all(color: rankColor.withValues(alpha: 0.3))
             : null,
       ),
       child: Row(

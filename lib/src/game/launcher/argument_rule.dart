@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 /// 操作系统类型
 enum OSType { windows, linux, osx }

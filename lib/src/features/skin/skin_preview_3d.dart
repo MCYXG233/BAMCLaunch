@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -406,14 +406,14 @@ class _SkinPainter extends CustomPainter {
   void _drawBackground(Canvas canvas, Size size) {
     // 绘制背景填充色
     final paint = Paint()
-      ..color = const Color(0xFF1a1a2e).withOpacity(0.3)
+      ..color = const Color(0xFF1a1a2e).withValues(alpha: 0.3)
       ..style = PaintingStyle.fill;
 
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
 
     // 绘制网格线，增强空间感
     final gridPaint = Paint()
-      ..color = const Color(0xFF3d3d5c).withOpacity(0.5)
+      ..color = const Color(0xFF3d3d5c).withValues(alpha: 0.5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.5;
 

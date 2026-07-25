@@ -334,12 +334,14 @@ class _MacOSWindowControlButtonState extends State<_MacOSWindowControlButton> {
           width: 12,
           height: 12,
           decoration: BoxDecoration(
-            color: _isHovered ? widget.color : widget.color.withOpacity(0.6),
+            color: _isHovered
+                ? widget.color
+                : widget.color.withValues(alpha: 0.6),
             shape: BoxShape.circle,
             boxShadow: _isPressed
                 ? [
                     BoxShadow(
-                      color: widget.color.withOpacity(0.5),
+                      color: widget.color.withValues(alpha: 0.5),
                       blurRadius: 4,
                       spreadRadius: 1,
                     ),

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 /// Minecraft风格配色方案
 ///
@@ -315,23 +315,23 @@ class MCThemeColors {
   // ==================== 毛玻璃效果 ====================
 
   /// 轻量毛玻璃效果色
-  static Color get frostedGlassLight => surface.withOpacity(0.35);
+  static Color get frostedGlassLight => surface.withValues(alpha: 0.35);
 
   /// 中等毛玻璃效果色
-  static Color get frostedGlassMedium => surface.withOpacity(0.25);
+  static Color get frostedGlassMedium => surface.withValues(alpha: 0.25);
 
   /// 重度毛玻璃效果色
-  static Color get frostedGlassHeavy => surface.withOpacity(0.15);
+  static Color get frostedGlassHeavy => surface.withValues(alpha: 0.15);
 
   /// 标准毛玻璃效果色
-  static Color get frostedGlass => surface.withOpacity(0.30);
+  static Color get frostedGlass => surface.withValues(alpha: 0.30);
 
   // ==================== 阴影效果 ====================
 
   /// 卡片阴影
   static List<BoxShadow> get cardShadow => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.04),
+      color: Colors.black.withValues(alpha: 0.04),
       blurRadius: 24,
       offset: const Offset(0, 6),
     ),
@@ -340,7 +340,7 @@ class MCThemeColors {
   /// 卡片悬停阴影
   static List<BoxShadow> get cardShadowHover => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.08),
+      color: Colors.black.withValues(alpha: 0.08),
       blurRadius: 32,
       offset: const Offset(0, 10),
     ),
@@ -349,7 +349,7 @@ class MCThemeColors {
   /// 发光阴影（蓝色）
   static List<BoxShadow> get glowShadow => [
     BoxShadow(
-      color: primary.withOpacity(0.25),
+      color: primary.withValues(alpha: 0.25),
       blurRadius: 20,
       offset: const Offset(0, 4),
     ),
@@ -358,7 +358,7 @@ class MCThemeColors {
   /// 发光阴影（草绿色）
   static List<BoxShadow> get glowShadowGreen => [
     BoxShadow(
-      color: secondary.withOpacity(0.25),
+      color: secondary.withValues(alpha: 0.25),
       blurRadius: 20,
       offset: const Offset(0, 4),
     ),
@@ -367,7 +367,7 @@ class MCThemeColors {
   /// 发光阴影（金色）
   static List<BoxShadow> get glowShadowGold => [
     BoxShadow(
-      color: gold.withOpacity(0.25),
+      color: gold.withValues(alpha: 0.25),
       blurRadius: 20,
       offset: const Offset(0, 4),
     ),
@@ -484,16 +484,16 @@ class MCThemeColorsDark {
   // ==================== 毛玻璃效果（深色模式） ====================
 
   /// 轻量毛玻璃效果色（深色模式）
-  static Color get frostedGlassLight => surface.withOpacity(0.35);
+  static Color get frostedGlassLight => surface.withValues(alpha: 0.35);
 
   /// 中等毛玻璃效果色（深色模式）
-  static Color get frostedGlassMedium => surface.withOpacity(0.25);
+  static Color get frostedGlassMedium => surface.withValues(alpha: 0.25);
 
   /// 重度毛玻璃效果色（深色模式）
-  static Color get frostedGlassHeavy => surface.withOpacity(0.15);
+  static Color get frostedGlassHeavy => surface.withValues(alpha: 0.15);
 
   /// 标准毛玻璃效果色（深色模式）
-  static Color get frostedGlass => surface.withOpacity(0.30);
+  static Color get frostedGlass => surface.withValues(alpha: 0.30);
 }
 
 /// Minecraft 风格的尺寸、间距、动画配置

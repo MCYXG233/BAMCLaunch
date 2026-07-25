@@ -1,4 +1,4 @@
-class LogIssue {
+﻿class LogIssue {
   final String severity;
   final String message;
   final String? suggestion;

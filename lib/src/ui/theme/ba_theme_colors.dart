@@ -256,23 +256,23 @@ class BAThemeColors {
   ///
   /// 用于轻量级毛玻璃效果的颜色（表面色35%不透明度）。
   /// 蔚蓝档案风格常用半透明效果营造层次感。
-  static Color get frostedGlassLight => surface.withOpacity(0.35);
+  static Color get frostedGlassLight => surface.withValues(alpha: 0.35);
 
   /// 中等毛玻璃效果色
   ///
   /// 用于中等强度毛玻璃效果的颜色（表面色25%不透明度）。
-  static Color get frostedGlassMedium => surface.withOpacity(0.25);
+  static Color get frostedGlassMedium => surface.withValues(alpha: 0.25);
 
   /// 重度毛玻璃效果色
   ///
   /// 用于重度毛玻璃效果的颜色（表面色15%不透明度）。
   /// 更透明的效果，用于需要更多底层内容透出的场景。
-  static Color get frostedGlassHeavy => surface.withOpacity(0.15);
+  static Color get frostedGlassHeavy => surface.withValues(alpha: 0.15);
 
   /// 标准毛玻璃效果色
   ///
   /// 用于标准毛玻璃效果的颜色（表面色30%不透明度）。
-  static Color get frostedGlass => surface.withOpacity(0.30);
+  static Color get frostedGlass => surface.withValues(alpha: 0.30);
 
   // ==================== 阴影效果 ====================
 
@@ -283,7 +283,7 @@ class BAThemeColors {
   /// 用于卡片、面板等组件的浮起效果。
   static List<BoxShadow> get cardShadow => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.04),
+      color: Colors.black.withValues(alpha: 0.04),
       blurRadius: 24,
       offset: const Offset(0, 6),
     ),
@@ -295,7 +295,7 @@ class BAThemeColors {
   /// 当用户悬停在卡片上时，阴影会变得更明显，提供交互反馈。
   static List<BoxShadow> get cardShadowHover => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.08),
+      color: Colors.black.withValues(alpha: 0.08),
       blurRadius: 32,
       offset: const Offset(0, 10),
     ),
@@ -307,7 +307,7 @@ class BAThemeColors {
   /// 用于需要强调或突出显示的元素，如选中项、焦点元素等。
   static List<BoxShadow> get glowShadow => [
     BoxShadow(
-      color: primary.withOpacity(0.25),
+      color: primary.withValues(alpha: 0.25),
       blurRadius: 20,
       offset: const Offset(0, 4),
     ),
@@ -319,7 +319,7 @@ class BAThemeColors {
   /// 用于需要粉色强调的特殊元素。
   static List<BoxShadow> get glowShadowPink => [
     BoxShadow(
-      color: secondary.withOpacity(0.25),
+      color: secondary.withValues(alpha: 0.25),
       blurRadius: 20,
       offset: const Offset(0, 4),
     ),
@@ -539,13 +539,13 @@ class BABadgeStyle {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: isSelected
-            ? BAThemeColors.primary.withOpacity(0.12)
+            ? BAThemeColors.primary.withValues(alpha: 0.12)
             : BAThemeColors.surfaceVariant,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isSelected
-              ? BAThemeColors.primary.withOpacity(0.4)
-              : BAThemeColors.border.withOpacity(0.5),
+              ? BAThemeColors.primary.withValues(alpha: 0.4)
+              : BAThemeColors.border.withValues(alpha: 0.5),
         ),
       ),
       child: Text(
@@ -589,9 +589,9 @@ class BACardStyle {
   /// 返回一个带有毛玻璃效果的 [BoxDecoration]。
   /// 包含半透明背景、圆角和细边框。
   static BoxDecoration get frostedGlass => BoxDecoration(
-    color: BAThemeColors.surface.withOpacity(0.25),
+    color: BAThemeColors.surface.withValues(alpha: 0.25),
     borderRadius: BorderRadius.circular(BAThemeData.radiusLarge),
-    border: Border.all(color: BAThemeColors.border.withOpacity(0.15)),
+    border: Border.all(color: BAThemeColors.border.withValues(alpha: 0.15)),
   );
 
   /// 卡片装饰
@@ -603,9 +603,12 @@ class BACardStyle {
   ///
   /// 返回：包含背景色、圆角和边框的装饰对象
   static BoxDecoration cardDecoration({double? opacity}) => BoxDecoration(
-    color: BAThemeColors.surface.withOpacity(opacity ?? 0.35),
+    color: BAThemeColors.surface.withValues(alpha: opacity ?? 0.35),
     borderRadius: BorderRadius.circular(BAThemeData.radiusLarge),
-    border: Border.all(color: BAThemeColors.border.withOpacity(0.15), width: 1),
+    border: Border.all(
+      color: BAThemeColors.border.withValues(alpha: 0.15),
+      width: 1,
+    ),
   );
 }
 
@@ -633,16 +636,18 @@ class BAInputStyle {
       hintText: hintText,
       hintStyle: TextStyle(color: BAThemeColors.textDisabled),
       filled: true,
-      fillColor: BAThemeColors.surface.withOpacity(0.7),
+      fillColor: BAThemeColors.surface.withValues(alpha: 0.7),
       contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(BAThemeData.radius),
-        borderSide: BorderSide(color: BAThemeColors.border.withOpacity(0.4)),
+        borderSide: BorderSide(
+          color: BAThemeColors.border.withValues(alpha: 0.4),
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(BAThemeData.radius),
         borderSide: BorderSide(
-          color: BAThemeColors.primary.withOpacity(0.4),
+          color: BAThemeColors.primary.withValues(alpha: 0.4),
           width: 1.5,
         ),
       ),

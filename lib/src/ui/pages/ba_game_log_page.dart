@@ -508,12 +508,12 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
         color: BAColors.surfaceOf(context),
         border: Border(
           bottom: BorderSide(
-            color: BAColors.borderOf(context).withOpacity(0.4),
+            color: BAColors.borderOf(context).withValues(alpha: 0.4),
           ),
         ),
         boxShadow: [
           BoxShadow(
-            color: BAColors.primaryOf(context).withOpacity(0.05),
+            color: BAColors.primaryOf(context).withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -535,7 +535,7 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: BAColors.primaryOf(context).withOpacity(0.3),
+                  color: BAColors.primaryOf(context).withValues(alpha: 0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -556,10 +556,10 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: _statusColor(context, _status).withOpacity(0.15),
+              color: _statusColor(context, _status).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: _statusColor(context, _status).withOpacity(0.4),
+                color: _statusColor(context, _status).withValues(alpha: 0.4),
               ),
             ),
             child: Row(
@@ -616,10 +616,10 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
-        color: BAColors.surfaceOf(context).withOpacity(0.6),
+        color: BAColors.surfaceOf(context).withValues(alpha: 0.6),
         border: Border(
           bottom: BorderSide(
-            color: BAColors.borderOf(context).withOpacity(0.3),
+            color: BAColors.borderOf(context).withValues(alpha: 0.3),
           ),
         ),
       ),
@@ -742,13 +742,13 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
         decoration: BoxDecoration(
           color: isSelected
-              ? BAColors.primaryOf(context).withOpacity(0.15)
+              ? BAColors.primaryOf(context).withValues(alpha: 0.15)
               : BAColors.surfaceVariantOf(context),
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
             color: isSelected
                 ? BAColors.primaryOf(context)
-                : BAColors.borderOf(context).withOpacity(0.5),
+                : BAColors.borderOf(context).withValues(alpha: 0.5),
           ),
         ),
         child: Text(
@@ -845,7 +845,9 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         border: Border(
-          top: BorderSide(color: BAColors.borderOf(context).withOpacity(0.4)),
+          top: BorderSide(
+            color: BAColors.borderOf(context).withValues(alpha: 0.4),
+          ),
         ),
       ),
       child: Row(

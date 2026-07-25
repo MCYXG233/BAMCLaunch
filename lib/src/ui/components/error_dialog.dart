@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
-import '../theme/app_theme.dart';
 import '../../core/error_codes.dart';
 import 'ba_buttons.dart';
 import 'ba_dialog.dart';
@@ -98,10 +97,10 @@ class ErrorDialog extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: BAColors.primaryOf(context).withOpacity(0.1),
+                color: BAColors.primaryOf(context).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: BAColors.primaryOf(context).withOpacity(0.3),
+                  color: BAColors.primaryOf(context).withValues(alpha: 0.3),
                 ),
               ),
               child: Row(

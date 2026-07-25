@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../auth/auth_manager.dart';
@@ -457,7 +457,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: isSelected
-                ? BAColors.primaryOf(context).withOpacity(0.2)
+                ? BAColors.primaryOf(context).withValues(alpha: 0.2)
                 : BAColors.surfaceVariantOf(context),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
@@ -586,7 +586,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: BAColors.primaryOf(context).withOpacity(0.15),
+                  color: BAColors.primaryOf(context).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -689,7 +689,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: BAColors.secondaryOf(context).withOpacity(0.15),
+                  color: BAColors.secondaryOf(context).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -832,10 +832,10 @@ class _BALoginDialogState extends State<BALoginDialog> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: BAColors.dangerOf(context).withOpacity(0.1),
+                color: BAColors.dangerOf(context).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: BAColors.dangerOf(context).withOpacity(0.3),
+                  color: BAColors.dangerOf(context).withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
@@ -1027,7 +1027,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: BAColors.primaryOf(context).withOpacity(0.1),
+            color: BAColors.primaryOf(context).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: BAColors.primaryOf(context)),
           ),
@@ -1112,7 +1112,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
           width: 64,
           height: 64,
           decoration: BoxDecoration(
-            color: BAColors.successOf(context).withOpacity(0.2),
+            color: BAColors.successOf(context).withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
           child: Icon(
@@ -1143,7 +1143,7 @@ class _BALoginDialogState extends State<BALoginDialog> {
           width: 64,
           height: 64,
           decoration: BoxDecoration(
-            color: BAColors.dangerOf(context).withOpacity(0.2),
+            color: BAColors.dangerOf(context).withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
           child: Icon(
@@ -1214,8 +1214,8 @@ class _AccountTile extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: account.type == AccountType.microsoft
-                    ? BAColors.primaryOf(context).withOpacity(0.15)
-                    : BAColors.secondaryOf(context).withOpacity(0.15),
+                    ? BAColors.primaryOf(context).withValues(alpha: 0.15)
+                    : BAColors.secondaryOf(context).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
