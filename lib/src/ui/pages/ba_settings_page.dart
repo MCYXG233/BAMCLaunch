@@ -14,14 +14,15 @@ import '../../platform/platform_adapter_factory.dart';
 import '../../updater/update_manager.dart';
 import '../animations/ba_animations.dart';
 import '../animations/ba_effects.dart';
-import '../components/ba_background_selector.dart';
 import '../components/ba_notification.dart';
-import '../components/color_picker_panel.dart';
 import '../theme/background_manager.dart';
 import '../theme/colors.dart';
 import '../theme/theme_manager.dart';
 import 'settings/about_settings_page.dart';
+import 'settings/background_settings_page.dart';
 import 'settings/backup_settings_page.dart';
+import 'settings/game_settings_page.dart';
+import 'settings/general_settings_page.dart';
 import 'settings/settings_components.dart';
 import 'settings/statistics_settings_page.dart';
 
@@ -810,17 +811,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
     }
   }
 
-  String _themeModeDisplayName(String mode) {
-    switch (mode) {
-      case 'light':
-        return '浅色';
-      case 'system':
-        return '跟随系统';
-      default:
-        return '深色';
-    }
-  }
-
   String _downloadSourceDisplayName(String source) {
     switch (source) {
       case 'mirror':
@@ -1116,431 +1106,72 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
     switch (_selectedCategory) {
       case 'general':
-        return _buildGeneralSettings();
+        return GeneralSettingsPage(
+          themeManagerInitialized: _themeManagerInitialized,
+          language: _language,
+          themeMode: _themeMode,
+          autoUpdate: _autoUpdate,
+          launchAtStartup: _launchAtStartup,
+          minimizeToTray: _minimizeToTray,
+          closeToTray: _closeToTray,
+          isCheckingUpdate: _isCheckingUpdate,
+          themeManager: _themeManager,
+          onLanguageChanged: _saveLanguage,
+          onThemeModeChanged: (mode) => _saveThemeMode(mode, _themeManager),
+          onAutoUpdateChanged: _saveAutoUpdate,
+          onLaunchAtStartupChanged: _saveLaunchAtStartup,
+          onMinimizeToTrayChanged: _saveMinimizeToTray,
+          onCloseToTrayChanged: _saveCloseToTray,
+          onCheckUpdate: _checkForUpdate,
+        );
       case 'background':
-        return _buildBackgroundSettings();
+        return BackgroundSettingsPage(
+          backgroundConfig: _backgroundConfig,
+          onConfigChanged: (config) =>
+              setState(() => _backgroundConfig = config),
+        );
       case 'backup':
         return const BackupSettingsPage();
       case 'statistics':
         return const StatisticsSettingsPage();
       case 'game':
-        return _buildGameSettings();
+        return GameSettingsPage(
+          gameDirectory: _gameDirectory,
+          javaPath: _javaPath,
+          memoryAllocation: _memoryAllocation,
+          gameWindowSize: _gameWindowSize,
+          initialJvmArgs: _jvmArgsController.text,
+          initialGameArgs: _gameArgsController.text,
+          onPickGameDirectory: _pickGameDirectory,
+          onPickJavaPath: _pickJavaPath,
+          onMemoryAllocationChanged: _saveMemoryAllocation,
+          onMemoryAllocationCommitted: _commitMemoryAllocation,
+          onGameWindowSizeChanged: _saveGameWindowSize,
+        );
       case 'download':
         return _buildDownloadSettings();
       case 'about':
         return AboutSettingsPage(appVersionDisplay: _appVersionDisplay);
       default:
-        return _buildGeneralSettings();
+        return GeneralSettingsPage(
+          themeManagerInitialized: _themeManagerInitialized,
+          language: _language,
+          themeMode: _themeMode,
+          autoUpdate: _autoUpdate,
+          launchAtStartup: _launchAtStartup,
+          minimizeToTray: _minimizeToTray,
+          closeToTray: _closeToTray,
+          isCheckingUpdate: _isCheckingUpdate,
+          themeManager: _themeManager,
+          onLanguageChanged: _saveLanguage,
+          onThemeModeChanged: (mode) => _saveThemeMode(mode, _themeManager),
+          onAutoUpdateChanged: _saveAutoUpdate,
+          onLaunchAtStartupChanged: _saveLaunchAtStartup,
+          onMinimizeToTrayChanged: _saveMinimizeToTray,
+          onCloseToTrayChanged: _saveCloseToTray,
+          onCheckUpdate: _checkForUpdate,
+        );
     }
-  }
-
-  Widget _buildBackgroundSettings() {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-      children: [
-        SettingsCard(
-          title: '背景设置',
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: BABackgroundSelector(
-                currentConfig: _backgroundConfig,
-                onConfigChanged: (config) async {
-                  await _backgroundManager.saveBackgroundConfig(config);
-                  setState(() {
-                    _backgroundConfig = config;
-                  });
-                  NotificationManager().showSuccess('背景设置已保存');
-                },
-                onPickImage: () async {
-                  final result = await FilePicker.platform.pickFiles(
-                    type: FileType.image,
-                    allowMultiple: false,
-                  );
-                  if (result != null && result.files.isNotEmpty) {
-                    final file = result.files.first;
-                    if (file.path != null) {
-                      final customConfig = BackgroundConfig(
-                        type: BackgroundType.image,
-                        imagePath: file.path,
-                        blur: _backgroundConfig.blur,
-                        opacity: _backgroundConfig.opacity,
-                      );
-                      await _backgroundManager.saveBackgroundConfig(
-                        customConfig,
-                      );
-                      setState(() {
-                        _backgroundConfig = customConfig;
-                      });
-                      NotificationManager().showSuccess('已选择图片: ${file.name}');
-                    }
-                  }
-                },
-                onPickVideo: () async {
-                  final result = await FilePicker.platform.pickFiles(
-                    type: FileType.custom,
-                    allowedExtensions: ['mp4', 'avi', 'mov', 'mkv'],
-                    allowMultiple: false,
-                  );
-                  if (result != null && result.files.isNotEmpty) {
-                    final file = result.files.first;
-                    if (file.path != null) {
-                      final customConfig = BackgroundConfig(
-                        type: BackgroundType.video,
-                        videoPath: file.path,
-                        blur: _backgroundConfig.blur,
-                        opacity: _backgroundConfig.opacity,
-                      );
-                      await _backgroundManager.saveBackgroundConfig(
-                        customConfig,
-                      );
-                      setState(() {
-                        _backgroundConfig = customConfig;
-                      });
-                      NotificationManager().showSuccess('已选择视频: ${file.name}');
-                    }
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGeneralSettings() {
-    if (!_themeManagerInitialized) {
-      return Center(
-        child: CircularProgressIndicator(color: BAColors.primaryOf(context)),
-      );
-    }
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-      children: [
-        SettingsCard(
-          title: '外观',
-          children: [
-            SettingsRow(
-              icon: Icons.language,
-              title: '语言',
-              subtitle: _language,
-              control: SettingsDropdown<String>(
-                value: _language,
-                items: const [
-                  DropdownMenuItem(value: '简体中文', child: Text('简体中文')),
-                  DropdownMenuItem(value: 'English', child: Text('English')),
-                ],
-                onChanged: (value) {
-                  if (value != null) _saveLanguage(value);
-                },
-              ),
-            ),
-            SettingsRow(
-              icon: Icons.palette,
-              title: '主题',
-              subtitle: _themeModeDisplayName(_themeMode),
-              control: SettingsDropdown<String>(
-                value: _themeMode,
-                items: const [
-                  DropdownMenuItem(value: 'dark', child: Text('深色')),
-                  DropdownMenuItem(value: 'light', child: Text('浅色')),
-                  DropdownMenuItem(value: 'system', child: Text('跟随系统')),
-                ],
-                onChanged: (value) {
-                  if (value != null) _saveThemeMode(value, _themeManager);
-                },
-              ),
-            ),
-            SettingsRow(
-              icon: Icons.style,
-              title: '主题风格',
-              subtitle: _themeManager.isBlueArchive ? '蔚蓝档案' : 'Minecraft',
-              control: SettingsDropdown<String>(
-                value: _themeManager.isBlueArchive
-                    ? 'blue_archive'
-                    : 'minecraft',
-                items: const [
-                  DropdownMenuItem(value: 'blue_archive', child: Text('蔚蓝档案')),
-                  DropdownMenuItem(
-                    value: 'minecraft',
-                    child: Text('Minecraft'),
-                  ),
-                ],
-                onChanged: (value) async {
-                  if (value == null) return;
-                  if (value == 'blue_archive') {
-                    await _themeManager.setBlueArchiveTheme();
-                  } else {
-                    await _themeManager.setMinecraftTheme();
-                  }
-                  NotificationManager().showSuccess('主题风格已切换');
-                },
-              ),
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ColorPickerPanel(
-                themeKey: _themeManager.isBlueArchive
-                    ? 'blue_archive'
-                    : 'minecraft',
-                brightness: Theme.of(context).brightness == Brightness.light
-                    ? Brightness.light
-                    : Brightness.dark,
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-        SettingsCard(
-          title: '行为',
-          children: [
-            SettingsRow(
-              icon: Icons.update,
-              title: '自动更新',
-              subtitle: '启动时检查更新',
-              control: SettingsSwitch(
-                value: _autoUpdate,
-                onChanged: _saveAutoUpdate,
-              ),
-            ),
-            SettingsRow(
-              icon: Icons.power_settings_new,
-              title: '开机自启动',
-              subtitle: '系统启动时自动运行',
-              control: SettingsSwitch(
-                value: _launchAtStartup,
-                onChanged: _saveLaunchAtStartup,
-              ),
-            ),
-            SettingsRow(
-              icon: Icons.minimize,
-              title: '最小化到托盘',
-              subtitle: '最小化时隐藏到系统托盘',
-              control: SettingsSwitch(
-                value: _minimizeToTray,
-                onChanged: _saveMinimizeToTray,
-              ),
-            ),
-            SettingsRow(
-              icon: Icons.close_fullscreen,
-              title: '关闭时最小化到托盘',
-              subtitle: '关闭窗口时最小化到系统托盘',
-              control: SettingsSwitch(
-                value: _closeToTray,
-                onChanged: _saveCloseToTray,
-              ),
-            ),
-          ],
-        ),
-        SettingsCard(
-          title: '更新',
-          children: [
-            SettingsRow(
-              icon: Icons.system_update,
-              title: '检查更新',
-              subtitle: _isCheckingUpdate ? '正在检查...' : '手动检查新版本',
-              control: SettingsPrimaryButton(
-                text: _isCheckingUpdate ? '' : '检查',
-                onPressed: _checkForUpdate,
-                isLoading: _isCheckingUpdate,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGameSettings() {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-      children: [
-        SettingsCard(
-          title: '路径设置',
-          children: [
-            SettingsRow(
-              icon: Icons.folder,
-              title: '游戏目录',
-              subtitle: _gameDirectory.isEmpty ? '未设置' : _gameDirectory,
-              control: SettingsPathSelector(
-                path: _gameDirectory,
-                placeholder: '未设置',
-                buttonText: '浏览',
-                onBrowse: _pickGameDirectory,
-              ),
-            ),
-            SettingsRow(
-              icon: Icons.developer_mode,
-              title: 'Java路径',
-              subtitle: _javaPath.isEmpty ? '自动检测' : _javaPath,
-              control: SettingsPrimaryButton(
-                text: '选择',
-                onPressed: _pickJavaPath,
-              ),
-            ),
-          ],
-        ),
-        SettingsCard(
-          title: '性能设置',
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-              child: Builder(
-                builder: (context) {
-                  final isLight =
-                      Theme.of(context).brightness == Brightness.light;
-                  final primaryText = BAColors.textPrimaryOf(context);
-                  final secondaryText = BAColors.textSecondaryOf(context);
-                  final accentBlue = BAColors.primaryLightOf(context);
-                  final inactiveTrack = BAColors.surfaceTertiaryOf(context);
-
-                  return Row(
-                    children: [
-                      BAAnimations.breathe(
-                        isActive: true,
-                        duration: const Duration(milliseconds: 3000),
-                        minOpacity: 0.85,
-                        maxOpacity: 1.0,
-                        glowRadius: 6.0,
-                        glowColor: accentBlue,
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                BAColors.primaryOf(
-                                  context,
-                                ).withValues(alpha: 0.3),
-                                accentBlue.withValues(alpha: 0.15),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: accentBlue.withValues(alpha: 0.25),
-                                blurRadius: 8,
-                                spreadRadius: 0.5,
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            Icons.memory,
-                            color: accentBlue,
-                            size: 18,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '最大内存',
-                              style: TextStyle(
-                                color: primaryText,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              '${_memoryAllocation.toInt()} MB',
-                              style: TextStyle(
-                                color: secondaryText,
-                                fontSize: 12,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            SliderTheme(
-                              data: SliderThemeData(
-                                activeTrackColor: BAColors.primaryOf(context),
-                                inactiveTrackColor: inactiveTrack,
-                                thumbColor: Colors.white,
-                                trackHeight: 4,
-                                thumbShape: const RoundSliderThumbShape(
-                                  enabledThumbRadius: 8,
-                                ),
-                                overlayColor: BAColors.primaryOf(
-                                  context,
-                                ).withValues(alpha: 0.2),
-                              ),
-                              child: Slider(
-                                value: _memoryAllocation,
-                                min: 1024,
-                                max: 16384,
-                                divisions: 15,
-                                label: '${_memoryAllocation.toInt()} MB',
-                                onChanged: _saveMemoryAllocation,
-                                onChangeEnd: _commitMemoryAllocation,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-            SettingsRow(
-              icon: Icons.aspect_ratio,
-              title: '游戏窗口分辨率',
-              subtitle: _gameWindowSize,
-              control: SettingsDropdown<String>(
-                value: _gameWindowSize,
-                items: const [
-                  DropdownMenuItem(value: '800x600', child: Text('800x600')),
-                  DropdownMenuItem(value: '1280x720', child: Text('1280x720')),
-                  DropdownMenuItem(
-                    value: '1920x1080',
-                    child: Text('1920x1080'),
-                  ),
-                  DropdownMenuItem(value: '自定义', child: Text('自定义')),
-                ],
-                onChanged: (value) {
-                  if (value != null) _saveGameWindowSize(value);
-                },
-              ),
-            ),
-          ],
-        ),
-        SettingsCard(
-          title: '高级参数',
-          children: [
-            SettingsRow(
-              icon: Icons.code,
-              title: 'JVM额外参数',
-              subtitle: _jvmArgsController.text.isEmpty
-                  ? '无'
-                  : _jvmArgsController.text,
-              control: SettingsTextField(
-                controller: _jvmArgsController,
-                focusNode: _jvmArgsFocusNode,
-                placeholder: '例如: -XX:+UseG1GC',
-              ),
-            ),
-            SettingsRow(
-              icon: Icons.play_arrow,
-              title: '游戏启动参数',
-              subtitle: _gameArgsController.text.isEmpty
-                  ? '无'
-                  : _gameArgsController.text,
-              control: SettingsTextField(
-                controller: _gameArgsController,
-                focusNode: _gameArgsFocusNode,
-                placeholder: '例如: --fullscreen',
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
   }
 
   Widget _buildDownloadSettings() {
