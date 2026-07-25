@@ -1,9 +1,11 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 import '../../account/account_manager.dart';
 import '../../account/account.dart';
 import '../../core/logger.dart';
+import '../../di/providers.dart';
 import '../../instance/instance_manager.dart';
 import '../../instance/models.dart';
 import '../../game/launcher/game_launcher.dart';
@@ -21,28 +23,32 @@ import 'ba_more_page.dart';
 import '../components/ba_settings_panel.dart';
 import '../components/ba_immersive_home.dart';
 
+/// 主页面 Provider 集合
+///
+/// 本文件内定义的 Provider 仅供 BAMainPage 内部使用，
+/// 跨页面共享状态使用 [selectedInstanceIndexProvider]（在 providers.dart）。
+final currentPageProvider = StateProvider<int>((ref) => 0);
+final selectedAccountNameProvider = StateProvider<String?>((ref) => null);
+final instancesProvider = StateProvider<List<GameInstance>>((ref) => []);
+final isLaunchingProvider = StateProvider<bool>((ref) => false);
+
 /// Minecraft 启动器首页
 ///  - 顶部: 毛玻璃栏 + 窗口控制按钮
 ///  - 中间: 缩放动画页面切换
 ///  - 底部: 毛玻璃导航栏
-class BAMainPage extends StatefulWidget {
+class BAMainPage extends ConsumerStatefulWidget {
   const BAMainPage({super.key});
 
   @override
-  State<BAMainPage> createState() => _BAMainPageState();
+  ConsumerState<BAMainPage> createState() => _BAMainPageState();
 }
 
-class _BAMainPageState extends State<BAMainPage> {
-  int _currentPage = 0;
+class _BAMainPageState extends ConsumerState<BAMainPage> {
   bool _isMaximized = false;
   final BackgroundManager _backgroundManager = BackgroundManager();
 
   final AccountManager _accountManager = AccountManager();
   final InstanceManager _instanceManager = InstanceManager();
-  String? _selectedAccountName;
-  List<GameInstance> _instances = [];
-  int _selectedInstanceIndex = 0;
-  bool _isLaunching = false;
 
   // 游戏统计
   int _instanceCount = 0;
@@ -76,15 +82,12 @@ class _BAMainPageState extends State<BAMainPage> {
     try {
       final selectedAccount = await _accountManager.getSelectedAccount();
       if (mounted) {
-        setState(() {
-          _selectedAccountName = selectedAccount?.username ?? '未登录';
-        });
+        ref.read(selectedAccountNameProvider.notifier).state =
+            selectedAccount?.username ?? '未登录';
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _selectedAccountName = '未登录';
-        });
+        ref.read(selectedAccountNameProvider.notifier).state = '未登录';
       }
     }
   }
@@ -93,9 +96,10 @@ class _BAMainPageState extends State<BAMainPage> {
     try {
       await _instanceManager.initialize();
       if (mounted) {
+        final instances = List<GameInstance>.from(_instanceManager.instances);
+        ref.read(instancesProvider.notifier).state = instances;
         setState(() {
-          _instances = List.from(_instanceManager.instances);
-          _instanceCount = _instances.length;
+          _instanceCount = instances.length;
         });
       }
     } catch (e, st) {
@@ -115,10 +119,13 @@ class _BAMainPageState extends State<BAMainPage> {
   }
 
   Future<void> _launchGame() async {
-    if (_instances.isEmpty || _isLaunching) return;
-    final instance = _instances[_selectedInstanceIndex];
+    final instances = ref.read(instancesProvider);
+    final selectedIndex = ref.read(selectedInstanceIndexProvider);
+    final isLaunching = ref.read(isLaunchingProvider);
+    if (instances.isEmpty || isLaunching) return;
+    final instance = instances[selectedIndex];
 
-    setState(() => _isLaunching = true);
+    ref.read(isLaunchingProvider.notifier).state = true;
 
     try {
       // 获取账号
@@ -171,7 +178,7 @@ class _BAMainPageState extends State<BAMainPage> {
       }
     } finally {
       if (mounted) {
-        setState(() => _isLaunching = false);
+        ref.read(isLaunchingProvider.notifier).state = false;
       }
     }
   }
@@ -227,7 +234,8 @@ class _BAMainPageState extends State<BAMainPage> {
   }
 
   Widget _buildCurrentPage() {
-    switch (_currentPage) {
+    final currentPage = ref.watch(currentPageProvider);
+    switch (currentPage) {
       case 0:
         return _buildHomePage(key: const ValueKey('home'));
       case 1:
@@ -244,14 +252,17 @@ class _BAMainPageState extends State<BAMainPage> {
   }
 
   Widget _buildHomePage({Key? key}) {
+    final instances = ref.watch(instancesProvider);
+    final selectedIndex = ref.watch(selectedInstanceIndexProvider);
+    final isLaunching = ref.watch(isLaunchingProvider);
     return ImmersiveHomePage(
       key: key,
-      instances: _instances,
-      selectedInstanceIndex: _selectedInstanceIndex,
+      instances: instances,
+      selectedInstanceIndex: selectedIndex,
       onInstanceChanged: (index) {
-        setState(() => _selectedInstanceIndex = index);
+        ref.read(selectedInstanceIndexProvider.notifier).state = index;
       },
-      isLaunching: _isLaunching,
+      isLaunching: isLaunching,
       onLaunch: _launchGame,
     );
   }
@@ -357,7 +368,7 @@ class _BAMainPageState extends State<BAMainPage> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      _selectedAccountName ?? '加载中...',
+                      ref.watch(selectedAccountNameProvider) ?? '加载中...',
                       style: TextStyle(
                         color: BAColors.textPrimaryOf(
                           context,
@@ -486,12 +497,13 @@ class _BAMainPageState extends State<BAMainPage> {
   }
 
   Widget _buildNavItem(IconData icon, String label, int index) {
-    final isSelected = _currentPage == index;
+    final currentPage = ref.watch(currentPageProvider);
+    final isSelected = currentPage == index;
     return GestureDetector(
       onTap: () {
         // 切换 tab 时主动取消所有 TextField 焦点，避免 IME 残留
         FocusManager.instance.primaryFocus?.unfocus();
-        setState(() => _currentPage = index);
+        ref.read(currentPageProvider.notifier).state = index;
       },
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
