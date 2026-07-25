@@ -1,3 +1,15 @@
+// 下载任务跟踪视图（用于 UI / 持久化层）
+//
+// 与 `download/download_task.dart` 中的 `DownloadTask`（核心执行类，继承 Task<String>）
+// 职责不同：
+// - `DownloadTask` (download/): 实际下载执行（url/savePath/hash/Task<String> 子类）
+// - `TrackedDownloadTask` (shared/): UI 层的任务跟踪视图（id/request/status/progress/时间戳）
+//
+// ## 引用规则
+//
+// - 业务逻辑层（队列、调度、下载执行）：使用 `download/DownloadTask`
+// - UI 层 / 持久化 / 通知：使用 `TrackedDownloadTask`
+//
 // Re-export canonical types from download/models.dart
 // HashType, DownloadRequest, and DownloadProgress are defined there.
 export '../../download/models.dart'
@@ -9,8 +21,10 @@ import '../../download/models.dart'
 /// 下载任务状态
 enum DownloadStatus { pending, downloading, paused, completed, failed }
 
-/// 下载任务
-class DownloadTask {
+/// 下载任务跟踪视图
+///
+/// UI 层和持久化层使用的"任务跟踪"包装，区别于下载执行类 `DownloadTask`。
+class TrackedDownloadTask {
   final String id;
   final DownloadRequest request;
   final DownloadStatus status;
@@ -21,7 +35,7 @@ class DownloadTask {
   final String? errorMessage;
   final int retryCount;
 
-  DownloadTask({
+  TrackedDownloadTask({
     required this.id,
     required this.request,
     this.status = DownloadStatus.pending,
@@ -33,7 +47,7 @@ class DownloadTask {
     this.retryCount = 0,
   });
 
-  DownloadTask copyWith({
+  TrackedDownloadTask copyWith({
     String? id,
     DownloadRequest? request,
     DownloadStatus? status,
@@ -44,7 +58,7 @@ class DownloadTask {
     String? errorMessage,
     int? retryCount,
   }) {
-    return DownloadTask(
+    return TrackedDownloadTask(
       id: id ?? this.id,
       request: request ?? this.request,
       status: status ?? this.status,
@@ -84,7 +98,7 @@ class DownloadTask {
     };
   }
 
-  factory DownloadTask.fromJson(Map<String, dynamic> json) {
+  factory TrackedDownloadTask.fromJson(Map<String, dynamic> json) {
     final requestJson = json['request'] as Map<String, dynamic>;
     final request = DownloadRequest(
       url: requestJson['url'] as String,
@@ -110,7 +124,7 @@ class DownloadTask {
       );
     }
 
-    return DownloadTask(
+    return TrackedDownloadTask(
       id: json['id'] as String,
       request: request,
       status: DownloadStatus.values.firstWhere(

@@ -24,15 +24,21 @@ enum ResourceType {
   dataPack,
 }
 
-/// 游戏目录
-class GameDirectory {
+/// 游戏目录（实例域）
+///
+/// 与 `config/config_models.dart` 中的 `GameDirectory`（配置条目）语义不同：
+/// - `GameDirectory` (config/): 轻量配置条目（仅 `dir` + `name`）
+/// - `InstanceDirectory` (instance/): 运行时目录元数据（id + name + path + 时间戳）
+///
+/// 本类是 instance 模块的权威定义。
+class InstanceDirectory {
   final String id;
   final String name;
   final String path;
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  GameDirectory({
+  InstanceDirectory({
     required this.id,
     required this.name,
     required this.path,
@@ -40,14 +46,14 @@ class GameDirectory {
     required this.updatedAt,
   });
 
-  GameDirectory copyWith({
+  InstanceDirectory copyWith({
     String? id,
     String? name,
     String? path,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
-    return GameDirectory(
+    return InstanceDirectory(
       id: id ?? this.id,
       name: name ?? this.name,
       path: path ?? this.path,
@@ -66,8 +72,8 @@ class GameDirectory {
     };
   }
 
-  factory GameDirectory.fromJson(Map<String, dynamic> json) {
-    return GameDirectory(
+  factory InstanceDirectory.fromJson(Map<String, dynamic> json) {
+    return InstanceDirectory(
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? 'Unknown',
       path: json['path'] as String? ?? '',

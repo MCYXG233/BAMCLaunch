@@ -119,7 +119,7 @@ class ModpackInstaller {
   static Future<void> _extractOverrides(
     String zipPath,
     String instanceId,
-    GameDirectory directory,
+    InstanceDirectory directory,
     void Function(int)? onProgress,
   ) async {
     try {

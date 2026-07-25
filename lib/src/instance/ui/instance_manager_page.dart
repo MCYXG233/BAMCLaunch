@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../models.dart';
 import '../instance_manager.dart';
 import '../../ui/theme/colors.dart';
@@ -501,11 +501,11 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
     }
   }
 
-  void _editDirectory(GameDirectory directory) {
+  void _editDirectory(InstanceDirectory directory) {
     _showSuccess('编辑目录: ${directory.name}');
   }
 
-  void _deleteDirectory(GameDirectory directory) async {
+  void _deleteDirectory(InstanceDirectory directory) async {
     final confirmed = await BAConfirmDialog.show(
       context: context,
       title: '删除目录',
@@ -1273,7 +1273,7 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
     );
   }
 
-  Future<void> _selectDirectory(GameDirectory directory) async {
+  Future<void> _selectDirectory(InstanceDirectory directory) async {
     try {
       await _instanceManager.selectDirectory(directory.id);
       setState(() {});
