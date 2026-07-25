@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 /// 蔚蓝档案风格配色方案
 ///
@@ -605,7 +605,10 @@ class BACardStyle {
   static BoxDecoration cardDecoration({double? opacity}) => BoxDecoration(
     color: BAThemeColors.surface.withValues(alpha: opacity ?? 0.35),
     borderRadius: BorderRadius.circular(BAThemeData.radiusLarge),
-    border: Border.all(color: BAThemeColors.border.withValues(alpha: 0.15), width: 1),
+    border: Border.all(
+      color: BAThemeColors.border.withValues(alpha: 0.15),
+      width: 1,
+    ),
   );
 }
 
@@ -637,7 +640,9 @@ class BAInputStyle {
       contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(BAThemeData.radius),
-        borderSide: BorderSide(color: BAThemeColors.border.withValues(alpha: 0.4)),
+        borderSide: BorderSide(
+          color: BAThemeColors.border.withValues(alpha: 0.4),
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(BAThemeData.radius),

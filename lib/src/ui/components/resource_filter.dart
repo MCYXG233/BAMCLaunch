@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../resource_center/models.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
@@ -210,7 +210,9 @@ class _ResourceFilterState extends State<ResourceFilter> {
                   widget.onFilterChanged(_currentParams);
                 });
               },
-              selectedColor: BAColors.secondaryOf(context).withValues(alpha: 0.2),
+              selectedColor: BAColors.secondaryOf(
+                context,
+              ).withValues(alpha: 0.2),
               checkmarkColor: BAColors.secondaryOf(context),
               backgroundColor: BAColors.surfaceVariantOf(context),
               labelStyle: TextStyle(

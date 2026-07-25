@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../models.dart';
 import '../instance_manager.dart';
 import '../../ui/theme/colors.dart';
@@ -862,7 +862,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                   selected: isSelected,
                   label: Text(dir.name),
                   onSelected: (_) => _selectDirectory(dir),
-                  selectedColor: BAColors.primaryOf(context).withValues(alpha: 0.2),
+                  selectedColor: BAColors.primaryOf(
+                    context,
+                  ).withValues(alpha: 0.2),
                   checkmarkColor: BAColors.primaryOf(context),
                   backgroundColor: BAColors.surfaceOf(context),
                   deleteIcon: isSelected
@@ -950,7 +952,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: BAColors.primaryOf(context).withValues(alpha: 0.15),
+                        color: BAColors.primaryOf(
+                          context,
+                        ).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Center(
@@ -1112,7 +1116,9 @@ class _InstanceManagerPageState extends State<InstanceManagerPage> {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      color: BAColors.primaryOf(context).withValues(alpha: 0.15),
+                      color: BAColors.primaryOf(
+                        context,
+                      ).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(

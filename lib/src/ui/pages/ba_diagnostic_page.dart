@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../../core/logger.dart';
@@ -605,12 +605,18 @@ class _BADiagnosticPageState extends State<BADiagnosticPage>
               color: BAColors.surfaceOf(context),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: _getBorderColor(context, item.status).withValues(alpha: 0.6),
+                color: _getBorderColor(
+                  context,
+                  item.status,
+                ).withValues(alpha: 0.6),
                 width: item.status == DiagnosticStatus.running ? 2 : 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: _getBorderColor(context, item.status).withValues(alpha: 0.1),
+                  color: _getBorderColor(
+                    context,
+                    item.status,
+                  ).withValues(alpha: 0.1),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),

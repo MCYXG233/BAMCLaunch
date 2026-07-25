@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -1562,7 +1562,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: (color ?? BAColors.primaryOf(context)).withValues(alpha: 0.3),
+                color: (color ?? BAColors.primaryOf(context)).withValues(
+                  alpha: 0.3,
+                ),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -1906,7 +1908,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                BAColors.primaryOf(context).withValues(alpha: 0.3),
+                                BAColors.primaryOf(
+                                  context,
+                                ).withValues(alpha: 0.3),
                                 accentBlue.withValues(alpha: 0.15),
                               ],
                             ),
@@ -2109,7 +2113,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                BAColors.primaryOf(context).withValues(alpha: 0.3),
+                                BAColors.primaryOf(
+                                  context,
+                                ).withValues(alpha: 0.3),
                                 accentBlue.withValues(alpha: 0.15),
                               ],
                             ),
@@ -2224,7 +2230,9 @@ class _BASettingsPageState extends State<BASettingsPage> {
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  BAColors.primaryOf(context).withValues(alpha: 0.3),
+                                  BAColors.primaryOf(
+                                    context,
+                                  ).withValues(alpha: 0.3),
                                   accentBlue.withValues(alpha: 0.15),
                                 ],
                               ),

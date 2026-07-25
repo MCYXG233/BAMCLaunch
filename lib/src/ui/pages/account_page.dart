@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -1688,7 +1688,9 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
       decoration: BoxDecoration(
         color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BAColors.borderOf(context).withValues(alpha: 0.5)),
+        border: Border.all(
+          color: BAColors.borderOf(context).withValues(alpha: 0.5),
+        ),
       ),
       child: Row(
         children: [
@@ -1909,7 +1911,9 @@ class _SkinManagerDialogState extends State<_SkinManagerDialog> {
       decoration: BoxDecoration(
         color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: BAColors.borderOf(context).withValues(alpha: 0.5)),
+        border: Border.all(
+          color: BAColors.borderOf(context).withValues(alpha: 0.5),
+        ),
       ),
       child: Row(
         children: [

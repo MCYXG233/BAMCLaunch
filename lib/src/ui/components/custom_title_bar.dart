@@ -1,4 +1,4 @@
-﻿import 'dart:io' show Platform;
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import '../theme/colors.dart';
@@ -334,7 +334,9 @@ class _MacOSWindowControlButtonState extends State<_MacOSWindowControlButton> {
           width: 12,
           height: 12,
           decoration: BoxDecoration(
-            color: _isHovered ? widget.color : widget.color.withValues(alpha: 0.6),
+            color: _isHovered
+                ? widget.color
+                : widget.color.withValues(alpha: 0.6),
             shape: BoxShape.circle,
             boxShadow: _isPressed
                 ? [

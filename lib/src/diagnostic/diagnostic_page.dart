@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import '../ui/theme/colors.dart';
@@ -784,7 +784,9 @@ class _DiagnosticPageState extends State<DiagnosticPage>
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: BAColors.borderOf(context).withValues(alpha: 0.6)),
+        border: Border.all(
+          color: BAColors.borderOf(context).withValues(alpha: 0.6),
+        ),
         boxShadow: [
           BoxShadow(
             color: BAColors.primaryOf(context).withValues(alpha: 0.05),
@@ -900,7 +902,9 @@ class _DiagnosticPageState extends State<DiagnosticPage>
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: BAColors.borderOf(context).withValues(alpha: 0.6)),
+        border: Border.all(
+          color: BAColors.borderOf(context).withValues(alpha: 0.6),
+        ),
       ),
       child: Column(
         children: [
@@ -1060,13 +1064,21 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: fixResult.isFixed
-                              ? BAColors.successOf(context).withValues(alpha: 0.1)
-                              : BAColors.dangerOf(context).withValues(alpha: 0.1),
+                              ? BAColors.successOf(
+                                  context,
+                                ).withValues(alpha: 0.1)
+                              : BAColors.dangerOf(
+                                  context,
+                                ).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: fixResult.isFixed
-                                ? BAColors.successOf(context).withValues(alpha: 0.3)
-                                : BAColors.dangerOf(context).withValues(alpha: 0.3),
+                                ? BAColors.successOf(
+                                    context,
+                                  ).withValues(alpha: 0.3)
+                                : BAColors.dangerOf(
+                                    context,
+                                  ).withValues(alpha: 0.3),
                           ),
                         ),
                         child: Row(
@@ -1134,7 +1146,9 @@ class _DiagnosticPageState extends State<DiagnosticPage>
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: BAColors.primaryOf(context).withValues(alpha: 0.12),
+                      color: BAColors.primaryOf(
+                        context,
+                      ).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

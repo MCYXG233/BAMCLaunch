@@ -1,4 +1,4 @@
-﻿import 'dart:ui';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../core/error_codes.dart';
 import '../../instance/instance_manager.dart';
@@ -909,7 +909,9 @@ class _VersionTileState extends State<_VersionTile> {
                 decoration: BoxDecoration(
                   color: _typeColor().withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: _typeColor().withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: _typeColor().withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Text(
                   _typeLabel(),

@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
@@ -195,13 +195,17 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                   Icon(
                     Icons.play_circle_outline,
                     size: 12,
-                    color: BAColors.textPrimaryOf(context).withValues(alpha: 0.6),
+                    color: BAColors.textPrimaryOf(
+                      context,
+                    ).withValues(alpha: 0.6),
                   ),
                   const SizedBox(width: 4),
                   Text(
                     '${widget.instances.length} 个实例',
                     style: TextStyle(
-                      color: BAColors.textPrimaryOf(context).withValues(alpha: 0.6),
+                      color: BAColors.textPrimaryOf(
+                        context,
+                      ).withValues(alpha: 0.6),
                       fontSize: 11,
                     ),
                   ),
@@ -607,15 +611,17 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                   boxShadow: [
                     if (!isDisabled)
                       BoxShadow(
-                        color: BAColors.primaryOf(
-                          context,
-                        ).withValues(alpha: 0.4 + (_pulseAnimation.value * 0.25)),
+                        color: BAColors.primaryOf(context).withValues(
+                          alpha: 0.4 + (_pulseAnimation.value * 0.25),
+                        ),
                         blurRadius: 20 + (_pulseAnimation.value * 12),
                         spreadRadius: _isHoveringLaunch ? 3 : 0,
                         offset: const Offset(0, 6),
                       ),
                     BoxShadow(
-                      color: BAColors.surfaceOf(context).withValues(alpha: 0.25),
+                      color: BAColors.surfaceOf(
+                        context,
+                      ).withValues(alpha: 0.25),
                       blurRadius: 0,
                       offset: const Offset(0, -2),
                       spreadRadius: -1,
@@ -638,9 +644,9 @@ class _ImmersiveHomePageState extends State<ImmersiveHomePage>
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               colors: [
-                                BAColors.surfaceOf(
-                                  context,
-                                ).withValues(alpha: _isHoveringLaunch ? 0.3 : 0.18),
+                                BAColors.surfaceOf(context).withValues(
+                                  alpha: _isHoveringLaunch ? 0.3 : 0.18,
+                                ),
                                 Colors.transparent,
                                 Colors.black.withValues(alpha: 0.12),
                               ],

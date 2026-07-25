@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
@@ -845,7 +845,9 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         border: Border(
-          top: BorderSide(color: BAColors.borderOf(context).withValues(alpha: 0.4)),
+          top: BorderSide(
+            color: BAColors.borderOf(context).withValues(alpha: 0.4),
+          ),
         ),
       ),
       child: Row(

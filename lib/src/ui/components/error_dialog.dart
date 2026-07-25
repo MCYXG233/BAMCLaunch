@@ -1,7 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
-import '../theme/app_theme.dart';
 import '../../core/error_codes.dart';
 import 'ba_buttons.dart';
 import 'ba_dialog.dart';

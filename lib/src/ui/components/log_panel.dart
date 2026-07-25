@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../core/logger.dart';
@@ -221,7 +221,9 @@ class _LogPanelState extends State<LogPanel> {
       decoration: BoxDecoration(
         color: BAColors.backgroundSecondaryOf(context),
         borderRadius: BorderRadius.circular(BAThemeData.radius),
-        border: Border.all(color: BAColors.borderOf(context).withValues(alpha: 0.3)),
+        border: Border.all(
+          color: BAColors.borderOf(context).withValues(alpha: 0.3),
+        ),
       ),
       child: Column(
         children: [
@@ -507,7 +509,9 @@ class _LogPanelState extends State<LogPanel> {
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         border: Border(
-          top: BorderSide(color: BAColors.borderOf(context).withValues(alpha: 0.3)),
+          top: BorderSide(
+            color: BAColors.borderOf(context).withValues(alpha: 0.3),
+          ),
         ),
       ),
       child: Row(

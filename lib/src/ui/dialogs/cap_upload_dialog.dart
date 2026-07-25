@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -296,7 +296,9 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
             child: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.5),
+                color: BAColors.surfaceVariantOf(
+                  context,
+                ).withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
@@ -375,7 +377,9 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
                     decoration: BoxDecoration(
                       color: _isDragging
                           ? BAColors.primaryOf(context).withValues(alpha: 0.1)
-                          : BAColors.surfaceVariantOf(context).withValues(alpha: 0.5),
+                          : BAColors.surfaceVariantOf(
+                              context,
+                            ).withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: _isDragging
@@ -446,7 +450,9 @@ class _CapeUploadDialogState extends State<CapeUploadDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.3),
+                color: BAColors.surfaceVariantOf(
+                  context,
+                ).withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: BAColors.borderOf(context).withValues(alpha: 0.4),

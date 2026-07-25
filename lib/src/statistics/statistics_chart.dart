@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../ui/theme/colors.dart';
 
@@ -106,7 +106,10 @@ class DailyPlayTimeChart extends StatelessWidget {
           drawVerticalLine: false,
           horizontalInterval: maxY / 4,
           getDrawingHorizontalLine: (value) {
-            return FlLine(color: labelColor.withValues(alpha: 0.2), strokeWidth: 1);
+            return FlLine(
+              color: labelColor.withValues(alpha: 0.2),
+              strokeWidth: 1,
+            );
           },
         ),
         borderData: FlBorderData(show: false),
@@ -379,7 +382,9 @@ class StatisticsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: BAColors.borderOf(context).withValues(alpha: 0.5)),
+        border: Border.all(
+          color: BAColors.borderOf(context).withValues(alpha: 0.5),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

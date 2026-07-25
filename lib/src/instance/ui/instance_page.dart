@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../models.dart';
 import '../instance_manager.dart';
 import '../resource_manager.dart';
@@ -487,7 +487,9 @@ class _InstancePageState extends State<InstancePage> {
                       _showError('切换目录失败: $e');
                     }
                   },
-                  selectedColor: BAColors.primaryOf(context).withValues(alpha: 0.2),
+                  selectedColor: BAColors.primaryOf(
+                    context,
+                  ).withValues(alpha: 0.2),
                   checkmarkColor: BAColors.primaryOf(context),
                   backgroundColor: BAColors.surfaceVariantOf(context),
                 );

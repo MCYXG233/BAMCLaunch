@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../theme/colors.dart';
 import '../../core/error_codes.dart';
@@ -621,7 +621,9 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
                   ? []
                   : [
                       BoxShadow(
-                        color: BAColors.primaryOf(context).withValues(alpha: 0.3),
+                        color: BAColors.primaryOf(
+                          context,
+                        ).withValues(alpha: 0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -753,7 +755,9 @@ class _BAModpackExportPageState extends State<BAModpackExportPage> {
               vertical: 12,
             ),
             filled: true,
-            fillColor: BAColors.surfaceVariantOf(context).withValues(alpha: 0.7),
+            fillColor: BAColors.surfaceVariantOf(
+              context,
+            ).withValues(alpha: 0.7),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(

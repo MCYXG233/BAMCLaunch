@@ -1,6 +1,9 @@
-﻿import '../resource_center/index.dart';
+import '../resource_center/index.dart';
 import '../download/index.dart';
 import '../core/logger.dart' show LogLevel;
+
+// Re-export LogLevel 以便通过 `event.dart` 访问
+export '../core/logger.dart' show LogLevel;
 
 /// 事件基类
 ///

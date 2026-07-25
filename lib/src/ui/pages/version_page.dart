@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../version/version_manager.dart';
 import '../../version/models.dart';
 import '../../event/event.dart';
@@ -618,7 +618,9 @@ class _BAMCVersionPageState extends State<BAMCVersionPage>
                                 color: BAColors.success.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
-                                  color: BAColors.success.withValues(alpha: 0.3),
+                                  color: BAColors.success.withValues(
+                                    alpha: 0.3,
+                                  ),
                                 ),
                               ),
                               child: Text(

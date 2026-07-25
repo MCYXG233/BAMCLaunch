@@ -1,4 +1,4 @@
-﻿// 下载任务跟踪视图（用于 UI / 持久化层）
+// 下载任务跟踪视图（用于 UI / 持久化层）
 //
 // 与 `download/download_task.dart` 中的 `DownloadTask`（核心执行类，继承 Task<String>）
 // 职责不同：

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/animations.dart';
@@ -123,7 +123,9 @@ class _BAAnimatedCardState extends State<BAAnimatedCard>
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: _isHovered ? 0.08 : 0.04),
+                  color: Colors.black.withValues(
+                    alpha: _isHovered ? 0.08 : 0.04,
+                  ),
                   blurRadius: _elevationAnimation.value * 3,
                   offset: Offset(0, _elevationAnimation.value),
                 ),
@@ -252,7 +254,9 @@ class _BAHoverCardState extends State<BAHoverCard>
                     decoration: BoxDecoration(
                       color:
                           widget.backgroundColor ??
-                          BAColors.surfaceVariantOf(context).withValues(alpha: 0.8),
+                          BAColors.surfaceVariantOf(
+                            context,
+                          ).withValues(alpha: 0.8),
                       borderRadius: const BorderRadius.only(
                         bottomLeft: Radius.circular(12),
                         bottomRight: Radius.circular(12),

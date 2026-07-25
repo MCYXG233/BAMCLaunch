@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
 import '../theme/animations.dart';
@@ -171,7 +171,9 @@ class _BASidebarState extends State<BASidebar>
                 borderRadius: BorderRadius.circular(12),
                 border: isSelected
                     ? Border.all(
-                        color: BAColors.primaryOf(context).withValues(alpha: 0.3),
+                        color: BAColors.primaryOf(
+                          context,
+                        ).withValues(alpha: 0.3),
                       )
                     : null,
               ),
@@ -400,7 +402,9 @@ class _BAAnimatedSidebarState extends State<BAAnimatedSidebar>
               color: BAColors.surfaceOf(context),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: _isHovered ? 0.1 : 0.05),
+                  color: Colors.black.withValues(
+                    alpha: _isHovered ? 0.1 : 0.05,
+                  ),
                   blurRadius: _isHovered ? 10 : 5,
                   offset: const Offset(2, 0),
                 ),
@@ -460,7 +464,9 @@ class _BAAnimatedSidebarState extends State<BAAnimatedSidebar>
                 borderRadius: BorderRadius.circular(12),
                 border: isSelected
                     ? Border.all(
-                        color: BAColors.primaryOf(context).withValues(alpha: 0.3),
+                        color: BAColors.primaryOf(
+                          context,
+                        ).withValues(alpha: 0.3),
                       )
                     : null,
               ),

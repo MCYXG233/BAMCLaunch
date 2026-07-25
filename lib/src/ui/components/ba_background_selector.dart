@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/ba_theme_colors.dart';
@@ -205,7 +205,9 @@ class _PresetCard extends StatelessWidget {
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: BAColors.primaryOf(context).withValues(alpha: 0.25),
+                      color: BAColors.primaryOf(
+                        context,
+                      ).withValues(alpha: 0.25),
                       blurRadius: 20,
                       offset: const Offset(0, 4),
                     ),

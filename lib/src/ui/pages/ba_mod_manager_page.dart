@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../../mod/mod_manager.dart';
 import '../../mod/mod_info.dart';
@@ -454,7 +454,9 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
       decoration: BoxDecoration(
         color: BAColors.dangerOf(context).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: BAColors.dangerOf(context).withValues(alpha: 0.3)),
+        border: Border.all(
+          color: BAColors.dangerOf(context).withValues(alpha: 0.3),
+        ),
       ),
       child: Row(
         children: [
@@ -652,7 +654,9 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
       decoration: BoxDecoration(
         color: BAColors.primaryOf(context).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: BAColors.primaryOf(context).withValues(alpha: 0.3)),
+        border: Border.all(
+          color: BAColors.primaryOf(context).withValues(alpha: 0.3),
+        ),
       ),
       child: Row(
         children: [
