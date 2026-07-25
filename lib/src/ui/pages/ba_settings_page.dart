@@ -1,30 +1,29 @@
-import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../theme/colors.dart';
-import '../../config/config_manager.dart';
-import '../../config/config_keys.dart';
-import '../../core/constants.dart';
-import '../../core/logger.dart';
-import '../../updater/update_manager.dart';
-import '../../platform/platform_adapter.dart';
-import '../../platform/platform_adapter_factory.dart';
-import '../theme/theme_manager.dart';
-import '../theme/background_manager.dart';
-import '../components/color_picker_panel.dart';
-import '../components/ba_notification.dart';
-import '../components/ba_background_selector.dart';
+import 'package:flutter/material.dart';
+
 import '../../config/background_config.dart';
-import '../../loader/java_selector_dialog.dart';
+import '../../config/config_keys.dart';
+import '../../config/config_manager.dart';
+import '../../core/constants.dart';
+import '../../download/mirror_manager.dart';
 import '../../game/backup_manager.dart';
 import '../../game/game_statistics.dart';
-import '../../instance/instance_manager.dart';
-import '../components/ba_backup_dialog.dart';
-import '../components/ba_dialog.dart';
-import '../../download/mirror_manager.dart';
+import '../../loader/java_selector_dialog.dart';
+import '../../platform/platform_adapter.dart';
+import '../../platform/platform_adapter_factory.dart';
+import '../../updater/update_manager.dart';
 import '../animations/ba_animations.dart';
 import '../animations/ba_effects.dart';
+import '../components/ba_background_selector.dart';
+import '../components/ba_notification.dart';
+import '../components/color_picker_panel.dart';
+import '../theme/background_manager.dart';
+import '../theme/colors.dart';
+import '../theme/theme_manager.dart';
+import 'settings/about_settings_page.dart';
+import 'settings/backup_settings_page.dart';
+import 'settings/settings_components.dart';
+import 'settings/statistics_settings_page.dart';
 
 class BASettingsPage extends StatefulWidget {
   const BASettingsPage({super.key});
@@ -831,77 +830,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
     }
   }
 
-  Future<void> _launchURL(String url) async {
-    try {
-      final uri = Uri.parse(url);
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (e) {
-      if (mounted) {
-        NotificationManager().showError('打开链接失败', message: e.toString());
-      }
-    }
-  }
-
-  Future<void> _confirmClearCache() async {
-    if (!mounted) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('确认清除缓存'),
-        content: const Text('此操作将清理启动器临时文件（包括下载缓存、解压中间文件等）。\n\n确定要继续吗？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(
-              foregroundColor: BAColors.dangerOf(context),
-            ),
-            child: const Text('清除'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true) {
-      await _clearCache();
-    }
-  }
-
-  Future<void> _clearCache() async {
-    try {
-      final platformAdapter = PlatformAdapterFactory.create();
-      final tempDir = await platformAdapter.getTempDirectory();
-      final directory = Directory(tempDir);
-      if (await directory.exists()) {
-        int count = 0;
-        await for (final entity in directory.list(recursive: true)) {
-          try {
-            await entity.delete(recursive: true);
-            count++;
-          } catch (e, st) {
-            Logger.instance.error('删除临时文件失败', e, st);
-          }
-        }
-        if (mounted) {
-          NotificationManager().showSuccess(
-            '缓存已清除',
-            message: '已清理 $count 个临时文件',
-          );
-        }
-      } else {
-        if (mounted) {
-          NotificationManager().showInfo('缓存为空', message: '没有需要清理的临时文件');
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        NotificationManager().showError('清除缓存失败', message: e.toString());
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -1192,455 +1120,25 @@ class _BASettingsPageState extends State<BASettingsPage> {
       case 'background':
         return _buildBackgroundSettings();
       case 'backup':
-        return _buildBackupSettings();
+        return const BackupSettingsPage();
       case 'statistics':
-        return _buildStatisticsSettings();
+        return const StatisticsSettingsPage();
       case 'game':
         return _buildGameSettings();
       case 'download':
         return _buildDownloadSettings();
       case 'about':
-        return _buildAboutSettings();
+        return AboutSettingsPage(appVersionDisplay: _appVersionDisplay);
       default:
         return _buildGeneralSettings();
     }
-  }
-
-  Widget _buildSettingsCard({
-    required BuildContext context,
-    required String title,
-    required List<Widget> children,
-  }) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final bgColor = BAColors.surfaceOf(context);
-    final borderColor = BAColors.borderOf(context);
-    final shadowOpacity = isLight ? 0.08 : 0.2;
-    final titleText = BAColors.textPrimaryOf(context);
-    final accentBlue = BAColors.primaryLightOf(context);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF000000).withValues(alpha: shadowOpacity),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
-            child: Row(
-              children: [
-                Container(
-                  width: 4,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [BAColors.primaryOf(context), accentBlue],
-                    ),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: titleText,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ...List.generate(children.length * 2 - 1, (index) {
-            if (index.isOdd) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(height: 1, color: borderColor),
-              );
-            }
-            return children[index ~/ 2];
-          }),
-          const SizedBox(height: 8),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSettingsRow({
-    required IconData icon,
-    required String title,
-    String? subtitle,
-    required Widget control,
-    Color? iconColor,
-  }) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final primaryText = BAColors.textPrimaryOf(context);
-    final secondaryText = BAColors.textSecondaryOf(context);
-    final accentBlue = BAColors.primaryLightOf(context);
-    final effectiveIconColor = iconColor ?? accentBlue;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      child: Row(
-        children: [
-          BAAnimations.breathe(
-            isActive: true,
-            duration: const Duration(milliseconds: 3000),
-            minOpacity: 0.85,
-            maxOpacity: 1.0,
-            glowRadius: 6.0,
-            glowColor: effectiveIconColor,
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    effectiveIconColor.withValues(alpha: 0.3),
-                    effectiveIconColor.withValues(alpha: 0.15),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: effectiveIconColor.withValues(alpha: 0.25),
-                    blurRadius: 8,
-                    spreadRadius: 0.5,
-                  ),
-                  BoxShadow(
-                    color: effectiveIconColor.withValues(alpha: 0.1),
-                    blurRadius: 16,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-              child: Icon(icon, color: effectiveIconColor, size: 18),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: primaryText,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 3),
-                  Text(
-                    subtitle,
-                    style: TextStyle(color: secondaryText, fontSize: 12),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          control,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSwitch(bool value, ValueChanged<bool> onChanged) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final accentBlueDyn = BAColors.primaryLightOf(context);
-    final offBgDyn = BAColors.surfaceTertiaryOf(context);
-    final offBorderDyn = BAColors.borderOf(context);
-
-    return GestureDetector(
-      onTap: () => onChanged(!value),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: 44,
-        height: 24,
-        padding: EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          gradient: value
-              ? LinearGradient(
-                  colors: [BAColors.primaryOf(context), accentBlueDyn],
-                )
-              : null,
-          color: value ? null : offBgDyn,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: value ? Colors.transparent : offBorderDyn),
-          boxShadow: value
-              ? [
-                  BoxShadow(
-                    color: BAColors.primaryOf(context).withValues(alpha: 0.4),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: AnimatedAlign(
-          duration: const Duration(milliseconds: 200),
-          alignment: value ? Alignment.centerRight : Alignment.centerLeft,
-          child: Container(
-            width: 20,
-            height: 20,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  blurRadius: 4,
-                  offset: const Offset(0, 1),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDropdown<T>({
-    required T value,
-    required List<DropdownMenuItem<T>> items,
-    required ValueChanged<T?> onChanged,
-  }) {
-    final validValues = items.map((item) => item.value).toList();
-    final effectiveValue = validValues.contains(value)
-        ? value
-        : items.first.value;
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final fillBg = BAColors.surfaceVariantOf(context);
-    final borderColor = BAColors.borderOf(context);
-    final primaryText = BAColors.textPrimaryOf(context);
-    final secondaryText = BAColors.textSecondaryOf(context);
-    final dropdownBg = BAColors.surfaceOf(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-      decoration: BoxDecoration(
-        color: fillBg,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: borderColor),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<T>(
-          value: effectiveValue,
-          icon: Icon(Icons.keyboard_arrow_down, color: secondaryText, size: 20),
-          style: TextStyle(color: primaryText, fontSize: 13),
-          dropdownColor: dropdownBg,
-          items: items,
-          onChanged: onChanged,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required FocusNode focusNode,
-    required String placeholder,
-    double width = 200,
-  }) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final fillBg = BAColors.surfaceVariantOf(context);
-    final borderColor = BAColors.borderOf(context);
-    final primaryText = BAColors.textPrimaryOf(context);
-    final secondaryText = BAColors.textSecondaryOf(context);
-
-    return SizedBox(
-      width: width,
-      child: TextField(
-        controller: controller,
-        focusNode: focusNode,
-        style: TextStyle(color: primaryText, fontSize: 13),
-        decoration: InputDecoration(
-          hintText: placeholder,
-          hintStyle: TextStyle(color: secondaryText, fontSize: 13),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 10,
-          ),
-          filled: true,
-          fillColor: fillBg,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: borderColor),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: borderColor),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: BAColors.primaryOf(context)),
-          ),
-          isDense: true,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPathSelector({
-    required String path,
-    required String placeholder,
-    required String buttonText,
-    required VoidCallback onBrowse,
-  }) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final fillBg = BAColors.surfaceVariantOf(context);
-    final borderColor = BAColors.borderOf(context);
-    final primaryText = BAColors.textPrimaryOf(context);
-    final secondaryText = BAColors.textSecondaryOf(context);
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          constraints: const BoxConstraints(maxWidth: 220),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: fillBg,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: borderColor),
-          ),
-          child: Text(
-            path.isEmpty ? placeholder : path,
-            style: TextStyle(
-              color: path.isEmpty ? secondaryText : primaryText,
-              fontSize: 12,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        const SizedBox(width: 8),
-        _buildPrimaryButton(text: buttonText, onPressed: onBrowse),
-      ],
-    );
-  }
-
-  Widget _buildPrimaryButton({
-    required String text,
-    required VoidCallback onPressed,
-    bool isLoading = false,
-    Color? color,
-  }) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final accentBlue = BAColors.primaryLightOf(context);
-    final effectiveColor = color ?? accentBlue;
-
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: isLoading ? null : onPressed,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [color ?? BAColors.primaryOf(context), effectiveColor],
-            ),
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: (color ?? BAColors.primaryOf(context)).withValues(
-                  alpha: 0.3,
-                ),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: isLoading
-              ? const SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-              : Text(
-                  text,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSecondaryButton({
-    required String text,
-    required VoidCallback onPressed,
-    bool isLoading = false,
-  }) {
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final offBg = BAColors.surfaceTertiaryOf(context);
-    final borderColor = BAColors.borderOf(context);
-    final accentBlue = BAColors.primaryLightOf(context);
-
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: isLoading ? null : onPressed,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-          decoration: BoxDecoration(
-            color: offBg,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: borderColor),
-          ),
-          child: isLoading
-              ? SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(accentBlue),
-                  ),
-                )
-              : Text(
-                  text,
-                  style: TextStyle(
-                    color: accentBlue,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-        ),
-      ),
-    );
   }
 
   Widget _buildBackgroundSettings() {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
       children: [
-        _buildSettingsCard(
-          context: context,
+        SettingsCard(
           title: '背景设置',
           children: [
             Padding(
@@ -1720,15 +1218,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
       children: [
-        _buildSettingsCard(
-          context: context,
+        SettingsCard(
           title: '外观',
           children: [
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.language,
               title: '语言',
               subtitle: _language,
-              control: _buildDropdown<String>(
+              control: SettingsDropdown<String>(
                 value: _language,
                 items: const [
                   DropdownMenuItem(value: '简体中文', child: Text('简体中文')),
@@ -1739,11 +1236,11 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 },
               ),
             ),
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.palette,
               title: '主题',
               subtitle: _themeModeDisplayName(_themeMode),
-              control: _buildDropdown<String>(
+              control: SettingsDropdown<String>(
                 value: _themeMode,
                 items: const [
                   DropdownMenuItem(value: 'dark', child: Text('深色')),
@@ -1755,11 +1252,11 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 },
               ),
             ),
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.style,
               title: '主题风格',
               subtitle: _themeManager.isBlueArchive ? '蔚蓝档案' : 'Minecraft',
-              control: _buildDropdown<String>(
+              control: SettingsDropdown<String>(
                 value: _themeManager.isBlueArchive
                     ? 'blue_archive'
                     : 'minecraft',
@@ -1796,45 +1293,55 @@ class _BASettingsPageState extends State<BASettingsPage> {
             const SizedBox(height: 8),
           ],
         ),
-        _buildSettingsCard(
-          context: context,
+        SettingsCard(
           title: '行为',
           children: [
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.update,
               title: '自动更新',
               subtitle: '启动时检查更新',
-              control: _buildSwitch(_autoUpdate, _saveAutoUpdate),
+              control: SettingsSwitch(
+                value: _autoUpdate,
+                onChanged: _saveAutoUpdate,
+              ),
             ),
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.power_settings_new,
               title: '开机自启动',
               subtitle: '系统启动时自动运行',
-              control: _buildSwitch(_launchAtStartup, _saveLaunchAtStartup),
+              control: SettingsSwitch(
+                value: _launchAtStartup,
+                onChanged: _saveLaunchAtStartup,
+              ),
             ),
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.minimize,
               title: '最小化到托盘',
               subtitle: '最小化时隐藏到系统托盘',
-              control: _buildSwitch(_minimizeToTray, _saveMinimizeToTray),
+              control: SettingsSwitch(
+                value: _minimizeToTray,
+                onChanged: _saveMinimizeToTray,
+              ),
             ),
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.close_fullscreen,
               title: '关闭时最小化到托盘',
               subtitle: '关闭窗口时最小化到系统托盘',
-              control: _buildSwitch(_closeToTray, _saveCloseToTray),
+              control: SettingsSwitch(
+                value: _closeToTray,
+                onChanged: _saveCloseToTray,
+              ),
             ),
           ],
         ),
-        _buildSettingsCard(
-          context: context,
+        SettingsCard(
           title: '更新',
           children: [
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.system_update,
               title: '检查更新',
               subtitle: _isCheckingUpdate ? '正在检查...' : '手动检查新版本',
-              control: _buildPrimaryButton(
+              control: SettingsPrimaryButton(
                 text: _isCheckingUpdate ? '' : '检查',
                 onPressed: _checkForUpdate,
                 isLoading: _isCheckingUpdate,
@@ -1850,34 +1357,32 @@ class _BASettingsPageState extends State<BASettingsPage> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
       children: [
-        _buildSettingsCard(
-          context: context,
+        SettingsCard(
           title: '路径设置',
           children: [
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.folder,
               title: '游戏目录',
               subtitle: _gameDirectory.isEmpty ? '未设置' : _gameDirectory,
-              control: _buildPathSelector(
+              control: SettingsPathSelector(
                 path: _gameDirectory,
                 placeholder: '未设置',
                 buttonText: '浏览',
                 onBrowse: _pickGameDirectory,
               ),
             ),
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.developer_mode,
               title: 'Java路径',
               subtitle: _javaPath.isEmpty ? '自动检测' : _javaPath,
-              control: _buildPrimaryButton(
+              control: SettingsPrimaryButton(
                 text: '选择',
                 onPressed: _pickJavaPath,
               ),
             ),
           ],
         ),
-        _buildSettingsCard(
-          context: context,
+        SettingsCard(
           title: '性能设置',
           children: [
             Padding(
@@ -1983,11 +1488,11 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 },
               ),
             ),
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.aspect_ratio,
               title: '游戏窗口分辨率',
               subtitle: _gameWindowSize,
-              control: _buildDropdown<String>(
+              control: SettingsDropdown<String>(
                 value: _gameWindowSize,
                 items: const [
                   DropdownMenuItem(value: '800x600', child: Text('800x600')),
@@ -2005,29 +1510,28 @@ class _BASettingsPageState extends State<BASettingsPage> {
             ),
           ],
         ),
-        _buildSettingsCard(
-          context: context,
+        SettingsCard(
           title: '高级参数',
           children: [
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.code,
               title: 'JVM额外参数',
               subtitle: _jvmArgsController.text.isEmpty
                   ? '无'
                   : _jvmArgsController.text,
-              control: _buildTextField(
+              control: SettingsTextField(
                 controller: _jvmArgsController,
                 focusNode: _jvmArgsFocusNode,
                 placeholder: '例如: -XX:+UseG1GC',
               ),
             ),
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.play_arrow,
               title: '游戏启动参数',
               subtitle: _gameArgsController.text.isEmpty
                   ? '无'
                   : _gameArgsController.text,
-              control: _buildTextField(
+              control: SettingsTextField(
                 controller: _gameArgsController,
                 focusNode: _gameArgsFocusNode,
                 placeholder: '例如: --fullscreen',
@@ -2043,15 +1547,14 @@ class _BASettingsPageState extends State<BASettingsPage> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
       children: [
-        _buildSettingsCard(
-          context: context,
+        SettingsCard(
           title: '下载设置',
           children: [
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.cloud_download,
               title: '下载源',
               subtitle: _downloadSourceDisplayName(_downloadSource),
-              control: _buildDropdown<String>(
+              control: SettingsDropdown<String>(
                 value: _downloadSource,
                 items: const [
                   DropdownMenuItem(value: 'official', child: Text('官方源')),
@@ -2062,27 +1565,29 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 },
               ),
             ),
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.download,
               title: '下载目录',
               subtitle: _downloadPath.isEmpty ? '未设置' : _downloadPath,
-              control: _buildPathSelector(
+              control: SettingsPathSelector(
                 path: _downloadPath,
                 placeholder: '未设置',
                 buttonText: '浏览',
                 onBrowse: _pickDownloadPath,
               ),
             ),
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.refresh,
               title: '下载失败自动重试',
               subtitle: '下载失败时自动重试',
-              control: _buildSwitch(_autoRetryDownload, _saveAutoRetryDownload),
+              control: SettingsSwitch(
+                value: _autoRetryDownload,
+                onChanged: _saveAutoRetryDownload,
+              ),
             ),
           ],
         ),
-        _buildSettingsCard(
-          context: context,
+        SettingsCard(
           title: '并发下载设置',
           children: [
             Padding(
@@ -2190,13 +1695,16 @@ class _BASettingsPageState extends State<BASettingsPage> {
                 },
               ),
             ),
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.data_usage,
               title: '限速设置',
               subtitle: _enableSpeedLimit
                   ? '${_speedLimitValue.toInt()} ${_speedLimitUnit == 0 ? "KB/s" : "MB/s"}'
                   : '未启用',
-              control: _buildSwitch(_enableSpeedLimit, _saveEnableSpeedLimit),
+              control: SettingsSwitch(
+                value: _enableSpeedLimit,
+                onChanged: _saveEnableSpeedLimit,
+              ),
             ),
             if (_enableSpeedLimit) ...[
               Padding(
@@ -2314,11 +1822,11 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   },
                 ),
               ),
-              _buildSettingsRow(
+              SettingsRow(
                 icon: Icons.timer,
                 title: '限速单位',
                 subtitle: _speedLimitUnit == 0 ? 'KB/s' : 'MB/s',
-                control: _buildDropdown<int>(
+                control: SettingsDropdown<int>(
                   value: _speedLimitUnit,
                   items: const [
                     DropdownMenuItem(value: 0, child: Text('KB/s')),
@@ -2342,22 +1850,24 @@ class _BASettingsPageState extends State<BASettingsPage> {
             ],
           ],
         ),
-        _buildSettingsCard(
-          context: context,
+        SettingsCard(
           title: '镜像源管理',
           children: [
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.auto_fix_high,
               title: '自动选择最快镜像',
               subtitle: '测速所有镜像并自动切换',
-              control: _buildSwitch(_autoSelectMirror, _saveAutoSelectMirror),
+              control: SettingsSwitch(
+                value: _autoSelectMirror,
+                onChanged: _saveAutoSelectMirror,
+              ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
               child: Row(
                 children: [
                   Expanded(
-                    child: _buildPrimaryButton(
+                    child: SettingsPrimaryButton(
                       text: _isSpeedTesting ? '' : '测速所有镜像',
                       onPressed: _speedTestMirrors,
                       isLoading: _isSpeedTesting,
@@ -2365,7 +1875,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _buildSecondaryButton(
+                    child: SettingsSecondaryButton(
                       text: _isSpeedTesting ? '' : '自动选择最快',
                       onPressed: _autoSelectFastestMirror,
                       isLoading: _isSpeedTesting,
@@ -2376,8 +1886,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
             ),
           ],
         ),
-        _buildSettingsCard(
-          context: context,
+        SettingsCard(
           title: '镜像列表',
           children: [
             ..._buildMirrorList(),
@@ -2404,7 +1913,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                         children: [
                           Expanded(
                             flex: 1,
-                            child: _buildTextField(
+                            child: SettingsTextField(
                               controller: _customMirrorNameController,
                               focusNode: _customMirrorNameFocusNode,
                               placeholder: '名称（可选）',
@@ -2414,7 +1923,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                           const SizedBox(width: 8),
                           Expanded(
                             flex: 3,
-                            child: _buildTextField(
+                            child: SettingsTextField(
                               controller: _customMirrorUrlController,
                               focusNode: _customMirrorUrlFocusNode,
                               placeholder: 'https://example.com',
@@ -2422,7 +1931,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          _buildPrimaryButton(
+                          SettingsPrimaryButton(
                             text: '添加',
                             onPressed: _addCustomMirror,
                           ),
@@ -2435,25 +1944,24 @@ class _BASettingsPageState extends State<BASettingsPage> {
             ),
           ],
         ),
-        _buildSettingsCard(
-          context: context,
+        SettingsCard(
           title: '网络设置',
           children: [
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.language,
               title: 'HTTP代理地址',
               subtitle: _proxyHost.isEmpty ? '未设置' : _proxyHost,
-              control: _buildTextField(
+              control: SettingsTextField(
                 controller: _proxyHostController,
                 focusNode: _proxyHostFocusNode,
                 placeholder: '例如: 127.0.0.1',
               ),
             ),
-            _buildSettingsRow(
+            SettingsRow(
               icon: Icons.numbers,
               title: 'HTTP代理端口',
               subtitle: _proxyPort == 0 ? '未设置' : '$_proxyPort',
-              control: _buildTextField(
+              control: SettingsTextField(
                 controller: _proxyPortController,
                 focusNode: _proxyPortFocusNode,
                 placeholder: '例如: 7890',
@@ -2686,222 +2194,5 @@ class _BASettingsPageState extends State<BASettingsPage> {
         ),
       );
     }).toList();
-  }
-
-  Widget _buildAboutSettings() {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-      children: [
-        _buildSettingsCard(
-          context: context,
-          title: '关于',
-          children: [
-            _buildSettingsRow(
-              icon: Icons.info_outline,
-              title: '关于 BAMC Launch',
-              subtitle: '查看应用信息和许可证',
-              control: _buildPrimaryButton(
-                text: '查看',
-                onPressed: () => showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('关于 BAMC Launch'),
-                    content: Text(
-                      '版本 $_appVersionDisplay\n© 2024 BAMC Launch Team',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('关闭'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            _buildSettingsRow(
-              icon: Icons.code,
-              title: 'GitHub 仓库',
-              subtitle: '访问源代码',
-              control: _buildPrimaryButton(
-                text: '访问',
-                onPressed: () =>
-                    _launchURL('https://github.com/TSSForsunshine/BAMCLaunch'),
-              ),
-            ),
-            _buildSettingsRow(
-              icon: Icons.feedback,
-              title: '问题反馈',
-              subtitle: '提交 Bug 或建议',
-              control: _buildPrimaryButton(
-                text: '反馈',
-                onPressed: () => _launchURL(
-                  'https://github.com/TSSForsunshine/BAMCLaunch/issues',
-                ),
-              ),
-            ),
-          ],
-        ),
-        _buildSettingsCard(
-          context: context,
-          title: '维护',
-          children: [
-            _buildSettingsRow(
-              icon: Icons.cleaning_services,
-              title: '清除缓存',
-              subtitle: '清理临时文件释放存储空间',
-              control: _buildPrimaryButton(
-                text: '清除',
-                onPressed: _confirmClearCache,
-                color: BAColors.accentPinkDarkOf(context),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBackupSettings() {
-    final allBackups = _backupManager.getAllBackups();
-    final instanceManager = InstanceManager();
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-      children: [
-        _buildSettingsCard(
-          context: context,
-          title: '备份管理',
-          children: [
-            _buildSettingsRow(
-              icon: Icons.folder,
-              title: '查看所有备份',
-              subtitle: '${allBackups.length} 个备份',
-              control: _buildPrimaryButton(
-                text: '管理',
-                onPressed: () {
-                  if (instanceManager.instances.isNotEmpty) {
-                    BABackupDialog.show(
-                      context: context,
-                      instance: instanceManager.instances.first,
-                    );
-                  } else {
-                    NotificationManager().showInfo(
-                      '暂无游戏实例',
-                      message: '请先创建一个游戏实例',
-                    );
-                  }
-                },
-              ),
-            ),
-            _buildSettingsRow(
-              icon: Icons.storage,
-              title: '备份存储',
-              subtitle: '管理所有备份文件',
-              control: const SizedBox.shrink(),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatisticsSettings() {
-    final totalPlayTime = _statisticsManager.getTotalPlayTime();
-    final totalLaunchCount = _statisticsManager.getTotalLaunchCount();
-    final todayPlayTime = _statisticsManager.getTodayPlayTime();
-    final mostPlayed = _statisticsManager.getMostPlayedInstance();
-
-    String formatDuration(Duration duration) {
-      final hours = duration.inHours;
-      final minutes = duration.inMinutes % 60;
-      if (hours > 0) {
-        return '$hours小时$minutes分钟';
-      } else {
-        return '$minutes分钟';
-      }
-    }
-
-    final children = <Widget>[
-      _buildSettingsCard(
-        context: context,
-        title: '总统计',
-        children: [
-          _buildSettingsRow(
-            icon: Icons.access_time,
-            title: '总游戏时长',
-            subtitle: formatDuration(totalPlayTime),
-            control: const SizedBox.shrink(),
-          ),
-          _buildSettingsRow(
-            icon: Icons.casino,
-            title: '总启动次数',
-            subtitle: '$totalLaunchCount 次',
-            control: const SizedBox.shrink(),
-          ),
-          _buildSettingsRow(
-            icon: Icons.calendar_today,
-            title: '今日游戏',
-            subtitle: formatDuration(todayPlayTime),
-            control: const SizedBox.shrink(),
-          ),
-        ],
-      ),
-    ];
-
-    if (mostPlayed != null) {
-      children.add(
-        _buildSettingsCard(
-          context: context,
-          title: '最常玩的实例',
-          children: [
-            _buildSettingsRow(
-              icon: Icons.star,
-              title: mostPlayed.instanceName,
-              subtitle:
-                  '${formatDuration(Duration(seconds: mostPlayed.totalPlayTimeSeconds))} / ${mostPlayed.launchCount}次',
-              control: const SizedBox.shrink(),
-              iconColor: BAColors.accentPinkDarkOf(context),
-            ),
-          ],
-        ),
-      );
-    }
-
-    children.add(
-      _buildSettingsCard(
-        context: context,
-        title: '数据管理',
-        children: [
-          _buildSettingsRow(
-            icon: Icons.delete_outline,
-            title: '清除统计数据',
-            subtitle: '清除所有游戏统计数据',
-            control: _buildPrimaryButton(
-              text: '清除',
-              onPressed: () async {
-                final confirmed = await BAConfirmDialog.show(
-                  context: context,
-                  title: '清除统计数据',
-                  content: '确定要清除所有统计数据吗？此操作不可撤销',
-                  confirmText: '清除',
-                );
-                if (confirmed) {
-                  await _statisticsManager.clearAllData();
-                  if (mounted) setState(() {});
-                  NotificationManager().showSuccess('统计数据已清除');
-                }
-              },
-              color: BAColors.accentPinkDarkOf(context),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-      children: children,
-    );
   }
 }
