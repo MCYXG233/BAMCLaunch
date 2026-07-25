@@ -73,10 +73,7 @@ void main() {
     });
 
     test('未注册类型 get 抛 StateError', () {
-      expect(
-        () => locator.get<_FakeService>(),
-        throwsA(isA<StateError>()),
-      );
+      expect(() => locator.get<_FakeService>(), throwsA(isA<StateError>()));
     });
 
     test('isRegistered 区分单例/懒加载/工厂', () {
@@ -106,8 +103,7 @@ void main() {
       });
 
       expect(locator.tryGet<_FakeService>(), isNull);
-      expect(factoryCalls, equals(0),
-          reason: 'tryGet 不应触发懒加载工厂');
+      expect(factoryCalls, equals(0), reason: 'tryGet 不应触发懒加载工厂');
     });
 
     test('tryGet 已缓存的单例返回该实例', () {

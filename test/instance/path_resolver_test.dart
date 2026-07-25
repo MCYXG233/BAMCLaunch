@@ -69,10 +69,7 @@ void main() {
     test('应返回第一个存在的目录', () async {
       final existing = Directory('${tempDir.path}/existing')..createSync();
       final resolver = MinecraftPathResolver(
-        customCandidates: [
-          existing.path,
-          '${tempDir.path}/missing',
-        ],
+        customCandidates: [existing.path, '${tempDir.path}/missing'],
       );
 
       final found = await resolver.findFirstExisting();

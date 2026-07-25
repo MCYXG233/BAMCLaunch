@@ -21,8 +21,9 @@ void main() {
   });
 
   group('MyApp widget 树', () {
-    testWidgets('ChangeNotifierProvider 树中 ThemeManager 可访问',
-        (WidgetTester tester) async {
+    testWidgets('ChangeNotifierProvider 树中 ThemeManager 可访问', (
+      WidgetTester tester,
+    ) async {
       final themeManager = ThemeManager();
 
       await tester.pumpWidget(
@@ -46,8 +47,7 @@ void main() {
       expect(darkTheme.brightness, equals(Brightness.dark));
     });
 
-    testWidgets('MyApp 顶层渲染 MaterialApp',
-        (WidgetTester tester) async {
+    testWidgets('MyApp 顶层渲染 MaterialApp', (WidgetTester tester) async {
       final themeManager = ThemeManager();
       await tester.pumpWidget(
         ChangeNotifierProvider<ThemeManager>.value(

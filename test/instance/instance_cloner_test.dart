@@ -59,20 +59,16 @@ void main() {
   setUp(() {
     cloner = InstanceCloner();
     tempDir = Directory.systemTemp.createTempSync('instance_cloner_test_');
-    directories = [
-      _makeDirectory(id: 'dir_1', path: tempDir.path),
-    ];
-    instances = [
-      _makeInstance(id: 'inst_1', directoryId: 'dir_1'),
-    ];
+    directories = [_makeDirectory(id: 'dir_1', path: tempDir.path)];
+    instances = [_makeInstance(id: 'inst_1', directoryId: 'dir_1')];
 
     // 预先创建原实例的 mods 目录与文件
-    final srcInstanceDir =
-        Directory('${tempDir.path}${Platform.pathSeparator}instances${Platform.pathSeparator}inst_1')
-          ..createSync(recursive: true);
-    final srcMods =
-        Directory('${srcInstanceDir.path}${Platform.pathSeparator}mods')
-          ..createSync();
+    final srcInstanceDir = Directory(
+      '${tempDir.path}${Platform.pathSeparator}instances${Platform.pathSeparator}inst_1',
+    )..createSync(recursive: true);
+    final srcMods = Directory(
+      '${srcInstanceDir.path}${Platform.pathSeparator}mods',
+    )..createSync();
     File('${srcMods.path}${Platform.pathSeparator}mod1.jar')
       ..writeAsStringSync('1234567890'); // 10 字节
     File('${srcMods.path}${Platform.pathSeparator}mod2.jar')
@@ -129,7 +125,9 @@ void main() {
       );
       expect(targetModsDir.existsSync(), isTrue);
 
-      final mod1 = File('${targetModsDir.path}${Platform.pathSeparator}mod1.jar');
+      final mod1 = File(
+        '${targetModsDir.path}${Platform.pathSeparator}mod1.jar',
+      );
       expect(mod1.existsSync(), isTrue);
       expect(mod1.readAsStringSync(), equals('1234567890'));
     });
@@ -159,8 +157,9 @@ void main() {
 
       // 实例条目已添加但磁盘文件不存在
       expect(
-        Directory('${tempDir.path}${Platform.pathSeparator}instances${Platform.pathSeparator}inst_nofile')
-            .existsSync(),
+        Directory(
+          '${tempDir.path}${Platform.pathSeparator}instances${Platform.pathSeparator}inst_nofile',
+        ).existsSync(),
         isFalse,
       );
       expect(instances, hasLength(2));
@@ -185,8 +184,9 @@ void main() {
 
       expect(result.directoryId, equals('dir_2'));
       expect(
-        Directory('${dir2.path}${Platform.pathSeparator}instances${Platform.pathSeparator}inst_cross')
-            .existsSync(),
+        Directory(
+          '${dir2.path}${Platform.pathSeparator}instances${Platform.pathSeparator}inst_cross',
+        ).existsSync(),
         isTrue,
       );
     });
@@ -219,10 +219,7 @@ void main() {
     });
 
     test('实例目录不存在时应返回 0', () async {
-      final phantom = _makeInstance(
-        id: 'phantom',
-        directoryId: 'dir_1',
-      );
+      final phantom = _makeInstance(id: 'phantom', directoryId: 'dir_1');
       instances.add(phantom);
 
       final size = await cloner.getInstanceSize(
@@ -262,12 +259,16 @@ void main() {
       );
       // mods 被复制
       expect(
-        Directory('${targetBase.path}${Platform.pathSeparator}mods').existsSync(),
+        Directory(
+          '${targetBase.path}${Platform.pathSeparator}mods',
+        ).existsSync(),
         isTrue,
       );
       // cache 被排除
       expect(
-        Directory('${targetBase.path}${Platform.pathSeparator}cache').existsSync(),
+        Directory(
+          '${targetBase.path}${Platform.pathSeparator}cache',
+        ).existsSync(),
         isFalse,
       );
     });

@@ -104,8 +104,9 @@ void main() {
       );
 
       // OutOfMemoryError 关键字只应出现一次（在诊断模式列表中）
-      final occurrences =
-          'java.lang.OutOfMemoryError'.allMatches(report).length;
+      final occurrences = 'java.lang.OutOfMemoryError'
+          .allMatches(report)
+          .length;
       // 报告中至少出现 1 次（"匹配到的故障模式"列表里），
       // 但 "建议:" 描述文字不应重复
       expect(occurrences, greaterThanOrEqualTo(1));
@@ -203,9 +204,9 @@ void main() {
       // 准备 crash-reports 目录
       final tempDir = Directory.systemTemp.createTempSync('crash_test_');
       try {
-        final crashDir =
-            Directory('${tempDir.path}${Platform.pathSeparator}crash-reports')
-              ..createSync();
+        final crashDir = Directory(
+          '${tempDir.path}${Platform.pathSeparator}crash-reports',
+        )..createSync();
         File('${crashDir.path}${Platform.pathSeparator}crash-2024-01-01.txt')
           ..writeAsStringSync('Minecraft crashed!\nStack trace here');
 
@@ -225,8 +226,10 @@ void main() {
 
   group('GameErrorDetector - knownCrashPatterns', () {
     test('应包含至少 10 个已知故障模式', () {
-      expect(GameErrorDetector.knownCrashPatterns.length,
-          greaterThanOrEqualTo(10));
+      expect(
+        GameErrorDetector.knownCrashPatterns.length,
+        greaterThanOrEqualTo(10),
+      );
     });
 
     test('每个模式应是非空字符串', () {

@@ -50,9 +50,7 @@ void main() {
 
     test('ProviderScope override 应生效', () {
       final container = ProviderContainer(
-        overrides: [
-          selectedInstanceIndexProvider.overrideWith((ref) => 42),
-        ],
+        overrides: [selectedInstanceIndexProvider.overrideWith((ref) => 42)],
       );
       addTearDown(container.dispose);
 
@@ -61,8 +59,9 @@ void main() {
   });
 
   group('themeManagerProvider', () {
-    testWidgets('ConsumerWidget 可读取 themeManagerProvider 并显示类型',
-        (tester) async {
+    testWidgets('ConsumerWidget 可读取 themeManagerProvider 并显示类型', (
+      tester,
+    ) async {
       var captured = '';
       // 用 overrideWith 创建本地独立实例，避免影响全局单例
       await tester.pumpWidget(
@@ -88,8 +87,7 @@ void main() {
       expect(find.text('Type: ThemeManager'), findsOneWidget);
     });
 
-    testWidgets('ConsumerWidget 通过 watch 应在 Provider 变化时重建',
-        (tester) async {
+    testWidgets('ConsumerWidget 通过 watch 应在 Provider 变化时重建', (tester) async {
       var buildCount = 0;
       await tester.pumpWidget(
         ProviderScope(
@@ -120,8 +118,7 @@ void main() {
 
       // 等一帧确保任何潜在重建完成
       await tester.pump();
-      expect(buildCount, equals(1),
-          reason: 'read 不应触发 watch Consumer 重建');
+      expect(buildCount, equals(1), reason: 'read 不应触发 watch Consumer 重建');
     });
   });
 

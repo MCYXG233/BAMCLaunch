@@ -11,10 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bamclaunch/src/instance/instance_path_service.dart';
 import 'package:bamclaunch/src/instance/models.dart';
 
-GameInstance _makeInstance({
-  required String id,
-  required String directoryId,
-}) {
+GameInstance _makeInstance({required String id, required String directoryId}) {
   final now = DateTime.now();
   return GameInstance(
     id: id,
@@ -54,12 +51,8 @@ void main() {
   setUp(() {
     service = InstancePathService();
     tempDir = Directory.systemTemp.createTempSync('instance_path_test_');
-    directories = [
-      _makeDirectory(id: 'dir_1', path: tempDir.path),
-    ];
-    instances = [
-      _makeInstance(id: 'inst_1', directoryId: 'dir_1'),
-    ];
+    directories = [_makeDirectory(id: 'dir_1', path: tempDir.path)];
+    instances = [_makeInstance(id: 'inst_1', directoryId: 'dir_1')];
   });
 
   tearDown(() {
@@ -77,8 +70,10 @@ void main() {
       );
 
       // 期望: tempDir/instances/inst_1
-      expect(result.endsWith('instances${Platform.pathSeparator}inst_1'),
-          isTrue);
+      expect(
+        result.endsWith('instances${Platform.pathSeparator}inst_1'),
+        isTrue,
+      );
     });
 
     test('不存在的实例应抛 ArgumentError', () {

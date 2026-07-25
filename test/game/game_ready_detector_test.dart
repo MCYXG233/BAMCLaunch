@@ -168,8 +168,7 @@ void main() {
 
   group('GameReadyDetector.readyKeywords', () {
     test('应包含至少 4 个就绪关键字', () {
-      expect(GameReadyDetector.readyKeywords.length,
-          greaterThanOrEqualTo(4));
+      expect(GameReadyDetector.readyKeywords.length, greaterThanOrEqualTo(4));
       expect(GameReadyDetector.readyKeywords, contains('render thread'));
       expect(GameReadyDetector.readyKeywords, contains('glfw'));
       expect(GameReadyDetector.readyKeywords, contains('setting user'));

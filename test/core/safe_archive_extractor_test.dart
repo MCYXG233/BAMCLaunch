@@ -126,9 +126,7 @@ void main() {
     });
 
     test('Unix 绝对路径应被拒绝（/etc/passwd）', () async {
-      final bytes = buildZipBytes([
-        textFile('/etc/passwd', 'pwned'),
-      ]);
+      final bytes = buildZipBytes([textFile('/etc/passwd', 'pwned')]);
 
       final result = await SafeArchiveExtractor.extractZip(
         bytes: bytes,
@@ -154,9 +152,7 @@ void main() {
     });
 
     test('onUnsafePath 回调应被触发并接收原始条目名', () async {
-      final bytes = buildZipBytes([
-        textFile('../../evil.txt', 'pwned'),
-      ]);
+      final bytes = buildZipBytes([textFile('../../evil.txt', 'pwned')]);
 
       final captured = <String>[];
       await SafeArchiveExtractor.extractZip(
@@ -194,9 +190,7 @@ void main() {
     });
 
     test('Transformer 重写后超 targetDir 应被拒绝', () async {
-      final bytes = buildZipBytes([
-        textFile('placeholder.txt', 'pwned'),
-      ]);
+      final bytes = buildZipBytes([textFile('placeholder.txt', 'pwned')]);
 
       // 即使 transformer 改写，escape 路径仍需被防护
       await SafeArchiveExtractor.extractZip(
