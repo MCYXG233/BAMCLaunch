@@ -50,11 +50,14 @@ class InstancePathService {
     required List<GameInstance> instances,
     required List<InstanceDirectory> directories,
   }) {
-    return path.join(getInstancePath(
-      instanceId: instanceId,
-      instances: instances,
-      directories: directories,
-    ), 'mods');
+    return path.join(
+      getInstancePath(
+        instanceId: instanceId,
+        instances: instances,
+        directories: directories,
+      ),
+      'mods',
+    );
   }
 
   /// 计算实例的 config 目录路径
@@ -63,11 +66,14 @@ class InstancePathService {
     required List<GameInstance> instances,
     required List<InstanceDirectory> directories,
   }) {
-    return path.join(getInstancePath(
-      instanceId: instanceId,
-      instances: instances,
-      directories: directories,
-    ), 'config');
+    return path.join(
+      getInstancePath(
+        instanceId: instanceId,
+        instances: instances,
+        directories: directories,
+      ),
+      'config',
+    );
   }
 
   /// 计算实例的 saves（存档）目录路径
@@ -76,11 +82,14 @@ class InstancePathService {
     required List<GameInstance> instances,
     required List<InstanceDirectory> directories,
   }) {
-    return path.join(getInstancePath(
-      instanceId: instanceId,
-      instances: instances,
-      directories: directories,
-    ), 'saves');
+    return path.join(
+      getInstancePath(
+        instanceId: instanceId,
+        instances: instances,
+        directories: directories,
+      ),
+      'saves',
+    );
   }
 
   /// 计算实例的 resourcepacks（资源包）目录路径
@@ -89,11 +98,14 @@ class InstancePathService {
     required List<GameInstance> instances,
     required List<InstanceDirectory> directories,
   }) {
-    return path.join(getInstancePath(
-      instanceId: instanceId,
-      instances: instances,
-      directories: directories,
-    ), 'resourcepacks');
+    return path.join(
+      getInstancePath(
+        instanceId: instanceId,
+        instances: instances,
+        directories: directories,
+      ),
+      'resourcepacks',
+    );
   }
 
   /// 计算实例的 shaderpacks（光影包）目录路径
@@ -102,11 +114,14 @@ class InstancePathService {
     required List<GameInstance> instances,
     required List<InstanceDirectory> directories,
   }) {
-    return path.join(getInstancePath(
-      instanceId: instanceId,
-      instances: instances,
-      directories: directories,
-    ), 'shaderpacks');
+    return path.join(
+      getInstancePath(
+        instanceId: instanceId,
+        instances: instances,
+        directories: directories,
+      ),
+      'shaderpacks',
+    );
   }
 
   /// 计算实例的 screenshots（截图）目录路径
@@ -115,11 +130,14 @@ class InstancePathService {
     required List<GameInstance> instances,
     required List<InstanceDirectory> directories,
   }) {
-    return path.join(getInstancePath(
-      instanceId: instanceId,
-      instances: instances,
-      directories: directories,
-    ), 'screenshots');
+    return path.join(
+      getInstancePath(
+        instanceId: instanceId,
+        instances: instances,
+        directories: directories,
+      ),
+      'screenshots',
+    );
   }
 
   /// 计算实例的 logs（日志）目录路径
@@ -128,11 +146,14 @@ class InstancePathService {
     required List<GameInstance> instances,
     required List<InstanceDirectory> directories,
   }) {
-    return path.join(getInstancePath(
-      instanceId: instanceId,
-      instances: instances,
-      directories: directories,
-    ), 'logs');
+    return path.join(
+      getInstancePath(
+        instanceId: instanceId,
+        instances: instances,
+        directories: directories,
+      ),
+      'logs',
+    );
   }
 
   /// 确保实例的所有必要目录都存在

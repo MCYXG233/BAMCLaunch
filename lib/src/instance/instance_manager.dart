@@ -293,9 +293,7 @@ class InstanceManager {
 
       for (final versionDir in versionDirs) {
         final versionName = _basename(versionDir.path);
-        final jsonFile = File(
-          _joinPath(versionDir.path, '$versionName.json'),
-        );
+        final jsonFile = File(_joinPath(versionDir.path, '$versionName.json'));
 
         if (await jsonFile.exists()) {
           final exists = _instances.any(

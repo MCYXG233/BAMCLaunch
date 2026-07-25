@@ -9,9 +9,7 @@ import '../service_locator.dart';
 /// 注意：mod/ 与 resource/ 下各有一个 ModManager 同名类，通过 alias 区分。
 void registerModRegistry(ServiceLocator locator) {
   // ModManager (mod/) - Mod 管理器
-  locator.registerLazySingleton<mod.ModManager>(
-    () => mod.ModManager.instance,
-  );
+  locator.registerLazySingleton<mod.ModManager>(() => mod.ModManager.instance);
 
   // ModManager (resource/) - 资源 Mod 管理器
   locator.registerLazySingleton<res_mod.ModManager>(

@@ -79,11 +79,7 @@ class ErrorHandler {
     );
 
     _eventBus.publish(
-      ExceptionEvent(
-        error: error,
-        stackTrace: details.stack,
-        isFatal: false,
-      ),
+      ExceptionEvent(error: error, stackTrace: details.stack, isFatal: false),
     );
 
     if (_originalOnError != null) {
