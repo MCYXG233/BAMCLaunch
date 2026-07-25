@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../game/backup_manager.dart';
 import '../../instance/instance_manager.dart';
 import '../../instance/models.dart';
