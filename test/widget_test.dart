@@ -24,5 +24,9 @@ void main() {
 
     // Verify the app starts correctly
     expect(find.byType(MaterialApp), findsOneWidget);
+
+    // 清理资源
+    await tester.pump(const Duration(seconds: 1));
+    themeManager.dispose();
   });
 }

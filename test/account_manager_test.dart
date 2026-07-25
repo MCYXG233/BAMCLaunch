@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bamclaunch/src/account/account.dart';
 import 'package:bamclaunch/src/account/account_manager.dart';
+import 'package:bamclaunch/src/account/account_store.dart';
 import 'package:bamclaunch/src/config/config_manager.dart';
 import 'package:bamclaunch/src/config/config_keys.dart';
 import 'package:bamclaunch/src/config/config_models.dart';
@@ -278,14 +279,17 @@ void main() {
 
     setUp(() {
       AccountManager.reset();
-      accountManager = AccountManager();
+      AccountStore.reset();
       configManager = MockConfigManager();
+      AccountStore.setConfigForTesting(configManager);
+      accountManager = AccountManager();
       eventBus = EventBus();
       accountManager.initialize(eventBus: eventBus);
     });
 
     tearDown(() {
       accountManager.dispose();
+      AccountStore.reset();
       EventBus.reset();
     });
 
