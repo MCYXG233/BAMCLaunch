@@ -11,6 +11,9 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../config/config_manager.dart';
+import '../core/logger.dart';
+import '../event/event_bus.dart';
 import '../ui/theme/theme_manager.dart';
 
 /// ThemeManager 单例 Provider
@@ -27,3 +30,17 @@ final themeManagerProvider = ChangeNotifierProvider<ThemeManager>((ref) {
 /// 用于首页 / 库页面之间的选中状态共享。
 /// TODO: 后续迁移 BAMainPage._selectedInstanceIndex 时启用
 final selectedInstanceIndexProvider = StateProvider<int>((ref) => 0);
+
+/// Logger Provider（直接委托给 Logger.instance，避免依赖 ServiceLocator）
+///
+/// Logger 是项目启动最早初始化的单例，无需经过 ServiceLocator 注册。
+/// 新代码（ConsumerWidget）用 ref.watch(loggerProvider) 获取。
+final loggerProvider = Provider<Logger>((ref) => Logger.instance);
+
+/// EventBus Provider（直接委托给 EventBus.instance）
+final eventBusProvider = Provider<EventBus>((ref) => EventBus.instance);
+
+/// ConfigManager Provider（直接委托给 ConfigManager.instance）
+final configManagerProvider = Provider<ConfigManager>(
+  (ref) => ConfigManager.instance,
+);
