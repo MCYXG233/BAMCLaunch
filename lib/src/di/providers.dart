@@ -28,7 +28,7 @@ final themeManagerProvider = ChangeNotifierProvider<ThemeManager>((ref) {
 /// 当前选中的实例索引 Provider
 ///
 /// 用于首页 / 库页面之间的选中状态共享。
-/// TODO: 后续迁移 BAMainPage._selectedInstanceIndex 时启用
+/// 见 docs/TECH_DEBT_CLEANUP_PLAN.md T2.1：后续迁移 BAMainPage._selectedInstanceIndex 时启用
 final selectedInstanceIndexProvider = StateProvider<int>((ref) => 0);
 
 /// Logger Provider（直接委托给 Logger.instance，避免依赖 ServiceLocator）

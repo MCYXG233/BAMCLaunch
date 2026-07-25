@@ -1,4 +1,4 @@
-﻿/// 错误码定义
+/// 错误码定义
 /// 用于统一管理应用中的所有错误类型
 class ErrorCodes {
   // ========== 网络相关错误 (1000-1999) ==========
@@ -310,6 +310,12 @@ class AppException implements Exception {
 
   /// 用户友好的错误消息（兼容旧抽象类接口）
   String get userFriendlyMessage => message;
+
+  /// 统一的用户消息字段
+  ///
+  /// 与 [BAMCException.userMessage] 对齐，作为错误处理统一基线。
+  /// 用于 `ErrorHandler` 在记录日志时从任意异常中提取用户可读消息。
+  String get userMessage => message;
 
   /// 技术详情（兼容旧抽象类接口）
   String get debugDescription {

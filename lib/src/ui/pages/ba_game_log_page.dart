@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../theme/colors.dart';
 import '../theme/ba_theme_colors.dart';
+import '../../core/logger.dart';
 import '../../game/launcher/game_launcher.dart';
 import '../../game/launcher/models.dart';
 import '../components/log_panel.dart';
@@ -20,6 +21,7 @@ class BAGameLogPage extends StatefulWidget {
 class _BAGameLogPageState extends State<BAGameLogPage> {
   final GameLauncher _launcher = GameLauncher();
   final ScrollController _scrollController = ScrollController();
+  final Logger _logger = Logger('BAGameLogPage');
 
   StreamSubscription<GameLog>? _logSubscription;
   StreamSubscription<GameProcessStatus>? _statusSubscription;
@@ -92,7 +94,9 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
         _logFile = files.first as File;
         _lastFileLength = _logFile!.lengthSync();
       }
-    } catch (e) {}
+    } catch (e, st) {
+      _logger.warn('Failed to read game log files', e, st);
+    }
 
     _fileWatcherTimer = Timer.periodic(
       const Duration(milliseconds: 500),
@@ -128,7 +132,9 @@ class _BAGameLogPageState extends State<BAGameLogPage> {
 
         _lastFileLength = currentLength;
       }
-    } catch (e) {}
+    } catch (e, st) {
+      _logger.warn('Failed to read log file changes', e, st);
+    }
   }
 
   GameLogLevel _parseLogLevel(String line) {
