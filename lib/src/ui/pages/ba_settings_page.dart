@@ -5,8 +5,6 @@ import '../../config/background_config.dart';
 import '../../config/config_keys.dart';
 import '../../config/config_manager.dart';
 import '../../core/constants.dart';
-import '../../game/backup_manager.dart';
-import '../../game/game_statistics.dart';
 import '../../loader/java_selector_dialog.dart';
 import '../../platform/platform_adapter.dart';
 import '../../platform/platform_adapter_factory.dart';
@@ -45,9 +43,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
   final ConfigManager _configManager = ConfigManager();
   final ThemeManager _themeManager = ThemeManager();
   final BackgroundManager _backgroundManager = BackgroundManager();
-  final BackupManager _backupManager = BackupManager.instance;
-  final GameStatisticsManager _statisticsManager =
-      GameStatisticsManager.instance;
 
   String _selectedCategory = 'general';
   bool _notificationInitialized = false;
@@ -84,8 +79,6 @@ class _BASettingsPageState extends State<BASettingsPage> {
 
   Future<void> _initAllManagers() async {
     await _themeManager.initialize();
-    await _backupManager.initialize();
-    await _statisticsManager.initialize();
     await _loadBackgroundConfig();
     if (mounted) {
       setState(() {
@@ -796,7 +789,7 @@ class _BASettingsPageState extends State<BASettingsPage> {
       case 'download':
         return const DownloadSettingsPage();
       case 'about':
-        return AboutSettingsPage(appVersionDisplay: _appVersionDisplay);
+        return const AboutSettingsPage();
       default:
         return GeneralSettingsPage(
           themeManagerInitialized: _themeManagerInitialized,
