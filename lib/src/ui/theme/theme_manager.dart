@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../di/service_locator.dart';
 import 'app_theme.dart';
@@ -27,6 +27,16 @@ class ThemeManager extends ChangeNotifier {
 
   /// 私有构造函数
   ThemeManager._internal();
+
+  /// 重置单例（仅用于测试）
+  ///
+  /// Riverpod ChangeNotifierProvider 在 ProviderContainer.dispose() 时会
+  /// 调用 ThemeManager.dispose()，这会污染全局 _instance，使后续测试
+  /// 拿到已 dispose 的实例。测试可在 setUp/tearDown 中调用此方法清理。
+  @visibleForTesting
+  static void resetForTesting() {
+    _instance = null;
+  }
 
   ThemeMode _themeMode = ThemeMode.system;
   String _currentTheme = _blueArchiveKey;

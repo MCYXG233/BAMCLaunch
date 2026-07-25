@@ -53,9 +53,21 @@ class InstanceCloner {
     final now = DateTime.now();
 
     // 创建副本（重置ID、名称、时间和统计数据）
-    final duplicated = instance.copyWith(
+    // 直接用构造器而非 copyWith：copyWith 用 ?? 合并，无法把
+    // lastPlayed 重置为 null。直接构造确保 lastPlayed=null 生效。
+    final duplicated = GameInstance(
       id: id,
       name: newName,
+      directoryId: instance.directoryId,
+      version: instance.version,
+      loader: instance.loader,
+      loaderVersion: instance.loaderVersion,
+      icon: instance.icon,
+      description: instance.description,
+      status: instance.status,
+      loaderStatus: instance.loaderStatus,
+      config: instance.config,
+      resources: instance.resources,
       createdAt: now,
       updatedAt: now,
       lastPlayed: null,
@@ -149,11 +161,21 @@ class InstanceCloner {
     final id = generateId();
     final now = DateTime.now();
 
-    // 创建副本（更新目录ID）
-    final duplicated = instance.copyWith(
+    // 创建副本（更新目录ID、重置统计数据）
+    // 直接用构造器：copyWith 无法把 lastPlayed 重置为 null
+    final duplicated = GameInstance(
       id: id,
       name: newName,
       directoryId: targetDirectoryId,
+      version: instance.version,
+      loader: instance.loader,
+      loaderVersion: instance.loaderVersion,
+      icon: instance.icon,
+      description: instance.description,
+      status: instance.status,
+      loaderStatus: instance.loaderStatus,
+      config: instance.config,
+      resources: instance.resources,
       createdAt: now,
       updatedAt: now,
       lastPlayed: null,
