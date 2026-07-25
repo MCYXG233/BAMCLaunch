@@ -10,11 +10,19 @@ import '../../theme/colors.dart';
 import 'settings_components.dart';
 
 /// 关于设置页:展示应用信息、链接、缓存清理
+///
+/// 完全自包含:版本号集中在本类内定义,与 pubspec.yaml 保持一致
 class AboutSettingsPage extends StatelessWidget {
-  const AboutSettingsPage({super.key, required this.appVersionDisplay});
+  const AboutSettingsPage({super.key});
 
-  /// 应用版本显示(如 v1.0.0+1)
-  final String appVersionDisplay;
+  /// 应用版本号(集中管理,与 pubspec.yaml 保持一致)
+  static const String _appVersion = '1.0.0';
+
+  /// 应用构建号
+  static const String _appBuild = '1';
+
+  /// 应用全版本显示
+  String get _appVersionDisplay => 'v$_appVersion+$_appBuild';
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +43,7 @@ class AboutSettingsPage extends StatelessWidget {
                   builder: (dialogContext) => AlertDialog(
                     title: const Text('关于 BAMC Launch'),
                     content: Text(
-                      '版本 $appVersionDisplay\n© 2024 BAMC Launch Team',
+                      '版本 $_appVersionDisplay\n© 2024 BAMC Launch Team',
                     ),
                     actions: [
                       TextButton(
