@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'dart:convert';
 import 'package:path/path.dart' as path;
 import '../core/logger.dart';
@@ -530,7 +530,7 @@ class TerracottaManager {
   ///
   /// 注意：
   /// 当前实现为简化版本，实际项目可能需要引入完整的 ZIP 解压库。
-  /// TODO: 实现完整的 ZIP/TAR.GZ 解压逻辑
+  /// See #12: 实现完整的 ZIP/TAR.GZ 解压逻辑
   Future<void> _extractArchive(String zipPath, String destPath) async {
     // 简单的 ZIP 解压占位实现
     // 实际项目可能需要完整的 ZIP 库支持，如 archive 包
@@ -632,7 +632,7 @@ class TerracottaManager {
       }
 
       // 设置 API 端口和生成访问令牌
-      // TODO: 实现动态端口分配，避免端口冲突
+      // See #12: 实现动态端口分配，避免端口冲突
       _apiPort = 8080;
       // 生成基于时间戳的唯一令牌
       _apiToken =

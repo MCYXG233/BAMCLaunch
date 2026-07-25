@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:archive/archive.dart' as archive;
@@ -404,13 +404,13 @@ class UpdateManager {
           );
         }
       } else if (Platform.isMacOS) {
-        // TODO: macOS update installation
+        // See #13: macOS update installation
         throw AppException.fromCode(
           ErrorCodes.unknown,
           detail: 'macOS updates not implemented yet',
         );
       } else if (Platform.isLinux) {
-        // TODO: Linux update installation
+        // See #13: Linux update installation
         throw AppException.fromCode(
           ErrorCodes.unknown,
           detail: 'Linux updates not implemented yet',

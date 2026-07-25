@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:archive/archive.dart' as archive;
 import 'package:path/path.dart' as path;
 import '../../version/models.dart';
@@ -161,7 +161,9 @@ class NativeLibraryManager {
           arch.toLowerCase().contains('aarch64')) {
         return true;
       }
-    } catch (_) {}
+    } catch (e, st) {
+      _logger.debug('Failed to read PROCESSOR_ARCHITECTURE env', e, st);
+    }
     return false;
   }
 

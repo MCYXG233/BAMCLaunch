@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -641,12 +641,24 @@ class NetworkClient {
             // 关闭 sink 并清理不完整的下载文件
             try {
               await sink.close();
-            } catch (_) {}
+            } catch (closeErr, closeStack) {
+              _logger.warn(
+                'Failed to close sink during cleanup',
+                closeErr,
+                closeStack,
+              );
+            }
             try {
               if (await file.exists()) {
                 await file.delete();
               }
-            } catch (_) {}
+            } catch (delErr, delStack) {
+              _logger.warn(
+                'Failed to delete incomplete download file: $destinationPath',
+                delErr,
+                delStack,
+              );
+            }
             rethrow;
           }
           // 记录下载完成日志

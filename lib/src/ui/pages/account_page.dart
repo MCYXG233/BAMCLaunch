@@ -1430,7 +1430,7 @@ class _AuthlibLoginWrapperState extends State<_AuthlibLoginWrapper> {
     });
 
     try {
-      // TODO: 实现Authlib登录逻辑
+      // Authlib 登录逻辑未完全实现（此页面在 T6 死代码清理范围内，详见 docs/TECH_DEBT_CLEANUP_PLAN.md）
       // 这里是一个简化的示例，实际实现需要与Authlib服务器通信
       await Future.delayed(const Duration(seconds: 2));
 

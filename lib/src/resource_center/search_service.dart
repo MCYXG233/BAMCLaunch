@@ -1,4 +1,4 @@
-﻿import '../di/service_locator.dart';
+import '../di/service_locator.dart';
 import 'models.dart';
 import 'modrinth_api.dart';
 import 'api_interface.dart';
@@ -48,7 +48,7 @@ class SearchService {
       // 使用 Modrinth 真实 API 搜索
       final result = await _modrinthApi.search(params);
 
-      // TODO: 当 CurseForge API Key 配置后，启用聚合搜索
+      // TODO(curseforge): 当 CurseForge API Key 配置后，启用聚合搜索
       // if (_curseforgeApi != null) {
       //   final cfResult = await _curseforgeApi!.search(params);
       //   result = _mergeResults(result, cfResult, params);

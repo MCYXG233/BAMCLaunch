@@ -1,6 +1,8 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'app_exceptions.dart';
+import 'error_codes.dart';
 import 'logger.dart';
 import '../event/event.dart';
 import '../event/event_bus.dart';
@@ -69,11 +71,16 @@ class ErrorHandler {
 
   /// 处理Flutter框架异常
   void _handleFlutterError(FlutterErrorDetails details) {
-    _logger.error('Flutter framework error', details.exception, details.stack);
+    final error = details.exception;
+    _logger.error(
+      'Flutter framework error: ${_formatErrorMessage(error)}',
+      error,
+      details.stack,
+    );
 
     _eventBus.publish(
       ExceptionEvent(
-        error: details.exception,
+        error: error,
         stackTrace: details.stack,
         isFatal: false,
       ),
@@ -88,7 +95,11 @@ class ErrorHandler {
 
   /// 处理平台异常
   bool _handlePlatformError(Object error, StackTrace stackTrace) {
-    _logger.error('Platform error', error, stackTrace);
+    _logger.error(
+      'Platform error: ${_formatErrorMessage(error)}',
+      error,
+      stackTrace,
+    );
 
     _eventBus.publish(
       ExceptionEvent(error: error, stackTrace: stackTrace, isFatal: false),
@@ -99,11 +110,32 @@ class ErrorHandler {
 
   /// 处理Zone异常
   void _handleZoneError(Object error, StackTrace stackTrace) {
-    _logger.fatal('Uncaught error in zone', error, stackTrace);
+    _logger.fatal(
+      'Uncaught error in zone: ${_formatErrorMessage(error)}',
+      error,
+      stackTrace,
+    );
 
     _eventBus.publish(
       ExceptionEvent(error: error, stackTrace: stackTrace, isFatal: true),
     );
+  }
+
+  /// 格式化异常消息，统一提取 [BAMCException] / [AppException] 的用户消息
+  ///
+  /// T0 基线：日志中同时展示用户消息与异常专属元数据（i18nKey / errorCode），
+  /// 便于在 UI 国际化接入后做错误归因。
+  String _formatErrorMessage(Object error) {
+    if (error is BAMCException) {
+      final i18nKey = error.i18nKey;
+      return i18nKey != null
+          ? '${error.userMessage} (i18n: $i18nKey)'
+          : error.userMessage;
+    }
+    if (error is AppException) {
+      return '${error.userMessage} [code=${error.errorCode}]';
+    }
+    return error.toString();
   }
 
   /// 构建错误Widget
