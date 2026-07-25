@@ -1,5 +1,7 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:convert';
+import 'package:meta/meta.dart';
+
 import '../config/config_manager.dart';
 import '../config/config_keys.dart';
 import '../config/crypto_util.dart';
@@ -25,22 +27,48 @@ import 'account.dart';
 class AccountStore {
   static AccountStore? _instance;
 
+  /// 测试用配置管理器覆盖（仅用于测试注入）
+  static IConfigManager? _configOverrideForTesting;
+
   factory AccountStore() => instance;
 
-  AccountStore._internal();
+  AccountStore._internal() : _config = ConfigManager.instance;
+
+  /// 测试用构造函数，允许注入 [IConfigManager]
+  ///
+  /// 仅用于单元测试，生产代码应使用 [instance] 单例。
+  @visibleForTesting
+  AccountStore.forTesting(IConfigManager config) : _config = config;
 
   /// 获取单例实例
-  static AccountStore get instance =>
-      ServiceLocator.instance.tryGet<AccountStore>() ??
-      (_instance ??= AccountStore._internal());
+  static AccountStore get instance {
+    // 测试覆盖优先
+    if (_configOverrideForTesting != null) {
+      _instance ??= AccountStore.forTesting(_configOverrideForTesting!);
+      return _instance!;
+    }
+    return ServiceLocator.instance.tryGet<AccountStore>() ??
+        (_instance ??= AccountStore._internal());
+  }
 
   /// 重置单例（仅用于测试）
   static void reset() {
     _instance = null;
+    _configOverrideForTesting = null;
+  }
+
+  /// 为测试注入 [IConfigManager]（仅用于测试）
+  ///
+  /// 调用后，[instance] 将使用注入的配置管理器创建实例。
+  /// 需在测试 setUp 中调用，并在 tearDown 中调用 [reset] 清理。
+  @visibleForTesting
+  static void setConfigForTesting(IConfigManager config) {
+    _configOverrideForTesting = config;
+    _instance = null;
   }
 
   final Logger _logger = Logger('AccountStore');
-  final ConfigManager _config = ConfigManager.instance;
+  final IConfigManager _config;
 
   /// 账户列表存储键
   static const String _accountsKey = ConfigKeys.accounts;

@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
@@ -22,6 +22,7 @@ class _BAMCSplashPageState extends State<BAMCSplashPage>
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
+  Timer? _loadingTextTimer;
   int _currentDotIndex = 0;
   final List<String> _loadingTexts = [
     '正在初始化...',
@@ -41,6 +42,7 @@ class _BAMCSplashPageState extends State<BAMCSplashPage>
 
   @override
   void dispose() {
+    _loadingTextTimer?.cancel();
     _animationController.dispose();
     super.dispose();
   }
@@ -64,7 +66,9 @@ class _BAMCSplashPageState extends State<BAMCSplashPage>
 
     _animationController.forward();
 
-    Timer.periodic(const Duration(milliseconds: 600), (timer) {
+    _loadingTextTimer = Timer.periodic(const Duration(milliseconds: 600), (
+      timer,
+    ) {
       if (mounted && !_isInitialized) {
         setState(() {
           _currentDotIndex = (_currentDotIndex + 1) % 4;
