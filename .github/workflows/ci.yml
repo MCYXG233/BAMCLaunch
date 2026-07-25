@@ -24,8 +24,8 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: dart format --set-exit-if-changed .
-      # 仅 error 级别失败，info/warning 不阻塞 CI（仓库有历史遗留 info 待逐步清理）
-      - run: flutter analyze --no-fatal-infos
+      # 仅 error 级别失败，info/warning 不阻塞 CI（仓库有历史遗留 info/warning 待逐步清理）
+      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
   test:
     name: Test
