@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import '../event/event.dart';
 import '../event/event_bus.dart';
 import '../core/logger.dart';
@@ -379,7 +379,7 @@ class AccountManager implements IAccountManager {
   /// 返回 `int?`：若资源键未配置或当前账户离线则返回 `null`。
   /// 真实游戏资源通常由启动器之外的后台服务同步，此处仅返回缓存值。
   int? getResource(String key) {
-    // TODO: 与实际游戏资源服务对接，当前返回 null 以让调用方使用默认值
+    // See #11: 与实际游戏资源服务对接，当前返回 null 以让调用方使用默认值
     return null;
   }
 
@@ -835,7 +835,7 @@ class AccountManager implements IAccountManager {
   /// 返回值：
   /// - `Future<bool>`: 刷新成功返回 true，否则返回 false
   ///
-  /// TODO: 实现完整的微软OAuth令牌刷新流程
+  /// See #11: 实现完整的微软OAuth令牌刷新流程
   Future<bool> _refreshMicrosoftToken(Account account) async {
     try {
       _logger.debug('Attempting to refresh Microsoft token for ${account.id}');

@@ -1,4 +1,4 @@
-﻿/// BAMCLaunch 统一异常层次结构
+/// BAMCLaunch 统一异常层次结构
 ///
 /// 参考 HMCL 的异常体系设计，为每种失败场景提供专用异常类。
 /// 每个异常都包含用户可读的 i18n 消息 key。
@@ -19,6 +19,12 @@ abstract class BAMCException implements Exception {
     this.stackTrace,
     this.retryable = false,
   });
+
+  /// 统一的用户消息字段
+  ///
+  /// 与 [AppException.userMessage] 对齐，作为错误处理统一基线。
+  /// 用于 `ErrorHandler` 在记录日志时从任意异常中提取用户可读消息。
+  String get userMessage => message;
 
   @override
   String toString() => message;

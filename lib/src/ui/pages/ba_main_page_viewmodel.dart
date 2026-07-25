@@ -1,5 +1,6 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import '../../account/account_manager.dart';
+import '../../core/logger.dart';
 import '../../instance/instance_manager.dart';
 import '../theme/background_manager.dart';
 
@@ -7,6 +8,7 @@ class BAMainPageViewModel extends ChangeNotifier {
   final AccountManager _accountManager;
   final InstanceManager _instanceManager;
   final BackgroundManager _backgroundManager;
+  final Logger _logger = Logger('BAMainPageViewModel');
 
   // UI状态
   int _currentPage = 0;
@@ -95,7 +97,9 @@ class BAMainPageViewModel extends ChangeNotifier {
       _missionProgress = _accountManager.getResource('missionProgress') ?? 2;
       _missionTotal = _accountManager.getResource('missionTotal') ?? 8;
       _mailCount = _accountManager.getResource('mailCount') ?? 6;
-    } catch (e) {}
+    } catch (e, st) {
+      _logger.warn('Failed to load resource data', e, st);
+    }
     notifyListeners();
   }
 

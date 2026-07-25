@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:archive/archive.dart' as archive_lib;
 import '../../core/logger.dart';
@@ -254,7 +254,9 @@ class JavaDownloader {
       // 删除下载的压缩包
       try {
         await File(zipPath).delete();
-      } catch (_) {}
+      } catch (e, st) {
+        _logger.warn('Failed to delete downloaded archive: $zipPath', e, st);
+      }
 
       // 查找 java 可执行文件路径
       final javaExePath = getJavaExecutable(extractDir);
