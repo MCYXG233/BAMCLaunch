@@ -116,8 +116,9 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
           _proxyHost = proxyHost;
           _proxyPort = proxyPort;
           _proxyHostController.text = proxyHost;
-          _proxyPortController.text =
-              proxyPort == 0 ? '' : proxyPort.toString();
+          _proxyPortController.text = proxyPort == 0
+              ? ''
+              : proxyPort.toString();
           _autoSelectMirror = autoSelectMirror;
           _enableSpeedLimit = enableSpeedLimit;
           _speedLimitValue = speedLimitValue.toDouble();
