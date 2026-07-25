@@ -34,9 +34,7 @@ void registerGameRegistry(ServiceLocator locator) {
   locator.registerLazySingleton<JavaManager>(() => JavaManager.instance);
 
   // JavaDownloader - Java 下载器
-  locator.registerLazySingleton<JavaDownloader>(
-    () => JavaDownloader.instance,
-  );
+  locator.registerLazySingleton<JavaDownloader>(() => JavaDownloader.instance);
 
   // GameStatisticsManager - 游戏统计管理器
   locator.registerLazySingleton<GameStatisticsManager>(

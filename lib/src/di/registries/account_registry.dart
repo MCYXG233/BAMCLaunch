@@ -13,9 +13,7 @@ void registerAccountRegistry(ServiceLocator locator) {
   locator.registerLazySingleton<AccountStore>(() => AccountStore.instance);
 
   // AccountManager - 账户管理器
-  locator.registerLazySingleton<AccountManager>(
-    () => AccountManager.instance,
-  );
+  locator.registerLazySingleton<AccountManager>(() => AccountManager.instance);
 
   // SkinManager - 皮肤管理器
   locator.registerLazySingleton<SkinManager>(() => SkinManager.instance);

@@ -7,9 +7,7 @@ import '../service_locator.dart';
 /// 下载引擎与镜像源服务注册
 void registerDownloadRegistry(ServiceLocator locator) {
   // DownloadEngine - 下载引擎
-  locator.registerLazySingleton<DownloadEngine>(
-    () => DownloadEngine.instance,
-  );
+  locator.registerLazySingleton<DownloadEngine>(() => DownloadEngine.instance);
 
   // DownloadQueueManager - 下载队列管理器
   locator.registerLazySingleton<DownloadQueueManager>(

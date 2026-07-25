@@ -16,9 +16,7 @@ import '../service_locator.dart';
 /// 注册整合包、扩展、更新、备份、窗口控制、国际化、背景、布局、HUD 等功能服务。
 void registerFeatureRegistry(ServiceLocator locator) {
   // ModpackManager - 整合包管理器
-  locator.registerLazySingleton<ModpackManager>(
-    () => ModpackManager.instance,
-  );
+  locator.registerLazySingleton<ModpackManager>(() => ModpackManager.instance);
 
   // ExtensionManager - 扩展管理器
   locator.registerLazySingleton<ExtensionManager>(
@@ -62,7 +60,5 @@ void registerFeatureRegistry(ServiceLocator locator) {
   locator.registerLazySingleton<LayoutManager>(() => LayoutManager());
 
   // GameHUDManager - 游戏 HUD 管理器
-  locator.registerLazySingleton<GameHUDManager>(
-    () => GameHUDManager.instance,
-  );
+  locator.registerLazySingleton<GameHUDManager>(() => GameHUDManager.instance);
 }

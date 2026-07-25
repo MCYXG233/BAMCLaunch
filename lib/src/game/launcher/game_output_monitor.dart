@@ -41,9 +41,7 @@ class GameOutputMonitor {
       if (!logDir.existsSync()) {
         logDir.createSync(recursive: true);
       }
-      final logFile = File(
-        '$gameDirectory/logs/launcher_$processId.log',
-      );
+      final logFile = File('$gameDirectory/logs/launcher_$processId.log');
       logSink = logFile.openWrite(mode: FileMode.append);
       logSink.writeln(
         '=== Launcher Log - Process $processId - ${DateTime.now().toIso8601String()} ===',
