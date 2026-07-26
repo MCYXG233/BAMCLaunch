@@ -114,10 +114,7 @@ class ModDetailDialog extends StatelessWidget {
           _InfoRow(label: '模组ID', value: mod.modId ?? '未知'),
           _InfoRow(label: '作者', value: mod.author ?? '未知'),
           _InfoRow(label: '文件名', value: mod.fileName),
-          _InfoRow(
-            label: '文件大小',
-            value: _formatSize(mod.fileSize),
-          ),
+          _InfoRow(label: '文件大小', value: _formatSize(mod.fileSize)),
           if (mod.modLoader != null)
             _InfoRow(label: '加载器', value: mod.modLoader!),
           if (mod.lastModified != null)

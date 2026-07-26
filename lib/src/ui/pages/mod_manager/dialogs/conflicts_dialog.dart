@@ -108,8 +108,7 @@ class ConflictsDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            ...missingDependencies
-                .map((d) => _MissingDependencyCard(dep: d)),
+            ...missingDependencies.map((d) => _MissingDependencyCard(dep: d)),
           ],
         ],
       ),

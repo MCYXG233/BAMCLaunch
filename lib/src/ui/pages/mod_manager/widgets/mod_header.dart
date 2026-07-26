@@ -98,10 +98,7 @@ class ModHeader extends StatelessWidget {
             color: BAColors.dangerOf(context),
           ),
         if (missingDepCount > 0)
-          _WarningBadge(
-            text: '$missingDepCount 缺失依赖',
-            color: Colors.orange,
-          ),
+          _WarningBadge(text: '$missingDepCount 缺失依赖', color: Colors.orange),
       ],
     );
   }

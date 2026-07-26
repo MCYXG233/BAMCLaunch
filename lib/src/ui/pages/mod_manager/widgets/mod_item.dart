@@ -46,8 +46,8 @@ class ModItem extends StatelessWidget {
               color: isSelected
                   ? BAColors.primaryOf(context)
                   : mod.isEnabled
-                      ? BAColors.borderOf(context)
-                      : BAColors.textDisabledOf(context).withValues(alpha: 0.3),
+                  ? BAColors.borderOf(context)
+                  : BAColors.textDisabledOf(context).withValues(alpha: 0.3),
               width: isSelected ? 2 : 1,
             ),
           ),

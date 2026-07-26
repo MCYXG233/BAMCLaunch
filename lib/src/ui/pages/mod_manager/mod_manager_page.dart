@@ -361,11 +361,15 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
   @override
   Widget build(BuildContext context) {
     final filtered = _getFilteredMods();
-    final canEnable = _selectedModIds.isNotEmpty &&
-        _mods.where((m) => _selectedModIds.contains(m.id) && !m.isEnabled)
+    final canEnable =
+        _selectedModIds.isNotEmpty &&
+        _mods
+            .where((m) => _selectedModIds.contains(m.id) && !m.isEnabled)
             .isNotEmpty;
-    final canDisable = _selectedModIds.isNotEmpty &&
-        _mods.where((m) => _selectedModIds.contains(m.id) && m.isEnabled)
+    final canDisable =
+        _selectedModIds.isNotEmpty &&
+        _mods
+            .where((m) => _selectedModIds.contains(m.id) && m.isEnabled)
             .isNotEmpty;
 
     return Material(
