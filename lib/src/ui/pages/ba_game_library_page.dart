@@ -48,14 +48,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
   // 实例详情页状态
   GameInstance? _selectedInstance;
   TabController? _detailTabController;
-  static const List<String> _detailTabs = [
-    '概览',
-    '存档',
-    '模组',
-    '资源包',
-    '光影',
-    '截图',
-  ];
+  static const List<String> _detailTabs = ['概览', '存档', '模组', '资源包', '光影', '截图'];
   List<FileSystemEntity> _detailFiles = [];
   bool _isLoadingFiles = false;
 
@@ -655,11 +648,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
         ),
 
         // 浮动按钮
-        const Positioned(
-          right: 32,
-          bottom: 32,
-          child: LibraryFloatingButton(),
-        ),
+        const Positioned(right: 32, bottom: 32, child: LibraryFloatingButton()),
       ],
     );
   }

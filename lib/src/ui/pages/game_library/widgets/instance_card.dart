@@ -58,16 +58,8 @@ class InstanceCard extends StatelessWidget {
 
     Widget card = BAContextMenu(
       items: [
-        BAContextMenuItem(
-          icon: Icons.play_arrow,
-          label: '启动',
-          onTap: onLaunch,
-        ),
-        BAContextMenuItem(
-          icon: Icons.copy,
-          label: '复制',
-          onTap: onDuplicate,
-        ),
+        BAContextMenuItem(icon: Icons.play_arrow, label: '启动', onTap: onLaunch),
+        BAContextMenuItem(icon: Icons.copy, label: '复制', onTap: onDuplicate),
         BAContextMenuItem(
           icon: Icons.file_upload,
           label: '导出',
