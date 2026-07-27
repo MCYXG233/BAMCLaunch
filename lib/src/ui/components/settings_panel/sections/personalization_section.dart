@@ -6,28 +6,48 @@ import '../widgets/settings_content_area.dart';
 /// 个性化 - 主题 / 背景 / 字体 / 导航样式 / 音效
 class PersonalizationSection extends StatelessWidget {
   final String themeMode;
+  final String colorScheme;
   final String headNavStyle;
   final double fontSize;
   final bool enableSoundEffects;
   final bool enableSplashAnimation;
+  final bool randomCustomBackground;
+  final bool autoDarkenBackground;
+  final bool autoPurgeLauncherLogs;
   final ValueChanged<String> onThemeModeChanged;
+  final ValueChanged<String> onColorSchemeChanged;
   final ValueChanged<String> onHeadNavStyleChanged;
   final ValueChanged<double> onFontSizeChanged;
   final ValueChanged<bool> onEnableSoundEffectsChanged;
   final ValueChanged<bool> onEnableSplashAnimationChanged;
+  final ValueChanged<bool> onRandomCustomBackgroundChanged;
+  final ValueChanged<bool> onAutoDarkenBackgroundChanged;
+  final ValueChanged<bool> onAutoPurgeLauncherLogsChanged;
+  final VoidCallback onOpenThemeEditor;
+  final VoidCallback onManageBackground;
 
   const PersonalizationSection({
     super.key,
     required this.themeMode,
+    required this.colorScheme,
     required this.headNavStyle,
     required this.fontSize,
     required this.enableSoundEffects,
     required this.enableSplashAnimation,
+    required this.randomCustomBackground,
+    required this.autoDarkenBackground,
+    required this.autoPurgeLauncherLogs,
     required this.onThemeModeChanged,
-    required this.onFontSizeChanged,
+    required this.onColorSchemeChanged,
     required this.onHeadNavStyleChanged,
+    required this.onFontSizeChanged,
     required this.onEnableSoundEffectsChanged,
     required this.onEnableSplashAnimationChanged,
+    required this.onRandomCustomBackgroundChanged,
+    required this.onAutoDarkenBackgroundChanged,
+    required this.onAutoPurgeLauncherLogsChanged,
+    required this.onOpenThemeEditor,
+    required this.onManageBackground,
   });
 
   @override
@@ -58,7 +78,7 @@ class PersonalizationSection extends StatelessWidget {
               icon: Icons.color_lens_outlined,
               title: '配色方案',
               subtitle: '蔚蓝档案 / Minecraft / 自定义',
-              value: 'blue_archive',
+              value: colorScheme,
               items: const [
                 DropdownMenuItem(
                   value: 'blue_archive',
@@ -67,14 +87,16 @@ class PersonalizationSection extends StatelessWidget {
                 DropdownMenuItem(value: 'minecraft', child: Text('Minecraft')),
                 DropdownMenuItem(value: 'custom', child: Text('自定义')),
               ],
-              onChanged: (_) {},
+              onChanged: (v) {
+                if (v != null) onColorSchemeChanged(v);
+              },
             ),
             ButtonRow(
               icon: Icons.brush_outlined,
               title: '自定义主题编辑器',
               subtitle: '颜色、字体、圆角、阴影',
               buttonLabel: '打开',
-              onPressed: () {},
+              onPressed: onOpenThemeEditor,
             ),
           ],
         ),
@@ -88,21 +110,21 @@ class PersonalizationSection extends StatelessWidget {
               title: '背景图片',
               subtitle: '选择本地图片作为主背景',
               buttonLabel: '管理',
-              onPressed: () {},
+              onPressed: onManageBackground,
             ),
             SwitchRow(
               icon: Icons.auto_awesome_outlined,
               title: '随机自定义背景',
               subtitle: '每次启动随机使用文件夹内的图片',
-              value: false,
-              onChanged: (_) {},
+              value: randomCustomBackground,
+              onChanged: onRandomCustomBackgroundChanged,
             ),
             SwitchRow(
               icon: Icons.dark_mode_outlined,
               title: '自动加深背景',
               subtitle: '保证前景文字清晰可读',
-              value: true,
-              onChanged: (_) {},
+              value: autoDarkenBackground,
+              onChanged: onAutoDarkenBackgroundChanged,
             ),
           ],
         ),
@@ -162,8 +184,8 @@ class PersonalizationSection extends StatelessWidget {
               icon: Icons.auto_delete_outlined,
               title: '自动清理启动器日志',
               subtitle: '避免日志文件无限增长',
-              value: true,
-              onChanged: (_) {},
+              value: autoPurgeLauncherLogs,
+              onChanged: onAutoPurgeLauncherLogsChanged,
             ),
           ],
         ),

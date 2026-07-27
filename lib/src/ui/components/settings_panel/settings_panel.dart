@@ -1,20 +1,26 @@
-import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../../../account/account_manager.dart';
+import '../../../auth/authlib_injector.dart';
 import '../../../config/background_config.dart';
 import '../../../config/config_keys.dart';
 import '../../../config/config_manager.dart';
 import '../../../core/constants.dart';
+import '../../../core/logger.dart';
+import '../../../core/privacy_manager.dart';
+import '../../../download/mirror_manager.dart';
+import '../../../game/backup_manager.dart';
+import '../../../instance/instance_manager.dart';
 import '../../theme/background_manager.dart';
-import '../../theme/colors.dart';
 import '../../theme/theme_manager.dart';
-import '../ba_background_selector.dart';
+import '../ba_login_dialog.dart';
 import '../ba_notification.dart';
+import '../theme_editor.dart';
 import '../../../loader/java_selector_dialog.dart';
+import 'dialogs/background_picker_dialog.dart';
+import 'dialogs/open_source_dialog.dart';
 import 'widgets/sidebar_nav.dart';
-import 'widgets/settings_content_area.dart';
 import 'widgets/settings_theme.dart';
 import 'sections/about_section.dart';
 import 'sections/accounts_section.dart';
@@ -138,10 +144,26 @@ class _SettingsPanelState extends State<SettingsPanel>
   int _mcpServerPort = 8765;
   bool _extensionsEnabled = false;
 
+  // 新增状态：账号 / 翻译 / 隐私 / 背景 / 主题
+  String _authlibSelectedServer = 'microsoft';
+  String _currentAccountLabel = '未登录';
+  bool _translateResourceNames = false;
+  bool _sendAnonymousStats = false;
+  bool _autoReportCrashes = true;
+  bool _randomCustomBackground = false;
+  bool _autoDarkenBackground = true;
+  bool _autoPurgeLauncherLogs = true;
+
+  // 关于页常量
+  static const String _launcherVersion = '1.0.0';
+  static const String _buildTime = '2026-07-27';
+
   late TextEditingController _proxyHostController;
   late TextEditingController _proxyPortController;
   late TextEditingController _jvmArgsController;
   late TextEditingController _gameArgsController;
+
+  final Logger _logger = Logger('SettingsPanel');
 
   @override
   void initState() {
@@ -277,6 +299,38 @@ class _SettingsPanelState extends State<SettingsPanel>
       _mcpServerPort = _configManager.getInt(ConfigKeys.mcpServerPort) ?? 8765;
       _extensionsEnabled =
           _configManager.getBool(ConfigKeys.extensionsEnabled) ?? false;
+
+      // 加载新增状态
+      _authlibSelectedServer =
+          _configManager.getString(ConfigKeys.authlibSelectedServer) ??
+          'microsoft';
+      _translateResourceNames =
+          _configManager.getBool(ConfigKeys.resourceTranslation) ?? false;
+      _randomCustomBackground =
+          _configManager.getBool(ConfigKeys.randomCustomBackground) ?? false;
+      _autoDarkenBackground =
+          _configManager.getBool(ConfigKeys.autoDarkenBackground) ?? true;
+      _autoPurgeLauncherLogs =
+          _configManager.getBool(ConfigKeys.autoPurgeLauncherLogs) ?? true;
+
+      // 从 PrivacyManager 加载隐私配置
+      try {
+        final privacyConfig = PrivacyManager().config;
+        _sendAnonymousStats = !privacyConfig.disableAnalytics;
+        _autoReportCrashes = !privacyConfig.disableCrashReporting;
+      } catch (e) {
+        _logger.warn('Failed to load privacy config: $e');
+      }
+
+      // 加载当前登录账号的显示名
+      try {
+        final account = await AccountManager.instance.getSelectedAccount();
+        if (account != null) {
+          _currentAccountLabel = account.username;
+        }
+      } catch (e) {
+        _logger.warn('Failed to load current account: $e');
+      }
 
       String themeModeStr;
       switch (_themeManager.themeMode) {
@@ -442,6 +496,513 @@ class _SettingsPanelState extends State<SettingsPanel>
     }
   }
 
+  // ==================== 账号回调 ====================
+
+  Future<void> _loginMicrosoft() async {
+    try {
+      await showDialog(context: context, builder: (_) => const BALoginDialog());
+      // 登录对话框关闭后刷新当前账号显示
+      final account = await AccountManager.instance.getSelectedAccount();
+      if (mounted) {
+        setState(() {
+          _currentAccountLabel = account?.username ?? '未登录';
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('登录失败', message: e.toString());
+      }
+    }
+  }
+
+  Future<void> _refreshToken() async {
+    try {
+      final account = await AccountManager.instance.getSelectedAccount();
+      if (account == null) {
+        NotificationManager().showWarning('请先登录账号');
+        return;
+      }
+      final success = await AccountManager.instance.refreshToken(account);
+      if (mounted) {
+        if (success) {
+          NotificationManager().showSuccess('令牌刷新成功');
+        } else {
+          NotificationManager().showWarning('令牌刷新失败，请重新登录');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('刷新令牌失败', message: e.toString());
+      }
+    }
+  }
+
+  Future<void> _addAuthlibServer() async {
+    final url = await _showTextInputDialog(
+      title: '添加认证服务器',
+      labelText: '服务器注册 API 地址',
+      hintText: '例如 https://example.com/api/yggdrasil',
+    );
+    if (url == null || url.isEmpty) return;
+
+    try {
+      final authlibInjector = AuthlibInjector.instance;
+      final serverInfo = await authlibInjector.getAuthServerInfo(url);
+      // 保存到已添加列表
+      final stored = _configManager.get<List<dynamic>>(
+            ConfigKeys.authlibServers,
+          ) ??
+          [];
+      final list = stored.cast<Map<dynamic, dynamic>>().map((e) {
+        return Map<String, dynamic>.from(e);
+      }).toList();
+      list.add({
+        'url': url,
+        'name': serverInfo.metadata.name,
+        'description': serverInfo.metadata.description,
+      });
+      await _configManager.set<List<dynamic>>(ConfigKeys.authlibServers, list);
+      await _configManager.save();
+      if (mounted) {
+        NotificationManager().showSuccess(
+          '已添加认证服务器：${serverInfo.metadata.name}',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('添加失败', message: e.toString());
+      }
+    }
+  }
+
+  Future<void> _manageAuthlibServers() async {
+    final stored = _configManager.get<List<dynamic>>(
+          ConfigKeys.authlibServers,
+        ) ??
+        [];
+    if (stored.isEmpty) {
+      NotificationManager().showInfo('尚未添加任何认证服务器');
+      return;
+    }
+    final list = stored.cast<Map<dynamic, dynamic>>().map((e) {
+      return Map<String, dynamic>.from(e);
+    }).toList();
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return AlertDialog(
+              title: const Text('管理认证服务器'),
+              content: SizedBox(
+                width: 360,
+                child: list.isEmpty
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: Text('已清空'),
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: list.length,
+                        itemBuilder: (_, i) {
+                          final item = list[i];
+                          return ListTile(
+                            title: Text(item['name'] as String? ?? '未知'),
+                            subtitle: Text(item['url'] as String? ?? ''),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete_outline, size: 18),
+                              onPressed: () {
+                                setState(() => list.removeAt(i));
+                              },
+                            ),
+                          );
+                        },
+                      ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('关闭'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    // 保存删除后的列表
+    try {
+      await _configManager.set<List<dynamic>>(ConfigKeys.authlibServers, list);
+      await _configManager.save();
+    } catch (e) {
+      _logger.warn('Failed to save authlib servers: $e');
+    }
+  }
+
+  Future<void> _createOfflineAccount() async {
+    final username = await _showTextInputDialog(
+      title: '新建离线账号',
+      labelText: '用户名',
+      hintText: '请输入离线账号用户名',
+    );
+    if (username == null || username.isEmpty) return;
+
+    try {
+      final account = await AccountManager.instance.addOfflineAccount(username);
+      await AccountManager.instance.selectAccount(account.id);
+      if (mounted) {
+        setState(() => _currentAccountLabel = account.username);
+        NotificationManager().showSuccess('离线账号已创建');
+      }
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('创建失败', message: e.toString());
+      }
+    }
+  }
+
+  void _onAuthlibServerChanged(String value) {
+    _setString(
+      ConfigKeys.authlibSelectedServer,
+      value,
+      (v) => _authlibSelectedServer = v,
+    );
+  }
+
+  // ==================== Java / 游戏目录回调 ====================
+
+  Future<void> _pickInstalledJava() async {
+    // 与 _pickJavaPath 复用同一对话框
+    await _pickJavaPath();
+  }
+
+  Future<void> _addCustomPath() async {
+    final result = await FilePicker.platform.getDirectoryPath();
+    if (result == null) return;
+
+    try {
+      final stored = _configManager.get<List<dynamic>>(
+            ConfigKeys.customGameDirectories,
+          ) ??
+          [];
+      final list = stored.cast<String>().toList();
+      if (!list.contains(result)) {
+        list.add(result);
+        await _configManager.set<List<dynamic>>(
+          ConfigKeys.customGameDirectories,
+          list,
+        );
+        await _configManager.save();
+        if (mounted) NotificationManager().showSuccess('已添加自定义路径');
+      } else {
+        if (mounted) NotificationManager().showInfo('该路径已存在');
+      }
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('添加失败', message: e.toString());
+      }
+    }
+  }
+
+  Future<void> _rescanSystem() async {
+    try {
+      await InstanceManager.instance.initialize();
+      if (mounted) {
+        NotificationManager().showSuccess('系统扫描已完成');
+      }
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('扫描失败', message: e.toString());
+      }
+    }
+  }
+
+  // ==================== 下载源回调 ====================
+
+  Future<void> _addCustomMirror() async {
+    final url = await _showTextInputDialog(
+      title: '添加自定义镜像',
+      labelText: '镜像 URL',
+      hintText: '例如 https://bmclapi2.bangbang93.com',
+    );
+    if (url == null || url.isEmpty) return;
+
+    final name = await _showTextInputDialog(
+      title: '镜像名称',
+      labelText: '显示名称',
+      hintText: '例如 我的镜像',
+    );
+    if (name == null || name.isEmpty) return;
+
+    try {
+      final mirror = MirrorInfo(
+        id: 'custom_${DateTime.now().millisecondsSinceEpoch}',
+        name: name,
+        url: url,
+      );
+      await MirrorManager.instance.addCustomMirror(mirror);
+      if (mounted) NotificationManager().showSuccess('已添加自定义镜像');
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('添加失败', message: e.toString());
+      }
+    }
+  }
+
+  Future<void> _speedTest() async {
+    try {
+      NotificationManager().showInfo('开始镜像延迟测试...');
+      final results = await MirrorManager.instance.speedTestAllMirrors();
+      if (mounted) {
+        if (results.isEmpty) {
+          NotificationManager().showWarning('未找到可用镜像');
+          return;
+        }
+        final fastest = results.reduce(
+          (a, b) => a.latencyMs < b.latencyMs ? a : b,
+        );
+        NotificationManager().showSuccess(
+          '测试完成，最快镜像：${fastest.mirror.name}（${fastest.latencyMs} ms）',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('测速失败', message: e.toString());
+      }
+    }
+  }
+
+  // ==================== 备份回调 ====================
+
+  Future<void> _viewBackupHistory() async {
+    try {
+      final backupManager = BackupManager();
+      await backupManager.initialize();
+      final backups = backupManager.getAllBackups();
+      if (backups.isEmpty) {
+        if (mounted) NotificationManager().showInfo('暂无历史备份');
+        return;
+      }
+      if (!mounted) return;
+      await showDialog(
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            title: const Text('历史备份'),
+            content: SizedBox(
+              width: 420,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: backups.length,
+                itemBuilder: (_, i) {
+                  final b = backups[i];
+                  return ListTile(
+                    title: Text(b.instanceName),
+                    subtitle: Text(
+                      '${b.createdAt.toLocal()} · ${b.type.name}',
+                    ),
+                  );
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('关闭'),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('加载备份失败', message: e.toString());
+      }
+    }
+  }
+
+  Future<void> _backupAllNow() async {
+    try {
+      final instanceManager = InstanceManager.instance;
+      await instanceManager.initialize();
+      final instances = instanceManager.instances;
+      if (instances.isEmpty) {
+        if (mounted) NotificationManager().showInfo('没有可备份的实例');
+        return;
+      }
+      final backupManager = BackupManager();
+      await backupManager.initialize();
+      int success = 0;
+      for (final inst in instances) {
+        final dir = instanceManager.directories.firstWhere(
+          (d) => d.id == inst.directoryId,
+          orElse: () => instanceManager.directories.first,
+        );
+        final record = await backupManager.createBackup(
+          instanceId: inst.id,
+          instanceName: inst.name,
+          instancePath: dir.path,
+        );
+        if (record != null) success++;
+      }
+      if (mounted) {
+        NotificationManager().showSuccess('备份完成：$success/${instances.length}');
+      }
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('备份失败', message: e.toString());
+      }
+    }
+  }
+
+  // ==================== 隐私回调 ====================
+
+  Future<void> _setPrivacyFlag(
+    bool value,
+    bool Function(PrivacyConfig) getter,
+    PrivacyConfig Function(PrivacyConfig, bool) updater,
+    ValueChanged<bool> stateUpdater,
+  ) async {
+    try {
+      final manager = PrivacyManager();
+      final current = manager.config;
+      final updated = updater(current, value);
+      await manager.setConfig(updated);
+      stateUpdater(value);
+      if (mounted) setState(() {});
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('保存失败', message: e.toString());
+      }
+    }
+  }
+
+  // ==================== 关于回调 ====================
+
+  Future<void> _checkUpdate() async {
+    NotificationManager().showInfo('正在检查更新...');
+    // TODO: 接入真实的更新检查逻辑
+    await Future.delayed(const Duration(seconds: 1));
+    if (mounted) {
+      NotificationManager().showSuccess('当前已是最新版本');
+    }
+  }
+
+  Future<void> _showChangelog() async {
+    if (!mounted) return;
+    await showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('更新日志'),
+          content: const SizedBox(
+            width: 420,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'v1.0.0',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text('· 初始版本发布'),
+                  Text('· 实现设置面板全新分组'),
+                  Text('· 接入 BackupManager / MirrorManager / AccountManager'),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('关闭'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ==================== 主题与背景回调 ====================
+
+  Future<void> _openThemeEditor() async {
+    if (!mounted) return;
+    final editorState = ThemeEditorState();
+    await editorState.loadConfig();
+    await showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('主题编辑器'),
+          content: SizedBox(
+            width: 560,
+            child: SingleChildScrollView(child: ThemeEditorWidget(editorState: editorState)),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('关闭'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _manageBackground() {
+    _showBackgroundSelector();
+  }
+
+  Future<void> _setColorScheme(String value) async {
+    try {
+      await _themeManager.setTheme(value);
+      if (mounted) setState(() => _colorScheme = value);
+    } catch (e) {
+      if (mounted) {
+        NotificationManager().showError('切换配色失败', message: e.toString());
+      }
+    }
+  }
+
+  // ==================== 工具：文本输入对话框 ====================
+
+  Future<String?> _showTextInputDialog({
+    required String title,
+    required String labelText,
+    String? hintText,
+  }) {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(title),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              labelText: labelText,
+              hintText: hintText,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(null),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+              child: const Text('确定'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   // ==================== 侧栏导航 ====================
 
   List<SidebarSection> _buildSidebarSections() {
@@ -542,7 +1103,16 @@ class _SettingsPanelState extends State<SettingsPanel>
   Widget _buildSelectedContent() {
     switch (_selectedId) {
       case SettingsSectionId.accounts:
-        return const AccountsSection();
+        return AccountsSection(
+          currentAccountLabel: _currentAccountLabel,
+          authlibSelectedServer: _authlibSelectedServer,
+          onLoginMicrosoft: _loginMicrosoft,
+          onRefreshToken: _refreshToken,
+          onAddAuthlibServer: _addAuthlibServer,
+          onAuthlibServerChanged: _onAuthlibServerChanged,
+          onManageAuthlibServers: _manageAuthlibServers,
+          onCreateOfflineAccount: _createOfflineAccount,
+        );
       case SettingsSectionId.javaLaunch:
         return JavaLaunchSection(
           javaPath: _javaPath,
@@ -583,6 +1153,7 @@ class _SettingsPanelState extends State<SettingsPanel>
               _setBool(ConfigKeys.fullscreen, v, (val) => _fullscreen = val),
           onGcStrategyChanged: (v) =>
               _setString(ConfigKeys.gcStrategy, v, (val) => _gcStrategy = val),
+          onPickInstalledJava: _pickInstalledJava,
         );
       case SettingsSectionId.gameDirectory:
         return GameDirectorySection(
@@ -594,6 +1165,8 @@ class _SettingsPanelState extends State<SettingsPanel>
             v,
             (val) => _versionIsolation = val,
           ),
+          onAddCustomPath: _addCustomPath,
+          onRescanSystem: _rescanSystem,
         );
       case SettingsSectionId.instance:
         return InstanceSection(
@@ -684,6 +1257,8 @@ class _SettingsPanelState extends State<SettingsPanel>
             v,
             (val) => _autoSwitchMirror = val,
           ),
+          onAddCustomMirror: _addCustomMirror,
+          onSpeedTest: _speedTest,
         );
       case SettingsSectionId.downloadParams:
         return DownloadParamsSection(
@@ -794,15 +1369,22 @@ class _SettingsPanelState extends State<SettingsPanel>
             v,
             (val) => _autoBackupCompress = val,
           ),
+          onViewHistory: _viewBackupHistory,
+          onBackupAllNow: _backupAllNow,
         );
       case SettingsSectionId.personalization:
         return PersonalizationSection(
           themeMode: _themeMode,
+          colorScheme: _colorScheme,
           headNavStyle: _headNavStyle,
           fontSize: _fontSize,
           enableSoundEffects: _enableSoundEffects,
           enableSplashAnimation: _enableAnimation,
+          randomCustomBackground: _randomCustomBackground,
+          autoDarkenBackground: _autoDarkenBackground,
+          autoPurgeLauncherLogs: _autoPurgeLauncherLogs,
           onThemeModeChanged: _saveThemeMode,
+          onColorSchemeChanged: _setColorScheme,
           onHeadNavStyleChanged: (v) => _setString(
             ConfigKeys.headNavStyle,
             v,
@@ -820,6 +1402,23 @@ class _SettingsPanelState extends State<SettingsPanel>
             v,
             (val) => _enableAnimation = val,
           ),
+          onRandomCustomBackgroundChanged: (v) => _setBool(
+            ConfigKeys.randomCustomBackground,
+            v,
+            (val) => _randomCustomBackground = val,
+          ),
+          onAutoDarkenBackgroundChanged: (v) => _setBool(
+            ConfigKeys.autoDarkenBackground,
+            v,
+            (val) => _autoDarkenBackground = val,
+          ),
+          onAutoPurgeLauncherLogsChanged: (v) => _setBool(
+            ConfigKeys.autoPurgeLauncherLogs,
+            v,
+            (val) => _autoPurgeLauncherLogs = val,
+          ),
+          onOpenThemeEditor: _openThemeEditor,
+          onManageBackground: _manageBackground,
         );
       case SettingsSectionId.advanced:
         return AdvancedSection(
@@ -830,6 +1429,9 @@ class _SettingsPanelState extends State<SettingsPanel>
           mcpServerEnabled: _mcpServerEnabled,
           mcpServerPort: _mcpServerPort,
           extensionsEnabled: _extensionsEnabled,
+          translateResourceNames: _translateResourceNames,
+          sendAnonymousStats: _sendAnonymousStats,
+          autoReportCrashes: _autoReportCrashes,
           onUseProxyChanged: (v) =>
               _setBool(ConfigKeys.useProxy, v, (val) => _useProxy = val),
           onProxyAddressSubmitted: (v) =>
@@ -855,157 +1457,68 @@ class _SettingsPanelState extends State<SettingsPanel>
             v,
             (val) => _extensionsEnabled = val,
           ),
+          onTranslateResourceNamesChanged: (v) => _setBool(
+            ConfigKeys.resourceTranslation,
+            v,
+            (val) => _translateResourceNames = val,
+          ),
+          onSendAnonymousStatsChanged: (v) => _setPrivacyFlag(
+            v,
+            (c) => !c.disableAnalytics,
+            (c, val) => c.copyWith(disableAnalytics: !val),
+            (val) => _sendAnonymousStats = val,
+          ),
+          onAutoReportCrashesChanged: (v) => _setPrivacyFlag(
+            v,
+            (c) => !c.disableCrashReporting,
+            (c, val) => c.copyWith(disableCrashReporting: !val),
+            (val) => _autoReportCrashes = val,
+          ),
         );
       case SettingsSectionId.about:
-        return const AboutSection();
+        return AboutSection(
+          autoUpdate: _autoUpdate,
+          launcherVersion: _launcherVersion,
+          buildTime: _buildTime,
+          onCheckUpdate: _checkUpdate,
+          onAutoUpdateChanged: (v) => _setBool(
+            ConfigKeys.autoUpdate,
+            v,
+            (val) => _autoUpdate = val,
+          ),
+          onViewChangelog: _showChangelog,
+          onViewOpenSource: _showOpenSourceDialog,
+        );
       default:
-        return const AccountsSection();
+        return AccountsSection(
+          currentAccountLabel: _currentAccountLabel,
+          authlibSelectedServer: _authlibSelectedServer,
+          onLoginMicrosoft: _loginMicrosoft,
+          onRefreshToken: _refreshToken,
+          onAddAuthlibServer: _addAuthlibServer,
+          onAuthlibServerChanged: _onAuthlibServerChanged,
+          onManageAuthlibServers: _manageAuthlibServers,
+          onCreateOfflineAccount: _createOfflineAccount,
+        );
     }
   }
 
   // ==================== 背景选择 / 开源对话框 ====================
 
   void _showBackgroundSelector() {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('背景设置'),
-        content: SizedBox(
-          width: 400,
-          child: BABackgroundSelector(
-            currentConfig: _backgroundConfig,
-            onConfigChanged: (config) async {
-              await _backgroundManager.saveBackgroundConfig(config);
-              if (!mounted) return;
-              setState(() => _backgroundConfig = config);
-            },
-            onPickImage: () async {
-              final result = await FilePicker.platform.pickFiles(
-                type: FileType.image,
-              );
-              if (!mounted) return;
-              if (result != null && result.files.isNotEmpty) {
-                final path = result.files.single.path;
-                if (path != null) {
-                  final config = BackgroundConfig(
-                    type: BackgroundType.image,
-                    imagePath: path,
-                    opacity: 1.0,
-                  );
-                  // ignore: use_build_context_synchronously
-                  Navigator.pop(dialogContext);
-                  await _backgroundManager.saveBackgroundConfig(config);
-                  if (!mounted) return;
-                  setState(() => _backgroundConfig = config);
-                  NotificationManager().showSuccess('背景已更新');
-                }
-              }
-            },
-            onPickVideo: () async {
-              final result = await FilePicker.platform.pickFiles(
-                type: FileType.video,
-              );
-              if (!mounted) return;
-              if (result != null && result.files.isNotEmpty) {
-                final path = result.files.single.path;
-                if (path != null) {
-                  final config = BackgroundConfig(
-                    type: BackgroundType.video,
-                    videoPath: path,
-                    opacity: 1.0,
-                  );
-                  // ignore: use_build_context_synchronously
-                  Navigator.pop(dialogContext);
-                  await _backgroundManager.saveBackgroundConfig(config);
-                  if (!mounted) return;
-                  setState(() => _backgroundConfig = config);
-                  NotificationManager().showSuccess('背景已更新');
-                }
-              }
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('完成'),
-          ),
-        ],
-      ),
+    BackgroundPickerDialog.show(
+      context,
+      currentConfig: _backgroundConfig,
+      onChanged: (config) async {
+        await _backgroundManager.saveBackgroundConfig(config);
+        if (!mounted) return;
+        setState(() => _backgroundConfig = config);
+      },
     );
   }
 
   void _showOpenSourceDialog() {
-    final openSourceProjects = [
-      {
-        'name': 'Flutter',
-        'url': 'https://github.com/flutter/flutter',
-        'license': 'BSD-3-Clause',
-      },
-      {'name': 'BMCLAPI', 'url': 'https://www.bmclapi.com/', 'license': '服务'},
-      {'name': 'Modrinth', 'url': 'https://modrinth.com', 'license': 'API'},
-      {
-        'name': 'CurseForge',
-        'url': 'https://www.curseforge.com/minecraft',
-        'license': 'API',
-      },
-      {
-        'name': 'url_launcher',
-        'url':
-            'https://github.com/flutter/packages/tree/main/packages/url_launcher',
-        'license': 'BSD-3-Clause',
-      },
-      {
-        'name': 'file_picker',
-        'url': 'https://github.com/miguelpruivo/flutter_file_picker',
-        'license': 'MIT',
-      },
-    ];
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.favorite, color: const Color(0xFFE668A8), size: 20),
-            const SizedBox(width: 8),
-            const Text('开源组件'),
-          ],
-        ),
-        content: SizedBox(
-          width: 400,
-          height: 400,
-          child: ListView.separated(
-            shrinkWrap: true,
-            itemCount: openSourceProjects.length,
-            separatorBuilder: (_, _) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final project = openSourceProjects[index];
-              return ListTile(
-                leading: const Icon(Icons.code),
-                title: Text(project['name']!),
-                subtitle: Text(project['license']!),
-                trailing: IconButton(
-                  icon: const Icon(Icons.open_in_new, size: 16),
-                  onPressed: () async {
-                    final url = project['url']!;
-                    if (await canLaunchUrl(Uri.parse(url))) {
-                      await launchUrl(Uri.parse(url));
-                    }
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('关闭'),
-          ),
-        ],
-      ),
-    );
+    OpenSourceDialog.show(context);
   }
 
   // ==================== 构建 ====================

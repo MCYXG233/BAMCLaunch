@@ -21,6 +21,7 @@ class JavaLaunchSection extends StatelessWidget {
   final ValueChanged<bool> onAutoDownloadJavaChanged;
   final ValueChanged<bool> onFullscreenChanged;
   final ValueChanged<String> onGcStrategyChanged;
+  final VoidCallback onPickInstalledJava;
 
   const JavaLaunchSection({
     super.key,
@@ -40,6 +41,7 @@ class JavaLaunchSection extends StatelessWidget {
     required this.onAutoDownloadJavaChanged,
     required this.onFullscreenChanged,
     required this.onGcStrategyChanged,
+    required this.onPickInstalledJava,
   });
 
   @override
@@ -84,7 +86,7 @@ class JavaLaunchSection extends StatelessWidget {
               icon: Icons.search,
               title: '从已安装版本中选择',
               buttonLabel: '选择',
-              onPressed: () {},
+              onPressed: onPickInstalledJava,
             ),
           ],
         ),

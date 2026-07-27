@@ -13,6 +13,8 @@ class DownloadSection extends StatelessWidget {
   final ValueChanged<int> onMirrorSourceIndexChanged;
   final ValueChanged<String> onSelectedMirrorChanged;
   final ValueChanged<bool> onAutoSwitchMirrorChanged;
+  final VoidCallback onAddCustomMirror;
+  final VoidCallback onSpeedTest;
 
   const DownloadSection({
     super.key,
@@ -24,6 +26,8 @@ class DownloadSection extends StatelessWidget {
     required this.onMirrorSourceIndexChanged,
     required this.onSelectedMirrorChanged,
     required this.onAutoSwitchMirrorChanged,
+    required this.onAddCustomMirror,
+    required this.onSpeedTest,
   });
 
   @override
@@ -101,14 +105,14 @@ class DownloadSection extends StatelessWidget {
               icon: Icons.add_link,
               title: '添加自定义镜像',
               buttonLabel: '添加',
-              onPressed: () {},
+              onPressed: onAddCustomMirror,
             ),
             ButtonRow(
               icon: Icons.speed,
               title: '镜像延迟测试',
               subtitle: '测速后选择最快镜像',
               buttonLabel: '测试',
-              onPressed: () {},
+              onPressed: onSpeedTest,
             ),
           ],
         ),

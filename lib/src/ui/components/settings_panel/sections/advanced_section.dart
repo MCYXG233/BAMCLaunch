@@ -19,6 +19,12 @@ class AdvancedSection extends StatelessWidget {
   final ValueChanged<bool> onMcpServerEnabledChanged;
   final ValueChanged<int> onMcpServerPortChanged;
   final ValueChanged<bool> onExtensionsEnabledChanged;
+  final bool translateResourceNames;
+  final bool sendAnonymousStats;
+  final bool autoReportCrashes;
+  final ValueChanged<bool> onTranslateResourceNamesChanged;
+  final ValueChanged<bool> onSendAnonymousStatsChanged;
+  final ValueChanged<bool> onAutoReportCrashesChanged;
 
   const AdvancedSection({
     super.key,
@@ -36,6 +42,12 @@ class AdvancedSection extends StatelessWidget {
     required this.onMcpServerEnabledChanged,
     required this.onMcpServerPortChanged,
     required this.onExtensionsEnabledChanged,
+    required this.translateResourceNames,
+    required this.sendAnonymousStats,
+    required this.autoReportCrashes,
+    required this.onTranslateResourceNamesChanged,
+    required this.onSendAnonymousStatsChanged,
+    required this.onAutoReportCrashesChanged,
   });
 
   @override
@@ -105,8 +117,8 @@ class AdvancedSection extends StatelessWidget {
               icon: Icons.translate,
               title: '翻译资源名称',
               subtitle: '下载的 mod 文件名使用中文别名（Modrinth 部分支持）',
-              value: false,
-              onChanged: (_) {},
+              value: translateResourceNames,
+              onChanged: onTranslateResourceNamesChanged,
             ),
           ],
         ),
@@ -173,15 +185,15 @@ class AdvancedSection extends StatelessWidget {
               icon: Icons.analytics_outlined,
               title: '发送匿名使用统计',
               subtitle: '帮助我们改进启动器',
-              value: false,
-              onChanged: (_) {},
+              value: sendAnonymousStats,
+              onChanged: onSendAnonymousStatsChanged,
             ),
             SwitchRow(
               icon: Icons.bug_report_outlined,
               title: '自动上报崩溃',
               subtitle: '崩溃时附带堆栈信息（不含账号/路径）',
-              value: true,
-              onChanged: (_) {},
+              value: autoReportCrashes,
+              onChanged: onAutoReportCrashesChanged,
             ),
           ],
         ),

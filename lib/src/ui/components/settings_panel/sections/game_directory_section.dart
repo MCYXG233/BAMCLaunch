@@ -9,6 +9,8 @@ class GameDirectorySection extends StatelessWidget {
   final bool versionIsolation;
   final ValueChanged<String> onGameDirectoryChanged;
   final ValueChanged<bool> onVersionIsolationChanged;
+  final VoidCallback onAddCustomPath;
+  final VoidCallback onRescanSystem;
 
   const GameDirectorySection({
     super.key,
@@ -16,6 +18,8 @@ class GameDirectorySection extends StatelessWidget {
     required this.versionIsolation,
     required this.onGameDirectoryChanged,
     required this.onVersionIsolationChanged,
+    required this.onAddCustomPath,
+    required this.onRescanSystem,
   });
 
   @override
@@ -100,13 +104,13 @@ class GameDirectorySection extends StatelessWidget {
               icon: Icons.add_location_alt_outlined,
               title: '添加自定义路径',
               buttonLabel: '添加',
-              onPressed: () {},
+              onPressed: onAddCustomPath,
             ),
             ButtonRow(
               icon: Icons.refresh,
               title: '重新扫描系统',
               buttonLabel: '扫描',
-              onPressed: () {},
+              onPressed: onRescanSystem,
             ),
           ],
         ),

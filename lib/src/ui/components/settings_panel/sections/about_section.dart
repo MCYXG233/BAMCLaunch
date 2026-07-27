@@ -5,7 +5,24 @@ import '../widgets/settings_content_area.dart';
 
 /// 关于 - 启动器版本信息
 class AboutSection extends StatelessWidget {
-  const AboutSection({super.key});
+  final bool autoUpdate;
+  final String launcherVersion;
+  final String buildTime;
+  final VoidCallback onCheckUpdate;
+  final ValueChanged<bool> onAutoUpdateChanged;
+  final VoidCallback onViewChangelog;
+  final VoidCallback onViewOpenSource;
+
+  const AboutSection({
+    super.key,
+    required this.autoUpdate,
+    required this.launcherVersion,
+    required this.buildTime,
+    required this.onCheckUpdate,
+    required this.onAutoUpdateChanged,
+    required this.onViewChangelog,
+    required this.onViewOpenSource,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +49,7 @@ class AboutSection extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '检查更新 · 启动器版本 v1.0.0',
+                    '检查更新 · 启动器版本 $launcherVersion',
                     style: TextStyle(
                       fontSize: 11,
                       color: SettingsPalette.textHint(context),
@@ -46,14 +63,14 @@ class AboutSection extends StatelessWidget {
               title: '检查更新',
               subtitle: '手动检查启动器是否有新版本',
               buttonLabel: '检查',
-              onPressed: () {},
+              onPressed: onCheckUpdate,
             ),
             SwitchRow(
               icon: Icons.update_outlined,
               title: '自动检查更新',
               subtitle: '启动时自动提示更新到最新版',
-              value: true,
-              onChanged: (_) {},
+              value: autoUpdate,
+              onChanged: onAutoUpdateChanged,
             ),
           ],
         ),
@@ -65,24 +82,28 @@ class AboutSection extends StatelessWidget {
             InfoRow(
               icon: Icons.numbers_outlined,
               label: '版本',
-              value: 'v1.0.0+dev',
+              value: launcherVersion,
             ),
-            InfoRow(
+            const InfoRow(
               icon: Icons.architecture_outlined,
               label: '架构',
               value: 'windows-x86_64',
             ),
-            InfoRow(icon: Icons.commit_outlined, label: '构建通道', value: '开发版'),
+            const InfoRow(
+              icon: Icons.commit_outlined,
+              label: '构建通道',
+              value: '开发版',
+            ),
             InfoRow(
               icon: Icons.update_outlined,
               label: '构建时间',
-              value: '2026-07-27',
+              value: buildTime,
             ),
             ButtonRow(
               icon: Icons.history_outlined,
               title: '更新日志',
               buttonLabel: '查看',
-              onPressed: () {},
+              onPressed: onViewChangelog,
             ),
           ],
         ),
@@ -108,7 +129,7 @@ class AboutSection extends StatelessWidget {
               title: '查看开源组件',
               subtitle: '本项目使用的开源库及其许可证',
               buttonLabel: '查看',
-              onPressed: () {},
+              onPressed: onViewOpenSource,
             ),
           ],
         ),

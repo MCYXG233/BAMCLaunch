@@ -13,6 +13,8 @@ class BackupSection extends StatelessWidget {
   final ValueChanged<String> onAutoBackupScheduleChanged;
   final ValueChanged<int> onAutoBackupKeepCountChanged;
   final ValueChanged<bool> onAutoBackupCompressChanged;
+  final VoidCallback onViewHistory;
+  final VoidCallback onBackupAllNow;
 
   const BackupSection({
     super.key,
@@ -24,6 +26,8 @@ class BackupSection extends StatelessWidget {
     required this.onAutoBackupScheduleChanged,
     required this.onAutoBackupKeepCountChanged,
     required this.onAutoBackupCompressChanged,
+    required this.onViewHistory,
+    required this.onBackupAllNow,
   });
 
   @override
@@ -98,13 +102,13 @@ class BackupSection extends StatelessWidget {
               icon: Icons.history_outlined,
               title: '查看历史备份',
               buttonLabel: '打开',
-              onPressed: () {},
+              onPressed: onViewHistory,
             ),
             ButtonRow(
               icon: Icons.restore_outlined,
               title: '立即备份所有实例',
               buttonLabel: '执行',
-              onPressed: () {},
+              onPressed: onBackupAllNow,
             ),
           ],
         ),

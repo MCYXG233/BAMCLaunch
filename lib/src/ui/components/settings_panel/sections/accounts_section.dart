@@ -5,10 +5,33 @@ import '../widgets/settings_content_area.dart';
 
 /// 账号与档案 - 正版登录 / 外置认证 / 离线账号
 class AccountsSection extends StatelessWidget {
-  const AccountsSection({super.key});
+  final String currentAccountLabel;
+  final String authlibSelectedServer;
+  final VoidCallback onLoginMicrosoft;
+  final VoidCallback onRefreshToken;
+  final VoidCallback onAddAuthlibServer;
+  final ValueChanged<String> onAuthlibServerChanged;
+  final VoidCallback onManageAuthlibServers;
+  final VoidCallback onCreateOfflineAccount;
+
+  const AccountsSection({
+    super.key,
+    required this.currentAccountLabel,
+    required this.authlibSelectedServer,
+    required this.onLoginMicrosoft,
+    required this.onRefreshToken,
+    required this.onAddAuthlibServer,
+    required this.onAuthlibServerChanged,
+    required this.onManageAuthlibServers,
+    required this.onCreateOfflineAccount,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final hasAuthlibServer = authlibSelectedServer != 'microsoft' &&
+        authlibSelectedServer != 'offline' &&
+        authlibSelectedServer.isNotEmpty;
+
     return SettingsContentArea(
       title: '账号与档案',
       breadcrumbs: const ['游戏', '账号与档案'],
@@ -30,8 +53,8 @@ class AccountsSection extends StatelessWidget {
             SettingRow(
               icon: Icons.person_outline,
               title: '当前登录账号',
-              subtitle: '尚未登录',
-              onTap: () {},
+              subtitle: currentAccountLabel,
+              onTap: onLoginMicrosoft,
               trailing: Text(
                 '登录',
                 style: TextStyle(fontSize: 11, color: SettingsPalette.accent),
@@ -42,14 +65,7 @@ class AccountsSection extends StatelessWidget {
               title: '刷新令牌',
               subtitle: '令牌过期后无法启动游戏',
               buttonLabel: '刷新',
-              onPressed: () {},
-            ),
-            SwitchRow(
-              icon: Icons.bolt_outlined,
-              title: '离线模式登录',
-              subtitle: '无需联网验证；适合自建服务器或测试',
-              value: false,
-              onChanged: (_) {},
+              onPressed: onRefreshToken,
             ),
           ],
         ),
@@ -73,24 +89,28 @@ class AccountsSection extends StatelessWidget {
               title: '添加认证服务器',
               subtitle: '粘贴服务器注册 API 地址以添加',
               buttonLabel: '添加',
-              onPressed: () {},
+              onPressed: onAddAuthlibServer,
             ),
             DropdownRow(
               icon: Icons.dns_outlined,
               title: '当前使用的认证服务器',
-              subtitle: '选择后影响游戏启动时的登录模式',
-              value: 'microsoft',
+              subtitle: hasAuthlibServer
+                  ? authlibSelectedServer
+                  : '未选择外置服务器',
+              value: authlibSelectedServer,
               items: const [
                 DropdownMenuItem(value: 'microsoft', child: Text('微软正版')),
                 DropdownMenuItem(value: 'offline', child: Text('离线模式')),
               ],
-              onChanged: (_) {},
+              onChanged: (v) {
+                if (v != null) onAuthlibServerChanged(v);
+              },
             ),
             ButtonRow(
               icon: Icons.list_alt,
               title: '管理已添加的服务器',
               buttonLabel: '管理',
-              onPressed: () {},
+              onPressed: onManageAuthlibServers,
             ),
           ],
         ),
@@ -113,7 +133,7 @@ class AccountsSection extends StatelessWidget {
               icon: Icons.add,
               title: '新建离线账号',
               buttonLabel: '新建',
-              onPressed: () {},
+              onPressed: onCreateOfflineAccount,
             ),
           ],
         ),
