@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../theme/colors.dart';
 
-/// BakaXL 风格设置面板的色板常量
+/// 设置面板的色板常量
 ///
 /// 设计要点：
 /// - 浅色基调，白色磨砂亚克力卡片
@@ -11,7 +11,7 @@ import '../../../theme/colors.dart';
 class SettingsPalette {
   SettingsPalette._();
 
-  /// 背景渐变（左紫→右粉，呼应 BakaXL 截图）
+  /// 背景渐变（左紫→右粉）
   static const backgroundGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -51,7 +51,7 @@ class SettingsPalette {
   /// 浅灰文字（描述用）
   static Color textHint(BuildContext context) => const Color(0xFF9A9AA1);
 
-  /// 强调色（紫色，呼应 BakaXL）
+  /// 强调色（紫色）
   static const accent = Color(0xFF7C5CFF);
 
   /// 强调色浅版背景（用于左侧选中指示）

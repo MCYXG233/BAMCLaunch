@@ -151,7 +151,7 @@ class AboutSettings extends StatelessWidget {
                   _buildCreditRow(
                     context,
                     '灵感',
-                    'BakaXL、HMCL、PCL、SJMCL 等启动器的设计参考',
+                    'HMCL、PCL、SJMCL 等启动器的设计参考',
                   ),
                 ],
               ),

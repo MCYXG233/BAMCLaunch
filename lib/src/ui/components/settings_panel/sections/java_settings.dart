@@ -33,7 +33,7 @@ class JavaSettings extends StatelessWidget {
         SettingsSectionCard(
           title: 'Java 虚拟机',
           children: [
-            // 提示卡片 - 对应 BakaXL 的"马云你听我说"
+            // 提示卡片
             InfoCard(
               child: Row(
                 children: [

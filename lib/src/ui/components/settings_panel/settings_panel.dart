@@ -46,7 +46,7 @@ class SettingsSectionId {
   static const about = 'about';
 }
 
-/// BakaXL 风格的设置面板
+/// 设置面板
 ///
 /// 布局：
 ///   - 全屏覆盖（替代居中 Dialog）
@@ -651,11 +651,6 @@ class _SettingsPanelState extends State<SettingsPanel>
         'name': 'SJMCL',
         'url': 'https://github.com/UNIkeEN/SJMCL',
         'license': 'MIT',
-      },
-      {
-        'name': 'BakaXL',
-        'url': 'https://github.com/BakaXL/BakaXL',
-        'license': 'GPL-3.0',
       },
       {
         'name': 'url_launcher',

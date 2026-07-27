@@ -32,14 +32,14 @@ class ThemeSettings extends StatelessWidget {
             ButtonRow(
               icon: Icons.file_download_outlined,
               title: '导入主题包',
-              subtitle: '从本地选择 .BakaSkin4 文件并导入',
+              subtitle: '从本地选择主题文件并导入',
               buttonLabel: '导入',
               onPressed: () {},
             ),
             ButtonRow(
               icon: Icons.save_outlined,
               title: '导出当前设置为主题包',
-              subtitle: '导出前颜色、深浅模式、视效与音铛打包为 .BakaSkin4',
+              subtitle: '导出当前颜色、主题模式与其他个性化设置',
               buttonLabel: '导出',
               onPressed: () {},
             ),
@@ -57,7 +57,7 @@ class ThemeSettings extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               child: Text(
-                '若您安装了 BakaXL 主题，它讲将会被显示在这里。',
+                '若您安装了第三方主题，它将会被显示在这里。',
                 style: TextStyle(
                   fontSize: 11,
                   color: SettingsPalette.textHint(context),
@@ -67,7 +67,7 @@ class ThemeSettings extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
               child: Text(
-                'BakaXL 主题是一套有个性化设置的文件，允许您保存背景、音乐等个性化设置，并与好友进行分享。',
+                '主题是一套有个性化设置的文件，允许您保存背景、音乐等个性化设置，并与好友进行分享。',
                 style: TextStyle(
                   fontSize: 11,
                   color: SettingsPalette.textHint(context),
