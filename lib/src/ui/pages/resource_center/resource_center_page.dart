@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../theme/colors.dart';
-import '../../animations/ba_animations.dart';
 import '../../../instance/models.dart';
 import '../../../resource_center/search_service.dart';
 import '../../../resource_center/models.dart';
@@ -302,7 +301,6 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
     return Column(
       children: [
         _buildHeader(context),
-        const SizedBox(height: 8),
         _buildTabBar(context),
         const SizedBox(height: 10),
         Expanded(
@@ -405,74 +403,75 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
   // ---------- 顶部标题栏 ----------
 
   Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 12, 24, 0),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 12),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          BAAnimations.breathe(
-            isActive: true,
-            duration: const Duration(milliseconds: 3000),
-            minOpacity: 0.85,
-            maxOpacity: 1.0,
-            glowRadius: 10.0,
-            glowColor: BAColors.primaryOf(context),
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    BAColors.primaryLightOf(context),
-                    BAColors.primaryOf(context),
+          // 左侧：图标 + 标题 + 副信息（与游戏库页统一格式）
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      BAColors.primaryLightOf(context),
+                      BAColors.primaryOf(context),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(11),
+                  boxShadow: [
+                    BoxShadow(
+                      color: BAColors.primaryOf(context)
+                          .withValues(alpha: 0.35),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
                   ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: BAColors.primaryOf(context).withValues(alpha: 0.4),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+                child: const Icon(
+                  Icons.extension_rounded,
+                  color: Color(0xFFFFFFFF),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '资源中心',
+                    style: TextStyle(
+                      color: BAColors.textPrimaryOf(context),
+                      fontSize: 19,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${_currentResourceCount()} 个资源',
+                    style: TextStyle(
+                      color: BAColors.textSecondaryOf(context),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                 ],
-              ),
-              child: const Icon(
-                Icons.extension,
-                color: Color(0xFFFFFFFF),
-                size: 22,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '资源中心',
-                style: TextStyle(
-                  color: BAColors.textPrimaryOf(context),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                '浏览和下载 Mod、资源包、整合包',
-                style: TextStyle(
-                  color: BAColors.textSecondaryOf(context),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w400,
-                ),
               ),
             ],
           ),
           const Spacer(),
-          // 资源数量指示器
+          // 右侧：当前来源标识
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
             decoration: BoxDecoration(
-              color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.85),
+              color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.55),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: BAColors.borderOf(context).withValues(alpha: 0.5),
@@ -482,19 +481,15 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.inventory_2,
-                  color: BAColors.textPrimaryOf(
-                    context,
-                  ).withValues(alpha: 0.85),
+                  Icons.cloud_outlined,
+                  color: BAColors.textSecondaryOf(context),
                   size: 14,
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  '${_currentResourceCount()} 个资源',
+                  _tabController.index == 1 ? 'CurseForge' : 'Modrinth',
                   style: TextStyle(
-                    color: BAColors.textPrimaryOf(
-                      context,
-                    ).withValues(alpha: 0.9),
+                    color: BAColors.textPrimaryOf(context),
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),
