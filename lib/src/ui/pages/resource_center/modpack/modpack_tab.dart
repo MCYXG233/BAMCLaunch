@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../theme/colors.dart';
 import '../../../../resource_center/models.dart';
-import '../resource_constants.dart';
-import '../widgets/sort_button.dart';
-import '../widgets/compact_dropdown.dart';
+import '../widgets/resource_filter_bar.dart';
+import '../widgets/resource_result_bar.dart';
 import '../widgets/resource_grid_card.dart';
 import '../widgets/state_widgets.dart';
 
-/// 热门整合包 Tab - 包含筛选栏与整合包网格
+/// 热门整合包 Tab - 包含筛选栏、统计与整合包网格
 class ModpackTab extends StatelessWidget {
   // 控制器
   final TextEditingController searchController;
@@ -62,127 +61,32 @@ class ModpackTab extends StatelessWidget {
   });
 
   Widget _buildFilterBar(BuildContext context) {
-    final textPrimary = BAColors.textPrimaryOf(context);
-    final textSecondary = BAColors.textSecondaryOf(context);
-    final border = BAColors.borderOf(context).withValues(alpha: 0.4);
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: BAColors.backgroundSecondaryOf(context).withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: border),
-      ),
-      child: Row(
-        children: [
-          // 整合包标识
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  BAColors.warningOf(context).withValues(alpha: 0.2),
-                  BAColors.warningOf(context).withValues(alpha: 0.1),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: BAColors.warningOf(context).withValues(alpha: 0.3),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.inventory_2,
-                  size: 14,
-                  color: BAColors.warningOf(context),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  '整合包',
-                  style: TextStyle(
-                    color: BAColors.warningOf(context),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
-          // 搜索框
-          Expanded(
-            child: SizedBox(
-              height: 36,
-              child: TextField(
-                controller: searchController,
-                onSubmitted: onQuerySubmitted,
-                style: TextStyle(color: textPrimary, fontSize: 12),
-                decoration: InputDecoration(
-                  hintText: '搜索整合包...',
-                  hintStyle: TextStyle(color: BAColors.textDisabledOf(context)),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: textSecondary,
-                    size: 16,
-                  ),
-                  suffixIcon: query.isNotEmpty
-                      ? IconButton(
-                          icon: Icon(
-                            Icons.clear,
-                            color: textSecondary,
-                            size: 14,
-                          ),
-                          onPressed: onQueryCleared,
-                        )
-                      : null,
-                  filled: true,
-                  fillColor: BAColors.surfaceVariantOf(context),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                  isDense: true,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          SortButton(
-            currentSort: sort,
-            onSelected: onSortChanged,
-            textPrimary: textPrimary,
-          ),
-          const SizedBox(width: 6),
-          CompactDropdown(
-            value: gameVersion,
-            hint: '版本',
-            items: ResourceConstants.gameVersions,
-            onChanged: onGameVersionChanged,
-            textPrimary: textPrimary,
-          ),
-          const SizedBox(width: 6),
-          CompactDropdown(
-            value: loader,
-            hint: '加载器',
-            items: ResourceConstants.loaders.map((e) => e.value).toList(),
-            displayItems: ResourceConstants.loaders.map((e) => e.key).toList(),
-            onChanged: onLoaderChanged,
-            textPrimary: textPrimary,
-          ),
-        ],
-      ),
+    // Modpack Tab 已经有类型限定（modpack），不需要 type chips
+    return ResourceFilterBar(
+      searchController: searchController,
+      query: query,
+      searchHint: '搜索整合包...',
+      onQuerySubmitted: onQuerySubmitted,
+      onQueryCleared: onQueryCleared,
+      sort: sort,
+      onSortChanged: onSortChanged,
+      selectedType: null,
+      onTypeChanged: null,
+      gameVersion: gameVersion,
+      onGameVersionChanged: onGameVersionChanged,
+      loader: loader,
+      onLoaderChanged: onLoaderChanged,
+      leftBadgeText: '整合包',
+      leftBadgeIcon: Icons.inventory_2_rounded,
+      leftBadgeColor: BAColors.warningOf(context),
     );
   }
 
   Widget _buildGrid(BuildContext context) {
-    if (loading) {
+    if (loading && resources.isEmpty) {
       return const ResourceLoadingPlaceholder();
     }
-    if (error != null) {
+    if (error != null && resources.isEmpty) {
       return ResourceErrorWidget(error: error!, onRetry: onRetry);
     }
     if (resources.isEmpty) {
@@ -195,8 +99,11 @@ class ModpackTab extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: BAColors.backgroundSecondaryOf(context).withValues(alpha: 0.5),
+        color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: BAColors.borderOf(context).withValues(alpha: 0.5),
+        ),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -208,7 +115,7 @@ class ModpackTab extends StatelessWidget {
               crossAxisCount: crossAxisCount,
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
-              childAspectRatio: 3.2,
+              childAspectRatio: 2.7,
             ),
             itemCount: resources.length + (loadingMore ? 1 : 0),
             itemBuilder: (context, index) {
@@ -241,7 +148,14 @@ class ModpackTab extends StatelessWidget {
     return Column(
       children: [
         _buildFilterBar(context),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
+        ResourceResultBar(
+          totalCount: resources.length,
+          loadingMore: loadingMore,
+          loading: loading,
+          onRefresh: onRetry,
+          label: '整合包',
+        ),
         Expanded(child: _buildGrid(context)),
       ],
     );

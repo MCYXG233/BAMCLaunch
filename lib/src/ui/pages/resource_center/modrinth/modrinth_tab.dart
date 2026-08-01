@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import '../../../theme/colors.dart';
 import '../../../../instance/models.dart';
 import '../../../../resource_center/models.dart';
-import '../resource_constants.dart';
-import '../widgets/sort_button.dart';
-import '../widgets/compact_dropdown.dart';
-import '../widgets/type_chip.dart';
+import '../widgets/resource_filter_bar.dart';
+import '../widgets/resource_result_bar.dart';
 import '../widgets/resource_grid_card.dart';
 import '../widgets/state_widgets.dart';
 
-/// Modrinth 源 Tab - 包含筛选栏与资源网格
+/// Modrinth 源 Tab - 包含筛选栏、统计与资源网格
 class ModrinthTab extends StatelessWidget {
   // 控制器
   final TextEditingController searchController;
@@ -68,125 +66,28 @@ class ModrinthTab extends StatelessWidget {
   });
 
   Widget _buildFilterBar(BuildContext context) {
-    final textPrimary = BAColors.textPrimaryOf(context);
-    final textSecondary = BAColors.textSecondaryOf(context);
-    final border = BAColors.borderOf(context).withValues(alpha: 0.4);
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: BAColors.backgroundSecondaryOf(context).withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: border),
-      ),
-      child: Column(
-        children: [
-          // 搜索行
-          Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 36,
-                  child: TextField(
-                    controller: searchController,
-                    onSubmitted: onQuerySubmitted,
-                    style: TextStyle(color: textPrimary, fontSize: 12),
-                    decoration: InputDecoration(
-                      hintText: '搜索模组、资源包、整合包...',
-                      hintStyle: TextStyle(
-                        color: BAColors.textDisabledOf(context),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: textSecondary,
-                        size: 16,
-                      ),
-                      suffixIcon: query.isNotEmpty
-                          ? IconButton(
-                              icon: Icon(
-                                Icons.clear,
-                                color: textSecondary,
-                                size: 14,
-                              ),
-                              onPressed: onQueryCleared,
-                            )
-                          : null,
-                      filled: true,
-                      fillColor: BAColors.surfaceVariantOf(context),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                      ),
-                      isDense: true,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              SortButton(
-                currentSort: sort,
-                onSelected: onSortChanged,
-                textPrimary: textPrimary,
-              ),
-              const SizedBox(width: 6),
-              CompactDropdown(
-                value: gameVersion,
-                hint: '版本',
-                items: ResourceConstants.gameVersions,
-                onChanged: onGameVersionChanged,
-                textPrimary: textPrimary,
-              ),
-              const SizedBox(width: 6),
-              CompactDropdown(
-                value: loader,
-                hint: '加载器',
-                items: ResourceConstants.loaders.map((e) => e.value).toList(),
-                displayItems: ResourceConstants.loaders
-                    .map((e) => e.key)
-                    .toList(),
-                onChanged: onLoaderChanged,
-                textPrimary: textPrimary,
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          // 类型筛选 Chips
-          SizedBox(
-            height: 30,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: ResourceConstants.modrinthTypeOptions.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 6),
-              itemBuilder: (context, index) {
-                final opt = ResourceConstants.modrinthTypeOptions[index];
-                final selected = type == opt.value;
-                final color =
-                    ResourceConstants.typeColorsOf(context)[opt.value] ??
-                    BAColors.primaryOf(context);
-                return TypeChip(
-                  label: opt.key,
-                  icon: ResourceConstants.typeIcons[opt.value] ?? Icons.apps,
-                  selected: selected,
-                  color: color,
-                  onTap: () => onTypeChanged(opt.value),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+    return ResourceFilterBar(
+      searchController: searchController,
+      query: query,
+      searchHint: '搜索模组、资源包、整合包...',
+      onQuerySubmitted: onQuerySubmitted,
+      onQueryCleared: onQueryCleared,
+      sort: sort,
+      onSortChanged: onSortChanged,
+      selectedType: type,
+      onTypeChanged: onTypeChanged,
+      gameVersion: gameVersion,
+      onGameVersionChanged: onGameVersionChanged,
+      loader: loader,
+      onLoaderChanged: onLoaderChanged,
     );
   }
 
   Widget _buildGrid(BuildContext context) {
-    if (loading) {
+    if (loading && resources.isEmpty) {
       return const ResourceLoadingPlaceholder();
     }
-    if (error != null) {
+    if (error != null && resources.isEmpty) {
       return ResourceErrorWidget(error: error!, onRetry: onRetry);
     }
     if (resources.isEmpty) {
@@ -196,8 +97,11 @@ class ModrinthTab extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: BAColors.backgroundSecondaryOf(context).withValues(alpha: 0.5),
+        color: BAColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: BAColors.borderOf(context).withValues(alpha: 0.5),
+        ),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -209,7 +113,7 @@ class ModrinthTab extends StatelessWidget {
               crossAxisCount: crossAxisCount,
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
-              childAspectRatio: 3.2,
+              childAspectRatio: 2.7,
             ),
             itemCount: resources.length + (loadingMore ? 1 : 0),
             itemBuilder: (context, index) {
@@ -242,7 +146,13 @@ class ModrinthTab extends StatelessWidget {
     return Column(
       children: [
         _buildFilterBar(context),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
+        ResourceResultBar(
+          totalCount: resources.length,
+          loadingMore: loadingMore,
+          loading: loading,
+          onRefresh: onRetry,
+        ),
         Expanded(child: _buildGrid(context)),
       ],
     );

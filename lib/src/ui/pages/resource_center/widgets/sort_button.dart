@@ -26,7 +26,7 @@ class SortButton extends StatelessWidget {
 
     return PopupMenuButton<String>(
       onSelected: onSelected,
-      offset: const Offset(0, 40),
+      offset: const Offset(0, 44),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       color: BAColors.backgroundSecondaryOf(context),
       itemBuilder: (_) => ResourceConstants.sortOptions
@@ -63,22 +63,22 @@ class SortButton extends StatelessWidget {
           )
           .toList(),
       child: Container(
-        height: 36,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        height: 40,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: BAColors.surfaceVariantOf(context),
-          borderRadius: BorderRadius.circular(10),
+          color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.65),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.sort, size: 14, color: textPrimary),
-            const SizedBox(width: 4),
-            Text(label, style: TextStyle(color: textPrimary, fontSize: 11)),
+            Icon(Icons.sort_rounded, size: 15, color: textPrimary),
+            const SizedBox(width: 6),
+            Text(label, style: TextStyle(color: textPrimary, fontSize: 12)),
             const SizedBox(width: 2),
             Icon(
-              Icons.keyboard_arrow_down,
-              size: 14,
+              Icons.keyboard_arrow_down_rounded,
+              size: 16,
               color: textPrimary.withValues(alpha: 0.6),
             ),
           ],
