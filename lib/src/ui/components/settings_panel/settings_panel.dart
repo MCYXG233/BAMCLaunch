@@ -14,12 +14,19 @@ import '../../../game/backup_manager.dart';
 import '../../../instance/instance_manager.dart';
 import '../../theme/background_manager.dart';
 import '../../theme/theme_manager.dart';
+import '../ba_buttons.dart';
+import '../ba_dialog.dart';
 import '../ba_login_dialog.dart';
 import '../ba_notification.dart';
 import '../theme_editor.dart';
 import '../../../loader/java_selector_dialog.dart';
+import 'dialogs/authlib_servers_dialog.dart';
 import 'dialogs/background_picker_dialog.dart';
+import 'dialogs/backup_history_dialog.dart';
+import 'dialogs/changelog_dialog.dart';
+import 'dialogs/mirror_speed_test_dialog.dart';
 import 'dialogs/open_source_dialog.dart';
+import 'dialogs/text_input_dialog.dart';
 import 'widgets/sidebar_nav.dart';
 import 'widgets/settings_theme.dart';
 import 'sections/about_section.dart';
@@ -538,12 +545,30 @@ class _SettingsPanelState extends State<SettingsPanel>
   }
 
   Future<void> _addAuthlibServer() async {
-    final url = await _showTextInputDialog(
+    final result = await BATextInputDialog.show(
+      context: context,
       title: '添加认证服务器',
-      labelText: '服务器注册 API 地址',
-      hintText: '例如 https://example.com/api/yggdrasil',
+      titleIcon: Icons.link_rounded,
+      description: '请填写外置登录服务器的注册 API 地址，启动器会自动获取服务器信息。',
+      confirmText: '添加',
+      fields: [
+        BATextFieldConfig(
+          label: '服务器地址',
+          hint: '例如 https://example.com/api/yggdrasil',
+          icon: Icons.link,
+          required: true,
+          keyboardType: TextInputType.url,
+          validator: (v) {
+            if (!v.startsWith('http://') && !v.startsWith('https://')) {
+              return '请输入以 http:// 或 https:// 开头的地址';
+            }
+            return null;
+          },
+        ),
+      ],
     );
-    if (url == null || url.isEmpty) return;
+    if (result == null || result.isEmpty) return;
+    final url = result.first;
 
     try {
       final authlibInjector = AuthlibInjector.instance;
@@ -580,74 +605,60 @@ class _SettingsPanelState extends State<SettingsPanel>
           ConfigKeys.authlibServers,
         ) ??
         [];
-    if (stored.isEmpty) {
-      NotificationManager().showInfo('尚未添加任何认证服务器');
-      return;
-    }
     final list = stored.cast<Map<dynamic, dynamic>>().map((e) {
       return Map<String, dynamic>.from(e);
     }).toList();
 
-    await showDialog<void>(
+    await AuthlibServersDialog.show(
       context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setState) {
-            return AlertDialog(
-              title: const Text('管理认证服务器'),
-              content: SizedBox(
-                width: 360,
-                child: list.isEmpty
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 24),
-                        child: Text('已清空'),
-                      )
-                    : ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: list.length,
-                        itemBuilder: (_, i) {
-                          final item = list[i];
-                          return ListTile(
-                            title: Text(item['name'] as String? ?? '未知'),
-                            subtitle: Text(item['url'] as String? ?? ''),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete_outline, size: 18),
-                              onPressed: () {
-                                setState(() => list.removeAt(i));
-                              },
-                            ),
-                          );
-                        },
-                      ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text('关闭'),
-                ),
-              ],
-            );
-          },
-        );
+      servers: list,
+      selectedServerUrl: _authlibSelectedServer,
+      onChanged: (change) async {
+        try {
+          await _configManager.set<List<dynamic>>(
+            ConfigKeys.authlibServers,
+            change.servers,
+          );
+          await _configManager.setString(
+            ConfigKeys.authlibSelectedServer,
+            change.selectedServerUrl,
+          );
+          await _configManager.save();
+          if (mounted) {
+            setState(() => _authlibSelectedServer = change.selectedServerUrl);
+          }
+        } catch (e) {
+          _logger.warn('Failed to save authlib servers: $e');
+        }
       },
     );
-
-    // 保存删除后的列表
-    try {
-      await _configManager.set<List<dynamic>>(ConfigKeys.authlibServers, list);
-      await _configManager.save();
-    } catch (e) {
-      _logger.warn('Failed to save authlib servers: $e');
-    }
   }
 
   Future<void> _createOfflineAccount() async {
-    final username = await _showTextInputDialog(
+    final result = await BATextInputDialog.show(
+      context: context,
       title: '新建离线账号',
-      labelText: '用户名',
-      hintText: '请输入离线账号用户名',
+      titleIcon: Icons.person_add_alt_1_rounded,
+      description: '离线账号仅用于本地游戏，无法登录正版服务器。',
+      confirmText: '创建',
+      fields: [
+        BATextFieldConfig(
+          label: '用户名',
+          hint: '请输入离线账号用户名',
+          icon: Icons.person,
+          required: true,
+          validator: (v) {
+            if (v.length > 16) return '用户名不能超过 16 个字符';
+            if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(v)) {
+              return '只能包含字母、数字和下划线';
+            }
+            return null;
+          },
+        ),
+      ],
     );
-    if (username == null || username.isEmpty) return;
+    if (result == null || result.isEmpty) return;
+    final username = result.first;
 
     try {
       final account = await AccountManager.instance.addOfflineAccount(username);
@@ -722,19 +733,37 @@ class _SettingsPanelState extends State<SettingsPanel>
   // ==================== 下载源回调 ====================
 
   Future<void> _addCustomMirror() async {
-    final url = await _showTextInputDialog(
+    final result = await BATextInputDialog.show(
+      context: context,
       title: '添加自定义镜像',
-      labelText: '镜像 URL',
-      hintText: '例如 https://bmclapi2.bangbang93.com',
+      titleIcon: Icons.add_link_rounded,
+      description: '请填写镜像的显示名称和下载 API 地址。BMCLAPI 兼容的镜像才能正常工作。',
+      confirmText: '添加',
+      fields: [
+        BATextFieldConfig(
+          label: '镜像名称',
+          hint: '例如 BMCLAPI 镜像',
+          icon: Icons.label,
+          required: true,
+        ),
+        BATextFieldConfig(
+          label: '镜像地址',
+          hint: '例如 https://bmclapi2.bangbang93.com',
+          icon: Icons.link,
+          required: true,
+          keyboardType: TextInputType.url,
+          validator: (v) {
+            if (!v.startsWith('http://') && !v.startsWith('https://')) {
+              return '请输入以 http:// 或 https:// 开头的地址';
+            }
+            return null;
+          },
+        ),
+      ],
     );
-    if (url == null || url.isEmpty) return;
-
-    final name = await _showTextInputDialog(
-      title: '镜像名称',
-      labelText: '显示名称',
-      hintText: '例如 我的镜像',
-    );
-    if (name == null || name.isEmpty) return;
+    if (result == null || result.length < 2) return;
+    final name = result[0];
+    final url = result[1];
 
     try {
       final mirror = MirrorInfo(
@@ -752,26 +781,28 @@ class _SettingsPanelState extends State<SettingsPanel>
   }
 
   Future<void> _speedTest() async {
-    try {
-      NotificationManager().showInfo('开始镜像延迟测试...');
-      final results = await MirrorManager.instance.speedTestAllMirrors();
-      if (mounted) {
-        if (results.isEmpty) {
-          NotificationManager().showWarning('未找到可用镜像');
-          return;
+    await MirrorSpeedTestDialog.show(
+      context: context,
+      mirrorManager: MirrorManager.instance,
+      selectedMirrorId: _selectedMirror,
+      onSetDefault: (mirror) async {
+        try {
+          await _setString(
+            ConfigKeys.selectedMirror,
+            mirror.id,
+            (v) => _selectedMirror = v,
+            successMessage: '已将 ${mirror.name} 设为默认镜像',
+          );
+        } catch (e) {
+          if (mounted) {
+            NotificationManager().showError(
+              '设为默认失败',
+              message: e.toString(),
+            );
+          }
         }
-        final fastest = results.reduce(
-          (a, b) => a.latencyMs < b.latencyMs ? a : b,
-        );
-        NotificationManager().showSuccess(
-          '测试完成，最快镜像：${fastest.mirror.name}（${fastest.latencyMs} ms）',
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        NotificationManager().showError('测速失败', message: e.toString());
-      }
-    }
+      },
+    );
   }
 
   // ==================== 备份回调 ====================
@@ -781,39 +812,29 @@ class _SettingsPanelState extends State<SettingsPanel>
       final backupManager = BackupManager();
       await backupManager.initialize();
       final backups = backupManager.getAllBackups();
-      if (backups.isEmpty) {
-        if (mounted) NotificationManager().showInfo('暂无历史备份');
-        return;
-      }
       if (!mounted) return;
-      await showDialog(
+      await BackupHistoryDialog.show(
         context: context,
-        builder: (ctx) {
-          return AlertDialog(
-            title: const Text('历史备份'),
-            content: SizedBox(
-              width: 420,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: backups.length,
-                itemBuilder: (_, i) {
-                  final b = backups[i];
-                  return ListTile(
-                    title: Text(b.instanceName),
-                    subtitle: Text(
-                      '${b.createdAt.toLocal()} · ${b.type.name}',
-                    ),
-                  );
-                },
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('关闭'),
-              ),
-            ],
+        backups: backups,
+        onRestore: (record) async {
+          // 还原前先定位实例目录路径
+          final instanceManager = InstanceManager.instance;
+          await instanceManager.initialize();
+          final instance = instanceManager.instances.firstWhere(
+            (i) => i.id == record.instanceId,
+            orElse: () => instanceManager.instances.first,
           );
+          final dir = instanceManager.directories.firstWhere(
+            (d) => d.id == instance.directoryId,
+            orElse: () => instanceManager.directories.first,
+          );
+          await backupManager.restoreBackup(
+            backup: record,
+            targetPath: dir.path,
+          );
+        },
+        onDelete: (record) async {
+          await backupManager.deleteBackup(record.id);
         },
       );
     } catch (e) {
@@ -892,37 +913,47 @@ class _SettingsPanelState extends State<SettingsPanel>
 
   Future<void> _showChangelog() async {
     if (!mounted) return;
-    await showDialog(
+    final entries = <ChangelogEntry>[
+      const ChangelogEntry(
+        version: '1.0.0',
+        date: '2026-07-27',
+        category: ChangelogCategory.feature,
+        title: '设置面板全新分组',
+        description: '按 BAMCLaunch 启动器真实功能（80 个 ConfigKey）重新设计 11 个分组页。',
+      ),
+      const ChangelogEntry(
+        version: '1.0.0',
+        date: '2026-07-27',
+        category: ChangelogCategory.feature,
+        title: '全量接入业务回调',
+        description: '账号、Java、游戏目录、下载、备份、隐私、主题等 16 项回调全部接入真实业务模块。',
+      ),
+      const ChangelogEntry(
+        version: '1.0.0',
+        date: '2026-07-27',
+        category: ChangelogCategory.feature,
+        title: '全局字体统一为思源黑体 SC',
+        description: '新增 4 个字重（Regular/Medium/Bold/Light），应用于所有 TextStyle。',
+      ),
+      const ChangelogEntry(
+        version: '1.0.0',
+        date: '2026-07-27',
+        category: ChangelogCategory.improvement,
+        title: '重构对话框交互',
+        description: '背景选择、开源组件、认证服务器、备份历史、更新日志、镜像测速等对话框统一采用 BADialog 设计语言。',
+      ),
+      const ChangelogEntry(
+        version: '1.0.0',
+        date: '2026-07-27',
+        category: ChangelogCategory.bugfix,
+        title: '修复 background_picker_dialog import 路径错误',
+        description: '修正少一层目录的 import，并修复 BackgroundConfig.gradient 不存在的问题。',
+      ),
+    ];
+    await ChangelogDialog.show(
       context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text('更新日志'),
-          content: const SizedBox(
-            width: 420,
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'v1.0.0',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  Text('· 初始版本发布'),
-                  Text('· 实现设置面板全新分组'),
-                  Text('· 接入 BackupManager / MirrorManager / AccountManager'),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('关闭'),
-            ),
-          ],
-        );
-      },
+      entries: entries,
+      currentVersion: _launcherVersion,
     );
   }
 
@@ -932,23 +963,18 @@ class _SettingsPanelState extends State<SettingsPanel>
     if (!mounted) return;
     final editorState = ThemeEditorState();
     await editorState.loadConfig();
-    await showDialog(
+    await BADialog.show(
       context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text('主题编辑器'),
-          content: SizedBox(
-            width: 560,
-            child: SingleChildScrollView(child: ThemeEditorWidget(editorState: editorState)),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('关闭'),
-            ),
-          ],
-        );
-      },
+      title: '主题编辑器',
+      titleIcon: Icons.palette_rounded,
+      width: 600,
+      actions: [
+        BAPrimaryButton(
+          text: '关闭',
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ],
+      child: ThemeEditorWidget(editorState: editorState),
     );
   }
 
@@ -965,42 +991,6 @@ class _SettingsPanelState extends State<SettingsPanel>
         NotificationManager().showError('切换配色失败', message: e.toString());
       }
     }
-  }
-
-  // ==================== 工具：文本输入对话框 ====================
-
-  Future<String?> _showTextInputDialog({
-    required String title,
-    required String labelText,
-    String? hintText,
-  }) {
-    final controller = TextEditingController();
-    return showDialog<String>(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: Text(title),
-          content: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              labelText: labelText,
-              hintText: hintText,
-              border: const OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(null),
-              child: const Text('取消'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
-              child: const Text('确定'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   // ==================== 侧栏导航 ====================
@@ -1542,8 +1532,8 @@ class _SettingsPanelState extends State<SettingsPanel>
               constraints: const BoxConstraints(maxWidth: 1100, minWidth: 880),
               height: double.infinity,
               decoration: BoxDecoration(
-                gradient: SettingsPalette.backgroundGradient,
-                boxShadow: SettingsPalette.panelShadow,
+                gradient: SettingsPalette.backgroundGradient(context),
+                boxShadow: SettingsPalette.panelShadow(context),
               ),
               child: Row(
                 children: [
