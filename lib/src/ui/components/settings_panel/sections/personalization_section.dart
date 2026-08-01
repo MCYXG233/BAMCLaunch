@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../widgets/settings_theme.dart';
 import '../widgets/settings_section_card.dart';
 import '../widgets/settings_content_area.dart';
 

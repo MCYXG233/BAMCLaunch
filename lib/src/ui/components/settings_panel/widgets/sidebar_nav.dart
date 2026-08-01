@@ -27,7 +27,7 @@ class SidebarNavItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
           color: selected
-              ? SettingsPalette.accentBackground
+              ? SettingsPalette.accentBackground(context)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),

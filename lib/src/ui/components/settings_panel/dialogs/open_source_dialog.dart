@@ -162,9 +162,9 @@ class _OpenSourceDialogState extends State<OpenSourceDialog> {
         width: 720,
         height: 640,
         decoration: BoxDecoration(
-          gradient: SettingsPalette.backgroundGradient,
+          gradient: SettingsPalette.backgroundGradient(context),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: SettingsPalette.panelShadow,
+          boxShadow: SettingsPalette.panelShadow(context),
         ),
         child: Column(
           children: [

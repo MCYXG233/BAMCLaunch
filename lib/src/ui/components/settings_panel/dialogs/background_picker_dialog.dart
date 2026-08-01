@@ -1,7 +1,7 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import '../../../theme/background_manager.dart';
 import '../../../../config/background_config.dart';
 import '../../ba_notification.dart';
 import '../widgets/settings_theme.dart';
@@ -45,7 +45,6 @@ class BackgroundPickerDialog extends StatefulWidget {
 
 class _BackgroundPickerDialogState extends State<BackgroundPickerDialog> {
   late BackgroundConfig _config = widget.currentConfig;
-  late final BackgroundManager _manager = BackgroundManager();
 
   String _selectedSection = 'image';
 
@@ -86,60 +85,103 @@ class _BackgroundPickerDialogState extends State<BackgroundPickerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final radius = BorderRadius.circular(20);
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.all(40),
-      child: Container(
-        width: 800,
-        height: 560,
-        decoration: BoxDecoration(
-          gradient: SettingsPalette.backgroundGradient,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: SettingsPalette.panelShadow,
-        ),
-        child: Column(
-          children: [
-            _buildHeader(context),
-            Expanded(
-              child: Row(
-                children: [
-                  SettingsSidebar(
-                    sections: [
-                      SidebarSection(title: '背景类型', items: [
-                        SidebarItem(
-                          id: 'image',
-                          icon: Icons.image_outlined,
-                          label: '图片',
-                        ),
-                        SidebarItem(
-                          id: 'video',
-                          icon: Icons.movie_outlined,
-                          label: '视频',
-                        ),
-                        SidebarItem(
-                          id: 'preset',
-                          icon: Icons.auto_awesome_outlined,
-                          label: '预设',
-                        ),
-                      ]),
-                    ],
-                    selectedId: _selectedSection,
-                    onSelected: (id) => setState(() => _selectedSection = id),
-                    onClose: () => Navigator.of(context).pop(),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 800, maxHeight: 560),
+        child: ClipRRect(
+          borderRadius: radius,
+          child: Stack(
+            children: [
+              // 远景磨砂
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                  child: Container(color: Colors.transparent),
+                ),
+              ),
+              // 渐变底
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: SettingsPalette.backgroundGradient(context),
+                    borderRadius: radius,
                   ),
-                  Expanded(
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 220),
-                      child: KeyedSubtree(
-                        key: ValueKey(_selectedSection),
-                        child: _buildContent(),
+                ),
+              ),
+              // 边框 + 阴影
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: radius,
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.10)
+                          : Colors.white.withValues(alpha: 0.85),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(
+                          alpha: isDark ? 0.45 : 0.18,
+                        ),
+                        blurRadius: 32,
+                        offset: const Offset(0, 12),
                       ),
+                    ],
+                  ),
+                ),
+              ),
+              Column(
+                children: [
+                  _buildHeader(context),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        SettingsSidebar(
+                          sections: [
+                            SidebarSection(title: '背景类型', items: [
+                              SidebarItem(
+                                id: 'image',
+                                icon: Icons.image_outlined,
+                                label: '图片',
+                              ),
+                              SidebarItem(
+                                id: 'video',
+                                icon: Icons.movie_outlined,
+                                label: '视频',
+                              ),
+                              SidebarItem(
+                                id: 'preset',
+                                icon: Icons.auto_awesome_outlined,
+                                label: '预设',
+                              ),
+                            ]),
+                          ],
+                          selectedId: _selectedSection,
+                          onSelected: (id) =>
+                              setState(() => _selectedSection = id),
+                          onClose: () => Navigator.of(context).pop(),
+                        ),
+                        Expanded(
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 220),
+                            child: KeyedSubtree(
+                              key: ValueKey(_selectedSection),
+                              child: _buildContent(),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -147,7 +189,7 @@ class _BackgroundPickerDialogState extends State<BackgroundPickerDialog> {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      padding: const EdgeInsets.fromLTRB(20, 18, 16, 14),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -158,18 +200,45 @@ class _BackgroundPickerDialogState extends State<BackgroundPickerDialog> {
       ),
       child: Row(
         children: [
+          Container(
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              color: SettingsPalette.accent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(9),
+              border: Border.all(
+                color: SettingsPalette.accent.withValues(alpha: 0.30),
+                width: 1,
+              ),
+            ),
+            child: Icon(
+              Icons.wallpaper_rounded,
+              size: 16,
+              color: SettingsPalette.accent,
+            ),
+          ),
+          const SizedBox(width: 12),
           Text(
             '背景设置',
             style: TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: SettingsPalette.textPrimary(context),
             ),
           ),
           const Spacer(),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('完成'),
+            style: TextButton.styleFrom(
+              foregroundColor: SettingsPalette.accent,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              '完成',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),

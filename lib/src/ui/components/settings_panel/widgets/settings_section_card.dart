@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'settings_theme.dart';
 
 /// 设置分组卡片 - 圆角 + 右上角折叠按钮 + 主体内容
+///
+/// 设计：透明亚克力磨砂风格，与 BADialog 一致。
 class SettingsSectionCard extends StatefulWidget {
   final String title;
   final List<Widget> children;
@@ -30,12 +32,12 @@ class _SettingsSectionCardState extends State<SettingsSectionCard> {
     return Container(
       decoration: BoxDecoration(
         color: SettingsPalette.glassWhite(context),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: SettingsPalette.cardBorder(context),
-          width: 0.5,
+          width: 1,
         ),
-        boxShadow: SettingsPalette.cardShadow,
+        boxShadow: SettingsPalette.cardShadow(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -43,20 +45,28 @@ class _SettingsSectionCardState extends State<SettingsSectionCard> {
           InkWell(
             onTap: () => setState(() => _collapsed = !_collapsed),
             borderRadius: BorderRadius.vertical(
-              top: const Radius.circular(12),
-              bottom: _collapsed ? const Radius.circular(12) : Radius.zero,
+              top: const Radius.circular(14),
+              bottom: _collapsed ? const Radius.circular(14) : Radius.zero,
             ),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
               child: Row(
                 children: [
                   if (widget.titleIcon != null) ...[
-                    Icon(
-                      widget.titleIcon,
-                      size: 16,
-                      color: SettingsPalette.textPrimary(context),
+                    Container(
+                      width: 26,
+                      height: 26,
+                      decoration: BoxDecoration(
+                        color: SettingsPalette.accentBackground(context),
+                        borderRadius: BorderRadius.circular(7),
+                      ),
+                      child: Icon(
+                        widget.titleIcon,
+                        size: 14,
+                        color: SettingsPalette.accent,
+                      ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 10),
                   ],
                   Expanded(
                     child: Text(
@@ -129,11 +139,11 @@ class InfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor ?? SettingsPalette.accentBackground,
+        color: backgroundColor ?? SettingsPalette.accentBackground(context),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: SettingsPalette.cardBorder(context),
-          width: 0.5,
+          width: 1,
         ),
       ),
       padding: const EdgeInsets.all(16),
@@ -151,13 +161,18 @@ class InfoCard extends StatelessWidget {
   }
 }
 
-/// 设置项行 - 左侧图标 + 标题 + 描述 + 右侧 trailing
+/// 设置项行 - 左侧图标徽章 + 标题 + 描述 + 右侧 trailing
+///
+/// 设计要点：
+/// - 左侧图标改为带浅色背景的圆角徽章，视觉更精致
+/// - 整体 hover 态有更明显的玻璃提亮
 class SettingRow extends StatelessWidget {
   final IconData icon;
   final String title;
   final String? subtitle;
   final Widget? trailing;
   final VoidCallback? onTap;
+  final Color? accentColor;
 
   const SettingRow({
     super.key,
@@ -166,15 +181,29 @@ class SettingRow extends StatelessWidget {
     this.subtitle,
     this.trailing,
     this.onTap,
+    this.accentColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final accent = accentColor ?? SettingsPalette.accent;
     final body = Padding(
       padding: const EdgeInsets.fromLTRB(10, 10, 14, 10),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: SettingsPalette.textSecondary(context)),
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: accent.withValues(alpha: 0.18),
+                width: 1,
+              ),
+            ),
+            child: Icon(icon, size: 14, color: accent),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -185,17 +214,19 @@ class SettingRow extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     color: SettingsPalette.textPrimary(context),
+                    height: 1.2,
                   ),
                 ),
                 if (subtitle != null) ...[
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 3),
                   Text(
                     subtitle!,
                     style: TextStyle(
                       fontSize: 11,
                       color: SettingsPalette.textHint(context),
+                      height: 1.4,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -209,11 +240,16 @@ class SettingRow extends StatelessWidget {
       ),
     );
     if (onTap == null) return body;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      hoverColor: Colors.black.withValues(alpha: 0.03),
-      child: body,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        hoverColor: SettingsPalette.glassWhiteHover(context),
+        splashColor: accent.withValues(alpha: 0.06),
+        highlightColor: accent.withValues(alpha: 0.04),
+        child: body,
+      ),
     );
   }
 }
@@ -225,6 +261,7 @@ class SwitchRow extends StatelessWidget {
   final String? subtitle;
   final bool value;
   final ValueChanged<bool>? onChanged;
+  final Color? accentColor;
 
   const SwitchRow({
     super.key,
@@ -233,15 +270,29 @@ class SwitchRow extends StatelessWidget {
     this.subtitle,
     required this.value,
     required this.onChanged,
+    this.accentColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final accent = accentColor ?? SettingsPalette.accent;
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 6, 14, 6),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: SettingsPalette.textSecondary(context)),
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: accent.withValues(alpha: 0.18),
+                width: 1,
+              ),
+            ),
+            child: Icon(icon, size: 14, color: accent),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -252,17 +303,19 @@ class SwitchRow extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     color: SettingsPalette.textPrimary(context),
+                    height: 1.2,
                   ),
                 ),
                 if (subtitle != null) ...[
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 3),
                   Text(
                     subtitle!,
                     style: TextStyle(
                       fontSize: 11,
                       color: SettingsPalette.textHint(context),
+                      height: 1.4,
                     ),
                   ),
                 ],
@@ -273,8 +326,8 @@ class SwitchRow extends StatelessWidget {
             value: value,
             onChanged: onChanged,
             activeThumbColor: Colors.white,
-            activeTrackColor: SettingsPalette.accent,
-            inactiveTrackColor: const Color(0xFFE0E0E5),
+            activeTrackColor: accent,
+            inactiveTrackColor: SettingsPalette.cardBorder(context),
             inactiveThumbColor: Colors.white,
             trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -293,6 +346,7 @@ class DropdownRow extends StatelessWidget {
   final String value;
   final List<DropdownMenuItem<String>> items;
   final ValueChanged<String?>? onChanged;
+  final Color? accentColor;
 
   const DropdownRow({
     super.key,
@@ -302,15 +356,29 @@ class DropdownRow extends StatelessWidget {
     required this.value,
     required this.items,
     required this.onChanged,
+    this.accentColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final accent = accentColor ?? SettingsPalette.accent;
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 6, 14, 6),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: SettingsPalette.textSecondary(context)),
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: accent.withValues(alpha: 0.18),
+                width: 1,
+              ),
+            ),
+            child: Icon(icon, size: 14, color: accent),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -321,38 +389,54 @@ class DropdownRow extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     color: SettingsPalette.textPrimary(context),
+                    height: 1.2,
                   ),
                 ),
                 if (subtitle != null) ...[
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 3),
                   Text(
                     subtitle!,
                     style: TextStyle(
                       fontSize: 11,
                       color: SettingsPalette.textHint(context),
+                      height: 1.4,
                     ),
                   ),
                 ],
               ],
             ),
           ),
-          DropdownButton<String>(
-            value: value,
-            onChanged: onChanged,
-            underline: const SizedBox(),
-            isDense: true,
-            icon: Icon(
-              Icons.keyboard_arrow_down,
-              size: 16,
-              color: SettingsPalette.textSecondary(context),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: SettingsPalette.glassWhite(context),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: SettingsPalette.cardBorder(context),
+                width: 1,
+              ),
             ),
-            style: TextStyle(
-              fontSize: 12,
-              color: SettingsPalette.textPrimary(context),
+            child: DropdownButton<String>(
+              value: value,
+              onChanged: onChanged,
+              underline: const SizedBox(),
+              isDense: true,
+              icon: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 16,
+                color: SettingsPalette.textSecondary(context),
+              ),
+              style: TextStyle(
+                fontSize: 12,
+                color: SettingsPalette.textPrimary(context),
+              ),
+              items: items,
+              dropdownColor: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF1E2747)
+                  : Colors.white,
             ),
-            items: items,
           ),
         ],
       ),
@@ -360,13 +444,134 @@ class DropdownRow extends StatelessWidget {
   }
 }
 
-/// 按钮行 - 左侧标签 + 右侧 OutlinedButton
+/// 文本输入行 - 左侧图标徽章 + 标题 + 内嵌输入框
+class TextFieldRow extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final String? hintText;
+  final TextEditingController controller;
+  final TextInputType? keyboardType;
+  final ValueChanged<String>? onSubmitted;
+  final Color? accentColor;
+
+  const TextFieldRow({
+    super.key,
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.hintText,
+    required this.controller,
+    this.keyboardType,
+    this.onSubmitted,
+    this.accentColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = accentColor ?? SettingsPalette.accent;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 8, 14, 8),
+      child: Row(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: accent.withValues(alpha: 0.18),
+                width: 1,
+              ),
+            ),
+            child: Icon(icon, size: 14, color: accent),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: SettingsPalette.textPrimary(context),
+                    height: 1.2,
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle!,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: SettingsPalette.textHint(context),
+                      height: 1.4,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                const SizedBox(height: 6),
+                TextField(
+                  controller: controller,
+                  keyboardType: keyboardType,
+                  onSubmitted: onSubmitted,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: SettingsPalette.textPrimary(context),
+                  ),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    filled: true,
+                    fillColor: SettingsPalette.glassWhite(context),
+                    hintText: hintText,
+                    hintStyle: TextStyle(
+                      fontSize: 12,
+                      color: SettingsPalette.textHint(context),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: SettingsPalette.cardBorder(context),
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: SettingsPalette.cardBorder(context),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: accent, width: 1.5),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 按钮行 - 左侧标签 + 右侧描边按钮
 class ButtonRow extends StatelessWidget {
   final IconData icon;
   final String title;
   final String? subtitle;
   final String buttonLabel;
   final VoidCallback onPressed;
+  final Color? accentColor;
 
   const ButtonRow({
     super.key,
@@ -375,15 +580,29 @@ class ButtonRow extends StatelessWidget {
     this.subtitle,
     required this.buttonLabel,
     required this.onPressed,
+    this.accentColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final accent = accentColor ?? SettingsPalette.accent;
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 6, 14, 6),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: SettingsPalette.textSecondary(context)),
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: accent.withValues(alpha: 0.18),
+                width: 1,
+              ),
+            ),
+            child: Icon(icon, size: 14, color: accent),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -394,17 +613,19 @@ class ButtonRow extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     color: SettingsPalette.textPrimary(context),
+                    height: 1.2,
                   ),
                 ),
                 if (subtitle != null) ...[
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 3),
                   Text(
                     subtitle!,
                     style: TextStyle(
                       fontSize: 11,
                       color: SettingsPalette.textHint(context),
+                      height: 1.4,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -416,11 +637,16 @@ class ButtonRow extends StatelessWidget {
           OutlinedButton(
             onPressed: onPressed,
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
               minimumSize: const Size(0, 28),
-              side: BorderSide(color: SettingsPalette.cardBorder(context)),
-              foregroundColor: SettingsPalette.textPrimary(context),
-              textStyle: const TextStyle(fontSize: 11),
+              side: BorderSide(
+                color: accent.withValues(alpha: 0.45),
+              ),
+              foregroundColor: accent,
+              textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             child: Text(buttonLabel),
           ),
@@ -443,6 +669,7 @@ class SliderRow extends StatelessWidget {
   final ValueChanged<double>? onChangeEnd;
   final String? minLabel;
   final String? maxLabel;
+  final Color? accentColor;
 
   const SliderRow({
     super.key,
@@ -457,10 +684,12 @@ class SliderRow extends StatelessWidget {
     this.onChangeEnd,
     this.minLabel,
     this.maxLabel,
+    this.accentColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final accent = accentColor ?? SettingsPalette.accent;
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 8, 14, 10),
       child: Column(
@@ -468,10 +697,18 @@ class SliderRow extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                icon,
-                size: 16,
-                color: SettingsPalette.textSecondary(context),
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: accent.withValues(alpha: 0.18),
+                    width: 1,
+                  ),
+                ),
+                child: Icon(icon, size: 14, color: accent),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -479,17 +716,25 @@ class SliderRow extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     color: SettingsPalette.textPrimary(context),
+                    height: 1.2,
                   ),
                 ),
               ),
-              Text(
-                valueLabel,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: SettingsPalette.accent,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  valueLabel,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: accent,
+                  ),
                 ),
               ),
             ],
@@ -497,155 +742,21 @@ class SliderRow extends StatelessWidget {
           const SizedBox(height: 4),
           SliderTheme(
             data: SliderThemeData(
-              activeTrackColor: SettingsPalette.accent,
-              inactiveTrackColor: SettingsPalette.accent.withValues(alpha: 0.2),
+              trackHeight: 4,
+              activeTrackColor: accent,
+              inactiveTrackColor: SettingsPalette.cardBorder(context),
               thumbColor: Colors.white,
-              overlayColor: SettingsPalette.accent.withValues(alpha: 0.1),
-              trackHeight: 3,
-              thumbShape: const RoundSliderThumbShape(
-                enabledThumbRadius: 7,
-                elevation: 1,
-              ),
+              overlayColor: accent.withValues(alpha: 0.15),
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
             ),
             child: Slider(
-              value: value,
               min: min,
               max: max,
               divisions: divisions,
+              value: value.clamp(min, max),
               onChanged: onChanged,
               onChangeEnd: onChangeEnd,
-            ),
-          ),
-          if (minLabel != null || maxLabel != null)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  minLabel ?? '',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: SettingsPalette.textHint(context),
-                  ),
-                ),
-                Text(
-                  maxLabel ?? '',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: SettingsPalette.textHint(context),
-                  ),
-                ),
-              ],
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// 文本输入行
-class TextFieldRow extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final String hintText;
-  final TextEditingController controller;
-  final TextInputType? keyboardType;
-  final ValueChanged<String>? onSubmitted;
-
-  const TextFieldRow({
-    super.key,
-    required this.icon,
-    required this.title,
-    this.subtitle,
-    required this.hintText,
-    required this.controller,
-    this.keyboardType,
-    this.onSubmitted,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 8, 14, 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                icon,
-                size: 16,
-                color: SettingsPalette.textSecondary(context),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: SettingsPalette.textPrimary(context),
-                      ),
-                    ),
-                    if (subtitle != null)
-                      Text(
-                        subtitle!,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: SettingsPalette.textHint(context),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: controller,
-            keyboardType: keyboardType,
-            onSubmitted: onSubmitted,
-            style: TextStyle(
-              fontSize: 12,
-              color: SettingsPalette.textPrimary(context),
-            ),
-            decoration: InputDecoration(
-              isCollapsed: false,
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 10,
-              ),
-              hintText: hintText,
-              hintStyle: TextStyle(
-                fontSize: 11,
-                color: SettingsPalette.textHint(context),
-              ),
-              filled: true,
-              fillColor: Colors.white.withValues(alpha: 0.6),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: SettingsPalette.cardBorder(context),
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: SettingsPalette.cardBorder(context),
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: SettingsPalette.accent,
-                  width: 1.5,
-                ),
-              ),
             ),
           ),
         ],
