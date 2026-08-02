@@ -99,8 +99,8 @@ class DiagnosticAutoFixSection extends StatelessWidget {
                   status == AutoFixStatus.scanning
                       ? Icons.search_rounded
                       : status == AutoFixStatus.fixing
-                          ? Icons.build_rounded
-                          : Icons.auto_fix_high_rounded,
+                      ? Icons.build_rounded
+                      : Icons.auto_fix_high_rounded,
                   color: BAColors.primaryOf(context),
                   size: 24,
                 ),
@@ -351,17 +351,21 @@ class DiagnosticAutoFixSection extends StatelessWidget {
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: fixResult.isFixed
-                              ? BAColors.successOf(context)
-                                  .withValues(alpha: 0.1)
-                              : BAColors.dangerOf(context)
-                                  .withValues(alpha: 0.1),
+                              ? BAColors.successOf(
+                                  context,
+                                ).withValues(alpha: 0.1)
+                              : BAColors.dangerOf(
+                                  context,
+                                ).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: fixResult.isFixed
-                                ? BAColors.successOf(context)
-                                    .withValues(alpha: 0.3)
-                                : BAColors.dangerOf(context)
-                                    .withValues(alpha: 0.3),
+                                ? BAColors.successOf(
+                                    context,
+                                  ).withValues(alpha: 0.3)
+                                : BAColors.dangerOf(
+                                    context,
+                                  ).withValues(alpha: 0.3),
                           ),
                         ),
                         child: Row(

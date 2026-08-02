@@ -5,10 +5,7 @@ import '../../ui/theme/colors.dart';
 class DiagnosticHeader extends StatelessWidget {
   final VoidCallback onBack;
 
-  const DiagnosticHeader({
-    super.key,
-    required this.onBack,
-  });
+  const DiagnosticHeader({super.key, required this.onBack});
 
   @override
   Widget build(BuildContext context) {

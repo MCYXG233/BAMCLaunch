@@ -28,8 +28,8 @@ class DiagnosticActionButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: isPrimary
                 ? (onPressed == null
-                    ? BAColors.primaryOf(context).withValues(alpha: 0.4)
-                    : BAColors.primaryOf(context))
+                      ? BAColors.primaryOf(context).withValues(alpha: 0.4)
+                      : BAColors.primaryOf(context))
                 : BAColors.surfaceVariantOf(context),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
@@ -46,8 +46,8 @@ class DiagnosticActionButton extends StatelessWidget {
                 color: isPrimary
                     ? Colors.white
                     : (onPressed == null
-                        ? BAColors.textDisabledOf(context)
-                        : BAColors.textPrimaryOf(context)),
+                          ? BAColors.textDisabledOf(context)
+                          : BAColors.textPrimaryOf(context)),
                 size: 18,
               ),
               const SizedBox(width: 8),
@@ -57,8 +57,8 @@ class DiagnosticActionButton extends StatelessWidget {
                   color: isPrimary
                       ? Colors.white
                       : (onPressed == null
-                          ? BAColors.textDisabledOf(context)
-                          : BAColors.textPrimaryOf(context)),
+                            ? BAColors.textDisabledOf(context)
+                            : BAColors.textPrimaryOf(context)),
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),

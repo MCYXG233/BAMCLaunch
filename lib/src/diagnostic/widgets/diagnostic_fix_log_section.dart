@@ -41,7 +41,9 @@ class DiagnosticFixLogSection extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: BAColors.primaryOf(context).withValues(alpha: 0.12),
+                      color: BAColors.primaryOf(
+                        context,
+                      ).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
