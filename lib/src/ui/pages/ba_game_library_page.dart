@@ -44,14 +44,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
   // 实例详情页状态
   GameInstance? _selectedInstance;
   TabController? _detailTabController;
-  static const List<String> _detailTabs = [
-    '概览',
-    '存档',
-    '模组',
-    '资源包',
-    '光影',
-    '截图'
-  ];
+  static const List<String> _detailTabs = ['概览', '存档', '模组', '资源包', '光影', '截图'];
   static const List<IconData> _detailTabIcons = [
     Icons.dashboard_rounded,
     Icons.folder_rounded,
@@ -443,8 +436,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
             decoration: InputDecoration(
               hintText: '请输入新实例名称',
               hintStyle: TextStyle(
-                color:
-                    BAColors.textSecondaryOf(context).withValues(alpha: 0.9),
+                color: BAColors.textSecondaryOf(context).withValues(alpha: 0.9),
               ),
               filled: true,
               fillColor: BAColors.surfaceOf(context),
@@ -454,8 +446,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    BorderSide(color: BAColors.primaryLightOf(context)),
+                borderSide: BorderSide(color: BAColors.primaryLightOf(context)),
               ),
             ),
           ),
@@ -648,12 +639,13 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
         return FadeTransition(
           opacity: animation,
           child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0.05, 0),
-              end: Offset.zero,
-            ).animate(
-              CurvedAnimation(parent: animation, curve: Curves.easeOut),
-            ),
+            position:
+                Tween<Offset>(
+                  begin: const Offset(0.05, 0),
+                  end: Offset.zero,
+                ).animate(
+                  CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                ),
             child: child,
           ),
         );
@@ -772,8 +764,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                   borderRadius: BorderRadius.circular(11),
                   boxShadow: [
                     BoxShadow(
-                      color: BAColors.primaryOf(context)
-                          .withValues(alpha: 0.35),
+                      color: BAColors.primaryOf(
+                        context,
+                      ).withValues(alpha: 0.35),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -857,8 +850,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
             onTap: _importInstance,
             borderRadius: BorderRadius.circular(14),
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
                 color: BAColors.surfaceOf(context).withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(14),
@@ -871,16 +863,18 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                 children: [
                   Icon(
                     Icons.file_upload_rounded,
-                    color: BAColors.primaryLightOf(context)
-                        .withValues(alpha: 0.9),
+                    color: BAColors.primaryLightOf(
+                      context,
+                    ).withValues(alpha: 0.9),
                     size: 18,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '导入实例',
                     style: TextStyle(
-                      color: BAColors.textPrimaryOf(context)
-                          .withValues(alpha: 0.95),
+                      color: BAColors.textPrimaryOf(
+                        context,
+                      ).withValues(alpha: 0.95),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -924,13 +918,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                   isLaunching: isLaunching,
                   statsManager: _statsManager,
                   onLaunchGame: () => _launchGame(instance),
-                  onOpenInstanceFolder: () =>
-                      _openInstanceFolder(instance),
-                  onOpenBackupManager: () =>
-                      _openBackupManager(instance),
+                  onOpenInstanceFolder: () => _openInstanceFolder(instance),
+                  onOpenBackupManager: () => _openBackupManager(instance),
                   onOpenModManager: () => _openModManager(instance),
-                  onDuplicateInstance: () =>
-                      _duplicateInstance(instance),
+                  onDuplicateInstance: () => _duplicateInstance(instance),
                   onExportInstance: () => _exportInstance(instance),
                   onDeleteInstance: () => _deleteInstance(instance),
                 ),
@@ -1004,8 +995,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
       );
     }
 
-    final recentWorlds =
-        _worlds.isNotEmpty ? [_worlds.first] : <WorldInfo>[];
+    final recentWorlds = _worlds.isNotEmpty ? [_worlds.first] : <WorldInfo>[];
     final allWorlds = _worlds;
 
     if (_worlds.isEmpty) {
@@ -1081,8 +1071,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
     );
   }
 
-  Widget _buildWorldListItem(
-      BuildContext context, WorldInfo w, bool isDark) {
+  Widget _buildWorldListItem(BuildContext context, WorldInfo w, bool isDark) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -1325,8 +1314,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                 Text(
                   '${isDir ? '文件夹' : formatBytes(size)}${modified != null ? ' · ${_formatDateTime(modified)}' : ''}',
                   style: TextStyle(
-                    color: BAColors.textSecondaryOf(context)
-                        .withValues(alpha: 0.8),
+                    color: BAColors.textSecondaryOf(
+                      context,
+                    ).withValues(alpha: 0.8),
                     fontSize: 11,
                   ),
                 ),

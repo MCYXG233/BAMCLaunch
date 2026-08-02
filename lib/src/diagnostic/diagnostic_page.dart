@@ -177,9 +177,7 @@ class _DiagnosticPageState extends State<DiagnosticPage>
       backgroundColor: BAColors.backgroundOf(context),
       body: Column(
         children: [
-          DiagnosticHeader(
-            onBack: () => Navigator.of(context).pop(),
-          ),
+          DiagnosticHeader(onBack: () => Navigator.of(context).pop()),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
