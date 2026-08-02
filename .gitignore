@@ -11,6 +11,9 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+.tmp/
+.uploads/
+.metadata
 
 # IntelliJ related
 *.iml
@@ -64,6 +67,9 @@ docs/*
 **/*.map.json
 *.tmp
 *.temp
+flutter_*.log
+hs_err_*.log
+build_debug.log
 
 # Local configuration
 config/local/
@@ -77,6 +83,10 @@ logs/
 tools/skills/
 DEPLOYMENT.md
 replace_colors.py
+
+# MiMoCode and research outputs
+.mimocode/
+survey/
 
 # Temporary debugging artifacts (analyze / build output, one-off fix scripts)
 analyze_*.txt
