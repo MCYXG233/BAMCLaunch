@@ -1,0 +1,29 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Dart files
+*.dart text eol=lf
+
+# Explicitly declare text files
+*.md text
+*.yaml text
+*.json text
+*.html text
+*.css text
+*.js text
+
+# Denote all files that are truly binary and should not be modified
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.eot binary
+*.zip binary
+*.7z binary
+*.tar.gz binary
