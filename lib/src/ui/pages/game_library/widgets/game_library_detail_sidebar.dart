@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../instance/instance_manager.dart';
 import '../../../instance/models.dart';
 import '../../../game/game_statistics.dart';
@@ -38,9 +38,9 @@ class GameLibraryDetailSidebar extends StatelessWidget {
     final hours = duration.inHours;
     final minutes = duration.inMinutes % 60;
     if (hours > 0) {
-      return '$hours�?minutes�?;
+      return '$hours�?minutes�?;
     } else {
-      return '$minutes�?;
+      return '$minutes�?;
     }
   }
 
@@ -240,8 +240,8 @@ class GameLibraryDetailSidebar extends StatelessWidget {
                                 const SizedBox(width: 4),
                                 Text(
                                   isRunning
-                                      ? '运行�?
-                                      : (isLaunching ? '启动�? : '启动游戏'),
+                                      ? '运行�?
+                                      : (isLaunching ? '启动�? : '启动游戏'),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 13,
@@ -333,11 +333,11 @@ class GameLibraryDetailSidebar extends StatelessWidget {
                   ? _formatDuration(
                       Duration(seconds: instanceStats.totalPlayTimeSeconds),
                     )
-                  : '0�?,
+                  : '0�?,
             ),
             _buildSidebarInfo(
               context,
-              '最近游�?,
+              '最近游�?,
               _formatDateTime(
                 instance.lastPlayed ?? instanceStats?.lastLaunchTime,
               ),
@@ -348,7 +348,7 @@ class GameLibraryDetailSidebar extends StatelessWidget {
             _buildSidebarDanger(
               context,
               icon: Icons.delete_outline_rounded,
-              label: '删除此实�?,
+              label: '删除此实�?,
               onTap: onDeleteInstance,
             ),
           ],
@@ -357,7 +357,7 @@ class GameLibraryDetailSidebar extends StatelessWidget {
     );
   }
 
-  /// 侧栏快捷操作�?  Widget _buildSidebarAction(
+  /// 侧栏快捷操作�?  Widget _buildSidebarAction(
     BuildContext context, {
     required IconData icon,
     required String label,
@@ -396,7 +396,7 @@ class GameLibraryDetailSidebar extends StatelessWidget {
     );
   }
 
-  /// 侧栏信息�?  Widget _buildSidebarInfo(BuildContext context, String label, String value) {
+  /// 侧栏信息�?  Widget _buildSidebarInfo(BuildContext context, String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: RichText(

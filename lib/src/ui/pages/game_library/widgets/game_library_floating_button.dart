@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../theme/colors.dart';
 import '../../../animations/ba_animations.dart';
 
-/// 蔚蓝档案风格浮动按钮 - 呼吸灯效�?class GameLibraryFloatingButton extends StatelessWidget {
+/// 蔚蓝档案风格浮动按钮 - 呼吸灯效�?class GameLibraryFloatingButton extends StatelessWidget {
   final VoidCallback onTap;
 
   const GameLibraryFloatingButton({

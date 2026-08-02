@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../instance/models.dart';
 import '../../../game/game_statistics.dart';
 import '../../../theme/colors.dart';
@@ -42,9 +42,9 @@ class GameLibraryInstanceGrid extends StatelessWidget {
     final hours = duration.inHours;
     final minutes = duration.inMinutes % 60;
     if (hours > 0) {
-      return '$hours�?minutes�?;
+      return '$hours�?minutes�?;
     } else {
-      return '$minutes�?;
+      return '$minutes�?;
     }
   }
 
@@ -105,8 +105,8 @@ class GameLibraryInstanceGrid extends StatelessWidget {
           const SizedBox(height: 28),
           Text(
             searchQuery.isNotEmpty || selectedFilter != 0
-                ? '没有找到匹配的实�?
-                : '还没有游戏实�?,
+                ? '没有找到匹配的实�?
+                : '还没有游戏实�?,
             style: TextStyle(
               color: BAColors.textPrimaryOf(context),
               fontSize: 22,
@@ -117,7 +117,7 @@ class GameLibraryInstanceGrid extends StatelessWidget {
           Text(
             searchQuery.isNotEmpty || selectedFilter != 0
                 ? '尝试修改搜索条件或切换筛选项'
-                : '点击右下角按钮创建第一个实�?,
+                : '点击右下角按钮创建第一个实�?,
             style: TextStyle(
               color:
                   BAColors.textSecondaryOf(context).withValues(alpha: 0.9),
@@ -129,7 +129,7 @@ class GameLibraryInstanceGrid extends StatelessWidget {
     );
   }
 
-  /// 实例卡片 - BakaXL 排版风格（紧凑横向布局�?  Widget _buildInstanceCard(BuildContext context, GameInstance instance) {
+  /// 实例卡片 - BakaXL 排版风格（紧凑横向布局�?  Widget _buildInstanceCard(BuildContext context, GameInstance instance) {
     final isRunning = instance.status == InstanceStatus.running;
     final isLaunching = launchingIds.contains(instance.id);
     final instanceStats = statsManager.getInstanceStatistics(instance.id);

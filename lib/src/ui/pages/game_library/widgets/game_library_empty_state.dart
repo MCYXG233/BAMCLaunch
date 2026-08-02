@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../theme/colors.dart';
 
-/// 通用空状�?- BakaXL 风格
+/// 通用空状�?- BakaXL 风格
 ///
-/// 视觉要点：渐变圆 + 副色"虚线�?装饰 + 主副文案�?/// 整体尺寸较克制（图标 56px），避免大块渐变抢戏�?class GameLibraryEmptyState extends StatelessWidget {
+/// 视觉要点：渐变圆 + 副色"虚线�?装饰 + 主副文案�?/// 整体尺寸较克制（图标 56px），避免大块渐变抢戏�?class GameLibraryEmptyState extends StatelessWidget {
   final IconData icon;
   final String message;
   final String subMessage;
@@ -21,7 +21,7 @@ import '../../../theme/colors.dart';
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // 双层圆：外圈虚线，内圈实心渐�?          SizedBox(
+          // 双层圆：外圈虚线，内圈实心渐�?          SizedBox(
             width: 96,
             height: 96,
             child: Stack(

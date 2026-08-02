@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../theme/colors.dart';
 
-/// 搜索和筛选区�?- 毛玻璃风�?class GameLibrarySearchFilter extends StatelessWidget {
+/// 搜索和筛选区�?- 毛玻璃风�?class GameLibrarySearchFilter extends StatelessWidget {
   final TextEditingController searchController;
   final String searchQuery;
   final int selectedFilter;
@@ -25,7 +25,7 @@ import '../../../theme/colors.dart';
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
         children: [
-          // 搜索�?- 毛玻�?          Expanded(
+          // 搜索�?- 毛玻�?          Expanded(
             flex: 2,
             child: Container(
               height: 48,
@@ -85,7 +85,7 @@ import '../../../theme/colors.dart';
           ),
           const SizedBox(width: 16),
 
-          // 筛选按�?- 毛玻�?          Expanded(
+          // 筛选按�?- 毛玻�?          Expanded(
             flex: 3,
             child: Row(
               children: List.generate(filters.length, (index) {

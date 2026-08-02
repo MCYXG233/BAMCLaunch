@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../theme/colors.dart';
 import '../../../components/settings_panel/widgets/settings_theme.dart';
 
-/// 游戏统计信息�?- BakaXL 风格紧凑横排
+/// 游戏统计信息�?- BakaXL 风格紧凑横排
 ///
-/// 把原�?3 个大卡片合并�?1 个毛玻璃信息条，
-/// 数据项之间用细分隔线区分，整体高度更低、信息密度更高�?class GameLibraryStatsBar extends StatelessWidget {
+/// 把原�?3 个大卡片合并�?1 个毛玻璃信息条，
+/// 数据项之间用细分隔线区分，整体高度更低、信息密度更高�?class GameLibraryStatsBar extends StatelessWidget {
   final Duration totalPlayTime;
   final int totalLaunchCount;
   final Duration todayPlayTime;
@@ -21,9 +21,9 @@ import '../../../components/settings_panel/widgets/settings_theme.dart';
     final hours = duration.inHours;
     final minutes = duration.inMinutes % 60;
     if (hours > 0) {
-      return '$hours�?minutes�?;
+      return '$hours�?minutes�?;
     } else {
-      return '$minutes�?;
+      return '$minutes�?;
     }
   }
 
@@ -51,14 +51,14 @@ import '../../../components/settings_panel/widgets/settings_theme.dart';
           children: [
             _buildStatCell(
               context,
-              label: '总游戏时�?,
+              label: '总游戏时�?,
               value: _formatDuration(totalPlayTime),
             ),
             _buildStatDivider(context),
             _buildStatCell(
               context,
-              label: '总启动次�?,
-              value: '$totalLaunchCount �?,
+              label: '总启动次�?,
+              value: '$totalLaunchCount �?,
             ),
             _buildStatDivider(context),
             _buildStatCell(
@@ -72,7 +72,7 @@ import '../../../components/settings_panel/widgets/settings_theme.dart';
     );
   }
 
-  /// 统计信息条中的单个数据单元（标签 + 数值，纵向排列�?  Widget _buildStatCell(
+  /// 统计信息条中的单个数据单元（标签 + 数值，纵向排列�?  Widget _buildStatCell(
     BuildContext context, {
     required String label,
     required String value,
@@ -104,7 +104,7 @@ import '../../../components/settings_panel/widgets/settings_theme.dart';
     );
   }
 
-  /// 统计信息条中的细分隔�?  Widget _buildStatDivider(BuildContext context) {
+  /// 统计信息条中的细分隔�?  Widget _buildStatDivider(BuildContext context) {
     return Container(
       width: 1,
       height: 26,
