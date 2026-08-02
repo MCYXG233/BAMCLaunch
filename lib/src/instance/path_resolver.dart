@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:path/path.dart' as path;
 
 /// Minecraft 游戏目录路径解析器
@@ -97,9 +97,10 @@ class MinecraftPathResolver {
   /// [predicate] 可选过滤函数（用于选择"哪个目录"是有效的游戏目录），
   /// 例如要求目录内含 `mods` 或 `versions` 等子目录。
   Future<String?> findFirstExisting({
+    List<String>? candidates,
     Future<bool> Function(Directory dir)? predicate,
   }) async {
-    for (final candidate in resolveCandidates()) {
+    for (final candidate in candidates ?? resolveCandidates()) {
       try {
         final dir = Directory(candidate);
         if (!await dir.exists()) continue;
