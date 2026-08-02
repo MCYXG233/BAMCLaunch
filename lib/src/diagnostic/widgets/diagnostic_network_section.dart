@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../ui/theme/colors.dart';
 import '../network_diagnostic.dart';
 import 'diagnostic_action_button.dart';

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../instance/models.dart';
 import '../../../theme/colors.dart';
 

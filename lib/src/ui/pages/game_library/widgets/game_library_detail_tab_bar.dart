@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../theme/colors.dart';
 
 /// 详情页子Tab�?- BakaXL 风格（带 icon + 渐变选中态）

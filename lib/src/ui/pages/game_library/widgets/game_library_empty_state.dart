@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../theme/colors.dart';
 
 /// 通用空状�?- BakaXL 风格

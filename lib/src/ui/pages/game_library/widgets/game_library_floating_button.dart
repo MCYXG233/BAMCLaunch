@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../theme/colors.dart';
 import '../../../animations/ba_animations.dart';
 

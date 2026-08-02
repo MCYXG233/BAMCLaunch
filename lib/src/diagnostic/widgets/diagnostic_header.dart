@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../ui/theme/colors.dart';
 
 /// 诊断页面顶部标题栏
