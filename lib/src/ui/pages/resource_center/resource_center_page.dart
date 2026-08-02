@@ -426,8 +426,9 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
                   borderRadius: BorderRadius.circular(11),
                   boxShadow: [
                     BoxShadow(
-                      color: BAColors.primaryOf(context)
-                          .withValues(alpha: 0.35),
+                      color: BAColors.primaryOf(
+                        context,
+                      ).withValues(alpha: 0.35),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),

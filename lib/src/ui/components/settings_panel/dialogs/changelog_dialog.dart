@@ -65,10 +65,8 @@ class ChangelogDialog extends StatefulWidget {
     return showDialog<void>(
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.4),
-      builder: (_) => ChangelogDialog(
-        entries: entries,
-        currentVersion: currentVersion,
-      ),
+      builder: (_) =>
+          ChangelogDialog(entries: entries, currentVersion: currentVersion),
     );
   }
 
@@ -86,9 +84,7 @@ class _ChangelogDialogState extends State<ChangelogDialog> {
       onClose: () => Navigator.of(context).pop(),
       child: SizedBox(
         height: 460,
-        child: widget.entries.isEmpty
-            ? _buildEmpty()
-            : _buildList(),
+        child: widget.entries.isEmpty ? _buildEmpty() : _buildList(),
       ),
       actions: [
         BASecondaryButton(
@@ -138,7 +134,9 @@ class _ChangelogDialogState extends State<ChangelogDialog> {
         final items = groups[v]!;
         final isCurrent = v == widget.currentVersion;
         return Padding(
-          padding: EdgeInsets.only(bottom: index < versions.length - 1 ? 16 : 0),
+          padding: EdgeInsets.only(
+            bottom: index < versions.length - 1 ? 16 : 0,
+          ),
           child: _buildVersionBlock(v, items, isCurrent: isCurrent),
         );
       },

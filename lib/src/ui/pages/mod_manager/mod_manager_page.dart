@@ -428,8 +428,9 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
                   borderRadius: BorderRadius.circular(11),
                   boxShadow: [
                     BoxShadow(
-                      color: BAColors.primaryOf(context)
-                          .withValues(alpha: 0.35),
+                      color: BAColors.primaryOf(
+                        context,
+                      ).withValues(alpha: 0.35),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -490,7 +491,9 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
           const SizedBox(width: 8),
           _buildHeaderButton(
             context,
-            icon: _isMultiSelectMode ? Icons.close_rounded : Icons.checklist_rounded,
+            icon: _isMultiSelectMode
+                ? Icons.close_rounded
+                : Icons.checklist_rounded,
             label: _isMultiSelectMode ? '退出多选' : '多选',
             onPressed: _toggleMultiSelectMode,
             active: _isMultiSelectMode,
@@ -514,8 +517,8 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
     final bg = active
         ? accent.withValues(alpha: 0.18)
         : (highlight
-            ? accent.withValues(alpha: 0.12)
-            : BAColors.surfaceOf(context).withValues(alpha: 0.55));
+              ? accent.withValues(alpha: 0.12)
+              : BAColors.surfaceOf(context).withValues(alpha: 0.55));
     final border = active || highlight
         ? accent.withValues(alpha: 0.55)
         : BAColors.borderOf(context).withValues(alpha: 0.5);

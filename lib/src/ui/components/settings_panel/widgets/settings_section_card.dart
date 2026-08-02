@@ -639,11 +639,12 @@ class ButtonRow extends StatelessWidget {
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
               minimumSize: const Size(0, 28),
-              side: BorderSide(
-                color: accent.withValues(alpha: 0.45),
-              ),
+              side: BorderSide(color: accent.withValues(alpha: 0.45)),
               foregroundColor: accent,
-              textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+              textStyle: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),

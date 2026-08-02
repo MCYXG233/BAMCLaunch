@@ -97,129 +97,130 @@ class BADialog extends StatelessWidget {
           width: width,
           height: height,
           child: ClipRRect(
-          borderRadius: radius,
-          child: Stack(
-            children: [
-              // 底层磨砂（远景模糊）
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                  child: Container(color: Colors.transparent),
+            borderRadius: radius,
+            child: Stack(
+              children: [
+                // 底层磨砂（远景模糊）
+                Positioned.fill(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                    child: Container(color: Colors.transparent),
+                  ),
                 ),
-              ),
-              // 表层渐变 + 半透明背景
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: isDark
-                          ? [
-                              const Color(0xCC1E2747),
-                              const Color(0xCC141C33),
-                            ]
-                          : [
-                              const Color(0xE6FFFFFF),
-                              const Color(0xCCF5F8FF),
+                // 表层渐变 + 半透明背景
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: isDark
+                            ? [const Color(0xCC1E2747), const Color(0xCC141C33)]
+                            : [
+                                const Color(0xE6FFFFFF),
+                                const Color(0xCCF5F8FF),
+                              ],
+                      ),
+                      borderRadius: radius,
+                    ),
+                  ),
+                ),
+                // 细噪点纹理层（亚克力质感关键）
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: _NoiseTexturePainter(
+                      baseColor: isDark
+                          ? const Color(0x14FFFFFF)
+                          : const Color(0x0A1A2744),
+                    ),
+                  ),
+                ),
+                // 边框 + 阴影
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: radius,
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.10)
+                            : Colors.white.withValues(alpha: 0.85),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                            alpha: isDark ? 0.45 : 0.18,
+                          ),
+                          blurRadius: 32,
+                          offset: const Offset(0, 12),
+                          spreadRadius: 2,
+                        ),
+                        BoxShadow(
+                          color: primaryColor.withValues(alpha: 0.18),
+                          blurRadius: 24,
+                          offset: const Offset(0, 0),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // 顶部彩色光带
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: IgnorePointer(
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
+                      child: Container(
+                        height: 1.5,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              primaryColor.withValues(alpha: 0.0),
+                              primaryColor.withValues(alpha: 0.7),
+                              BAColors.accentPink.withValues(alpha: 0.6),
+                              primaryColor.withValues(alpha: 0.0),
                             ],
-                    ),
-                    borderRadius: radius,
-                  ),
-                ),
-              ),
-              // 细噪点纹理层（亚克力质感关键）
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: _NoiseTexturePainter(
-                    baseColor: isDark
-                        ? const Color(0x14FFFFFF)
-                        : const Color(0x0A1A2744),
-                  ),
-                ),
-              ),
-              // 边框 + 阴影
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: radius,
-                    border: Border.all(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.10)
-                          : Colors.white.withValues(alpha: 0.85),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.18),
-                        blurRadius: 32,
-                        offset: const Offset(0, 12),
-                        spreadRadius: 2,
-                      ),
-                      BoxShadow(
-                        color: primaryColor.withValues(alpha: 0.18),
-                        blurRadius: 24,
-                        offset: const Offset(0, 0),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              // 顶部彩色光带
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: IgnorePointer(
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                    child: Container(
-                      height: 1.5,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            primaryColor.withValues(alpha: 0.0),
-                            primaryColor.withValues(alpha: 0.7),
-                            BAColors.accentPink.withValues(alpha: 0.6),
-                            primaryColor.withValues(alpha: 0.0),
-                          ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              // 主内容
-              Column(
-                mainAxisSize: height != null
-                    ? MainAxisSize.max
-                    : MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildHeader(context, primaryColor),
-                  // 内容区：
-                  // - height 不为空时用 Flexible（垂直有界，调用方传任意 child）
-                  // - height 为空时直接放 child，由调用方自己控制尺寸
-                  if (height != null)
-                    Flexible(
-                      child: Padding(
+                // 主内容
+                Column(
+                  mainAxisSize: height != null
+                      ? MainAxisSize.max
+                      : MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildHeader(context, primaryColor),
+                    // 内容区：
+                    // - height 不为空时用 Flexible（垂直有界，调用方传任意 child）
+                    // - height 为空时直接放 child，由调用方自己控制尺寸
+                    if (height != null)
+                      Flexible(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 18, 24, 4),
+                          child: child,
+                        ),
+                      )
+                    else
+                      Padding(
                         padding: const EdgeInsets.fromLTRB(24, 18, 24, 4),
                         child: child,
                       ),
-                    )
-                  else
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 18, 24, 4),
-                      child: child,
-                    ),
-                  if (actions != null && actions!.isNotEmpty)
-                    _buildActions(context),
-                ],
-              ),
-            ],
+                    if (actions != null && actions!.isNotEmpty)
+                      _buildActions(context),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -258,11 +259,7 @@ class BADialog extends StatelessWidget {
                   width: 1,
                 ),
               ),
-              child: Icon(
-                titleIcon,
-                size: 16,
-                color: primaryColor,
-              ),
+              child: Icon(titleIcon, size: 16, color: primaryColor),
             ),
             const SizedBox(width: 12),
           ],
@@ -277,8 +274,7 @@ class BADialog extends StatelessWidget {
               ),
             ),
           ),
-          if (showCloseButton)
-            _CloseButton(onTap: onClose),
+          if (showCloseButton) _CloseButton(onTap: onClose),
         ],
       ),
     );

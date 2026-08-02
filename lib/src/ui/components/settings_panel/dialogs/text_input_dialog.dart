@@ -188,10 +188,7 @@ class _BATextInputDialogState extends State<BATextInputDialog> {
           onPressed: () => Navigator.of(context).pop(null),
         ),
         const SizedBox(width: 12),
-        BAPrimaryButton(
-          text: widget.confirmText,
-          onPressed: _onConfirm,
-        ),
+        BAPrimaryButton(text: widget.confirmText, onPressed: _onConfirm),
       ],
     );
   }
@@ -279,7 +276,10 @@ class _BATextInputDialogState extends State<BATextInputDialog> {
               vertical: 10,
             ),
           ),
-          style: TextStyle(color: BAColors.textPrimaryOf(context), fontSize: 14),
+          style: TextStyle(
+            color: BAColors.textPrimaryOf(context),
+            fontSize: 14,
+          ),
           onSubmitted: (_) => _onConfirm(),
         ),
       ],

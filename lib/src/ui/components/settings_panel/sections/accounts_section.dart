@@ -28,7 +28,8 @@ class AccountsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasAuthlibServer = authlibSelectedServer != 'microsoft' &&
+    final hasAuthlibServer =
+        authlibSelectedServer != 'microsoft' &&
         authlibSelectedServer != 'offline' &&
         authlibSelectedServer.isNotEmpty;
 
@@ -94,9 +95,7 @@ class AccountsSection extends StatelessWidget {
             DropdownRow(
               icon: Icons.dns_outlined,
               title: '当前使用的认证服务器',
-              subtitle: hasAuthlibServer
-                  ? authlibSelectedServer
-                  : '未选择外置服务器',
+              subtitle: hasAuthlibServer ? authlibSelectedServer : '未选择外置服务器',
               value: authlibSelectedServer,
               items: const [
                 DropdownMenuItem(value: 'microsoft', child: Text('微软正版')),

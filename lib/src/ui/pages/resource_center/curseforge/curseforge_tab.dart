@@ -19,9 +19,7 @@ class CurseForgeTab extends StatelessWidget {
         decoration: BoxDecoration(
           color: _cfOrange.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: _cfOrange.withValues(alpha: 0.25),
-          ),
+          border: Border.all(color: _cfOrange.withValues(alpha: 0.25)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -71,7 +69,9 @@ class CurseForgeTab extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.7),
+                color: BAColors.surfaceVariantOf(
+                  context,
+                ).withValues(alpha: 0.7),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: BAColors.borderOf(context).withValues(alpha: 0.3),

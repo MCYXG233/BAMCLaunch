@@ -43,8 +43,9 @@ class AccountListHeader extends StatelessWidget {
                   borderRadius: BorderRadius.circular(11),
                   boxShadow: [
                     BoxShadow(
-                      color: BAColors.primaryOf(context)
-                          .withValues(alpha: 0.35),
+                      color: BAColors.primaryOf(
+                        context,
+                      ).withValues(alpha: 0.35),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -107,8 +108,7 @@ class AccountListHeader extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: BAColors.primaryOf(context)
-                          .withValues(alpha: 0.3),
+                      color: BAColors.primaryOf(context).withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),

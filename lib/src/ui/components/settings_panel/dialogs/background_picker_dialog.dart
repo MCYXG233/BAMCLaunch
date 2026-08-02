@@ -58,11 +58,13 @@ class _BackgroundPickerDialogState extends State<BackgroundPickerDialog> {
     if (result == null || result.files.isEmpty) return;
     final path = result.files.single.path;
     if (path == null) return;
-    _update(BackgroundConfig(
-      type: BackgroundType.image,
-      imagePath: path,
-      opacity: _config.opacity,
-    ));
+    _update(
+      BackgroundConfig(
+        type: BackgroundType.image,
+        imagePath: path,
+        opacity: _config.opacity,
+      ),
+    );
     if (mounted) {
       NotificationManager().showSuccess('背景图片已设置');
     }
@@ -73,11 +75,13 @@ class _BackgroundPickerDialogState extends State<BackgroundPickerDialog> {
     if (result == null || result.files.isEmpty) return;
     final path = result.files.single.path;
     if (path == null) return;
-    _update(BackgroundConfig(
-      type: BackgroundType.video,
-      videoPath: path,
-      opacity: _config.opacity,
-    ));
+    _update(
+      BackgroundConfig(
+        type: BackgroundType.video,
+        videoPath: path,
+        opacity: _config.opacity,
+      ),
+    );
     if (mounted) {
       NotificationManager().showSuccess('背景视频已设置');
     }
@@ -143,23 +147,26 @@ class _BackgroundPickerDialogState extends State<BackgroundPickerDialog> {
                       children: [
                         SettingsSidebar(
                           sections: [
-                            SidebarSection(title: '背景类型', items: [
-                              SidebarItem(
-                                id: 'image',
-                                icon: Icons.image_outlined,
-                                label: '图片',
-                              ),
-                              SidebarItem(
-                                id: 'video',
-                                icon: Icons.movie_outlined,
-                                label: '视频',
-                              ),
-                              SidebarItem(
-                                id: 'preset',
-                                icon: Icons.auto_awesome_outlined,
-                                label: '预设',
-                              ),
-                            ]),
+                            SidebarSection(
+                              title: '背景类型',
+                              items: [
+                                SidebarItem(
+                                  id: 'image',
+                                  icon: Icons.image_outlined,
+                                  label: '图片',
+                                ),
+                                SidebarItem(
+                                  id: 'video',
+                                  icon: Icons.movie_outlined,
+                                  label: '视频',
+                                ),
+                                SidebarItem(
+                                  id: 'preset',
+                                  icon: Icons.auto_awesome_outlined,
+                                  label: '预设',
+                                ),
+                              ],
+                            ),
                           ],
                           selectedId: _selectedSection,
                           onSelected: (id) =>

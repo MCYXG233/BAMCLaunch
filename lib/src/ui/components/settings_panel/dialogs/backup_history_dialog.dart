@@ -64,12 +64,12 @@ class _BackupHistoryDialogState extends State<BackupHistoryDialog> {
       }
       if (_typeFilter != null && b.type != _typeFilter) return false;
       return true;
-    }).toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }).toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
   List<String> get _instanceNames {
-    final set = widget.backups.map((b) => b.instanceName).toSet().toList()..sort();
+    final set = widget.backups.map((b) => b.instanceName).toSet().toList()
+      ..sort();
     return set;
   }
 
@@ -101,10 +101,7 @@ class _BackupHistoryDialogState extends State<BackupHistoryDialog> {
                   ),
                   const SizedBox(width: 16),
                   // 右侧：详情
-                  Expanded(
-                    flex: 2,
-                    child: _buildDetail(),
-                  ),
+                  Expanded(flex: 2, child: _buildDetail()),
                 ],
               ),
       ),
@@ -216,10 +213,7 @@ class _BackupHistoryDialogState extends State<BackupHistoryDialog> {
             items: items,
             onChanged: onChanged,
             isExpanded: true,
-            underline: Container(
-              height: 1,
-              color: BAColors.borderOf(context),
-            ),
+            underline: Container(height: 1, color: BAColors.borderOf(context)),
             style: TextStyle(
               color: BAColors.textPrimaryOf(context),
               fontSize: 12,
@@ -413,8 +407,7 @@ class _BackupHistoryDialogState extends State<BackupHistoryDialog> {
           if (b.gameVersion != null && b.gameVersion!.isNotEmpty)
             _buildDetailRow('游戏版本', b.gameVersion!),
           _buildDetailRow('压缩', b.isCompressed ? '是' : '否'),
-          if (b.tags.isNotEmpty)
-            _buildDetailRow('标签', b.tags.join(', ')),
+          if (b.tags.isNotEmpty) _buildDetailRow('标签', b.tags.join(', ')),
           if (b.description != null && b.description!.isNotEmpty) ...[
             const SizedBox(height: 12),
             Text(

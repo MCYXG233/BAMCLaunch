@@ -574,10 +574,8 @@ class _SettingsPanelState extends State<SettingsPanel>
       final authlibInjector = AuthlibInjector.instance;
       final serverInfo = await authlibInjector.getAuthServerInfo(url);
       // 保存到已添加列表
-      final stored = _configManager.get<List<dynamic>>(
-            ConfigKeys.authlibServers,
-          ) ??
-          [];
+      final stored =
+          _configManager.get<List<dynamic>>(ConfigKeys.authlibServers) ?? [];
       final list = stored.cast<Map<dynamic, dynamic>>().map((e) {
         return Map<String, dynamic>.from(e);
       }).toList();
@@ -601,10 +599,8 @@ class _SettingsPanelState extends State<SettingsPanel>
   }
 
   Future<void> _manageAuthlibServers() async {
-    final stored = _configManager.get<List<dynamic>>(
-          ConfigKeys.authlibServers,
-        ) ??
-        [];
+    final stored =
+        _configManager.get<List<dynamic>>(ConfigKeys.authlibServers) ?? [];
     final list = stored.cast<Map<dynamic, dynamic>>().map((e) {
       return Map<String, dynamic>.from(e);
     }).toList();
@@ -694,9 +690,8 @@ class _SettingsPanelState extends State<SettingsPanel>
     if (result == null) return;
 
     try {
-      final stored = _configManager.get<List<dynamic>>(
-            ConfigKeys.customGameDirectories,
-          ) ??
+      final stored =
+          _configManager.get<List<dynamic>>(ConfigKeys.customGameDirectories) ??
           [];
       final list = stored.cast<String>().toList();
       if (!list.contains(result)) {
@@ -795,10 +790,7 @@ class _SettingsPanelState extends State<SettingsPanel>
           );
         } catch (e) {
           if (mounted) {
-            NotificationManager().showError(
-              '设为默认失败',
-              message: e.toString(),
-            );
+            NotificationManager().showError('设为默认失败', message: e.toString());
           }
         }
       },
@@ -1471,11 +1463,8 @@ class _SettingsPanelState extends State<SettingsPanel>
           launcherVersion: _launcherVersion,
           buildTime: _buildTime,
           onCheckUpdate: _checkUpdate,
-          onAutoUpdateChanged: (v) => _setBool(
-            ConfigKeys.autoUpdate,
-            v,
-            (val) => _autoUpdate = val,
-          ),
+          onAutoUpdateChanged: (v) =>
+              _setBool(ConfigKeys.autoUpdate, v, (val) => _autoUpdate = val),
           onViewChangelog: _showChangelog,
           onViewOpenSource: _showOpenSourceDialog,
         );

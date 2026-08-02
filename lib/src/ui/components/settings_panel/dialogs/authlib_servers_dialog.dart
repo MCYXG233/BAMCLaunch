@@ -86,7 +86,9 @@ class _AuthlibServersDialogState extends State<AuthlibServersDialog> {
       _list.removeAt(_pendingDeleteIndex!);
       _pendingDeleteIndex = null;
       if (removedUrl == _selectedUrl) {
-        _selectedUrl = _list.isNotEmpty ? (_list.first['url'] as String? ?? '') : '';
+        _selectedUrl = _list.isNotEmpty
+            ? (_list.first['url'] as String? ?? '')
+            : '';
       }
     });
     _notifyChanged();
@@ -260,8 +262,9 @@ class _AuthlibServersDialogState extends State<AuthlibServersDialog> {
                                     gradient: LinearGradient(
                                       colors: [
                                         BAColors.primaryOf(context),
-                                        BAColors.primaryOf(context)
-                                            .withValues(alpha: 0.85),
+                                        BAColors.primaryOf(
+                                          context,
+                                        ).withValues(alpha: 0.85),
                                       ],
                                     ),
                                     borderRadius: BorderRadius.circular(6),
@@ -285,7 +288,8 @@ class _AuthlibServersDialogState extends State<AuthlibServersDialog> {
                               fontSize: 12,
                             ),
                           ),
-                          if (description != null && description.isNotEmpty) ...[
+                          if (description != null &&
+                              description.isNotEmpty) ...[
                             const SizedBox(height: 2),
                             Text(
                               description,
@@ -309,10 +313,14 @@ class _AuthlibServersDialogState extends State<AuthlibServersDialog> {
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: BAColors.dangerOf(context).withValues(alpha: 0.10),
+                        color: BAColors.dangerOf(
+                          context,
+                        ).withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: BAColors.dangerOf(context).withValues(alpha: 0.30),
+                          color: BAColors.dangerOf(
+                            context,
+                          ).withValues(alpha: 0.30),
                           width: 1,
                         ),
                       ),
@@ -351,17 +359,9 @@ class _AuthlibServersDialogState extends State<AuthlibServersDialog> {
             ),
           ),
         ),
-        BASecondaryButton(
-          text: '取消',
-          onPressed: onCancel,
-          height: 30,
-        ),
+        BASecondaryButton(text: '取消', onPressed: onCancel, height: 30),
         const SizedBox(width: 8),
-        BADangerButton(
-          text: '删除',
-          onPressed: onConfirm,
-          height: 30,
-        ),
+        BADangerButton(text: '删除', onPressed: onConfirm, height: 30),
       ],
     );
   }

@@ -119,9 +119,7 @@ class _MirrorSpeedTestDialogState extends State<MirrorSpeedTestDialog> {
   }
 
   MirrorInfo? get _fastest {
-    final available = _results.values
-        .where((r) => r.isAvailable)
-        .toList()
+    final available = _results.values.where((r) => r.isAvailable).toList()
       ..sort((a, b) => a.latencyMs.compareTo(b.latencyMs));
     return available.isEmpty ? null : available.first.mirror;
   }
@@ -136,9 +134,7 @@ class _MirrorSpeedTestDialogState extends State<MirrorSpeedTestDialog> {
       title: '镜像延迟测试',
       titleIcon: Icons.speed_rounded,
       width: 560,
-      onClose: _testing
-          ? null
-          : () => Navigator.of(context).pop(),
+      onClose: _testing ? null : () => Navigator.of(context).pop(),
       child: SizedBox(
         height: 420,
         child: Column(
@@ -151,11 +147,7 @@ class _MirrorSpeedTestDialogState extends State<MirrorSpeedTestDialog> {
         ),
       ),
       actions: [
-        if (_done)
-          BASecondaryButton(
-            text: '重新测试',
-            onPressed: _startTest,
-          ),
+        if (_done) BASecondaryButton(text: '重新测试', onPressed: _startTest),
         if (_done) const SizedBox(width: 12),
         BASecondaryButton(
           text: _testing ? '测试中...' : '关闭',
@@ -213,9 +205,7 @@ class _MirrorSpeedTestDialogState extends State<MirrorSpeedTestDialog> {
                 ),
               const SizedBox(width: 10),
               Text(
-                _testing
-                    ? '正在测试... $finished / $total'
-                    : '测试完成，共 $total 个镜像',
+                _testing ? '正在测试... $finished / $total' : '测试完成，共 $total 个镜像',
                 style: TextStyle(
                   color: BAColors.textPrimaryOf(context),
                   fontSize: 13,
@@ -233,7 +223,9 @@ class _MirrorSpeedTestDialogState extends State<MirrorSpeedTestDialog> {
                     color: BAColors.successOf(context).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                      color: BAColors.successOf(context).withValues(alpha: 0.30),
+                      color: BAColors.successOf(
+                        context,
+                      ).withValues(alpha: 0.30),
                       width: 1,
                     ),
                   ),
@@ -335,16 +327,10 @@ class _MirrorSpeedTestDialogState extends State<MirrorSpeedTestDialog> {
                       ),
                     ),
                     if (isSelected)
-                      _buildBadge(
-                        BAColors.primaryOf(context),
-                        '当前',
-                      ),
+                      _buildBadge(BAColors.primaryOf(context), '当前'),
                     if (isFastest) ...[
                       const SizedBox(width: 6),
-                      _buildBadge(
-                        BAColors.successOf(context),
-                        '最快',
-                      ),
+                      _buildBadge(BAColors.successOf(context), '最快'),
                     ],
                   ],
                 ),
@@ -417,10 +403,7 @@ class _MirrorSpeedTestDialogState extends State<MirrorSpeedTestDialog> {
     if (result == null) {
       return Text(
         '—',
-        style: TextStyle(
-          color: BAColors.textDisabledOf(context),
-          fontSize: 12,
-        ),
+        style: TextStyle(color: BAColors.textDisabledOf(context), fontSize: 12),
       );
     }
     if (!result.isAvailable) {
@@ -435,10 +418,7 @@ class _MirrorSpeedTestDialogState extends State<MirrorSpeedTestDialog> {
           const SizedBox(width: 4),
           Text(
             '不可用',
-            style: TextStyle(
-              color: BAColors.dangerOf(context),
-              fontSize: 12,
-            ),
+            style: TextStyle(color: BAColors.dangerOf(context), fontSize: 12),
           ),
         ],
       );
@@ -451,11 +431,7 @@ class _MirrorSpeedTestDialogState extends State<MirrorSpeedTestDialog> {
         : BAColors.dangerOf(context);
     return Text(
       '$latency ms',
-      style: TextStyle(
-        color: color,
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-      ),
+      style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600),
     );
   }
 }

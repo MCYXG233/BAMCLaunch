@@ -251,8 +251,15 @@ class ResourceGridCard extends StatelessWidget {
 
     // 分类标签（最多 2 个）
     for (final cat in resource.categories.take(2)) {
-      tags.add(_buildTag(context, cat, typeColor.withValues(alpha: 0.18),
-          typeColor, isAccent: false));
+      tags.add(
+        _buildTag(
+          context,
+          cat,
+          typeColor.withValues(alpha: 0.18),
+          typeColor,
+          isAccent: false,
+        ),
+      );
     }
 
     // 加载器标签
@@ -290,10 +297,7 @@ class ResourceGridCard extends StatelessWidget {
         color: bg,
         borderRadius: BorderRadius.circular(4),
         border: isAccent
-            ? Border.all(
-                color: fg.withValues(alpha: 0.3),
-                width: 0.5,
-              )
+            ? Border.all(color: fg.withValues(alpha: 0.3), width: 0.5)
             : null,
       ),
       child: Text(
@@ -325,11 +329,7 @@ class ResourceGridCard extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.layers_outlined,
-                  size: 9,
-                  color: textSecondary,
-                ),
+                Icon(Icons.layers_outlined, size: 9, color: textSecondary),
                 const SizedBox(width: 3),
                 Text(
                   resource.supportedGameVersions.first,

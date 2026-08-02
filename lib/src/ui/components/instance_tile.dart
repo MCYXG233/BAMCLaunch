@@ -44,10 +44,7 @@ class InstanceTile extends StatefulWidget {
     required this.subtitle,
     this.iconFile,
     this.defaultIcon = Icons.widgets_rounded,
-    this.defaultIconColors = const [
-      Color(0xFF7AB3F0),
-      Color(0xFF4A90D9),
-    ],
+    this.defaultIconColors = const [Color(0xFF7AB3F0), Color(0xFF4A90D9)],
     this.status = InstanceTileStatus.stopped,
     this.selected = false,
     this.onTap,
@@ -159,11 +156,9 @@ class _InstanceTileState extends State<InstanceTile> {
       ),
     );
 
-    if (widget.contextMenuItems != null && widget.contextMenuItems!.isNotEmpty) {
-      card = BAContextMenu(
-        items: widget.contextMenuItems!,
-        child: card,
-      );
+    if (widget.contextMenuItems != null &&
+        widget.contextMenuItems!.isNotEmpty) {
+      card = BAContextMenu(items: widget.contextMenuItems!, child: card);
     }
 
     return card;
@@ -214,11 +209,7 @@ class _InstanceTileState extends State<InstanceTile> {
         ),
         borderRadius: BorderRadius.circular(9),
       ),
-      child: Icon(
-        widget.defaultIcon,
-        size: 20,
-        color: Colors.white,
-      ),
+      child: Icon(widget.defaultIcon, size: 20, color: Colors.white),
     );
   }
 
@@ -226,10 +217,7 @@ class _InstanceTileState extends State<InstanceTile> {
     final (color, pulse) = switch (widget.status) {
       InstanceTileStatus.running => (BAColors.successOf(context), true),
       InstanceTileStatus.launching => (BAColors.warningOf(context), true),
-      InstanceTileStatus.stopped => (
-          BAColors.textDisabledOf(context),
-          false,
-        ),
+      InstanceTileStatus.stopped => (BAColors.textDisabledOf(context), false),
     };
     final dot = Container(
       width: 9,

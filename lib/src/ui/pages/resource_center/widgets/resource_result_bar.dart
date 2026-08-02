@@ -86,8 +86,7 @@ class ResourceResultBar extends StatelessWidget {
           ),
           const Spacer(),
           // 右侧：刷新按钮
-          if (onRefresh != null)
-            _buildRefreshButton(context, textPrimary),
+          if (onRefresh != null) _buildRefreshButton(context, textPrimary),
         ],
       ),
     );

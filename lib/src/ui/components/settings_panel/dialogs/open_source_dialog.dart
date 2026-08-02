@@ -141,10 +141,12 @@ class _OpenSourceDialogState extends State<OpenSourceDialog> {
   List<_Project> get _filteredProjects {
     if (_filter.isEmpty) return _projects;
     return _projects
-        .where((p) =>
-            p.name.toLowerCase().contains(_filter.toLowerCase()) ||
-            p.category.contains(_filter) ||
-            p.description.contains(_filter))
+        .where(
+          (p) =>
+              p.name.toLowerCase().contains(_filter.toLowerCase()) ||
+              p.category.contains(_filter) ||
+              p.description.contains(_filter),
+        )
         .toList();
   }
 

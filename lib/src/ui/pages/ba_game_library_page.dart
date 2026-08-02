@@ -657,8 +657,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
   /// 通过 [InstanceManager] 查表得到 [InstanceDirectory.path]；
   /// 找不到时回退到 "未知目录" 而不是硬编码字符串，避免误导。
   String _resolveInstanceDirectoryPath(GameInstance instance) {
-    final directory = InstanceManager()
-        .directories
+    final directory = InstanceManager().directories
         .where((d) => d.id == instance.directoryId)
         .firstOrNull;
     if (directory == null) return '未知目录';
@@ -693,7 +692,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                   borderRadius: BorderRadius.circular(11),
                   boxShadow: [
                     BoxShadow(
-                      color: BAColors.primaryOf(context).withValues(alpha: 0.35),
+                      color: BAColors.primaryOf(
+                        context,
+                      ).withValues(alpha: 0.35),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -720,10 +721,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
           const Spacer(),
 
           // 目录选择器（顶部下拉，PCL 风格但不照搬）
-          BADirectorySelector(
-            width: 200,
-            onChanged: _onDirectoryChanged,
-          ),
+          BADirectorySelector(width: 200, onChanged: _onDirectoryChanged),
           const SizedBox(width: 10),
 
           // 右侧：操作按钮组（仅保留必要操作）
@@ -1103,12 +1101,13 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
 
     final status = isRunning
         ? InstanceTileStatus.running
-        : (isLaunching ? InstanceTileStatus.launching : InstanceTileStatus.stopped);
+        : (isLaunching
+              ? InstanceTileStatus.launching
+              : InstanceTileStatus.stopped);
 
     // 副标题拼接：version · loader · 游玩时长
     // 若拼接结果与标题完全一致（用户以版本号命名），则隐藏副标题避免重复
-    final hasLoader =
-        instance.loader != null && instance.loader!.isNotEmpty;
+    final hasLoader = instance.loader != null && instance.loader!.isNotEmpty;
     final parts = <String>[
       if (instance.version.isNotEmpty) instance.version,
       if (hasLoader) instance.loader!,
@@ -1308,10 +1307,26 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                         controller: _detailTabController,
                         children: [
                           _buildOverviewTab(context, instance),
-                          _buildFileListTab(context, '还没有存档', Icons.folder_rounded),
-                          _buildFileListTab(context, '还没有模组', Icons.extension_rounded),
-                          _buildFileListTab(context, '还没有资源包', Icons.palette_rounded),
-                          _buildFileListTab(context, '还没有光影包', Icons.brightness_7_rounded),
+                          _buildFileListTab(
+                            context,
+                            '还没有存档',
+                            Icons.folder_rounded,
+                          ),
+                          _buildFileListTab(
+                            context,
+                            '还没有模组',
+                            Icons.extension_rounded,
+                          ),
+                          _buildFileListTab(
+                            context,
+                            '还没有资源包',
+                            Icons.palette_rounded,
+                          ),
+                          _buildFileListTab(
+                            context,
+                            '还没有光影包',
+                            Icons.brightness_7_rounded,
+                          ),
                           _buildScreenshotTab(context),
                         ],
                       ),
@@ -1373,15 +1388,21 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                   gradient: LinearGradient(
                     colors: isRunning
                         ? [BAColors.successOf(context), BAColors.successDark]
-                        : [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                        : [
+                            BAColors.primaryLightOf(context),
+                            BAColors.primaryOf(context),
+                          ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: (isRunning ? BAColors.successOf(context) : BAColors.primaryOf(context))
-                          .withValues(alpha: 0.35),
+                      color:
+                          (isRunning
+                                  ? BAColors.successOf(context)
+                                  : BAColors.primaryOf(context))
+                              .withValues(alpha: 0.35),
                       blurRadius: 16,
                       offset: const Offset(0, 4),
                     ),
@@ -1432,22 +1453,32 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: isRunning
-                            ? [BAColors.successOf(context), BAColors.successDark]
+                            ? [
+                                BAColors.successOf(context),
+                                BAColors.successDark,
+                              ]
                             : isLaunching
-                                ? [BAColors.warningOf(context), BAColors.warningDark]
-                                : [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                            ? [
+                                BAColors.warningOf(context),
+                                BAColors.warningDark,
+                              ]
+                            : [
+                                BAColors.primaryLightOf(context),
+                                BAColors.primaryOf(context),
+                              ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
-                          color: (isRunning
-                                  ? BAColors.successOf(context)
-                                  : isLaunching
+                          color:
+                              (isRunning
+                                      ? BAColors.successOf(context)
+                                      : isLaunching
                                       ? BAColors.warningOf(context)
                                       : BAColors.primaryOf(context))
-                              .withValues(alpha: 0.35),
+                                  .withValues(alpha: 0.35),
                           blurRadius: 10,
                           offset: const Offset(0, 3),
                         ),
@@ -1460,7 +1491,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                               height: 16,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
                             )
                           : Row(
@@ -1547,13 +1580,37 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
               ),
             ),
             const SizedBox(height: 8),
-            _buildSidebarInfo(context, '核心', '${instance.version}${instance.loader != null ? ' · ${instance.loader}' : ''}'),
-            _buildSidebarInfo(context, '实例类型', _inferInstanceType(instance.loader)),
-            _buildSidebarInfo(context, '来源目录', _resolveInstanceDirectoryPath(instance)),
-            _buildSidebarInfo(context, '游玩时长', instanceStats != null
-                ? _formatDuration(Duration(seconds: instanceStats.totalPlayTimeSeconds))
-                : '0分'),
-            _buildSidebarInfo(context, '最近游玩', _formatDateTime(instance.lastPlayed ?? instanceStats?.lastLaunchTime)),
+            _buildSidebarInfo(
+              context,
+              '核心',
+              '${instance.version}${instance.loader != null ? ' · ${instance.loader}' : ''}',
+            ),
+            _buildSidebarInfo(
+              context,
+              '实例类型',
+              _inferInstanceType(instance.loader),
+            ),
+            _buildSidebarInfo(
+              context,
+              '来源目录',
+              _resolveInstanceDirectoryPath(instance),
+            ),
+            _buildSidebarInfo(
+              context,
+              '游玩时长',
+              instanceStats != null
+                  ? _formatDuration(
+                      Duration(seconds: instanceStats.totalPlayTimeSeconds),
+                    )
+                  : '0分',
+            ),
+            _buildSidebarInfo(
+              context,
+              '最近游玩',
+              _formatDateTime(
+                instance.lastPlayed ?? instanceStats?.lastLaunchTime,
+              ),
+            ),
 
             // 危险区域
             const SizedBox(height: 14),
@@ -1585,7 +1642,11 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           child: Row(
             children: [
-              Icon(icon, size: 14, color: SettingsPalette.textSecondary(context)),
+              Icon(
+                icon,
+                size: 14,
+                color: SettingsPalette.textSecondary(context),
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -1606,11 +1667,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
   }
 
   /// 侧栏信息行
-  Widget _buildSidebarInfo(
-    BuildContext context,
-    String label,
-    String value,
-  ) {
+  Widget _buildSidebarInfo(BuildContext context, String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: RichText(
@@ -1663,8 +1720,11 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                   ),
                 ),
               ),
-              Icon(Icons.chevron_right_rounded,
-                  size: 14, color: SettingsPalette.danger),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 14,
+                color: SettingsPalette.danger,
+              ),
             ],
           ),
         ),
@@ -1679,9 +1739,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
   Widget _buildDetailHeader(BuildContext context, GameInstance instance) {
     final isRunning = instance.status == InstanceStatus.running;
     final isLaunching = _launchingIds.contains(instance.id);
-    final statusLabel = isRunning
-        ? '运行中'
-        : (isLaunching ? '启动中' : '未启动');
+    final statusLabel = isRunning ? '运行中' : (isLaunching ? '启动中' : '未启动');
     final statusColor = isRunning
         ? BAColors.successOf(context)
         : (isLaunching
@@ -1834,7 +1892,10 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
               onTap: isRunning ? null : () => _launchGame(instance),
               gradient: isRunning
                   ? [BAColors.successOf(context), BAColors.successDark]
-                  : [BAColors.primaryLightOf(context), BAColors.primaryOf(context)],
+                  : [
+                      BAColors.primaryLightOf(context),
+                      BAColors.primaryOf(context),
+                    ],
             ),
         ],
       ),
@@ -1852,9 +1913,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
   }) {
     final disabled = onTap == null;
     return MouseRegion(
-      cursor: disabled
-          ? SystemMouseCursors.basic
-          : SystemMouseCursors.click,
+      cursor: disabled ? SystemMouseCursors.basic : SystemMouseCursors.click,
       child: GestureDetector(
         onTap: onTap,
         child: Container(
@@ -1917,12 +1976,12 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
   /// 未选中态靠左对齐，hover 态由 Material InkWell 提供微妙水波。
   Widget _buildDetailTabBar(BuildContext context) {
     final icons = <IconData>[
-      Icons.dashboard_rounded,         // 概览
-      Icons.folder_rounded,            // 存档
-      Icons.extension_rounded,         // 模组
-      Icons.palette_rounded,           // 资源包
-      Icons.brightness_7_rounded,      // 光影
-      Icons.photo_camera_rounded,      // 截图
+      Icons.dashboard_rounded, // 概览
+      Icons.folder_rounded, // 存档
+      Icons.extension_rounded, // 模组
+      Icons.palette_rounded, // 资源包
+      Icons.brightness_7_rounded, // 光影
+      Icons.photo_camera_rounded, // 截图
     ];
     return Container(
       margin: const EdgeInsets.fromLTRB(24, 12, 24, 0),
@@ -1939,8 +1998,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
         isScrollable: true,
         tabAlignment: TabAlignment.start,
         labelColor: const Color(0xFFFFFFFF),
-        unselectedLabelColor:
-            BAColors.textSecondaryOf(context).withValues(alpha: 0.85),
+        unselectedLabelColor: BAColors.textSecondaryOf(
+          context,
+        ).withValues(alpha: 0.85),
         labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(
           fontSize: 13,
@@ -2066,17 +2126,21 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
           });
 
         for (final dir in entries) {
-          final levelDat = File('${dir.path}${Platform.pathSeparator}level.dat');
+          final levelDat = File(
+            '${dir.path}${Platform.pathSeparator}level.dat',
+          );
           if (!levelDat.existsSync()) continue; // 跳过非世界目录
 
           final stat = dir.statSync();
-          worlds.add(_WorldInfo(
-            name: dir.path.split(Platform.pathSeparator).last,
-            subtitle: '',
-            lastPlayed: _formatDateTime(stat.modified),
-            iconFile: File('${dir.path}${Platform.pathSeparator}icon.png'),
-            isRecent: false,
-          ));
+          worlds.add(
+            _WorldInfo(
+              name: dir.path.split(Platform.pathSeparator).last,
+              subtitle: '',
+              lastPlayed: _formatDateTime(stat.modified),
+              iconFile: File('${dir.path}${Platform.pathSeparator}icon.png'),
+              isRecent: false,
+            ),
+          );
         }
       }
 
@@ -2141,11 +2205,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
   }
 
   /// 世界列表项 - BakaXL 排版
-  Widget _buildWorldListItem(
-    BuildContext context,
-    _WorldInfo w,
-    bool isDark,
-  ) {
+  Widget _buildWorldListItem(BuildContext context, _WorldInfo w, bool isDark) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -2240,8 +2300,7 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
   /// 世界图标：优先读取 `world/icon.png`，否则用渐变 + 默认地球图标
   Widget _buildWorldIcon(BuildContext context, _WorldInfo w) {
     const size = 40.0;
-    final hasIcon =
-        w.iconFile != null && w.iconFile!.existsSync();
+    final hasIcon = w.iconFile != null && w.iconFile!.existsSync();
 
     if (hasIcon) {
       return ClipRRect(
@@ -2546,7 +2605,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: BAColors.primaryOf(context).withValues(alpha: 0.15),
+                      color: BAColors.primaryOf(
+                        context,
+                      ).withValues(alpha: 0.15),
                       width: 1,
                     ),
                   ),
@@ -2566,8 +2627,9 @@ class _BAGameLibraryPageState extends State<BAGameLibraryPage>
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color:
-                            BAColors.primaryOf(context).withValues(alpha: 0.25),
+                        color: BAColors.primaryOf(
+                          context,
+                        ).withValues(alpha: 0.25),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),

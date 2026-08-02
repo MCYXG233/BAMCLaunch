@@ -75,7 +75,12 @@ class _BADirectorySelectorState extends State<BADirectorySelector> {
 
     _overlayEntry = OverlayEntry(
       builder: (context) => _DirectoryDropdown(
-        anchorRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
+        anchorRect: Rect.fromLTWH(
+          offset.dx,
+          offset.dy,
+          size.width,
+          size.height,
+        ),
         onDismiss: _removeOverlay,
         onSelect: (id) async {
           _removeOverlay();
@@ -144,7 +149,9 @@ class _BADirectorySelectorState extends State<BADirectorySelector> {
       final dir = Directory(path);
       if (!await dir.exists()) return false;
 
-      final versionsDir = Directory('${dir.path}${Platform.pathSeparator}versions');
+      final versionsDir = Directory(
+        '${dir.path}${Platform.pathSeparator}versions',
+      );
       final modsDir = Directory('${dir.path}${Platform.pathSeparator}mods');
       return (await versionsDir.exists()) || (await modsDir.exists());
     } catch (_) {
@@ -161,9 +168,7 @@ class _BADirectorySelectorState extends State<BADirectorySelector> {
       builder: (ctx) => AlertDialog(
         backgroundColor: BAColors.surfaceOf(ctx),
         title: const Text('目录可能不是游戏目录'),
-        content: Text(
-          '所选目录未检测到 versions/ 或 mods/ 子目录：\n\n$path\n\n是否仍要添加？',
-        ),
+        content: Text('所选目录未检测到 versions/ 或 mods/ 子目录：\n\n$path\n\n是否仍要添加？'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -392,9 +397,7 @@ class _DirectoryItem extends StatelessWidget {
           child: Row(
             children: [
               Icon(
-                selected
-                    ? Icons.check_circle_rounded
-                    : Icons.folder_outlined,
+                selected ? Icons.check_circle_rounded : Icons.folder_outlined,
                 size: 16,
                 color: selected
                     ? BAColors.primaryLightOf(context)
