@@ -66,11 +66,14 @@ class AccountListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AccountListHeader(onAddAccount: onAddAccount),
+          AccountListHeader(
+            onAddAccount: onAddAccount,
+            accountCount: accounts.length,
+          ),
           const SizedBox(height: 20),
           if (currentAccount != null) ...[
             CurrentAccountCard(

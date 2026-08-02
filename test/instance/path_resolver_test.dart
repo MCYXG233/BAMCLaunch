@@ -77,14 +77,14 @@ void main() {
     });
 
     test('所有目录都不存在时应返回 null', () async {
-      final resolver = MinecraftPathResolver(
-        customCandidates: [
+      final resolver = MinecraftPathResolver();
+
+      final found = await resolver.findFirstExisting(
+        candidates: [
           '${tempDir.path}/nonexistent_1',
           '${tempDir.path}/nonexistent_2',
         ],
       );
-
-      final found = await resolver.findFirstExisting();
       expect(found, isNull);
     });
 

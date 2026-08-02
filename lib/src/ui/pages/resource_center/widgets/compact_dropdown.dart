@@ -24,10 +24,14 @@ class CompactDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 36,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: BAColors.surfaceVariantOf(context),
+        color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: BAColors.borderOf(context).withValues(alpha: 0.4),
+          width: 0.5,
+        ),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -37,22 +41,22 @@ class CompactDropdown extends StatelessWidget {
             hint,
             style: TextStyle(
               color: textPrimary.withValues(alpha: 0.5),
-              fontSize: 11,
+              fontSize: 11.5,
             ),
           ),
           icon: Icon(
-            Icons.keyboard_arrow_down,
-            size: 14,
+            Icons.keyboard_arrow_down_rounded,
+            size: 16,
             color: textPrimary.withValues(alpha: 0.6),
           ),
-          dropdownColor: BAColors.backgroundSecondaryOf(context),
-          style: TextStyle(color: textPrimary, fontSize: 11),
+          dropdownColor: BAColors.surfaceOf(context),
+          style: TextStyle(color: textPrimary, fontSize: 11.5),
           items: [
             DropdownMenuItem<String>(
               value: null,
               child: Text(
                 '全部',
-                style: TextStyle(fontSize: 11, color: textPrimary),
+                style: TextStyle(fontSize: 11.5, color: textPrimary),
               ),
             ),
             ...List.generate(items.length, (i) {

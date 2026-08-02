@@ -395,87 +395,165 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          decoration: BoxDecoration(
-            gradient: BAColors.secondaryGradient,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: BAColors.secondaryOf(context).withValues(alpha: 0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+    // 副信息：模组总数 + 冲突 + 缺失依赖（如有）
+    final parts = <String>['${_mods.length} 个模组'];
+    if (_conflicts.isNotEmpty) {
+      parts.add('${_conflicts.length} 冲突');
+    }
+    if (_missingDependencies.isNotEmpty) {
+      parts.add('${_missingDependencies.length} 缺失');
+    }
+    final subtitle = parts.join(' · ');
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // 左侧：图标 + 标题 + 副信息（与游戏库页统一格式）
+          Row(
             children: [
-              const Icon(Icons.extension, color: Colors.white, size: 24),
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      BAColors.primaryLightOf(context),
+                      BAColors.primaryOf(context),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(11),
+                  boxShadow: [
+                    BoxShadow(
+                      color: BAColors.primaryOf(
+                        context,
+                      ).withValues(alpha: 0.35),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.extension_rounded,
+                  color: Color(0xFFFFFFFF),
+                  size: 20,
+                ),
+              ),
               const SizedBox(width: 12),
-              Text(
-                '模组管理',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '模组管理',
+                    style: TextStyle(
+                      color: BAColors.textPrimaryOf(context),
+                      fontSize: 19,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: _conflicts.isNotEmpty
+                          ? BAColors.dangerOf(context)
+                          : BAColors.textSecondaryOf(context),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ),
-        const SizedBox(width: 16),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          const Spacer(),
+          // 右侧：操作按钮组（紧凑、玻璃拟态）
+          _buildHeaderButton(
+            context,
+            icon: Icons.refresh_rounded,
+            label: '检查更新',
+            onPressed: _checkUpdates,
+          ),
+          const SizedBox(width: 8),
+          _buildHeaderButton(
+            context,
+            icon: Icons.warning_rounded,
+            label: '冲突',
+            onPressed: _showConflictsDialog,
+            highlight: _conflicts.isNotEmpty,
+            highlightColor: BAColors.dangerOf(context),
+          ),
+          const SizedBox(width: 8),
+          _buildHeaderButton(
+            context,
+            icon: _isMultiSelectMode
+                ? Icons.close_rounded
+                : Icons.checklist_rounded,
+            label: _isMultiSelectMode ? '退出多选' : '多选',
+            onPressed: _toggleMultiSelectMode,
+            active: _isMultiSelectMode,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 标题栏右侧的紧凑操作按钮
+  Widget _buildHeaderButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    bool highlight = false,
+    bool active = false,
+    Color? highlightColor,
+  }) {
+    final accent = highlightColor ?? BAColors.primaryOf(context);
+    final bg = active
+        ? accent.withValues(alpha: 0.18)
+        : (highlight
+              ? accent.withValues(alpha: 0.12)
+              : BAColors.surfaceOf(context).withValues(alpha: 0.55));
+    final border = active || highlight
+        ? accent.withValues(alpha: 0.55)
+        : BAColors.borderOf(context).withValues(alpha: 0.5);
+    final fg = active || highlight ? accent : BAColors.textPrimaryOf(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.8),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: BAColors.borderOf(context).withValues(alpha: 0.5),
-            ),
+            color: bg,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: border),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.extension,
-                color: BAColors.secondaryOf(context),
-                size: 18,
-              ),
-              const SizedBox(width: 8),
+              Icon(icon, size: 15, color: fg),
+              const SizedBox(width: 6),
               Text(
-                '${_mods.length}',
+                label,
                 style: TextStyle(
-                  color: BAColors.textPrimaryOf(context),
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                ' 个模组',
-                style: TextStyle(
-                  color: BAColors.textSecondaryOf(context),
-                  fontSize: 14,
+                  color: fg,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
         ),
-        const Spacer(),
-        if (_conflicts.isNotEmpty)
-          WarningBadge(
-            text: '${_conflicts.length} 冲突',
-            color: BAColors.dangerOf(context),
-          ),
-        if (_missingDependencies.isNotEmpty)
-          WarningBadge(
-            text: '${_missingDependencies.length} 缺失依赖',
-            color: Colors.orange,
-          ),
-      ],
+      ),
     );
   }
 
@@ -497,26 +575,6 @@ class _BAModManagerPageState extends State<BAModManagerPage> {
           ShowDisabledSwitch(
             value: _showDisabled,
             onChanged: (v) => setState(() => _showDisabled = v),
-          ),
-          const SizedBox(width: 12),
-          ToolbarButton(
-            icon: Icons.refresh,
-            label: '检查更新',
-            onPressed: _checkUpdates,
-          ),
-          const SizedBox(width: 8),
-          ToolbarButton(
-            icon: Icons.warning,
-            label: '冲突检测',
-            onPressed: _showConflictsDialog,
-            color: _conflicts.isNotEmpty ? BAColors.dangerOf(context) : null,
-          ),
-          const SizedBox(width: 8),
-          ToolbarButton(
-            icon: _isMultiSelectMode ? Icons.close : Icons.checklist,
-            label: _isMultiSelectMode ? '取消选择' : '多选',
-            onPressed: _toggleMultiSelectMode,
-            color: _isMultiSelectMode ? BAColors.primaryOf(context) : null,
           ),
         ],
       ),
