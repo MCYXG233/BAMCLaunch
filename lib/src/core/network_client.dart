@@ -61,7 +61,6 @@ class NetworkClient {
   /// - `User-Agent`: 标识客户端身份
   /// - `Accept`: 指定接受的响应内容类型
   /// - `Accept-Language`: 指定接受的语言
-  /// - `Accept-Encoding`: 支持的压缩编码
   /// - `Connection`: 连接类型
   /// - `Cache-Control`: 缓存控制
   /// - `Pragma`: 缓存指令（HTTP/1.0兼容）
@@ -70,7 +69,6 @@ class NetworkClient {
       'User-Agent': 'BAMCLauncher/2.0.0 (Windows; https://github.com/BAMC)',
       'Accept': 'application/json',
       'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-      'Accept-Encoding': 'gzip, deflate, br',
       'Connection': 'keep-alive',
       'Cache-Control': 'no-cache',
       'Pragma': 'no-cache',
