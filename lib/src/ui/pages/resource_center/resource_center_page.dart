@@ -55,6 +55,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
   bool _modpackHasMore = true;
   String? _modpackError;
   String _modpackQuery = '';
+  ResourceType? _modpackType;
   String _modpackSort = 'downloads';
   int _modpackPage = 1;
   String? _modpackGameVersion;
@@ -201,7 +202,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
     try {
       final params = SearchParams(
         query: _modpackQuery,
-        type: ResourceType.modpack,
+        type: _modpackType,
         page: 1,
         pageSize: _pageSize,
         sortBy: _modpackSort,
@@ -235,7 +236,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
       final nextPage = _modpackPage + 1;
       final params = SearchParams(
         query: _modpackQuery,
-        type: ResourceType.modpack,
+        type: _modpackType,
         page: nextPage,
         pageSize: _pageSize,
         sortBy: _modpackSort,
@@ -365,6 +366,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
                   error: _modpackError,
                   query: _modpackQuery,
                   sort: _modpackSort,
+                  type: _modpackType,
                   gameVersion: _modpackGameVersion,
                   loader: _modpackLoader,
                   favoriteIds: _favoriteIds,
@@ -381,6 +383,10 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
                   },
                   onSortChanged: (v) {
                     _modpackSort = v;
+                    _performModpackSearch();
+                  },
+                  onTypeChanged: (v) {
+                    _modpackType = v;
                     _performModpackSearch();
                   },
                   onGameVersionChanged: (v) {
