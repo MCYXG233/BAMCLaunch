@@ -2,13 +2,10 @@ import 'package:flutter/material.dart';
 import '../../../theme/colors.dart';
 import '../../../animations/ba_animations.dart';
 
-/// 蔚蓝档案风格浮动按钮 - 呼吸灯效�?class GameLibraryFloatingButton extends StatelessWidget {
+class GameLibraryFloatingButton extends StatelessWidget {
   final VoidCallback onTap;
 
-  const GameLibraryFloatingButton({
-    super.key,
-    required this.onTap,
-  });
+  const GameLibraryFloatingButton({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +40,9 @@ import '../../../animations/ba_animations.dart';
                   offset: const Offset(0, 8),
                 ),
                 BoxShadow(
-                  color: BAColors.primaryLightOf(context)
-                      .withValues(alpha: 0.2),
+                  color: BAColors.primaryLightOf(
+                    context,
+                  ).withValues(alpha: 0.2),
                   blurRadius: 48,
                   spreadRadius: -8,
                   offset: const Offset(0, 16),

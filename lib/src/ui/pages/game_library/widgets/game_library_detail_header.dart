@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../instance/models.dart';
+import '../../../../instance/models.dart';
 import '../../../theme/colors.dart';
 
-/// 详情页顶部栏 - BakaXL 风格
-///
-/// 视觉重心：左导航 + 中标�?+ 右主操作按钮（带文字，比单纯 icon 更突出）�?/// 状态点紧贴实例名，让运行�?启动态一眼可见�?class GameLibraryDetailHeader extends StatelessWidget {
+class GameLibraryDetailHeader extends StatelessWidget {
   final GameInstance instance;
   final bool isRunning;
   final bool isLaunching;
@@ -22,18 +20,17 @@ import '../../../theme/colors.dart';
 
   @override
   Widget build(BuildContext context) {
-    final statusLabel = isRunning ? '运行�? : (isLaunching ? '启动�? : '未启�?);
+    final statusLabel = isRunning ? '运行中' : (isLaunching ? '启动中' : '未启动');
     final statusColor = isRunning
         ? BAColors.successOf(context)
         : (isLaunching
-            ? BAColors.warningOf(context)
-            : BAColors.textDisabledOf(context));
+              ? BAColors.warningOf(context)
+              : BAColors.textDisabledOf(context));
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 14, 24, 8),
       child: Row(
         children: [
-          // 返回按钮
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
@@ -57,8 +54,6 @@ import '../../../theme/colors.dart';
             ),
           ),
           const SizedBox(width: 12),
-
-          // 实例图标
           Container(
             width: 42,
             height: 42,
@@ -87,15 +82,13 @@ import '../../../theme/colors.dart';
             ),
           ),
           const SizedBox(width: 12),
-
-          // 实例名称 + 状态点 + 副标�?          Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   children: [
-                    // 状态点
                     Container(
                       width: 8,
                       height: 8,
@@ -142,8 +135,9 @@ import '../../../theme/colors.dart';
                 Text(
                   '${instance.version}${instance.loader != null ? ' · ${instance.loader}' : ''}',
                   style: TextStyle(
-                    color: BAColors.textSecondaryOf(context)
-                        .withValues(alpha: 0.9),
+                    color: BAColors.textSecondaryOf(
+                      context,
+                    ).withValues(alpha: 0.9),
                     fontSize: 12,
                   ),
                   maxLines: 1,
@@ -153,13 +147,11 @@ import '../../../theme/colors.dart';
             ),
           ),
           const SizedBox(width: 12),
-
-          // 主操作按钮（带文字，比单�?icon 更突出）
           if (isLaunching)
             _buildActionButton(
               context,
               icon: null,
-              label: '启动�?,
+              label: '启动中',
               showSpinner: true,
               onTap: null,
               gradient: [BAColors.warningOf(context), BAColors.warningDark],
@@ -183,7 +175,7 @@ import '../../../theme/colors.dart';
     );
   }
 
-  /// 详情页主操作按钮 - BakaXL 风格（圆�?+ 渐变 + 文字 + icon�?  Widget _buildActionButton(
+  Widget _buildActionButton(
     BuildContext context, {
     required IconData? icon,
     required String label,

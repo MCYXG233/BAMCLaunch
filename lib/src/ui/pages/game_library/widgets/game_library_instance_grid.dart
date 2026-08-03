@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../instance/models.dart';
-import '../../../game/game_statistics.dart';
+import '../../../../instance/models.dart';
+import '../../../../game/game_statistics.dart';
 import '../../../theme/colors.dart';
 import '../../../components/ba_context_menu.dart';
 import '../../../components/instance_tile.dart';
 
-/// 实例网格组件
 class GameLibraryInstanceGrid extends StatelessWidget {
   final List<GameInstance> instances;
   final String? selectedInstanceId;
@@ -42,9 +41,9 @@ class GameLibraryInstanceGrid extends StatelessWidget {
     final hours = duration.inHours;
     final minutes = duration.inMinutes % 60;
     if (hours > 0) {
-      return '$hours�?minutes�?;
+      return '$hours小时$minutes分';
     } else {
-      return '$minutes�?;
+      return '$minutes分';
     }
   }
 
@@ -72,7 +71,6 @@ class GameLibraryInstanceGrid extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // 圆形卡片包裹图标
           Container(
             width: 120,
             height: 120,
@@ -105,8 +103,8 @@ class GameLibraryInstanceGrid extends StatelessWidget {
           const SizedBox(height: 28),
           Text(
             searchQuery.isNotEmpty || selectedFilter != 0
-                ? '没有找到匹配的实�?
-                : '还没有游戏实�?,
+                ? '没有找到匹配的实例'
+                : '还没有游戏实例',
             style: TextStyle(
               color: BAColors.textPrimaryOf(context),
               fontSize: 22,
@@ -117,10 +115,9 @@ class GameLibraryInstanceGrid extends StatelessWidget {
           Text(
             searchQuery.isNotEmpty || selectedFilter != 0
                 ? '尝试修改搜索条件或切换筛选项'
-                : '点击右下角按钮创建第一个实�?,
+                : '点击右下角按钮创建第一个实例',
             style: TextStyle(
-              color:
-                  BAColors.textSecondaryOf(context).withValues(alpha: 0.9),
+              color: BAColors.textSecondaryOf(context).withValues(alpha: 0.9),
               fontSize: 14,
             ),
           ),
@@ -129,7 +126,7 @@ class GameLibraryInstanceGrid extends StatelessWidget {
     );
   }
 
-  /// 实例卡片 - BakaXL 排版风格（紧凑横向布局�?  Widget _buildInstanceCard(BuildContext context, GameInstance instance) {
+  Widget _buildInstanceCard(BuildContext context, GameInstance instance) {
     final isRunning = instance.status == InstanceStatus.running;
     final isLaunching = launchingIds.contains(instance.id);
     final instanceStats = statsManager.getInstanceStatistics(instance.id);
@@ -137,11 +134,9 @@ class GameLibraryInstanceGrid extends StatelessWidget {
     final status = isRunning
         ? InstanceTileStatus.running
         : (isLaunching
-            ? InstanceTileStatus.launching
-            : InstanceTileStatus.stopped);
+              ? InstanceTileStatus.launching
+              : InstanceTileStatus.stopped);
 
-    // 副标题拼接：version · loader · 游玩时长
-    // 若拼接结果与标题完全一致（用户以版本号命名），则隐藏副标题避免重复
     final hasLoader = instance.loader != null && instance.loader!.isNotEmpty;
     final parts = <String>[
       if (instance.version.isNotEmpty) instance.version,

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../theme/colors.dart';
 
-/// 详情页子Tab�?- BakaXL 风格（带 icon + 渐变选中态）
-///
-/// 每个 Tab �?14px icon 提升可读性；选中态保留渐�?+ 阴影�?/// 未选中态靠左对齐，hover 态由 Material InkWell 提供微妙水波�?class GameLibraryDetailTabBar extends StatelessWidget {
+class GameLibraryDetailTabBar extends StatelessWidget {
   final TabController controller;
   final List<String> tabs;
   final List<IconData> icons;
@@ -32,8 +30,9 @@ import '../../../theme/colors.dart';
         isScrollable: true,
         tabAlignment: TabAlignment.start,
         labelColor: const Color(0xFFFFFFFF),
-        unselectedLabelColor:
-            BAColors.textSecondaryOf(context).withValues(alpha: 0.85),
+        unselectedLabelColor: BAColors.textSecondaryOf(
+          context,
+        ).withValues(alpha: 0.85),
         labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(
           fontSize: 13,

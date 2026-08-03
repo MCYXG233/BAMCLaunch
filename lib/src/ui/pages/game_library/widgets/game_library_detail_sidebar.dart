@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../instance/instance_manager.dart';
-import '../../../instance/models.dart';
-import '../../../game/game_statistics.dart';
+import '../../../../instance/instance_manager.dart';
+import '../../../../instance/models.dart';
+import '../../../../game/game_statistics.dart';
 import '../../../theme/colors.dart';
 import '../../../components/settings_panel/widgets/settings_theme.dart';
 
-/// 左侧固定信息面板 - BakaXL 实例信息风格
 class GameLibraryDetailSidebar extends StatelessWidget {
   final GameInstance instance;
   final bool isRunning;
@@ -38,9 +37,9 @@ class GameLibraryDetailSidebar extends StatelessWidget {
     final hours = duration.inHours;
     final minutes = duration.inMinutes % 60;
     if (hours > 0) {
-      return '$hours�?minutes�?;
+      return '$hours小时$minutes分';
     } else {
-      return '$minutes�?;
+      return '$minutes分';
     }
   }
 
@@ -71,8 +70,7 @@ class GameLibraryDetailSidebar extends StatelessWidget {
   }
 
   String _resolveInstanceDirectoryPath(GameInstance instance) {
-    final directory = InstanceManager()
-        .directories
+    final directory = InstanceManager().directories
         .where((d) => d.id == instance.directoryId)
         .firstOrNull;
     if (directory == null) return '未知目录';
@@ -104,7 +102,6 @@ class GameLibraryDetailSidebar extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 标题
             Text(
               '实例信息',
               style: TextStyle(
@@ -114,8 +111,6 @@ class GameLibraryDetailSidebar extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 14),
-
-            // 图标
             Center(
               child: Container(
                 width: 80,
@@ -134,10 +129,11 @@ class GameLibraryDetailSidebar extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: (isRunning
-                              ? BAColors.successOf(context)
-                              : BAColors.primaryOf(context))
-                          .withValues(alpha: 0.35),
+                      color:
+                          (isRunning
+                                  ? BAColors.successOf(context)
+                                  : BAColors.primaryOf(context))
+                              .withValues(alpha: 0.35),
                       blurRadius: 16,
                       offset: const Offset(0, 4),
                     ),
@@ -151,8 +147,6 @@ class GameLibraryDetailSidebar extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 14),
-
-            // 实例名称
             Text(
               instance.name,
               style: TextStyle(
@@ -171,10 +165,7 @@ class GameLibraryDetailSidebar extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-
             const SizedBox(height: 14),
-
-            // 启动游戏按钮
             SizedBox(
               width: double.infinity,
               height: 40,
@@ -191,26 +182,27 @@ class GameLibraryDetailSidebar extends StatelessWidget {
                                 BAColors.successDark,
                               ]
                             : isLaunching
-                                ? [
-                                    BAColors.warningOf(context),
-                                    BAColors.warningDark,
-                                  ]
-                                : [
-                                    BAColors.primaryLightOf(context),
-                                    BAColors.primaryOf(context),
-                                  ],
+                            ? [
+                                BAColors.warningOf(context),
+                                BAColors.warningDark,
+                              ]
+                            : [
+                                BAColors.primaryLightOf(context),
+                                BAColors.primaryOf(context),
+                              ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
-                          color: (isRunning
-                                  ? BAColors.successOf(context)
-                                  : isLaunching
+                          color:
+                              (isRunning
+                                      ? BAColors.successOf(context)
+                                      : isLaunching
                                       ? BAColors.warningOf(context)
                                       : BAColors.primaryOf(context))
-                              .withValues(alpha: 0.35),
+                                  .withValues(alpha: 0.35),
                           blurRadius: 10,
                           offset: const Offset(0, 3),
                         ),
@@ -223,8 +215,9 @@ class GameLibraryDetailSidebar extends StatelessWidget {
                               height: 16,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
                             )
                           : Row(
@@ -240,8 +233,8 @@ class GameLibraryDetailSidebar extends StatelessWidget {
                                 const SizedBox(width: 4),
                                 Text(
                                   isRunning
-                                      ? '运行�?
-                                      : (isLaunching ? '启动�? : '启动游戏'),
+                                      ? '运行中'
+                                      : (isLaunching ? '启动中' : '启动游戏'),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 13,
@@ -255,10 +248,7 @@ class GameLibraryDetailSidebar extends StatelessWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 18),
-
-            // 快捷操作
             Text(
               '快捷操作',
               style: TextStyle(
@@ -298,10 +288,7 @@ class GameLibraryDetailSidebar extends StatelessWidget {
               label: '导出实例',
               onTap: onExportInstance,
             ),
-
             const SizedBox(height: 18),
-
-            // 游戏信息列表
             Text(
               '游戏信息',
               style: TextStyle(
@@ -333,22 +320,20 @@ class GameLibraryDetailSidebar extends StatelessWidget {
                   ? _formatDuration(
                       Duration(seconds: instanceStats.totalPlayTimeSeconds),
                     )
-                  : '0�?,
+                  : '0分',
             ),
             _buildSidebarInfo(
               context,
-              '最近游�?,
+              '最近游玩',
               _formatDateTime(
                 instance.lastPlayed ?? instanceStats?.lastLaunchTime,
               ),
             ),
-
-            // 危险区域
             const SizedBox(height: 14),
             _buildSidebarDanger(
               context,
               icon: Icons.delete_outline_rounded,
-              label: '删除此实�?,
+              label: '删除此实例',
               onTap: onDeleteInstance,
             ),
           ],
@@ -357,7 +342,7 @@ class GameLibraryDetailSidebar extends StatelessWidget {
     );
   }
 
-  /// 侧栏快捷操作�?  Widget _buildSidebarAction(
+  Widget _buildSidebarAction(
     BuildContext context, {
     required IconData icon,
     required String label,
@@ -396,7 +381,7 @@ class GameLibraryDetailSidebar extends StatelessWidget {
     );
   }
 
-  /// 侧栏信息�?  Widget _buildSidebarInfo(BuildContext context, String label, String value) {
+  Widget _buildSidebarInfo(BuildContext context, String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: RichText(
@@ -421,7 +406,6 @@ class GameLibraryDetailSidebar extends StatelessWidget {
     );
   }
 
-  /// 侧栏危险操作
   Widget _buildSidebarDanger(
     BuildContext context, {
     required IconData icon,

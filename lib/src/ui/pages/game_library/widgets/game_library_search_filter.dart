@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../theme/colors.dart';
 
-/// 搜索和筛选区�?- 毛玻璃风�?class GameLibrarySearchFilter extends StatelessWidget {
+class GameLibrarySearchFilter extends StatelessWidget {
   final TextEditingController searchController;
   final String searchQuery;
   final int selectedFilter;
@@ -25,7 +25,7 @@ import '../../../theme/colors.dart';
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
         children: [
-          // 搜索�?- 毛玻�?          Expanded(
+          Expanded(
             flex: 2,
             child: Container(
               height: 48,
@@ -53,8 +53,9 @@ import '../../../theme/colors.dart';
                 decoration: InputDecoration(
                   hintText: '搜索实例...',
                   hintStyle: TextStyle(
-                    color:
-                        BAColors.textSecondaryOf(context).withValues(alpha: 0.7),
+                    color: BAColors.textSecondaryOf(
+                      context,
+                    ).withValues(alpha: 0.7),
                   ),
                   prefixIcon: Icon(
                     Icons.search_rounded,
@@ -84,8 +85,7 @@ import '../../../theme/colors.dart';
             ),
           ),
           const SizedBox(width: 16),
-
-          // 筛选按�?- 毛玻�?          Expanded(
+          Expanded(
             flex: 3,
             child: Row(
               children: List.generate(filters.length, (index) {
@@ -114,18 +114,23 @@ import '../../../theme/colors.dart';
                             : null,
                         color: isSelected
                             ? null
-                            : BAColors.surfaceOf(context).withValues(alpha: 0.6),
+                            : BAColors.surfaceOf(
+                                context,
+                              ).withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
                           color: isSelected
                               ? Colors.transparent
-                              : BAColors.borderOf(context).withValues(alpha: 0.5),
+                              : BAColors.borderOf(
+                                  context,
+                                ).withValues(alpha: 0.5),
                         ),
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                  color: BAColors.primaryOf(context)
-                                      .withValues(alpha: 0.4),
+                                  color: BAColors.primaryOf(
+                                    context,
+                                  ).withValues(alpha: 0.4),
                                   blurRadius: 10,
                                   offset: const Offset(0, 3),
                                 ),
@@ -139,8 +144,9 @@ import '../../../theme/colors.dart';
                               ? const Color(0xFFFFFFFF)
                               : BAColors.textSecondaryOf(context),
                           fontSize: 13,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w500,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.w500,
                         ),
                       ),
                     ),
