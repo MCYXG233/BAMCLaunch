@@ -1,36 +1,34 @@
 import 'package:flutter/material.dart';
 import '../../../theme/colors.dart';
+import '../../../../instance/models.dart';
 import '../../../../resource_center/models.dart';
 import '../widgets/resource_filter_bar.dart';
 import '../widgets/resource_result_bar.dart';
 import '../widgets/resource_grid_card.dart';
 import '../widgets/state_widgets.dart';
 
-/// 热门整合包 Tab - 包含筛选栏、统计与整合包网格
 class ModpackTab extends StatelessWidget {
-  // 控制器
   final TextEditingController searchController;
   final ScrollController scrollController;
 
-  // 状态
   final List<Resource> resources;
   final bool loading;
   final bool loadingMore;
   final String? error;
   final String query;
   final String sort;
+  final ResourceType? type;
   final String? gameVersion;
   final String? loader;
 
-  // 收藏
   final Set<String> favoriteIds;
   final String Function(int) formatDownloads;
 
-  // 回调
   final VoidCallback onRetry;
   final ValueChanged<String> onQuerySubmitted;
   final VoidCallback onQueryCleared;
   final ValueChanged<String> onSortChanged;
+  final ValueChanged<ResourceType?> onTypeChanged;
   final ValueChanged<String?> onGameVersionChanged;
   final ValueChanged<String?> onLoaderChanged;
   final ValueChanged<Resource> onResourceTap;
@@ -46,6 +44,7 @@ class ModpackTab extends StatelessWidget {
     required this.error,
     required this.query,
     required this.sort,
+    required this.type,
     required this.gameVersion,
     required this.loader,
     required this.favoriteIds,
@@ -54,6 +53,7 @@ class ModpackTab extends StatelessWidget {
     required this.onQuerySubmitted,
     required this.onQueryCleared,
     required this.onSortChanged,
+    required this.onTypeChanged,
     required this.onGameVersionChanged,
     required this.onLoaderChanged,
     required this.onResourceTap,
@@ -61,24 +61,20 @@ class ModpackTab extends StatelessWidget {
   });
 
   Widget _buildFilterBar(BuildContext context) {
-    // Modpack Tab 已经有类型限定（modpack），不需要 type chips
     return ResourceFilterBar(
       searchController: searchController,
       query: query,
-      searchHint: '搜索整合包...',
+      searchHint: '搜索热门资源...',
       onQuerySubmitted: onQuerySubmitted,
       onQueryCleared: onQueryCleared,
       sort: sort,
       onSortChanged: onSortChanged,
-      selectedType: null,
-      onTypeChanged: null,
+      selectedType: type,
+      onTypeChanged: onTypeChanged,
       gameVersion: gameVersion,
       onGameVersionChanged: onGameVersionChanged,
       loader: loader,
       onLoaderChanged: onLoaderChanged,
-      leftBadgeText: '整合包',
-      leftBadgeIcon: Icons.inventory_2_rounded,
-      leftBadgeColor: BAColors.warningOf(context),
     );
   }
 
@@ -91,7 +87,7 @@ class ModpackTab extends StatelessWidget {
     }
     if (resources.isEmpty) {
       return const ResourceEmptyWidget(
-        title: '暂无整合包数据',
+        title: '暂无热门资源',
         subtitle: '稍后再试或调整筛选条件',
       );
     }
@@ -154,7 +150,7 @@ class ModpackTab extends StatelessWidget {
           loadingMore: loadingMore,
           loading: loading,
           onRefresh: onRetry,
-          label: '整合包',
+          label: '热门资源',
         ),
         Expanded(child: _buildGrid(context)),
       ],

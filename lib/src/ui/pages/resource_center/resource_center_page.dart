@@ -27,6 +27,8 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
   // 收藏（全局共享）
   final Set<String> _favoriteIds = {};
 
+  String _selectedSource = 'modrinth';
+
   static const int _pageSize = 20;
 
   // ==================== Tab 0: Modrinth 源 ====================
@@ -53,6 +55,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
   bool _modpackHasMore = true;
   String? _modpackError;
   String _modpackQuery = '';
+  ResourceType? _modpackType;
   String _modpackSort = 'downloads';
   int _modpackPage = 1;
   String? _modpackGameVersion;
@@ -61,7 +64,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     _modrinthScrollCtrl.addListener(_onModrinthScroll);
     _modpackScrollCtrl.addListener(_onModpackScroll);
     _tabController.addListener(_onTabChanged);
@@ -80,8 +83,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
 
   void _onTabChanged() {
     if (!_tabController.indexIsChanging) return;
-    // 切换到热门整合包时自动加载
-    if (_tabController.index == 2 &&
+    if (_tabController.index == 1 &&
         _modpackResources.isEmpty &&
         !_modpackLoading) {
       _performModpackSearch();
@@ -200,7 +202,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
     try {
       final params = SearchParams(
         query: _modpackQuery,
-        type: ResourceType.modpack,
+        type: _modpackType,
         page: 1,
         pageSize: _pageSize,
         sortBy: _modpackSort,
@@ -234,7 +236,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
       final nextPage = _modpackPage + 1;
       final params = SearchParams(
         query: _modpackQuery,
-        type: ResourceType.modpack,
+        type: _modpackType,
         page: nextPage,
         pageSize: _pageSize,
         sortBy: _modpackSort,
@@ -308,51 +310,52 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
             controller: _tabController,
             children: [
               RepaintBoundary(
-                child: ModrinthTab(
-                  searchController: _modrinthSearchCtrl,
-                  scrollController: _modrinthScrollCtrl,
-                  resources: _modrinthResources,
-                  loading: _modrinthLoading,
-                  loadingMore: _modrinthLoadingMore,
-                  error: _modrinthError,
-                  query: _modrinthQuery,
-                  sort: _modrinthSort,
-                  type: _modrinthType,
-                  gameVersion: _modrinthGameVersion,
-                  loader: _modrinthLoader,
-                  favoriteIds: _favoriteIds,
-                  formatDownloads: _formatDownloads,
-                  onRetry: _performModrinthSearch,
-                  onQuerySubmitted: (v) {
-                    _modrinthQuery = v;
-                    _performModrinthSearch();
-                  },
-                  onQueryCleared: () {
-                    _modrinthSearchCtrl.clear();
-                    _modrinthQuery = '';
-                    _performModrinthSearch();
-                  },
-                  onSortChanged: (v) {
-                    _modrinthSort = v;
-                    _performModrinthSearch();
-                  },
-                  onTypeChanged: (v) {
-                    _modrinthType = v;
-                    _performModrinthSearch();
-                  },
-                  onGameVersionChanged: (v) {
-                    _modrinthGameVersion = v;
-                    _performModrinthSearch();
-                  },
-                  onLoaderChanged: (v) {
-                    _modrinthLoader = v;
-                    _performModrinthSearch();
-                  },
-                  onResourceTap: _onResourceTap,
-                  onToggleFavorite: _toggleFavorite,
-                ),
+                child: _selectedSource == 'curseforge'
+                    ? const CurseForgeTab()
+                    : ModrinthTab(
+                        searchController: _modrinthSearchCtrl,
+                        scrollController: _modrinthScrollCtrl,
+                        resources: _modrinthResources,
+                        loading: _modrinthLoading,
+                        loadingMore: _modrinthLoadingMore,
+                        error: _modrinthError,
+                        query: _modrinthQuery,
+                        sort: _modrinthSort,
+                        type: _modrinthType,
+                        gameVersion: _modrinthGameVersion,
+                        loader: _modrinthLoader,
+                        favoriteIds: _favoriteIds,
+                        formatDownloads: _formatDownloads,
+                        onRetry: _performModrinthSearch,
+                        onQuerySubmitted: (v) {
+                          _modrinthQuery = v;
+                          _performModrinthSearch();
+                        },
+                        onQueryCleared: () {
+                          _modrinthSearchCtrl.clear();
+                          _modrinthQuery = '';
+                          _performModrinthSearch();
+                        },
+                        onSortChanged: (v) {
+                          _modrinthSort = v;
+                          _performModrinthSearch();
+                        },
+                        onTypeChanged: (v) {
+                          _modrinthType = v;
+                          _performModrinthSearch();
+                        },
+                        onGameVersionChanged: (v) {
+                          _modrinthGameVersion = v;
+                          _performModrinthSearch();
+                        },
+                        onLoaderChanged: (v) {
+                          _modrinthLoader = v;
+                          _performModrinthSearch();
+                        },
+                        onResourceTap: _onResourceTap,
+                        onToggleFavorite: _toggleFavorite,
+                      ),
               ),
-              const RepaintBoundary(child: CurseForgeTab()),
               RepaintBoundary(
                 child: ModpackTab(
                   searchController: _modpackSearchCtrl,
@@ -363,6 +366,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
                   error: _modpackError,
                   query: _modpackQuery,
                   sort: _modpackSort,
+                  type: _modpackType,
                   gameVersion: _modpackGameVersion,
                   loader: _modpackLoader,
                   favoriteIds: _favoriteIds,
@@ -379,6 +383,10 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
                   },
                   onSortChanged: (v) {
                     _modpackSort = v;
+                    _performModpackSearch();
+                  },
+                  onTypeChanged: (v) {
+                    _modpackType = v;
                     _performModpackSearch();
                   },
                   onGameVersionChanged: (v) {
@@ -468,36 +476,7 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
             ],
           ),
           const Spacer(),
-          // 右侧：当前来源标识
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-            decoration: BoxDecoration(
-              color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.55),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: BAColors.borderOf(context).withValues(alpha: 0.5),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.cloud_outlined,
-                  color: BAColors.textSecondaryOf(context),
-                  size: 14,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  _tabController.index == 1 ? 'CurseForge' : 'Modrinth',
-                  style: TextStyle(
-                    color: BAColors.textPrimaryOf(context),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildSourceSelector(context),
         ],
       ),
     );
@@ -506,10 +485,8 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
   int _currentResourceCount() {
     switch (_tabController.index) {
       case 0:
-        return _modrinthResources.length;
+        return _selectedSource == 'curseforge' ? 0 : _modrinthResources.length;
       case 1:
-        return 0; // CurseForge
-      case 2:
         return _modpackResources.length;
       default:
         return 0;
@@ -552,9 +529,8 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
         labelPadding: EdgeInsets.zero,
         indicatorPadding: const EdgeInsets.all(3),
         tabs: [
-          _buildTab(Icons.cloud_outlined, 'Modrinth 源'),
-          _buildTab(Icons.construction_outlined, 'CurseForge 源'),
-          _buildTab(Icons.inventory_2_outlined, '热门整合包'),
+          _buildTab(Icons.explore_outlined, '资源浏览'),
+          _buildTab(Icons.local_fire_department_outlined, '热门推荐'),
         ],
       ),
     );
@@ -569,6 +545,114 @@ class _BAResourceCenterPageState extends State<BAResourceCenterPage>
           Icon(icon, size: 15),
           const SizedBox(width: 6),
           Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSourceSelector(BuildContext context) {
+    final textPrimary = BAColors.textPrimaryOf(context);
+    final textSecondary = BAColors.textSecondaryOf(context);
+    final primary = BAColors.primaryOf(context);
+    final isModrinth = _selectedSource == 'modrinth';
+
+    return PopupMenuButton<String>(
+      onSelected: (value) {
+        if (value == _selectedSource) return;
+        setState(() => _selectedSource = value);
+      },
+      offset: const Offset(0, 44),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      color: BAColors.backgroundSecondaryOf(context),
+      itemBuilder: (_) => [
+        _buildSourceMenuItem(
+          'modrinth',
+          'Modrinth',
+          Icons.cloud_outlined,
+          const Color(0xFF1BD96A),
+          isModrinth,
+          textPrimary,
+          primary,
+        ),
+        _buildSourceMenuItem(
+          'curseforge',
+          'CurseForge',
+          Icons.construction_outlined,
+          const Color(0xFFF16436),
+          !isModrinth,
+          textPrimary,
+          primary,
+        ),
+      ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        decoration: BoxDecoration(
+          color: BAColors.surfaceVariantOf(context).withValues(alpha: 0.55),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: BAColors.borderOf(context).withValues(alpha: 0.5),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isModrinth ? Icons.cloud_outlined : Icons.construction_outlined,
+              color: isModrinth
+                  ? const Color(0xFF1BD96A)
+                  : const Color(0xFFF16436),
+              size: 14,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              isModrinth ? 'Modrinth' : 'CurseForge',
+              style: TextStyle(
+                color: textPrimary,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 2),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 14,
+              color: textSecondary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  PopupMenuItem<String> _buildSourceMenuItem(
+    String value,
+    String label,
+    IconData icon,
+    Color color,
+    bool selected,
+    Color textPrimary,
+    Color primary,
+  ) {
+    return PopupMenuItem<String>(
+      value: value,
+      height: 36,
+      child: Row(
+        children: [
+          if (selected)
+            Icon(Icons.check, size: 14, color: primary)
+          else
+            const SizedBox(width: 14),
+          const SizedBox(width: 8),
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              color: selected ? primary : textPrimary,
+              fontSize: 12,
+              fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+            ),
+          ),
         ],
       ),
     );
